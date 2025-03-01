@@ -1,0 +1,3 @@
+[submodule "engine/external/glm"]
+	path = engine/external/glm
+	url = https://github.com/g-truc/glm.git
