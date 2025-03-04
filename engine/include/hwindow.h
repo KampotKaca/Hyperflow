@@ -8,7 +8,7 @@ namespace hf
 	class Window
 	{
 	public:
-		Window(const WindowData& data, hRef<Window> parent);
+		Window(const WindowData& data, Ref<Window> parent);
 		~Window();
 
 		glm::ivec2 GetSize();
@@ -34,11 +34,14 @@ namespace hf
 		WindowStyle m_Style;
 		WindowFlags m_Flags;
 		bool m_ShouldClose;
-		hRef<Window> m_Parent;
+		Ref<Window> m_Parent;
 		std::string m_WriteRecords;
 		std::vector<KeySubscriptionData*> m_KeyEventSubscriptions;
 		KeyCode m_PrevKeyState;
 	};
+
+	void SubscribeOnKey(Ref<Window> window, KeySubscriptionData* data);
+	void UnsubscribeOnKey(Ref<Window> window, KeySubscriptionData* data);
 }
 
 #endif //HWINDOW_H

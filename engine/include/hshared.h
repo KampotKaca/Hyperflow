@@ -34,10 +34,10 @@ namespace hf
 	typedef __int128 KeyCode;
 
 	template<typename T>
-	using hRef = std::shared_ptr<T>;
+	using Ref = std::shared_ptr<T>;
 
 	template <typename T, typename... Args>
-	hRef<T> hMakeRef(Args&&... args)
+	Ref<T> MakeRef(Args&&... args)
 	{
 		return std::make_shared<T>(std::forward<Args>(args)...);
 	}
@@ -281,8 +281,8 @@ namespace hf
 
 	//region Helpers
 
-	uint32_t hTrailingZeros64(uint64_t n);
-	uint32_t hTrailingZeros128(__int128 n);
+	uint32_t TrailingZeros64(uint64_t n);
+	uint32_t TrailingZeros128(__int128 n);
 
 	//endregion
 }

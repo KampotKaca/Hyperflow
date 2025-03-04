@@ -5,7 +5,7 @@
 
 namespace hf
 {
-	void Platform_HandleEvents(std::vector<hRef<Window>>& windows, EngineUpdateType updateType);
+	void Platform_HandleEvents(std::vector<Ref<Window>>& windows, EngineUpdateType updateType);
 	void Platform_Initialize();
 }
 

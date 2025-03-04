@@ -1,6 +1,9 @@
-#include "hyperflow.h"
 #include "hwindow.h"
 #include "hplatform.h"
+
+#define private public
+#include "hyperflow.h"
+#undef private
 
 namespace hf
 {
@@ -9,8 +12,8 @@ namespace hf
 	bool Hyperflow::s_IsRunning;
 
 	std::string Hyperflow::s_AppTitle;
-	hRef<Window> Hyperflow::s_MainWindow = NULL;
-	std::vector<hRef<Window>> Hyperflow::s_Windows;
+	Ref<Window> Hyperflow::s_MainWindow = NULL;
+	std::vector<Ref<Window>> Hyperflow::s_Windows;
 
 	void Hyperflow::Run(const EngineData& engineData)
 	{
@@ -21,8 +24,7 @@ namespace hf
 		Hyperflow::s_UpdateType = engineData.updateType;
 		Hyperflow::s_AppTitle = engineData.appTitle;
 
-		s_MainWindow = hMakeRef<Window>(engineData.windowData, nullptr);
-		s_Windows.push_back(s_MainWindow);
+		s_MainWindow = OpenWindow(engineData.windowData, nullptr);
 
 		Hyperflow::s_IsRunning = true;
 
@@ -37,8 +39,26 @@ namespace hf
 		}
 
 		if(s_LifecycleCallbacks.onUpdateCallback) s_LifecycleCallbacks.onUpdateCallback();
-		s_MainWindow->Close();
+		CloseWindow(s_MainWindow);
 	}
 
 	bool Hyperflow::IsRunning() { return Hyperflow::s_IsRunning && !s_MainWindow->IsClosing(); }
+
+	Ref<Window> Hyperflow::MainWindow() { return s_MainWindow; }
+
+	Ref<Window> OpenWindow(const WindowData &data, Ref<Window> parent)
+	{
+		auto newWindow = MakeRef<Window>(data, parent);
+		Hyperflow::s_Windows.push_back(newWindow);
+		return newWindow;
+	}
+
+	void CloseWindow(Ref<Window> window)
+	{
+		std::remove(Hyperflow::s_Windows.begin(), Hyperflow::s_Windows.end(), window);
+		window->Close();
+	}
+
+	void SubscribeOnKey(KeySubscriptionData* data) { SubscribeOnKey(Hyperflow::s_MainWindow, data); }
+	void UnsubscribeOnKey(KeySubscriptionData* data) { UnsubscribeOnKey(Hyperflow::s_MainWindow, data); }
 }

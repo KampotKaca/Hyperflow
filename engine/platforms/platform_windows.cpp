@@ -304,7 +304,7 @@ namespace hf
 
 	//region Window
 
-	Window::Window(const WindowData& data, hRef<Window> parent)
+	Window::Window(const WindowData& data, Ref<Window> parent)
 	{
 		HINSTANCE hinstance = GetModuleHandle(NULL);
 		uint32_t currentStyle = GetStyleID(data.style);
@@ -441,18 +441,18 @@ namespace hf
 		}
 	}
 
-	void Platform_HandleEvents(std::vector<hRef<Window>>& windows, EngineUpdateType updateType)
+	void Platform_HandleEvents(std::vector<Ref<Window>>& windows, EngineUpdateType updateType)
 	{
 		uint32_t windowCount = windows.size();
 		for (uint32_t i = 0; i < windowCount; ++i)
 		{
-			hRef<Window> window = windows[i];
-			window->m_WriteRecords = "";
+			Ref<Window> window = windows[i];
+			window->m_WriteRecords.clear();
 			KeyCode currentKeyDowns = window->m_PrevKeyState;
 
 			while (currentKeyDowns != KEY_NULL)
 			{
-				uint32_t bitIndex = hTrailingZeros128(currentKeyDowns);
+				uint32_t bitIndex = TrailingZeros128(currentKeyDowns);
 				KeyCode keyCode = ((KeyCode)1) << bitIndex;
 				currentKeyDowns &= ~keyCode;
 

@@ -1,4 +1,7 @@
+#define private public
 #include "hyperflow.h"
+#include "application.h"
+#undef private
 
 int main()
 {
@@ -8,10 +11,10 @@ int main()
 		.updateType = hf::EngineUpdateType::Continues,
 		.lifecycleCallbacks =
 		{
-			.onStartCallback    = NULL,
-			.onUpdateCallback   = NULL,
-			.onRenderCallback   = NULL,
-			.onQuitCallback     = NULL,
+			.onStartCallback    = app::Application::Start,
+			.onUpdateCallback   = app::Application::Update,
+			.onRenderCallback   = app::Application::Render,
+			.onQuitCallback     = app::Application::Quit,
 		},
 		.windowData =
 		{
@@ -24,6 +27,5 @@ int main()
 	};
 
 	hf::Hyperflow::Run(engineData);
-	log_warn("You have been warned");
 	return 0;
 }
