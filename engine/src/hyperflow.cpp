@@ -2,6 +2,7 @@
 #include "hplatform.h"
 
 #define private public
+#include "hwindow.h"
 #include "hyperflow.h"
 #undef private
 
@@ -12,7 +13,7 @@ namespace hf
 	bool Hyperflow::s_IsRunning;
 
 	std::string Hyperflow::s_AppTitle;
-	Ref<Window> Hyperflow::s_MainWindow = NULL;
+	Ref<Window> Hyperflow::s_MainWindow = nullptr;
 	std::vector<Ref<Window>> Hyperflow::s_Windows;
 
 	void Hyperflow::Run(const EngineData& engineData)
@@ -46,17 +47,17 @@ namespace hf
 
 	Ref<Window> Hyperflow::MainWindow() { return s_MainWindow; }
 
-	Ref<Window> OpenWindow(const WindowData &data, Ref<Window> parent)
+	Ref<Window> OpenWindow(const WindowData &data, const Ref<Window>& parent)
 	{
 		auto newWindow = MakeRef<Window>(data, parent);
 		Hyperflow::s_Windows.push_back(newWindow);
 		return newWindow;
 	}
 
-	void CloseWindow(Ref<Window> window)
+	void CloseWindow(const Ref<Window>& window)
 	{
-		std::remove(Hyperflow::s_Windows.begin(), Hyperflow::s_Windows.end(), window);
-		window->Close();
+		auto result = std::remove(Hyperflow::s_Windows.begin(), Hyperflow::s_Windows.end(), window);
+		if(result != Hyperflow::s_Windows.end()) window->Close();
 	}
 
 	void SubscribeOnKey(KeySubscriptionData* data) { SubscribeOnKey(Hyperflow::s_MainWindow, data); }

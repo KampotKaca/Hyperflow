@@ -8,23 +8,23 @@ namespace hf
 	class Window
 	{
 	public:
-		Window(const WindowData& data, Ref<Window> parent);
+		Window(const WindowData& data, const Ref<Window>& parent);
 		~Window();
 
-		glm::ivec2 GetSize();
-		glm::ivec2 GetPosition();
-		IRect GetRect();
-		WindowFlags GetFlags();
-		WindowStyle GetStyle();
+		glm::ivec2 GetSize() const;
+		glm::ivec2 GetPosition() const;
+		IRect GetRect() const;
+		WindowFlags GetFlags() const;
+		WindowStyle GetStyle() const;
 
-		void SetSize(glm::ivec2 size);
-		void SetPosition(glm::ivec2 position);
+		void SetSize(glm::ivec2 size) const;
+		void SetPosition(glm::ivec2 position) const;
 		void SetRect(IRect rect);
 
-		bool IsClosing() const;
+		[[nodiscard]] bool IsClosing() const;
 
 		void SetFlags(WindowFlags flags);
-		void Focus();
+		void Focus() const;
 
 		void Close();
 
@@ -37,7 +37,7 @@ namespace hf
 		Ref<Window> m_Parent;
 		std::string m_WriteRecords;
 		std::vector<KeySubscriptionData*> m_KeyEventSubscriptions;
-		KeyCode m_PrevKeyState;
+		KeyCode m_PrevKeyState{};
 	};
 
 	void SubscribeOnKey(Ref<Window> window, KeySubscriptionData* data);

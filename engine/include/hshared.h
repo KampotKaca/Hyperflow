@@ -11,7 +11,7 @@
 
 extern "C"
 {
-#include <log.h>
+#include "log.h"
 };
 
 #include <sys/stat.h>
@@ -20,11 +20,11 @@ extern "C"
 #include <cinttypes>
 #include <memory>
 
-#include <glm/vec2.hpp>
-#include <glm/vec3.hpp>
-#include <glm/vec4.hpp>
+#include "glm/vec2.hpp"
+#include "glm/vec3.hpp"
+#include "glm/vec4.hpp"
 
-#include <glm/mat4x4.hpp>
+#include "glm/mat4x4.hpp"
 
 namespace hf
 {
@@ -242,14 +242,12 @@ namespace hf
 	};
 
 
-	typedef struct
+	struct KeySubscriptionData
 	{
 		ActionCallback callback;
 		KeyState state;
 		KeyCode keyCode;
-	}KeySubscriptionData;
-
-	class Window;
+	};
 
 	//endregion
 
@@ -276,6 +274,8 @@ namespace hf
 		EngineLifecycleCallbacks lifecycleCallbacks;
 		WindowData windowData;
 	};
+
+	class Window;
 
 	//endregion
 

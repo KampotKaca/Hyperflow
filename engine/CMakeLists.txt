@@ -1,12 +1,17 @@
-#region Platforms
+cmake_minimum_required(VERSION 3.30)
+project(Hyperflow_Engine VERSION 0.0.0)
 
+set(CMAKE_CXX_STANDARD 23)
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O0")
+
+#region Platforms
 if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
     add_definitions(-DPLATFORM_WINDOWS)
     option(DESKTOP "Desktop" ON)
-elseif (CMAKE_SYSTEM_NAME STREQUAL "Linux")
+elseif  (CMAKE_SYSTEM_NAME STREQUAL "Linux")
     add_definitions(-DPLATFORM_LINUX)
     option(DESKTOP "Desktop" ON)
-elseif (CMAKE_SYSTEM_NAME STREQUAL "Darwin")
+elseif  (CMAKE_SYSTEM_NAME STREQUAL "Darwin")
     add_definitions(-DPLATFORM_MAC)
     option(DESKTOP "Desktop" ON)
 else()
@@ -15,7 +20,7 @@ endif()
 
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
     add_definitions(-DDEBUG)
-elseif(CMAKE_BUILD_TYPE STREQUAL "Release")
+elseif (CMAKE_BUILD_TYPE STREQUAL "Release")
     add_definitions(-DRELEASE)
 endif()
 #endregion
@@ -32,21 +37,35 @@ add_subdirectory(external/glm)
 add_subdirectory(external/stb)
 add_subdirectory(external/logc)
 
-
-add_library(Engine ${ENGINE_SRC} ${PLATFORM})
+add_library(${PROJECT_NAME} ${ENGINE_SRC} ${PLATFORM})
 
 # Using keyword-based signature consistently
-target_link_libraries(Engine PRIVATE glm)
-target_link_libraries(Engine PRIVATE stb)
-target_link_libraries(Engine PRIVATE logc)
+target_link_libraries(${PROJECT_NAME}
+        PUBLIC
+        glm
+        stb
+        logc
+)
+
+target_compile_definitions(${PROJECT_NAME}
+        PRIVATE
+        BUILDING_HYPERFLOW
+)
 
 # Link winmm only on Windows
 #if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
 #    target_link_libraries(Engine PRIVATE winmm)
 #endif()
 
-target_include_directories(Engine PUBLIC src/)
-target_include_directories(Engine PUBLIC include/)
-target_include_directories(Engine PUBLIC external/stb/include)
-target_include_directories(Engine PUBLIC external/glm)
-target_include_directories(Engine PUBLIC external/logc/include)
+# Set include directories
+target_include_directories(${PROJECT_NAME}
+        PUBLIC
+        src/
+        include/
+        external/stb/include
+        external/glm
+        external/logc/include
+        PRIVATE
+)
+
+target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_BINARY_DIR}/include/)

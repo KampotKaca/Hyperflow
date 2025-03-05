@@ -1,4 +1,3 @@
-#include "hyperflow.h"
 #include "hplatform.h"
 
 #include <windows.h>
@@ -262,8 +261,8 @@ namespace hf
 	{
 		if(msg == WM_NCCREATE)
 		{
-			CREATESTRUCT* pCreate = (CREATESTRUCT*)lparam;
-			Window* window = (Window*)pCreate->lpCreateParams;
+			auto* pCreate = (CREATESTRUCT*)lparam;
+			auto* window = (Window*)pCreate->lpCreateParams;
 			SetWindowLongPtr(hwnd, GWLP_USERDATA, (LONG_PTR)window);
 			SetWindowLongPtr(hwnd, GWLP_WNDPROC, (LONG_PTR)Platform_WindowProc);
 		}
@@ -272,21 +271,21 @@ namespace hf
 
 	void Platform_Initialize()
 	{
-		HINSTANCE hinstance = GetModuleHandle(NULL);
+		HINSTANCE hinstance = GetModuleHandle(nullptr);
 
 		WNDCLASSEX wndClass;
 		wndClass.cbSize = sizeof(wndClass);
 		wndClass.lpszClassName = WINDOWS_CLASS_NAME;
 		wndClass.style = CS_OWNDC;
-		wndClass.hCursor = LoadCursor(NULL, IDC_ARROW);
-		wndClass.hIcon = LoadIcon(NULL, IDI_APPLICATION);
-		wndClass.hbrBackground = NULL;
-		wndClass.lpszMenuName = NULL;
+		wndClass.hCursor = LoadCursor(nullptr, IDC_ARROW);
+		wndClass.hIcon = LoadIcon(nullptr, IDI_APPLICATION);
+		wndClass.hbrBackground = nullptr;
+		wndClass.lpszMenuName = nullptr;
 		wndClass.hInstance = hinstance;
 		wndClass.lpfnWndProc = Platform_WindowProc_Create;
 		wndClass.cbClsExtra = 0;
 		wndClass.cbWndExtra = 0;
-		wndClass.hIconSm = NULL;
+		wndClass.hIconSm = nullptr;
 		wndClass.hInstance = hinstance;
 
 		RegisterClassEx(&wndClass);
@@ -304,9 +303,9 @@ namespace hf
 
 	//region Window
 
-	Window::Window(const WindowData& data, Ref<Window> parent)
+	Window::Window(const WindowData& data, const Ref<Window>& parent)
 	{
-		HINSTANCE hinstance = GetModuleHandle(NULL);
+		HINSTANCE hinstance = GetModuleHandle(nullptr);
 		uint32_t currentStyle = GetStyleID(data.style);
 
 //		window->prevKeyState = KEY_NULL;
@@ -315,9 +314,10 @@ namespace hf
 		m_Style = data.style;
 		m_Parent = parent;
 		m_ShouldClose = false;
+		m_Flags = (WindowFlags)0;
 
-		HWND parentHandle = NULL;
-		if(parent != NULL) parentHandle = (HWND)parent->m_Handle;
+		HWND parentHandle = nullptr;
+		if(parent != nullptr) parentHandle = (HWND)parent->m_Handle;
 
 		glm::ivec2 convertedSize = data.size;
 		Platform_ConvertSize(this, convertedSize);
@@ -331,15 +331,12 @@ namespace hf
 			data.position[0], data.position[1],
 			convertedSize[0], convertedSize[1],
 			parentHandle,
-			NULL,
+			nullptr,
 			hinstance,
 			this
 		);
 
-//		window->writeRecords = List_Create(64, sizeof(char));
-//		window->keyEventSubscriptions = List_Create(16, sizeof(void*));
-
-		if(m_Handle == NULL)
+		if(m_Handle == nullptr)
 		{
 			log_fatal("Unable to create window titled {0}", data.title.c_str());
 			m_ShouldClose = true;
@@ -355,21 +352,21 @@ namespace hf
 		DestroyWindow((HWND)m_Handle);
 	}
 
-	glm::ivec2 Window::GetSize()
+	glm::ivec2 Window::GetSize() const
 	{
 		LPRECT rect = {};
 		GetWindowRect((HWND)m_Handle, rect);
 
 		return { (int32_t)rect->right - (int32_t)rect->left, (int32_t)rect->bottom - (int32_t)rect->top };
 	}
-	glm::ivec2 Window::GetPosition()
+	glm::ivec2 Window::GetPosition() const
 	{
 		LPRECT rect = {};
 		GetWindowRect((HWND)m_Handle, rect);
 
 		return { (int32_t)rect->left, (int32_t)rect->top };
 	}
-	IRect Window::GetRect()
+	IRect Window::GetRect() const
 	{
 		LPRECT rect = {};
 		GetWindowRect((HWND)m_Handle, rect);
@@ -381,23 +378,23 @@ namespace hf
 		};
 	}
 
-	WindowFlags Window::GetFlags() { return m_Flags; }
-	WindowStyle Window::GetStyle() { return m_Style; }
+	WindowFlags Window::GetFlags() const { return m_Flags; }
+	WindowStyle Window::GetStyle() const { return m_Style; }
 
-	void Window::SetSize(glm::ivec2 size)
+	void Window::SetSize(glm::ivec2 size) const
 	{
-		SetWindowPos((HWND)m_Handle, NULL, 0, 0, size[0], size[1], SWP_NOMOVE);
+		SetWindowPos((HWND)m_Handle, nullptr, 0, 0, size[0], size[1], SWP_NOMOVE);
 	}
-	void Window::SetPosition(glm::ivec2 position)
+	void Window::SetPosition(glm::ivec2 position) const
 	{
-		SetWindowPos((HWND)m_Handle, NULL, position[0], position[1], 0, 0, SWP_NOSIZE);
+		SetWindowPos((HWND)m_Handle, nullptr, position[0], position[1], 0, 0, SWP_NOSIZE);
 	}
 	void Window::SetRect(IRect rect)
 	{
 		glm::ivec2 convertedSize = rect.size;
 		Platform_ConvertSize(this, convertedSize);
 
-		SetWindowPos((HWND)m_Handle, NULL, rect.position[0], rect.position[1], convertedSize[0], convertedSize[1], 0);
+		SetWindowPos((HWND)m_Handle, nullptr, rect.position[0], rect.position[1], convertedSize[0], convertedSize[1], 0);
 	}
 
 	bool Window::IsClosing() const { return m_ShouldClose; }
@@ -424,8 +421,7 @@ namespace hf
 		m_Flags = flags;
 	}
 
-	void Window::Focus() { SetFocus((HWND)m_Handle); }
-	void Window::Close() { m_ShouldClose = true; }
+	void Window::Focus() const { SetFocus((HWND)m_Handle); }
 
 	//endregion
 
@@ -437,7 +433,7 @@ namespace hf
 		for (uint32_t i = 0; i < eventCount; ++i)
 		{
 			KeySubscriptionData* element = window->m_KeyEventSubscriptions[i];
-			if((element->keyCode & keyCode) && ((int32_t)element->state & (int32_t)state)) element->callback(NULL);
+			if((element->keyCode & keyCode) && ((int32_t)element->state & (int32_t)state)) element->callback(nullptr);
 		}
 	}
 
@@ -446,7 +442,7 @@ namespace hf
 		uint32_t windowCount = windows.size();
 		for (uint32_t i = 0; i < windowCount; ++i)
 		{
-			Ref<Window> window = windows[i];
+			const Ref<Window>& window = windows[i];
 			window->m_WriteRecords.clear();
 			KeyCode currentKeyDowns = window->m_PrevKeyState;
 
@@ -465,7 +461,7 @@ namespace hf
 		{
 			case EngineUpdateType::Continues:
 
-				if (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
+				if (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE))
 				{
 					TranslateMessage(&msg);
 					DispatchMessage(&msg);
@@ -475,7 +471,7 @@ namespace hf
 			case EngineUpdateType::EventRaised:
 			default:
 
-				if(GetMessage(&msg, NULL, 0, 0) > 0)
+				if(GetMessage(&msg, nullptr, 0, 0) > 0)
 				{
 					TranslateMessage(&msg);
 					DispatchMessage(&msg);
@@ -497,6 +493,7 @@ namespace hf
 			case VK_SHIFT: case VK_CONTROL: case VK_MENU:
 				virtualKeyCode = LOWORD(MapVirtualKeyW(scanCode, MAPVK_VSC_TO_VK_EX));
 				break;
+			default: break;
 		}
 
 		BOOL isExtendedKey = (keyFlags & KF_EXTENDED) == KF_EXTENDED;

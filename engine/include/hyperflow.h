@@ -2,6 +2,8 @@
 #define HYPERFLOW_H
 
 #include "hshared.h"
+#include "htime.h"
+#include "hwindow.h"
 
 namespace hf
 {
@@ -22,8 +24,8 @@ namespace hf
 		static std::vector<Ref<Window>> s_Windows;
 	};
 
-	Ref<Window> OpenWindow(const WindowData& data, Ref<Window> parent);
-	void CloseWindow(Ref<Window> window);
+	Ref<Window> OpenWindow(const WindowData& data, const Ref<Window>& parent);
+	void CloseWindow(const Ref<Window>& window);
 
 	void SubscribeOnKey(KeySubscriptionData* data);
 	void UnsubscribeOnKey(KeySubscriptionData* data);

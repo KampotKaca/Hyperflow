@@ -5,15 +5,29 @@
 
 namespace hf
 {
-	extern void hPauseThread(uint32_t milliseconds);
-	extern uint64_t hGetFrameCount();
-	extern double hGetDeltaTime();
-	extern double hGetTimePassedAfterLaunch();
-	extern int16_t hGetTargetFrameRate();
+	class Time
+	{
+	public:
+		static void PauseThread(double seconds);
+		static uint64_t GetFrameCount();
+		static double GetDeltaTime();
+		static double GetTimePassedAfterLaunch();
+		static int16_t GetTargetFrameRate();
 
-	extern int16_t hGetCurrentFrameRate();
+		static double GetAvgFrameRate();
+		static void SetTargetFrameRate(int16_t targetFrameRate);
 
-	extern void hSetTargetFrameRate(int16_t targetFrameRate);
+		static void LoadTime(double currentTime);
+		static void UpdateTime(double currentTime);
+
+	private:
+		static int16_t s_TargetFrameRate;
+		static double s_ApplicationStartTime;
+		static double s_CurrentTime;
+		static double s_DeltaTime;
+		static uint64_t s_FrameCount;
+		static double s_AvgFrameRate;
+	};
 }
 
 #endif //HTIME_H
