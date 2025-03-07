@@ -11,11 +11,11 @@ namespace hf
 		Window(const WindowData& data, const Ref<Window>& parent);
 		~Window();
 
-		glm::ivec2 GetSize() const;
-		glm::ivec2 GetPosition() const;
-		IRect GetRect() const;
-		WindowFlags GetFlags() const;
-		WindowStyle GetStyle() const;
+		[[nodiscard]] glm::ivec2 GetSize() const;
+		[[nodiscard]] glm::ivec2 GetPosition() const;
+		[[nodiscard]] IRect GetRect() const;
+		[[nodiscard]] WindowFlags GetFlags() const;
+		[[nodiscard]] WindowStyle GetStyle() const;
 
 		void SetSize(glm::ivec2 size) const;
 		void SetPosition(glm::ivec2 position) const;
@@ -25,8 +25,6 @@ namespace hf
 
 		void SetFlags(WindowFlags flags);
 		void Focus() const;
-
-		void Close();
 
 	private:
 		std::string m_Title;

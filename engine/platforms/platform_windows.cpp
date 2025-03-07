@@ -291,6 +291,35 @@ namespace hf
 		RegisterClassEx(&wndClass);
 	}
 
+	void Platform_BeginTemporarySystemTimer(uint16_t millisecondPrecision)
+	{
+		timeBeginPeriod(millisecondPrecision);
+	}
+	void Platform_EndTemporarySystemTimer(uint16_t millisecondPrecision)
+	{
+		timeEndPeriod(millisecondPrecision);
+	}
+
+	uint64_t Platform_GetTicks()
+	{
+		return GetTickCount64();
+	}
+
+	void Platform_Sleep(double seconds)
+	{
+		// A waitable timer seems to be better than the Windows Sleep().
+		HANDLE WaitTimer;
+		LARGE_INTEGER dueTime;
+		seconds *= -10.0 * 1000.0 * 1000.0;
+		dueTime.QuadPart = static_cast<LONGLONG>(seconds); //dueTime is in 100ns
+		// We don't name the timer (third parameter) because CreateWaitableTimer will fail if the name
+		// matches an existing name (e.g., if two threads call osaSleep).
+		WaitTimer = CreateWaitableTimer(NULL, true, NULL);
+		SetWaitableTimer(WaitTimer, &dueTime, 0, NULL, NULL, 0);
+		WaitForSingleObject(WaitTimer, INFINITE);
+		CloseHandle(WaitTimer);
+	}
+
 	bool Platform_ConvertSize(Window* window, glm::ivec2& size)
 	{
 		uint32_t currentStyle = GetStyleID(window->m_Style);
@@ -308,7 +337,7 @@ namespace hf
 		HINSTANCE hinstance = GetModuleHandle(nullptr);
 		uint32_t currentStyle = GetStyleID(data.style);
 
-//		window->prevKeyState = KEY_NULL;
+		m_PrevKeyState = KEY_NULL;
 
 		m_Title = data.title;
 		m_Style = data.style;
@@ -521,7 +550,7 @@ namespace hf
 	                                          __attribute__((unused)) WPARAM wparam,
 	                                          __attribute__((unused)) LPARAM lparam)
 	{
-		window->Close();
+		window->m_ShouldClose = true;
 		return 0;
 	}
 

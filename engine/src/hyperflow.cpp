@@ -1,5 +1,5 @@
-#include "hwindow.h"
 #include "hplatform.h"
+#include "hinternal.h"
 
 #define private public
 #include "hwindow.h"
@@ -19,6 +19,8 @@ namespace hf
 	void Hyperflow::Run(const EngineData& engineData)
 	{
 		Platform_Initialize();
+		Platform_BeginTemporarySystemTimer(1);
+		LoadTime();
 		log_set_level(LOG_TRACE);
 
 		Hyperflow::s_LifecycleCallbacks = engineData.lifecycleCallbacks;
@@ -33,14 +35,14 @@ namespace hf
 
 		while (IsRunning())
 		{
+			UpdateTime();
 			Platform_HandleEvents(s_Windows, s_UpdateType);
 			if(s_LifecycleCallbacks.onUpdateCallback) s_LifecycleCallbacks.onUpdateCallback();
-
-//			Platform_UpdateTime();
 		}
 
 		if(s_LifecycleCallbacks.onUpdateCallback) s_LifecycleCallbacks.onUpdateCallback();
 		CloseWindow(s_MainWindow);
+		Platform_EndTemporarySystemTimer(1);
 	}
 
 	bool Hyperflow::IsRunning() { return Hyperflow::s_IsRunning && !s_MainWindow->IsClosing(); }
@@ -57,7 +59,7 @@ namespace hf
 	void CloseWindow(const Ref<Window>& window)
 	{
 		auto result = std::remove(Hyperflow::s_Windows.begin(), Hyperflow::s_Windows.end(), window);
-		if(result != Hyperflow::s_Windows.end()) window->Close();
+		if(result != Hyperflow::s_Windows.end()) window->m_ShouldClose = true;
 	}
 
 	void SubscribeOnKey(KeySubscriptionData* data) { SubscribeOnKey(Hyperflow::s_MainWindow, data); }

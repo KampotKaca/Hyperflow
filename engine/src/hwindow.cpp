@@ -13,9 +13,4 @@ namespace hf
 	{
 		std::remove(window->m_KeyEventSubscriptions.begin(), window->m_KeyEventSubscriptions.end(), data);
 	}
-
-	void Window::Close()
-	{
-		m_ShouldClose = true;
-	}
 }

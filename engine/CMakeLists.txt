@@ -53,9 +53,9 @@ target_compile_definitions(${PROJECT_NAME}
 )
 
 # Link winmm only on Windows
-#if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
-#    target_link_libraries(Engine PRIVATE winmm)
-#endif()
+if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
+    target_link_libraries(${PROJECT_NAME} PRIVATE winmm)
+endif()
 
 # Set include directories
 target_include_directories(${PROJECT_NAME}

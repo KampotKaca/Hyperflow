@@ -1,39 +1,60 @@
-#include "htime.h"
+#include "hinternal.h"
 #include <chrono>
 #include <thread>
+#include "hplatform.h"
+
+#define private public
+#include "htime.h"
+#undef private
 
 namespace hf
 {
-	int16_t Time::s_TargetFrameRate = 60;
+	int16_t Time::s_TargetFrameRate = 50;
+	double Time::s_TargetFrameDuration = (1.0 / s_TargetFrameRate);
 	double Time::s_ApplicationStartTime = 0;
 	double Time::s_CurrentTime = 0;
-	double Time::s_DeltaTime = 0;
+	double Time::s_DeltaTime = s_TargetFrameDuration;
 	uint64_t Time::s_FrameCount = 0;
-	double Time::s_AvgFrameRate = 0;
-
-	void Time::PauseThread(double seconds)
-	{
-		std::this_thread::sleep_for(std::chrono::duration<double>(seconds));
-	}
 
 	uint64_t Time::GetFrameCount() { return s_FrameCount; }
 	double Time::GetDeltaTime() { return s_DeltaTime; }
 	double Time::GetTimePassedAfterLaunch() { return s_CurrentTime - s_ApplicationStartTime; }
 	int16_t Time::GetTargetFrameRate() { return s_TargetFrameRate; }
-	double Time::GetAvgFrameRate() { return s_AvgFrameRate; }
+
+	double Time::GetSystemTime()
+	{
+		using namespace std::chrono;
+		auto time = high_resolution_clock::now().time_since_epoch();
+		return duration<double>(time).count();
+	}
 
 	void Time::SetTargetFrameRate(int16_t targetFrameRate)
 	{
 		s_TargetFrameRate = targetFrameRate;
+		s_TargetFrameDuration = (1.0 / s_TargetFrameRate);
 	}
 
-	void Time::LoadTime(double currentTime)
+	void LoadTime()
 	{
-
+		Time::s_ApplicationStartTime = Time::GetSystemTime();
 	}
 
-	void Time::UpdateTime(double currentTime)
+	void UpdateTime()
 	{
+		double currentTime = Time::GetSystemTime();
 
+		if(Time::s_TargetFrameRate > 0)
+		{
+			auto diff = Time::s_TargetFrameDuration - (currentTime - Time::s_CurrentTime);
+			if(diff > .001)
+			{
+				Platform_Sleep(diff);
+				currentTime = Time::GetSystemTime();
+			}
+		}
+
+		Time::s_DeltaTime = currentTime - Time::s_CurrentTime;
+		Time::s_CurrentTime = currentTime;
+		Time::s_FrameCount++;
 	}
 }
