@@ -44,11 +44,11 @@ namespace app
 
 	static void Log(void* params)
 	{
-		log_error("LOGGGGGG");
+		LOG_INFO("LOGGGGGG");
 	}
 
 	static void UpLog(void* params)
 	{
-		log_error("LOGGGGGG UPPPPPPP");
+		LOG_INFO("LOGGGGGG UPPPPPPP");
 	}
 }

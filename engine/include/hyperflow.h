@@ -4,6 +4,8 @@
 #include "hshared.h"
 #include "htime.h"
 #include "hwindow.h"
+#include "hrenderer.h"
+#include "hexception.h"
 
 namespace hf
 {

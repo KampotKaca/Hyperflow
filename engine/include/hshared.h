@@ -9,6 +9,11 @@
 #include <cstdarg>
 #include <vector>
 
+#include <thread>
+#include <mutex>
+#include <condition_variable>
+#include <atomic>
+
 extern "C"
 {
 #include "log.h"

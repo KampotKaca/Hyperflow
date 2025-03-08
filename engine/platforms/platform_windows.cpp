@@ -1,10 +1,62 @@
-#include "hplatform.h"
+//region Windows
 
+//Windows 7 or later
+#define _WIN32_WINNT 0x0601
+#include <sdkddkver.h>
+
+#define NOMINMAX
+#define STRICT
+
+#include <dde.h>
+#include <ddeml.h>
+#include <mmsystem.h>
+#include <rpc.h>
+
+#define WIN32_LEAN_AND_MEAN
+#define NOGDICAPMASKS
+#define NOSYSMETRICS
+#define NOMENUS
+#define NOICONS
+#define NOSYSCOMMANDS
+#define NORASTEROPS
+#define OEMRESOURCE
+#define NOATOM
+#define NOCLIPBOARD
+#define NOCOLOR
+#define NOCTLMGR
+#define NODRAWTEXT
+#define NOKERNEL
+#define NONLS
+#define NOMEMMGR
+#define NOMETAFILE
+#define NOOPENFILE
+#define NOSCROLL
+#define NOSERVICE
+#define NOSOUND
+#define NOTEXTMETRIC
+#define NOWH
+#define NOCOMM
+#define NOKANJI
+#define NOHELP
+#define NOPROFILER
+#define NODEFERWINDOWPOS
+#define NOMCX
+#define NORPC
+#define NOPROXYSTUB
+#define NOIMAGE
+#define NOTAPE
 #include <windows.h>
+
+//endregion
+
+#include "hplatform.h"
 
 #define private public
 #include "hwindow.h"
 #undef private
+
+#include "hyperflow.h"
+#include <sstream>
 
 namespace hf
 {
@@ -193,6 +245,55 @@ namespace hf
 	};
 	//endregion
 
+	//region Exception Handling
+	class WindowException : public HyperException
+	{
+	public:
+		WindowException(int32_t lineNum, const char* file, HRESULT errorCode)
+			: HyperException(lineNum, file), m_ErrorCode(errorCode)
+		{
+
+		}
+
+		const char* what() const noexcept override
+		{
+			std::ostringstream oss;
+			oss << GetType() << std::endl
+			    << "[Error Code] " << GetErrorCode() << std::endl
+			    << "[Description] " << GetErrorString();
+
+			m_WhatBuffer = oss.str();
+			return m_WhatBuffer.c_str();
+		}
+
+		static std::string TranslateErrorCode(HRESULT result)
+		{
+			char* pMsgBuf = nullptr;
+			DWORD nMsgLen = FormatMessage
+				(
+					FORMAT_MESSAGE_ALLOCATE_BUFFER |
+					FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
+					nullptr, result, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+					reinterpret_cast<LPSTR>(&pMsgBuf), 0, nullptr
+				);
+			if(nMsgLen == 9) return "Unidentified error code";
+			std::string errorString = pMsgBuf;
+			LocalFree(pMsgBuf);
+			return errorString;
+		}
+
+		virtual HRESULT GetErrorCode() const noexcept { return m_ErrorCode; }
+		virtual const char* GetType() const noexcept override { return "[Window Exception]"; }
+		std::string GetErrorString() const noexcept { return TranslateErrorCode(m_ErrorCode); }
+
+	private:
+		HRESULT m_ErrorCode;
+	};
+
+#define WND_EXCEPT(hr) WindowException(__LINE__, __FILE__, hr);
+#define WND_LAST_EXCEPT() WindowException(__LINE__, __FILE__, GetLastError());
+	//endregion
+
 	//region Message Handing
 	KeyStrokeFlags GetKeyStokeFlags(WPARAM wparam, LPARAM lparam);
 
@@ -214,18 +315,11 @@ namespace hf
 
 	//endregion
 
-	uint32_t GetStyleID(WindowStyle style)
-	{
-		switch (style)
-		{
-			case WindowStyle::Default: return WS_SIZEBOX | WS_CAPTION | WS_MINIMIZEBOX | WS_MAXIMIZEBOX | WS_SYSMENU;
-		}
-		return 0;
-	}
+	//region WinProc
 
 	LRESULT CALLBACK Platform_WindowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
 	{
-		Window* window = (Window*)(GetWindowLongPtr(hwnd, GWLP_USERDATA));
+		auto* window = (Window*)(GetWindowLongPtr(hwnd, GWLP_USERDATA));
 
 		switch (msg)
 		{
@@ -252,6 +346,8 @@ namespace hf
 			case WM_RBUTTONUP:     return Platform_HandleEvents_MouseUp          (window, wparam, lparam, KEY_BUTTON_RIGHT);
 			case WM_MBUTTONUP:     return Platform_HandleEvents_MouseUp          (window, wparam, lparam, KEY_BUTTON_MIDDLE);
 			case WM_XBUTTONUP:     return Platform_HandleEvents_MouseExtraUp     (window, wparam, lparam);
+
+			default: break;
 		}
 
 		return DefWindowProcA(hwnd, msg, wparam, lparam);
@@ -268,6 +364,10 @@ namespace hf
 		}
 		return DefWindowProcA(hwnd, msg, wparam, lparam);
 	}
+
+	//endregion
+
+	//region Platform Specific Functions
 
 	void Platform_Initialize()
 	{
@@ -305,6 +405,15 @@ namespace hf
 		return GetTickCount64();
 	}
 
+	uint32_t GetStyleID(WindowStyle style)
+	{
+		switch (style)
+		{
+			case WindowStyle::Default: return WS_SIZEBOX | WS_CAPTION | WS_MINIMIZEBOX | WS_MAXIMIZEBOX | WS_SYSMENU;
+		}
+		return 0;
+	}
+
 	void Platform_Sleep(double seconds)
 	{
 		// A waitable timer seems to be better than the Windows Sleep().
@@ -314,21 +423,22 @@ namespace hf
 		dueTime.QuadPart = static_cast<LONGLONG>(seconds); //dueTime is in 100ns
 		// We don't name the timer (third parameter) because CreateWaitableTimer will fail if the name
 		// matches an existing name (e.g., if two threads call osaSleep).
-		WaitTimer = CreateWaitableTimer(NULL, true, NULL);
-		SetWaitableTimer(WaitTimer, &dueTime, 0, NULL, NULL, 0);
+		WaitTimer = CreateWaitableTimer(nullptr, true, nullptr);
+		SetWaitableTimer(WaitTimer, &dueTime, 0, nullptr, nullptr, 0);
 		WaitForSingleObject(WaitTimer, INFINITE);
 		CloseHandle(WaitTimer);
 	}
 
-	bool Platform_ConvertSize(Window* window, glm::ivec2& size)
+	void Platform_ConvertSize(Window* window, glm::ivec2& size)
 	{
 		uint32_t currentStyle = GetStyleID(window->m_Style);
 		RECT targetRect = { 0, 0, size[0], size[1] };
-		bool result = AdjustWindowRectEx(&targetRect, currentStyle, false, 0);
+		if(FAILED(AdjustWindowRectEx(&targetRect, currentStyle, false, 0))) throw WND_LAST_EXCEPT();
 		size[0] = targetRect.right - targetRect.left;
 		size[1] = targetRect.bottom - targetRect.top;
-		return result;
 	}
+
+	//endregion
 
 	//region Window
 
@@ -365,12 +475,7 @@ namespace hf
 			this
 		);
 
-		if(m_Handle == nullptr)
-		{
-			log_fatal("Unable to create window titled {0}", data.title.c_str());
-			m_ShouldClose = true;
-			throw;
-		}
+		if(m_Handle == nullptr) throw WND_LAST_EXCEPT();
 
 		SetFlags(data.flags);
 		Focus();
@@ -589,7 +694,7 @@ namespace hf
 	                                            __attribute__((unused)) WPARAM wparam,
 	                                            __attribute__((unused)) LPARAM lparam)
 	{
-		log_info("Window Focused");
+		LOG_INFO("Window Focused");
 		return 0;
 	}
 
@@ -597,7 +702,7 @@ namespace hf
 	                                              __attribute__((unused)) WPARAM wparam,
 	                                              __attribute__((unused)) LPARAM lparam)
 	{
-		log_info("Window UnFocused");
+		LOG_INFO("Window UnFocused");
 		return 0;
 	}
 

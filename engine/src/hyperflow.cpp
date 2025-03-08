@@ -18,31 +18,46 @@ namespace hf
 
 	void Hyperflow::Run(const EngineData& engineData)
 	{
-		Platform_Initialize();
-		Platform_BeginTemporarySystemTimer(1);
-		LoadTime();
-		log_set_level(LOG_TRACE);
-
-		Hyperflow::s_LifecycleCallbacks = engineData.lifecycleCallbacks;
-		Hyperflow::s_UpdateType = engineData.updateType;
-		Hyperflow::s_AppTitle = engineData.appTitle;
-
-		s_MainWindow = OpenWindow(engineData.windowData, nullptr);
-
-		Hyperflow::s_IsRunning = true;
-
-		if(s_LifecycleCallbacks.onStartCallback) s_LifecycleCallbacks.onStartCallback();
-
-		while (IsRunning())
+		try
 		{
-			UpdateTime();
-			Platform_HandleEvents(s_Windows, s_UpdateType);
-			if(s_LifecycleCallbacks.onUpdateCallback) s_LifecycleCallbacks.onUpdateCallback();
-		}
+			Platform_Initialize();
+			Platform_BeginTemporarySystemTimer(1);
+			LoadTime();
+			log_set_level(LOG_TRACE);
 
-		if(s_LifecycleCallbacks.onUpdateCallback) s_LifecycleCallbacks.onUpdateCallback();
-		CloseWindow(s_MainWindow);
-		Platform_EndTemporarySystemTimer(1);
+			Hyperflow::s_LifecycleCallbacks = engineData.lifecycleCallbacks;
+			Hyperflow::s_UpdateType = engineData.updateType;
+			Hyperflow::s_AppTitle = engineData.appTitle;
+
+			s_MainWindow = OpenWindow(engineData.windowData, nullptr);
+
+			Hyperflow::s_IsRunning = true;
+
+			if(s_LifecycleCallbacks.onStartCallback) s_LifecycleCallbacks.onStartCallback();
+
+			while (IsRunning())
+			{
+				UpdateTime();
+				Platform_HandleEvents(s_Windows, s_UpdateType);
+				if(s_LifecycleCallbacks.onUpdateCallback) s_LifecycleCallbacks.onUpdateCallback();
+			}
+
+			if(s_LifecycleCallbacks.onUpdateCallback) s_LifecycleCallbacks.onUpdateCallback();
+			CloseWindow(s_MainWindow);
+			Platform_EndTemporarySystemTimer(1);
+		}
+		catch(const HyperException& e)
+		{
+			log_fatal(e.GetFile().c_str(), e.GetLine(), e.what());
+		}
+		catch(const std::exception& e)
+		{
+			LOG_FATAL(e.what());
+		}
+		catch(...)
+		{
+			LOG_FATAL("No Details Are Available");
+		}
 	}
 
 	bool Hyperflow::IsRunning() { return Hyperflow::s_IsRunning && !s_MainWindow->IsClosing(); }
