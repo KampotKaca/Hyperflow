@@ -1,10 +1,10 @@
-#include "hplatform.h"
-#include "hinternal.h"
-
 #define private public
-#include "hwindow.h"
+#include "components/windowhandling/hwindow.h"
 #include "hyperflow.h"
 #undef private
+
+#include "components/hplatform.h"
+#include "components/hinternal.h"
 
 namespace hf
 {
@@ -76,7 +76,4 @@ namespace hf
 		auto result = std::remove(Hyperflow::s_Windows.begin(), Hyperflow::s_Windows.end(), window);
 		if(result != Hyperflow::s_Windows.end()) window->m_ShouldClose = true;
 	}
-
-	void SubscribeOnKey(KeySubscriptionData* data) { SubscribeOnKey(Hyperflow::s_MainWindow, data); }
-	void UnsubscribeOnKey(KeySubscriptionData* data) { UnsubscribeOnKey(Hyperflow::s_MainWindow, data); }
 }

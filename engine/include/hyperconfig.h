@@ -1,0 +1,6 @@
+#ifndef HYPERCONFIG_H
+#define HYPERCONFIG_H
+
+#define MAX_KEYBOARD_BUFFER_SIZE 64u
+
+#endif //HYPERCONFIG_H

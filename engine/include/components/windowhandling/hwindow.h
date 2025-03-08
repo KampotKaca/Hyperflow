@@ -2,6 +2,8 @@
 #define HWINDOW_H
 
 #include "hshared.h"
+#include "hkeyboard.h"
+#include "hmouse.h"
 
 namespace hf
 {
@@ -26,6 +28,9 @@ namespace hf
 		void SetFlags(WindowFlags flags);
 		void Focus() const;
 
+		Keyboard Kb;
+		Mouse Ms;
+		
 	private:
 		std::string m_Title;
 		void* m_Handle;
@@ -33,13 +38,7 @@ namespace hf
 		WindowFlags m_Flags;
 		bool m_ShouldClose;
 		Ref<Window> m_Parent;
-		std::string m_WriteRecords;
-		std::vector<KeySubscriptionData*> m_KeyEventSubscriptions;
-		KeyCode m_PrevKeyState{};
 	};
-
-	void SubscribeOnKey(Ref<Window> window, KeySubscriptionData* data);
-	void UnsubscribeOnKey(Ref<Window> window, KeySubscriptionData* data);
 }
 
 #endif //HWINDOW_H

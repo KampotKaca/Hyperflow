@@ -1,5 +1,5 @@
-#include "hrenderer.h"
-#include "hplatform.h"
+#include "components/rendering/hrenderer.h"
+#include "components/hplatform.h"
 
 namespace hf
 {

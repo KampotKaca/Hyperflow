@@ -49,199 +49,189 @@
 
 //endregion
 
-#include "hplatform.h"
+#include "components/hplatform.h"
 
 #define private public
-#include "hwindow.h"
+#include "components/windowhandling/hwindow.h"
 #undef private
 
 #include "hyperflow.h"
+#include "components/hinternal.h"
 #include <sstream>
 
 namespace hf
 {
 	//region Definitions
 
-	typedef struct
-	{
-		KeyCode keyCode;
-		uint32_t virtualKeyCode;
-		uint32_t repeatCount;
-		uint32_t scanCode;
-		bool isExtendedKey;
-		bool wasPrevStateDown; //was previous state down
-		bool isBeingPressed;   //is key currently being pressed or released
-	}KeyStrokeFlags;
-
 	const char* WINDOWS_CLASS_NAME = "HyperflowClass";
 
 	//Converts Window Virtual Key to Hyper Key Code
-	constexpr KeyCode KEY_CODES[] =
+	constexpr uint8_t KEY_CODES[] =
 	{
-		KEY_NULL,               // 0: Reserved
-		KEY_BUTTON_LEFT,        // 1: Mouse button left                     VK_LBUTTON
-		KEY_BUTTON_RIGHT,       // 2: Mouse button right                    VK_RBUTTON
-		KEY_NULL,               // 3: Not Implemented                       VK_CANCEL
-		KEY_BUTTON_MIDDLE,      // 4: Mouse button middle (pressed wheel)   VK_MBUTTON
-		KEY_BUTTON_EXTRA1,      // 5: Mouse button extra 1                  VK_XBUTTON1
-		KEY_BUTTON_EXTRA2,      // 6: Mouse button extra 2                  VK_XBUTTON2
-		KEY_NULL,               // 7: Reserved
-		KEY_BACKSPACE,          // 8: Backspace Key                         VK_BACK
-		KEY_TAB,                // 9: Tab Key                               VK_TAB
-		KEY_NULL, KEY_NULL,     // 10, 11: Reserved
-		KEY_NULL,               // 12: Not Implemented                      VK_CLEAR
-		KEY_ENTER,              // 13: Enter Key                            VK_ENTER
-		KEY_NULL, KEY_NULL,     // 14, 15: Unassigned
-		KEY_SHIFT,              // 16: Shift Key                            VK_SHIFT
-		KEY_CONTROL,            // 17: Ctrl Key                             VK_CONTROL
-		KEY_ALT,                // 18: Alt Key                              VK_MENU
-		KEY_PAUSE,              // 19: Pause Key                            VK_PAUSE
-		KEY_CAPS_LOCK,          // 20: Caps Lock Key                        VK_CAPITAL
-		KEY_NULL,               // 21: Not Implemented                      VK_KANA, VK_HANGUL
-		KEY_NULL,               // 22: Not Implemented                      VK_IME_ON
-		KEY_NULL,               // 23: Not Implemented                      VK_JUNJA
-		KEY_NULL,               // 24: Not Implemented                      VK_FINAL
-		KEY_NULL,               // 25: Not Implemented                      VK_HANJA, VK_KANJI
-		KEY_NULL,               // 26: Not Implemented                      VK_IME_OFF
-		KEY_ESCAPE,             // 27: Esc Key                              VK_ESCAPE
-		KEY_NULL,               // 28: Not Implemented                      VK_CONVERT
-		KEY_NULL,               // 29: Not Implemented                      VK_NONCONVERT
-		KEY_NULL,               // 30: Not Implemented                      VK_ACCEPT
-		KEY_NULL,               // 31: Not Implemented                      VK_MODECHANGE
-		KEY_SPACE,              // 32: Space Key                            VK_SPACE
-		KEY_PAGE_UP,            // 33: Page Up key                          VK_PRIOR
-		KEY_PAGE_DOWN,          // 34: Page Down key                        VK_NEXT
-		KEY_END,                // 35: End key                              VK_END
-		KEY_HOME,               // 36: Home key                             VK_HOME
-		KEY_LEFT,               // 37: Left arrow key                       VK_LEFT
-		KEY_UP,                 // 38: Up arrow key                         VK_UP
-		KEY_RIGHT,              // 39: Right arrow key                      VK_RIGHT
-		KEY_DOWN,               // 40: Down arrow key                       VK_DOWN
-		KEY_NULL,               // 41: Not Implemented                      VK_SELECT
-		KEY_NULL,               // 42: Not Implemented                      VK_PRINT
-		KEY_NULL,               // 43: Not Implemented                      VK_EXECUTE
-		KEY_PRINT_SCREEN,       // 44: PrtSc Key                            VK_SNAPSHOT
-		KEY_INSERT,             // 45: Insert Key                           VK_INSERT
-		KEY_DELETE,             // 46: Delete Key                           VK_DELETE
-		KEY_NULL,               // 47: Not Implemented                      VK_HELP
-		KEY_ZERO,               // 48: 0 Key
-		KEY_ONE,                // 49: 1 Key
-		KEY_TWO,                // 50: 2 Key
-		KEY_THREE,              // 51: 3 Key
-		KEY_FOUR,               // 52: 4 Key
-		KEY_FIVE,               // 53: 5 Key
-		KEY_SIX,                // 54: 6 Key
-		KEY_SEVEN,              // 55: 7 Key
-		KEY_EIGHT,              // 56: 8 Key
-		KEY_NINE,               // 57: 9 Key
-		KEY_NULL, KEY_NULL, KEY_NULL, KEY_NULL, KEY_NULL, KEY_NULL, KEY_NULL, // 58-64 Undefined
-		KEY_A,                  // 65: a | A Key
-		KEY_B,                  // 66: b | B Key
-		KEY_C,                  // 67: c | C Key
-		KEY_D,                  // 68: d | D Key
-		KEY_E,                  // 69: e | E Key
-		KEY_F,                  // 70: f | F Key
-		KEY_G,                  // 71: g | G Key
-		KEY_H,                  // 72: h | H Key
-		KEY_I,                  // 73: i | I Key
-		KEY_J,                  // 74: j | J Key
-		KEY_K,                  // 75: k | K Key
-		KEY_L,                  // 76: l | L Key
-		KEY_M,                  // 77: m | M Key
-		KEY_N,                  // 78: n | N Key
-		KEY_O,                  // 79: O | O Key
-		KEY_P,                  // 80: p | P Key
-		KEY_Q,                  // 81: q | Q Key
-		KEY_R,                  // 82: r | R Key
-		KEY_S,                  // 83: s | S Key
-		KEY_T,                  // 84: t | T Key
-		KEY_U,                  // 85: u | U Key
-		KEY_V,                  // 86: v | V Key
-		KEY_W,                  // 87: w | W Key
-		KEY_X,                  // 88: x | X Key
-		KEY_Y,                  // 89: y | Y Key
-		KEY_Z,                  // 90: z | Z Key
-		KEY_LEFT_SUPER,         // 91: Left Windows Key                     VK_LWIN
-		KEY_RIGHT_SUPER,        // 92: Right Windows Key                    VK_RWIN
-		KEY_NULL,               // 93: Not Implemented                      VK_APPS
-		KEY_NULL,               // 94: Reserved
-		KEY_NULL,               // 95: Not Implemented                      VK_SLEEP
-		KEY_KP_0,               // 96: Keypad 0 Key                         VK_NUMPAD0
-		KEY_KP_1,               // 97: Keypad 1 Key                         VK_NUMPAD1
-		KEY_KP_2,               // 98: Keypad 2 Key                         VK_NUMPAD2
-		KEY_KP_3,               // 99: Keypad 3 Key                         VK_NUMPAD3
-		KEY_KP_4,               // 100: Keypad 4 Key                        VK_NUMPAD4
-		KEY_KP_5,               // 101: Keypad 5 Key                        VK_NUMPAD5
-		KEY_KP_6,               // 102: Keypad 6 Key                        VK_NUMPAD6
-		KEY_KP_7,               // 103: Keypad 7 Key                        VK_NUMPAD7
-		KEY_KP_8,               // 104: Keypad 8 Key                        VK_NUMPAD8
-		KEY_KP_9,               // 105: Keypad 9 Key                        VK_NUMPAD9
-		KEY_KP_MULTIPLY,        // 106: Multiply Key                        VK_MULTIPLY
-		KEY_KP_ADD,             // 107: Add Key                             VK_ADD
-		KEY_KP_EQUAL,           // 108: Equal Key                           VK_SEPARATOR
-		KEY_KP_SUBTRACT,        // 109: Subtract key                        VK_SUBTRACT
-		KEY_KP_DECIMAL,         // 110: Decimal key                         VK_DECIMAL
-		KEY_KP_DIVIDE,          // 111: Divide key                          VK_DIVIDE
-		KEY_F1,                 // 112: F1 key                              VK_F1
-		KEY_F2,                 // 113: F2 key                              VK_F2
-		KEY_F3,                 // 114: F3 key                              VK_F3
-		KEY_F4,                 // 115: F4 key                              VK_F4
-		KEY_F5,                 // 116: F5 key                              VK_F5
-		KEY_F6,                 // 117: F6 key                              VK_F6
-		KEY_F7,                 // 118: F7 key                              VK_F7
-		KEY_F8,                 // 119: F8 key                              VK_F8
-		KEY_F9,                 // 120: F9 key                              VK_F9
-		KEY_F10,                // 121: F10 key                             VK_F10
-		KEY_F11,                // 122: F11 key                             VK_F11
-		KEY_F12,                // 123: F12 key                             VK_F12
+		(uint8_t)Key::None,               // 0: Reserved
+		(uint8_t)Button::Left,            // 1: Mouse button left                     VK_LBUTTON
+		(uint8_t)Button::Right,           // 2: Mouse button right                    VK_RBUTTON
+		(uint8_t)Key::None,               // 3: Not Implemented                       VK_CANCEL
+		(uint8_t)Button::Wheel,           // 4: Mouse button middle (pressed wheel)   VK_MBUTTON
+		(uint8_t)Button::Extra1,          // 5: Mouse button extra 1                  VK_XBUTTON1
+		(uint8_t)Button::Extra2,          // 6: Mouse button extra 2                  VK_XBUTTON2
+		(uint8_t)Key::None,               // 7: Reserved
+		(uint8_t)Key::Backspace,          // 8: Backspace Key                         VK_BACK
+		(uint8_t)Key::Tab,                // 9: Tab Key                               VK_TAB
+		(uint8_t)Key::None, (uint8_t)Key::None,               // 10, 11: Reserved
+		(uint8_t)Key::None,               // 12: Not Implemented                      VK_CLEAR
+		(uint8_t)Key::Enter,              // 13: Enter Key                            VK_ENTER
+		(uint8_t)Key::None, (uint8_t)Key::None,               // 14, 15: Unassigned
+		(uint8_t)Key::Shift,              // 16: Shift Key                            VK_SHIFT
+		(uint8_t)Key::Control,            // 17: Ctrl Key                             VK_CONTROL
+		(uint8_t)Key::Alt,                // 18: Alt Key                              VK_MENU
+		(uint8_t)Key::Pause,              // 19: Pause Key                            VK_PAUSE
+		(uint8_t)Key::CapsLock,           // 20: Caps Lock Key                        VK_CAPITAL
+		(uint8_t)Key::None,               // 21: Not Implemented                      VK_KANA, VK_HANGUL
+		(uint8_t)Key::None,               // 22: Not Implemented                      VK_IME_ON
+		(uint8_t)Key::None,               // 23: Not Implemented                      VK_JUNJA
+		(uint8_t)Key::None,               // 24: Not Implemented                      VK_FINAL
+		(uint8_t)Key::None,               // 25: Not Implemented                      VK_HANJA, VK_KANJI
+		(uint8_t)Key::None,               // 26: Not Implemented                      VK_IME_OFF
+		(uint8_t)Key::Escape,             // 27: Esc Key                              VK_ESCAPE
+		(uint8_t)Key::None,               // 28: Not Implemented                      VK_CONVERT
+		(uint8_t)Key::None,               // 29: Not Implemented                      VK_NONCONVERT
+		(uint8_t)Key::None,               // 30: Not Implemented                      VK_ACCEPT
+		(uint8_t)Key::None,               // 31: Not Implemented                      VK_MODECHANGE
+		(uint8_t)Key::Space,              // 32: Space Key                            VK_SPACE
+		(uint8_t)Key::PageUp,             // 33: Page Up key                          VK_PRIOR
+		(uint8_t)Key::PageDown,           // 34: Page Down key                        VK_NEXT
+		(uint8_t)Key::End,                // 35: End key                              VK_END
+		(uint8_t)Key::Home,               // 36: Home key                             VK_HOME
+		(uint8_t)Key::Left,               // 37: Left arrow key                       VK_LEFT
+		(uint8_t)Key::Up,                 // 38: Up arrow key                         VK_UP
+		(uint8_t)Key::Right,              // 39: Right arrow key                      VK_RIGHT
+		(uint8_t)Key::Down,               // 40: Down arrow key                       VK_DOWN
+		(uint8_t)Key::None,               // 41: Not Implemented                      VK_SELECT
+		(uint8_t)Key::None,               // 42: Not Implemented                      VK_PRINT
+		(uint8_t)Key::None,               // 43: Not Implemented                      VK_EXECUTE
+		(uint8_t)Key::PrintScreen,        // 44: PrtSc Key                            VK_SNAPSHOT
+		(uint8_t)Key::Insert,             // 45: Insert Key                           VK_INSERT
+		(uint8_t)Key::Delete,             // 46: Delete Key                           VK_DELETE
+		(uint8_t)Key::None,               // 47: Not Implemented                      VK_HELP
+		(uint8_t)Key::Zero,               // 48: 0 Key
+		(uint8_t)Key::One,                // 49: 1 Key
+		(uint8_t)Key::Two,                // 50: 2 Key
+		(uint8_t)Key::Three,              // 51: 3 Key
+		(uint8_t)Key::Four,               // 52: 4 Key
+		(uint8_t)Key::Five,               // 53: 5 Key
+		(uint8_t)Key::Six,                // 54: 6 Key
+		(uint8_t)Key::Seven,              // 55: 7 Key
+		(uint8_t)Key::Eight,              // 56: 8 Key
+		(uint8_t)Key::Nine,               // 57: 9 Key
+		(uint8_t)Key::None, (uint8_t)Key::None, (uint8_t)Key::None, (uint8_t)Key::None, (uint8_t)Key::None, (uint8_t)Key::None, (uint8_t)Key::None, // 58-64 Undefined
+		(uint8_t)Key::A,                  // 65: a | A Key
+		(uint8_t)Key::B,                  // 66: b | B Key
+		(uint8_t)Key::C,                  // 67: c | C Key
+		(uint8_t)Key::D,                  // 68: d | D Key
+		(uint8_t)Key::E,                  // 69: e | E Key
+		(uint8_t)Key::F,                  // 70: f | F Key
+		(uint8_t)Key::G,                  // 71: g | G Key
+		(uint8_t)Key::H,                  // 72: h | H Key
+		(uint8_t)Key::I,                  // 73: i | I Key
+		(uint8_t)Key::J,                  // 74: j | J Key
+		(uint8_t)Key::K,                  // 75: k | K Key
+		(uint8_t)Key::L,                  // 76: l | L Key
+		(uint8_t)Key::M,                  // 77: m | M Key
+		(uint8_t)Key::N,                  // 78: n | N Key
+		(uint8_t)Key::O,                  // 79: O | O Key
+		(uint8_t)Key::P,                  // 80: p | P Key
+		(uint8_t)Key::Q,                  // 81: q | Q Key
+		(uint8_t)Key::R,                  // 82: r | R Key
+		(uint8_t)Key::S,                  // 83: s | S Key
+		(uint8_t)Key::T,                  // 84: t | T Key
+		(uint8_t)Key::U,                  // 85: u | U Key
+		(uint8_t)Key::V,                  // 86: v | V Key
+		(uint8_t)Key::W,                  // 87: w | W Key
+		(uint8_t)Key::X,                  // 88: x | X Key
+		(uint8_t)Key::Y,                  // 89: y | Y Key
+		(uint8_t)Key::Z,                  // 90: z | Z Key
+		(uint8_t)Key::LeftSuper,          // 91: Left Windows Key                     VK_LWIN
+		(uint8_t)Key::RightSuper,         // 92: Right Windows Key                    VK_RWIN
+		(uint8_t)Key::None,               // 93: Not Implemented                      VK_APPS
+		(uint8_t)Key::None,               // 94: Reserved
+		(uint8_t)Key::None,               // 95: Not Implemented                      VK_SLEEP
+		(uint8_t)Key::Pad0,               // 96: Keypad 0 Key                         VK_NUMPAD0
+		(uint8_t)Key::Pad1,               // 97: Keypad 1 Key                         VK_NUMPAD1
+		(uint8_t)Key::Pad2,               // 98: Keypad 2 Key                         VK_NUMPAD2
+		(uint8_t)Key::Pad3,               // 99: Keypad 3 Key                         VK_NUMPAD3
+		(uint8_t)Key::Pad4,               // 100: Keypad 4 Key                        VK_NUMPAD4
+		(uint8_t)Key::Pad5,               // 101: Keypad 5 Key                        VK_NUMPAD5
+		(uint8_t)Key::Pad6,               // 102: Keypad 6 Key                        VK_NUMPAD6
+		(uint8_t)Key::Pad7,               // 103: Keypad 7 Key                        VK_NUMPAD7
+		(uint8_t)Key::Pad8,               // 104: Keypad 8 Key                        VK_NUMPAD8
+		(uint8_t)Key::Pad9,               // 105: Keypad 9 Key                        VK_NUMPAD9
+		(uint8_t)Key::PadMultiply,        // 106: Multiply Key                        VK_MULTIPLY
+		(uint8_t)Key::PadAdd,             // 107: Add Key                             VK_ADD
+		(uint8_t)Key::PadEqual,           // 108: Equal Key                           VK_SEPARATOR
+		(uint8_t)Key::PadSubtract,        // 109: Subtract key                        VK_SUBTRACT
+		(uint8_t)Key::PadDecimal,         // 110: Decimal key                         VK_DECIMAL
+		(uint8_t)Key::PadDivide,          // 111: Divide key                          VK_DIVIDE
+		(uint8_t)Key::F1,                 // 112: F1 key                              VK_F1
+		(uint8_t)Key::F2,                 // 113: F2 key                              VK_F2
+		(uint8_t)Key::F3,                 // 114: F3 key                              VK_F3
+		(uint8_t)Key::F4,                 // 115: F4 key                              VK_F4
+		(uint8_t)Key::F5,                 // 116: F5 key                              VK_F5
+		(uint8_t)Key::F6,                 // 117: F6 key                              VK_F6
+		(uint8_t)Key::F7,                 // 118: F7 key                              VK_F7
+		(uint8_t)Key::F8,                 // 119: F8 key                              VK_F8
+		(uint8_t)Key::F9,                 // 120: F9 key                              VK_F9
+		(uint8_t)Key::F10,                // 121: F10 key                             VK_F10
+		(uint8_t)Key::F11,                // 122: F11 key                             VK_F11
+		(uint8_t)Key::F12,                // 123: F12 key                             VK_F12
 
 		// 124-135: F13-F24 keys                                            VK_F13-VK_F24
-		KEY_NULL, KEY_NULL, KEY_NULL, KEY_NULL, KEY_NULL, KEY_NULL, KEY_NULL, KEY_NULL, KEY_NULL, KEY_NULL, KEY_NULL, KEY_NULL,
+		(uint8_t)Key::None, (uint8_t)Key::None, (uint8_t)Key::None, (uint8_t)Key::None, (uint8_t)Key::None, (uint8_t)Key::None, (uint8_t)Key::None, (uint8_t)Key::None, (uint8_t)Key::None, (uint8_t)Key::None, (uint8_t)Key::None, (uint8_t)Key::None,
 		// 136-143: Reserved
-		KEY_NULL, KEY_NULL, KEY_NULL, KEY_NULL, KEY_NULL, KEY_NULL, KEY_NULL, KEY_NULL,
-
-		KEY_NUM_LOCK,           // 144: Num lock key                        VK_NUMLOCK
-		KEY_SCROLL_LOCK,        // 145: Scroll lock key                     VK_SCROLL
+		(uint8_t)Key::None, (uint8_t)Key::None, (uint8_t)Key::None, (uint8_t)Key::None, (uint8_t)Key::None, (uint8_t)Key::None, (uint8_t)Key::None, (uint8_t)Key::None,
+		
+		(uint8_t)Key::NumLock,            // 144: Num lock key                        VK_NUMLOCK
+		(uint8_t)Key::ScrollLock,         // 145: Scroll lock key                     VK_SCROLL
 
 		// 146-150: OEM specific
-		KEY_NULL, KEY_NULL, KEY_NULL, KEY_NULL, KEY_NULL,
+		(uint8_t)Key::None, (uint8_t)Key::None, (uint8_t)Key::None, (uint8_t)Key::None, (uint8_t)Key::None,
 		// 151-159: Unassigned
-		KEY_NULL, KEY_NULL, KEY_NULL, KEY_NULL, KEY_NULL, KEY_NULL, KEY_NULL, KEY_NULL, KEY_NULL,
-
-		KEY_LEFT_SHIFT,         // 160: Left Shift Key                      VK_LSHIFT
-		KEY_RIGHT_SHIFT,        // 161: Right Shift Key                     VK_RSHIFT
-		KEY_LEFT_CONTROL,       // 162: Left Ctrl Key                       VK_LCONTROL
-		KEY_RIGHT_CONTROL,      // 163: Right Ctrl Key                      VK_RCONTROL
-		KEY_LEFT_ALT,           // 164: Left Alt Key                        VK_LMENU
-		KEY_RIGHT_ALT,          // 165: Right Alt Key                       VK_RMENU
+		(uint8_t)Key::None, (uint8_t)Key::None, (uint8_t)Key::None, (uint8_t)Key::None, (uint8_t)Key::None, (uint8_t)Key::None, (uint8_t)Key::None, (uint8_t)Key::None, (uint8_t)Key::None,
+		
+		(uint8_t)Key::LeftShift,          // 160: Left Shift Key                      VK_LSHIFT
+		(uint8_t)Key::RightShift,         // 161: Right Shift Key                     VK_RSHIFT
+		(uint8_t)Key::LeftControl,        // 162: Left Ctrl Key                       VK_LCONTROL
+		(uint8_t)Key::RightControl,       // 163: Right Ctrl Key                      VK_RCONTROL
+		(uint8_t)Key::LeftAlt,            // 164: Left Alt Key                        VK_LMENU
+		(uint8_t)Key::RightAlt,           // 165: Right Alt Key                       VK_RMENU
 
 		// 166-185: Not Implemented
-		KEY_NULL, KEY_NULL, KEY_NULL, KEY_NULL, KEY_NULL, KEY_NULL, KEY_NULL, KEY_NULL, KEY_NULL, KEY_NULL,
-		KEY_NULL, KEY_NULL, KEY_NULL, KEY_NULL, KEY_NULL, KEY_NULL, KEY_NULL, KEY_NULL, KEY_NULL, KEY_NULL,
-
-		KEY_SEMICOLON,          // 186: ; Key                               VK_OEM_1
-		KEY_EQUAL,              // 187: = Key                               VK_OEM_PLUS
-		KEY_COMMA,              // 188: , Key                               VK_OEM_COMMA
-		KEY_MINUS,              // 189: - Key                               VK_OEM_MINUS
-		KEY_PERIOD,             // 190: . Key                               VK_OEM_PERIOD
-		KEY_SLASH,              // 191: / Key                               VK_OEM_2
-		KEY_GRAVE,              // 192: ` Key                               VK_OEM_3
+		(uint8_t)Key::None, (uint8_t)Key::None, (uint8_t)Key::None, (uint8_t)Key::None, (uint8_t)Key::None, (uint8_t)Key::None, (uint8_t)Key::None, (uint8_t)Key::None, (uint8_t)Key::None, (uint8_t)Key::None,
+		(uint8_t)Key::None, (uint8_t)Key::None, (uint8_t)Key::None, (uint8_t)Key::None, (uint8_t)Key::None, (uint8_t)Key::None, (uint8_t)Key::None, (uint8_t)Key::None, (uint8_t)Key::None, (uint8_t)Key::None,
+		
+		(uint8_t)Key::Semicolon,          // 186: ; Key                               VK_OEM_1
+		(uint8_t)Key::Equal,              // 187: = Key                               VK_OEM_PLUS
+		(uint8_t)Key::Comma,              // 188: , Key                               VK_OEM_COMMA
+		(uint8_t)Key::Minus,              // 189: - Key                               VK_OEM_MINUS
+		(uint8_t)Key::Period,             // 190: . Key                               VK_OEM_PERIOD
+		(uint8_t)Key::Slash,              // 191: / Key                               VK_OEM_2
+		(uint8_t)Key::Grave,              // 192: ` Key                               VK_OEM_3
 
 		// 193-218 Reserved
-		KEY_NULL, KEY_NULL, KEY_NULL, KEY_NULL, KEY_NULL, KEY_NULL, KEY_NULL, KEY_NULL, KEY_NULL, KEY_NULL,
-		KEY_NULL, KEY_NULL, KEY_NULL, KEY_NULL, KEY_NULL, KEY_NULL, KEY_NULL, KEY_NULL, KEY_NULL, KEY_NULL,
-		KEY_NULL, KEY_NULL, KEY_NULL, KEY_NULL, KEY_NULL, KEY_NULL,
-
-		KEY_LEFT_BRACKET,       // 219: [ Key                               VK_OEM_4
-		KEY_BACKSLASH,          // 220: \ Key                               VK_OEM_5
-		KEY_RIGHT_BRACKET,      // 221: ] Key                               VK_OEM_6
-		KEY_APOSTROPHE,         // 222: ' Key                               VK_OEM_7
+		(uint8_t)Key::None, (uint8_t)Key::None, (uint8_t)Key::None, (uint8_t)Key::None, (uint8_t)Key::None, (uint8_t)Key::None, (uint8_t)Key::None, (uint8_t)Key::None, (uint8_t)Key::None, (uint8_t)Key::None,
+		(uint8_t)Key::None, (uint8_t)Key::None, (uint8_t)Key::None, (uint8_t)Key::None, (uint8_t)Key::None, (uint8_t)Key::None, (uint8_t)Key::None, (uint8_t)Key::None, (uint8_t)Key::None, (uint8_t)Key::None,
+		(uint8_t)Key::None, (uint8_t)Key::None, (uint8_t)Key::None, (uint8_t)Key::None, (uint8_t)Key::None, (uint8_t)Key::None,
+		
+		(uint8_t)Key::LeftBracket,        // 219: [ Key                               VK_OEM_4
+		(uint8_t)Key::Backslash,          // 220: \ Key                               VK_OEM_5
+		(uint8_t)Key::RightBracket,       // 221: ] Key                               VK_OEM_6
+		(uint8_t)Key::Apostrophe,         // 222: ' Key                               VK_OEM_7
 
 		// 223-254 Not Implemented
-		KEY_NULL, KEY_NULL, KEY_NULL, KEY_NULL, KEY_NULL, KEY_NULL, KEY_NULL, KEY_NULL, KEY_NULL, KEY_NULL,
-		KEY_NULL, KEY_NULL, KEY_NULL, KEY_NULL, KEY_NULL, KEY_NULL, KEY_NULL, KEY_NULL, KEY_NULL, KEY_NULL,
-		KEY_NULL, KEY_NULL, KEY_NULL, KEY_NULL, KEY_NULL, KEY_NULL, KEY_NULL, KEY_NULL, KEY_NULL, KEY_NULL,
-		KEY_NULL, KEY_NULL,
+		(uint8_t)Key::None, (uint8_t)Key::None, (uint8_t)Key::None, (uint8_t)Key::None, (uint8_t)Key::None, (uint8_t)Key::None, (uint8_t)Key::None, (uint8_t)Key::None, (uint8_t)Key::None, (uint8_t)Key::None,
+		(uint8_t)Key::None, (uint8_t)Key::None, (uint8_t)Key::None, (uint8_t)Key::None, (uint8_t)Key::None, (uint8_t)Key::None, (uint8_t)Key::None, (uint8_t)Key::None, (uint8_t)Key::None, (uint8_t)Key::None,
+		(uint8_t)Key::None, (uint8_t)Key::None, (uint8_t)Key::None, (uint8_t)Key::None, (uint8_t)Key::None, (uint8_t)Key::None, (uint8_t)Key::None, (uint8_t)Key::None, (uint8_t)Key::None, (uint8_t)Key::None,
+		(uint8_t)Key::None, (uint8_t)Key::None, (uint8_t)Key::None
 	};
 	//endregion
 
@@ -295,23 +285,21 @@ namespace hf
 	//endregion
 
 	//region Message Handing
-	KeyStrokeFlags GetKeyStokeFlags(WPARAM wparam, LPARAM lparam);
-
 	LRESULT Platform_HandleEvents_WindowClose       (Window* window, WPARAM wparam, LPARAM lparam);
 	LRESULT Platform_HandleEvents_WindowShow        (Window* window, WPARAM wparam, LPARAM lparam);
 	LRESULT Platform_HandleEvents_WindowMove        (Window* window, WPARAM wparam, LPARAM lparam);
 	LRESULT Platform_HandleEvents_WindowResize      (Window* window, WPARAM wparam, LPARAM lparam);
 	LRESULT Platform_HandleEvents_WindowFocused     (Window* window, WPARAM wparam, LPARAM lparam);
 	LRESULT Platform_HandleEvents_WindowUnFocused   (Window* window, WPARAM wparam, LPARAM lparam);
-	LRESULT Platform_HandleEvents_Write             (Window* window, WPARAM wparam, LPARAM lparam);
-	LRESULT Platform_HandleEvents_KeyDown           (Window* window, WPARAM wparam, LPARAM lparam);
-	LRESULT Platform_HandleEvents_KeyUp             (Window* window, WPARAM wparam, LPARAM lparam);
+	LRESULT Platform_HandleEvents_Char              (Window* window, WPARAM wparam, LPARAM lparam);
+	LRESULT Platform_HandleEvents_KeyPress          (Window* window, WPARAM wparam, LPARAM lparam);
+	LRESULT Platform_HandleEvents_KeyRelease        (Window* window, WPARAM wparam, LPARAM lparam);
 
-	LRESULT Platform_HandleEvents_MouseDown         (Window* window, WPARAM wparam, LPARAM lparam, KeyCode keyCode);
-	LRESULT Platform_HandleEvents_MouseUp           (Window* window, WPARAM wparam, LPARAM lparam, KeyCode keyCode);
+	LRESULT Platform_HandleEvents_MousePress        (Window* window, WPARAM wparam, LPARAM lparam, Button button);
+	LRESULT Platform_HandleEvents_MouseRelease      (Window* window, WPARAM wparam, LPARAM lparam, Button button);
 
-	LRESULT Platform_HandleEvents_MouseExtraDown    (Window* window, WPARAM wparam, LPARAM lparam);
-	LRESULT Platform_HandleEvents_MouseExtraUp      (Window* window, WPARAM wparam, LPARAM lparam);
+	LRESULT Platform_HandleEvents_MouseExtraPress   (Window* window, WPARAM wparam, LPARAM lparam);
+	LRESULT Platform_HandleEvents_MouseExtraRelease (Window* window, WPARAM wparam, LPARAM lparam);
 
 	//endregion
 
@@ -332,20 +320,21 @@ namespace hf
 			case WM_KILLFOCUS:     return Platform_HandleEvents_WindowUnFocused  (window, wparam, lparam);
 
 			//KeyBoard
-			case WM_CHAR:          return Platform_HandleEvents_Write            (window, wparam, lparam);
-			case WM_KEYDOWN:       return Platform_HandleEvents_KeyDown          (window, wparam, lparam);
-			case WM_KEYUP:         return Platform_HandleEvents_KeyUp            (window, wparam, lparam);
+			case WM_CHAR:          return Platform_HandleEvents_Char(window, wparam, lparam);
+			case WM_KEYDOWN:
+			case WM_SYSKEYDOWN:    return Platform_HandleEvents_KeyPress(window, wparam, lparam);
+			case WM_KEYUP:         return Platform_HandleEvents_KeyRelease(window, wparam, lparam);
 
 			//Mouse
-			case WM_LBUTTONDOWN:   return Platform_HandleEvents_MouseDown        (window, wparam, lparam, KEY_BUTTON_LEFT);
-			case WM_RBUTTONDOWN:   return Platform_HandleEvents_MouseDown        (window, wparam, lparam, KEY_BUTTON_RIGHT);
-			case WM_MBUTTONDOWN:   return Platform_HandleEvents_MouseDown        (window, wparam, lparam, KEY_BUTTON_MIDDLE);
-			case WM_XBUTTONDOWN:   return Platform_HandleEvents_MouseExtraDown   (window, wparam, lparam);
+			case WM_LBUTTONDOWN:   return Platform_HandleEvents_MousePress(window, wparam, lparam, Button::Left);
+			case WM_RBUTTONDOWN:   return Platform_HandleEvents_MousePress(window, wparam, lparam, Button::Right);
+			case WM_MBUTTONDOWN:   return Platform_HandleEvents_MousePress(window, wparam, lparam, Button::Wheel);
+			case WM_XBUTTONDOWN:   return Platform_HandleEvents_MouseExtraPress(window, wparam, lparam);
 
-			case WM_LBUTTONUP:     return Platform_HandleEvents_MouseUp          (window, wparam, lparam, KEY_BUTTON_LEFT);
-			case WM_RBUTTONUP:     return Platform_HandleEvents_MouseUp          (window, wparam, lparam, KEY_BUTTON_RIGHT);
-			case WM_MBUTTONUP:     return Platform_HandleEvents_MouseUp          (window, wparam, lparam, KEY_BUTTON_MIDDLE);
-			case WM_XBUTTONUP:     return Platform_HandleEvents_MouseExtraUp     (window, wparam, lparam);
+			case WM_LBUTTONUP:     return Platform_HandleEvents_MouseRelease(window, wparam, lparam, Button::Left);
+			case WM_RBUTTONUP:     return Platform_HandleEvents_MouseRelease(window, wparam, lparam, Button::Right);
+			case WM_MBUTTONUP:     return Platform_HandleEvents_MouseRelease(window, wparam, lparam, Button::Wheel);
+			case WM_XBUTTONUP:     return Platform_HandleEvents_MouseExtraRelease(window, wparam, lparam);
 
 			default: break;
 		}
@@ -446,8 +435,6 @@ namespace hf
 	{
 		HINSTANCE hinstance = GetModuleHandle(nullptr);
 		uint32_t currentStyle = GetStyleID(data.style);
-
-		m_PrevKeyState = KEY_NULL;
 
 		m_Title = data.title;
 		m_Style = data.style;
@@ -561,33 +548,11 @@ namespace hf
 
 	//region Message Handing Impl
 
-	void Platform_SendEvent(Window* window, KeyCode keyCode, KeyState state)
-	{
-		uint32_t eventCount = window->m_KeyEventSubscriptions.size();
-		for (uint32_t i = 0; i < eventCount; ++i)
-		{
-			KeySubscriptionData* element = window->m_KeyEventSubscriptions[i];
-			if((element->keyCode & keyCode) && ((int32_t)element->state & (int32_t)state)) element->callback(nullptr);
-		}
-	}
-
 	void Platform_HandleEvents(std::vector<Ref<Window>>& windows, EngineUpdateType updateType)
 	{
-		uint32_t windowCount = windows.size();
-		for (uint32_t i = 0; i < windowCount; ++i)
+		for(auto& window : windows)
 		{
-			const Ref<Window>& window = windows[i];
-			window->m_WriteRecords.clear();
-			KeyCode currentKeyDowns = window->m_PrevKeyState;
-
-			while (currentKeyDowns != KEY_NULL)
-			{
-				uint32_t bitIndex = TrailingZeros128(currentKeyDowns);
-				KeyCode keyCode = ((KeyCode)1) << bitIndex;
-				currentKeyDowns &= ~keyCode;
-
-				Platform_SendEvent(window.get(), keyCode, KeyState::DownContinues);
-			}
+		
 		}
 
 		MSG msg;
@@ -613,37 +578,6 @@ namespace hf
 
 				break;
 		}
-	}
-
-	KeyStrokeFlags GetKeyStokeFlags(WPARAM wparam, LPARAM lparam)
-	{
-		WORD virtualKeyCode = LOWORD(wparam);
-		WORD repeatCount = LOWORD(lparam);
-		WORD keyFlags = HIWORD(lparam);
-		WORD scanCode = LOBYTE(keyFlags);
-
-		switch (virtualKeyCode)
-		{
-			case VK_SHIFT: case VK_CONTROL: case VK_MENU:
-				virtualKeyCode = LOWORD(MapVirtualKeyW(scanCode, MAPVK_VSC_TO_VK_EX));
-				break;
-			default: break;
-		}
-
-		BOOL isExtendedKey = (keyFlags & KF_EXTENDED) == KF_EXTENDED;
-		if (isExtendedKey) scanCode = MAKEWORD(scanCode, 0xE0);
-
-		KeyStrokeFlags flags =
-		{
-			.keyCode = KEY_CODES[virtualKeyCode],
-			.virtualKeyCode = virtualKeyCode,
-			.repeatCount = repeatCount,
-			.scanCode = scanCode,
-			.isExtendedKey = (bool)isExtendedKey,
-			.wasPrevStateDown = (keyFlags & (1u << 14u)) > 0,
-			.isBeingPressed = (keyFlags & (1u << 15u)) > 0,
-		};
-		return flags;
 	}
 
 	void Platform_SetWindowFlag(WindowFlags* flags, WindowFlags target, uint32_t value)
@@ -702,73 +636,58 @@ namespace hf
 	                                              __attribute__((unused)) WPARAM wparam,
 	                                              __attribute__((unused)) LPARAM lparam)
 	{
-		LOG_INFO("Window UnFocused");
+		window->Kb.DisposeAll();
+		LOG_INFO("UnFocused");
 		return 0;
 	}
 
-	LRESULT Platform_HandleEvents_Write(Window* window, WPARAM wparam,
-	                                    __attribute__((unused)) LPARAM lparam)
+	LRESULT Platform_HandleEvents_Char(Window* window, WPARAM wparam,
+	                                   __attribute__((unused)) LPARAM lparam)
 	{
-		char writtenCharacter = (char)wparam;
-		window->m_WriteRecords.push_back(writtenCharacter);
+		OnChar(window->Kb, (char)wparam);
 		return 0;
 	}
 
-	void Platform_HandleEvents_DownHandling(Window* window, KeyCode keyCode)
+	LRESULT Platform_HandleEvents_KeyPress(Window* window, WPARAM wparam, LPARAM lparam)
 	{
-		if(!(window->m_PrevKeyState & keyCode))
+		if(!(lparam & 0x40000000) || window->Kb.IsAutoRepeatEnabled())
 		{
-			window->m_PrevKeyState |= keyCode;
-			Platform_SendEvent(window, keyCode, KeyState::Down);
+			auto key = (Key)((uint8_t)wparam);
+			OnKeyPressed(window->Kb, key);
 		}
-	}
-
-	void Platform_HandleEvents_UpHandling(Window* window, KeyCode keyCode)
-	{
-		if(window->m_PrevKeyState & keyCode)
-		{
-			window->m_PrevKeyState &= ~keyCode;
-			Platform_SendEvent(window, keyCode, KeyState::Up);
-		}
-	}
-
-	LRESULT Platform_HandleEvents_KeyDown(Window* window, WPARAM wparam, LPARAM lparam)
-	{
-		KeyStrokeFlags flags = GetKeyStokeFlags(wparam, lparam);
-		Platform_HandleEvents_DownHandling(window, flags.keyCode);
 		return 0;
 	}
 
-	LRESULT Platform_HandleEvents_KeyUp(Window* window, WPARAM wparam, LPARAM lparam)
+	LRESULT Platform_HandleEvents_KeyRelease(Window* window, WPARAM wparam, LPARAM lparam)
 	{
-		KeyStrokeFlags flags = GetKeyStokeFlags(wparam, lparam);
-		Platform_HandleEvents_UpHandling(window, flags.keyCode);
+		auto key = (Key)((uint8_t)wparam);
+		if(window->Kb.IsPressed(key)) OnKeyReleased(window->Kb, key);
 		return 0;
 	}
 
-	LRESULT Platform_HandleEvents_MouseDown(Window* window, WPARAM wparam, LPARAM lparam, KeyCode keyCode)
+	LRESULT Platform_HandleEvents_MousePress(Window* window, WPARAM wparam, LPARAM lparam, Button button)
 	{
-		Platform_HandleEvents_DownHandling(window, keyCode);
+		OnButtonPressed(window->Ms, button);
 		return 0;
 	}
 
-	LRESULT Platform_HandleEvents_MouseUp(Window* window, WPARAM wparam, LPARAM lparam, KeyCode keyCode)
+	LRESULT Platform_HandleEvents_MouseRelease(Window* window, WPARAM wparam, LPARAM lparam, Button button)
 	{
-		Platform_HandleEvents_UpHandling(window, keyCode);
+		OnButtonReleased(window->Ms, button);
 		return 0;
 	}
 
-	LRESULT Platform_HandleEvents_MouseExtraDown(Window* window, WPARAM wparam, LPARAM lparam)
+	LRESULT Platform_HandleEvents_MouseExtraPress(Window* window, WPARAM wparam, LPARAM lparam)
 	{
-		if(wparam & MK_XBUTTON1) Platform_HandleEvents_MouseDown(window, wparam, lparam, KEY_BUTTON_EXTRA1);
-		if(wparam & MK_XBUTTON2) Platform_HandleEvents_MouseDown(window, wparam, lparam, KEY_BUTTON_EXTRA2);
+		if(wparam & MK_XBUTTON1) OnButtonPressed(window->Ms, Button::Extra1);
+		if(wparam & MK_XBUTTON2) OnButtonPressed(window->Ms, Button::Extra2);
 		return 0;
 	}
 
-	LRESULT Platform_HandleEvents_MouseExtraUp(Window* window, WPARAM wparam, LPARAM lparam)
+	LRESULT Platform_HandleEvents_MouseExtraRelease(Window* window, WPARAM wparam, LPARAM lparam)
 	{
-		if(wparam & MK_XBUTTON1) Platform_HandleEvents_MouseUp(window, wparam, lparam, KEY_BUTTON_EXTRA1);
-		if(wparam & MK_XBUTTON2) Platform_HandleEvents_MouseUp(window, wparam, lparam, KEY_BUTTON_EXTRA2);
+		if(wparam & MK_XBUTTON1) OnButtonReleased(window->Ms, Button::Extra1);
+		if(wparam & MK_XBUTTON2) OnButtonReleased(window->Ms, Button::Extra2);
 		return 0;
 	}
 

@@ -2,9 +2,9 @@
 #define HYPERFLOW_H
 
 #include "hshared.h"
-#include "htime.h"
-#include "hwindow.h"
-#include "hrenderer.h"
+#include "components/htime.h"
+#include "components/windowhandling/hwindow.h"
+#include "rendering/hrenderer.h"
 #include "hexception.h"
 
 namespace hf
@@ -28,9 +28,6 @@ namespace hf
 
 	Ref<Window> OpenWindow(const WindowData& data, const Ref<Window>& parent);
 	void CloseWindow(const Ref<Window>& window);
-
-	void SubscribeOnKey(KeySubscriptionData* data);
-	void UnsubscribeOnKey(KeySubscriptionData* data);
 }
 
 #endif //HYPERFLOW_H
