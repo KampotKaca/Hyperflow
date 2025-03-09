@@ -1,8 +1,8 @@
 #define private public
 #include "components/windowhandling/hwindow.h"
-#include "hyperflow.h"
 #undef private
 
+#include "hyperflow.h"
 #include "components/hplatform.h"
 #include "components/hinternal.h"
 
@@ -38,8 +38,11 @@ namespace hf
 			while (IsRunning())
 			{
 				Time_Update();
-				Platform_HandleEvents(s_Windows, s_UpdateType);
+				Platform_HandleEvents(s_UpdateType);
+				Window_HandleInput(s_Windows);
 				if(s_LifecycleCallbacks.onUpdateCallback) s_LifecycleCallbacks.onUpdateCallback();
+
+				if(Input::IsDown(Key::Escape)) Terminate();
 			}
 
 			if(s_LifecycleCallbacks.onUpdateCallback) s_LifecycleCallbacks.onUpdateCallback();
@@ -64,16 +67,18 @@ namespace hf
 
 	Ref<Window> Hyperflow::MainWindow() { return s_MainWindow; }
 
-	Ref<Window> OpenWindow(const WindowData &data, const Ref<Window>& parent)
+	Ref<Window> Hyperflow::OpenWindow(const WindowData &data, const Ref<Window> &parent)
 	{
 		auto newWindow = MakeRef<Window>(data, parent);
-		Hyperflow::s_Windows.push_back(newWindow);
+		s_Windows.push_back(newWindow);
 		return newWindow;
 	}
 
-	void CloseWindow(const Ref<Window>& window)
+	void Hyperflow::CloseWindow(const Ref<Window> &window)
 	{
-		auto result = std::remove(Hyperflow::s_Windows.begin(), Hyperflow::s_Windows.end(), window);
+		auto result = std::remove(s_Windows.begin(), s_Windows.end(), window);
 		if(result != Hyperflow::s_Windows.end()) window->m_ShouldClose = true;
 	}
+
+	void Hyperflow::Terminate() { s_IsRunning = false; }
 }

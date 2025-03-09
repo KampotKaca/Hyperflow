@@ -6,6 +6,7 @@
 #include "components/windowhandling/hwindow.h"
 #include "rendering/hrenderer.h"
 #include "hexception.h"
+#include "hinput.h"
 
 namespace hf
 {
@@ -16,6 +17,11 @@ namespace hf
 		static bool IsRunning();
 		static Ref<Window> MainWindow();
 
+		static Ref<Window> OpenWindow(const WindowData& data, const Ref<Window>& parent);
+		static void CloseWindow(const Ref<Window>& window);
+
+		static void Terminate();
+
 	private:
 		static EngineLifecycleCallbacks s_LifecycleCallbacks;
 		static EngineUpdateType s_UpdateType;
@@ -25,9 +31,6 @@ namespace hf
 		static Ref<Window> s_MainWindow;
 		static std::vector<Ref<Window>> s_Windows;
 	};
-
-	Ref<Window> OpenWindow(const WindowData& data, const Ref<Window>& parent);
-	void CloseWindow(const Ref<Window>& window);
 }
 
 #endif //HYPERFLOW_H

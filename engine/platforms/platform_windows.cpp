@@ -53,6 +53,8 @@
 
 #define private public
 #include "components/windowhandling/hwindow.h"
+#include "components/windowhandling/hkeyboard.h"
+#include "components/windowhandling/hmouse.h"
 #undef private
 
 #include "hyperflow.h"
@@ -240,7 +242,7 @@ namespace hf
 	{
 	public:
 		WindowException(int32_t lineNum, const char* file, HRESULT errorCode)
-			: HyperException(lineNum, file), m_ErrorCode(errorCode)
+		: HyperException(lineNum, file), m_ErrorCode(errorCode)
 		{
 
 		}
@@ -280,8 +282,8 @@ namespace hf
 		HRESULT m_ErrorCode;
 	};
 
-#define WND_EXCEPT(hr) WindowException(__LINE__, __FILE__, hr);
-#define WND_LAST_EXCEPT() WindowException(__LINE__, __FILE__, GetLastError());
+#define WND_EXCEPT(hr) WindowException(__LINE__, __FILE__, hr)
+#define WND_LAST_EXCEPT() WindowException(__LINE__, __FILE__, GetLastError())
 	//endregion
 
 	//region Message Handing
@@ -449,6 +451,9 @@ namespace hf
 			.size = data.size
 		};
 
+		m_Mouse = MakeRef<Mouse>();
+		m_Keyboard = MakeRef<Keyboard>();
+
 		HWND parentHandle = nullptr;
 		if(parent != nullptr) parentHandle = (HWND)parent->m_Handle;
 
@@ -532,13 +537,8 @@ namespace hf
 
 	//region Message Handing Impl
 
-	void Platform_HandleEvents(std::vector<Ref<Window>>& windows, EngineUpdateType updateType)
+	void Platform_HandleEvents(EngineUpdateType updateType)
 	{
-		for(auto& window : windows)
-		{
-		
-		}
-
 		MSG msg;
 		switch (updateType)
 		{
@@ -624,7 +624,7 @@ namespace hf
 	LRESULT Platform_HandleEvents_KeyboardChar(Window* window, WPARAM wparam,
 	                                           __attribute__((unused)) LPARAM lparam)
 	{
-		KeyboardEvent_Char(window->keyboard, (char) wparam);
+		KeyboardEvent_Char(window->m_Keyboard, (char) wparam);
 		return 0;
 	}
 
@@ -639,12 +639,12 @@ namespace hf
 			case Keyboard::Event::Type::Invalid: LOG_WARN("Invalid Event thrown"); break;
 			case Keyboard::Event::Type::Press:
 
-				if(!(lparam & 0x40000000) || window->keyboard.IsAutoRepeatEnabled())
-					KeyboardEvent_Key(window->keyboard, key, type);
+				if(!(lparam & 0x40000000) || window->m_Keyboard->IsAutoRepeatEnabled())
+					KeyboardEvent_Key(window->m_Keyboard, key, type);
 
 				break;
 			case Keyboard::Event::Type::Release:
-				if(window->keyboard.IsPressed(key)) KeyboardEvent_Key(window->keyboard, key, type);
+				if(window->m_Keyboard->IsPressed(key)) KeyboardEvent_Key(window->m_Keyboard, key, type);
 				break;
 		}
 		return 0;
@@ -652,14 +652,14 @@ namespace hf
 
 	LRESULT Platform_HandleEvents_MouseButton(Window* window, WPARAM wparam, LPARAM lparam, Button button, Mouse::Event::Type type)
 	{
-		MouseEvent_Button(window->mouse, button, type);
+		MouseEvent_Button(window->m_Mouse, button, type);
 		return 0;
 	}
 
 	LRESULT Platform_HandleEvents_MouseButtonExtra(Window* window, WPARAM wparam, LPARAM lparam, Mouse::Event::Type type)
 	{
-		if(wparam & MK_XBUTTON1) MouseEvent_Button(window->mouse, Button::Extra1, type);
-		if(wparam & MK_XBUTTON2) MouseEvent_Button(window->mouse, Button::Extra2, type);
+		if(wparam & MK_XBUTTON1) MouseEvent_Button(window->m_Mouse, Button::Extra1, type);
+		if(wparam & MK_XBUTTON2) MouseEvent_Button(window->m_Mouse, Button::Extra2, type);
 		return 0;
 	}
 
@@ -670,7 +670,7 @@ namespace hf
 			GET_X_LPARAM(lparam),
 			GET_Y_LPARAM(lparam)
 		};
-		MouseEvent_Moved(window->mouse, position);
+		MouseEvent_Moved(window->m_Mouse, position);
 
 		return 0;
 	}
@@ -683,7 +683,7 @@ namespace hf
 			GET_Y_LPARAM(lparam)
 		};
 
-		MouseEvent_Scroll(window->mouse, position);
+		MouseEvent_Scroll(window->m_Mouse, position);
 
 		return 0;
 	}

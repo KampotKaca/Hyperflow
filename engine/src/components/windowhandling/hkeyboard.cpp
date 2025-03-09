@@ -52,22 +52,16 @@ namespace hf
 		DisposeChar();
 	}
 
-	void KeyboardEvent_Key(Keyboard& keyboard, Key key, Keyboard::Event::Type type) noexcept
+	void KeyboardEvent_Key(const Ref<Keyboard>& keyboard, Key key, Keyboard::Event::Type type) noexcept
 	{
 		if(type == Keyboard::Event::Type::Invalid) return;
 
-		keyboard.m_States[(uint8_t)key] = type == Keyboard::Event::Type::Press;
-		keyboard.m_Buffer.emplace(key, type);
-
-		while(keyboard.m_Buffer.size() > MAX_KEYBOARD_BUFFER_SIZE)
-			keyboard.m_Buffer.pop();
+		keyboard->m_States[(uint8_t)key] = type == Keyboard::Event::Type::Press;
+		keyboard->m_Buffer.emplace(key, type);
 	}
 	
-	void KeyboardEvent_Char(Keyboard& keyboard, char character) noexcept
+	void KeyboardEvent_Char(const Ref<Keyboard>& keyboard, char character) noexcept
 	{
-		keyboard.m_CharBuffer.push(character);
-
-		while(keyboard.m_CharBuffer.size() > MAX_KEYBOARD_BUFFER_SIZE)
-			keyboard.m_CharBuffer.pop();
+		keyboard->m_CharBuffer.push(character);
 	}
 }

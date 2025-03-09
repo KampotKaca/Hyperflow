@@ -43,6 +43,8 @@ namespace hf
 
 	template<typename T>
 	using Ref = std::shared_ptr<T>;
+	template<typename T>
+	using URef = std::unique_ptr<T>;
 
 	template <typename T, typename... Args>
 	Ref<T> MakeRef(Args&&... args)
@@ -50,7 +52,69 @@ namespace hf
 		return std::make_shared<T>(std::forward<Args>(args)...);
 	}
 
+	template <typename T, typename... Args>
+	Ref<T> MakeURef(Args&&... args)
+	{
+		return std::make_unique<T>(std::forward<Args>(args)...);
+	}
+
 	//endregion
+
+	//region Definitions
+
+	enum class Key : uint8_t
+	{
+		None,
+		Backspace,
+		Tab,
+		Enter,
+		Shift,
+		Control,
+		Alt,
+		Pause,
+		CapsLock,
+		Escape,
+		Space,
+		PageUp, PageDown,
+		End, Home,
+		Left, Up, Right, Down,
+		PrintScreen,
+		Insert,
+		Delete,
+		Zero, One, Two, Three, Four, Five, Six, Seven, Eight, Nine,
+		LeftSuper, RightSuper,
+		Pad0, Pad1, Pad2, Pad3, Pad4, Pad5, Pad6, Pad7, Pad8, Pad9,
+		PadMultiply,
+		PadAdd,
+		PadEqual,
+		PadSubtract,
+		PadDecimal,
+		PadDivide,
+		F1, F2, F3, F4, F5, F6, F7, F8, F9, F10, F11, F12,
+		LeftBracket,
+		Backslash,
+		RightBracket,
+		A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, W, X, Y, Z,
+		Apostrophe,
+		NumLock,
+		ScrollLock,
+		LeftShift, RightShift,
+		LeftControl, RightControl,
+		LeftAlt, RightAlt,
+		Semicolon,
+		Equal,
+		Comma,
+		Minus,
+		Period,
+		Slash,
+		Grave,
+		Count
+	};
+
+	enum class Button : uint8_t { None, Left, Right, Wheel, Extra1, Extra2, Count };
+
+	enum class KeyState { None, Down, DownContinues, Up };
+	typedef KeyState ButtonState;
 
 	struct Rect
 	{

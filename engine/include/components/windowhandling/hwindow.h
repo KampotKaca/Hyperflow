@@ -2,11 +2,12 @@
 #define HWINDOW_H
 
 #include "hshared.h"
-#include "hkeyboard.h"
-#include "hmouse.h"
 
 namespace hf
 {
+	class Keyboard;
+	class Mouse;
+
 	class Window
 	{
 	public:
@@ -29,18 +30,26 @@ namespace hf
 
 		void SetFlags(WindowFlags flags);
 		void Focus() const;
-
-		Keyboard keyboard;
-		Mouse mouse;
 		
 	private:
+		struct EventData
+		{
+			KeyState keyStates[(uint8_t)Key::Count];
+			ButtonState buttonStates[(uint8_t)Button::Count];
+			std::string charData;
+		};
+
 		std::string m_Title;
-		IRect m_Rect;
+		IRect m_Rect{};
 		void* m_Handle;
 		WindowStyle m_Style;
 		WindowFlags m_Flags;
 		bool m_ShouldClose;
 		Ref<Window> m_Parent;
+
+		Ref<Keyboard> m_Keyboard;
+		Ref<Mouse> m_Mouse;
+		EventData m_EventData;
 	};
 }
 

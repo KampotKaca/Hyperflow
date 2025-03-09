@@ -5,8 +5,6 @@
 
 namespace hf
 {
-	enum class Button : uint8_t { None, Left, Right, Wheel, Extra1, Extra2 };
-	
 	class Mouse
 	{
 	public:
@@ -28,8 +26,6 @@ namespace hf
 		};
 		
 		Mouse() = default;
-		Mouse(const Mouse&) = delete;
-		Mouse& operator=(const Mouse&) = delete;
 		
 		[[nodiscard]] glm::ivec2 GetPosition() const noexcept;
 		[[nodiscard]] glm::ivec2 GetScroll() const noexcept;
