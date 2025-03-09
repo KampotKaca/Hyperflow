@@ -45,7 +45,7 @@
 #define NOPROXYSTUB
 #define NOIMAGE
 #define NOTAPE
-#include <windows.h>
+#include <windowsx.h>
 
 //endregion
 
@@ -272,8 +272,8 @@ namespace hf
 			return errorString;
 		}
 
-		virtual HRESULT GetErrorCode() const noexcept { return m_ErrorCode; }
-		virtual const char* GetType() const noexcept override { return "[Window Exception]"; }
+		HRESULT GetErrorCode() const noexcept { return m_ErrorCode; }
+		const char* GetType() const noexcept override { return "[Window Exception]"; }
 		std::string GetErrorString() const noexcept { return TranslateErrorCode(m_ErrorCode); }
 
 	private:
@@ -285,21 +285,19 @@ namespace hf
 	//endregion
 
 	//region Message Handing
+	LRESULT Platform_HandleEvents_WindowTitle       (Window* window, WPARAM wparam, LPARAM lparam);
 	LRESULT Platform_HandleEvents_WindowClose       (Window* window, WPARAM wparam, LPARAM lparam);
 	LRESULT Platform_HandleEvents_WindowShow        (Window* window, WPARAM wparam, LPARAM lparam);
 	LRESULT Platform_HandleEvents_WindowMove        (Window* window, WPARAM wparam, LPARAM lparam);
 	LRESULT Platform_HandleEvents_WindowResize      (Window* window, WPARAM wparam, LPARAM lparam);
-	LRESULT Platform_HandleEvents_WindowFocused     (Window* window, WPARAM wparam, LPARAM lparam);
-	LRESULT Platform_HandleEvents_WindowUnFocused   (Window* window, WPARAM wparam, LPARAM lparam);
-	LRESULT Platform_HandleEvents_Char              (Window* window, WPARAM wparam, LPARAM lparam);
-	LRESULT Platform_HandleEvents_KeyPress          (Window* window, WPARAM wparam, LPARAM lparam);
-	LRESULT Platform_HandleEvents_KeyRelease        (Window* window, WPARAM wparam, LPARAM lparam);
+	LRESULT Platform_HandleEvents_WindowFocus       (Window* window, WPARAM wparam, LPARAM lparam, bool focused);
+	LRESULT Platform_HandleEvents_KeyboardChar      (Window* window, WPARAM wparam, LPARAM lparam);
+	LRESULT Platform_HandleEvents_KeyboardKey       (Window* window, WPARAM wparam, LPARAM lparam, Keyboard::Event::Type type);
 
-	LRESULT Platform_HandleEvents_MousePress        (Window* window, WPARAM wparam, LPARAM lparam, Button button);
-	LRESULT Platform_HandleEvents_MouseRelease      (Window* window, WPARAM wparam, LPARAM lparam, Button button);
-
-	LRESULT Platform_HandleEvents_MouseExtraPress   (Window* window, WPARAM wparam, LPARAM lparam);
-	LRESULT Platform_HandleEvents_MouseExtraRelease (Window* window, WPARAM wparam, LPARAM lparam);
+	LRESULT Platform_HandleEvents_MouseButton       (Window* window, WPARAM wparam, LPARAM lparam, Button button, Mouse::Event::Type type);
+	LRESULT Platform_HandleEvents_MouseButtonExtra  (Window* window, WPARAM wparam, LPARAM lparam, Mouse::Event::Type type);
+	LRESULT Platform_HandleEvents_MouseMove         (Window* window, WPARAM wparam, LPARAM lparam);
+	LRESULT Platform_HandleEvents_MouseScroll       (Window* window, WPARAM wparam, LPARAM lparam);
 
 	//endregion
 
@@ -312,29 +310,33 @@ namespace hf
 		switch (msg)
 		{
 			//Window
+			case WM_SETTEXT:       return Platform_HandleEvents_WindowTitle      (window, wparam, lparam);
 			case WM_CLOSE:         return Platform_HandleEvents_WindowClose      (window, wparam, lparam);
 			case WM_SHOWWINDOW:    return Platform_HandleEvents_WindowShow       (window, wparam, lparam);
 			case WM_MOVE:          return Platform_HandleEvents_WindowMove       (window, wparam, lparam);
 			case WM_SIZE:          return Platform_HandleEvents_WindowResize     (window, wparam, lparam);
-			case WM_SETFOCUS:      return Platform_HandleEvents_WindowFocused    (window, wparam, lparam);
-			case WM_KILLFOCUS:     return Platform_HandleEvents_WindowUnFocused  (window, wparam, lparam);
+			case WM_SETFOCUS:      return Platform_HandleEvents_WindowFocus      (window, wparam, lparam, true);
+			case WM_KILLFOCUS:     return Platform_HandleEvents_WindowFocus      (window, wparam, lparam, false);
 
 			//KeyBoard
-			case WM_CHAR:          return Platform_HandleEvents_Char(window, wparam, lparam);
+			case WM_CHAR:          return Platform_HandleEvents_KeyboardChar(window, wparam, lparam);
 			case WM_KEYDOWN:
-			case WM_SYSKEYDOWN:    return Platform_HandleEvents_KeyPress(window, wparam, lparam);
-			case WM_KEYUP:         return Platform_HandleEvents_KeyRelease(window, wparam, lparam);
+			case WM_SYSKEYDOWN:    return Platform_HandleEvents_KeyboardKey(window, wparam, lparam, Keyboard::Event::Type::Press);
+			case WM_KEYUP:         return Platform_HandleEvents_KeyboardKey(window, wparam, lparam, Keyboard::Event::Type::Release);
 
 			//Mouse
-			case WM_LBUTTONDOWN:   return Platform_HandleEvents_MousePress(window, wparam, lparam, Button::Left);
-			case WM_RBUTTONDOWN:   return Platform_HandleEvents_MousePress(window, wparam, lparam, Button::Right);
-			case WM_MBUTTONDOWN:   return Platform_HandleEvents_MousePress(window, wparam, lparam, Button::Wheel);
-			case WM_XBUTTONDOWN:   return Platform_HandleEvents_MouseExtraPress(window, wparam, lparam);
+			case WM_LBUTTONDOWN:   return Platform_HandleEvents_MouseButton(window, wparam, lparam, Button::Left, Mouse::Event::Type::Press);
+			case WM_RBUTTONDOWN:   return Platform_HandleEvents_MouseButton(window, wparam, lparam, Button::Right, Mouse::Event::Type::Press);
+			case WM_MBUTTONDOWN:   return Platform_HandleEvents_MouseButton(window, wparam, lparam, Button::Wheel, Mouse::Event::Type::Press);
+			case WM_XBUTTONDOWN:   return Platform_HandleEvents_MouseButtonExtra(window, wparam, lparam, Mouse::Event::Type::Press);
 
-			case WM_LBUTTONUP:     return Platform_HandleEvents_MouseRelease(window, wparam, lparam, Button::Left);
-			case WM_RBUTTONUP:     return Platform_HandleEvents_MouseRelease(window, wparam, lparam, Button::Right);
-			case WM_MBUTTONUP:     return Platform_HandleEvents_MouseRelease(window, wparam, lparam, Button::Wheel);
-			case WM_XBUTTONUP:     return Platform_HandleEvents_MouseExtraRelease(window, wparam, lparam);
+			case WM_LBUTTONUP:     return Platform_HandleEvents_MouseButton(window, wparam, lparam, Button::Left, Mouse::Event::Type::Release);
+			case WM_RBUTTONUP:     return Platform_HandleEvents_MouseButton(window, wparam, lparam, Button::Right, Mouse::Event::Type::Release);
+			case WM_MBUTTONUP:     return Platform_HandleEvents_MouseButton(window, wparam, lparam, Button::Wheel, Mouse::Event::Type::Release);
+			case WM_XBUTTONUP:     return Platform_HandleEvents_MouseButtonExtra(window, wparam, lparam, Mouse::Event::Type::Release);
+
+			case WM_MOUSEMOVE:     return Platform_HandleEvents_MouseMove(window, wparam, lparam);
+			case WM_MOUSEHWHEEL:   return Platform_HandleEvents_MouseScroll(window, wparam, lparam);
 
 			default: break;
 		}
@@ -422,7 +424,7 @@ namespace hf
 	{
 		uint32_t currentStyle = GetStyleID(window->m_Style);
 		RECT targetRect = { 0, 0, size[0], size[1] };
-		if(FAILED(AdjustWindowRectEx(&targetRect, currentStyle, false, 0))) throw WND_LAST_EXCEPT();
+		if(!AdjustWindowRectEx(&targetRect, currentStyle, false, 0)) throw WND_LAST_EXCEPT();
 		size[0] = targetRect.right - targetRect.left;
 		size[1] = targetRect.bottom - targetRect.top;
 	}
@@ -441,6 +443,11 @@ namespace hf
 		m_Parent = parent;
 		m_ShouldClose = false;
 		m_Flags = (WindowFlags)0;
+		m_Rect =
+		{
+			.position = data.position,
+			.size = data.size
+		};
 
 		HWND parentHandle = nullptr;
 		if(parent != nullptr) parentHandle = (HWND)parent->m_Handle;
@@ -473,49 +480,26 @@ namespace hf
 		DestroyWindow((HWND)m_Handle);
 	}
 
-	glm::ivec2 Window::GetSize() const
+	void Window::SetTitle(const char* title) const
 	{
-		LPRECT rect = {};
-		GetWindowRect((HWND)m_Handle, rect);
-
-		return { (int32_t)rect->right - (int32_t)rect->left, (int32_t)rect->bottom - (int32_t)rect->top };
+		if(!SetWindowText((HWND)m_Handle, title)) throw WND_LAST_EXCEPT();
 	}
-	glm::ivec2 Window::GetPosition() const
+	void Window::SetSize(glm::ivec2 size)
 	{
-		LPRECT rect = {};
-		GetWindowRect((HWND)m_Handle, rect);
-
-		return { (int32_t)rect->left, (int32_t)rect->top };
-	}
-	IRect Window::GetRect() const
-	{
-		LPRECT rect = {};
-		GetWindowRect((HWND)m_Handle, rect);
-
-		return IRect
-		{
-			.position = { (int32_t)rect->left, (int32_t)rect->top },
-			.size = { (int32_t)rect->right - (int32_t)rect->left, (int32_t)rect->bottom - (int32_t)rect->top }
-		};
-	}
-
-	WindowFlags Window::GetFlags() const { return m_Flags; }
-	WindowStyle Window::GetStyle() const { return m_Style; }
-
-	void Window::SetSize(glm::ivec2 size) const
-	{
-		SetWindowPos((HWND)m_Handle, nullptr, 0, 0, size[0], size[1], SWP_NOMOVE);
+		Platform_ConvertSize(this, size);
+		if(!SetWindowPos((HWND)m_Handle, nullptr, 0, 0, size[0], size[1], SWP_NOMOVE))
+			throw WND_LAST_EXCEPT();
 	}
 	void Window::SetPosition(glm::ivec2 position) const
 	{
-		SetWindowPos((HWND)m_Handle, nullptr, position[0], position[1], 0, 0, SWP_NOSIZE);
+		if(!SetWindowPos((HWND)m_Handle, nullptr, position[0], position[1], 0, 0, SWP_NOSIZE))
+			throw WND_LAST_EXCEPT();
 	}
 	void Window::SetRect(IRect rect)
 	{
-		glm::ivec2 convertedSize = rect.size;
-		Platform_ConvertSize(this, convertedSize);
-
-		SetWindowPos((HWND)m_Handle, nullptr, rect.position[0], rect.position[1], convertedSize[0], convertedSize[1], 0);
+		Platform_ConvertSize(this, rect.size);
+		if(!SetWindowPos((HWND)m_Handle, nullptr, rect.position[0], rect.position[1], rect.size[0], rect.size[1], 0))
+			throw WND_LAST_EXCEPT();
 	}
 
 	bool Window::IsClosing() const { return m_ShouldClose; }
@@ -589,14 +573,14 @@ namespace hf
 	                                          __attribute__((unused)) WPARAM wparam,
 	                                          __attribute__((unused)) LPARAM lparam)
 	{
-		window->m_ShouldClose = true;
+		WindowEvent_Close(window);
 		return 0;
 	}
 
 	LRESULT Platform_HandleEvents_WindowShow(Window* window, WPARAM wparam,
 	                                         __attribute__((unused)) LPARAM lparam)
 	{
-		Platform_SetWindowFlag(&window->m_Flags, WindowFlags::Visible, (bool)wparam);
+		WindowEvent_Show(window, (bool)wparam);
 		return 0;
 	}
 
@@ -606,9 +590,11 @@ namespace hf
 	{
 		glm::ivec2 position =
 		{
-			(int32_t)(int16_t)LOWORD(lparam),
-			(int32_t)(int16_t)HIWORD(lparam)
+			GET_X_LPARAM(lparam),
+			GET_Y_LPARAM(lparam)
 		};
+
+		WindowEvent_Move(window, position);
 		return 0;
 	}
 
@@ -618,76 +604,99 @@ namespace hf
 	{
 		glm::ivec2 size =
 		{
-			(int32_t)(int16_t)LOWORD(lparam),
-			(int32_t)(int16_t)HIWORD(lparam)
+			GET_X_LPARAM(lparam),
+			GET_Y_LPARAM(lparam)
 		};
+
+		WindowEvent_Resize(window, size);
 		return 0;
 	}
 
-	LRESULT Platform_HandleEvents_WindowFocused(Window* window,
+	LRESULT Platform_HandleEvents_WindowFocus(Window* window,
 	                                            __attribute__((unused)) WPARAM wparam,
-	                                            __attribute__((unused)) LPARAM lparam)
+	                                            __attribute__((unused)) LPARAM lparam,
+												bool focused)
 	{
-		LOG_INFO("Window Focused");
+		WindowEvent_Focus(window, focused);
 		return 0;
 	}
 
-	LRESULT Platform_HandleEvents_WindowUnFocused(Window* window,
-	                                              __attribute__((unused)) WPARAM wparam,
-	                                              __attribute__((unused)) LPARAM lparam)
+	LRESULT Platform_HandleEvents_KeyboardChar(Window* window, WPARAM wparam,
+	                                           __attribute__((unused)) LPARAM lparam)
 	{
-		window->Kb.DisposeAll();
-		LOG_INFO("UnFocused");
+		KeyboardEvent_Char(window->keyboard, (char) wparam);
 		return 0;
 	}
 
-	LRESULT Platform_HandleEvents_Char(Window* window, WPARAM wparam,
-	                                   __attribute__((unused)) LPARAM lparam)
+	LRESULT Platform_HandleEvents_KeyboardKey(Window* window, WPARAM wparam, LPARAM lparam,
+	                                       Keyboard::Event::Type type)
 	{
-		OnChar(window->Kb, (char)wparam);
-		return 0;
-	}
+		auto key = (Key)(KEY_CODES[(uint8_t)wparam]);
 
-	LRESULT Platform_HandleEvents_KeyPress(Window* window, WPARAM wparam, LPARAM lparam)
-	{
-		if(!(lparam & 0x40000000) || window->Kb.IsAutoRepeatEnabled())
+		switch (type)
 		{
-			auto key = (Key)((uint8_t)wparam);
-			OnKeyPressed(window->Kb, key);
+
+			case Keyboard::Event::Type::Invalid: LOG_WARN("Invalid Event thrown"); break;
+			case Keyboard::Event::Type::Press:
+
+				if(!(lparam & 0x40000000) || window->keyboard.IsAutoRepeatEnabled())
+					KeyboardEvent_Key(window->keyboard, key, type);
+
+				break;
+			case Keyboard::Event::Type::Release:
+				if(window->keyboard.IsPressed(key)) KeyboardEvent_Key(window->keyboard, key, type);
+				break;
 		}
 		return 0;
 	}
 
-	LRESULT Platform_HandleEvents_KeyRelease(Window* window, WPARAM wparam, LPARAM lparam)
+	LRESULT Platform_HandleEvents_MouseButton(Window* window, WPARAM wparam, LPARAM lparam, Button button, Mouse::Event::Type type)
 	{
-		auto key = (Key)((uint8_t)wparam);
-		if(window->Kb.IsPressed(key)) OnKeyReleased(window->Kb, key);
+		MouseEvent_Button(window->mouse, button, type);
 		return 0;
 	}
 
-	LRESULT Platform_HandleEvents_MousePress(Window* window, WPARAM wparam, LPARAM lparam, Button button)
+	LRESULT Platform_HandleEvents_MouseButtonExtra(Window* window, WPARAM wparam, LPARAM lparam, Mouse::Event::Type type)
 	{
-		OnButtonPressed(window->Ms, button);
+		if(wparam & MK_XBUTTON1) MouseEvent_Button(window->mouse, Button::Extra1, type);
+		if(wparam & MK_XBUTTON2) MouseEvent_Button(window->mouse, Button::Extra2, type);
 		return 0;
 	}
 
-	LRESULT Platform_HandleEvents_MouseRelease(Window* window, WPARAM wparam, LPARAM lparam, Button button)
+	LRESULT Platform_HandleEvents_MouseMove(Window* window, WPARAM wparam, LPARAM lparam)
 	{
-		OnButtonReleased(window->Ms, button);
+		glm::ivec2 position =
+		{
+			GET_X_LPARAM(lparam),
+			GET_Y_LPARAM(lparam)
+		};
+		MouseEvent_Moved(window->mouse, position);
+
 		return 0;
 	}
 
-	LRESULT Platform_HandleEvents_MouseExtraPress(Window* window, WPARAM wparam, LPARAM lparam)
+	LRESULT Platform_HandleEvents_MouseScroll(Window* window, WPARAM wparam, LPARAM lparam)
 	{
-		if(wparam & MK_XBUTTON1) OnButtonPressed(window->Ms, Button::Extra1);
-		if(wparam & MK_XBUTTON2) OnButtonPressed(window->Ms, Button::Extra2);
+		glm::ivec2 position =
+		{
+			GET_X_LPARAM(lparam),
+			GET_Y_LPARAM(lparam)
+		};
+
+		MouseEvent_Scroll(window->mouse, position);
+
 		return 0;
 	}
 
-	LRESULT Platform_HandleEvents_MouseExtraRelease(Window* window, WPARAM wparam, LPARAM lparam)
+	LRESULT Platform_HandleEvents_WindowTitle(Window *window, WPARAM wparam, LPARAM lparam)
 	{
-		if(wparam & MK_XBUTTON1) OnButtonReleased(window->Ms, Button::Extra1);
-		if(wparam & MK_XBUTTON2) OnButtonReleased(window->Ms, Button::Extra2);
+		auto newTitle = reinterpret_cast<LPCWSTR>(lparam);
+
+		if (newTitle)
+		{
+			std::wstring ws(newTitle);
+			WindowEvent_Title(window, std::string(ws.begin(), ws.end()));
+		}
 		return 0;
 	}
 

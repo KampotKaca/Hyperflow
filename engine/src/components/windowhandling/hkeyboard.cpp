@@ -23,7 +23,7 @@ namespace hf
 			m_Buffer.pop();
 			return e;
 		}
-		return Keyboard::Event();
+		return {};
 	}
 	
 	bool Keyboard::IsEmpty() const noexcept { return m_Buffer.empty(); }
@@ -51,48 +51,23 @@ namespace hf
 		Dispose();
 		DisposeChar();
 	}
-	
-	void Keyboard::OnFocusLoss() noexcept
+
+	void KeyboardEvent_Key(Keyboard& keyboard, Key key, Keyboard::Event::Type type) noexcept
 	{
-		DisposeChar();
-		std::queue<Event> tempBuffer;
-		
-		while (!IsEmpty())
-		{
-			auto e = Read();
-			if(e.IsValid())
-			{
-				if(e.GetType() == Event::Type::Release) tempBuffer.push(e);
-				else m_States[(uint8_t)e.GetKey()] = false;
-			}
-		}
-		
-		for (uint32_t i = 0; i < 256; ++i)
-		{
-			if(m_States[i]) tempBuffer.push(Event((Key)i, Event::Type::Release));
-		}
-		
-		m_States = 0;
-		m_Buffer = tempBuffer;
+		if(type == Keyboard::Event::Type::Invalid) return;
+
+		keyboard.m_States[(uint8_t)key] = type == Keyboard::Event::Type::Press;
+		keyboard.m_Buffer.emplace(key, type);
+
+		while(keyboard.m_Buffer.size() > MAX_KEYBOARD_BUFFER_SIZE)
+			keyboard.m_Buffer.pop();
 	}
 	
-	void OnKeyPressed(Keyboard& keyboard, Key key) noexcept
+	void KeyboardEvent_Char(Keyboard& keyboard, char character) noexcept
 	{
-		if(keyboard.m_Buffer.size() >= MAX_KEYBOARD_BUFFER_SIZE) return;
-		keyboard.m_States[(uint8_t)key] = true;
-		keyboard.m_Buffer.push(Keyboard::Event(key, Keyboard::Event::Type::Press));
-	}
-	
-	void OnKeyReleased(Keyboard& keyboard, Key key) noexcept
-	{
-		if(keyboard.m_Buffer.size() >= MAX_KEYBOARD_BUFFER_SIZE) return;
-		keyboard.m_States[(uint8_t)key] = false;
-		keyboard.m_Buffer.push(Keyboard::Event(key, Keyboard::Event::Type::Release));
-	}
-	
-	void OnChar(Keyboard& keyboard, char character) noexcept
-	{
-		if(keyboard.m_CharBuffer.size() >= MAX_KEYBOARD_BUFFER_SIZE) return;
 		keyboard.m_CharBuffer.push(character);
+
+		while(keyboard.m_CharBuffer.size() > MAX_KEYBOARD_BUFFER_SIZE)
+			keyboard.m_CharBuffer.pop();
 	}
 }

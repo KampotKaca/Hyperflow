@@ -34,12 +34,12 @@ namespace hf
 		s_TargetFrameDuration = (1.0 / s_TargetFrameRate);
 	}
 
-	void LoadTime()
+	void Time_Load()
 	{
 		Time::s_ApplicationStartTime = Time::GetSystemTime();
 	}
 
-	void UpdateTime()
+	void Time_Update()
 	{
 		double currentTime = Time::GetSystemTime();
 

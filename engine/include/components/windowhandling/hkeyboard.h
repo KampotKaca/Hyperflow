@@ -65,6 +65,7 @@ namespace hf
 			
 			[[nodiscard]] Key GetKey() const noexcept;
 			[[nodiscard]] Type GetType() const noexcept;
+			[[nodiscard]] bool IsValid() const noexcept;
 		
 		private:
 			Key m_Key;

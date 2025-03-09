@@ -22,7 +22,7 @@ namespace hf
 		{
 			Platform_Initialize();
 			Platform_BeginTemporarySystemTimer(1);
-			LoadTime();
+			Time_Load();
 			log_set_level(LOG_TRACE);
 
 			Hyperflow::s_LifecycleCallbacks = engineData.lifecycleCallbacks;
@@ -37,7 +37,7 @@ namespace hf
 
 			while (IsRunning())
 			{
-				UpdateTime();
+				Time_Update();
 				Platform_HandleEvents(s_Windows, s_UpdateType);
 				if(s_LifecycleCallbacks.onUpdateCallback) s_LifecycleCallbacks.onUpdateCallback();
 			}

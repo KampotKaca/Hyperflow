@@ -1,4 +1,4 @@
-#include "components/rendering/hrenderer.h"
+#include "rendering/hrenderer.h"
 #include "components/hplatform.h"
 
 namespace hf

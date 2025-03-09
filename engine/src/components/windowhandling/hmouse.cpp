@@ -2,6 +2,8 @@
 #include "components/windowhandling/hmouse.h"
 #undef private
 
+#include "hyperconfig.h"
+
 namespace hf
 {
 	Mouse::Event::Event() : m_Button(Button::None), m_Type(Type::Invalid) { }
@@ -9,49 +11,46 @@ namespace hf
 	
 	Button Mouse::Event::GetButton() const noexcept { return m_Button; }
 	Mouse::Event::Type Mouse::Event::GetType() const noexcept { return m_Type; }
+	bool Mouse::Event::IsValid() const noexcept { return m_Button != Button::None && m_Type != Type::Invalid; }
+
+	glm::ivec2 Mouse::GetPosition() const noexcept { return m_Position; }
+	glm::ivec2 Mouse::GetScroll() const noexcept { return m_Scroll; }
+	bool Mouse::IsPressed(Button button) const noexcept { return m_States[(uint8_t)button]; }
+	bool Mouse::IsEmpty() const noexcept { return m_Buffer.empty(); }
 	
-	[[maybe_unused]] glm::ivec2 Mouse::GetPosition() const noexcept
+	Mouse::Event Mouse::Read() noexcept
 	{
-		return glm::ivec2();
-	}
-	
-	bool Mouse::IsPressed(Button button) const noexcept
-	{
-		return false;
-	}
-	
-	bool Mouse::IsEmpty() const noexcept
-	{
-		return false;
-	}
-	
-	Mouse::Event Mouse::Read() const noexcept
-	{
-		return Mouse::Event();
+		if(!m_Buffer.empty())
+		{
+			auto e = m_Buffer.front();
+			m_Buffer.pop();
+			return e;
+		}
+		return {};
 	}
 	
 	void Mouse::Dispose() noexcept
 	{
 		m_Buffer = std::queue<Event>();
 	}
-	
-	void OnButtonPressed(Mouse& mouse, Button button) noexcept
+
+	void MouseEvent_Button(Mouse& mouse, Button button, Mouse::Event::Type type) noexcept
 	{
-	
+		if(type == Mouse::Event::Type::Invalid) return;
+
+		mouse.m_States[(uint8_t)button] = type == Mouse::Event::Type::Press;
+		mouse.m_Buffer.emplace(button, type);
+		while(mouse.m_Buffer.size() > MAX_MOUSE_BUFFER_SIZE)
+			mouse.m_Buffer.pop();
 	}
 	
-	void OnButtonReleased(Mouse& mouse, Button button) noexcept
+	void MouseEvent_Moved(Mouse& mouse, glm::ivec2 position) noexcept
 	{
-	
+		mouse.m_Position = position;
 	}
-	
-	void OnMouseMoved(Mouse& mouse, glm::ivec2 position) noexcept
+
+	void MouseEvent_Scroll(Mouse& mouse, glm::ivec2 position) noexcept
 	{
-	
-	}
-	
-	void OnMouseWheelScroll(Mouse& mouse, glm::vec2 scroll) noexcept
-	{
-	
+		mouse.m_Scroll = position;
 	}
 }

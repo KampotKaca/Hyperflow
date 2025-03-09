@@ -20,6 +20,7 @@ namespace hf
 			
 			[[nodiscard]] Button GetButton() const noexcept;
 			[[nodiscard]] Type GetType() const noexcept;
+			[[nodiscard]] bool IsValid() const noexcept;
 			
 		private:
 			Button m_Button;
@@ -31,15 +32,16 @@ namespace hf
 		Mouse& operator=(const Mouse&) = delete;
 		
 		[[nodiscard]] glm::ivec2 GetPosition() const noexcept;
+		[[nodiscard]] glm::ivec2 GetScroll() const noexcept;
 		[[nodiscard]] bool IsPressed(Button button) const noexcept;
 		[[nodiscard]] bool IsEmpty() const noexcept;
 		
-		[[nodiscard]] Event Read() const noexcept;
+		[[nodiscard]] Event Read() noexcept;
 		
 		void Dispose() noexcept;
 		
 	private:
-		glm::ivec2 m_Position;
+		glm::ivec2 m_Position, m_Scroll;
 		std::bitset<8> m_States;
 		std::queue<Event> m_Buffer;
 	};

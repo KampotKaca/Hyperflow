@@ -13,13 +13,15 @@ namespace hf
 		Window(const WindowData& data, const Ref<Window>& parent);
 		~Window();
 
+		[[nodiscard]] std::string GetTitle() const;
 		[[nodiscard]] glm::ivec2 GetSize() const;
 		[[nodiscard]] glm::ivec2 GetPosition() const;
 		[[nodiscard]] IRect GetRect() const;
 		[[nodiscard]] WindowFlags GetFlags() const;
 		[[nodiscard]] WindowStyle GetStyle() const;
 
-		void SetSize(glm::ivec2 size) const;
+		void SetTitle(const char* title) const;
+		void SetSize(glm::ivec2 size);
 		void SetPosition(glm::ivec2 position) const;
 		void SetRect(IRect rect);
 
@@ -28,11 +30,12 @@ namespace hf
 		void SetFlags(WindowFlags flags);
 		void Focus() const;
 
-		Keyboard Kb;
-		Mouse Ms;
+		Keyboard keyboard;
+		Mouse mouse;
 		
 	private:
 		std::string m_Title;
+		IRect m_Rect;
 		void* m_Handle;
 		WindowStyle m_Style;
 		WindowFlags m_Flags;
