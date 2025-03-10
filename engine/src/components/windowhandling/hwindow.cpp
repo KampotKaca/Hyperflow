@@ -9,7 +9,7 @@
 
 namespace hf
 {
-	std::string Window::GetTitle() const { return m_Title; }
+	const std::string& Window::GetTitle() const { return m_Title; }
 	glm::ivec2 Window::GetSize() const { return m_Rect.size; }
 	glm::ivec2 Window::GetPosition() const { return m_Rect.size; }
 	IRect Window::GetRect() const { return m_Rect; }
@@ -60,29 +60,69 @@ namespace hf
 		}
 	}
 
+	void Window_SendShortcut(const InputShortcut* ins, const Window::EventData& states)
+	{
+		for(auto& shortcutKey : ins->keys)
+		{
+			auto& state = states.keyStates[(uint8_t)shortcutKey];
+			if(state == KeyState::Up || state == KeyState::None) return;
+		}
+
+		for(auto& shortcutButton : ins->buttons)
+		{
+			auto& state = states.buttonStates[(uint8_t)shortcutButton];
+			if(state == KeyState::Up || state == KeyState::None) return;
+		}
+
+		ins->Callback();
+	}
+
 	void Window_SendEvent(const Ref<Window>& window, Key key)
 	{
-		
+		auto& keyCallbacks = window->m_Callbacks.m_KeyCallbacks;
+		auto& state = window->m_EventData.keyStates[(uint8_t)key];
+		for(auto& callback : keyCallbacks[(uint8_t)key])
+			if(state == callback->state) callback->Callback();
+
+		if(state == KeyState::Down)
+		{
+			auto& keyShortcuts = window->m_Callbacks.m_KeyShortcuts;
+			for(auto& shortcut : keyShortcuts[(uint8_t)key])
+				Window_SendShortcut(shortcut, window->m_EventData);
+		}
 	}
 	
 	void Window_SendEvent(const Ref<Window>& window, Button button)
 	{
-		
+		auto& buttonCallbacks = window->m_Callbacks.m_ButtonCallbacks;
+		auto& state = window->m_EventData.buttonStates[(uint8_t)button];
+		for(auto& callback : buttonCallbacks[(uint8_t)button])
+			if(state == callback->state) callback->Callback();
+
+		if(state == KeyState::Down)
+		{
+			auto& buttonShortcuts = window->m_Callbacks.m_ButtonShortcuts;
+			for(auto& shortcut : buttonShortcuts[(uint8_t)button])
+				Window_SendShortcut(shortcut, window->m_EventData);
+		}
 	}
 
 	void Window_SendCharEvent(const Ref<Window>& window)
 	{
-
+		for (auto& callback : window->m_Callbacks.m_CharCallbacks)
+			callback(window->m_EventData.charData);
 	}
 	
-	void Window_SendMousePointerEvent(const Ref<Window>& window)
+	void Window_SendPointerEvent(const Ref<Window>& window)
 	{
-	
+		for (auto& callback : window->m_Callbacks.m_PointerMoveCallbacks)
+			callback(window->m_EventData.pointerDelta);
 	}
 	
 	void Window_SendScrollEvent(const Ref<Window>& window)
 	{
-	
+		for (auto& callback : window->m_Callbacks.m_ScrollCallbacks)
+			callback(window->m_EventData.scrollDelta);
 	}
 	
 	void Window_HandleInput(std::vector<Ref<Window>>& windows)
@@ -155,7 +195,7 @@ namespace hf
 		{
 			auto& eventData = window->m_EventData;
 			if (!eventData.charData.empty()) Window_SendCharEvent(window);
-			if(eventData.pointerDelta != glm::ivec2{ 0, 0 }) Window_SendMousePointerEvent(window);
+			if(eventData.pointerDelta != glm::ivec2{ 0, 0 }) Window_SendPointerEvent(window);
 			if(eventData.scrollDelta != glm::vec2{ 0, 0 }) Window_SendScrollEvent(window);
 		}
 		

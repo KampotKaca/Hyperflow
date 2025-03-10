@@ -116,6 +116,25 @@ namespace hf
 	enum class KeyState { None, Down, DownContinues, Up };
 	typedef KeyState ButtonState;
 
+	struct InputCallback
+	{
+		std::vector<Key> keys;
+		std::vector<Button> buttons;
+		KeyState state = KeyState::None;
+		void (*Callback)() = nullptr;
+	};
+
+	struct InputShortcut
+	{
+		std::vector<Key> keys;
+		std::vector<Button> buttons;
+		void (*Callback)() = nullptr;
+	};
+
+	typedef void (*InputCharCallback)(const std::string& str);
+	typedef void (*InputPointerMoveCallback)(glm::ivec2 delta);
+	typedef void (*InputScrollCallback)(glm::vec2 delta);
+
 	struct Rect
 	{
 		glm::vec2 position;

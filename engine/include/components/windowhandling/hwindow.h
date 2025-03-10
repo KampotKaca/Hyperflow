@@ -14,7 +14,7 @@ namespace hf
 		Window(const WindowData& data, const Ref<Window>& parent);
 		~Window();
 
-		[[nodiscard]] std::string GetTitle() const;
+		[[nodiscard]] const std::string& GetTitle() const;
 		[[nodiscard]] glm::ivec2 GetSize() const;
 		[[nodiscard]] glm::ivec2 GetPosition() const;
 		[[nodiscard]] IRect GetRect() const;
@@ -42,6 +42,19 @@ namespace hf
 			glm::vec2 scrollDelta;
 		};
 
+		struct EventCallbacks
+		{
+			std::vector<const InputCallback*> m_KeyCallbacks[(uint8_t)Key::Count];
+			std::vector<const InputCallback*> m_ButtonCallbacks[(uint8_t)Button::Count];
+
+			std::vector<const InputShortcut*> m_KeyShortcuts[(uint8_t)Key::Count];
+			std::vector<const InputShortcut*> m_ButtonShortcuts[(uint8_t)Button::Count];
+
+			std::vector<InputCharCallback> m_CharCallbacks;
+			std::vector<InputPointerMoveCallback> m_PointerMoveCallbacks;
+			std::vector<InputScrollCallback> m_ScrollCallbacks;
+		};
+
 		std::string m_Title;
 		IRect m_Rect{};
 		void* m_Handle;
@@ -53,6 +66,7 @@ namespace hf
 		Ref<Keyboard> m_Keyboard;
 		Ref<Mouse> m_Mouse;
 		EventData m_EventData;
+		EventCallbacks m_Callbacks;
 	};
 }
 

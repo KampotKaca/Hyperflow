@@ -8,6 +8,8 @@
 
 namespace hf
 {
+	//region Update handled Input
+
 	glm::ivec2 Input::GetPointerPosition(Ref<Window> window)
 	{
 		if(!window) throw NULL_REF_EXCEPTION(Window, window);
@@ -54,35 +56,133 @@ namespace hf
 	ButtonState Input::GetState(Button button) { return GetState(Hyperflow::MainWindow(), button); }
 	const std::string& Input::GetWrite() { return GetWrite(Hyperflow::MainWindow()); }
 
-#define W_FUNC(type, state) bool type(Ref<Window> window, Key key) { return GetState(window, key) == state; }
+	bool Input::IsDown(Ref<Window> window, Key key) { return GetState(window, key) == KeyState::Down; }
+	bool Input::IsDownContinues(Ref<Window> window, Key key) { return GetState(window, key) == KeyState::DownContinues; }
+	bool Input::IsUp(Ref<Window> window, Key key) { return GetState(window, key) == KeyState::Up; }
 
-	W_FUNC(Input::IsDown, KeyState::Down)
-	W_FUNC(Input::IsDownContinues, KeyState::DownContinues)
-	W_FUNC(Input::IsUp, KeyState::Up)
+	bool Input::IsDown(Ref<Window> window, Button button) { return GetState(window, button) == ButtonState ::Down; }
+	bool Input::IsDownContinues(Ref<Window> window, Button button) { return GetState(window, button) == ButtonState::DownContinues; }
+	bool Input::IsUp(Ref<Window> window, Button button) { return GetState(window, button) == ButtonState::Up; }
 
-#undef W_FUNC
+	bool Input::IsDown(Key key) { return IsDown(Hyperflow::MainWindow(), key); }
+	bool Input::IsDownContinues(Key key) { return IsDownContinues(Hyperflow::MainWindow(), key); }
+	bool Input::IsUp(Key key) { return IsUp(Hyperflow::MainWindow(), key); }
 
-#define W_FUNC(type, state) bool type(Ref<Window> window, Button button) { return GetState(window, button) == state; }
+	bool Input::IsDown(Button button) { return IsDown(Hyperflow::MainWindow(), button); }
+	bool Input::IsDownContinues(Button button) { return IsDownContinues(Hyperflow::MainWindow(), button); }
+	bool Input::IsUp(Button button) { return IsUp(Hyperflow::MainWindow(), button); }
 
-	W_FUNC(Input::IsDown, ButtonState ::Down)
-	W_FUNC(Input::IsDownContinues, ButtonState::DownContinues)
-	W_FUNC(Input::IsUp, ButtonState::Up)
+	//endregion
 
-#undef W_FUNC
+	//region Event Handled Input
 
-#define N_FUNC(func) bool Input::func(Key key) { return func(Hyperflow::MainWindow(), key); }
+	void Input::Subscribe(Ref<Window> window, const InputCallback *callback)
+	{
+		if(!window) throw NULL_REF_EXCEPTION(Window, window);
+		if(!callback) throw NULL_REF_EXCEPTION(InputCallback, callback);
 
-	N_FUNC(IsDown)
-	N_FUNC(IsDownContinues)
-	N_FUNC(IsUp)
+		for (auto& key : callback->keys)
+			window->m_Callbacks.m_KeyCallbacks[(uint8_t)key].push_back(callback);
 
-#undef N_FUNC
+		for (auto& button : callback->buttons)
+			window->m_Callbacks.m_ButtonCallbacks[(uint8_t)button].push_back(callback);
+	}
 
-#define N_FUNC(func) bool Input::func(Button button) { return func(Hyperflow::MainWindow(), button); }
+	void Input::Subscribe(Ref<Window> window, const InputShortcut *shortcut)
+	{
+		if(!window) throw NULL_REF_EXCEPTION(Window, window);
+		if(!shortcut) throw NULL_REF_EXCEPTION(InputShortcut, shortcut);
 
-	N_FUNC(IsDown)
-	N_FUNC(IsDownContinues)
-	N_FUNC(IsUp)
+		for (auto& key : shortcut->keys)
+			window->m_Callbacks.m_KeyShortcuts[(uint8_t)key].push_back(shortcut);
 
-#undef N_FUNC
+		for (auto& button : shortcut->buttons)
+			window->m_Callbacks.m_ButtonShortcuts[(uint8_t)button].push_back(shortcut);
+	}
+
+#define SUBSCRIBE_NORMAL(n, vec, c)\
+	void Input::n(Ref<Window> window, c callback)\
+	{\
+		if(!window) throw NullReferenceException(__LINE__, __FILE__, "Window", "window");\
+        if(window->IsClosing()) return;\
+		if(!callback) throw NullReferenceException(__LINE__, __FILE__, #c, "callback");\
+		window->m_Callbacks.vec.push_back(callback);\
+	}
+
+	SUBSCRIBE_NORMAL(SubscribeChar, m_CharCallbacks, InputCharCallback)
+	SUBSCRIBE_NORMAL(SubscribePointerMove, m_PointerMoveCallbacks, InputPointerMoveCallback)
+	SUBSCRIBE_NORMAL(SubscribeScroll, m_ScrollCallbacks, InputScrollCallback)
+
+#undef SUBSCRIBE_NORMAL
+
+	void Input::Unsubscribe(Ref<Window> window, const InputCallback *callback)
+	{
+		if(!window) throw NULL_REF_EXCEPTION(Window, window);
+		if(!callback) throw NULL_REF_EXCEPTION(InputCallback, callback);
+
+		for (auto& key : callback->keys)
+		{
+			auto& v = window->m_Callbacks.m_KeyCallbacks[(uint8_t)key];
+			std::remove_if(v.begin(), v.end(), [&](const auto &item)
+			{ return item == callback; });
+		}
+
+		for (auto& button : callback->buttons)
+		{
+			auto& v = window->m_Callbacks.m_ButtonCallbacks[(uint8_t)button];
+			std::remove_if(v.begin(), v.end(), [&](const auto &item)
+			{ return item == callback; });
+		}
+	}
+
+	void Input::Unsubscribe(Ref<Window> window, const InputShortcut *shortcut)
+	{
+		if(!window) throw NULL_REF_EXCEPTION(Window, window);
+		if(!shortcut) throw NULL_REF_EXCEPTION(InputShortcut, shortcut);
+
+		for (auto& key : shortcut->keys)
+		{
+			auto& v = window->m_Callbacks.m_KeyShortcuts[(uint8_t)key];
+			std::remove_if(v.begin(), v.end(), [&](const auto &item)
+			{ return item == shortcut; });
+		}
+
+		for (auto& button : shortcut->buttons)
+		{
+			auto& v = window->m_Callbacks.m_ButtonShortcuts[(uint8_t)button];
+			std::remove_if(v.begin(), v.end(), [&](const auto &item)
+			{ return item == shortcut; });
+		}
+	}
+
+#define UNSUBSCRIBE_NORMAL(n, vec, c)\
+	void Input::n(Ref<Window> window, c callback)\
+	{\
+		if(!window) throw NullReferenceException(__LINE__, __FILE__, "Window", "window");\
+        if(window->IsClosing()) return;\
+		if(!callback) throw NullReferenceException(__LINE__, __FILE__, #c, "callback");\
+		auto& v = window->m_Callbacks.vec;\
+		std::remove_if(v.begin(), v.end(), [&](const auto &item)\
+		{ return item == callback; });\
+	}
+
+	UNSUBSCRIBE_NORMAL(UnsubscribeChar, m_CharCallbacks, InputCharCallback)
+	UNSUBSCRIBE_NORMAL(UnsubscribePointerMove, m_PointerMoveCallbacks, InputPointerMoveCallback)
+	UNSUBSCRIBE_NORMAL(UnsubscribeScroll, m_ScrollCallbacks, InputScrollCallback)
+
+#undef UNSUBSCRIBE_NORMAL
+
+	void Input::Subscribe(const InputCallback *callback) { Subscribe(Hyperflow::MainWindow(), callback); }
+	void Input::Subscribe(const InputShortcut *shortcut) { Subscribe(Hyperflow::MainWindow(), shortcut); }
+	void Input::SubscribeChar(InputCharCallback callback) { SubscribeChar(Hyperflow::MainWindow(), callback); }
+	void Input::SubscribePointerMove(InputPointerMoveCallback callback) { SubscribePointerMove(Hyperflow::MainWindow(), callback); }
+	void Input::SubscribeScroll(InputScrollCallback callback) { SubscribeScroll(Hyperflow::MainWindow(), callback); }
+
+	void Input::Unsubscribe(const InputCallback *callback) { Unsubscribe(Hyperflow::MainWindow(), callback); }
+	void Input::Unsubscribe(const InputShortcut *shortcut) { Unsubscribe(Hyperflow::MainWindow(), shortcut); }
+	void Input::UnsubscribeChar(InputCharCallback callback) { UnsubscribeChar(Hyperflow::MainWindow(), callback); }
+	void Input::UnsubscribePointerMove(InputPointerMoveCallback callback) { UnsubscribePointerMove(Hyperflow::MainWindow(), callback); }
+	void Input::UnsubscribeScroll(InputScrollCallback callback) { UnsubscribeScroll(Hyperflow::MainWindow(), callback); }
+
+	//endregion
 }

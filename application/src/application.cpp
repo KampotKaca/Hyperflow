@@ -6,7 +6,7 @@ namespace app
 {
 	void Application::Start()
 	{
-	
+
 	}
 
 	void Application::Update()
@@ -21,6 +21,6 @@ namespace app
 
 	void Application::Quit()
 	{
-	
+
 	}
 }
