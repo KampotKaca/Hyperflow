@@ -53,14 +53,16 @@ namespace hf
 		static const std::string& GetWrite();
 
 		static glm::ivec2 GetPointerPosition();
-		static glm::ivec2 GetScroll();
+		static glm::ivec2 GetPointerDelta();
+		static glm::vec2 GetScrollDelta();
 
 		static KeyState GetState(Ref<Window> window, Key key);
 		static ButtonState GetState(Ref<Window> window, Button button);
 		static const std::string& GetWrite(Ref<Window> window);
 
 		static glm::ivec2 GetPointerPosition(Ref<Window> window);
-		static glm::ivec2 GetScroll(Ref<Window> window);
+		static glm::ivec2 GetPointerDelta(Ref<Window> window);
+		static glm::vec2 GetScrollDelta(Ref<Window> window);
 	};
 }
 

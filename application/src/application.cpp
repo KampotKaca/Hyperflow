@@ -11,7 +11,7 @@ namespace app
 
 	void Application::Update()
 	{
-
+	
 	}
 
 	void Application::Render()

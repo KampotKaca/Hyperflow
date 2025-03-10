@@ -299,7 +299,7 @@ namespace hf
 	LRESULT Platform_HandleEvents_MouseButton       (Window* window, WPARAM wparam, LPARAM lparam, Button button, Mouse::Event::Type type);
 	LRESULT Platform_HandleEvents_MouseButtonExtra  (Window* window, WPARAM wparam, LPARAM lparam, Mouse::Event::Type type);
 	LRESULT Platform_HandleEvents_MouseMove         (Window* window, WPARAM wparam, LPARAM lparam);
-	LRESULT Platform_HandleEvents_MouseScroll       (Window* window, WPARAM wparam, LPARAM lparam);
+	LRESULT Platform_HandleEvents_MouseScroll       (Window* window, WPARAM wparam, LPARAM lparam, glm::ivec2 direction);
 
 	//endregion
 
@@ -338,7 +338,8 @@ namespace hf
 			case WM_XBUTTONUP:     return Platform_HandleEvents_MouseButtonExtra(window, wparam, lparam, Mouse::Event::Type::Release);
 
 			case WM_MOUSEMOVE:     return Platform_HandleEvents_MouseMove(window, wparam, lparam);
-			case WM_MOUSEHWHEEL:   return Platform_HandleEvents_MouseScroll(window, wparam, lparam);
+			case WM_MOUSEWHEEL:    return Platform_HandleEvents_MouseScroll(window, wparam, lparam, glm::ivec2{ 0, 1 });
+			case WM_MOUSEHWHEEL:   return Platform_HandleEvents_MouseScroll(window, wparam, lparam, glm::ivec2{ 1, 0 });
 
 			default: break;
 		}
@@ -459,9 +460,6 @@ namespace hf
 			.size = data.size
 		};
 
-		m_Mouse = MakeRef<Mouse>();
-		m_Keyboard = MakeRef<Keyboard>();
-
 		HWND parentHandle = nullptr;
 		if(parent != nullptr) parentHandle = (HWND)parent->m_Handle;
 
@@ -483,7 +481,12 @@ namespace hf
 		);
 
 		if(m_Handle == nullptr) throw WND_LAST_EXCEPT();
-
+		
+		auto pPos = Platform_GetPointerPosition(this);
+		m_Mouse = MakeRef<Mouse>(pPos, pPos.x >= 0 && pPos.x < m_Rect.size.x && pPos.y > 0 && pPos.y < m_Rect.size.y);
+		m_Keyboard = MakeRef<Keyboard>();
+		m_EventData.pointerPosition = m_Mouse->m_Position;
+		
 		SetFlags(data.flags);
 		Focus();
 	}
@@ -673,6 +676,28 @@ namespace hf
 
 	LRESULT Platform_HandleEvents_MouseMove(Window* window, WPARAM wparam, LPARAM lparam)
 	{
+		const POINTS pt = MAKEPOINTS(lparam);
+		auto rect = window->m_Rect;
+		
+		if(pt.x >= 0 && pt.x < rect.size.x && pt.y > 0 && pt.y < rect.size.y)
+		{
+			MouseEvent_Moved(window->m_Mouse, glm::ivec2{ pt.x, pt.y });
+			if(!window->m_Mouse->m_IsInClientRegion)
+			{
+				SetCapture((HWND)window->m_Handle);
+				window->m_Mouse->m_IsInClientRegion = true;
+			}
+		}
+		else
+		{
+			if(wparam & (MK_LBUTTON | MK_RBUTTON)) MouseEvent_Moved(window->m_Mouse, glm::ivec2{ pt.x, pt.y });
+			else
+			{
+				ReleaseCapture();
+				window->m_Mouse->m_IsInClientRegion = false;
+			}
+		}
+		
 		glm::ivec2 position =
 		{
 			GET_X_LPARAM(lparam),
@@ -683,15 +708,11 @@ namespace hf
 		return 0;
 	}
 
-	LRESULT Platform_HandleEvents_MouseScroll(Window* window, WPARAM wparam, LPARAM lparam)
+	LRESULT Platform_HandleEvents_MouseScroll(Window* window, WPARAM wparam, LPARAM lparam, glm::ivec2 direction)
 	{
-		glm::ivec2 position =
-		{
-			GET_X_LPARAM(lparam),
-			GET_Y_LPARAM(lparam)
-		};
-
-		MouseEvent_Scroll(window->m_Mouse, position);
+		auto delta = GET_WHEEL_DELTA_WPARAM(wparam) / (float)WHEEL_DELTA;
+		
+		MouseEvent_Scroll(window->m_Mouse, (glm::vec2)direction * delta);
 
 		return 0;
 	}

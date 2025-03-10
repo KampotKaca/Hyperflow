@@ -15,7 +15,7 @@ namespace hf
 
 	void MouseEvent_Button(const Ref<Mouse>& mouse, Button button, Mouse::Event::Type type) noexcept;
 	void MouseEvent_Moved(const Ref<Mouse>& mouse, glm::ivec2 position) noexcept;
-	void MouseEvent_Scroll(const Ref<Mouse>& mouse, glm::ivec2 position) noexcept;
+	void MouseEvent_Scroll(const Ref<Mouse>& mouse, glm::vec2 delta) noexcept;
 
 	void WindowEvent_Title(Window* window, const std::string& newTitle) noexcept;
 	void WindowEvent_Close(Window* window) noexcept;

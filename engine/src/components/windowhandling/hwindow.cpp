@@ -60,12 +60,12 @@ namespace hf
 		}
 	}
 
-	void Window_SendKeyEvent(const Ref<Window>& window, Key key)
+	void Window_SendEvent(const Ref<Window>& window, Key key)
 	{
 		
 	}
 	
-	void Window_SendButtonEvent(const Ref<Window>& window, Button button)
+	void Window_SendEvent(const Ref<Window>& window, Button button)
 	{
 		
 	}
@@ -75,12 +75,25 @@ namespace hf
 
 	}
 	
+	void Window_SendMousePointerEvent(const Ref<Window>& window)
+	{
+	
+	}
+	
+	void Window_SendScrollEvent(const Ref<Window>& window)
+	{
+	
+	}
+	
 	void Window_HandleInput(std::vector<Ref<Window>>& windows)
 	{
+		std::vector<std::pair<Ref<Window>, Key>> keyEvents;
+		std::vector<std::pair<Ref<Window>, Button>> buttonEvents;
+		
 		for(auto& window : windows)
 		{
 			auto& eventData = window->m_EventData;
-
+			
 #define EVENT_HANDLING(type, event, loc, evLoc, sys, t)\
 			for (uint8_t i = 0; i < (uint8_t)type::Count; ++i)\
 			{\
@@ -92,7 +105,7 @@ namespace hf
 					case KeyState::Down: currentState = KeyState::DownContinues; break;\
 					case KeyState::DownContinues: break;\
 				}\
-				event(window, (type)i);\
+				event.emplace_back(window, (type)i);\
 			}\
 			while(!evLoc->IsEmpty())\
 			{\
@@ -106,7 +119,7 @@ namespace hf
 						if(e.m_Type == sys::Event::Type::Press)\
 						{\
 							currentState = KeyState::Down;\
-							event(window, e.t);\
+							event.emplace_back(window, e.t);\
 						}\
 						else LOG_WARN("Discarded Input event");\
 						break;\
@@ -115,24 +128,39 @@ namespace hf
 						if(e.m_Type == sys::Event::Type::Release)\
 						{\
 							currentState = KeyState::Up;\
-							event(window, e.t);\
+							event.emplace_back(window, e.t);\
 						}\
 						else LOG_WARN("Discarded Input event");\
 						break;\
 				}\
 			}
-
-			EVENT_HANDLING(Key, Window_SendKeyEvent, eventData.keyStates, window->m_Keyboard, Keyboard, m_Key)
-			EVENT_HANDLING(Button, Window_SendButtonEvent, eventData.buttonStates, window->m_Mouse, Mouse, m_Button)
+			
+			EVENT_HANDLING(Key, keyEvents, eventData.keyStates, window->m_Keyboard, Keyboard, m_Key)
+			EVENT_HANDLING(Button, buttonEvents, eventData.buttonStates, window->m_Mouse, Mouse, m_Button)
 
 			eventData.charData = "";
 			while(!window->m_Keyboard->CharIsEmpty())
 			{
 				eventData.charData += window->m_Keyboard->ReadChar();
 			}
-
-			if(!eventData.charData.empty()) Window_SendCharEvent(window);
+			
+			eventData.scrollDelta = window->m_Mouse->GetScrollDelta();
+			window->m_Mouse->m_ScrollDelta = glm::vec2{ 0, 0 };
+			
+			eventData.pointerDelta = window->m_Mouse->GetPosition() - eventData.pointerPosition;
+			eventData.pointerPosition = window->m_Mouse->GetPosition();
 		}
+		
+		for(auto& window : windows)
+		{
+			auto& eventData = window->m_EventData;
+			if (!eventData.charData.empty()) Window_SendCharEvent(window);
+			if(eventData.pointerDelta != glm::ivec2{ 0, 0 }) Window_SendMousePointerEvent(window);
+			if(eventData.scrollDelta != glm::vec2{ 0, 0 }) Window_SendScrollEvent(window);
+		}
+		
+		for (auto& p : keyEvents) Window_SendEvent(p.first, p.second);
+		for (auto& p : buttonEvents) Window_SendEvent(p.first, p.second);
 	}
 
 	//region Focus Control
@@ -189,7 +217,7 @@ namespace hf
 
 		mouse->m_States = 0;
 		mouse->m_Buffer = tempBuffer;
-		mouse->m_Scroll = { 0, 0 };
+		mouse->m_ScrollDelta = { 0, 0 };
 	};
 	//endregion
 }

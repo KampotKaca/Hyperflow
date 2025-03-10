@@ -39,7 +39,7 @@ namespace hf
 			std::string charData;
 			glm::ivec2 pointerPosition;
 			glm::ivec2 pointerDelta;
-			glm::ivec2 scrollDelta;
+			glm::vec2 scrollDelta;
 		};
 
 		std::string m_Title;

@@ -13,11 +13,17 @@ namespace hf
 		if(!window) throw NULL_REF_EXCEPTION(Window, window);
 		return window->m_EventData.pointerPosition;
 	}
-
-	glm::ivec2 Input::GetScroll(Ref<Window> window)
+	
+	glm::ivec2 Input::GetPointerDelta(Ref<Window> window)
 	{
 		if(!window) throw NULL_REF_EXCEPTION(Window, window);
-		return window->m_EventData.scroll;
+		return window->m_EventData.pointerDelta;
+	}
+	
+	glm::vec2 Input::GetScrollDelta(Ref<Window> window)
+	{
+		if(!window) throw NULL_REF_EXCEPTION(Window, window);
+		return window->m_EventData.scrollDelta;
 	}
 
 	KeyState Input::GetState(Ref<Window> window, Key key)
@@ -41,7 +47,8 @@ namespace hf
 	}
 
 	glm::ivec2 Input::GetPointerPosition() { return GetPointerPosition(Hyperflow::MainWindow()); }
-	glm::ivec2 Input::GetScroll() { return GetScroll(Hyperflow::MainWindow()); }
+	glm::ivec2 Input::GetPointerDelta() { return GetPointerDelta(Hyperflow::MainWindow()); }
+	glm::vec2 Input::GetScrollDelta() { return GetScrollDelta(Hyperflow::MainWindow()); }
 
 	KeyState Input::GetState(Key key) { return GetState(Hyperflow::MainWindow(), key); }
 	ButtonState Input::GetState(Button button) { return GetState(Hyperflow::MainWindow(), button); }

@@ -6,6 +6,8 @@
 
 namespace hf
 {
+	Mouse::Mouse(glm::ivec2 position, bool isInClientRegion) : m_Position(position), m_IsInClientRegion(isInClientRegion) { }
+	
 	Mouse::Event::Event() : m_Button(Button::None), m_Type(Type::Invalid) { }
 	Mouse::Event::Event(Button button, Mouse::Event::Type type) : m_Button(button), m_Type(type) { }
 	
@@ -14,7 +16,7 @@ namespace hf
 	bool Mouse::Event::IsValid() const noexcept { return m_Button != Button::None && m_Type != Type::Invalid; }
 
 	glm::ivec2 Mouse::GetPosition() const noexcept { return m_Position; }
-	glm::ivec2 Mouse::GetScroll() const noexcept { return m_Scroll; }
+	glm::vec2 Mouse::GetScrollDelta() const noexcept { return m_ScrollDelta; }
 	bool Mouse::IsPressed(Button button) const noexcept { return m_States[(uint8_t)button]; }
 	bool Mouse::IsEmpty() const noexcept { return m_Buffer.empty(); }
 	
@@ -47,8 +49,8 @@ namespace hf
 		mouse->m_Position = position;
 	}
 
-	void MouseEvent_Scroll(const Ref<Mouse>& mouse, glm::ivec2 position) noexcept
+	void MouseEvent_Scroll(const Ref<Mouse>& mouse, glm::vec2 delta) noexcept
 	{
-		mouse->m_Scroll = position;
+		mouse->m_ScrollDelta += delta;
 	}
 }
