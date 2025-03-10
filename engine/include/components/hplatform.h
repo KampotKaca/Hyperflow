@@ -12,6 +12,8 @@ namespace hf
 	void Platform_EndTemporarySystemTimer(uint16_t millisecondPrecision);
 	uint64_t Platform_GetTicks();
 	void Platform_Sleep(double seconds);
+
+	glm::ivec2 Platform_GetPointerPosition(Window* window);
 }
 
 #endif //HPLATFORM_H

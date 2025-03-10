@@ -422,6 +422,14 @@ namespace hf
 		CloseHandle(WaitTimer);
 	}
 
+	glm::ivec2 Platform_GetPointerPosition(Window* window)
+	{
+		POINT point;
+		if(!GetCursorPos(&point)) throw WND_LAST_EXCEPT();
+		if(!ScreenToClient((HWND)window->m_Handle, &point)) throw WND_LAST_EXCEPT();
+		return { (int32_t)point.x, (int32_t)point.y };
+	}
+
 	void Platform_ConvertSize(Window* window, glm::ivec2& size)
 	{
 		uint32_t currentStyle = GetStyleID(window->m_Style);

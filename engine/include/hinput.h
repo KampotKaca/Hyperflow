@@ -7,6 +7,28 @@ namespace hf
 {
 	class Window;
 
+	template<typename T>
+	struct InputCallback
+	{
+
+	};
+
+	typedef InputCallback<Key> KeyCallback;
+	typedef InputCallback<Button> ButtonCallback;
+
+	template<typename T>
+	struct InputShortcut
+	{
+
+	};
+
+	typedef InputShortcut<Key> KeyShortcut;
+	typedef InputShortcut<Button> ButtonShortcut;
+
+	typedef void (*InputCharCallback)(std::string str);
+	typedef void (*InputPointerMoveCallback)(glm::ivec2 delta);
+	typedef void (*InputScrollCallback)(glm::ivec2 delta);
+
 	class Input
 	{
 	public:
@@ -28,11 +50,17 @@ namespace hf
 
 		static KeyState GetState(Key key);
 		static ButtonState GetState(Button button);
-		static std::string GetWrite();
+		static const std::string& GetWrite();
+
+		static glm::ivec2 GetPointerPosition();
+		static glm::ivec2 GetScroll();
 
 		static KeyState GetState(Ref<Window> window, Key key);
 		static ButtonState GetState(Ref<Window> window, Button button);
-		static std::string GetWrite(Ref<Window> window);
+		static const std::string& GetWrite(Ref<Window> window);
+
+		static glm::ivec2 GetPointerPosition(Ref<Window> window);
+		static glm::ivec2 GetScroll(Ref<Window> window);
 	};
 }
 

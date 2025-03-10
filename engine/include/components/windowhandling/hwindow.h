@@ -37,6 +37,9 @@ namespace hf
 			KeyState keyStates[(uint8_t)Key::Count];
 			ButtonState buttonStates[(uint8_t)Button::Count];
 			std::string charData;
+			glm::ivec2 pointerPosition;
+			glm::ivec2 pointerDelta;
+			glm::ivec2 scrollDelta;
 		};
 
 		std::string m_Title;

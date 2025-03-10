@@ -16,7 +16,9 @@ namespace hf
 	WindowFlags Window::GetFlags() const { return m_Flags; }
 	WindowStyle Window::GetStyle() const { return m_Style; }
 
+	void HandleKeyboardFocus(const Ref<Keyboard>& keyboard) noexcept;
 	void HandleKeyboardFocusLoss(const Ref<Keyboard>& keyboard) noexcept;
+	void HandleMouseFocus(const Ref<Mouse>& mouse, Window* window) noexcept;
 	void HandleMouseFocusLoss(const Ref<Mouse>& mouse) noexcept;
 
 	void WindowEvent_Title(Window* window, const std::string& newTitle) noexcept
@@ -46,57 +48,16 @@ namespace hf
 
 	void WindowEvent_Focus(Window* window, bool isFocused) noexcept
 	{
-		if(!isFocused)
+		if(isFocused)
+		{
+			HandleKeyboardFocus(window->m_Keyboard);
+			HandleMouseFocus(window->m_Mouse, window);
+		}
+		else
 		{
 			HandleKeyboardFocusLoss(window->m_Keyboard);
 			HandleMouseFocusLoss(window->m_Mouse);
 		}
-	}
-
-	void HandleKeyboardFocusLoss(const Ref<Keyboard>& keyboard) noexcept
-	{
-		keyboard->DisposeChar();
-		std::queue<Keyboard::Event> tempBuffer;
-
-		while (!keyboard->IsEmpty())
-		{
-			auto e = keyboard->Read();
-			if(e.IsValid())
-			{
-				if(e.GetType() == Keyboard::Event::Type::Release) tempBuffer.push(e);
-				else keyboard->m_States[(uint8_t)e.GetKey()] = false;
-			}
-		}
-
-		for (uint32_t i = 0; i < 256; ++i)
-		{
-			if(keyboard->m_States[i]) tempBuffer.emplace((Key)i, Keyboard::Event::Type::Release);
-		}
-
-		keyboard->m_States = 0;
-		keyboard->m_Buffer = tempBuffer;
-	}
-
-	void HandleMouseFocusLoss(const Ref<Mouse>& mouse) noexcept
-	{
-		std::queue<Mouse::Event> tempBuffer;
-		while (!mouse->IsEmpty())
-		{
-			auto e = mouse->Read();
-			if(e.IsValid())
-			{
-				if(e.GetType() == Mouse::Event::Type::Release) tempBuffer.push(e);
-				else mouse->m_States[(uint8_t)e.GetButton()] = false;
-			}
-		}
-
-		for (uint32_t i = 0; i < 256; ++i)
-		{
-			if(mouse->m_States[i]) tempBuffer.emplace((Button)i, Mouse::Event::Type::Release);
-		}
-
-		mouse->m_States = 0;
-		mouse->m_Buffer = tempBuffer;
 	}
 
 	void Window_SendKeyEvent(const Ref<Window>& window, Key key)
@@ -169,7 +130,66 @@ namespace hf
 			{
 				eventData.charData += window->m_Keyboard->ReadChar();
 			}
-			Window_SendCharEvent(window);
+
+			if(!eventData.charData.empty()) Window_SendCharEvent(window);
 		}
 	}
+
+	//region Focus Control
+	void HandleKeyboardFocus(const Ref<Keyboard>& keyboard) noexcept
+	{
+	}
+
+	void HandleKeyboardFocusLoss(const Ref<Keyboard>& keyboard) noexcept
+	{
+		keyboard->DisposeChar();
+		std::queue<Keyboard::Event> tempBuffer;
+
+		while (!keyboard->IsEmpty())
+		{
+			auto e = keyboard->Read();
+			if(e.IsValid())
+			{
+				if(e.GetType() == Keyboard::Event::Type::Release) tempBuffer.push(e);
+				else keyboard->m_States[(uint8_t)e.GetKey()] = false;
+			}
+		}
+
+		for (uint32_t i = 0; i < 256; ++i)
+		{
+			if(keyboard->m_States[i]) tempBuffer.emplace((Key)i, Keyboard::Event::Type::Release);
+		}
+
+		keyboard->m_States = 0;
+		keyboard->m_Buffer = tempBuffer;
+	}
+
+	void HandleMouseFocus(const Ref<Mouse>& mouse, Window* window) noexcept
+	{
+		mouse->m_Position = Platform_GetPointerPosition(window);
+	}
+
+	void HandleMouseFocusLoss(const Ref<Mouse>& mouse) noexcept
+	{
+		std::queue<Mouse::Event> tempBuffer;
+		while (!mouse->IsEmpty())
+		{
+			auto e = mouse->Read();
+			if(e.IsValid())
+			{
+				if(e.GetType() == Mouse::Event::Type::Release) tempBuffer.push(e);
+				else mouse->m_States[(uint8_t)e.GetButton()] = false;
+			}
+		}
+
+		for (uint32_t i = 0; i < 256; ++i)
+		{
+			if(mouse->m_States[i]) tempBuffer.emplace((Button)i, Mouse::Event::Type::Release);
+		}
+
+		mouse->m_States = 0;
+		mouse->m_Buffer = tempBuffer;
+		mouse->m_Scroll = { 0, 0 };
+	};
+	//endregion
 }

@@ -8,6 +8,18 @@
 
 namespace hf
 {
+	glm::ivec2 Input::GetPointerPosition(Ref<Window> window)
+	{
+		if(!window) throw NULL_REF_EXCEPTION(Window, window);
+		return window->m_EventData.pointerPosition;
+	}
+
+	glm::ivec2 Input::GetScroll(Ref<Window> window)
+	{
+		if(!window) throw NULL_REF_EXCEPTION(Window, window);
+		return window->m_EventData.scroll;
+	}
+
 	KeyState Input::GetState(Ref<Window> window, Key key)
 	{
 		if(!window) throw NULL_REF_EXCEPTION(Window, window);
@@ -22,15 +34,18 @@ namespace hf
 		return (KeyState)window->m_EventData.buttonStates[(uint8_t)button];
 	}
 
-	std::string Input::GetWrite(Ref<Window> window)
+	const std::string& Input::GetWrite(Ref<Window> window)
 	{
 		if(!window) throw NULL_REF_EXCEPTION(Window, window);
 		return window->m_EventData.charData;
 	}
 
+	glm::ivec2 Input::GetPointerPosition() { return GetPointerPosition(Hyperflow::MainWindow()); }
+	glm::ivec2 Input::GetScroll() { return GetScroll(Hyperflow::MainWindow()); }
+
 	KeyState Input::GetState(Key key) { return GetState(Hyperflow::MainWindow(), key); }
 	ButtonState Input::GetState(Button button) { return GetState(Hyperflow::MainWindow(), button); }
-	std::string Input::GetWrite() { return GetWrite(Hyperflow::MainWindow()); }
+	const std::string& Input::GetWrite() { return GetWrite(Hyperflow::MainWindow()); }
 
 #define W_FUNC(type, state) bool type(Ref<Window> window, Key key) { return GetState(window, key) == state; }
 
