@@ -45,6 +45,7 @@
 #define NOPROXYSTUB
 #define NOIMAGE
 #define NOTAPE
+#define _UNICODE
 #include <windowsx.h>
 
 //endregion
@@ -60,6 +61,7 @@
 #include "hyperflow.h"
 #include "components/hinternal.h"
 #include <sstream>
+#include <codecvt>
 
 namespace hf
 {
@@ -312,7 +314,7 @@ namespace hf
 		switch (msg)
 		{
 			//Window
-			case WM_SETTEXT:       return Platform_HandleEvents_WindowTitle      (window, wparam, lparam);
+			case WM_SETTEXT:              Platform_HandleEvents_WindowTitle      (window, wparam, lparam); break;
 			case WM_CLOSE:         return Platform_HandleEvents_WindowClose      (window, wparam, lparam);
 			case WM_SHOWWINDOW:    return Platform_HandleEvents_WindowShow       (window, wparam, lparam);
 			case WM_MOVE:          return Platform_HandleEvents_WindowMove       (window, wparam, lparam);
@@ -724,7 +726,7 @@ namespace hf
 		if (newTitle)
 		{
 			std::wstring ws(newTitle);
-			WindowEvent_Title(window, std::string(ws.begin(), ws.end()));
+			WindowEvent_Title(window, (const char*)ws.c_str());
 		}
 		return 0;
 	}

@@ -21,9 +21,9 @@ namespace hf
 	void HandleMouseFocus(const Ref<Mouse>& mouse, Window* window) noexcept;
 	void HandleMouseFocusLoss(const Ref<Mouse>& mouse) noexcept;
 
-	void WindowEvent_Title(Window* window, const std::string& newTitle) noexcept
+	void WindowEvent_Title(Window* window, const char* newTitle) noexcept
 	{
-		window->m_Title = newTitle;
+		window->m_Title = std::string(newTitle);
 	}
 
 	void WindowEvent_Close(Window* window) noexcept

@@ -13,6 +13,7 @@ namespace hf
 		static double GetTimePassedAfterLaunch();
 		static int16_t GetTargetFrameRate();
 		static double GetSystemTime();
+		static int32_t GetFrameRate();
 
 		static void SetTargetFrameRate(int16_t targetFrameRate);
 
@@ -23,6 +24,7 @@ namespace hf
 		static double s_CurrentTime;
 		static double s_DeltaTime;
 		static uint64_t s_FrameCount;
+		static double s_FrameRate;
 	};
 }
 
