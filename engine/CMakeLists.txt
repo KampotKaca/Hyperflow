@@ -28,7 +28,7 @@ endif()
 file(GLOB_RECURSE ENGINE_SRC CONFIGURE_DEPENDS src/*.cpp)
 
 if(DESKTOP)
-    set(PLATFORM platforms/platform_windows.cpp)
+    file(GLOB_RECURSE PLATFORM_SRC CONFIGURE_DEPENDS platforms/windows/*.cpp)
 else()
     message(FATAL_ERROR "Unsupported platform: ${CMAKE_SYSTEM_NAME}")
 endif()
@@ -37,7 +37,7 @@ add_subdirectory(external/glm)
 add_subdirectory(external/stb)
 add_subdirectory(external/logc)
 
-add_library(${PROJECT_NAME} ${ENGINE_SRC} ${PLATFORM})
+add_library(${PROJECT_NAME} ${ENGINE_SRC} ${PLATFORM_SRC})
 
 # Using keyword-based signature consistently
 target_link_libraries(${PROJECT_NAME}

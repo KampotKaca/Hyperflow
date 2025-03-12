@@ -20,6 +20,7 @@ namespace hf
 		[[nodiscard]] IRect GetRect() const;
 		[[nodiscard]] WindowFlags GetFlags() const;
 		[[nodiscard]] WindowStyle GetStyle() const;
+		[[nodiscard]] void* GetHandle() const;
 
 		void SetTitle(const char* title) const;
 		void SetSize(glm::ivec2 size);

@@ -28,8 +28,6 @@ namespace hf
 
 		Ref<Window> m_RenderingWindow;
 		std::thread m_Thread;
-
-		void Draw();
 	};
 }
 

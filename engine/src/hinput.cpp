@@ -1,5 +1,5 @@
 #define private public
-#include "components/windowhandling/hwindow.h"
+#include "components/window/hwindow.h"
 #undef private
 
 #include "hinput.h"

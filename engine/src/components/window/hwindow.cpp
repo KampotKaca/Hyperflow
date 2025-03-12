@@ -1,7 +1,7 @@
 #define private public
-#include "components/windowhandling/hwindow.h"
-#include "components/windowhandling/hkeyboard.h"
-#include "components/windowhandling/hmouse.h"
+#include "components/window/hwindow.h"
+#include "components/window/hkeyboard.h"
+#include "components/window/hmouse.h"
 #undef private
 
 #include "components/hinternal.h"

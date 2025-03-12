@@ -1,9 +1,10 @@
 #ifndef HINTERNAL_H
 #define HINTERNAL_H
 
-#include "components/windowhandling/hwindow.h"
-#include "components/windowhandling/hkeyboard.h"
-#include "components/windowhandling/hmouse.h"
+#include "hshared.h"
+#include "components/window/hwindow.h"
+#include "components/window/hkeyboard.h"
+#include "components/window/hmouse.h"
 
 namespace hf
 {

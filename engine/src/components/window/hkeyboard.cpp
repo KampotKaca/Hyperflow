@@ -1,5 +1,5 @@
 #define private public
-#include "components/windowhandling/hkeyboard.h"
+#include "components/window/hkeyboard.h"
 #undef private
 
 #include "components/hinternal.h"
