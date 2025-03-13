@@ -10,7 +10,7 @@ namespace hf
 	{
 		std::ostringstream oss;
 		oss << GetType() << std::endl
-		<< "[Error Code] " << GetErrorCode() << std::endl
+		<< "[Error Code] " << std::hex << GetErrorCode() << std::endl
 		<< "[Description] " << GetErrorString();
 
 		m_WhatBuffer = oss.str();
@@ -36,8 +36,4 @@ namespace hf
 	HRESULT WindowException::GetErrorCode() const noexcept { return m_ErrorCode; }
 	const char* WindowException::GetType() const noexcept { return "[Window Exception]"; }
 	std::string WindowException::GetErrorString() const noexcept { return TranslateErrorCode(m_ErrorCode); }
-
-
-#define WND_EXCEPT(hr) WindowException(__LINE__, __FILE__, hr)
-#define WND_LAST_EXCEPT() WindowException(__LINE__, __FILE__, GetLastError())
 }

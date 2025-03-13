@@ -2,6 +2,7 @@
 #define HWINDOW_H
 
 #include "hshared.h"
+#include "rendering/hrenderer.h"
 
 namespace hf
 {
@@ -21,6 +22,7 @@ namespace hf
 		[[nodiscard]] WindowFlags GetFlags() const;
 		[[nodiscard]] WindowStyle GetStyle() const;
 		[[nodiscard]] void* GetHandle() const;
+		Ref<Renderer> GetRenderer();
 
 		void SetTitle(const char* title) const;
 		void SetSize(glm::ivec2 size);
@@ -31,7 +33,7 @@ namespace hf
 
 		void SetFlags(WindowFlags flags);
 		void Focus() const;
-		
+
 	private:
 		struct EventData
 		{
@@ -68,6 +70,7 @@ namespace hf
 		Ref<Mouse> m_Mouse;
 		EventData m_EventData;
 		EventCallbacks m_Callbacks;
+		Ref<Renderer> m_Renderer;
 	};
 }
 

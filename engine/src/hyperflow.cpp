@@ -42,6 +42,12 @@ namespace hf
 				Window_HandleInput(s_Windows);
 				if(s_LifecycleCallbacks.onUpdateCallback) s_LifecycleCallbacks.onUpdateCallback();
 
+				for(auto& window : s_Windows)
+				{
+					window->GetRenderer()->StartFrame();
+					window->GetRenderer()->EndFrame();
+				}
+
 				if(Input::IsDown(Key::Escape)) Terminate();
 			}
 
@@ -70,6 +76,7 @@ namespace hf
 	Ref<Window> Hyperflow::OpenWindow(const WindowData &data, const Ref<Window> &parent)
 	{
 		auto newWindow = MakeRef<Window>(data, parent);
+		newWindow->m_Renderer = MakeRef<Renderer>(newWindow);
 		s_Windows.push_back(newWindow);
 		return newWindow;
 	}

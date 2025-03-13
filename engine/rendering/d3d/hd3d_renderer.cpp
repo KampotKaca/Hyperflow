@@ -13,4 +13,14 @@ namespace hf
 	{
 		delete (Graphics*)m_GraphicsHandle;
 	}
+
+	void Renderer::StartFrame()
+	{
+		((Graphics*)m_GraphicsHandle)->StartFrame();
+	}
+
+	void Renderer::EndFrame()
+	{
+		((Graphics*)m_GraphicsHandle)->EndFrame();
+	}
 }

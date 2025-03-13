@@ -19,12 +19,6 @@ else()
     message(FATAL_ERROR "Unsupported platform: ${CMAKE_SYSTEM_NAME}")
 endif()
 
-if(CMAKE_BUILD_TYPE STREQUAL "Debug")
-    add_definitions(-DDEBUG)
-elseif (CMAKE_BUILD_TYPE STREQUAL "Release")
-    add_definitions(-DRELEASE)
-endif()
-
 file(READ "config.h" CONFIG_HEADER_CONTENTS)
 string(FIND "${CONFIG_HEADER_CONTENTS}" "#define RENDERER_D3D" RENDERER_D3D)
 
@@ -37,6 +31,12 @@ if(NOT RENDERER_D3D EQUAL -1)
         message(FATAL_ERROR "d3d is windows only!!!")
     endif ()
 endif ()
+
+if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+    add_definitions(-DDEBUG)
+elseif (CMAKE_BUILD_TYPE STREQUAL "Release")
+    add_definitions(-DRELEASE)
+endif()
 #endregion
 
 file(GLOB_RECURSE ENGINE_SRC CONFIGURE_DEPENDS src/*.cpp)
@@ -64,6 +64,14 @@ target_compile_definitions(${PROJECT_NAME}
 if (WINDOWS)
     target_link_libraries(${PROJECT_NAME} PRIVATE winmm)
 endif()
+
+if (D3D)
+    target_link_libraries(${PROJECT_NAME}
+            PRIVATE
+            d3d11
+            dxgi
+    )
+endif ()
 
 # Set include directories
 target_include_directories(${PROJECT_NAME}

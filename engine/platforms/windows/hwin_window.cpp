@@ -111,5 +111,4 @@ namespace hf
 	}
 
 	void Window::Focus() const { SetFocus((HWND)m_Handle); }
-	void *Window::GetHandle() const { return m_Handle; }
 }

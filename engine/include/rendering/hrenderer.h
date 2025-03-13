@@ -11,6 +11,8 @@ namespace hf
 		Renderer(Ref<Window> window);
 		~Renderer();
 		void* GetGraphicsHandle();
+		void StartFrame();
+		void EndFrame();
 
 	private:
 		void* m_GraphicsHandle;

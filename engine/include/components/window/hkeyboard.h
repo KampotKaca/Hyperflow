@@ -25,6 +25,8 @@ namespace hf
 		};
 		
 		Keyboard() = default;
+		Keyboard(const Keyboard&) = delete;
+		Keyboard& operator=(const Keyboard&) = delete;
 		
 		[[nodiscard]] bool IsPressed(Key key) const noexcept;
 		[[nodiscard]] bool IsEmpty() const noexcept;

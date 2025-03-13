@@ -30,7 +30,7 @@ typedef void (*log_LockFn)(bool lock, void *udata);
 
 enum { LOG_TRACE, LOG_DEBUG, LOG_INFO, LOG_WARN, LOG_ERROR, LOG_FATAL };
 
-#if DEBUG
+#if !RELEASE
 #define log_trace(file, line, ...) log_log(LOG_TRACE, file, line, __VA_ARGS__)
 #define log_debug(file, line, ...) log_log(LOG_DEBUG, file, line, __VA_ARGS__)
 #define log_info(file, line, ...)  log_log(LOG_INFO,  file, line, __VA_ARGS__)
@@ -52,6 +52,13 @@ enum { LOG_TRACE, LOG_DEBUG, LOG_INFO, LOG_WARN, LOG_ERROR, LOG_FATAL };
 #define log_warn(...)
 #define log_error(...)
 #define log_fatal(...)
+
+#define LOG_TRACE(...)
+#define LOG_DEBUG(...)
+#define LOG_INFO(...) 
+#define LOG_WARN(...)
+#define LOG_ERROR(...)
+#define LOG_FATAL(...)
 #endif
 const char* log_level_string(int level);
 void log_set_lock(log_LockFn fn, void *udata);

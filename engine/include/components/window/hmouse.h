@@ -26,6 +26,8 @@ namespace hf
 		};
 		
 		Mouse(glm::ivec2 position, bool isInClientRegion);
+		Mouse(const Mouse&) = delete;
+		Mouse& operator=(const Mouse&) = delete;
 		
 		[[nodiscard]] glm::ivec2 GetPosition() const noexcept;
 		[[nodiscard]] glm::vec2 GetScrollDelta() const noexcept;
