@@ -2,12 +2,12 @@
 #define HWINDOW_H
 
 #include "hshared.h"
-#include "rendering/hrenderer.h"
 
 namespace hf
 {
 	class Keyboard;
 	class Mouse;
+	class Renderer;
 
 	class Window
 	{
@@ -22,7 +22,7 @@ namespace hf
 		[[nodiscard]] WindowFlags GetFlags() const;
 		[[nodiscard]] WindowStyle GetStyle() const;
 		[[nodiscard]] void* GetHandle() const;
-		Ref<Renderer> GetRenderer();
+		Ref<Renderer> GetRenderer() const;
 
 		void SetTitle(const char* title) const;
 		void SetSize(glm::ivec2 size);

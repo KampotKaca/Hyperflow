@@ -1,5 +1,5 @@
 #define private public
-#include "components/window/hmouse.h"
+#include "hmouse.h"
 #undef private
 
 #include "hyperconfig.h"

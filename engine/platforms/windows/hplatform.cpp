@@ -1,5 +1,5 @@
 #include "hwindows.h"
-#include "components/hplatform.h"
+#include "hplatform.h"
 #include "hwinproc.h"
 #include "exceptions/hwindowexception.h"
 

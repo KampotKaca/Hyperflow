@@ -1,5 +1,5 @@
 #define private public
-#include "components/window/hkeyboard.h"
+#include "hkeyboard.h"
 #undef private
 
 #include "components/hinternal.h"
@@ -8,7 +8,7 @@
 namespace hf
 {
 	Keyboard::Event::Event() : m_Key(Key::None), m_Type(Type::Invalid) { }
-	Keyboard::Event::Event(Key key, Keyboard::Event::Type type) : m_Key(key), m_Type(type) { }
+	Keyboard::Event::Event(Key key, Type type) : m_Key(key), m_Type(type) { }
 	Key Keyboard::Event::GetKey() const noexcept { return m_Key; }
 	Keyboard::Event::Type Keyboard::Event::GetType() const noexcept { return m_Type; }
 	bool Keyboard::Event::IsValid() const noexcept { return m_Key != Key::None && m_Type != Type::Invalid; }
@@ -19,7 +19,7 @@ namespace hf
 	{
 		if(!m_Buffer.empty())
 		{
-			Keyboard::Event e = m_Buffer.front();
+			Event e = m_Buffer.front();
 			m_Buffer.pop();
 			return e;
 		}

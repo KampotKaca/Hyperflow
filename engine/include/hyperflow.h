@@ -3,8 +3,8 @@
 
 #include "hshared.h"
 #include "components/htime.h"
-#include "components/window/hwindow.h"
-#include "rendering/hrenderer.h"
+#include "hwindow.h"
+#include "hrenderer.h"
 #include "hexception.h"
 #include "hinput.h"
 

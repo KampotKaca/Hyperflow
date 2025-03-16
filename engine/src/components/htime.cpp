@@ -1,11 +1,11 @@
-#include "components/hinternal.h"
-#include <chrono>
-#include <thread>
-#include "components/hplatform.h"
-
 #define private public
 #include "components/htime.h"
 #undef private
+
+#include "components/hinternal.h"
+#include <chrono>
+#include <thread>
+#include "hplatform.h"
 
 namespace hf
 {

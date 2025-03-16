@@ -1,11 +1,12 @@
 #define private public
-#include "components/window/hwindow.h"
-#include "components/window/hkeyboard.h"
-#include "components/window/hmouse.h"
+#include "hwindow.h"
+#include "hkeyboard.h"
+#include "hmouse.h"
 #undef private
 
 #include "components/hinternal.h"
-#include "components/hplatform.h"
+#include "hplatform.h"
+#include "hrenderer.h"
 
 namespace hf
 {
@@ -16,7 +17,7 @@ namespace hf
 	WindowFlags Window::GetFlags() const { return m_Flags; }
 	WindowStyle Window::GetStyle() const { return m_Style; }
 	void *Window::GetHandle() const { return m_Handle; }
-	Ref<Renderer> Window::GetRenderer() { return m_Renderer; }
+	Ref<Renderer> Window::GetRenderer() const { return m_Renderer; }
 
 	void HandleKeyboardFocus(const Ref<Keyboard>& keyboard) noexcept;
 	void HandleKeyboardFocusLoss(const Ref<Keyboard>& keyboard) noexcept;

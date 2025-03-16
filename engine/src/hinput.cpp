@@ -1,5 +1,5 @@
 #define private public
-#include "components/window/hwindow.h"
+#include "hwindow.h"
 #undef private
 
 #include "hinput.h"
@@ -10,39 +10,39 @@ namespace hf
 {
 	//region Update handled Input
 
-	glm::ivec2 Input::GetPointerPosition(Ref<Window> window)
+	glm::ivec2 Input::GetPointerPosition(const Ref<Window> &window)
 	{
 		if(!window) throw NULL_REF_EXCEPTION(Window, window);
 		return window->m_EventData.pointerPosition;
 	}
 	
-	glm::ivec2 Input::GetPointerDelta(Ref<Window> window)
+	glm::ivec2 Input::GetPointerDelta(const Ref<Window> &window)
 	{
 		if(!window) throw NULL_REF_EXCEPTION(Window, window);
 		return window->m_EventData.pointerDelta;
 	}
 	
-	glm::vec2 Input::GetScrollDelta(Ref<Window> window)
+	glm::vec2 Input::GetScrollDelta(const Ref<Window> &window)
 	{
 		if(!window) throw NULL_REF_EXCEPTION(Window, window);
 		return window->m_EventData.scrollDelta;
 	}
 
-	KeyState Input::GetState(Ref<Window> window, Key key)
+	KeyState Input::GetState(const Ref<Window> &window, Key key)
 	{
 		if(!window) throw NULL_REF_EXCEPTION(Window, window);
 		if(key == Key::None) LOG_WARN("Redundant Key State Request!");
 		return (KeyState)window->m_EventData.keyStates[(uint8_t)key];
 	}
 
-	ButtonState Input::GetState(Ref<Window> window, Button button)
+	ButtonState Input::GetState(const Ref<Window> &window, Button button)
 	{
 		if(!window) throw NULL_REF_EXCEPTION(Window, window);
 		if(button == Button::None) LOG_WARN("Redundant Button State Request!");
 		return (KeyState)window->m_EventData.buttonStates[(uint8_t)button];
 	}
 
-	const std::string& Input::GetWrite(Ref<Window> window)
+	const std::string& Input::GetWrite(const Ref<Window> &window)
 	{
 		if(!window) throw NULL_REF_EXCEPTION(Window, window);
 		return window->m_EventData.charData;
@@ -56,13 +56,13 @@ namespace hf
 	ButtonState Input::GetState(Button button) { return GetState(Hyperflow::MainWindow(), button); }
 	const std::string& Input::GetWrite() { return GetWrite(Hyperflow::MainWindow()); }
 
-	bool Input::IsDown(Ref<Window> window, Key key) { return GetState(window, key) == KeyState::Down; }
-	bool Input::IsDownContinues(Ref<Window> window, Key key) { return GetState(window, key) == KeyState::DownContinues; }
-	bool Input::IsUp(Ref<Window> window, Key key) { return GetState(window, key) == KeyState::Up; }
+	bool Input::IsDown(const Ref<Window> &window, Key key) { return GetState(window, key) == KeyState::Down; }
+	bool Input::IsDownContinues(const Ref<Window> &window, Key key) { return GetState(window, key) == KeyState::DownContinues; }
+	bool Input::IsUp(const Ref<Window> &window, Key key) { return GetState(window, key) == KeyState::Up; }
 
-	bool Input::IsDown(Ref<Window> window, Button button) { return GetState(window, button) == ButtonState ::Down; }
-	bool Input::IsDownContinues(Ref<Window> window, Button button) { return GetState(window, button) == ButtonState::DownContinues; }
-	bool Input::IsUp(Ref<Window> window, Button button) { return GetState(window, button) == ButtonState::Up; }
+	bool Input::IsDown(const Ref<Window> &window, Button button) { return GetState(window, button) == ButtonState ::Down; }
+	bool Input::IsDownContinues(const Ref<Window> &window, Button button) { return GetState(window, button) == ButtonState::DownContinues; }
+	bool Input::IsUp(const Ref<Window> &window, Button button) { return GetState(window, button) == ButtonState::Up; }
 
 	bool Input::IsDown(Key key) { return IsDown(Hyperflow::MainWindow(), key); }
 	bool Input::IsDownContinues(Key key) { return IsDownContinues(Hyperflow::MainWindow(), key); }
@@ -76,7 +76,7 @@ namespace hf
 
 	//region Event Handled Input
 
-	void Input::Subscribe(Ref<Window> window, const InputCallback *callback)
+	void Input::Subscribe(const Ref<Window> &window, const InputCallback *callback)
 	{
 		if(!window) throw NULL_REF_EXCEPTION(Window, window);
 		if(!callback) throw NULL_REF_EXCEPTION(InputCallback, callback);
@@ -88,7 +88,7 @@ namespace hf
 			window->m_Callbacks.m_ButtonCallbacks[(uint8_t)button].push_back(callback);
 	}
 
-	void Input::Subscribe(Ref<Window> window, const InputShortcut *shortcut)
+	void Input::Subscribe(const Ref<Window> &window, const InputShortcut *shortcut)
 	{
 		if(!window) throw NULL_REF_EXCEPTION(Window, window);
 		if(!shortcut) throw NULL_REF_EXCEPTION(InputShortcut, shortcut);
@@ -101,7 +101,7 @@ namespace hf
 	}
 
 #define SUBSCRIBE_NORMAL(n, vec, c)\
-	void Input::n(Ref<Window> window, c callback)\
+	void Input::n(const Ref<Window> &window, c callback)\
 	{\
 		if(!window) throw NullReferenceException(__LINE__, __FILE__, "Window", "window");\
         if(window->IsClosing()) return;\
@@ -115,7 +115,7 @@ namespace hf
 
 #undef SUBSCRIBE_NORMAL
 
-	void Input::Unsubscribe(Ref<Window> window, const InputCallback *callback)
+	void Input::Unsubscribe(const Ref<Window> &window, const InputCallback *callback)
 	{
 		if(!window) throw NULL_REF_EXCEPTION(Window, window);
 		if(!callback) throw NULL_REF_EXCEPTION(InputCallback, callback);
@@ -135,7 +135,7 @@ namespace hf
 		}
 	}
 
-	void Input::Unsubscribe(Ref<Window> window, const InputShortcut *shortcut)
+	void Input::Unsubscribe(const Ref<Window> &window, const InputShortcut *shortcut)
 	{
 		if(!window) throw NULL_REF_EXCEPTION(Window, window);
 		if(!shortcut) throw NULL_REF_EXCEPTION(InputShortcut, shortcut);
@@ -156,7 +156,7 @@ namespace hf
 	}
 
 #define UNSUBSCRIBE_NORMAL(n, vec, c)\
-	void Input::n(Ref<Window> window, c callback)\
+	void Input::n(const Ref<Window> &window, c callback)\
 	{\
 		if(!window) throw NullReferenceException(__LINE__, __FILE__, "Window", "window");\
         if(window->IsClosing()) return;\

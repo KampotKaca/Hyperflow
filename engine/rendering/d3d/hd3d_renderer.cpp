@@ -1,6 +1,6 @@
 #include "hd3d_graphics.h"
-#include "rendering/hrenderer.h"
-#include "components/window/hwindow.h"
+#include "hrenderer.h"
+#include "hwindow.h"
 
 namespace hf
 {
