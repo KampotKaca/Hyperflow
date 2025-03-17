@@ -1,13 +1,13 @@
 #include "hwindows.h"
 
 #define private public
-#include "components/window/hwindow.h"
-#include "components/window/hkeyboard.h"
-#include "components/window/hmouse.h"
+#include "hwindow.h"
+#include "hkeyboard.h"
+#include "hmouse.h"
 #undef private
 
 #include "hwinproc.h"
-#include "components/hinternal.h"
+#include "hplatform.h"
 
 namespace hf
 {
@@ -187,14 +187,14 @@ namespace hf
 
 	LRESULT Platform_HandleEvents_WindowClose(Window* window,
 	                                          __attribute__((unused)) WPARAM wparam,
-	                                          __attribute__((unused)) LPARAM lparam)
+	                                          __attribute__((unused)) LPARAM lparam) noexcept
 	{
 		WindowEvent_Close(window);
 		return 0;
 	}
 
 	LRESULT Platform_HandleEvents_WindowShow(Window* window, WPARAM wparam,
-	                                         __attribute__((unused)) LPARAM lparam)
+	                                         __attribute__((unused)) LPARAM lparam) noexcept
 	{
 		WindowEvent_Show(window, (bool)wparam);
 		return 0;
@@ -202,7 +202,7 @@ namespace hf
 
 	LRESULT Platform_HandleEvents_WindowMove(Window* window,
 	                                         __attribute__((unused)) WPARAM wparam,
-	                                         LPARAM lparam)
+	                                         LPARAM lparam) noexcept
 	{
 		glm::ivec2 position =
 			{
@@ -216,7 +216,7 @@ namespace hf
 
 	LRESULT Platform_HandleEvents_WindowResize(Window* window,
 	                                           __attribute__((unused)) WPARAM wparam,
-	                                           LPARAM lparam)
+	                                           LPARAM lparam) noexcept
 	{
 		glm::ivec2 size =
 			{
@@ -231,21 +231,21 @@ namespace hf
 	LRESULT Platform_HandleEvents_WindowFocus(Window* window,
 	                                          __attribute__((unused)) WPARAM wparam,
 	                                          __attribute__((unused)) LPARAM lparam,
-	                                          bool focused)
+	                                          bool focused) noexcept
 	{
 		WindowEvent_Focus(window, focused);
 		return 0;
 	}
 
 	LRESULT Platform_HandleEvents_KeyboardChar(Window* window, WPARAM wparam,
-	                                           __attribute__((unused)) LPARAM lparam)
+	                                           __attribute__((unused)) LPARAM lparam) noexcept
 	{
 		KeyboardEvent_Char(window->m_Keyboard, (char) wparam);
 		return 0;
 	}
 
 	LRESULT Platform_HandleEvents_KeyboardKey(Window* window, WPARAM wparam, LPARAM lparam,
-	                                          Keyboard::Event::Type type)
+	                                          Keyboard::Event::Type type) noexcept
 	{
 		auto key = (Key)(KEY_CODES[(uint8_t)wparam]);
 
@@ -266,20 +266,20 @@ namespace hf
 		return 0;
 	}
 
-	LRESULT Platform_HandleEvents_MouseButton(Window* window, WPARAM wparam, LPARAM lparam, Button button, Mouse::Event::Type type)
+	LRESULT Platform_HandleEvents_MouseButton(Window* window, WPARAM wparam, LPARAM lparam, Button button, Mouse::Event::Type type) noexcept
 	{
 		MouseEvent_Button(window->m_Mouse, button, type);
 		return 0;
 	}
 
-	LRESULT Platform_HandleEvents_MouseButtonExtra(Window* window, WPARAM wparam, LPARAM lparam, Mouse::Event::Type type)
+	LRESULT Platform_HandleEvents_MouseButtonExtra(Window* window, WPARAM wparam, LPARAM lparam, Mouse::Event::Type type) noexcept
 	{
 		if(wparam & MK_XBUTTON1) MouseEvent_Button(window->m_Mouse, Button::Extra1, type);
 		if(wparam & MK_XBUTTON2) MouseEvent_Button(window->m_Mouse, Button::Extra2, type);
 		return 0;
 	}
 
-	LRESULT Platform_HandleEvents_MouseMove(Window* window, WPARAM wparam, LPARAM lparam)
+	LRESULT Platform_HandleEvents_MouseMove(Window* window, WPARAM wparam, LPARAM lparam) noexcept
 	{
 		const POINTS pt = MAKEPOINTS(lparam);
 		auto rect = window->m_Rect;
@@ -313,7 +313,7 @@ namespace hf
 		return 0;
 	}
 
-	LRESULT Platform_HandleEvents_MouseScroll(Window* window, WPARAM wparam, LPARAM lparam, glm::ivec2 direction)
+	LRESULT Platform_HandleEvents_MouseScroll(Window* window, WPARAM wparam, LPARAM lparam, glm::ivec2 direction) noexcept
 	{
 		auto delta = GET_WHEEL_DELTA_WPARAM(wparam) / (float)WHEEL_DELTA;
 
@@ -322,7 +322,7 @@ namespace hf
 		return 0;
 	}
 
-	LRESULT Platform_HandleEvents_WindowTitle(Window *window, WPARAM wparam, LPARAM lparam)
+	LRESULT Platform_HandleEvents_WindowTitle(Window *window, WPARAM wparam, LPARAM lparam) noexcept
 	{
 		auto newTitle = reinterpret_cast<LPCWSTR>(lparam);
 

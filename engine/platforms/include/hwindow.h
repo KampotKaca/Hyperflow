@@ -22,23 +22,24 @@ namespace hf
 		[[nodiscard]] WindowFlags GetFlags() const;
 		[[nodiscard]] WindowStyle GetStyle() const;
 		[[nodiscard]] void* GetHandle() const;
-		Ref<Renderer> GetRenderer() const;
+		[[nodiscard]] Ref<Renderer> GetRenderer() const;
 
 		void SetTitle(const char* title) const;
-		void SetSize(glm::ivec2 size);
+		void SetSize(glm::ivec2 size) const;
 		void SetPosition(glm::ivec2 position) const;
-		void SetRect(IRect rect);
+		void SetRect(IRect rect) const;
 
 		[[nodiscard]] bool IsClosing() const;
 
 		void SetFlags(WindowFlags flags);
 		void Focus() const;
+		bool Close();
 
 	private:
 		struct EventData
 		{
-			KeyState keyStates[(uint8_t)Key::Count];
-			ButtonState buttonStates[(uint8_t)Button::Count];
+			KeyState keyStates[(uint8_t)Key::Count]{};
+			ButtonState buttonStates[(uint8_t)Button::Count]{};
 			std::string charData;
 			glm::ivec2 pointerPosition;
 			glm::ivec2 pointerDelta;
@@ -58,12 +59,11 @@ namespace hf
 			std::vector<InputScrollCallback> m_ScrollCallbacks;
 		};
 
-		std::string m_Title;
+		std::string m_Title{};
 		IRect m_Rect{};
 		void* m_Handle;
 		WindowStyle m_Style;
 		WindowFlags m_Flags;
-		bool m_ShouldClose;
 		Ref<Window> m_Parent;
 
 		Ref<Keyboard> m_Keyboard;
@@ -71,6 +71,8 @@ namespace hf
 		EventData m_EventData;
 		EventCallbacks m_Callbacks;
 		Ref<Renderer> m_Renderer;
+
+		void Update();
 	};
 }
 

@@ -39,21 +39,19 @@ namespace hf
 			while (IsRunning())
 			{
 				Time_Update();
+
 				Platform_HandleEvents(s_UpdateType);
 				Window_HandleInput(s_Windows);
 				if(s_LifecycleCallbacks.onUpdateCallback) s_LifecycleCallbacks.onUpdateCallback();
 
 				for(auto& window : s_Windows)
 				{
-					window->GetRenderer()->StartFrame();
-					window->GetRenderer()->EndFrame();
+					if (!window->IsClosing()) window->Update();
 				}
 
 				if(Input::IsDown(Key::Escape)) Terminate();
 			}
-
-			if(s_LifecycleCallbacks.onUpdateCallback) s_LifecycleCallbacks.onUpdateCallback();
-			CloseWindow(s_MainWindow);
+			if(s_LifecycleCallbacks.onUpdateCallback) s_LifecycleCallbacks.onQuitCallback();
 			Platform_EndTemporarySystemTimer(1);
 		}
 		catch(const HyperException& e)
@@ -82,11 +80,12 @@ namespace hf
 		return newWindow;
 	}
 
-	void Hyperflow::CloseWindow(const Ref<Window> &window)
-	{
-		auto result = std::remove(s_Windows.begin(), s_Windows.end(), window);
-		if(result != s_Windows.end()) window->m_ShouldClose = true;
-	}
-
 	void Hyperflow::Terminate() { s_IsRunning = false; }
+	void Hyperflow::ClearWindow(Window* window)
+	{
+		std::erase_if(s_Windows, [&](Ref<Window> &w)
+		{
+			return w.get() == window;
+		} );
+	}
 }

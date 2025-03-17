@@ -57,7 +57,7 @@ namespace hf
 		if(type == Keyboard::Event::Type::Invalid) return;
 
 		keyboard->m_States[(uint8_t)key] = type == Keyboard::Event::Type::Press;
-		keyboard->m_Buffer.emplace(key, type);
+		keyboard->m_Buffer.emplace( key, type );
 	}
 	
 	void KeyboardEvent_Char(const Ref<Keyboard>& keyboard, char character) noexcept

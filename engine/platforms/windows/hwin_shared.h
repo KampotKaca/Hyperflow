@@ -5,7 +5,7 @@
 
 namespace hf
 {
-	void Windows_ConvertSize(Window* window, glm::ivec2& size);
+	void Windows_ConvertSize(const Window* window, glm::ivec2& size);
 	uint64_t Windows_GetTicks();
 	uint32_t Windows_GetStyleID(WindowStyle style);
 }

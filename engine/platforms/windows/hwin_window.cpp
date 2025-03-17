@@ -1,13 +1,14 @@
 #include "hwindows.h"
 
 #define private public
-#include "components/window/hwindow.h"
-#include "components/window/hkeyboard.h"
-#include "components/window/hmouse.h"
+#include <hyperflow.h>
+#include "hwindow.h"
+#include "hkeyboard.h"
+#include "hmouse.h"
 #undef private
 
 #include "hwin_shared.h"
-#include "components/hplatform.h"
+#include "hplatform.h"
 #include "exceptions/hwindowexception.h"
 
 namespace hf
@@ -20,7 +21,6 @@ namespace hf
 		m_Title = data.title;
 		m_Style = data.style;
 		m_Parent = parent;
-		m_ShouldClose = false;
 		m_Flags = (WindowFlags)0;
 		m_Rect =
 			{
@@ -61,14 +61,14 @@ namespace hf
 
 	Window::~Window()
 	{
-		DestroyWindow((HWND)m_Handle);
+		Close();
 	}
 
 	void Window::SetTitle(const char* title) const
 	{
 		if(!SetWindowText((HWND)m_Handle, title)) throw WND_LAST_EXCEPT();
 	}
-	void Window::SetSize(glm::ivec2 size)
+	void Window::SetSize(glm::ivec2 size) const
 	{
 		Windows_ConvertSize(this, size);
 		if(!SetWindowPos((HWND)m_Handle, nullptr, 0, 0, size[0], size[1], SWP_NOMOVE))
@@ -79,14 +79,12 @@ namespace hf
 		if(!SetWindowPos((HWND)m_Handle, nullptr, position[0], position[1], 0, 0, SWP_NOSIZE))
 			throw WND_LAST_EXCEPT();
 	}
-	void Window::SetRect(IRect rect)
+	void Window::SetRect(IRect rect) const
 	{
 		Windows_ConvertSize(this, rect.size);
 		if(!SetWindowPos((HWND)m_Handle, nullptr, rect.position[0], rect.position[1], rect.size[0], rect.size[1], 0))
 			throw WND_LAST_EXCEPT();
 	}
-
-	bool Window::IsClosing() const { return m_ShouldClose; }
 
 	void Window::SetFlags(WindowFlags flags)
 	{
@@ -110,5 +108,21 @@ namespace hf
 		m_Flags = flags;
 	}
 
-	void Window::Focus() const { SetFocus((HWND)m_Handle); }
+	void Window::Focus() const
+	{
+		SetFocus((HWND)m_Handle);
+		SetForegroundWindow((HWND)m_Handle);
+	}
+	bool Window::Close()
+	{
+		if (m_Handle && IsWindow((HWND)m_Handle))
+		{
+			if(!DestroyWindow((HWND)m_Handle)) throw WND_LAST_EXCEPT();
+			m_Handle = nullptr;
+			Hyperflow::ClearWindow(this);
+			return true;
+		}
+
+		return false;
+	}
 }

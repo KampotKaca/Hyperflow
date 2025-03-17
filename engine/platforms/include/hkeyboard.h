@@ -43,7 +43,7 @@ namespace hf
 		
 	private:
 		bool m_AutoRepeatEnabled = false;
-		std::bitset<256> m_States;
+		std::bitset<256> m_States = 0;
 		std::queue<Event> m_Buffer;
 		std::queue<char> m_CharBuffer;
 	};

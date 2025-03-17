@@ -4,6 +4,9 @@
 #include "hmouse.h"
 #undef private
 
+#include <d3d10.h>
+#include <windows.h>
+
 #include "components/hinternal.h"
 #include "hplatform.h"
 #include "hrenderer.h"
@@ -18,6 +21,12 @@ namespace hf
 	WindowStyle Window::GetStyle() const { return m_Style; }
 	void *Window::GetHandle() const { return m_Handle; }
 	Ref<Renderer> Window::GetRenderer() const { return m_Renderer; }
+	bool Window::IsClosing() const { return m_Handle == nullptr; }
+	void Window::Update()
+	{
+		m_Renderer->StartFrame();
+		m_Renderer->EndFrame();
+	}
 
 	void HandleKeyboardFocus(const Ref<Keyboard>& keyboard) noexcept;
 	void HandleKeyboardFocusLoss(const Ref<Keyboard>& keyboard) noexcept;
@@ -31,7 +40,7 @@ namespace hf
 
 	void WindowEvent_Close(Window* window) noexcept
 	{
-		window->m_ShouldClose = true;
+		window->Close();
 	}
 
 	void WindowEvent_Show(Window* window, bool show) noexcept
@@ -201,7 +210,7 @@ namespace hf
 			if(eventData.pointerDelta != glm::ivec2{ 0, 0 }) Window_SendPointerEvent(window);
 			if(eventData.scrollDelta != glm::vec2{ 0, 0 }) Window_SendScrollEvent(window);
 		}
-		
+
 		for (auto& p : keyEvents) Window_SendEvent(p.first, p.second);
 		for (auto& p : buttonEvents) Window_SendEvent(p.first, p.second);
 	}
