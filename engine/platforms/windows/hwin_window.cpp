@@ -13,9 +13,8 @@
 
 namespace hf
 {
-	Window::Window(const WindowData& data, const Ref<Window>& parent)
+	Window::Window(void* platformHandle, const WindowData& data, const Ref<Window>& parent)
 	{
-		HINSTANCE hinstance = GetModuleHandle(nullptr);
 		uint32_t currentStyle = Windows_GetStyleID(data.style);
 
 		m_Title = data.title;
@@ -23,10 +22,10 @@ namespace hf
 		m_Parent = parent;
 		m_Flags = (WindowFlags)0;
 		m_Rect =
-			{
-				.position = data.position,
-				.size = data.size
-			};
+		{
+			.position = data.position,
+			.size = data.size
+		};
 
 		HWND parentHandle = nullptr;
 		if(parent != nullptr) parentHandle = (HWND)parent->m_Handle;
@@ -35,18 +34,18 @@ namespace hf
 		Windows_ConvertSize(this, convertedSize);
 
 		m_Handle = CreateWindowEx
-			(
-				0,
-				WINDOWS_CLASS_NAME,
-				data.title.c_str(),
-				currentStyle,
-				data.position[0], data.position[1],
-				convertedSize[0], convertedSize[1],
-				parentHandle,
-				nullptr,
-				hinstance,
-				this
-			);
+		(
+			0,
+			WINDOWS_CLASS_NAME,
+			data.title.c_str(),
+			currentStyle,
+			data.position[0], data.position[1],
+			convertedSize[0], convertedSize[1],
+			parentHandle,
+			nullptr,
+			(HINSTANCE)platformHandle,
+			this
+		);
 
 		if(m_Handle == nullptr) throw WND_LAST_EXCEPT();
 

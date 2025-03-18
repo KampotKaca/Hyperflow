@@ -91,7 +91,7 @@ namespace hf
 		return DefWindowProcA(hwnd, msg, wparam, lparam);
 	}
 
-	void Platform_Initialize()
+	void* Platform_Initialize()
 	{
 		HINSTANCE hinstance = GetModuleHandle(nullptr);
 
@@ -111,7 +111,13 @@ namespace hf
 		wndClass.hInstance = hinstance;
 
 		RegisterClassEx(&wndClass);
+        return hinstance;
 	}
+
+	void Platform_Dispose(void* platformHandle)
+    {
+
+    }
 
 	void Platform_BeginTemporarySystemTimer(uint16_t millisecondPrecision)
 	{

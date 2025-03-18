@@ -62,7 +62,9 @@ target_compile_definitions(${PROJECT_NAME}
 # Link winmm only on Windows
 if (WINDOWS)
     target_link_libraries(${PROJECT_NAME} PRIVATE winmm)
-endif()
+elseif (LINUX)
+    target_link_libraries(${PROJECT_NAME} PRIVATE X11)
+endif ()
 
 if (D3D)
     target_link_libraries(${PROJECT_NAME}

@@ -16,12 +16,13 @@ namespace hf
 	std::string Hyperflow::s_AppTitle;
 	Ref<Window> Hyperflow::s_MainWindow = nullptr;
 	std::vector<Ref<Window>> Hyperflow::s_Windows;
+	void* Hyperflow::s_PlatformHandle = nullptr;
 
 	void Hyperflow::Run(const EngineData& engineData)
 	{
 		try
 		{
-			Platform_Initialize();
+			s_PlatformHandle = Platform_Initialize();
 			Platform_BeginTemporarySystemTimer(1);
 			Time_Load();
 			log_set_level(LOG_TRACE);
@@ -53,6 +54,7 @@ namespace hf
 			}
 			if(s_LifecycleCallbacks.onUpdateCallback) s_LifecycleCallbacks.onQuitCallback();
 			Platform_EndTemporarySystemTimer(1);
+			Platform_Dispose(s_PlatformHandle);
 		}
 		catch(const HyperException& e)
 		{
@@ -74,13 +76,14 @@ namespace hf
 
 	Ref<Window> Hyperflow::OpenWindow(const WindowData &data, const Ref<Window> &parent)
 	{
-		auto newWindow = MakeRef<Window>(data, parent);
+		auto newWindow = MakeRef<Window>(s_PlatformHandle, data, parent);
 		newWindow->m_Renderer = MakeRef<Renderer>(newWindow);
 		s_Windows.push_back(newWindow);
 		return newWindow;
 	}
 
 	void Hyperflow::Terminate() { s_IsRunning = false; }
+	void* Hyperflow::GetPlatformHandle() { return s_PlatformHandle; }
 	void Hyperflow::ClearWindow(Window* window)
 	{
 		std::erase_if(s_Windows, [&](Ref<Window> &w)

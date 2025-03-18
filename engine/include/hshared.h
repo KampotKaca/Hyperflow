@@ -36,6 +36,12 @@ extern "C"
 #include "glm/mat4x4.hpp"
 #include "glm/common.hpp"
 
+#if PLATFORM_LINUX
+#ifdef None
+#undef None;
+#endif
+#endif
+
 namespace hf
 {
 	//region Aditionalls

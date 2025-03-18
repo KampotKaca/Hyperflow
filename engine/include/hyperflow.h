@@ -19,6 +19,7 @@ namespace hf
 
 		static Ref<Window> OpenWindow(const WindowData& data, const Ref<Window>& parent);
 		static void Terminate();
+		static void* GetPlatformHandle();
 
 	private:
 		static EngineLifecycleCallbacks s_LifecycleCallbacks;
@@ -28,6 +29,7 @@ namespace hf
 		static std::string s_AppTitle;
 		static Ref<Window> s_MainWindow;
 		static std::vector<Ref<Window>> s_Windows;
+		static void* s_PlatformHandle;
 
 		static void ClearWindow(Window* window);
 	};

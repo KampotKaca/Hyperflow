@@ -4,9 +4,6 @@
 #include "hmouse.h"
 #undef private
 
-#include <d3d10.h>
-#include <windows.h>
-
 #include "components/hinternal.h"
 #include "hplatform.h"
 #include "hrenderer.h"

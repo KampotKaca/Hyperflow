@@ -12,7 +12,7 @@ namespace hf
 	class Window
 	{
 	public:
-		Window(const WindowData& data, const Ref<Window>& parent);
+		Window(void* platformHandle, const WindowData& data, const Ref<Window>& parent);
 		~Window();
 
 		[[nodiscard]] const std::string& GetTitle() const;
