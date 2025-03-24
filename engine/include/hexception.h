@@ -3,7 +3,7 @@
 
 #include <string>
 #include <exception>
-#include <inttypes.h>
+#include <cinttypes>
 
 namespace hf
 {
