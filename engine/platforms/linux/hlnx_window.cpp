@@ -1,6 +1,3 @@
-#include <X11/Xlib.h>
-#include <X11/Xutil.h>
-
 #define private public
 #include <hyperflow.h>
 #include "hwindow.h"
@@ -9,9 +6,9 @@
 #undef private
 
 #include "hplatform.h"
+#include "hlnx_eventhandling.h"
 #include "exceptions/hwindowexception.h"
-#include <X11/Xlib.h>
-#include <X11/Xutil.h>
+#include "hlnx_window.h"
 
 namespace hf
 {
@@ -39,12 +36,39 @@ namespace hf
 
 		auto display = (Display*)platformHandle;
 		int screen = DefaultScreen(display);
-		auto root = RootWindow(display, screen);
-		if (parent != nullptr) root = (::Window)m_Parent->m_Handle;
-		m_Handle = (void*)XCreateSimpleWindow(display, root, data.position.x, data.position.y,
-		data.size.x, data.size.y, 1, BlackPixel(display, screen), WhitePixel(display, screen));
 
-		XSelectInput(display, (::Window)m_Handle, (1L << 25) - 1);
+		auto attributes = (XSetWindowAttributes)
+		{
+			.background_pixel = WhitePixel(display, screen),
+			.event_mask = KeyPressMask | KeyReleaseMask |
+						  ButtonPressMask | ButtonReleaseMask |
+						  VisibilityChangeMask | ResizeRedirectMask |
+						  StructureNotifyMask,
+		};
+
+		auto root = RootWindow(display, screen);
+		if (parent) root = ((LnxWindowData*)m_Parent->m_Handle)->windowHandle;
+		auto lnxData = new LnxWindowData();
+		m_Handle = lnxData;
+
+		lnxData->windowHandle = XCreateWindow(display, root,
+		data.position.x, data.position.y,
+		data.size.x, data.size.y, 1,
+		DefaultDepth(display, screen), InputOutput,
+		DefaultVisual(display, screen),
+		CWBackPixel | CWEventMask, &attributes);
+
+		if(parent) XSetTransientForHint(display, lnxData->windowHandle, root);
+
+		Platform_PushWindowToRegistry(lnxData->windowHandle, this);
+
+		lnxData->closeMessage = XInternAtom(display, "WM_DELETE_WINDOW", False);
+		lnxData->wmState = XInternAtom(display, "_NET_WM_STATE", False);
+		lnxData->maxHorz = XInternAtom(display, "_NET_WM_STATE_MAXIMIZED_HORZ", False);
+		lnxData->maxVert = XInternAtom(display, "_NET_WM_STATE_MAXIMIZED_VERT", False);
+
+		XSetWMProtocols(display, lnxData->windowHandle, &lnxData->closeMessage, 1);
+
 		XSetErrorHandler(XErrorHandler);
 		XSetIOErrorHandler(XIOErrorHandler);
 
@@ -65,15 +89,15 @@ namespace hf
 
 	void Window::SetTitle(const char* title) const
 	{
-		XStoreName((Display*)Hyperflow::GetPlatformHandle(), (::Window)m_Handle, title);
+		XStoreName((Display*)Hyperflow::GetPlatformHandle(), ((LnxWindowData*)m_Handle)->windowHandle, title);
 	}
 	void Window::SetSize(glm::ivec2 size) const
 	{
-		XResizeWindow((Display*)Hyperflow::GetPlatformHandle(), (::Window)m_Handle, size.x, size.y);
+		XResizeWindow((Display*)Hyperflow::GetPlatformHandle(), ((LnxWindowData*)m_Handle)->windowHandle, size.x, size.y);
 	}
 	void Window::SetPosition(glm::ivec2 position) const
 	{
-		XMoveWindow((Display*)Hyperflow::GetPlatformHandle(), (::Window)m_Handle, position.x, position.y);
+		XMoveWindow((Display*)Hyperflow::GetPlatformHandle(), ((LnxWindowData*)m_Handle)->windowHandle, position.x, position.y);
 	}
 	void Window::SetRect(IRect rect) const
 	{
@@ -83,18 +107,18 @@ namespace hf
 
 	void XIconify(Display* display, ::Window window, int32_t id)
 	{
-		Atom wm_state = XInternAtom(display, "_NET_WM_STATE", False);
-		Atom max_horz = XInternAtom(display, "_NET_WM_STATE_MAXIMIZED_HORZ", False);
-		Atom max_vert = XInternAtom(display, "_NET_WM_STATE_MAXIMIZED_VERT", False);
+		auto winPtr = Platform_GetWinPtr(window);
+		if (!winPtr) return;
+		auto lnxData = (LnxWindowData*)winPtr->m_Handle;
 		XEvent event = {0};
 		event.xclient.type = ClientMessage;
-		event.xclient.message_type = wm_state;
+		event.xclient.message_type = lnxData->wmState;
 		event.xclient.display = display;
 		event.xclient.window = window;
 		event.xclient.format = 32;
 		event.xclient.data.l[0] = id;
-		event.xclient.data.l[1] = max_horz;
-		event.xclient.data.l[2] = max_vert;
+		event.xclient.data.l[1] = (long)lnxData->maxHorz;
+		event.xclient.data.l[2] = (long)lnxData->maxVert;
 		XSendEvent(display, DefaultRootWindow(display), False, SubstructureNotifyMask | SubstructureRedirectMask, &event);
 	}
 
@@ -103,7 +127,7 @@ namespace hf
 		if(m_Flags == flags) return;
 
 		auto display = (Display*)Hyperflow::GetPlatformHandle();
-		auto window = (::Window)m_Handle;
+		auto window = ((LnxWindowData*)m_Handle)->windowHandle;
 		if(((int32_t)m_Flags & (int32_t)WindowFlags::Visible) != ((int32_t)flags & (int32_t)WindowFlags::Visible))
 		{
 			if((int32_t)flags & (int32_t)WindowFlags::Visible) XMapWindow(display, window);
@@ -129,7 +153,7 @@ namespace hf
 		event.xclient.type = ClientMessage;
 		event.xclient.message_type = XInternAtom(display, "_NET_ACTIVE_WINDOW", False);
 		event.xclient.display = display;
-		event.xclient.window = (::Window)m_Handle;
+		event.xclient.window = ((LnxWindowData*)m_Handle)->windowHandle;
 		event.xclient.format = 32;
 		event.xclient.data.l[0] = 1;  // 1 = normal request
 		event.xclient.data.l[1] = CurrentTime;
@@ -141,7 +165,10 @@ namespace hf
 	{
 		if (m_Handle)
 		{
-			XDestroyWindow((Display*)Hyperflow::GetPlatformHandle(), (::Window)m_Handle);
+			auto window = ((LnxWindowData*)m_Handle)->windowHandle;
+			Platform_PopWindowFromRegistry(window);
+			XDestroyWindow((Display*)Hyperflow::GetPlatformHandle(), window);
+			free(m_Handle);
 			m_Handle = nullptr;
 			return true;
 		}

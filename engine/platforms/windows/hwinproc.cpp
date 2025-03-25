@@ -29,9 +29,9 @@ namespace hf
 			(uint8_t)Key::None,               // 12: Not Implemented                      VK_CLEAR
 			(uint8_t)Key::Enter,              // 13: Enter Key                            VK_ENTER
 			(uint8_t)Key::None, (uint8_t)Key::None,               // 14, 15: Unassigned
-			(uint8_t)Key::Shift,              // 16: Shift Key                            VK_SHIFT
-			(uint8_t)Key::Control,            // 17: Ctrl Key                             VK_CONTROL
-			(uint8_t)Key::Alt,                // 18: Alt Key                              VK_MENU
+			(uint8_t)Key::LeftShift,          // 16: Shift Key                            VK_SHIFT
+			(uint8_t)Key::LeftControl,        // 17: Ctrl Key                             VK_CONTROL
+			(uint8_t)Key::LeftAlt,            // 18: Alt Key                              VK_MENU
 			(uint8_t)Key::Pause,              // 19: Pause Key                            VK_PAUSE
 			(uint8_t)Key::CapsLock,           // 20: Caps Lock Key                        VK_CAPITAL
 			(uint8_t)Key::None,               // 21: Not Implemented                      VK_KANA, VK_HANGUL
