@@ -2,7 +2,7 @@
 
 namespace hf
 {
-    Renderer::Renderer(Ref<Window> window)
+    Renderer::Renderer(const Ref<Window>& window)
     {
         m_GraphicsHandle = nullptr;
     }

@@ -8,7 +8,7 @@ namespace hf
 	class Renderer
 	{
 	public:
-		Renderer(Ref<Window> window);
+		Renderer(const Ref<Window>& window);
 		~Renderer();
 		void* GetGraphicsHandle() const;
 		void StartFrame();
