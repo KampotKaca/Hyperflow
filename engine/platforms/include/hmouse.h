@@ -25,12 +25,12 @@ namespace hf
 			Type m_Type;
 		};
 		
-		Mouse(glm::ivec2 position, bool isInClientRegion);
+		Mouse(ivec2 position, bool isInClientRegion);
 		Mouse(const Mouse&) = delete;
 		Mouse& operator=(const Mouse&) = delete;
 		
-		[[nodiscard]] glm::ivec2 GetPosition() const noexcept;
-		[[nodiscard]] glm::vec2 GetScrollDelta() const noexcept;
+		[[nodiscard]] ivec2 GetPosition() const noexcept;
+		[[nodiscard]] vec2 GetScrollDelta() const noexcept;
 		[[nodiscard]] bool IsPressed(Button button) const noexcept;
 		[[nodiscard]] bool IsEmpty() const noexcept;
 		
@@ -39,8 +39,8 @@ namespace hf
 		void Dispose() noexcept;
 		
 	private:
-		glm::ivec2 m_Position;
-		glm::vec2 m_ScrollDelta = glm::vec2{ 0, 0 };
+		ivec2 m_Position;
+		vec2 m_ScrollDelta = vec2{ 0, 0 };
 		std::bitset<8> m_States;
 		std::queue<Event> m_Buffer;
 		bool m_IsInClientRegion;

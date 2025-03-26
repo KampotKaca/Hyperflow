@@ -70,8 +70,8 @@ namespace hf
 			case WM_XBUTTONUP:     return Platform_HandleEvents_MouseButtonExtra(window, wparam, lparam, Mouse::Event::Type::Release);
 
 			case WM_MOUSEMOVE:     return Platform_HandleEvents_MouseMove(window, wparam, lparam);
-			case WM_MOUSEWHEEL:    return Platform_HandleEvents_MouseScroll(window, wparam, lparam, glm::ivec2{ 0, 1 });
-			case WM_MOUSEHWHEEL:   return Platform_HandleEvents_MouseScroll(window, wparam, lparam, glm::ivec2{ 1, 0 });
+			case WM_MOUSEWHEEL:    return Platform_HandleEvents_MouseScroll(window, wparam, lparam, ivec2{ 0, 1 });
+			case WM_MOUSEHWHEEL:   return Platform_HandleEvents_MouseScroll(window, wparam, lparam, ivec2{ 1, 0 });
 
 			default: break;
 		}
@@ -143,7 +143,7 @@ namespace hf
 		CloseHandle(WaitTimer);
 	}
 
-	glm::ivec2 Platform_GetPointerPosition(Window* window)
+	ivec2 Platform_GetPointerPosition(Window* window)
 	{
 		POINT point;
 		if(!GetCursorPos(&point)) throw WND_LAST_EXCEPT();

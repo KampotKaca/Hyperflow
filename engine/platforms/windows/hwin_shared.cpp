@@ -5,7 +5,7 @@
 
 namespace hf
 {
-	void Windows_ConvertSize(const Window* window, glm::ivec2& size)
+	void Windows_ConvertSize(const Window* window, ivec2& size)
 	{
 		uint32_t currentStyle = Windows_GetStyleID(window->GetStyle());
 		RECT targetRect = { 0, 0, size[0], size[1] };

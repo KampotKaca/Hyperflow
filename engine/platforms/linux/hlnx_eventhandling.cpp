@@ -30,10 +30,19 @@ namespace hf
 	void Platform_PopWindowFromRegistry(::Window window) { LNX_WIN_REGISTRY.erase(window); }
 
 	static Key Platform_TransformToKey(KeySym key);
-	static void Platform_HandleDestroyMessage	(XEvent& event);
+	static void Platform_HandleDestroyNotify	(XEvent& event);
 	static void Platform_HandleClientMessage	(XEvent& event);
+
+	static void Platform_HandleConfigureNotify	(XEvent& event);
+	static void Platform_HandleFocusIn	        (XEvent& event);
+	static void Platform_HandleFocusOut	        (XEvent& event);
+	static void Platform_HandleExpose	        (XEvent& event);
+
 	static void Platform_HandleKeyPress			(XEvent& event);
+	static void Platform_HandleButtonPress		(XEvent& event);
 	static void Platform_HandleKeyRelease		(XEvent& event);
+	static void Platform_HandleButtonRelease	(XEvent& event);
+	static void Platform_HandleMotionNotify		(XEvent& event);
 
     void Platform_HandleNextEvent()
     {
@@ -43,10 +52,19 @@ namespace hf
 
         switch (event.type)
         {
-            case DestroyNotify:   Platform_HandleDestroyMessage(event); break;
-            case ClientMessage:   Platform_HandleClientMessage(event);  break;
-            case KeyPress:   	  Platform_HandleKeyPress(event);	   break;
-            case KeyRelease: 	  Platform_HandleKeyRelease(event);	   break;
+            case DestroyNotify:   	Platform_HandleDestroyNotify(event);		break;
+            case ClientMessage:   	Platform_HandleClientMessage(event);		break;
+
+            case ConfigureNotify:   Platform_HandleConfigureNotify(event);	break;
+            case FocusIn:			Platform_HandleFocusIn(event);			break;
+            case FocusOut:			Platform_HandleFocusOut(event);			break;
+            case Expose:			Platform_HandleExpose(event);			break;
+
+        	case KeyPress:   		Platform_HandleKeyPress(event);			break;
+        	case ButtonPress:   	Platform_HandleKeyPress(event);			break;
+            case KeyRelease: 		Platform_HandleKeyRelease(event);		break;
+            case ButtonRelease: 	Platform_HandleKeyRelease(event);		break;
+            case MotionNotify:	 	Platform_HandleMotionNotify(event);		break;
         }
     }
 
@@ -64,17 +82,40 @@ namespace hf
     	if (it != LNX_WIN_REGISTRY.end()) it->second->Close();
     }
 
-	static void Platform_HandleDestroyMessage(XEvent& event)
+	static void Platform_HandleDestroyNotify(XEvent& event)
     {
     	auto window = Platform_GetWinPtr(event.xclient.window);
     	if (window) window->Close();
     }
 
+	static void Platform_HandleConfigureNotify(XEvent& event)
+	{
+
+	}
+	static void Platform_HandleFocusIn(XEvent& event)
+	{
+
+	}
+	static void Platform_HandleFocusOut(XEvent& event)
+	{
+
+	}
+	static void Platform_HandleExpose(XEvent& event)
+	{
+
+	}
+
+	//region Input
 	static void Platform_HandleKeyPress(XEvent& event)
     {
     	auto win = Platform_GetWinPtr(event.xkey.window);
     	auto key = Platform_TransformToKey(XLookupKeysym(&event.xkey, 0));
     	KeyboardEvent_Key(win->m_Keyboard, key, Keyboard::Event::Type::Press);
+    }
+
+	static void Platform_HandleButtonPress(XEvent& event)
+    {
+
     }
 
 	static void Platform_HandleKeyRelease(XEvent& event)
@@ -83,6 +124,17 @@ namespace hf
     	auto key = Platform_TransformToKey(XLookupKeysym(&event.xkey, 0));
     	KeyboardEvent_Key(win->m_Keyboard, key, Keyboard::Event::Type::Release);
     }
+
+	static void Platform_HandleButtonRelease(XEvent& event)
+	{
+
+	}
+
+	static void Platform_HandleMotionNotify(XEvent& event)
+	{
+
+	}
+	//endregion
 
 	static Key Platform_TransformToKey(KeySym key)
     {

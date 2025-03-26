@@ -52,6 +52,7 @@ target_link_libraries(${PROJECT_NAME}
         glm
         stb
         logc
+        dl
 )
 
 target_compile_definitions(${PROJECT_NAME}
@@ -63,7 +64,7 @@ target_compile_definitions(${PROJECT_NAME}
 if (WINDOWS)
     target_link_libraries(${PROJECT_NAME} PRIVATE winmm)
 elseif (LINUX)
-    target_link_libraries(${PROJECT_NAME} PRIVATE X11)
+    target_link_libraries(${PROJECT_NAME} PRIVATE X11 Xxf86vm Xrandr Xi)
 endif ()
 
 if (D3D)
@@ -72,6 +73,10 @@ if (D3D)
             d3d11
             dxgi
     )
+endif ()
+
+if(VULKAN)
+    target_link_libraries(${PROJECT_NAME} PRIVATE vulkan)
 endif ()
 
 # Set include directories

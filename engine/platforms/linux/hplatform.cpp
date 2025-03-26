@@ -14,7 +14,6 @@ namespace hf
 
 	void Platform_HandleEvents(EngineUpdateType updateType)
 	{
-		XEvent event;
 		auto display = (Display*)Hyperflow::GetPlatformHandle();
 		switch (updateType)
 		{
@@ -61,7 +60,7 @@ namespace hf
 
 	}
 
-	glm::ivec2 Platform_GetPointerPosition(Window* window)
+	ivec2 Platform_GetPointerPosition(Window* window)
 	{
 		return { 0, 0 };
 	}

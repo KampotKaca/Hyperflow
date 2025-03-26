@@ -32,17 +32,17 @@ namespace hf
 		static ButtonState GetState(Button button);
 		static const std::string& GetWrite();
 
-		static glm::ivec2 GetPointerPosition();
-		static glm::ivec2 GetPointerDelta();
-		static glm::vec2 GetScrollDelta();
+		static ivec2 GetPointerPosition();
+		static ivec2 GetPointerDelta();
+		static vec2 GetScrollDelta();
 
 		static KeyState GetState(const Ref<Window> &window, Key key);
 		static ButtonState GetState(const Ref<Window> &window, Button button);
 		static const std::string& GetWrite(const Ref<Window> &window);
 
-		static glm::ivec2 GetPointerPosition(const Ref<Window> &window);
-		static glm::ivec2 GetPointerDelta(const Ref<Window> &window);
-		static glm::vec2 GetScrollDelta(const Ref<Window> &window);
+		static ivec2 GetPointerPosition(const Ref<Window> &window);
+		static ivec2 GetPointerDelta(const Ref<Window> &window);
+		static vec2 GetScrollDelta(const Ref<Window> &window);
 
 		//endregion
 

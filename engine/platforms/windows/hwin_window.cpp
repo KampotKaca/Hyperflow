@@ -30,7 +30,7 @@ namespace hf
 		HWND parentHandle = nullptr;
 		if(parent != nullptr) parentHandle = (HWND)parent->m_Handle;
 
-		glm::ivec2 convertedSize = data.size;
+		ivec2 convertedSize = data.size;
 		Windows_ConvertSize(this, convertedSize);
 
 		m_Handle = CreateWindowEx
@@ -67,13 +67,13 @@ namespace hf
 	{
 		if(!SetWindowText((HWND)m_Handle, title)) throw WND_LAST_EXCEPT();
 	}
-	void Window::SetSize(glm::ivec2 size) const
+	void Window::SetSize(ivec2 size) const
 	{
 		Windows_ConvertSize(this, size);
 		if(!SetWindowPos((HWND)m_Handle, nullptr, 0, 0, size[0], size[1], SWP_NOMOVE))
 			throw WND_LAST_EXCEPT();
 	}
-	void Window::SetPosition(glm::ivec2 position) const
+	void Window::SetPosition(ivec2 position) const
 	{
 		if(!SetWindowPos((HWND)m_Handle, nullptr, position[0], position[1], 0, 0, SWP_NOSIZE))
 			throw WND_LAST_EXCEPT();

@@ -16,8 +16,8 @@ namespace hf
 		~Window();
 
 		[[nodiscard]] const std::string& GetTitle() const;
-		[[nodiscard]] glm::ivec2 GetSize() const;
-		[[nodiscard]] glm::ivec2 GetPosition() const;
+		[[nodiscard]] ivec2 GetSize() const;
+		[[nodiscard]] ivec2 GetPosition() const;
 		[[nodiscard]] IRect GetRect() const;
 		[[nodiscard]] WindowFlags GetFlags() const;
 		[[nodiscard]] WindowStyle GetStyle() const;
@@ -25,8 +25,8 @@ namespace hf
 		[[nodiscard]] Ref<Renderer> GetRenderer() const;
 
 		void SetTitle(const char* title) const;
-		void SetSize(glm::ivec2 size) const;
-		void SetPosition(glm::ivec2 position) const;
+		void SetSize(ivec2 size) const;
+		void SetPosition(ivec2 position) const;
 		void SetRect(IRect rect) const;
 
 		[[nodiscard]] bool IsClosing() const;
@@ -41,9 +41,9 @@ namespace hf
 			KeyState keyStates[(uint8_t)Key::Count]{};
 			ButtonState buttonStates[(uint8_t)Button::Count]{};
 			std::string charData;
-			glm::ivec2 pointerPosition;
-			glm::ivec2 pointerDelta;
-			glm::vec2 scrollDelta;
+			ivec2 pointerPosition;
+			ivec2 pointerDelta;
+			vec2 scrollDelta;
 		};
 
 		struct EventCallbacks

@@ -18,6 +18,8 @@
 #include <queue>
 #include <optional>
 
+#include "glm/fwd.hpp"
+
 extern "C"
 {
 #include "log.h"
@@ -25,16 +27,9 @@ extern "C"
 
 #include <sys/stat.h>
 #include <sys/types.h>
-
-#include <cinttypes>
 #include <memory>
 
-#include "glm/vec2.hpp"
-#include "glm/vec3.hpp"
-#include "glm/vec4.hpp"
-
-#include "glm/mat4x4.hpp"
-#include "glm/common.hpp"
+#include "components/hmath.h"
 
 #if PLATFORM_LINUX
 #ifdef None
@@ -45,7 +40,6 @@ extern "C"
 namespace hf
 {
 	//region Aditionalls
-
 	typedef void (*ActionCallback)(void* params);
 
 	template<typename T>
@@ -136,19 +130,19 @@ namespace hf
 	};
 
 	typedef void (*InputCharCallback)(const std::string& str);
-	typedef void (*InputPointerMoveCallback)(glm::ivec2 delta);
-	typedef void (*InputScrollCallback)(glm::vec2 delta);
+	typedef void (*InputPointerMoveCallback)(ivec2 delta);
+	typedef void (*InputScrollCallback)(vec2 delta);
 
 	struct Rect
 	{
-		glm::vec2 position;
-		glm::vec2 size;
+		vec2 position;
+		vec2 size;
 	};
 
 	struct IRect
 	{
-		glm::ivec2 position;
-		glm::ivec2 size;
+		ivec2 position;
+		ivec2 size;
 	};
 
 	//endregion
@@ -174,8 +168,8 @@ namespace hf
 		std::string title;
 		WindowFlags flags;
 		WindowStyle style;
-		glm::ivec2 position;
-		glm::ivec2 size;
+		ivec2 position;
+		ivec2 size;
 	};
 
 	//endregion

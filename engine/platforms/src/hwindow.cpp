@@ -11,8 +11,8 @@
 namespace hf
 {
 	const std::string& Window::GetTitle() const { return m_Title; }
-	glm::ivec2 Window::GetSize() const { return m_Rect.size; }
-	glm::ivec2 Window::GetPosition() const { return m_Rect.size; }
+	ivec2 Window::GetSize() const { return m_Rect.size; }
+	ivec2 Window::GetPosition() const { return m_Rect.size; }
 	IRect Window::GetRect() const { return m_Rect; }
 	WindowFlags Window::GetFlags() const { return m_Flags; }
 	WindowStyle Window::GetStyle() const { return m_Style; }
@@ -45,12 +45,12 @@ namespace hf
 		Platform_SetWindowFlag(&window->m_Flags, WindowFlags::Visible, show);
 	}
 
-	void WindowEvent_Move(Window* window, glm::ivec2 position) noexcept
+	void WindowEvent_Move(Window* window, ivec2 position) noexcept
 	{
 		window->m_Rect.position = position;
 	}
 
-	void WindowEvent_Resize(Window* window, glm::ivec2 size) noexcept
+	void WindowEvent_Resize(Window* window, ivec2 size) noexcept
 	{
 		window->m_Rect.size = size;
 	}
@@ -204,8 +204,8 @@ namespace hf
 		{
 			auto& eventData = window->m_EventData;
 			if (!eventData.charData.empty()) Window_SendCharEvent(window);
-			if(eventData.pointerDelta != glm::ivec2{ 0, 0 }) Window_SendPointerEvent(window);
-			if(eventData.scrollDelta != glm::vec2{ 0, 0 }) Window_SendScrollEvent(window);
+			if(eventData.pointerDelta != ivec2{ 0, 0 }) Window_SendPointerEvent(window);
+			if(eventData.scrollDelta != vec2{ 0, 0 }) Window_SendScrollEvent(window);
 		}
 
 		for (auto& p : keyEvents) Window_SendEvent(p.first, p.second);

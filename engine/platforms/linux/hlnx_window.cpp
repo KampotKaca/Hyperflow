@@ -91,11 +91,11 @@ namespace hf
 	{
 		XStoreName((Display*)Hyperflow::GetPlatformHandle(), ((LnxWindowData*)m_Handle)->windowHandle, title);
 	}
-	void Window::SetSize(glm::ivec2 size) const
+	void Window::SetSize(ivec2 size) const
 	{
 		XResizeWindow((Display*)Hyperflow::GetPlatformHandle(), ((LnxWindowData*)m_Handle)->windowHandle, size.x, size.y);
 	}
-	void Window::SetPosition(glm::ivec2 position) const
+	void Window::SetPosition(ivec2 position) const
 	{
 		XMoveWindow((Display*)Hyperflow::GetPlatformHandle(), ((LnxWindowData*)m_Handle)->windowHandle, position.x, position.y);
 	}
@@ -168,7 +168,7 @@ namespace hf
 			auto window = ((LnxWindowData*)m_Handle)->windowHandle;
 			Platform_PopWindowFromRegistry(window);
 			XDestroyWindow((Display*)Hyperflow::GetPlatformHandle(), window);
-			free(m_Handle);
+			delete((LnxWindowData*)m_Handle);
 			m_Handle = nullptr;
 			return true;
 		}

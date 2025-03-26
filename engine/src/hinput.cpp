@@ -10,19 +10,19 @@ namespace hf
 {
 	//region Update handled Input
 
-	glm::ivec2 Input::GetPointerPosition(const Ref<Window> &window)
+	ivec2 Input::GetPointerPosition(const Ref<Window> &window)
 	{
 		if(!window) throw NULL_REF_EXCEPTION(Window, window);
 		return window->m_EventData.pointerPosition;
 	}
 	
-	glm::ivec2 Input::GetPointerDelta(const Ref<Window> &window)
+	ivec2 Input::GetPointerDelta(const Ref<Window> &window)
 	{
 		if(!window) throw NULL_REF_EXCEPTION(Window, window);
 		return window->m_EventData.pointerDelta;
 	}
 	
-	glm::vec2 Input::GetScrollDelta(const Ref<Window> &window)
+	vec2 Input::GetScrollDelta(const Ref<Window> &window)
 	{
 		if(!window) throw NULL_REF_EXCEPTION(Window, window);
 		return window->m_EventData.scrollDelta;
@@ -48,9 +48,9 @@ namespace hf
 		return window->m_EventData.charData;
 	}
 
-	glm::ivec2 Input::GetPointerPosition() { return GetPointerPosition(Hyperflow::MainWindow()); }
-	glm::ivec2 Input::GetPointerDelta() { return GetPointerDelta(Hyperflow::MainWindow()); }
-	glm::vec2 Input::GetScrollDelta() { return GetScrollDelta(Hyperflow::MainWindow()); }
+	ivec2 Input::GetPointerPosition() { return GetPointerPosition(Hyperflow::MainWindow()); }
+	ivec2 Input::GetPointerDelta() { return GetPointerDelta(Hyperflow::MainWindow()); }
+	vec2 Input::GetScrollDelta() { return GetScrollDelta(Hyperflow::MainWindow()); }
 
 	KeyState Input::GetState(Key key) { return GetState(Hyperflow::MainWindow(), key); }
 	ButtonState Input::GetState(Button button) { return GetState(Hyperflow::MainWindow(), button); }

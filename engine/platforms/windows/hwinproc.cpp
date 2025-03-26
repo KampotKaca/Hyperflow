@@ -204,11 +204,11 @@ namespace hf
 	                                         __attribute__((unused)) WPARAM wparam,
 	                                         LPARAM lparam) noexcept
 	{
-		glm::ivec2 position =
-			{
-				GET_X_LPARAM(lparam),
-				GET_Y_LPARAM(lparam)
-			};
+		ivec2 position =
+		{
+			GET_X_LPARAM(lparam),
+			GET_Y_LPARAM(lparam)
+		};
 
 		WindowEvent_Move(window, position);
 		return 0;
@@ -218,11 +218,11 @@ namespace hf
 	                                           __attribute__((unused)) WPARAM wparam,
 	                                           LPARAM lparam) noexcept
 	{
-		glm::ivec2 size =
-			{
-				GET_X_LPARAM(lparam),
-				GET_Y_LPARAM(lparam)
-			};
+		ivec2 size =
+		{
+			GET_X_LPARAM(lparam),
+			GET_Y_LPARAM(lparam)
+		};
 
 		WindowEvent_Resize(window, size);
 		return 0;
@@ -286,7 +286,7 @@ namespace hf
 
 		if(pt.x >= 0 && pt.x < rect.size.x && pt.y > 0 && pt.y < rect.size.y)
 		{
-			MouseEvent_Moved(window->m_Mouse, glm::ivec2{ pt.x, pt.y });
+			MouseEvent_Moved(window->m_Mouse, ivec2{ pt.x, pt.y });
 			if(!window->m_Mouse->m_IsInClientRegion)
 			{
 				SetCapture((HWND)window->m_Handle);
@@ -295,7 +295,7 @@ namespace hf
 		}
 		else
 		{
-			if(wparam & (MK_LBUTTON | MK_RBUTTON)) MouseEvent_Moved(window->m_Mouse, glm::ivec2{ pt.x, pt.y });
+			if(wparam & (MK_LBUTTON | MK_RBUTTON)) MouseEvent_Moved(window->m_Mouse, ivec2{ pt.x, pt.y });
 			else
 			{
 				ReleaseCapture();
@@ -303,21 +303,21 @@ namespace hf
 			}
 		}
 
-		glm::ivec2 position =
-			{
-				GET_X_LPARAM(lparam),
-				GET_Y_LPARAM(lparam)
-			};
+		ivec2 position =
+		{
+			GET_X_LPARAM(lparam),
+			GET_Y_LPARAM(lparam)
+		};
 		MouseEvent_Moved(window->m_Mouse, position);
 
 		return 0;
 	}
 
-	LRESULT Platform_HandleEvents_MouseScroll(Window* window, WPARAM wparam, LPARAM lparam, glm::ivec2 direction) noexcept
+	LRESULT Platform_HandleEvents_MouseScroll(Window* window, WPARAM wparam, LPARAM lparam, ivec2 direction) noexcept
 	{
 		auto delta = GET_WHEEL_DELTA_WPARAM(wparam) / (float)WHEEL_DELTA;
 
-		MouseEvent_Scroll(window->m_Mouse, (glm::vec2)direction * delta);
+		MouseEvent_Scroll(window->m_Mouse, (vec2)direction * delta);
 
 		return 0;
 	}
