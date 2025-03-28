@@ -4,6 +4,8 @@
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
 
+#include "../hlnx_window.h"
+
 namespace hf
 {
     WindowException::WindowException(int32_t lineNum, const char* file, int32_t errorCode)
@@ -11,23 +13,24 @@ namespace hf
 
     const char* WindowException::what() const noexcept
     {
+        char errorString[256];
+        GetErrorString(errorString);
         std::ostringstream oss;
         oss << GetType() << std::endl
         << "[Error Code] " << std::hex << GetErrorCode() << std::endl
-        << "[Description] " << GetErrorString();
+        << "[Description] " << errorString;
 
         m_WhatBuffer = oss.str();
         return m_WhatBuffer.c_str();
     }
 
-    std::string WindowException::TranslateErrorCode(int32_t result)
+    void WindowException::TranslateErrorCode(int32_t errorCode, char* result)
     {
-        char error_text[256];
-        XGetErrorText((Display*)Hyperflow::GetPlatformHandle(), result, error_text, sizeof(error_text));
-        return error_text;
+        auto handle = (LnxPlatformHandle*)Hyperflow::GetPlatformHandle();
+        XGetErrorText(handle->display, errorCode, result, 256);
     }
 
     int32_t WindowException::GetErrorCode() const noexcept { return m_ErrorCode; }
     const char* WindowException::GetType() const noexcept { return "[Window Exception]"; }
-    std::string WindowException::GetErrorString() const noexcept { return TranslateErrorCode(m_ErrorCode); }
+    void WindowException::GetErrorString(char* result) const noexcept { return TranslateErrorCode(m_ErrorCode, result); }
 }

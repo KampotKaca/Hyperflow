@@ -13,6 +13,12 @@ namespace hf
         Atom maxHorz;
         Atom maxVert;
     };
+
+    struct LnxPlatformHandle
+    {
+        Display* display;
+        int32_t xiOpcode;
+    };
 }
 
 #endif //HLNX_WINDOW_H

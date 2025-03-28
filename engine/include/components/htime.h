@@ -10,7 +10,8 @@ namespace hf
 	public:
 		static uint64_t GetFrameCount();
 		static double GetDeltaTime();
-		static double GetTimePassedAfterLaunch();
+		static double GetTimePassed();
+		static double GetAbsoluteTimePassed();
 		static int16_t GetTargetFrameRate();
 		static double GetSystemTime();
 		static int32_t GetFrameRate();

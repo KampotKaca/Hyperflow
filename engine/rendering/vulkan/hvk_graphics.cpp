@@ -18,4 +18,14 @@ namespace hf
         if (s_RefCount == 0) Dispose();
     }
 
+    void VKGraphics::Init()
+    {
+
+    }
+
+    void VKGraphics::Dispose()
+    {
+
+    }
+
 }

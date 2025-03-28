@@ -123,15 +123,17 @@ namespace hf
 		for (auto& key : callback->keys)
 		{
 			auto& v = window->m_Callbacks.m_KeyCallbacks[(uint8_t)key];
-			std::remove_if(v.begin(), v.end(), [&](const auto &item)
+			auto res = std::remove_if(v.begin(), v.end(), [&](const auto &item)
 			{ return item == callback; });
+			if (res == v.end()) LOG_WARN("Unable to unsubscibe");
 		}
 
 		for (auto& button : callback->buttons)
 		{
 			auto& v = window->m_Callbacks.m_ButtonCallbacks[(uint8_t)button];
-			std::remove_if(v.begin(), v.end(), [&](const auto &item)
+			auto res = std::remove_if(v.begin(), v.end(), [&](const auto &item)
 			{ return item == callback; });
+			if (res == v.end()) LOG_WARN("Unable to unsubscibe");
 		}
 	}
 
@@ -143,15 +145,17 @@ namespace hf
 		for (auto& key : shortcut->keys)
 		{
 			auto& v = window->m_Callbacks.m_KeyShortcuts[(uint8_t)key];
-			std::remove_if(v.begin(), v.end(), [&](const auto &item)
+			auto res = std::remove_if(v.begin(), v.end(), [&](const auto &item)
 			{ return item == shortcut; });
+			if (res == v.end()) LOG_WARN("Unable to unsubscibe");
 		}
 
 		for (auto& button : shortcut->buttons)
 		{
 			auto& v = window->m_Callbacks.m_ButtonShortcuts[(uint8_t)button];
-			std::remove_if(v.begin(), v.end(), [&](const auto &item)
+			auto res = std::remove_if(v.begin(), v.end(), [&](const auto &item)
 			{ return item == shortcut; });
+			if (res == v.end()) LOG_WARN("Unable to unsubscibe");
 		}
 	}
 

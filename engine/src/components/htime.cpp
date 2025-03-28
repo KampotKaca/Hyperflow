@@ -19,7 +19,8 @@ namespace hf
 
 	uint64_t Time::GetFrameCount() { return s_FrameCount; }
 	double Time::GetDeltaTime() { return s_DeltaTime; }
-	double Time::GetTimePassedAfterLaunch() { return s_CurrentTime - s_ApplicationStartTime; }
+	double Time::GetTimePassed() { return s_CurrentTime - s_ApplicationStartTime; }
+	double Time::GetAbsoluteTimePassed() { return GetSystemTime() - s_ApplicationStartTime; }
 	int16_t Time::GetTargetFrameRate() { return s_TargetFrameRate; }
 
 	double Time::GetSystemTime()

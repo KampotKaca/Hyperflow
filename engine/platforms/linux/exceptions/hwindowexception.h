@@ -14,11 +14,11 @@ namespace hf
 
         const char* what() const noexcept override;
 
-        static std::string TranslateErrorCode(int32_t result);
+        static void TranslateErrorCode(int32_t errorCode, char* result);
 
         int32_t GetErrorCode() const noexcept;
         const char* GetType() const noexcept override;
-        std::string GetErrorString() const noexcept;
+        void GetErrorString(char* result) const noexcept;
 
     private:
         int32_t m_ErrorCode;
