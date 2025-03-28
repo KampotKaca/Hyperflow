@@ -55,7 +55,7 @@ namespace hf
 			}
 			if(s_LifecycleCallbacks.onUpdateCallback) s_LifecycleCallbacks.onQuitCallback();
 
-			for (auto window : s_Windows) window->Close();
+			for (const auto& window : s_Windows) window->Close();
 			s_Windows.clear();
 			Platform_EndTemporarySystemTimer(1);
 			Platform_Dispose(s_PlatformHandle);

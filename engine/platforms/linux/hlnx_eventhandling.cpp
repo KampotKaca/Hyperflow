@@ -8,6 +8,7 @@
 #include "hyperflow.h"
 #include <X11/Xlib.h>
 #include <X11/keysym.h>
+#include <X11/Xatom.h>
 #include <X11/extensions/XInput2.h>
 
 #include "hlnx_window.h"
@@ -93,23 +94,11 @@ namespace hf
 									   &rootPos.x, &rootPos.y,
 									   &winPos.x, &winPos.y,
 									   &mask_return);
-    		// if (retval && child)
-    		// {
-    		// 	ivec2 localPos{};
-    		// 	XTranslateCoordinates(display, rootWindow, child,
-						// 			  rootPos.x, rootPos.y,
-						// 			  &localPos.x, &localPos.y, &child);
-    		// }
     		if (!retval || !child) return;
 
-    		auto win = Hyperflow::MainWindow();
-    		auto winData = (LnxWindowData*)win->GetHandle();
-    		LOG_INFO("C: %i, W: %i", root, root);
-    		if (winData->windowHandle == child) LOG_INFO("True");
-			// auto win = Platform_GetWinPtr(child);
-   //  		if (!win) return;
-			// auto pos = Platform_GetPointerPosition(win);
-    		// LOG_INFO("POS: X: %i, Y: %i", pos.x, pos.y);
+    		// auto window = Platform_GetWinPtr(root);
+    		// ivec2 localPos = window->GetPosition() - rootPos;
+    		// LOG_INFO("X: %i, Y: %i", localPos.x, localPos.y);
     	}
     }
 
