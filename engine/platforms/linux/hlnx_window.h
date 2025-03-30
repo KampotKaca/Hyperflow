@@ -8,17 +8,21 @@ namespace hf
     struct LnxWindowData
     {
         ::Window windowHandle;
+    };
+
+    struct LnxPlatformData
+    {
+        Display* display;
+        int32_t xiOpcode;
+
         Atom closeMessage;
         Atom wmState;
         Atom maxHorz;
         Atom maxVert;
     };
 
-    struct LnxPlatformHandle
-    {
-        Display* display;
-        int32_t xiOpcode;
-    };
+    extern LnxPlatformData PLATFORM_DATA;
+    extern std::unordered_map<::Window, Window*> WIN_REGISTRY;
 }
 
 #endif //HLNX_WINDOW_H

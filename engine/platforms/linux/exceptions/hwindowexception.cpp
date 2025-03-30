@@ -26,8 +26,7 @@ namespace hf
 
     void WindowException::TranslateErrorCode(int32_t errorCode, char* result)
     {
-        auto handle = (LnxPlatformHandle*)Hyperflow::GetPlatformHandle();
-        XGetErrorText(handle->display, errorCode, result, 256);
+        XGetErrorText(PLATFORM_DATA.display, errorCode, result, 256);
     }
 
     int32_t WindowException::GetErrorCode() const noexcept { return m_ErrorCode; }

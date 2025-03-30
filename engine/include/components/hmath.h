@@ -20,9 +20,6 @@ namespace hf
     typedef glm::ivec4 ivec4;
 
     typedef glm::quat quaternion;
-
-
-
 }
 
 #endif //HMATH_H

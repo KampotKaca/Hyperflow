@@ -8,24 +8,28 @@ namespace hf
 	class Time
 	{
 	public:
-		static uint64_t GetFrameCount();
-		static double GetDeltaTime();
-		static double GetTimePassed();
-		static double GetAbsoluteTimePassed();
-		static int16_t GetTargetFrameRate();
-		static double GetSystemTime();
-		static int32_t GetFrameRate();
+		Time();
+		~Time();
 
-		static void SetTargetFrameRate(int16_t targetFrameRate);
+		void Update();
+
+		uint64_t GetFrameCount() const;
+		double GetDeltaTime() const;
+		double GetTimePassed() const;
+		double GetAbsoluteTimePassed() const;
+		int16_t GetTargetFrameRate() const;
+		int32_t GetFrameRate() const;
+
+		void SetTargetFrameRate(int16_t targetFrameRate);
 
 	private:
-		static int16_t s_TargetFrameRate;
-		static double s_TargetFrameDuration;
-		static double s_ApplicationStartTime;
-		static double s_CurrentTime;
-		static double s_DeltaTime;
-		static uint64_t s_FrameCount;
-		static double s_FrameRate;
+		int16_t targetFrameRate = 50;
+		double targetFrameDuration = (1.0 / targetFrameRate);
+		double creationTime = 0;
+		double currentTime = 0;
+		double deltaTime = targetFrameDuration;
+		uint64_t frameCount = 0;
+		double frameRate = targetFrameRate;
 	};
 }
 

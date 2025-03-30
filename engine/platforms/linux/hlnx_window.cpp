@@ -12,6 +12,9 @@
 
 namespace hf
 {
+	LnxPlatformData PLATFORM_DATA{};
+	std::unordered_map<::Window, Window*> WIN_REGISTRY{};
+
 	int32_t XErrorHandler(Display *display, XErrorEvent *error)
 	{
 		char error_text[256];
@@ -25,7 +28,7 @@ namespace hf
 		throw WND_EXCEPT(EXIT_FAILURE);
 	}
 
-	Window::Window(void* platformHandle, const WindowData& data, const Ref<Window>& parent)
+	Window::Window(const WindowData& data, const Ref<Window>& parent)
 	{
 		m_Title = data.title;
 		m_Style = data.style;
@@ -37,8 +40,7 @@ namespace hf
 			.size = data.size
 		};
 
-		auto handle = (LnxPlatformHandle*)platformHandle;
-		auto display = handle->display;
+		auto display = PLATFORM_DATA.display;
 		int screen = DefaultScreen(display);
 
 		auto attributes = (XSetWindowAttributes)
@@ -61,14 +63,9 @@ namespace hf
 
 		if(parent) XSetTransientForHint(display, lnxData->windowHandle, root);
 
-		Platform_PushWindowToRegistry(lnxData->windowHandle, this);
+		WIN_REGISTRY[lnxData->windowHandle] = this;
 
-		lnxData->closeMessage = XInternAtom(display, "WM_DELETE_WINDOW", False);
-		lnxData->wmState = XInternAtom(display, "_NET_WM_STATE", False);
-		lnxData->maxHorz = XInternAtom(display, "_NET_WM_STATE_MAXIMIZED_HORZ", False);
-		lnxData->maxVert = XInternAtom(display, "_NET_WM_STATE_MAXIMIZED_VERT", False);
-
-		XSetWMProtocols(display, lnxData->windowHandle, &lnxData->closeMessage, 1);
+		XSetWMProtocols(display, lnxData->windowHandle, &PLATFORM_DATA.closeMessage, 1);
 
 		XSetErrorHandler(XErrorHandler);
 		XSetIOErrorHandler(XIOErrorHandler);
@@ -76,7 +73,7 @@ namespace hf
 		auto pPos = Platform_GetPointerPosition(this);
 		m_Mouse = MakeRef<Mouse>(pPos, pPos.x >= 0 && pPos.x < m_Rect.size.x && pPos.y > 0 && pPos.y < m_Rect.size.y);
 		m_Keyboard = MakeRef<Keyboard>();
-		m_EventData.pointerPosition = m_Mouse->m_Position;
+		m_EventData.pointerPosition = m_Mouse->GetPosition();
 
 		SetFlags(data.flags);
 		Focus();
@@ -90,18 +87,15 @@ namespace hf
 
 	void Window::SetTitle(const char* title) const
 	{
-		auto handle = (LnxPlatformHandle*)Hyperflow::GetPlatformHandle();
-		XStoreName(handle->display, ((LnxWindowData*)m_Handle)->windowHandle, title);
+		XStoreName(PLATFORM_DATA.display, ((LnxWindowData*)m_Handle)->windowHandle, title);
 	}
 	void Window::SetSize(ivec2 size) const
 	{
-		auto handle = (LnxPlatformHandle*)Hyperflow::GetPlatformHandle();
-		XResizeWindow(handle->display, ((LnxWindowData*)m_Handle)->windowHandle, size.x, size.y);
+		XResizeWindow(PLATFORM_DATA.display, ((LnxWindowData*)m_Handle)->windowHandle, size.x, size.y);
 	}
 	void Window::SetPosition(ivec2 position) const
 	{
-		auto handle = (LnxPlatformHandle*)Hyperflow::GetPlatformHandle();
-		XMoveWindow(handle->display, ((LnxWindowData*)m_Handle)->windowHandle, position.x, position.y);
+		XMoveWindow(PLATFORM_DATA.display, ((LnxWindowData*)m_Handle)->windowHandle, position.x, position.y);
 	}
 	void Window::SetRect(IRect rect) const
 	{
@@ -109,29 +103,28 @@ namespace hf
 		SetSize(rect.size);
 	}
 
-	void XIconify(Display* display, ::Window window, int32_t id)
+	void XIconify(::Window window, int32_t id)
 	{
-		auto winPtr = Platform_GetWinPtr(window);
-		if (!winPtr) return;
-		auto lnxData = (LnxWindowData*)winPtr->m_Handle;
+		auto it = WIN_REGISTRY.find(window);
+		if (it == WIN_REGISTRY.end()) return;
 		XEvent event = {0};
 		event.xclient.type = ClientMessage;
-		event.xclient.message_type = lnxData->wmState;
-		event.xclient.display = display;
+		event.xclient.message_type = PLATFORM_DATA.wmState;
+		event.xclient.display = PLATFORM_DATA.display;
 		event.xclient.window = window;
 		event.xclient.format = 32;
 		event.xclient.data.l[0] = id;
-		event.xclient.data.l[1] = (long)lnxData->maxHorz;
-		event.xclient.data.l[2] = (long)lnxData->maxVert;
-		XSendEvent(display, DefaultRootWindow(display), False, SubstructureNotifyMask | SubstructureRedirectMask, &event);
+		event.xclient.data.l[1] = (long)PLATFORM_DATA.maxHorz;
+		event.xclient.data.l[2] = (long)PLATFORM_DATA.maxVert;
+		XSendEvent(PLATFORM_DATA.display, DefaultRootWindow(PLATFORM_DATA.display), False,
+			SubstructureNotifyMask | SubstructureRedirectMask, &event);
 	}
 
 	void Window::SetFlags(WindowFlags flags)
 	{
 		if(m_Flags == flags) return;
 
-		auto handle = (LnxPlatformHandle*)Hyperflow::GetPlatformHandle();
-		auto display = handle->display;
+		auto& display = PLATFORM_DATA.display;
 		auto window = ((LnxWindowData*)m_Handle)->windowHandle;
 		if(((int32_t)m_Flags & (int32_t)WindowFlags::Visible) != ((int32_t)flags & (int32_t)WindowFlags::Visible))
 		{
@@ -144,8 +137,8 @@ namespace hf
 		{
 			uint32_t both = (int32_t)flags & (int32_t)WindowFlags::Minimized + (int32_t)flags & (int32_t)WindowFlags::Maximized;
 			if((int32_t)flags & (int32_t)WindowFlags::Minimized) XIconifyWindow(display, window, DefaultScreen(display));
-			if((int32_t)flags & (int32_t)WindowFlags::Maximized) XIconify(display, window, 1);
-			if(both == 0) XIconify(display, window, 0);
+			if((int32_t)flags & (int32_t)WindowFlags::Maximized) XIconify(window, 1);
+			if(both == 0) XIconify(window, 0);
 		}
 
 		m_Flags = flags;
@@ -153,9 +146,8 @@ namespace hf
 
 	void Window::Focus() const
 	{
-		auto handle = (LnxPlatformHandle*)Hyperflow::GetPlatformHandle();
-		auto display = handle->display;
-		XEvent event = {0};
+		auto& display = PLATFORM_DATA.display;
+		XEvent event = {};
 		event.xclient.type = ClientMessage;
 		event.xclient.message_type = XInternAtom(display, "_NET_ACTIVE_WINDOW", False);
 		event.xclient.display = display;
@@ -172,9 +164,9 @@ namespace hf
 		if (m_Handle)
 		{
 			auto window = ((LnxWindowData*)m_Handle)->windowHandle;
-			auto handle = (LnxPlatformHandle*)Hyperflow::GetPlatformHandle();
-			Platform_PopWindowFromRegistry(window);
-			XDestroyWindow(handle->display, window);
+
+			WIN_REGISTRY.erase(window);
+			XDestroyWindow(PLATFORM_DATA.display, window);
 			delete((LnxWindowData*)m_Handle);
 			m_Handle = nullptr;
 			return true;

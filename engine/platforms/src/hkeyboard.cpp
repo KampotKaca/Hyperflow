@@ -2,7 +2,6 @@
 #include "hkeyboard.h"
 #undef private
 
-#include "components/hinternal.h"
 #include "hyperconfig.h"
 
 namespace hf

@@ -3,62 +3,69 @@
 #undef private
 
 #include "hyperflow.h"
+
 #include "hplatform.h"
-#include "components/hinternal.h"
 #include "hrenderer.h"
+#include "components/htime.h"
 
 namespace hf
 {
-	EngineLifecycleCallbacks Hyperflow::s_LifecycleCallbacks;
-	EngineUpdateType Hyperflow::s_UpdateType;
-	bool Hyperflow::s_IsRunning;
+	struct Hyperflow
+	{
+		EngineLifecycleCallbacks lifecycleCallbacks;
+		EngineUpdateType updateType;
+		bool isRunning;
+		std::string appTitle;
+		Time time;
+		Ref<Window> mainWindow;
+		std::vector<Ref<Window>> windows;
+	};
 
-	std::string Hyperflow::s_AppTitle;
-	Ref<Window> Hyperflow::s_MainWindow = nullptr;
-	std::vector<Ref<Window>> Hyperflow::s_Windows;
-	void* Hyperflow::s_PlatformHandle = nullptr;
+	void ClearWindow(const Window* window);
 
-	void Hyperflow::Run(const EngineData& engineData)
+	Hyperflow HF;
+
+	void Run(const EngineData& engineData)
 	{
 		try
 		{
-			Time_Load();
-			s_PlatformHandle = Platform_Initialize();
+			HF.time = Time();
+			Platform_Initialize();
 			Platform_BeginTemporarySystemTimer(1);
 			log_set_level(LOG_TRACE);
 
-			s_LifecycleCallbacks = engineData.lifecycleCallbacks;
-			s_UpdateType = engineData.updateType;
-			s_AppTitle = engineData.appTitle;
+			HF.lifecycleCallbacks = engineData.lifecycleCallbacks;
+			HF.updateType = engineData.updateType;
+			HF.appTitle = engineData.appTitle;
 
-			s_MainWindow = OpenWindow(engineData.windowData, nullptr);
+			HF.mainWindow = OpenWindow(engineData.windowData, nullptr);
 
-			s_IsRunning = true;
+			HF.isRunning = true;
 
-			if(s_LifecycleCallbacks.onStartCallback) s_LifecycleCallbacks.onStartCallback();
+			if(HF.lifecycleCallbacks.onStartCallback) HF.lifecycleCallbacks.onStartCallback();
 
-			LOG_INFO("Loading Time: %f", hf::Time::GetAbsoluteTimePassed());
+			LOG_INFO("Loading Time: %f", HF.time.GetAbsoluteTimePassed());
 			while (IsRunning())
 			{
-				Time_Update();
+				HF.time.Update();
 
-				Platform_HandleEvents(s_UpdateType);
-				Window_HandleInput(s_Windows);
-				if(s_LifecycleCallbacks.onUpdateCallback) s_LifecycleCallbacks.onUpdateCallback();
+				Platform_HandleEvents(HF.updateType);
+				Window_HandleInput(HF.windows);
+				if(HF.lifecycleCallbacks.onUpdateCallback) HF.lifecycleCallbacks.onUpdateCallback();
 
-				for(auto& window : s_Windows)
+				for(auto& window : HF.windows)
 				{
 					if (!window->IsClosing()) window->Update();
 				}
 
-				if(Input::IsDown(Key::Escape)) Terminate();
+				if(input::IsDown(Key::Escape)) Terminate();
 			}
-			if(s_LifecycleCallbacks.onUpdateCallback) s_LifecycleCallbacks.onQuitCallback();
+			if(HF.lifecycleCallbacks.onUpdateCallback) HF.lifecycleCallbacks.onQuitCallback();
 
-			for (const auto& window : s_Windows) window->Close();
-			s_Windows.clear();
+			for (const auto& window : HF.windows) window->Close();
+			HF.windows.clear();
 			Platform_EndTemporarySystemTimer(1);
-			Platform_Dispose(s_PlatformHandle);
+			Platform_Dispose();
 		}
 		catch(const HyperException& e)
 		{
@@ -74,25 +81,43 @@ namespace hf
 		}
 	}
 
-	bool Hyperflow::IsRunning() { return s_IsRunning && !s_MainWindow->IsClosing(); }
+	bool IsRunning() { return HF.isRunning && !HF.mainWindow->IsClosing(); }
 
-	Ref<Window> Hyperflow::MainWindow() { return s_MainWindow; }
+	Ref<Window> GetMainWindow() { return HF.mainWindow; }
 
-	Ref<Window> Hyperflow::OpenWindow(const WindowData &data, const Ref<Window> &parent)
+	Ref<Window> OpenWindow(const WindowData &data, const Ref<Window> &parent)
 	{
-		auto newWindow = MakeRef<Window>(s_PlatformHandle, data, parent);
+		auto newWindow = MakeRef<Window>(data, parent);
 		newWindow->m_Renderer = MakeRef<Renderer>(newWindow);
-		s_Windows.push_back(newWindow);
+		HF.windows.push_back(newWindow);
 		return newWindow;
 	}
 
-	void Hyperflow::Terminate() { s_IsRunning = false; }
-	void* Hyperflow::GetPlatformHandle() { return s_PlatformHandle; }
-	void Hyperflow::ClearWindow(Window* window)
+	void Terminate() { HF.isRunning = false; }
+
+	void ClearWindow(const Window* window)
 	{
-		std::erase_if(s_Windows, [&](Ref<Window> &w)
+		std::erase_if(HF.windows, [&](Ref<Window> &w)
 		{
 			return w.get() == window;
-		} );
+		});
+	}
+
+	namespace time
+	{
+		uint64_t GetFrameCount() { return HF.time.GetFrameCount(); }
+		double GetDeltaTime(){ return HF.time.GetDeltaTime(); }
+		double GetTimePassed() { return HF.time.GetTimePassed(); }
+		double GetAbsoluteTimePassed() { return HF.time.GetAbsoluteTimePassed(); }
+		int16_t GetTargetFrameRate() { return HF.time.GetTargetFrameRate(); }
+		int32_t GetFrameRate() { return HF.time.GetFrameRate(); }
+		void SetTargetFrameRate(int16_t targetFrameRate) { return HF.time.SetTargetFrameRate(targetFrameRate); }
+
+		double GetSystemTime()
+		{
+			using namespace std::chrono;
+			const auto time = high_resolution_clock::now().time_since_epoch();
+			return duration<double>(time).count();
+		}
 	}
 }

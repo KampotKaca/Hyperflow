@@ -26,6 +26,6 @@ int main()
 		}
 	};
 
-	hf::Hyperflow::Run(engineData);
+	hf::Run(engineData);
 	return 0;
 }

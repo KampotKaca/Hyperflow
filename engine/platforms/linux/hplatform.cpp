@@ -7,6 +7,7 @@
 #include "hlnx_eventhandling.h"
 #include "hlnx_window.h"
 #include "hunsupportedexception.h"
+#include <ctime>
 
 namespace hf
 {
@@ -17,8 +18,7 @@ namespace hf
 
 	void Platform_HandleEvents(EngineUpdateType updateType)
 	{
-		auto handle = (LnxPlatformHandle*)Hyperflow::GetPlatformHandle();
-		auto display = handle->display;
+		auto display = PLATFORM_DATA.display;
 		switch (updateType)
 		{
 		case EngineUpdateType::Continues:
@@ -41,7 +41,7 @@ namespace hf
 		}
 	}
 
-	void* Platform_Initialize()
+	void Platform_Initialize()
 	{
 		auto display = XOpenDisplay(nullptr);
 		auto rootWindow = XRootWindow(display, 0);
@@ -67,21 +67,23 @@ namespace hf
 		};
     	XISelectEvents(display, rootWindow, &eventMask, 1);
 
-		auto handle = new LnxPlatformHandle();
-		handle->display = display;
-		handle->xiOpcode = xi_opcode;
-		return handle;
+		PLATFORM_DATA.closeMessage = XInternAtom(display, "WM_DELETE_WINDOW", False);
+		PLATFORM_DATA.wmState = XInternAtom(display, "_NET_WM_STATE", False);
+		PLATFORM_DATA.maxHorz = XInternAtom(display, "_NET_WM_STATE_MAXIMIZED_HORZ", False);
+		PLATFORM_DATA.maxVert = XInternAtom(display, "_NET_WM_STATE_MAXIMIZED_VERT", False);
+
+		PLATFORM_DATA.display = display;
+		PLATFORM_DATA.xiOpcode = xi_opcode;
 	}
 
-	void Platform_Dispose(void* platformHandle)
+	void Platform_Dispose()
     {
-		auto handle = (LnxPlatformHandle*)Hyperflow::GetPlatformHandle();
-		XCloseDisplay(handle->display);
-		delete handle;
+		XCloseDisplay(PLATFORM_DATA.display);
     }
 
 	void Platform_BeginTemporarySystemTimer(uint16_t millisecondPrecision)
 	{
+
 	}
 	void Platform_EndTemporarySystemTimer(uint16_t millisecondPrecision)
 	{
@@ -89,17 +91,19 @@ namespace hf
 
 	void Platform_Sleep(double seconds)
 	{
-
+		timespec ts{};
+		ts.tv_sec = (time_t)seconds;
+		ts.tv_nsec = (long)((seconds - (double)ts.tv_sec) * 1e9);
+		nanosleep(&ts, nullptr);
 	}
 
 	ivec2 Platform_GetPointerPosition(Window* window)
 	{
-		auto handle = (LnxPlatformHandle*)Hyperflow::GetPlatformHandle();
 		auto winHandle = (LnxWindowData*)window->GetHandle();
 		::Window root, child;
 		ivec2 rootPos{}, winPos{};
 		unsigned int mask_return;
-		int retval = XQueryPointer(handle->display, winHandle->windowHandle, &root, &child,
+		int retval = XQueryPointer(PLATFORM_DATA.display, winHandle->windowHandle, &root, &child,
 								   &rootPos.x, &rootPos.y,
 								   &winPos.x, &winPos.y,
 								   &mask_return);

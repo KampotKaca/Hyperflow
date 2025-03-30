@@ -20,63 +20,53 @@
 
 namespace hf
 {
-	std::unordered_map<::Window, Window*> LNX_WIN_REGISTRY;
-	Window* Platform_GetWinPtr(::Window window)
-	{
-		auto it = LNX_WIN_REGISTRY.find(window);
-		if (it != LNX_WIN_REGISTRY.end()) return it->second;
-		return nullptr;
-	}
-
-	void Platform_PushWindowToRegistry(::Window window, Window* ptr) { LNX_WIN_REGISTRY[window] = ptr; }
-	void Platform_PopWindowFromRegistry(::Window window) { LNX_WIN_REGISTRY.erase(window); }
-
 	static Key Platform_TransformToKey(KeySym key);
 	static void Platform_HandleGenericEvent		(XEvent& event);
-	static void Platform_HandleDestroyNotify	(XEvent& event);
-	static void Platform_HandleClientMessage	(XEvent& event);
+	static void Platform_HandleDestroyNotify	(XEvent& event, Window* window);
+	static void Platform_HandleClientMessage	(const XEvent& event, Window* window);
 
-	static void Platform_HandleConfigureNotify	(XEvent& event);
-	static void Platform_HandleFocusIn	        (XEvent& event);
-	static void Platform_HandleFocusOut	        (XEvent& event);
-	static void Platform_HandleExpose	        (XEvent& event);
+	static void Platform_HandleConfigureNotify	(const XEvent& event, Window* window);
+	static void Platform_HandleFocusIn	        (XEvent& event, Window* window);
+	static void Platform_HandleFocusOut	        (XEvent& event, Window* window);
+	static void Platform_HandleExpose	        (XEvent& event, Window* window);
 
-	static void Platform_HandleKeyPress			(XEvent& event);
-	static void Platform_HandleButtonPress		(XEvent& event);
-	static void Platform_HandleKeyRelease		(XEvent& event);
-	static void Platform_HandleButtonRelease	(XEvent& event);
-	static void Platform_HandleMotionNotify		(XEvent& event);
+	static void Platform_HandleKeyPress			(XEvent& event, const Window* window);
+	static void Platform_HandleButtonPress		(const XEvent& event, const Window* window);
+	static void Platform_HandleKeyRelease		(XEvent& event, const Window* window);
+	static void Platform_HandleButtonRelease	(const XEvent& event, const Window* window);
+	static void Platform_HandleMotionNotify		(XEvent& event, const Window* window);
 
     void Platform_HandleNextEvent()
     {
         XEvent event;
-        auto handle = (LnxPlatformHandle*)Hyperflow::GetPlatformHandle();
-        XNextEvent(handle->display, &event);
+        XNextEvent(PLATFORM_DATA.display, &event);
 
-        switch (event.type)
+    	auto it = WIN_REGISTRY.find(event.xclient.window);
+		Window* window = nullptr;
+    	if (it != WIN_REGISTRY.end()) window = it->second;
+    	switch (event.type)
         {
-            case GenericEvent:   	Platform_HandleGenericEvent(event);		return;
-            case DestroyNotify:   	Platform_HandleDestroyNotify(event);		return;
-            case ClientMessage:   	Platform_HandleClientMessage(event);		return;
+            case GenericEvent:   	Platform_HandleGenericEvent(event);		        return;
+            case DestroyNotify:   	Platform_HandleDestroyNotify(event, window);		return;
+            case ClientMessage:   	Platform_HandleClientMessage(event, window);		return;
 
-            case ConfigureNotify:   Platform_HandleConfigureNotify(event);	return;
-            case FocusIn:			Platform_HandleFocusIn(event);			return;
-            case FocusOut:			Platform_HandleFocusOut(event);			return;
-            case Expose:			Platform_HandleExpose(event);			return;
+            case ConfigureNotify:   Platform_HandleConfigureNotify(event, window);	return;
+            case FocusIn:			Platform_HandleFocusIn(event, window);			return;
+            case FocusOut:			Platform_HandleFocusOut(event, window);			return;
+            case Expose:			Platform_HandleExpose(event, window);			return;
 
-        	case KeyPress:   		Platform_HandleKeyPress(event);			return;
-        	case ButtonPress:   	Platform_HandleButtonPress(event);		return;
-            case KeyRelease: 		Platform_HandleKeyRelease(event);		return;
-            case ButtonRelease: 	Platform_HandleButtonRelease(event);		return;
-            case MotionNotify:	 	Platform_HandleMotionNotify(event);		return;
+        	case KeyPress:   		Platform_HandleKeyPress(event, window);			return;
+        	case ButtonPress:   	Platform_HandleButtonPress(event, window);		return;
+            case KeyRelease: 		Platform_HandleKeyRelease(event, window);		return;
+            case ButtonRelease: 	Platform_HandleButtonRelease(event, window);		return;
+            case MotionNotify:	 	Platform_HandleMotionNotify(event, window);		return;
         }
     }
 
 	static void Platform_HandleGenericEvent(XEvent& event)
     {
-    	auto handle = (LnxPlatformHandle*)Hyperflow::GetPlatformHandle();
-    	auto display = handle->display;
-    	if (event.xcookie.extension == handle->xiOpcode)
+    	auto display = PLATFORM_DATA.display;
+    	if (event.xcookie.extension == PLATFORM_DATA.xiOpcode)
     	{
     		auto rootWindow = XRootWindow(display, 0);
     		XGetEventData(display, &event.xcookie);
@@ -102,111 +92,96 @@ namespace hf
     	}
     }
 
-	static void Platform_HandleClientMessage(XEvent& event)
+	static void Platform_HandleClientMessage(const XEvent& event, Window* window)
     {
+    	if (!window) return;
     	auto message = (Atom)event.xclient.data.l[0];
-
-    	auto it = std::ranges::find_if(LNX_WIN_REGISTRY,
-	    [&](const std::pair<const::Window, Window*>& entry)
-	    {
-		    auto lnxData = (LnxWindowData*)entry.second->m_Handle;
-		    return lnxData->closeMessage == message;
-	    });
-
-    	if (it != LNX_WIN_REGISTRY.end()) it->second->Close();
+    	if (message == PLATFORM_DATA.closeMessage) window->Close();
     }
 
-	static void Platform_HandleDestroyNotify(XEvent& event)
+	static void Platform_HandleDestroyNotify(XEvent& event, Window* window)
     {
-    	auto window = Platform_GetWinPtr(event.xclient.window);
     	if (window) window->Close();
     }
 
-	static void Platform_HandleConfigureNotify(XEvent& event)
+	static void Platform_HandleConfigureNotify(const XEvent& event, Window* window)
 	{
-    	auto window = Platform_GetWinPtr(event.xclient.window);
     	window->m_Rect = (IRect)
-    	{
-    		.position = ivec2(event.xconfigure.x, event.xconfigure.y),
-    		.size = ivec2(event.xconfigure.width, event.xconfigure.height),
-    	};
+		{
+			.position = ivec2(event.xconfigure.x, event.xconfigure.y),
+			.size = ivec2(event.xconfigure.width, event.xconfigure.height),
+		};
 	}
-	static void Platform_HandleFocusIn(XEvent& event)
+	static void Platform_HandleFocusIn(XEvent& event, Window* window)
 	{
-    	auto window = Platform_GetWinPtr(event.xclient.window);
+    	if (!window) return;
 		WindowEvent_Focus(window, true);
 	}
-	static void Platform_HandleFocusOut(XEvent& event)
+	static void Platform_HandleFocusOut(XEvent& event, Window* window)
 	{
-    	auto window = Platform_GetWinPtr(event.xclient.window);
+    	if (!window) return;
     	WindowEvent_Focus(window, false);
 	}
-	static void Platform_HandleExpose(XEvent& event)
+	static void Platform_HandleExpose(XEvent& event, Window* window)
 	{
-    	auto window = Platform_GetWinPtr(event.xclient.window);
+    	if (!window) return;
     	WindowEvent_Show(window, true);
 	}
 
 	//region Input
-	static void Platform_HandleKeyPress(XEvent& event)
+	static void Platform_HandleKeyPress(XEvent& event, const Window* window)
     {
-    	auto win = Platform_GetWinPtr(event.xkey.window);
     	auto key = Platform_TransformToKey(XLookupKeysym(&event.xkey, 0));
-    	KeyboardEvent_Key(win->m_Keyboard, key, Keyboard::Event::Type::Press);
+    	KeyboardEvent_Key(window->m_Keyboard, key, Keyboard::Event::Type::Press);
     }
 
-	static void Platform_HandleButtonPress(XEvent& event)
+	static void Platform_HandleButtonPress(const XEvent& event, const Window* window)
     {
-    	auto win = Platform_GetWinPtr(event.xkey.window);
-
     	switch (event.xbutton.button)
     	{
-    	    case Button1: MouseEvent_Button(win->m_Mouse, Button::Left, Mouse::Event::Type::Press);   break;
-    	    case Button2: MouseEvent_Button(win->m_Mouse, Button::Wheel, Mouse::Event::Type::Press);  break;
-    	    case Button3: MouseEvent_Button(win->m_Mouse, Button::Right, Mouse::Event::Type::Press);  break;
+    	    case Button1: MouseEvent_Button(window->m_Mouse, Button::Left, Mouse::Event::Type::Press);   break;
+    	    case Button2: MouseEvent_Button(window->m_Mouse, Button::Wheel, Mouse::Event::Type::Press);  break;
+    	    case Button3: MouseEvent_Button(window->m_Mouse, Button::Right, Mouse::Event::Type::Press);  break;
 
-    	    case 8:       MouseEvent_Button(win->m_Mouse, Button::Extra1, Mouse::Event::Type::Press); break;
-    	    case 9:       MouseEvent_Button(win->m_Mouse, Button::Extra2, Mouse::Event::Type::Press); break;
+    	    case 8:       MouseEvent_Button(window->m_Mouse, Button::Extra1, Mouse::Event::Type::Press); break;
+    	    case 9:       MouseEvent_Button(window->m_Mouse, Button::Extra2, Mouse::Event::Type::Press); break;
 
-    		case Button4: MouseEvent_Scroll(win->m_Mouse, vec2(0, 1));  break;
-    		case Button5: MouseEvent_Scroll(win->m_Mouse, vec2(0, -1)); break;
+    		case Button4: MouseEvent_Scroll(window->m_Mouse, vec2(0, 1));  break;
+    		case Button5: MouseEvent_Scroll(window->m_Mouse, vec2(0, -1)); break;
 
-    	    case 6: MouseEvent_Scroll(win->m_Mouse, vec2(1, 0));  break;
-    	    case 7: MouseEvent_Scroll(win->m_Mouse, vec2(-1, 0)); break;
+    	    case 6: MouseEvent_Scroll(window->m_Mouse, vec2(1, 0));  break;
+    	    case 7: MouseEvent_Scroll(window->m_Mouse, vec2(-1, 0)); break;
 			default: break;
 	    }
     }
 
-	static void Platform_HandleKeyRelease(XEvent& event)
+	static void Platform_HandleKeyRelease(XEvent& event, const Window* window)
     {
-    	auto win = Platform_GetWinPtr(event.xkey.window);
     	auto key = Platform_TransformToKey(XLookupKeysym(&event.xkey, 0));
-    	KeyboardEvent_Key(win->m_Keyboard, key, Keyboard::Event::Type::Release);
+    	KeyboardEvent_Key(window->m_Keyboard, key, Keyboard::Event::Type::Release);
     }
 
-	static void Platform_HandleButtonRelease(XEvent& event)
+	static void Platform_HandleButtonRelease(const XEvent& event, const Window* window)
 	{
-    	auto win = Platform_GetWinPtr(event.xkey.window);
     	switch (event.xbutton.button)
     	{
-    	    case Button1: MouseEvent_Button(win->m_Mouse, Button::Left, Mouse::Event::Type::Release);   break;
-    	    case Button2: MouseEvent_Button(win->m_Mouse, Button::Wheel, Mouse::Event::Type::Release);  break;
-    	    case Button3: MouseEvent_Button(win->m_Mouse, Button::Right, Mouse::Event::Type::Release);  break;
-    	    case 8:       MouseEvent_Button(win->m_Mouse, Button::Extra1, Mouse::Event::Type::Release); break;
-    	    case 9:       MouseEvent_Button(win->m_Mouse, Button::Extra2, Mouse::Event::Type::Release); break;
+    	    case Button1: MouseEvent_Button(window->m_Mouse, Button::Left, Mouse::Event::Type::Release);   break;
+    	    case Button2: MouseEvent_Button(window->m_Mouse, Button::Wheel, Mouse::Event::Type::Release);  break;
+    	    case Button3: MouseEvent_Button(window->m_Mouse, Button::Right, Mouse::Event::Type::Release);  break;
+    	    case 8:       MouseEvent_Button(window->m_Mouse, Button::Extra1, Mouse::Event::Type::Release); break;
+    	    case 9:       MouseEvent_Button(window->m_Mouse, Button::Extra2, Mouse::Event::Type::Release); break;
     	    default: break;
     	}
 	}
 
-	static void Platform_HandleMotionNotify(XEvent& event)
+	static void Platform_HandleMotionNotify(XEvent& event, const Window* window)
 	{
-    	auto win = Platform_GetWinPtr(event.xkey.window);
-    	MouseEvent_Moved(win->m_Mouse, { event.xmotion.x, event.xmotion.y });
+    	MouseEvent_Moved(window->m_Mouse, { event.xmotion.x, event.xmotion.y });
 	}
 
 	//endregion
 
-	static Key Platform_TransformToKey(KeySym key)
+	static Key Platform_TransformToKey(const KeySym key)
     {
 	    switch (key)
     	{

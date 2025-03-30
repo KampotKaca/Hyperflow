@@ -2,67 +2,57 @@
 #include "components/htime.h"
 #undef private
 
-#include "components/hinternal.h"
 #include <chrono>
 #include <thread>
 #include "hplatform.h"
+#include "hyperflow.h"
 
 namespace hf
 {
-	int16_t Time::s_TargetFrameRate = 50;
-	double Time::s_TargetFrameDuration = (1.0 / s_TargetFrameRate);
-	double Time::s_ApplicationStartTime = 0;
-	double Time::s_CurrentTime = 0;
-	double Time::s_DeltaTime = s_TargetFrameDuration;
-	uint64_t Time::s_FrameCount = 0;
-	double Time::s_FrameRate = 0;
-
-	uint64_t Time::GetFrameCount() { return s_FrameCount; }
-	double Time::GetDeltaTime() { return s_DeltaTime; }
-	double Time::GetTimePassed() { return s_CurrentTime - s_ApplicationStartTime; }
-	double Time::GetAbsoluteTimePassed() { return GetSystemTime() - s_ApplicationStartTime; }
-	int16_t Time::GetTargetFrameRate() { return s_TargetFrameRate; }
-
-	double Time::GetSystemTime()
+	Time::Time()
 	{
-		using namespace std::chrono;
-		auto time = high_resolution_clock::now().time_since_epoch();
-		return duration<double>(time).count();
+		creationTime = time::GetSystemTime();
+		currentTime = creationTime;
 	}
 
-	void Time::SetTargetFrameRate(int16_t targetFrameRate)
+	Time::~Time()
 	{
-		s_TargetFrameRate = targetFrameRate;
-		s_TargetFrameDuration = (1.0 / s_TargetFrameRate);
+
 	}
 
-	int32_t Time::GetFrameRate() { return (int32_t)glm::round(s_FrameRate); }
-
-	void Time_Load()
+	void Time::Update()
 	{
-		Time::s_ApplicationStartTime = Time::GetSystemTime();
-		Time::s_CurrentTime = Time::s_ApplicationStartTime;
-	}
+		double cTime = time::GetSystemTime();
 
-	void Time_Update()
-	{
-		double currentTime = Time::GetSystemTime();
-
-		if(Time::s_TargetFrameRate > 0)
+		if(targetFrameRate > 0)
 		{
-			auto diff = Time::s_TargetFrameDuration - (currentTime - Time::s_CurrentTime);
+			auto diff = targetFrameDuration - (cTime - currentTime);
 			if(diff > .001)
 			{
 				Platform_Sleep(diff);
-				currentTime = Time::GetSystemTime();
+				cTime = time::GetSystemTime();
 			}
 		}
 
-		Time::s_DeltaTime = currentTime - Time::s_CurrentTime;
-		Time::s_CurrentTime = currentTime;
-		Time::s_FrameCount++;
+		deltaTime = cTime - currentTime;
+		currentTime = cTime;
+		frameCount++;
 
-		double current = 1.0 / hf::Time::GetDeltaTime();
-		Time::s_FrameRate = std::lerp(Time::s_FrameRate, current, 5 * Time::s_DeltaTime);
+		double current = 1.0 / GetDeltaTime();
+		frameRate = std::lerp(frameRate, current, 5 * deltaTime);
 	}
+
+	uint64_t Time::GetFrameCount() const { return frameCount; }
+	double Time::GetDeltaTime() const { return deltaTime; }
+	double Time::GetTimePassed() const { return currentTime - creationTime; }
+	double Time::GetAbsoluteTimePassed() const { return time::GetSystemTime() - creationTime; }
+	int16_t Time::GetTargetFrameRate() const { return targetFrameRate; }
+
+	void Time::SetTargetFrameRate(int16_t targetFrameRate)
+	{
+		this->targetFrameRate = targetFrameRate;
+		targetFrameDuration = (1.0 / targetFrameRate);
+	}
+
+	int32_t Time::GetFrameRate() const { return (int32_t)glm::round(frameRate); }
 }
