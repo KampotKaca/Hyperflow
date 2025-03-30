@@ -1,6 +1,6 @@
 #include "hd3d_graphics.h"
 #include "exceptions/hgraphicsexception.h"
-#include "components/htime.h"
+#include "hyperflow.h"
 
 namespace hf
 {
@@ -92,7 +92,7 @@ namespace hf
 
 	void Graphics::StartFrame()
 	{
-		ClearFrame({ glm::abs(std::sin((float)Time::GetTimePassedAfterLaunch())), 0, 0, 1 });
+		ClearFrame({ glm::abs(std::sin((float)time::GetTimePassed())), 0, 0, 1 });
 	}
 
 	void Graphics::EndFrame()

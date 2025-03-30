@@ -1,4 +1,4 @@
-#include "hwindows.h"
+#include "hwin_shared.h"
 #include "hplatform.h"
 #include "hwinproc.h"
 #include "exceptions/hwindowexception.h"
@@ -91,7 +91,7 @@ namespace hf
 		return DefWindowProcA(hwnd, msg, wparam, lparam);
 	}
 
-	void* Platform_Initialize()
+	void Platform_Initialize()
 	{
 		HINSTANCE hinstance = GetModuleHandle(nullptr);
 
@@ -111,10 +111,10 @@ namespace hf
 		wndClass.hInstance = hinstance;
 
 		RegisterClassEx(&wndClass);
-        return hinstance;
+		PLATFORM_DATA.instance = hinstance;
 	}
 
-	void Platform_Dispose(void* platformHandle)
+	void Platform_Dispose()
     {
 
     }

@@ -13,12 +13,12 @@ namespace hf
 
 		void Update();
 
-		uint64_t GetFrameCount() const;
-		double GetDeltaTime() const;
-		double GetTimePassed() const;
-		double GetAbsoluteTimePassed() const;
-		int16_t GetTargetFrameRate() const;
-		int32_t GetFrameRate() const;
+		[[nodiscard]] uint64_t GetFrameCount() const;
+		[[nodiscard]] double GetDeltaTime() const;
+		[[nodiscard]] double GetTimePassed() const;
+		[[nodiscard]] double GetAbsoluteTimePassed() const;
+		[[nodiscard]] int16_t GetTargetFrameRate() const;
+		[[nodiscard]] int32_t GetFrameRate() const;
 
 		void SetTargetFrameRate(int16_t targetFrameRate);
 

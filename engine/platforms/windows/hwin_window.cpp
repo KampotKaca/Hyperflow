@@ -1,4 +1,4 @@
-#include "hwindows.h"
+#include "hwin_shared.h"
 
 #define private public
 #include <hyperflow.h>
@@ -7,13 +7,12 @@
 #include "hmouse.h"
 #undef private
 
-#include "hwin_shared.h"
 #include "hplatform.h"
 #include "exceptions/hwindowexception.h"
 
 namespace hf
 {
-	Window::Window(void* platformHandle, const WindowData& data, const Ref<Window>& parent)
+	Window::Window(const WindowData& data, const Ref<Window>& parent)
 	{
 		uint32_t currentStyle = Windows_GetStyleID(data.style);
 
@@ -43,7 +42,7 @@ namespace hf
 			convertedSize[0], convertedSize[1],
 			parentHandle,
 			nullptr,
-			(HINSTANCE)platformHandle,
+			PLATFORM_DATA.instance,
 			this
 		);
 
@@ -118,7 +117,6 @@ namespace hf
 		{
 			if(!DestroyWindow((HWND)m_Handle)) throw WND_LAST_EXCEPT();
 			m_Handle = nullptr;
-			Hyperflow::ClearWindow(this);
 			return true;
 		}
 

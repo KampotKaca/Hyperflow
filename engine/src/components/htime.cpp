@@ -15,10 +15,7 @@ namespace hf
 		currentTime = creationTime;
 	}
 
-	Time::~Time()
-	{
-
-	}
+	Time::~Time() = default;
 
 	void Time::Update()
 	{

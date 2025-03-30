@@ -52,7 +52,6 @@ target_link_libraries(${PROJECT_NAME}
         glm
         stb
         logc
-        dl
 )
 
 target_compile_definitions(${PROJECT_NAME}
@@ -64,7 +63,13 @@ target_compile_definitions(${PROJECT_NAME}
 if (WINDOWS)
     target_link_libraries(${PROJECT_NAME} PRIVATE winmm)
 elseif (LINUX)
-    target_link_libraries(${PROJECT_NAME} PRIVATE X11 Xxf86vm Xrandr Xi)
+    target_link_libraries(${PROJECT_NAME}
+            PRIVATE
+            X11
+            Xxf86vm
+            Xrandr
+            Xi
+            dl)
 endif ()
 
 if (D3D)

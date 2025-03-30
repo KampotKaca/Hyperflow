@@ -14,6 +14,6 @@ namespace hf
 		auto high = (uint64_t)(n >> (__int128)64);
 
 		if (low != 0) return __builtin_ctzll(low);
-		else return (__int128)64 + __builtin_ctzll(high);
+		return (__int128)64 + __builtin_ctzll(high);
 	}
 }

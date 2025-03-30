@@ -5,6 +5,8 @@
 
 namespace hf
 {
+	Win_Platform_Data PLATFORM_DATA;
+
 	void Windows_ConvertSize(const Window* window, ivec2& size)
 	{
 		uint32_t currentStyle = Windows_GetStyleID(window->GetStyle());
