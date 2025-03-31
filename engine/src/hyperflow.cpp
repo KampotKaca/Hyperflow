@@ -3,10 +3,12 @@
 #undef private
 
 #include "hyperflow.h"
+#include "../../application/appconfig.h"
 
 #include "hplatform.h"
 #include "hrenderer.h"
 #include "components/htime.h"
+#include <sstream>
 
 namespace hf
 {
@@ -84,11 +86,12 @@ namespace hf
 	bool IsRunning() { return HF.isRunning && !HF.mainWindow->IsClosing(); }
 
 	Ref<Window> GetMainWindow() { return HF.mainWindow; }
+	const std::string& GetApplicationTitle() { return HF.appTitle; }
 
 	Ref<Window> OpenWindow(const WindowData &data, const Ref<Window> &parent)
 	{
 		auto newWindow = MakeRef<Window>(data, parent);
-		newWindow->m_Renderer = MakeRef<Renderer>(newWindow);
+		newWindow->m_Renderer = MakeRef<Renderer>(newWindow, APP_VERSION);
 		HF.windows.push_back(newWindow);
 		return newWindow;
 	}
@@ -118,6 +121,25 @@ namespace hf
 			using namespace std::chrono;
 			const auto time = high_resolution_clock::now().time_since_epoch();
 			return duration<double>(time).count();
+		}
+	}
+
+	namespace utils
+	{
+		ivec3 ConvertVersion(const char* version)
+		{
+			std::istringstream ss(version);
+			std::string token;
+
+			ivec3 v{};
+			uint32_t id = 0;
+			while (std::getline(ss, token, '.') && id < 3)
+			{
+				v[id] = std::stoi(token);
+				id++;
+			}
+
+			return v;
 		}
 	}
 }

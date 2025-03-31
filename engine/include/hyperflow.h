@@ -11,6 +11,7 @@ namespace hf
 	void Run(const EngineData& engineData);
 	bool IsRunning();
 	Ref<Window> GetMainWindow();
+	const std::string& GetApplicationTitle();
 
 	Ref<Window> OpenWindow(const WindowData& data, const Ref<Window>& parent);
 	void Terminate();
@@ -60,6 +61,11 @@ namespace hf
 		double GetSystemTime();
 		int32_t GetFrameRate();
 		void SetTargetFrameRate(int16_t targetFrameRate);
+	}
+
+	namespace utils
+	{
+		ivec3 ConvertVersion(const char* version);
 	}
 }
 

@@ -96,13 +96,11 @@ namespace hf
 					case KeyState::Up:\
 						if(e.m_Type == sys::Event::Type::Press)\
 							currentState = KeyState::Down;\
-						else LOG_WARN("Discarded Input event");\
 						break;\
 					case KeyState::Down:\
 					case KeyState::DownContinues:\
 						if(e.m_Type == sys::Event::Type::Release)\
 							currentState = KeyState::Up;\
-						else LOG_WARN("Discarded Input event");\
 						break;\
 				}\
 			}

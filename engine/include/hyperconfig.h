@@ -1,5 +1,0 @@
-#ifndef HYPERCONFIG_H
-#define HYPERCONFIG_H
-
-
-#endif //HYPERCONFIG_H

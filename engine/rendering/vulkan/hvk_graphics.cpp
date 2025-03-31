@@ -1,29 +1,25 @@
 #include "hvk_graphics.h"
+#include "hyperflow.h"
+#include "../config.h"
 
 namespace hf
 {
-    int32_t VKGraphics::s_RefCount = 0;
+    GraphicsData GRAPHICS_DATA;
 
-    VKGraphics::VKGraphics(void* windowHandle)
+    extern void GraphicsLoad(const char* appVersion)
     {
-        if (s_RefCount == 0) Init();
-
-        s_RefCount++;
+        auto engineV = utils::ConvertVersion(VERSION);
+        auto appV = utils::ConvertVersion(appVersion);
+        auto& appInfo = GRAPHICS_DATA.appInfo;
+        appInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
+        appInfo.pApplicationName = GetApplicationTitle().c_str();
+        appInfo.applicationVersion = VK_MAKE_VERSION(appV.x, appV.y, appV.z);
+        appInfo.pEngineName = HF_ENGINE_TITLE;
+        appInfo.engineVersion = VK_MAKE_VERSION(engineV.x, engineV.y, engineV.z);
+        appInfo.apiVersion = VULKAN_API_VERSION;
     }
 
-    VKGraphics::~VKGraphics()
-    {
-        s_RefCount--;
-
-        if (s_RefCount == 0) Dispose();
-    }
-
-    void VKGraphics::Init()
-    {
-
-    }
-
-    void VKGraphics::Dispose()
+    extern void GraphicsUnload()
     {
 
     }

@@ -2,22 +2,26 @@
 #define HVK_GRAPHICS_H
 
 #include "hshared.h"
+#include <vulkan/vulkan.h>
 
 namespace hf
 {
-    class VKGraphics
+    struct GraphicsData
     {
-    public:
-        VKGraphics(void* windowHandle);
-        ~VKGraphics();
-
-        static void Init();
-        static void Dispose();
-
-    private:
-
-        static int32_t s_RefCount;
+        int rendererCount = 0;
+        VkApplicationInfo appInfo{};
     };
+
+    struct VKRendererData
+    {
+        void* windowHandle = nullptr;
+        VkInstance instance{};
+    };
+
+    extern GraphicsData GRAPHICS_DATA;
+    extern void GraphicsLoad(const char* appVersion);
+    extern void GraphicsUnload();
+
 }
 
 #endif //HVK_GRAPHICS_H

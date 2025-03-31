@@ -1,10 +1,19 @@
 cmake_minimum_required(VERSION 3.30)
-project(Hyperflow_Engine VERSION 0.0.0)
+
+file(READ "config.h" CONFIG_HEADER_CONTENTS)
+
+string(REGEX MATCH "#define VERSION \"([0-9]+\\.[0-9]+\\.[0-9]+)\"" VERSION_MATCH "${CONFIG_H_CONTENTS}")
+
+# Set CMake project version
+if(VERSION_MATCH)
+    project(Hyperflow_Engine VERSION ${CMAKE_MATCH_1})
+else()
+    project(Hyperflow_Engine VERSION 0.0.0)
+endif()
 
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O0")
 
-file(READ "config.h" CONFIG_HEADER_CONTENTS)
 string(FIND "${CONFIG_HEADER_CONTENTS}" "#define RENDERER_D3D" RENDERER_D3D)
 string(FIND "${CONFIG_HEADER_CONTENTS}" "#define RENDERER_VULKAN" RENDERER_VULKAN)
 
