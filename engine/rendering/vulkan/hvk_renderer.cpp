@@ -39,15 +39,22 @@ namespace hf
 
             createInfo.ppEnabledLayerNames = validationLayers;
             createInfo.enabledLayerCount = 1;
+            createInfo.pNext = (VkDebugUtilsMessengerCreateInfoEXT*) &rendererData->debugCreateInfo;
         }
 #endif
 
         VK_HANDLE_EXCEPT(vkCreateInstance(&createInfo, nullptr, &rendererData->instance));
+        VK_HANDLE_EXCEPT(Debug_CreateUtilsMessengerEXT(rendererData->instance, &rendererData->debugCreateInfo,
+                        nullptr, &rendererData->debugMessenger));
     }
 
     Renderer::~Renderer()
     {
         const auto data = (VKRendererData*)m_GraphicsHandle;
+
+#if DEBUG
+        Debug_DestroyUtilsMessengerEXT(data->instance, data->debugMessenger, nullptr);
+#endif
 
         vkDestroyInstance(data->instance, nullptr);
         delete(data);

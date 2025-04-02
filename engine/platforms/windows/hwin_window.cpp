@@ -115,6 +115,7 @@ namespace hf
 	{
 		if (m_Handle && IsWindow((HWND)m_Handle))
 		{
+			delete(m_Renderer);
 			if(!DestroyWindow((HWND)m_Handle)) throw WND_LAST_EXCEPT();
 			m_Handle = nullptr;
 			return true;

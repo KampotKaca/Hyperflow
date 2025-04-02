@@ -46,7 +46,7 @@ namespace hf
 
 			if(HF.lifecycleCallbacks.onStartCallback) HF.lifecycleCallbacks.onStartCallback();
 
-			LOG_INFO("Loading Time: %f", HF.time.GetAbsoluteTimePassed());
+			LOG_LOG("Loading Time: %f", HF.time.GetAbsoluteTimePassed());
 			while (IsRunning())
 			{
 				HF.time.Update();
@@ -91,7 +91,7 @@ namespace hf
 	Ref<Window> OpenWindow(const WindowData &data, const Ref<Window> &parent)
 	{
 		auto newWindow = MakeRef<Window>(data, parent);
-		newWindow->m_Renderer = MakeRef<Renderer>(newWindow, APP_VERSION);
+		newWindow->m_Renderer = new Renderer(newWindow, APP_VERSION);
 		HF.windows.push_back(newWindow);
 		return newWindow;
 	}

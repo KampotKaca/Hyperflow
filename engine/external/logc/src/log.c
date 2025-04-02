@@ -168,19 +168,21 @@ void log_log(int level, const char *file, int line, const char *fmt, ...) {
   unlock();
 }
 
-void log_fmt(const char *fmt, char **res, va_list args)
+void log_fmt(const char *fmt, char **res, ...)
 {
-  va_list args_copy;
-  va_copy(args_copy, args);
-  int size = vsnprintf(NULL, 0, fmt, args_copy) + 1;
-  va_end(args_copy);
+  va_list args;
+  va_start(args, fmt);
+  va_end(args);
 
-  if (size <= 0) return;
+  vsprintf(*res, fmt, args);
+}
 
-  // Allocate memory for result
-  *res = (char*)malloc(size);
-  if (!*res) return;
-
-  // Format the string
-  vsnprintf(*res, size, fmt, args);
+void log_simple(const char *fmt, ...)
+{
+  va_list args;
+  va_start(args, fmt);
+  vprintf(fmt, args);
+  va_end(args);
+  printf("\n");
+  fflush(stdout);
 }

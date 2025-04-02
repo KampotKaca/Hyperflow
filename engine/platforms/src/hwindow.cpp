@@ -16,7 +16,7 @@ namespace hf
 	WindowFlags Window::GetFlags() const { return m_Flags; }
 	WindowStyle Window::GetStyle() const { return m_Style; }
 	void *Window::GetHandle() const { return m_Handle; }
-	Ref<Renderer> Window::GetRenderer() const { return m_Renderer; }
+	const Renderer* Window::GetRenderer() const { return m_Renderer; }
 	bool Window::IsClosing() const { return m_Handle == nullptr; }
 	void Window::Update()
 	{

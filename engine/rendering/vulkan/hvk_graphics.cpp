@@ -1,8 +1,6 @@
 #include "hvk_graphics.h"
 
-#include <hunsupportedexception.h>
-#include <set>
-
+#include "hunsupportedexception.h"
 #include "hyperflow.h"
 #include "../config.h"
 
@@ -27,6 +25,47 @@ namespace hf
         "VK_EXT_debug_utils"
 #endif
     };
+
+#if DEBUG
+    VKAPI_ATTR VkBool32 VKAPI_CALL DebugCallback(
+        VkDebugUtilsMessageSeverityFlagBitsEXT severity,
+        VkDebugUtilsMessageTypeFlagsEXT type,
+        const VkDebugUtilsMessengerCallbackDataEXT* callbackData,
+        void* userData)
+    {
+        switch (severity)
+        {
+        case VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT:
+            LOG_LOG("[Vulkan Debug Callback]\n%s", callbackData->pMessage);
+            break;
+        case VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT:
+            LOG_WARN("[Vulkan Debug Callback]\n%s", callbackData->pMessage);
+            break;
+        case VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT:
+            LOG_ERROR("[Vulkan Debug Callback]\n%s", callbackData->pMessage);
+            break;
+        default: break;
+        }
+        return VK_FALSE;
+    }
+
+    VkResult Debug_CreateUtilsMessengerEXT(
+        VkInstance instance,
+        const VkDebugUtilsMessengerCreateInfoEXT* pCreateInfo,
+        const VkAllocationCallbacks* pAllocator,
+        VkDebugUtilsMessengerEXT* pDebugMessenger)
+    {
+        auto func = (PFN_vkCreateDebugUtilsMessengerEXT) vkGetInstanceProcAddr(instance, "vkCreateDebugUtilsMessengerEXT");
+        if (func != nullptr) return func(instance, pCreateInfo, pAllocator, pDebugMessenger);
+        return VK_ERROR_EXTENSION_NOT_PRESENT;
+    }
+
+    void Debug_DestroyUtilsMessengerEXT(VkInstance instance, VkDebugUtilsMessengerEXT debugMessenger, const VkAllocationCallbacks* pAllocator)
+    {
+        auto func = (PFN_vkDestroyDebugUtilsMessengerEXT) vkGetInstanceProcAddr(instance, "vkDestroyDebugUtilsMessengerEXT");
+        if (func != nullptr) func(instance, debugMessenger, pAllocator);
+    }
+#endif
 
     void GraphicsLoad(const char* appVersion)
     {
@@ -58,6 +97,12 @@ namespace hf
             if (!GraphicsValidateExtensionSupport(extension))
                 throw UNSUPPORTED_EXCEPT_EXT("[Required Vulkan extension not supported]\n%s", extension);
         }
+
+        vkEnumerateInstanceVersion(&GRAPHICS_DATA.supportedVersion);
+        LOG_LOG("Supported Vulkan API Version: (%i.%i.%i)",
+            VK_VERSION_MAJOR(GRAPHICS_DATA.supportedVersion),
+            VK_VERSION_MINOR(GRAPHICS_DATA.supportedVersion),
+            VK_VERSION_PATCH(GRAPHICS_DATA.supportedVersion));
     }
 
     void GraphicsUnload()

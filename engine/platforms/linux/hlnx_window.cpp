@@ -87,14 +87,17 @@ namespace hf
 
 	void Window::SetTitle(const char* title) const
 	{
+		if (IsClosing()) return;
 		XStoreName(PLATFORM_DATA.display, ((LnxWindowData*)m_Handle)->windowHandle, title);
 	}
 	void Window::SetSize(ivec2 size) const
 	{
+		if (IsClosing()) return;
 		XResizeWindow(PLATFORM_DATA.display, ((LnxWindowData*)m_Handle)->windowHandle, size.x, size.y);
 	}
 	void Window::SetPosition(ivec2 position) const
 	{
+		if (IsClosing()) return;
 		XMoveWindow(PLATFORM_DATA.display, ((LnxWindowData*)m_Handle)->windowHandle, position.x, position.y);
 	}
 	void Window::SetRect(IRect rect) const
@@ -122,7 +125,7 @@ namespace hf
 
 	void Window::SetFlags(WindowFlags flags)
 	{
-		if(m_Flags == flags) return;
+		if(IsClosing() || m_Flags == flags) return;
 
 		auto& display = PLATFORM_DATA.display;
 		auto window = ((LnxWindowData*)m_Handle)->windowHandle;
@@ -146,6 +149,7 @@ namespace hf
 
 	void Window::Focus() const
 	{
+		if (IsClosing()) return;
 		auto& display = PLATFORM_DATA.display;
 		XEvent event = {};
 		event.xclient.type = ClientMessage;
@@ -161,12 +165,13 @@ namespace hf
 
 	bool Window::Close()
 	{
-		if (m_Handle)
+		if (!IsClosing())
 		{
 			auto window = ((LnxWindowData*)m_Handle)->windowHandle;
 
 			WIN_REGISTRY.erase(window);
 			XDestroyWindow(PLATFORM_DATA.display, window);
+			delete(m_Renderer);
 			delete((LnxWindowData*)m_Handle);
 			m_Handle = nullptr;
 			return true;

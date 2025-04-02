@@ -22,7 +22,7 @@ namespace hf
 		[[nodiscard]] WindowFlags GetFlags() const;
 		[[nodiscard]] WindowStyle GetStyle() const;
 		[[nodiscard]] void* GetHandle() const;
-		[[nodiscard]] Ref<Renderer> GetRenderer() const;
+		[[nodiscard]] const Renderer* GetRenderer() const;
 
 		void SetTitle(const char* title) const;
 		void SetSize(ivec2 size) const;
@@ -56,7 +56,7 @@ namespace hf
 		Ref<Keyboard> m_Keyboard;
 		Ref<Mouse> m_Mouse;
 		EventData m_EventData;
-		Ref<Renderer> m_Renderer;
+		Renderer* m_Renderer;
 
 		void Update();
 	};
