@@ -8,6 +8,7 @@
 #include <cstring>
 #include <cstdarg>
 #include <vector>
+#include <set>
 
 #include <thread>
 #include <mutex>

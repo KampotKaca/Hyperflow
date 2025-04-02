@@ -21,6 +21,7 @@
  */
 
 #include "log.h"
+#include "stdlib.h"
 
 #define MAX_CALLBACKS 32
 
@@ -165,4 +166,21 @@ void log_log(int level, const char *file, int line, const char *fmt, ...) {
   }
 
   unlock();
+}
+
+void log_fmt(const char *fmt, char **res, va_list args)
+{
+  va_list args_copy;
+  va_copy(args_copy, args);
+  int size = vsnprintf(NULL, 0, fmt, args_copy) + 1;
+  va_end(args_copy);
+
+  if (size <= 0) return;
+
+  // Allocate memory for result
+  *res = (char*)malloc(size);
+  if (!*res) return;
+
+  // Format the string
+  vsnprintf(*res, size, fmt, args);
 }

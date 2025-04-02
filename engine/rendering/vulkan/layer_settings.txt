@@ -1,0 +1,2 @@
+khronos_validation.enable_all_messages = true
+khronos_validation.report_flags = 0x7

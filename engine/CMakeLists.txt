@@ -29,12 +29,27 @@ if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
         file(GLOB_RECURSE RENDERER CONFIGURE_DEPENDS rendering/d3d/*.cpp)
     endif ()
 
-elseif  (CMAKE_SYSTEM_NAME STREQUAL "Linux")
+elseif (CMAKE_SYSTEM_NAME STREQUAL "Linux")
     add_definitions(-DPLATFORM_LINUX)
     option(LINUX "Linux" ON)
     file(GLOB_RECURSE PLATFORM CONFIGURE_DEPENDS platforms/linux/*.cpp)
 
+    find_package(X11 REQUIRED)
+    if(X11_FOUND)
+        add_definitions(-DX11)
+    else()
+        find_package(PkgConfig REQUIRED)
+        pkg_check_modules(WAYLAND wayland-client)
+
+        if(WAYLAND_FOUND)
+            add_definitions(-DWAILAND)
+        else()
+            message(FATAL_ERROR "Unsupported display server detected")
+        endif()
+    endif()
+
     if(NOT RENDERER_VULKAN EQUAL -1)
+        find_package(Vulkan REQUIRED)
         add_definitions(-DRENDERER_VULKAN)
         option(VULKAN "vulkan" ON)
         file(GLOB_RECURSE RENDERER CONFIGURE_DEPENDS rendering/vulkan/*.cpp)
@@ -44,6 +59,19 @@ else()
     message(FATAL_ERROR "Unsupported platform: ${CMAKE_SYSTEM_NAME}")
 endif()
 #endregion
+
+if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+    if(VULKAN)
+
+        if(WINDOWS)
+            set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /D VK_USE_PLATFORM_WIN32_KHR")
+        elseif(LINUX)
+            set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DVK_USE_PLATFORM_XLIB_KHR")
+        endif()
+        set(ENV{VK_LAYER_SETTINGS_PATH} "rendering/vulkan/layer_settings.txt")
+
+    endif ()
+endif ()
 
 file(GLOB_RECURSE RENDERER_SRC CONFIGURE_DEPENDS rendering/src/*.cpp)
 file(GLOB_RECURSE PLATFORM_SRC CONFIGURE_DEPENDS platforms/src/*.cpp)
@@ -78,7 +106,8 @@ elseif (LINUX)
             Xxf86vm
             Xrandr
             Xi
-            dl)
+            dl
+    )
 endif ()
 
 if (D3D)
@@ -90,7 +119,10 @@ if (D3D)
 endif ()
 
 if(VULKAN)
-    target_link_libraries(${PROJECT_NAME} PRIVATE vulkan)
+    target_link_libraries(${PROJECT_NAME}
+            PRIVATE
+            vulkan
+    )
 endif ()
 
 # Set include directories

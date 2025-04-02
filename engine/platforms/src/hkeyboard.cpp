@@ -2,8 +2,6 @@
 #include "hkeyboard.h"
 #undef private
 
-#include "hyperconfig.h"
-
 namespace hf
 {
 	Keyboard::Event::Event() : m_Key(Key::None), m_Type(Type::Invalid) { }

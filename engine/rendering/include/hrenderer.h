@@ -10,7 +10,7 @@ namespace hf
 	public:
 		Renderer(const Ref<Window>& window, const char* version);
 		~Renderer();
-		void* GetGraphicsHandle() const;
+		[[nodiscard]] void* GetGraphicsHandle() const;
 		void StartFrame();
 		void EndFrame();
 

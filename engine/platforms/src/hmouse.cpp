@@ -2,8 +2,6 @@
 #include "hmouse.h"
 #undef private
 
-#include "hyperconfig.h"
-
 namespace hf
 {
 	Mouse::Mouse(ivec2 position, bool isInClientRegion) : m_Position(position), m_IsInClientRegion(isInClientRegion) { }
