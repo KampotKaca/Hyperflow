@@ -9,6 +9,7 @@
 #include <cstdarg>
 #include <vector>
 #include <set>
+#include <map>
 
 #include <thread>
 #include <mutex>

@@ -22,6 +22,7 @@
 
 #include "log.h"
 #include "stdlib.h"
+#include <stdarg.h>
 
 #define MAX_CALLBACKS 32
 
@@ -166,15 +167,6 @@ void log_log(int level, const char *file, int line, const char *fmt, ...) {
   }
 
   unlock();
-}
-
-void log_fmt(const char *fmt, char **res, ...)
-{
-  va_list args;
-  va_start(args, fmt);
-  va_end(args);
-
-  vsprintf(*res, fmt, args);
 }
 
 void log_simple(const char *fmt, ...)

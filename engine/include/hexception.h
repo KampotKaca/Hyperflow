@@ -40,6 +40,7 @@ namespace hf
 	};
 
 #define NULL_REF_EXCEPTION(type, variable) NullReferenceException(__LINE__, __FILE__, #type, #variable)
+
 }
 
 #endif //HEXCEPTION_H

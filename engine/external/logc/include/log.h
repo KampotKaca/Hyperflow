@@ -9,7 +9,7 @@
 #define LOG_H
 
 #include <stdio.h>
-#include <stdarg.h>
+
 #include <stdbool.h>
 #include <time.h>
 
@@ -72,6 +72,5 @@ int log_add_callback(log_LogFn fn, void *udata, int level);
 int log_add_fp(FILE *fp, int level);
 
 void log_log(int level, const char *file, int line, const char *fmt, ...);
-void log_fmt(const char *fmt, char **res, ...);
 void log_simple(const char *fmt, ...);
 #endif

@@ -1,4 +1,5 @@
 #include "hplatform.h"
+#include "hgenericexception.h"
 
 #include <hyperflow.h>
 #include <X11/extensions/XInput2.h>
@@ -6,7 +7,6 @@
 #include <X11/Xutil.h>
 #include "hlnx_eventhandling.h"
 #include "hlnx_window.h"
-#include "hunsupportedexception.h"
 #include <ctime>
 
 namespace hf
@@ -48,13 +48,13 @@ namespace hf
 
 		int xi_opcode, event, error;
 		if (!XQueryExtension(display, "XInputExtension", &xi_opcode, &event, &error))
-			throw UNSUPPORTED_EXCEPT("Error: XInput extension is not supported!");
+			throw GENERIC_EXCEPT("[X11]", "Error: XInput extension is not supported!");
 
 		int major = 2;
 		int minor = 0;
 		int retval = XIQueryVersion(display, &major, &minor);
 		if (retval != Success)
-			throw UNSUPPORTED_EXCEPT("Error: XInput 2.0 is not supported (ancient X11?)");
+			throw GENERIC_EXCEPT("[X11]", "Error: XInput 2.0 is not supported (ancient X11?)");
 
 		unsigned char mask_bytes[(XI_LASTEVENT + 7) / 8] = {0};
     	XISetMask(mask_bytes, XI_RawMotion);

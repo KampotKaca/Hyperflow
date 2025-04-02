@@ -12,25 +12,29 @@ namespace hf
         VkDebugUtilsMessageTypeFlagsEXT type,
         const VkDebugUtilsMessengerCallbackDataEXT* callbackData,
         void* userData);
-
-    VkResult Debug_CreateUtilsMessengerEXT(VkInstance instance, const VkDebugUtilsMessengerCreateInfoEXT* pCreateInfo, const VkAllocationCallbacks* pAllocator, VkDebugUtilsMessengerEXT* pDebugMessenger);
-    void Debug_DestroyUtilsMessengerEXT(VkInstance instance, VkDebugUtilsMessengerEXT debugMessenger, const VkAllocationCallbacks* pAllocator);
 #endif
+
+    struct GraphicsDevice
+    {
+        VkPhysicalDevice device;
+        VkPhysicalDeviceProperties properties;
+        VkPhysicalDeviceFeatures features;
+        int32_t score;
+    };
 
     struct GraphicsData
     {
         int32_t rendererCount = 0;
         std::vector<VkLayerProperties> availableLayers{};
         std::vector<VkExtensionProperties> availableExtensions{};
-        std::set<std::string> availableExtensionNames{};
-        VkApplicationInfo appInfo{};
-        uint32_t supportedVersion;
-    };
 
-    struct VKRendererData
-    {
-        void* windowHandle = nullptr;
+        std::vector<GraphicsDevice> suitableDevices{};
+
         VkInstance instance{};
+        uint32_t supportedVersion;
+        std::set<std::string> availableExtensionNames{};
+
+        GraphicsDevice* defaultDevice;
 
 #if DEBUG
         VkDebugUtilsMessengerCreateInfoEXT debugCreateInfo
@@ -44,11 +48,17 @@ namespace hf
 #endif
     };
 
+    struct VKRendererData
+    {
+        void* windowHandle = nullptr;
+    };
+
     extern GraphicsData GRAPHICS_DATA;
-    extern void GraphicsLoad(const char* appVersion);
-    extern void GraphicsUnload();
-    extern bool GraphicsValidateLayerSupport(const char* layer);
-    extern bool GraphicsValidateExtensionSupport(const char* extension);
+
+    extern void Graphics_Load(const char* appVersion);
+    extern void Graphics_Unload();
+    extern bool Graphics_IsLayerSupported(const char* layer);
+    extern bool Graphics_IsExtensionSupported(const char* extension);
 
     extern const std::vector<const char*> REQUIRED_EXTENSIONS;
 }
