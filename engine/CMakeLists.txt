@@ -1,8 +1,10 @@
 cmake_minimum_required(VERSION 3.30)
 
-file(READ "config.h" CONFIG_HEADER_CONTENTS)
-
+file(READ "config.h" CONFIG_H_CONTENTS)
 string(REGEX MATCH "#define VERSION \"([0-9]+\\.[0-9]+\\.[0-9]+)\"" VERSION_MATCH "${CONFIG_H_CONTENTS}")
+
+#option(D3D "d3d" ON)
+#option(VULKAN "vulkan" ON)
 
 # Set CMake project version
 if(VERSION_MATCH)
@@ -14,19 +16,15 @@ endif()
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O0")
 
-string(FIND "${CONFIG_HEADER_CONTENTS}" "#define D3D" RENDERER_D3D)
-string(FIND "${CONFIG_HEADER_CONTENTS}" "#define VULKAN" RENDERER_VULKAN)
-
 #region Platforms
+
 if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
     add_definitions(-DPLATFORM_WINDOWS)
     option(WINDOWS "Windows" ON)
     file(GLOB_RECURSE PLATFORM CONFIGURE_DEPENDS platforms/windows/*.cpp)
 
-    if(NOT RENDERER_D3D EQUAL -1)
+    if(D3D STREQUAL "ON")
         add_definitions(-DRENDERER_D3D)
-        option(D3D "d3d" ON)
-        file(GLOB_RECURSE RENDERER CONFIGURE_DEPENDS rendering/d3d/*.cpp)
     endif ()
 
 elseif (CMAKE_SYSTEM_NAME STREQUAL "Linux")
@@ -48,23 +46,29 @@ elseif (CMAKE_SYSTEM_NAME STREQUAL "Linux")
         endif()
     endif()
 
-    if(NOT RENDERER_VULKAN EQUAL -1)
-        find_package(Vulkan REQUIRED)
-        add_definitions(-DRENDERER_VULKAN)
-        option(VULKAN "vulkan" ON)
-        file(GLOB_RECURSE RENDERER CONFIGURE_DEPENDS rendering/vulkan/*.cpp)
-    endif ()
-
 else()
     message(FATAL_ERROR "Unsupported platform: ${CMAKE_SYSTEM_NAME}")
 endif()
+
+if(NOT D3D STREQUAL "ON")
+    option(VULKAN "vulkan" ON)
+    add_definitions(-DRENDERER_VULKAN)
+endif ()
+
+if(D3D STREQUAL "ON")
+    file(GLOB_RECURSE RENDERER CONFIGURE_DEPENDS rendering/d3d/*.cpp)
+elseif (VULKAN STREQUAL "ON")
+    find_package(Vulkan REQUIRED)
+    file(GLOB_RECURSE RENDERER CONFIGURE_DEPENDS rendering/vulkan/*.cpp)
+endif ()
+
 #endregion
 
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
     if(VULKAN)
 
         if(WINDOWS)
-            set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /D VK_USE_PLATFORM_WIN32_KHR")
+            set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -D VK_USE_PLATFORM_WIN32_KHR")
         elseif(LINUX)
             set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DVK_USE_PLATFORM_XLIB_KHR")
         endif()
@@ -119,10 +123,17 @@ if (D3D)
 endif ()
 
 if(VULKAN)
-    target_link_libraries(${PROJECT_NAME}
-            PRIVATE
-            vulkan
-    )
+    if(WINDOWS)
+        target_link_libraries(${PROJECT_NAME}
+                PRIVATE
+                Vulkan::Vulkan
+        )
+    elseif (LINUX)
+        target_link_libraries(${PROJECT_NAME}
+                PRIVATE
+                vulkan
+        )
+    endif ()
 endif ()
 
 # Set include directories

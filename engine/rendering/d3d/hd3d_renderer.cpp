@@ -4,7 +4,7 @@
 
 namespace hf
 {
-	Renderer::Renderer(const Ref<Window>& window)
+	Renderer::Renderer(const Ref<Window>& window, const char* version)
 	{
 		m_GraphicsHandle = new Graphics((HWND)window->GetHandle());
 	}
