@@ -64,19 +64,6 @@ endif ()
 
 #endregion
 
-if(CMAKE_BUILD_TYPE STREQUAL "Debug")
-    if(VULKAN)
-
-        if(WINDOWS)
-            set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -D VK_USE_PLATFORM_WIN32_KHR")
-        elseif(LINUX)
-            set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DVK_USE_PLATFORM_XLIB_KHR")
-        endif()
-        set(ENV{VK_LAYER_SETTINGS_PATH} "rendering/vulkan/layer_settings.txt")
-
-    endif ()
-endif ()
-
 file(GLOB_RECURSE RENDERER_SRC CONFIGURE_DEPENDS rendering/src/*.cpp)
 file(GLOB_RECURSE PLATFORM_SRC CONFIGURE_DEPENDS platforms/src/*.cpp)
 file(GLOB_RECURSE ENGINE_SRC CONFIGURE_DEPENDS src/*.cpp)
@@ -123,17 +110,10 @@ if (D3D)
 endif ()
 
 if(VULKAN)
-    if(WINDOWS)
-        target_link_libraries(${PROJECT_NAME}
-                PRIVATE
-                Vulkan::Vulkan
-        )
-    elseif (LINUX)
-        target_link_libraries(${PROJECT_NAME}
-                PRIVATE
-                vulkan
-        )
-    endif ()
+    target_link_libraries(${PROJECT_NAME}
+            PRIVATE
+            Vulkan::Vulkan
+    )
 endif ()
 
 # Set include directories
