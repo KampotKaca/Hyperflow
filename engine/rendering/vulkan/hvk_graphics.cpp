@@ -28,6 +28,8 @@ namespace hf
     };
 
 #if DEBUG
+    const std::vector<const char*> DEBUG_VALIDATION_LAYERS = { "VK_LAYER_KHRONOS_validation" };
+
     VKAPI_ATTR VkBool32 VKAPI_CALL DebugCallback(
         VkDebugUtilsMessageSeverityFlagBitsEXT severity,
         VkDebugUtilsMessageTypeFlagsEXT type,
@@ -71,11 +73,14 @@ namespace hf
     void InitLayers();
     void InitExtensions();
     void InitInstanceVersion();
-    void InitDevice();
-    bool SetupDevice(VkPhysicalDevice device, GraphicsDevice* deviceData);
 
     void CreateInstance(VkApplicationInfo& appInfo);
     void DestroyInstance();
+
+    void CreateLogicalDevice(GraphicsDevice& device);
+    void DestroyLogicalDevice(LogicalDevice& device);
+
+    bool SetupPhysicalDevice(VkPhysicalDevice device, GraphicsDevice* deviceData);
 
     void Graphics_Load(const char* appVersion)
     {
@@ -93,9 +98,15 @@ namespace hf
         InitExtensions();
         InitInstanceVersion();
 
-        CreateInstance(appInfo);
+#if DEBUG
+        for (const char* layer : DEBUG_VALIDATION_LAYERS)
+        {
+            if (!Graphics_IsLayerSupported(layer))
+                throw GENERIC_EXCEPT("[Vulkan Debug]", "Unsupported validation layer [%s]", layer);
+        }
+#endif
 
-        InitDevice();
+        CreateInstance(appInfo);
     }
 
     void Graphics_Unload()
@@ -116,6 +127,63 @@ namespace hf
     {
         return GRAPHICS_DATA.availableExtensionNames.contains(extension);
     }
+
+    //------------------------------------------------------------------------------------
+
+    void Graphics_LoadSurface(VKRendererData* rendererData)
+    {
+#if PLATFORM_WINDOWS
+
+#elif PLATFORM_LINUX
+
+#endif
+    }
+
+    void Graphics_UnloadSurface(VKRendererData* rendererData)
+    {
+
+    }
+
+    //------------------------------------------------------------------------------------
+
+    void Graphics_LoadPhysicalDevices(VKRendererData* rendererData)
+    {
+        uint32_t deviceCount = 0;
+        vkEnumeratePhysicalDevices(GRAPHICS_DATA.instance, &deviceCount, nullptr);
+
+        if (deviceCount == 0) throw GENERIC_EXCEPT("[Vulkan]", "No Graphics device found");
+
+        std::vector<VkPhysicalDevice> availableDevices(deviceCount);
+        vkEnumeratePhysicalDevices(GRAPHICS_DATA.instance, &deviceCount, availableDevices.data());
+
+        for (const auto& device : availableDevices)
+        {
+            GraphicsDevice deviceData{};
+            if (SetupPhysicalDevice(device, &deviceData))
+            {
+                CreateLogicalDevice(deviceData);
+                rendererData->suitableDevices.push_back(deviceData);
+            }
+        }
+
+        if (rendererData->suitableDevices.empty())
+            throw GENERIC_EXCEPT("[Vulkan]", "No suitable graphics device found");
+
+        std::stable_sort(rendererData->suitableDevices.begin(), rendererData->suitableDevices.end(),
+                      [](const GraphicsDevice& a, const GraphicsDevice& b)
+                      { return a.score > b.score; });
+
+        rendererData->defaultDevice = &rendererData->suitableDevices[0];
+        LOG_LOG("Graphics device found [%s]", rendererData->defaultDevice->properties.deviceName);
+    }
+
+    extern void Graphics_UnloadPhysicalDevices(VKRendererData* rendererData)
+    {
+        for (auto& device : rendererData->suitableDevices)
+            DestroyLogicalDevice(device.logicalDevice);
+    }
+
+    //------------------------------------------------------------------------------------
 
     void InitLayers()
     {
@@ -151,46 +219,7 @@ namespace hf
             VK_VERSION_PATCH(GRAPHICS_DATA.supportedVersion));
     }
 
-    void InitDevice()
-    {
-        uint32_t deviceCount = 0;
-        vkEnumeratePhysicalDevices(GRAPHICS_DATA.instance, &deviceCount, nullptr);
-
-        if (deviceCount == 0) throw GENERIC_EXCEPT("[Vulkan]", "No Graphics device found");
-
-        std::vector<VkPhysicalDevice> availableDevices(deviceCount);
-        vkEnumeratePhysicalDevices(GRAPHICS_DATA.instance, &deviceCount, availableDevices.data());
-
-        for (const auto& device : availableDevices)
-        {
-            GraphicsDevice deviceData{};
-            if (SetupDevice(device, &deviceData)) GRAPHICS_DATA.suitableDevices.push_back(deviceData);
-        }
-
-        if (GRAPHICS_DATA.suitableDevices.size() == 0)
-            throw GENERIC_EXCEPT("[Vulkan]", "No suitable graphics device found");
-
-        std::stable_sort(GRAPHICS_DATA.suitableDevices.begin(), GRAPHICS_DATA.suitableDevices.end(),
-                      [](const GraphicsDevice& a, const GraphicsDevice& b)
-                      { return a.score > b.score; });
-
-        GRAPHICS_DATA.defaultDevice = &GRAPHICS_DATA.suitableDevices[0];
-        LOG_LOG("Graphics device found [%s]", GRAPHICS_DATA.defaultDevice->properties.deviceName);
-    }
-
-    bool SetupDevice(VkPhysicalDevice device, GraphicsDevice* deviceData)
-    {
-        vkGetPhysicalDeviceProperties(device, &deviceData->properties);
-        vkGetPhysicalDeviceFeatures(device, &deviceData->features);
-
-        if (!deviceData->features.geometryShader) return false;
-
-        int32_t score = 0;
-        score += (deviceData->properties.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU) * 1000;
-        score += deviceData->properties.limits.maxImageDimension2D;
-        deviceData->score = score;
-        return true;
-    }
+    //------------------------------------------------------------------------------------
 
     void CreateInstance(VkApplicationInfo& appInfo)
     {
@@ -204,19 +233,9 @@ namespace hf
         };
 
 #if DEBUG
-        {
-            const char* validationLayers[] = { "VK_LAYER_KHRONOS_validation" };
-
-            for (const char* layer : validationLayers)
-            {
-                if (!Graphics_IsLayerSupported(layer))
-                    throw GENERIC_EXCEPT("[Vulkan Debug]", "Unsupported validation layer [%s]", layer);
-            }
-
-            createInfo.ppEnabledLayerNames = validationLayers;
-            createInfo.enabledLayerCount = 1;
-            createInfo.pNext = (VkDebugUtilsMessengerCreateInfoEXT*) &GRAPHICS_DATA.debugCreateInfo;
-        }
+        createInfo.ppEnabledLayerNames = DEBUG_VALIDATION_LAYERS.data();
+        createInfo.enabledLayerCount = DEBUG_VALIDATION_LAYERS.size();
+        createInfo.pNext = (VkDebugUtilsMessengerCreateInfoEXT*) &GRAPHICS_DATA.debugCreateInfo;
 #endif
 
         VK_HANDLE_EXCEPT(vkCreateInstance(&createInfo, nullptr, &GRAPHICS_DATA.instance));
@@ -233,6 +252,79 @@ namespace hf
 #endif
 
         vkDestroyInstance(GRAPHICS_DATA.instance, nullptr);
+    }
+
+    //------------------------------------------------------------------------------------
+
+    void CreateLogicalDevice(GraphicsDevice& device)
+    {
+        float queuePriority = 1.0f;
+        VkDeviceQueueCreateInfo queueCreateInfo
+        {
+            .sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO,
+            .queueFamilyIndex = device.familyIndices.graphicsFamily.value(),
+            .queueCount = 1,
+            .pQueuePriorities = &queuePriority
+        };
+
+        VkDeviceCreateInfo createInfo
+        {
+            .sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO,
+            .pQueueCreateInfos = &queueCreateInfo,
+            .queueCreateInfoCount = 1,
+            .pEnabledFeatures = &device.features,
+            .enabledExtensionCount = 0,
+            .enabledLayerCount = 0
+        };
+
+#if DEBUG
+        createInfo.ppEnabledLayerNames = DEBUG_VALIDATION_LAYERS.data();
+        createInfo.enabledLayerCount = DEBUG_VALIDATION_LAYERS.size();
+#endif
+
+        VK_HANDLE_EXCEPT(vkCreateDevice(device.device, &createInfo, nullptr, &device.logicalDevice.device));
+
+        vkGetDeviceQueue(device.logicalDevice.device, device.familyIndices.graphicsFamily.value(),
+            0, &device.logicalDevice.queue);
+    }
+
+    void DestroyLogicalDevice(LogicalDevice& device)
+    {
+        vkDestroyDevice(device.device, nullptr);
+    }
+
+    //------------------------------------------------------------------------------------
+
+    bool SetupPhysicalDevice(VkPhysicalDevice device, GraphicsDevice* deviceData)
+    {
+        deviceData->device = device;
+        vkGetPhysicalDeviceProperties(device, &deviceData->properties);
+        vkGetPhysicalDeviceFeatures(device, &deviceData->features);
+
+        if (!deviceData->features.geometryShader) return false;
+
+        uint32_t familyCount = 0;
+        vkGetPhysicalDeviceQueueFamilyProperties(device, &familyCount, nullptr);
+
+        std::vector<VkQueueFamilyProperties> queueFamilies(familyCount);
+        vkGetPhysicalDeviceQueueFamilyProperties(device, &familyCount, queueFamilies.data());
+
+        for (uint32_t i = 0; i < queueFamilies.size(); i++)
+        {
+            if (queueFamilies[i].queueFlags & VK_QUEUE_GRAPHICS_BIT)
+            {
+                deviceData->familyIndices.graphicsFamily = i;
+                break;
+            }
+        }
+        if (!deviceData->familyIndices.graphicsFamily.has_value()) return false;
+
+        int32_t score = 0;
+        score += (deviceData->properties.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU) * 1000;
+        score += (int32_t)deviceData->properties.limits.maxImageDimension2D;
+        deviceData->score = score;
+
+        return true;
     }
 
 }

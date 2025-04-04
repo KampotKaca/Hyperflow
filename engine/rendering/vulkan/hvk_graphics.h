@@ -7,6 +7,8 @@
 namespace hf
 {
 #if DEBUG
+    extern const std::vector<const char*> DEBUG_VALIDATION_LAYERS;
+
     VKAPI_ATTR VkBool32 VKAPI_CALL DebugCallback(
         VkDebugUtilsMessageSeverityFlagBitsEXT severity,
         VkDebugUtilsMessageTypeFlagsEXT type,
@@ -14,12 +16,26 @@ namespace hf
         void* userData);
 #endif
 
+    struct QueueFamilyIndices
+    {
+        std::optional<uint32_t> graphicsFamily;
+    };
+
+    struct LogicalDevice
+    {
+        VkDevice device{};
+        VkQueue queue{};
+    };
+
     struct GraphicsDevice
     {
-        VkPhysicalDevice device;
-        VkPhysicalDeviceProperties properties;
-        VkPhysicalDeviceFeatures features;
-        int32_t score;
+        VkPhysicalDevice device{};
+        VkPhysicalDeviceProperties properties{};
+        VkPhysicalDeviceFeatures features{};
+        int32_t score{};
+
+        QueueFamilyIndices familyIndices{};
+        LogicalDevice logicalDevice{};
     };
 
     struct GraphicsData
@@ -28,13 +44,9 @@ namespace hf
         std::vector<VkLayerProperties> availableLayers{};
         std::vector<VkExtensionProperties> availableExtensions{};
 
-        std::vector<GraphicsDevice> suitableDevices{};
-
         VkInstance instance{};
         uint32_t supportedVersion;
         std::set<std::string> availableExtensionNames{};
-
-        GraphicsDevice* defaultDevice;
 
 #if DEBUG
         VkDebugUtilsMessengerCreateInfoEXT debugCreateInfo
@@ -51,6 +63,9 @@ namespace hf
     struct VKRendererData
     {
         void* windowHandle = nullptr;
+        VkSurfaceKHR surface{};
+        std::vector<GraphicsDevice> suitableDevices{};
+        GraphicsDevice* defaultDevice;
     };
 
     extern GraphicsData GRAPHICS_DATA;
@@ -59,6 +74,12 @@ namespace hf
     extern void Graphics_Unload();
     extern bool Graphics_IsLayerSupported(const char* layer);
     extern bool Graphics_IsExtensionSupported(const char* extension);
+
+    extern void Graphics_LoadSurface(VKRendererData* rendererData);
+    extern void Graphics_UnloadSurface(VKRendererData* rendererData);
+
+    extern void Graphics_LoadPhysicalDevices(VKRendererData* rendererData);
+    extern void Graphics_UnloadPhysicalDevices(VKRendererData* rendererData);
 
     extern const std::vector<const char*> REQUIRED_EXTENSIONS;
 }

@@ -16,12 +16,19 @@ namespace hf
         {
             .windowHandle = window->GetHandle()
         };
+
+        Graphics_LoadSurface(rendererData);
+        Graphics_LoadPhysicalDevices(rendererData);
         m_GraphicsHandle = rendererData;
     }
 
     Renderer::~Renderer()
     {
         const auto data = (VKRendererData*)m_GraphicsHandle;
+
+        Graphics_UnloadSurface(data);
+        Graphics_UnloadPhysicalDevices(data);
+
         delete(data);
         m_GraphicsHandle = nullptr;
 
