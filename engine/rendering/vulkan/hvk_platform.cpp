@@ -23,11 +23,10 @@ namespace hf
 {
     const std::vector<const char*> REQUIRED_EXTENSIONS =
     {
+        VK_KHR_SURFACE_EXTENSION_NAME,
 #if PLATFORM_WINDOWS
-        "VK_KHR_surface",
         "VK_KHR_win32_surface",
 #elif PLATFORM_LINUX
-        "VK_KHR_surface",
     #if X11
         "VK_KHR_xlib_surface",
     #elif WAYLAND

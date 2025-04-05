@@ -65,7 +65,7 @@ namespace hf
     void CreateLogicalDevice(GraphicsDevice& device);
     void DestroyLogicalDevice(LogicalDevice& device);
 
-    bool SetupPhysicalDevice(VkPhysicalDevice device, GraphicsDevice* deviceData);
+    bool SetupPhysicalDevice(VKRendererData* renderer, VkPhysicalDevice device, GraphicsDevice* deviceData);
 
     void Graphics_Load(const char* appVersion)
     {
@@ -129,7 +129,7 @@ namespace hf
         for (const auto& device : availableDevices)
         {
             GraphicsDevice deviceData{};
-            if (SetupPhysicalDevice(device, &deviceData))
+            if (SetupPhysicalDevice(rendererData, device, &deviceData))
             {
                 CreateLogicalDevice(deviceData);
                 rendererData->suitableDevices.push_back(deviceData);
@@ -265,7 +265,7 @@ namespace hf
 
     //------------------------------------------------------------------------------------
 
-    bool SetupPhysicalDevice(VkPhysicalDevice device, GraphicsDevice* deviceData)
+    bool SetupPhysicalDevice(VKRendererData* renderer, VkPhysicalDevice device, GraphicsDevice* deviceData)
     {
         deviceData->device = device;
         vkGetPhysicalDeviceProperties(device, &deviceData->properties);
@@ -287,7 +287,8 @@ namespace hf
                 break;
             }
         }
-        if (!deviceData->familyIndices.graphicsFamily.has_value()) return false;
+
+        if (!deviceData->familyIndices.IsComplete()) return false;
 
         int32_t score = 0;
         score += (deviceData->properties.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU) * 1000;
@@ -296,5 +297,7 @@ namespace hf
 
         return true;
     }
+
+    bool QueueFamilyIndices::IsComplete() const { return graphicsFamily.has_value(); }
 
 }

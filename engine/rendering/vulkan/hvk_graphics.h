@@ -19,7 +19,8 @@ namespace hf
     struct QueueFamilyIndices
     {
         std::optional<uint32_t> graphicsFamily;
-        std::optional<uint32_t> presentFamily;
+
+        [[nodiscard]] bool IsComplete() const;
     };
 
     struct LogicalDevice
