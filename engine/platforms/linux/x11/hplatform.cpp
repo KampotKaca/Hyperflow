@@ -103,7 +103,7 @@ namespace hf
 		::Window root, child;
 		ivec2 rootPos{}, winPos{};
 		unsigned int mask_return;
-		int retval = XQueryPointer(PLATFORM_DATA.display, winHandle->windowHandle, &root, &child,
+		int retval = XQueryPointer(PLATFORM_DATA.display, winHandle->window, &root, &child,
 								   &rootPos.x, &rootPos.y,
 								   &winPos.x, &winPos.y,
 								   &mask_return);

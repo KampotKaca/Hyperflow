@@ -46,11 +46,6 @@ namespace hf
 
     }
 
-    void Graphics_SetupPlatform()
-    {
-
-    }
-
 #elif PLATFORM_LINUX
 
 #if X11
@@ -61,25 +56,15 @@ namespace hf
         {
             .sType = VK_STRUCTURE_TYPE_XLIB_SURFACE_CREATE_INFO_KHR,
             .dpy = PLATFORM_DATA.display,
-            .window = (::Window)rendererData->windowHandle,
+            .window = ((LnxWindowData*)rendererData->windowHandle)->window,
         };
 
         VK_HANDLE_EXCEPT(vkCreateXlibSurfaceKHR(GRAPHICS_DATA.instance, &createInfo, nullptr, &rendererData->surface));
     }
 
-    void Graphics_SetupPlatform()
-    {
-
-    }
-
 #elif WAYLAND
 
     void Graphics_LoadSurface(VKRendererData* rendererData)
-    {
-
-    }
-
-    void Graphics_SetupPlatform()
     {
 
     }

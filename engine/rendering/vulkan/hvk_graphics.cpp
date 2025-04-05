@@ -92,7 +92,6 @@ namespace hf
 #endif
 
         CreateInstance(appInfo);
-        Graphics_SetupPlatform();
     }
 
     void Graphics_Unload()
@@ -126,6 +125,8 @@ namespace hf
         std::vector<VkPhysicalDevice> availableDevices(deviceCount);
         vkEnumeratePhysicalDevices(GRAPHICS_DATA.instance, &deviceCount, availableDevices.data());
 
+        Graphics_LoadSurface(rendererData);
+
         for (const auto& device : availableDevices)
         {
             GraphicsDevice deviceData{};
@@ -149,6 +150,7 @@ namespace hf
 
     extern void Graphics_UnloadPhysicalDevices(VKRendererData* rendererData)
     {
+        Graphics_UnloadSurface(rendererData);
         for (auto& device : rendererData->suitableDevices)
             DestroyLogicalDevice(device.logicalDevice);
     }
@@ -242,9 +244,9 @@ namespace hf
             .sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO,
             .pQueueCreateInfos = &queueCreateInfo,
             .queueCreateInfoCount = 1,
-            .pEnabledFeatures = &device.features,
+            .enabledLayerCount = 0,
             .enabledExtensionCount = 0,
-            .enabledLayerCount = 0
+            .pEnabledFeatures = &device.features,
         };
 
 #if DEBUG
@@ -282,10 +284,13 @@ namespace hf
         for (uint32_t i = 0; i < queueFamilies.size(); i++)
         {
             if (queueFamilies[i].queueFlags & VK_QUEUE_GRAPHICS_BIT)
-            {
                 deviceData->familyIndices.graphicsFamily = i;
-                break;
-            }
+
+            VkBool32 presentSupport = false;
+            VK_HANDLE_EXCEPT(vkGetPhysicalDeviceSurfaceSupportKHR(device, i, renderer->surface, &presentSupport));
+
+            if (presentSupport) deviceData->familyIndices.presentFamily = i;
+            if (deviceData->familyIndices.IsComplete()) break;
         }
 
         if (!deviceData->familyIndices.IsComplete()) return false;
@@ -298,6 +303,6 @@ namespace hf
         return true;
     }
 
-    bool QueueFamilyIndices::IsComplete() const { return graphicsFamily.has_value(); }
+    bool QueueFamilyIndices::IsComplete() const { return graphicsFamily.has_value() && presentFamily.has_value(); }
 
 }

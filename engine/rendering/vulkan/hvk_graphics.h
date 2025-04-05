@@ -19,6 +19,7 @@ namespace hf
     struct QueueFamilyIndices
     {
         std::optional<uint32_t> graphicsFamily;
+        std::optional<uint32_t> presentFamily;
 
         [[nodiscard]] bool IsComplete() const;
     };
@@ -76,8 +77,6 @@ namespace hf
     extern void Graphics_Unload();
     extern bool Graphics_IsLayerSupported(const char* layer);
     extern bool Graphics_IsExtensionSupported(const char* extension);
-
-    extern void Graphics_SetupPlatform();
 
     extern void Graphics_LoadSurface(VKRendererData* rendererData);
     extern void Graphics_UnloadSurface(VKRendererData* rendererData);

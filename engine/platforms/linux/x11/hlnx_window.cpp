@@ -51,22 +51,22 @@ namespace hf
 		};
 
 		auto root = RootWindow(display, screen);
-		if (parent) root = ((LnxWindowData*)m_Parent->m_Handle)->windowHandle;
+		if (parent) root = ((LnxWindowData*)m_Parent->m_Handle)->window;
 		auto lnxData = new LnxWindowData();
 		m_Handle = lnxData;
 
-		lnxData->windowHandle = XCreateWindow(display, root,
+		lnxData->window = XCreateWindow(display, root,
 		data.position.x, data.position.y,
 		data.size.x, data.size.y, 1,
 		DefaultDepth(display, screen), InputOutput,
 		DefaultVisual(display, screen),
 		CWBackPixel | CWEventMask, &attributes);
 
-		if(parent) XSetTransientForHint(display, lnxData->windowHandle, root);
+		if(parent) XSetTransientForHint(display, lnxData->window, root);
 
-		WIN_REGISTRY[lnxData->windowHandle] = this;
+		WIN_REGISTRY[lnxData->window] = this;
 
-		XSetWMProtocols(display, lnxData->windowHandle, &PLATFORM_DATA.closeMessage, 1);
+		XSetWMProtocols(display, lnxData->window, &PLATFORM_DATA.closeMessage, 1);
 
 		XSetErrorHandler(XErrorHandler);
 		XSetIOErrorHandler(XIOErrorHandler);
@@ -91,19 +91,19 @@ namespace hf
 	void Window::SetTitle(const char* title) const
 	{
 		if (IsClosing()) return;
-		XStoreName(PLATFORM_DATA.display, ((LnxWindowData*)m_Handle)->windowHandle, title);
+		XStoreName(PLATFORM_DATA.display, ((LnxWindowData*)m_Handle)->window, title);
 		XFlush(PLATFORM_DATA.display);
 	}
 	void Window::SetSize(ivec2 size) const
 	{
 		if (IsClosing()) return;
-		XResizeWindow(PLATFORM_DATA.display, ((LnxWindowData*)m_Handle)->windowHandle, size.x, size.y);
+		XResizeWindow(PLATFORM_DATA.display, ((LnxWindowData*)m_Handle)->window, size.x, size.y);
 		XFlush(PLATFORM_DATA.display);
 	}
 	void Window::SetPosition(ivec2 position) const
 	{
 		if (IsClosing()) return;
-		XMoveWindow(PLATFORM_DATA.display, ((LnxWindowData*)m_Handle)->windowHandle, position.x, position.y);
+		XMoveWindow(PLATFORM_DATA.display, ((LnxWindowData*)m_Handle)->window, position.x, position.y);
 		XFlush(PLATFORM_DATA.display);
 	}
 	void Window::SetRect(IRect rect) const
@@ -134,7 +134,7 @@ namespace hf
 		if(IsClosing() || m_Flags == flags) return;
 
 		auto& display = PLATFORM_DATA.display;
-		auto window = ((LnxWindowData*)m_Handle)->windowHandle;
+		auto window = ((LnxWindowData*)m_Handle)->window;
 		if(((int32_t)m_Flags & (int32_t)WindowFlags::Visible) != ((int32_t)flags & (int32_t)WindowFlags::Visible))
 		{
 			if((int32_t)flags & (int32_t)WindowFlags::Visible) XMapWindow(display, window);
@@ -162,7 +162,7 @@ namespace hf
 		event.xclient.type = ClientMessage;
 		event.xclient.message_type = XInternAtom(display, "_NET_ACTIVE_WINDOW", False);
 		event.xclient.display = display;
-		event.xclient.window = ((LnxWindowData*)m_Handle)->windowHandle;
+		event.xclient.window = ((LnxWindowData*)m_Handle)->window;
 		event.xclient.format = 32;
 		event.xclient.data.l[0] = 1;  // 1 = normal request
 		event.xclient.data.l[1] = CurrentTime;
@@ -175,7 +175,7 @@ namespace hf
 	{
 		if (!IsClosing())
 		{
-			auto window = ((LnxWindowData*)m_Handle)->windowHandle;
+			auto window = ((LnxWindowData*)m_Handle)->window;
 
 			WIN_REGISTRY.erase(window);
 			XDestroyWindow(PLATFORM_DATA.display, window);

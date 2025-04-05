@@ -7,7 +7,7 @@ namespace hf
 {
     struct LnxWindowData
     {
-        ::Window windowHandle;
+        ::Window window;
     };
 
     struct LnxPlatformData
