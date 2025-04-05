@@ -24,10 +24,10 @@ namespace hf
 		m_Renderer->EndFrame();
 	}
 
-	void HandleKeyboardFocus(const Ref<Keyboard>& keyboard) noexcept;
-	void HandleKeyboardFocusLoss(const Ref<Keyboard>& keyboard) noexcept;
-	void HandleMouseFocus(const Ref<Mouse>& mouse, Window* window) noexcept;
-	void HandleMouseFocusLoss(const Ref<Mouse>& mouse) noexcept;
+	void HandleKeyboardFocus(Keyboard* keyboard) noexcept;
+	void HandleKeyboardFocusLoss(Keyboard* keyboard) noexcept;
+	void HandleMouseFocus(Mouse* mouse, Window* window) noexcept;
+	void HandleMouseFocusLoss(Mouse* mouse) noexcept;
 
 	void WindowEvent_Title(Window* window, const char* newTitle) noexcept
 	{
@@ -123,11 +123,11 @@ namespace hf
 	}
 
 	//region Focus Control
-	void HandleKeyboardFocus(const Ref<Keyboard>& keyboard) noexcept
+	void HandleKeyboardFocus(Keyboard* keyboard) noexcept
 	{
 	}
 
-	void HandleKeyboardFocusLoss(const Ref<Keyboard>& keyboard) noexcept
+	void HandleKeyboardFocusLoss(Keyboard* keyboard) noexcept
 	{
 		keyboard->DisposeChar();
 		std::queue<Keyboard::Event> tempBuffer;
@@ -151,12 +151,12 @@ namespace hf
 		keyboard->m_Buffer = tempBuffer;
 	}
 
-	void HandleMouseFocus(const Ref<Mouse>& mouse, Window* window) noexcept
+	void HandleMouseFocus(Mouse* mouse, Window* window) noexcept
 	{
 		mouse->m_Position = Platform_GetPointerPosition(window);
 	}
 
-	void HandleMouseFocusLoss(const Ref<Mouse>& mouse) noexcept
+	void HandleMouseFocusLoss(Mouse* mouse) noexcept
 	{
 		std::queue<Mouse::Event> tempBuffer;
 		while (!mouse->IsEmpty())

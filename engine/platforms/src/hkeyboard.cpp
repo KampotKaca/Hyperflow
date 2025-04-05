@@ -49,7 +49,7 @@ namespace hf
 		DisposeChar();
 	}
 
-	void KeyboardEvent_Key(const Ref<Keyboard>& keyboard, Key key, Keyboard::Event::Type type) noexcept
+	void KeyboardEvent_Key(Keyboard* keyboard, Key key, Keyboard::Event::Type type) noexcept
 	{
 		if(type == Keyboard::Event::Type::Invalid) return;
 
@@ -57,7 +57,7 @@ namespace hf
 		keyboard->m_Buffer.emplace( key, type );
 	}
 	
-	void KeyboardEvent_Char(const Ref<Keyboard>& keyboard, char character) noexcept
+	void KeyboardEvent_Char(Keyboard* keyboard, char character) noexcept
 	{
 		keyboard->m_CharBuffer.push(character);
 	}

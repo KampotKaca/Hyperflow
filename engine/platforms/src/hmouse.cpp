@@ -34,7 +34,7 @@ namespace hf
 		m_Buffer = std::queue<Event>();
 	}
 
-	void MouseEvent_Button(const Ref<Mouse>& mouse, Button button, Mouse::Event::Type type) noexcept
+	void MouseEvent_Button(Mouse* mouse, Button button, Mouse::Event::Type type) noexcept
 	{
 		if(type == Mouse::Event::Type::Invalid) return;
 
@@ -42,12 +42,12 @@ namespace hf
 		mouse->m_Buffer.emplace(button, type);
 	}
 	
-	void MouseEvent_Moved(const Ref<Mouse>& mouse, ivec2 position) noexcept
+	void MouseEvent_Moved(Mouse* mouse, ivec2 position) noexcept
 	{
 		mouse->m_Position = position;
 	}
 
-	void MouseEvent_Scroll(const Ref<Mouse>& mouse, vec2 delta) noexcept
+	void MouseEvent_Scroll(Mouse* mouse, vec2 delta) noexcept
 	{
 		mouse->m_ScrollDelta += delta;
 	}

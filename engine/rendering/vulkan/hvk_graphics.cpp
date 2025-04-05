@@ -8,27 +8,12 @@
 namespace hf
 {
     GraphicsData GRAPHICS_DATA;
-    const std::vector<const char*> REQUIRED_EXTENSIONS =
+
+#if DEBUG
+    const std::vector<const char*> DEBUG_VALIDATION_LAYERS =
     {
-#if PLATFORM_WINDOWS
-        "VK_KHR_surface",
-        "VK_KHR_win32_surface",
-#elif PLATFORM_LINUX
-        "VK_KHR_surface",
-    #if X11
-        "VK_KHR_xlib_surface",
-    #elif WAILAND
-        "VK_KHR_wayland_surface",
-    #endif
-#endif
-
-#if DEBUG
-        "VK_EXT_debug_utils"
-#endif
+        "VK_LAYER_KHRONOS_validation",
     };
-
-#if DEBUG
-    const std::vector<const char*> DEBUG_VALIDATION_LAYERS = { "VK_LAYER_KHRONOS_validation" };
 
     VKAPI_ATTR VkBool32 VKAPI_CALL DebugCallback(
         VkDebugUtilsMessageSeverityFlagBitsEXT severity,
@@ -107,6 +92,7 @@ namespace hf
 #endif
 
         CreateInstance(appInfo);
+        Graphics_SetupPlatform();
     }
 
     void Graphics_Unload()
@@ -126,22 +112,6 @@ namespace hf
     bool Graphics_IsExtensionSupported(const char* extension)
     {
         return GRAPHICS_DATA.availableExtensionNames.contains(extension);
-    }
-
-    //------------------------------------------------------------------------------------
-
-    void Graphics_LoadSurface(VKRendererData* rendererData)
-    {
-#if PLATFORM_WINDOWS
-
-#elif PLATFORM_LINUX
-
-#endif
-    }
-
-    void Graphics_UnloadSurface(VKRendererData* rendererData)
-    {
-
     }
 
     //------------------------------------------------------------------------------------
@@ -235,7 +205,7 @@ namespace hf
 #if DEBUG
         createInfo.ppEnabledLayerNames = DEBUG_VALIDATION_LAYERS.data();
         createInfo.enabledLayerCount = DEBUG_VALIDATION_LAYERS.size();
-        createInfo.pNext = (VkDebugUtilsMessengerCreateInfoEXT*) &GRAPHICS_DATA.debugCreateInfo;
+        createInfo.pNext = (VkDebugUtilsMessengerCreateInfoEXT*)&GRAPHICS_DATA.debugCreateInfo;
 #endif
 
         VK_HANDLE_EXCEPT(vkCreateInstance(&createInfo, nullptr, &GRAPHICS_DATA.instance));

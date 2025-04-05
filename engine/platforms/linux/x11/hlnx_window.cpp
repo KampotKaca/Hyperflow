@@ -39,6 +39,7 @@ namespace hf
 			.position = data.position,
 			.size = data.size
 		};
+		m_Renderer = nullptr;
 
 		auto display = PLATFORM_DATA.display;
 		int screen = DefaultScreen(display);
@@ -71,8 +72,8 @@ namespace hf
 		XSetIOErrorHandler(XIOErrorHandler);
 
 		auto pPos = Platform_GetPointerPosition(this);
-		m_Mouse = MakeRef<Mouse>(pPos, pPos.x >= 0 && pPos.x < m_Rect.size.x && pPos.y > 0 && pPos.y < m_Rect.size.y);
-		m_Keyboard = MakeRef<Keyboard>();
+		m_Mouse = new Mouse(pPos, pPos.x >= 0 && pPos.x < m_Rect.size.x && pPos.y > 0 && pPos.y < m_Rect.size.y);
+		m_Keyboard = new Keyboard();
 		m_EventData.pointerPosition = m_Mouse->GetPosition();
 
 		SetFlags(data.flags);
@@ -82,6 +83,8 @@ namespace hf
 
 	Window::~Window()
 	{
+		delete(m_Mouse);
+		delete(m_Keyboard);
 		Close();
 	}
 
@@ -89,16 +92,19 @@ namespace hf
 	{
 		if (IsClosing()) return;
 		XStoreName(PLATFORM_DATA.display, ((LnxWindowData*)m_Handle)->windowHandle, title);
+		XFlush(PLATFORM_DATA.display);
 	}
 	void Window::SetSize(ivec2 size) const
 	{
 		if (IsClosing()) return;
 		XResizeWindow(PLATFORM_DATA.display, ((LnxWindowData*)m_Handle)->windowHandle, size.x, size.y);
+		XFlush(PLATFORM_DATA.display);
 	}
 	void Window::SetPosition(ivec2 position) const
 	{
 		if (IsClosing()) return;
 		XMoveWindow(PLATFORM_DATA.display, ((LnxWindowData*)m_Handle)->windowHandle, position.x, position.y);
+		XFlush(PLATFORM_DATA.display);
 	}
 	void Window::SetRect(IRect rect) const
 	{
@@ -144,6 +150,7 @@ namespace hf
 			if(both == 0) XIconify(window, 0);
 		}
 
+		XFlush(display);
 		m_Flags = flags;
 	}
 
@@ -161,6 +168,7 @@ namespace hf
 		event.xclient.data.l[1] = CurrentTime;
 
 		XSendEvent(display, DefaultRootWindow(display), False, SubstructureNotifyMask | SubstructureRedirectMask, &event);
+		XFlush(display);
 	}
 
 	bool Window::Close()

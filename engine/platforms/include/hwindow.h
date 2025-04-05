@@ -53,8 +53,8 @@ namespace hf
 		WindowFlags m_Flags;
 		Ref<Window> m_Parent;
 
-		Ref<Keyboard> m_Keyboard;
-		Ref<Mouse> m_Mouse;
+		Keyboard* m_Keyboard;
+		Mouse* m_Mouse;
 		EventData m_EventData;
 		Renderer* m_Renderer;
 

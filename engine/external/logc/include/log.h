@@ -8,6 +8,8 @@
 #ifndef LOG_H
 #define LOG_H
 
+#define ALWAYS_LOG true
+
 #include <stdio.h>
 
 #include <stdbool.h>
@@ -30,7 +32,7 @@ typedef void (*log_LockFn)(bool lock, void *udata);
 
 enum { LOG_TRACE, LOG_DEBUG, LOG_INFO, LOG_WARN, LOG_ERROR, LOG_FATAL };
 
-#if !RELEASE
+#if !RELEASE || ALWAYS_LOG
 #define log_trace(file, line, ...) log_log(LOG_TRACE, file, line, __VA_ARGS__)
 #define log_debug(file, line, ...) log_log(LOG_DEBUG, file, line, __VA_ARGS__)
 #define log_info(file, line, ...)  log_log(LOG_INFO,  file, line, __VA_ARGS__)
