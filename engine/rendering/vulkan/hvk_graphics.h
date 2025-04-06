@@ -27,7 +27,8 @@ namespace hf
     struct LogicalDevice
     {
         VkDevice device{};
-        VkQueue queue{};
+        VkQueue graphicsQueue{};
+        VkQueue presentQueue{};
     };
 
     struct GraphicsDevice
