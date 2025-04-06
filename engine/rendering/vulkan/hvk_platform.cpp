@@ -7,7 +7,8 @@
 // #endif
 
 #if PLATFORM_WINDOWS
-
+#include "../platforms/windows/hwin_shared.h"
+#include <vulkan/vulkan_win32.h>
 #elif PLATFORM_LINUX
 
     #if X11
@@ -43,7 +44,14 @@ namespace hf
 
     void Graphics_LoadSurface(VKRendererData* rendererData)
     {
+        VkWin32SurfaceCreateInfoKHR createInfo
+        {
+            .sType = VK_STRUCTURE_TYPE_WIN32_SURFACE_CREATE_INFO_KHR,
+            .hinstance = PLATFORM_DATA.instance,
+            .hwnd = (HWND)rendererData->windowHandle,
+        };
 
+        VK_HANDLE_EXCEPT(vkCreateWin32SurfaceKHR(GRAPHICS_DATA.instance, &createInfo, nullptr, &rendererData->surface));
     }
 
 #elif PLATFORM_LINUX

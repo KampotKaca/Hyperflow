@@ -2,11 +2,18 @@
 #define HWINDOWS_H
 
 //Windows 7 or later
+#ifndef _WIN32_WINNT
 #define _WIN32_WINNT 0x0601
+#endif
 #include <sdkddkver.h>
 
+#ifndef NOMINMAX
 #define NOMINMAX
+#endif
+
+#ifndef STRICT
 #define STRICT
+#endif
 
 #include <dde.h>
 #include <ddeml.h>

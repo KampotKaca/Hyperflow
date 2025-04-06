@@ -49,8 +49,8 @@ namespace hf
 		if(m_Handle == nullptr) throw WND_LAST_EXCEPT();
 
 		auto pPos = Platform_GetPointerPosition(this);
-		m_Mouse = MakeRef<Mouse>(pPos, pPos.x >= 0 && pPos.x < m_Rect.size.x && pPos.y > 0 && pPos.y < m_Rect.size.y);
-		m_Keyboard = MakeRef<Keyboard>();
+		m_Mouse = new Mouse(pPos, pPos.x >= 0 && pPos.x < m_Rect.size.x && pPos.y > 0 && pPos.y < m_Rect.size.y);
+		m_Keyboard = new Keyboard();
 		m_EventData.pointerPosition = m_Mouse->m_Position;
 
 		SetFlags(data.flags);

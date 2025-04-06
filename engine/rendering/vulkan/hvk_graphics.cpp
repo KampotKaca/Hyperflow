@@ -257,8 +257,8 @@ namespace hf
         VkDeviceCreateInfo createInfo
         {
             .sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO,
-            .pQueueCreateInfos = queueCreateInfos.data(),
             .queueCreateInfoCount = (uint32_t)queueCreateInfos.size(),
+            .pQueueCreateInfos = queueCreateInfos.data(),
             .enabledLayerCount = 0,
             .enabledExtensionCount = (uint32_t)DEVICE_EXTENSIONS.size(),
             .ppEnabledExtensionNames = DEVICE_EXTENSIONS.data(),

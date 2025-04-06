@@ -3,8 +3,8 @@ cmake_minimum_required(VERSION 3.30)
 file(READ "config.h" CONFIG_H_CONTENTS)
 string(REGEX MATCH "#define VERSION \"([0-9]+\\.[0-9]+\\.[0-9]+)\"" VERSION_MATCH "${CONFIG_H_CONTENTS}")
 
-#option(D3D "d3d" ON)
-#option(VULKAN "vulkan" ON)
+#option(BUILD_D3D "build_d3d" ON)
+#option(BUILD_VULKAN "build_vulkan" ON)
 
 # Set CMake project version
 if(VERSION_MATCH)
@@ -23,7 +23,8 @@ if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
     option(WINDOWS "Windows" ON)
     file(GLOB_RECURSE PLATFORM CONFIGURE_DEPENDS platforms/windows/*.cpp)
 
-    if(D3D STREQUAL "ON")
+    if(BUILD_D3D STREQUAL "ON")
+        option(D3D "d3d" ON)
         add_definitions(-DRENDERER_D3D)
     endif ()
 
@@ -59,7 +60,6 @@ endif ()
 if(D3D STREQUAL "ON")
     file(GLOB_RECURSE RENDERER CONFIGURE_DEPENDS rendering/d3d/*.cpp)
 elseif (VULKAN STREQUAL "ON")
-    find_package(Vulkan REQUIRED)
     file(GLOB_RECURSE RENDERER CONFIGURE_DEPENDS rendering/vulkan/*.cpp)
 endif ()
 
@@ -111,6 +111,7 @@ if (D3D)
 endif ()
 
 if(VULKAN)
+    find_package(Vulkan REQUIRED)
     target_link_libraries(${PROJECT_NAME}
             PRIVATE
             Vulkan::Vulkan
