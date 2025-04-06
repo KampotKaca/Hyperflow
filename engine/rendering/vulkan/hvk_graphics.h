@@ -68,6 +68,7 @@ namespace hf
     {
         void* windowHandle = nullptr;
         VkSurfaceKHR surface{};
+        VkSwapchainKHR swapchain{};
         std::vector<GraphicsDevice> suitableDevices{};
         GraphicsDevice* defaultDevice;
     };

@@ -59,6 +59,13 @@ namespace hf
     }
 #endif
 
+    struct SwapChainSupportDetails
+    {
+        VkSurfaceCapabilitiesKHR capabilities;
+        std::vector<VkSurfaceFormatKHR> formats;
+        std::vector<VkPresentModeKHR> presentModes;
+    };
+
     void InitLayers();
     void InitExtensions();
     void InitInstanceVersion();
@@ -70,7 +77,9 @@ namespace hf
     void DestroyLogicalDevice(LogicalDevice& device);
 
     bool SetupPhysicalDevice(const VKRendererData* renderer, VkPhysicalDevice device, GraphicsDevice* deviceData);
-    bool CheckDeviceExtensionSupport(VkPhysicalDevice device);
+    bool CheckDeviceExtensionSupport(const VkPhysicalDevice& device);
+
+    void QuerySwapChainSupport(const VkPhysicalDevice& device, const VkSurfaceKHR& surface, SwapChainSupportDetails* supportDetails);
 
     void Graphics_Load(const char* appVersion)
     {
@@ -138,8 +147,14 @@ namespace hf
             if (SetupPhysicalDevice(rendererData, device, &deviceData) &&
                 CheckDeviceExtensionSupport(device))
             {
-                CreateLogicalDevice(deviceData);
-                rendererData->suitableDevices.push_back(deviceData);
+                SwapChainSupportDetails swapChainSupport{};
+                QuerySwapChainSupport(device, rendererData->surface, &swapChainSupport);
+
+                if (!swapChainSupport.formats.empty() && !swapChainSupport.presentModes.empty())
+                {
+                    CreateLogicalDevice(deviceData);
+                    rendererData->suitableDevices.push_back(deviceData);
+                }
             }
         }
 
@@ -322,7 +337,31 @@ namespace hf
         return true;
     }
 
-    bool CheckDeviceExtensionSupport(const VkPhysicalDevice device)
+    void QuerySwapChainSupport(const VkPhysicalDevice& device, const VkSurfaceKHR& surface, SwapChainSupportDetails* supportDetails)
+    {
+        vkGetPhysicalDeviceSurfaceCapabilitiesKHR(device, surface, &supportDetails->capabilities);
+
+        uint32_t formatCount;
+        vkGetPhysicalDeviceSurfaceFormatsKHR(device, surface, &formatCount, nullptr);
+        if (formatCount > 0)
+        {
+            supportDetails->formats = std::vector<VkSurfaceFormatKHR>(formatCount);
+            vkGetPhysicalDeviceSurfaceFormatsKHR(device, surface, &formatCount,
+                supportDetails->formats.data());
+        }
+
+        uint32_t presentModeCount;
+        vkGetPhysicalDeviceSurfacePresentModesKHR(device, surface, &presentModeCount, nullptr);
+
+        if (presentModeCount > 0)
+        {
+            supportDetails->presentModes = std::vector<VkPresentModeKHR>(presentModeCount);
+            vkGetPhysicalDeviceSurfacePresentModesKHR(device, surface, &presentModeCount,
+                supportDetails->presentModes.data());
+        }
+    }
+
+    bool CheckDeviceExtensionSupport(const VkPhysicalDevice& device)
     {
         uint32_t extensionCount;
         vkEnumerateDeviceExtensionProperties(device, nullptr, &extensionCount, nullptr);
