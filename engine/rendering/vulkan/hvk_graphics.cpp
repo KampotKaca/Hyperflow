@@ -236,20 +236,29 @@ namespace hf
 
     void CreateLogicalDevice(GraphicsDevice& device)
     {
-        float queuePriority = 1.0f;
-        VkDeviceQueueCreateInfo queueCreateInfo
+        std::vector<VkDeviceQueueCreateInfo> queueCreateInfos{};
+        std::set<uint32_t> uniqueQueueFamilies =
         {
-            .sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO,
-            .queueFamilyIndex = device.familyIndices.graphicsFamily.value(),
-            .queueCount = 1,
-            .pQueuePriorities = &queuePriority
+            device.familyIndices.graphicsFamily.value(),
+            device.familyIndices.presentFamily.value()
         };
+
+        float queuePriority = 1.0f;
+        for (uint32_t queueFamily : uniqueQueueFamilies)
+        {
+            VkDeviceQueueCreateInfo queueCreateInfo{};
+            queueCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
+            queueCreateInfo.queueFamilyIndex = queueFamily;
+            queueCreateInfo.queueCount = 1;
+            queueCreateInfo.pQueuePriorities = &queuePriority;
+            queueCreateInfos.push_back(queueCreateInfo);
+        }
 
         VkDeviceCreateInfo createInfo
         {
             .sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO,
-            .pQueueCreateInfos = &queueCreateInfo,
-            .queueCreateInfoCount = 1,
+            .pQueueCreateInfos = queueCreateInfos.data(),
+            .queueCreateInfoCount = (uint32_t)queueCreateInfos.size(),
             .enabledLayerCount = 0,
             .enabledExtensionCount = (uint32_t)DEVICE_EXTENSIONS.size(),
             .ppEnabledExtensionNames = DEVICE_EXTENSIONS.data(),
@@ -264,7 +273,10 @@ namespace hf
         VK_HANDLE_EXCEPT(vkCreateDevice(device.device, &createInfo, nullptr, &device.logicalDevice.device));
 
         vkGetDeviceQueue(device.logicalDevice.device, device.familyIndices.graphicsFamily.value(),
-            0, &device.logicalDevice.queue);
+            0, &device.logicalDevice.graphicsQueue);
+
+        vkGetDeviceQueue(device.logicalDevice.device, device.familyIndices.presentFamily.value(),
+            0, &device.logicalDevice.presentQueue);
     }
 
     void DestroyLogicalDevice(LogicalDevice& device)
