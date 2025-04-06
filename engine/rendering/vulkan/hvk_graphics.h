@@ -85,6 +85,7 @@ namespace hf
     extern void Graphics_UnloadPhysicalDevices(VKRendererData* rendererData);
 
     extern const std::vector<const char*> REQUIRED_EXTENSIONS;
+    extern const std::vector<const char*> DEVICE_EXTENSIONS;
 }
 
 #endif //HVK_GRAPHICS_H

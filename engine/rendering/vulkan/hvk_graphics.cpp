@@ -8,6 +8,10 @@
 namespace hf
 {
     GraphicsData GRAPHICS_DATA;
+    const std::vector<const char*> DEVICE_EXTENSIONS
+    {
+        VK_KHR_SWAPCHAIN_EXTENSION_NAME
+    };
 
 #if DEBUG
     const std::vector<const char*> DEBUG_VALIDATION_LAYERS =
@@ -65,7 +69,8 @@ namespace hf
     void CreateLogicalDevice(GraphicsDevice& device);
     void DestroyLogicalDevice(LogicalDevice& device);
 
-    bool SetupPhysicalDevice(VKRendererData* renderer, VkPhysicalDevice device, GraphicsDevice* deviceData);
+    bool SetupPhysicalDevice(const VKRendererData* renderer, VkPhysicalDevice device, GraphicsDevice* deviceData);
+    bool CheckDeviceExtensionSupport(VkPhysicalDevice device);
 
     void Graphics_Load(const char* appVersion)
     {
@@ -130,7 +135,8 @@ namespace hf
         for (const auto& device : availableDevices)
         {
             GraphicsDevice deviceData{};
-            if (SetupPhysicalDevice(rendererData, device, &deviceData))
+            if (SetupPhysicalDevice(rendererData, device, &deviceData) &&
+                CheckDeviceExtensionSupport(device))
             {
                 CreateLogicalDevice(deviceData);
                 rendererData->suitableDevices.push_back(deviceData);
@@ -245,7 +251,8 @@ namespace hf
             .pQueueCreateInfos = &queueCreateInfo,
             .queueCreateInfoCount = 1,
             .enabledLayerCount = 0,
-            .enabledExtensionCount = 0,
+            .enabledExtensionCount = (uint32_t)DEVICE_EXTENSIONS.size(),
+            .ppEnabledExtensionNames = DEVICE_EXTENSIONS.data(),
             .pEnabledFeatures = &device.features,
         };
 
@@ -267,7 +274,7 @@ namespace hf
 
     //------------------------------------------------------------------------------------
 
-    bool SetupPhysicalDevice(VKRendererData* renderer, VkPhysicalDevice device, GraphicsDevice* deviceData)
+    bool SetupPhysicalDevice(const VKRendererData* renderer, VkPhysicalDevice device, GraphicsDevice* deviceData)
     {
         deviceData->device = device;
         vkGetPhysicalDeviceProperties(device, &deviceData->properties);
@@ -303,6 +310,21 @@ namespace hf
         return true;
     }
 
-    bool QueueFamilyIndices::IsComplete() const { return graphicsFamily.has_value() && presentFamily.has_value(); }
+    bool CheckDeviceExtensionSupport(const VkPhysicalDevice device)
+    {
+        uint32_t extensionCount;
+        vkEnumerateDeviceExtensionProperties(device, nullptr, &extensionCount, nullptr);
 
+        std::vector<VkExtensionProperties> availableExtensions(extensionCount);
+        vkEnumerateDeviceExtensionProperties(device, nullptr, &extensionCount, availableExtensions.data());
+
+        std::set<std::string> requiredExtensions(DEVICE_EXTENSIONS.begin(), DEVICE_EXTENSIONS.end());
+
+        for (const auto& extension : availableExtensions)
+            requiredExtensions.erase(extension.extensionName);
+
+        return requiredExtensions.empty();
+    }
+
+    bool QueueFamilyIndices::IsComplete() const { return graphicsFamily.has_value() && presentFamily.has_value(); }
 }
