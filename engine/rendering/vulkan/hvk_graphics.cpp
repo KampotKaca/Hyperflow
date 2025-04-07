@@ -1,5 +1,7 @@
 #include "hvk_graphics.h"
 
+#include <bits/ranges_algo.h>
+
 #include "hgenericexception.h"
 #include "exceptions/hgraphicsexception.h"
 #include "hyperflow.h"
@@ -66,6 +68,13 @@ namespace hf
         std::vector<VkPresentModeKHR> presentModes;
     };
 
+    struct SurfaceDetails
+    {
+        VkSurfaceFormatKHR format;
+        VkPresentModeKHR presentMode;
+        VkExtent2D extent;
+    };
+
     void InitLayers();
     void InitExtensions();
     void InitInstanceVersion();
@@ -80,6 +89,8 @@ namespace hf
     bool CheckDeviceExtensionSupport(const VkPhysicalDevice& device);
 
     void QuerySwapChainSupport(const VkPhysicalDevice& device, const VkSurfaceKHR& surface, SwapChainSupportDetails* supportDetails);
+    bool GetAvailableSurfaceDetails(const SwapChainSupportDetails& swapChainSupportDetails,
+                                    VkColorSpaceKHR targetColorSpace, VkPresentModeKHR targetPresentMode, SurfaceDetails* result);
 
     void Graphics_Load(const char* appVersion)
     {
@@ -375,6 +386,42 @@ namespace hf
             requiredExtensions.erase(extension.extensionName);
 
         return requiredExtensions.empty();
+    }
+
+    bool GetAvailableSurfaceDetails(const SwapChainSupportDetails& swapChainSupportDetails,
+    VkColorSpaceKHR targetColorSpace, VkPresentModeKHR targetPresentMode, uvec2 targetExtents,
+    SurfaceDetails* result)
+    {
+        int mask = 0;
+        for (auto& format : swapChainSupportDetails.formats)
+        {
+            if (format.colorSpace == targetColorSpace && !(mask & (1 << 0)))
+            {
+                result->format = format;
+                mask |= 1 << 0;
+            }
+        }
+
+        for (auto& presentMode : swapChainSupportDetails.presentModes)
+        {
+            if (presentMode == targetPresentMode && !(mask & (1 << 1)))
+            {
+                result->presentMode = presentMode;
+                mask |= 1 << 1;
+            }
+        }
+
+        VkExtent2D extents = { targetExtents.x, targetExtents.y };
+        extents.width = std::clamp(extents.width, swapChainSupportDetails.capabilities.minImageExtent.width,
+            swapChainSupportDetails.capabilities.maxImageExtent.width);
+        extents.height = std::clamp(extents.height, swapChainSupportDetails.capabilities.minImageExtent.height,
+            swapChainSupportDetails.capabilities.maxImageExtent.height);
+
+        result->extent = extents;
+        if (!(mask & (1 << 0))) LOG_WARN("[Vulkan] %s", "Unable to choose target swapchain surface format");
+        if (!(mask & (1 << 1))) LOG_WARN("[Vulkan] %s", "Unable to choose target swapchain present mode");
+
+        return mask == ((1 << 2) - 1);
     }
 
     bool QueueFamilyIndices::IsComplete() const { return graphicsFamily.has_value() && presentFamily.has_value(); }
