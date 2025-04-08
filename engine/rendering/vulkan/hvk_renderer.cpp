@@ -18,6 +18,7 @@ namespace hf
         };
 
         Graphics_LoadPhysicalDevices(rendererData);
+        Graphics_LoadSwapchain(rendererData, 0);
         m_GraphicsHandle = rendererData;
     }
 
@@ -25,6 +26,7 @@ namespace hf
     {
         const auto data = (VKRendererData*)m_GraphicsHandle;
 
+        Graphics_UnloadSwapchain(data);
         Graphics_UnloadPhysicalDevices(data);
 
         delete(data);

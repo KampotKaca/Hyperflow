@@ -61,13 +61,6 @@ namespace hf
     }
 #endif
 
-    struct SwapChainSupportDetails
-    {
-        VkSurfaceCapabilitiesKHR capabilities;
-        std::vector<VkSurfaceFormatKHR> formats;
-        std::vector<VkPresentModeKHR> presentModes;
-    };
-
     struct SurfaceDetails
     {
         VkSurfaceFormatKHR format;
@@ -90,7 +83,8 @@ namespace hf
 
     void QuerySwapChainSupport(const VkPhysicalDevice& device, const VkSurfaceKHR& surface, SwapChainSupportDetails* supportDetails);
     bool GetAvailableSurfaceDetails(const SwapChainSupportDetails& swapChainSupportDetails,
-                                    VkColorSpaceKHR targetColorSpace, VkPresentModeKHR targetPresentMode, SurfaceDetails* result);
+                                    VkFormat targetFormat, VkPresentModeKHR targetPresentMode, uvec2 targetExtents,
+                                    SurfaceDetails* result);
 
     void Graphics_Load(const char* appVersion)
     {
@@ -143,12 +137,14 @@ namespace hf
     void Graphics_LoadPhysicalDevices(VKRendererData* rendererData)
     {
         uint32_t deviceCount = 0;
-        vkEnumeratePhysicalDevices(GRAPHICS_DATA.instance, &deviceCount, nullptr);
+        VK_HANDLE_EXCEPT(vkEnumeratePhysicalDevices(GRAPHICS_DATA.instance,
+            &deviceCount, nullptr));
 
         if (deviceCount == 0) throw GENERIC_EXCEPT("[Vulkan]", "No Graphics device found");
 
         std::vector<VkPhysicalDevice> availableDevices(deviceCount);
-        vkEnumeratePhysicalDevices(GRAPHICS_DATA.instance, &deviceCount, availableDevices.data());
+        VK_HANDLE_EXCEPT(vkEnumeratePhysicalDevices(GRAPHICS_DATA.instance,
+            &deviceCount, availableDevices.data()));
 
         Graphics_LoadSurface(rendererData);
 
@@ -158,10 +154,10 @@ namespace hf
             if (SetupPhysicalDevice(rendererData, device, &deviceData) &&
                 CheckDeviceExtensionSupport(device))
             {
-                SwapChainSupportDetails swapChainSupport{};
-                QuerySwapChainSupport(device, rendererData->surface, &swapChainSupport);
+                QuerySwapChainSupport(device, rendererData->surface, &deviceData.swapChainSupport);
 
-                if (!swapChainSupport.formats.empty() && !swapChainSupport.presentModes.empty())
+                if (!deviceData.swapChainSupport.formats.empty() &&
+                    !deviceData.swapChainSupport.presentModes.empty())
                 {
                     CreateLogicalDevice(deviceData);
                     rendererData->suitableDevices.push_back(deviceData);
@@ -172,19 +168,84 @@ namespace hf
         if (rendererData->suitableDevices.empty())
             throw GENERIC_EXCEPT("[Vulkan]", "No suitable graphics device found");
 
-        std::stable_sort(rendererData->suitableDevices.begin(), rendererData->suitableDevices.end(),
-                      [](const GraphicsDevice& a, const GraphicsDevice& b)
-                      { return a.score > b.score; });
-
-        rendererData->defaultDevice = &rendererData->suitableDevices[0];
-        LOG_LOG("Graphics device found [%s]", rendererData->defaultDevice->properties.deviceName);
+        std::ranges::stable_sort(rendererData->suitableDevices,
+                                 [](const GraphicsDevice& a, const GraphicsDevice& b)
+                                 { return a.score > b.score; });
     }
 
-    extern void Graphics_UnloadPhysicalDevices(VKRendererData* rendererData)
+    void Graphics_UnloadPhysicalDevices(VKRendererData* rendererData)
     {
         Graphics_UnloadSurface(rendererData);
         for (auto& device : rendererData->suitableDevices)
             DestroyLogicalDevice(device.logicalDevice);
+    }
+
+    uint32_t Graphics_GetDeviceCount(const VKRendererData* rendererData) { return rendererData->suitableDevices.size(); }
+
+    void Graphics_LoadSwapchain(VKRendererData* rendererData, uint32_t deviceIndex)
+    {
+        if (deviceIndex >= rendererData->suitableDevices.size())
+            throw GENERIC_EXCEPT("[Vulkan]", "Invalid device index [%d]", deviceIndex);
+
+        Graphics_UnloadSwapchain(rendererData);
+        rendererData->defaultDevice = &rendererData->suitableDevices[deviceIndex];
+        LOG_LOG("Graphics device found [%s]", rendererData->defaultDevice->properties.deviceName);
+
+        auto& scs = rendererData->defaultDevice->swapChainSupport;
+        SurfaceDetails details{};
+        if (GetAvailableSurfaceDetails(scs,
+            VULKAN_API_COLOR_FORMAT, VULKAN_API_PRESENT_MODE, ivec2(1080, 1920), &details))
+        {
+            uint32_t imageCount = scs.capabilities.minImageCount + 1;
+            uint32_t maxImageCount = scs.capabilities.maxImageCount;
+            if (maxImageCount > 0 && imageCount > maxImageCount) imageCount = maxImageCount;
+
+            VkSwapchainCreateInfoKHR createInfo
+            {
+                .sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR,
+                .surface = rendererData->surface,
+                .minImageCount = imageCount,
+                .imageFormat = details.format.format,
+                .imageColorSpace = details.format.colorSpace,
+                .imageExtent = details.extent,
+                .imageArrayLayers = 1,
+                .imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT,
+                .preTransform = scs.capabilities.currentTransform,
+                .compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR,
+                .presentMode = details.presentMode,
+                .clipped = VK_TRUE,
+                .oldSwapchain = VK_NULL_HANDLE
+            };
+
+            auto& indices = rendererData->defaultDevice->familyIndices;
+            if (indices.graphicsFamily != indices.presentFamily)
+            {
+                uint32_t familyIndices[] = { indices.graphicsFamily.value(), indices.presentFamily.value() };
+                createInfo.imageSharingMode = VK_SHARING_MODE_CONCURRENT;
+                createInfo.queueFamilyIndexCount = 2;
+                createInfo.pQueueFamilyIndices = familyIndices;
+            }
+            else
+            {
+                createInfo.imageSharingMode = VK_SHARING_MODE_EXCLUSIVE;
+                createInfo.queueFamilyIndexCount = 0;
+                createInfo.pQueueFamilyIndices = nullptr;
+            }
+
+            VK_HANDLE_EXCEPT(vkCreateSwapchainKHR(rendererData->defaultDevice->logicalDevice.device, &createInfo,
+                nullptr, &rendererData->swapchain));
+        }
+        else throw GENERIC_EXCEPT("[Vulkan]", "Unable to create swapchain");
+    }
+
+    void Graphics_UnloadSwapchain(VKRendererData* rendererData)
+    {
+        if (rendererData->swapchain != VK_NULL_HANDLE)
+        {
+            vkDestroySwapchainKHR(rendererData->defaultDevice->logicalDevice.device,
+                rendererData->swapchain, nullptr);
+            rendererData->swapchain = VK_NULL_HANDLE;
+        }
     }
 
     //------------------------------------------------------------------------------------
@@ -192,17 +253,18 @@ namespace hf
     void InitLayers()
     {
         uint32_t layerCount = 0;
-        vkEnumerateInstanceLayerProperties(&layerCount, nullptr);
+        VK_HANDLE_EXCEPT(vkEnumerateInstanceLayerProperties(&layerCount, nullptr));
         GRAPHICS_DATA.availableLayers = std::vector<VkLayerProperties>(layerCount);
-        vkEnumerateInstanceLayerProperties(&layerCount, GRAPHICS_DATA.availableLayers.data());
+        VK_HANDLE_EXCEPT(vkEnumerateInstanceLayerProperties(&layerCount, GRAPHICS_DATA.availableLayers.data()));
     }
 
     void InitExtensions()
     {
         uint32_t extensionCount = 0;
-        vkEnumerateInstanceExtensionProperties(nullptr, &extensionCount, nullptr);
+        VK_HANDLE_EXCEPT(vkEnumerateInstanceExtensionProperties(nullptr, &extensionCount, nullptr));
         GRAPHICS_DATA.availableExtensions = std::vector<VkExtensionProperties>(extensionCount);
-        vkEnumerateInstanceExtensionProperties(nullptr, &extensionCount, GRAPHICS_DATA.availableExtensions.data());
+        VK_HANDLE_EXCEPT(vkEnumerateInstanceExtensionProperties(nullptr,
+            &extensionCount, GRAPHICS_DATA.availableExtensions.data()));
 
         for (const auto& ext : GRAPHICS_DATA.availableExtensions)
             GRAPHICS_DATA.availableExtensionNames.insert(ext.extensionName);
@@ -216,7 +278,7 @@ namespace hf
 
     void InitInstanceVersion()
     {
-        vkEnumerateInstanceVersion(&GRAPHICS_DATA.supportedVersion);
+        VK_HANDLE_EXCEPT(vkEnumerateInstanceVersion(&GRAPHICS_DATA.supportedVersion));
         LOG_LOG("Supported Vulkan API Version: (%i.%i.%i)",
             VK_VERSION_MAJOR(GRAPHICS_DATA.supportedVersion),
             VK_VERSION_MINOR(GRAPHICS_DATA.supportedVersion),
@@ -350,10 +412,10 @@ namespace hf
 
     void QuerySwapChainSupport(const VkPhysicalDevice& device, const VkSurfaceKHR& surface, SwapChainSupportDetails* supportDetails)
     {
-        vkGetPhysicalDeviceSurfaceCapabilitiesKHR(device, surface, &supportDetails->capabilities);
+        VK_HANDLE_EXCEPT(vkGetPhysicalDeviceSurfaceCapabilitiesKHR(device, surface, &supportDetails->capabilities));
 
         uint32_t formatCount;
-        vkGetPhysicalDeviceSurfaceFormatsKHR(device, surface, &formatCount, nullptr);
+        VK_HANDLE_EXCEPT(vkGetPhysicalDeviceSurfaceFormatsKHR(device, surface, &formatCount, nullptr));
         if (formatCount > 0)
         {
             supportDetails->formats = std::vector<VkSurfaceFormatKHR>(formatCount);
@@ -362,23 +424,23 @@ namespace hf
         }
 
         uint32_t presentModeCount;
-        vkGetPhysicalDeviceSurfacePresentModesKHR(device, surface, &presentModeCount, nullptr);
+        VK_HANDLE_EXCEPT(vkGetPhysicalDeviceSurfacePresentModesKHR(device, surface, &presentModeCount, nullptr));
 
         if (presentModeCount > 0)
         {
             supportDetails->presentModes = std::vector<VkPresentModeKHR>(presentModeCount);
-            vkGetPhysicalDeviceSurfacePresentModesKHR(device, surface, &presentModeCount,
-                supportDetails->presentModes.data());
+            VK_HANDLE_EXCEPT(vkGetPhysicalDeviceSurfacePresentModesKHR(device, surface, &presentModeCount,
+                supportDetails->presentModes.data()));
         }
     }
 
     bool CheckDeviceExtensionSupport(const VkPhysicalDevice& device)
     {
         uint32_t extensionCount;
-        vkEnumerateDeviceExtensionProperties(device, nullptr, &extensionCount, nullptr);
+        VK_HANDLE_EXCEPT(vkEnumerateDeviceExtensionProperties(device, nullptr, &extensionCount, nullptr));
 
         std::vector<VkExtensionProperties> availableExtensions(extensionCount);
-        vkEnumerateDeviceExtensionProperties(device, nullptr, &extensionCount, availableExtensions.data());
+        VK_HANDLE_EXCEPT(vkEnumerateDeviceExtensionProperties(device, nullptr, &extensionCount, availableExtensions.data()));
 
         std::set<std::string> requiredExtensions(DEVICE_EXTENSIONS.begin(), DEVICE_EXTENSIONS.end());
 
@@ -389,25 +451,27 @@ namespace hf
     }
 
     bool GetAvailableSurfaceDetails(const SwapChainSupportDetails& swapChainSupportDetails,
-    VkColorSpaceKHR targetColorSpace, VkPresentModeKHR targetPresentMode, uvec2 targetExtents,
+    VkFormat targetFormat, VkPresentModeKHR targetPresentMode, uvec2 targetExtents,
     SurfaceDetails* result)
     {
         int mask = 0;
         for (auto& format : swapChainSupportDetails.formats)
         {
-            if (format.colorSpace == targetColorSpace && !(mask & (1 << 0)))
+            if (format.format == targetFormat)
             {
                 result->format = format;
                 mask |= 1 << 0;
+                break;
             }
         }
 
         for (auto& presentMode : swapChainSupportDetails.presentModes)
         {
-            if (presentMode == targetPresentMode && !(mask & (1 << 1)))
+            if (presentMode == targetPresentMode)
             {
                 result->presentMode = presentMode;
                 mask |= 1 << 1;
+                break;
             }
         }
 
@@ -421,7 +485,7 @@ namespace hf
         if (!(mask & (1 << 0))) LOG_WARN("[Vulkan] %s", "Unable to choose target swapchain surface format");
         if (!(mask & (1 << 1))) LOG_WARN("[Vulkan] %s", "Unable to choose target swapchain present mode");
 
-        return mask == ((1 << 2) - 1);
+        return mask == (1 << 2) - 1;
     }
 
     bool QueueFamilyIndices::IsComplete() const { return graphicsFamily.has_value() && presentFamily.has_value(); }

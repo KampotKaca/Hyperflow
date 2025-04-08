@@ -16,6 +16,13 @@ namespace hf
         void* userData);
 #endif
 
+    struct SwapChainSupportDetails
+    {
+        VkSurfaceCapabilitiesKHR capabilities;
+        std::vector<VkSurfaceFormatKHR> formats;
+        std::vector<VkPresentModeKHR> presentModes;
+    };
+
     struct QueueFamilyIndices
     {
         std::optional<uint32_t> graphicsFamily;
@@ -40,6 +47,7 @@ namespace hf
 
         QueueFamilyIndices familyIndices{};
         LogicalDevice logicalDevice{};
+        SwapChainSupportDetails swapChainSupport{};
     };
 
     struct GraphicsData
@@ -67,8 +75,8 @@ namespace hf
     struct VKRendererData
     {
         void* windowHandle = nullptr;
-        VkSurfaceKHR surface{};
-        VkSwapchainKHR swapchain{};
+        VkSurfaceKHR surface = VK_NULL_HANDLE;
+        VkSwapchainKHR swapchain = VK_NULL_HANDLE;
         std::vector<GraphicsDevice> suitableDevices{};
         GraphicsDevice* defaultDevice;
     };
@@ -85,6 +93,10 @@ namespace hf
 
     extern void Graphics_LoadPhysicalDevices(VKRendererData* rendererData);
     extern void Graphics_UnloadPhysicalDevices(VKRendererData* rendererData);
+
+    extern uint32_t Graphics_GetDeviceCount(const VKRendererData* rendererData);
+    extern void Graphics_LoadSwapchain(VKRendererData* rendererData, uint32_t deviceIndex);
+    extern void Graphics_UnloadSwapchain(VKRendererData* rendererData);
 
     extern const std::vector<const char*> REQUIRED_EXTENSIONS;
     extern const std::vector<const char*> DEVICE_EXTENSIONS;
