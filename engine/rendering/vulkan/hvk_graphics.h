@@ -72,11 +72,25 @@ namespace hf
 #endif
     };
 
+    struct GraphicsSwapchainDetails
+    {
+        VkSurfaceFormatKHR format;
+        VkPresentModeKHR presentMode;
+        VkExtent2D extent;
+    };
+
+    struct GraphicsSwapChain
+    {
+        VkSwapchainKHR swapchain = VK_NULL_HANDLE;
+        std::vector<VkImage> swapchainImages{};
+        GraphicsSwapchainDetails details{};
+    };
+
     struct VKRendererData
     {
         void* windowHandle = nullptr;
         VkSurfaceKHR surface = VK_NULL_HANDLE;
-        VkSwapchainKHR swapchain = VK_NULL_HANDLE;
+        GraphicsSwapChain swapchain{};
         std::vector<GraphicsDevice> suitableDevices{};
         GraphicsDevice* defaultDevice;
     };

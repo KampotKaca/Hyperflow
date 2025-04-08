@@ -61,13 +61,6 @@ namespace hf
     }
 #endif
 
-    struct SurfaceDetails
-    {
-        VkSurfaceFormatKHR format;
-        VkPresentModeKHR presentMode;
-        VkExtent2D extent;
-    };
-
     void InitLayers();
     void InitExtensions();
     void InitInstanceVersion();
@@ -84,7 +77,7 @@ namespace hf
     void QuerySwapChainSupport(const VkPhysicalDevice& device, const VkSurfaceKHR& surface, SwapChainSupportDetails* supportDetails);
     bool GetAvailableSurfaceDetails(const SwapChainSupportDetails& swapChainSupportDetails,
                                     VkFormat targetFormat, VkPresentModeKHR targetPresentMode, uvec2 targetExtents,
-                                    SurfaceDetails* result);
+                                    GraphicsSwapchainDetails* result);
 
     void Graphics_Load(const char* appVersion)
     {
@@ -192,7 +185,7 @@ namespace hf
         LOG_LOG("Graphics device found [%s]", rendererData->defaultDevice->properties.deviceName);
 
         auto& scs = rendererData->defaultDevice->swapChainSupport;
-        SurfaceDetails details{};
+        GraphicsSwapchainDetails details{};
         if (GetAvailableSurfaceDetails(scs,
             VULKAN_API_COLOR_FORMAT, VULKAN_API_PRESENT_MODE, ivec2(1080, 1920), &details))
         {
@@ -233,18 +226,29 @@ namespace hf
             }
 
             VK_HANDLE_EXCEPT(vkCreateSwapchainKHR(rendererData->defaultDevice->logicalDevice.device, &createInfo,
-                nullptr, &rendererData->swapchain));
+                nullptr, &rendererData->swapchain.swapchain));
+            rendererData->swapchain.details = details;
         }
         else throw GENERIC_EXCEPT("[Vulkan]", "Unable to create swapchain");
+
+        uint32_t imageCount;
+        VK_HANDLE_EXCEPT(vkGetSwapchainImagesKHR(rendererData->defaultDevice->logicalDevice.device,
+            rendererData->swapchain.swapchain, &imageCount, nullptr));
+
+        rendererData->swapchain.swapchainImages = std::vector<VkImage>(imageCount);
+        VK_HANDLE_EXCEPT(vkGetSwapchainImagesKHR(rendererData->defaultDevice->logicalDevice.device,
+            rendererData->swapchain.swapchain, &imageCount,
+            rendererData->swapchain.swapchainImages.data()));
     }
 
     void Graphics_UnloadSwapchain(VKRendererData* rendererData)
     {
-        if (rendererData->swapchain != VK_NULL_HANDLE)
+        if (rendererData->defaultDevice != nullptr)
         {
             vkDestroySwapchainKHR(rendererData->defaultDevice->logicalDevice.device,
-                rendererData->swapchain, nullptr);
-            rendererData->swapchain = VK_NULL_HANDLE;
+                rendererData->swapchain.swapchain, nullptr);
+            rendererData->swapchain.swapchain = VK_NULL_HANDLE;
+            rendererData->swapchain.swapchainImages.clear();
         }
     }
 
@@ -452,7 +456,7 @@ namespace hf
 
     bool GetAvailableSurfaceDetails(const SwapChainSupportDetails& swapChainSupportDetails,
     VkFormat targetFormat, VkPresentModeKHR targetPresentMode, uvec2 targetExtents,
-    SurfaceDetails* result)
+    GraphicsSwapchainDetails* result)
     {
         int mask = 0;
         for (auto& format : swapChainSupportDetails.formats)
