@@ -41,7 +41,7 @@ file(COPY ${CMAKE_SOURCE_DIR}/application/res DESTINATION ${CMAKE_BINARY_DIR})
 target_compile_definitions("${CMAKE_PROJECT_NAME}" PUBLIC RES_PATH="${CMAKE_BINARY_DIR}./res/") #BUILD
 
 set(SHADER_SOURCE_DIR "${CMAKE_SOURCE_DIR}/application/shaders/vulkan")
-set(SHADER_BINARY_DIR "${CMAKE_BINARY_DIR}/res/shaders")
+set(SHADER_BINARY_DIR "${CMAKE_BINARY_DIR}/res/shaders/vulkan")
 
 # Find all shader source files
 file(GLOB_RECURSE SHADER_SOURCES

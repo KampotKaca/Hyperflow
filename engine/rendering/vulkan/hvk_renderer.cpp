@@ -14,7 +14,7 @@ namespace hf
 
         auto rendererData = new VKRendererData
         {
-            .windowHandle = window->GetHandle()
+            .windowHandle = window->handle
         };
 
         Graphics_LoadPhysicalDevices(rendererData);

@@ -97,9 +97,9 @@ namespace hf
 		nanosleep(&ts, nullptr);
 	}
 
-	ivec2 Platform_GetPointerPosition(Window* window)
+	ivec2 Platform_GetPointerPosition(const Window* window)
 	{
-		auto winHandle = (LnxWindowData*)window->GetHandle();
+		auto winHandle = (LnxWindowData*)window->handle;
 		::Window root, child;
 		ivec2 rootPos{}, winPos{};
 		unsigned int mask_return;

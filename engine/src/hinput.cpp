@@ -10,39 +10,39 @@ namespace hf::input
 	ivec2 GetPointerPosition(const Ref<Window> &window)
 	{
 		if(!window) throw NULL_REF_EXCEPTION(Window, window);
-		return window->m_EventData.pointerPosition;
+		return window->eventData.pointerPosition;
 	}
 	
 	ivec2 GetPointerDelta(const Ref<Window> &window)
 	{
 		if(!window) throw NULL_REF_EXCEPTION(Window, window);
-		return window->m_EventData.pointerDelta;
+		return window->eventData.pointerDelta;
 	}
 	
 	vec2 GetScrollDelta(const Ref<Window> &window)
 	{
 		if(!window) throw NULL_REF_EXCEPTION(Window, window);
-		return window->m_EventData.scrollDelta;
+		return window->eventData.scrollDelta;
 	}
 
 	KeyState GetState(const Ref<Window> &window, Key key)
 	{
 		if(!window) throw NULL_REF_EXCEPTION(Window, window);
 		if(key == Key::None) LOG_WARN("Redundant Key State Request!");
-		return (KeyState)window->m_EventData.keyStates[(uint8_t)key];
+		return (KeyState)window->eventData.keyStates[(uint8_t)key];
 	}
 
 	ButtonState GetState(const Ref<Window> &window, Button button)
 	{
 		if(!window) throw NULL_REF_EXCEPTION(Window, window);
 		if(button == Button::None) LOG_WARN("Redundant Button State Request!");
-		return (KeyState)window->m_EventData.buttonStates[(uint8_t)button];
+		return (KeyState)window->eventData.buttonStates[(uint8_t)button];
 	}
 
 	const std::string& GetWrite(const Ref<Window> &window)
 	{
 		if(!window) throw NULL_REF_EXCEPTION(Window, window);
-		return window->m_EventData.charData;
+		return window->eventData.charData;
 	}
 
 	ivec2 GetPointerPosition() { return GetPointerPosition(GetMainWindow()); }

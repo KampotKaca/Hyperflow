@@ -6,6 +6,7 @@
 
 #include "hlnx_eventhandling.h"
 #include "hyperflow.h"
+#include "hinternal.h"
 #include <X11/Xlib.h>
 #include <X11/keysym.h>
 #include <X11/Xatom.h>
@@ -96,17 +97,17 @@ namespace hf
     {
     	if (!window) return;
     	auto message = (Atom)event.xclient.data.l[0];
-    	if (message == PLATFORM_DATA.closeMessage) window->Close();
+    	if (message == PLATFORM_DATA.closeMessage) inter::window::Close(window);
     }
 
 	static void Platform_HandleDestroyNotify(XEvent& event, Window* window)
     {
-    	if (window) window->Close();
+    	if (window) inter::window::Close(window);
     }
 
 	static void Platform_HandleConfigureNotify(const XEvent& event, Window* window)
 	{
-    	window->m_Rect = (IRect)
+    	window->rect = (IRect)
 		{
 			.position = ivec2(event.xconfigure.x, event.xconfigure.y),
 			.size = ivec2(event.xconfigure.width, event.xconfigure.height),
@@ -132,25 +133,25 @@ namespace hf
 	static void Platform_HandleKeyPress(XEvent& event, const Window* window)
     {
     	auto key = Platform_TransformToKey(XLookupKeysym(&event.xkey, 0));
-    	KeyboardEvent_Key(window->m_Keyboard, key, Keyboard::Event::Type::Press);
+    	KeyboardEvent_Key(window->keyboard, key, Keyboard::Event::Type::Press);
     }
 
 	static void Platform_HandleButtonPress(const XEvent& event, const Window* window)
     {
     	switch (event.xbutton.button)
     	{
-    	    case Button1: MouseEvent_Button(window->m_Mouse, Button::Left, Mouse::Event::Type::Press);   break;
-    	    case Button2: MouseEvent_Button(window->m_Mouse, Button::Wheel, Mouse::Event::Type::Press);  break;
-    	    case Button3: MouseEvent_Button(window->m_Mouse, Button::Right, Mouse::Event::Type::Press);  break;
+    	    case Button1: MouseEvent_Button(window->mouse, Button::Left, Mouse::Event::Type::Press);   break;
+    	    case Button2: MouseEvent_Button(window->mouse, Button::Wheel, Mouse::Event::Type::Press);  break;
+    	    case Button3: MouseEvent_Button(window->mouse, Button::Right, Mouse::Event::Type::Press);  break;
 
-    	    case 8:       MouseEvent_Button(window->m_Mouse, Button::Extra1, Mouse::Event::Type::Press); break;
-    	    case 9:       MouseEvent_Button(window->m_Mouse, Button::Extra2, Mouse::Event::Type::Press); break;
+    	    case 8:       MouseEvent_Button(window->mouse, Button::Extra1, Mouse::Event::Type::Press); break;
+    	    case 9:       MouseEvent_Button(window->mouse, Button::Extra2, Mouse::Event::Type::Press); break;
 
-    		case Button4: MouseEvent_Scroll(window->m_Mouse, vec2(0, 1));  break;
-    		case Button5: MouseEvent_Scroll(window->m_Mouse, vec2(0, -1)); break;
+    		case Button4: MouseEvent_Scroll(window->mouse, vec2(0, 1));  break;
+    		case Button5: MouseEvent_Scroll(window->mouse, vec2(0, -1)); break;
 
-    	    case 6: MouseEvent_Scroll(window->m_Mouse, vec2(1, 0));  break;
-    	    case 7: MouseEvent_Scroll(window->m_Mouse, vec2(-1, 0)); break;
+    	    case 6: MouseEvent_Scroll(window->mouse, vec2(1, 0));  break;
+    	    case 7: MouseEvent_Scroll(window->mouse, vec2(-1, 0)); break;
 			default: break;
 	    }
     }
@@ -158,25 +159,25 @@ namespace hf
 	static void Platform_HandleKeyRelease(XEvent& event, const Window* window)
     {
     	auto key = Platform_TransformToKey(XLookupKeysym(&event.xkey, 0));
-    	KeyboardEvent_Key(window->m_Keyboard, key, Keyboard::Event::Type::Release);
+    	KeyboardEvent_Key(window->keyboard, key, Keyboard::Event::Type::Release);
     }
 
 	static void Platform_HandleButtonRelease(const XEvent& event, const Window* window)
 	{
     	switch (event.xbutton.button)
     	{
-    	    case Button1: MouseEvent_Button(window->m_Mouse, Button::Left, Mouse::Event::Type::Release);   break;
-    	    case Button2: MouseEvent_Button(window->m_Mouse, Button::Wheel, Mouse::Event::Type::Release);  break;
-    	    case Button3: MouseEvent_Button(window->m_Mouse, Button::Right, Mouse::Event::Type::Release);  break;
-    	    case 8:       MouseEvent_Button(window->m_Mouse, Button::Extra1, Mouse::Event::Type::Release); break;
-    	    case 9:       MouseEvent_Button(window->m_Mouse, Button::Extra2, Mouse::Event::Type::Release); break;
+    	    case Button1: MouseEvent_Button(window->mouse, Button::Left, Mouse::Event::Type::Release);   break;
+    	    case Button2: MouseEvent_Button(window->mouse, Button::Wheel, Mouse::Event::Type::Release);  break;
+    	    case Button3: MouseEvent_Button(window->mouse, Button::Right, Mouse::Event::Type::Release);  break;
+    	    case 8:       MouseEvent_Button(window->mouse, Button::Extra1, Mouse::Event::Type::Release); break;
+    	    case 9:       MouseEvent_Button(window->mouse, Button::Extra2, Mouse::Event::Type::Release); break;
     	    default: break;
     	}
 	}
 
 	static void Platform_HandleMotionNotify(XEvent& event, const Window* window)
 	{
-    	MouseEvent_Moved(window->m_Mouse, { event.xmotion.x, event.xmotion.y });
+    	MouseEvent_Moved(window->mouse, { event.xmotion.x, event.xmotion.y });
 	}
 
 	//endregion

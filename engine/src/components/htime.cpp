@@ -6,6 +6,7 @@
 #include <thread>
 #include "hplatform.h"
 #include "hyperflow.h"
+#include "hinternal.h"
 
 namespace hf
 {
@@ -52,4 +53,22 @@ namespace hf
 	}
 
 	int32_t Time::GetFrameRate() const { return (int32_t)glm::round(frameRate); }
+
+	namespace time
+	{
+		uint64_t GetFrameCount() { return inter::HF.time.GetFrameCount(); }
+		double GetDeltaTime(){ return inter::HF.time.GetDeltaTime(); }
+		double GetTimePassed() { return inter::HF.time.GetTimePassed(); }
+		double GetAbsoluteTimePassed() { return inter::HF.time.GetAbsoluteTimePassed(); }
+		int16_t GetTargetFrameRate() { return inter::HF.time.GetTargetFrameRate(); }
+		int32_t GetFrameRate() { return inter::HF.time.GetFrameRate(); }
+		void SetTargetFrameRate(int16_t targetFrameRate) { return inter::HF.time.SetTargetFrameRate(targetFrameRate); }
+
+		double GetSystemTime()
+		{
+			using namespace std::chrono;
+			const auto time = high_resolution_clock::now().time_since_epoch();
+			return duration<double>(time).count();
+		}
+	}
 }

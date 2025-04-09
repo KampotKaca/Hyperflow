@@ -181,7 +181,7 @@ namespace hf
 		WindowData windowData;
 	};
 
-	class Window;
+	struct Window;
 
 	//endregion
 

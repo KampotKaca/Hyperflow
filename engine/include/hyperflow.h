@@ -2,7 +2,6 @@
 #define HYPERFLOW_H
 
 #include "hshared.h"
-#include "hwindow.h"
 #include "hrenderer.h"
 #include "hexception.h"
 
@@ -51,6 +50,28 @@ namespace hf
 		vec2 GetScrollDelta(const Ref<Window> &window);
 	}
 
+	namespace window
+	{
+		const std::string& GetTitle(const Ref<Window> &window);
+		ivec2 GetSize(const Ref<Window> &window);
+		ivec2 GetPosition(const Ref<Window> &window);
+		IRect GetRect(const Ref<Window> &window);
+		WindowFlags GetFlags(const Ref<Window> &window);
+		WindowStyle GetStyle(const Ref<Window> &window);
+		void* GetHandle(const Ref<Window> &window);
+		const Renderer* GetRenderer(const Ref<Window> &window);
+
+		void SetTitle(const Ref<Window> &window, const char* title);
+		void SetSize(const Ref<Window> &window, ivec2 size);
+		void SetPosition(const Ref<Window> &window, ivec2 position);
+		void SetRect(const Ref<Window> &window, IRect rect);
+
+		bool IsClosing(const Ref<Window> &window);
+		void SetFlags(const Ref<Window> &window, WindowFlags flags);
+		void Focus(const Ref<Window> &window);
+		bool Close(const Ref<Window> &window);
+	}
+
 	namespace time
 	{
 		uint64_t GetFrameCount();
@@ -66,6 +87,7 @@ namespace hf
 	namespace utils
 	{
 		ivec3 ConvertVersion(const char* version);
+		bool ReadFile(const std::string& filename, std::vector<char>& location);
 	}
 }
 

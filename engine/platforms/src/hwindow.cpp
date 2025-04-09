@@ -1,27 +1,36 @@
 #define private public
-#include "hwindow.h"
 #include "hkeyboard.h"
 #include "hmouse.h"
 #undef private
 
+#include "hinternal.h"
+#include "hyperflow.h"
+#include "hwindow.h"
 #include "hplatform.h"
 #include "hrenderer.h"
 
 namespace hf
 {
-	const std::string& Window::GetTitle() const { return m_Title; }
-	ivec2 Window::GetSize() const { return m_Rect.size; }
-	ivec2 Window::GetPosition() const { return m_Rect.size; }
-	IRect Window::GetRect() const { return m_Rect; }
-	WindowFlags Window::GetFlags() const { return m_Flags; }
-	WindowStyle Window::GetStyle() const { return m_Style; }
-	void *Window::GetHandle() const { return m_Handle; }
-	const Renderer* Window::GetRenderer() const { return m_Renderer; }
-	bool Window::IsClosing() const { return m_Handle == nullptr; }
-	void Window::Update()
+	namespace window
 	{
-		m_Renderer->StartFrame();
-		m_Renderer->EndFrame();
+		const std::string& GetTitle(const Ref<Window> &window) { return window->title; }
+		ivec2 GetSize(const Ref<Window> &window) { return window->rect.size; }
+		ivec2 GetPosition(const Ref<Window> &window) { return window->rect.size; }
+		IRect GetRect(const Ref<Window> &window) { return window->rect; }
+		WindowFlags GetFlags(const Ref<Window> &window) { return window->flags; }
+		WindowStyle GetStyle(const Ref<Window> &window) { return window->style; }
+		void* GetHandle(const Ref<Window> &window) { return window->handle; }
+		const Renderer* GetRenderer(const Ref<Window> &window) { return window->renderer; }
+		bool IsClosing(const Ref<Window> &window) { return window->handle == nullptr; }
+
+		void SetTitle(const Ref<Window> &window, const char* title) { inter::window::SetTitle(window.get(), title); }
+		void SetSize(const Ref<Window> &window, ivec2 size) { inter::window::SetSize(window.get(), size); }
+		void SetPosition(const Ref<Window> &window, ivec2 position) { inter::window::SetPosition(window.get(), position); }
+		void SetRect(const Ref<Window> &window, IRect rect) { inter::window::SetRect(window.get(), rect); }
+
+		void SetFlags(const Ref<Window> &window, WindowFlags flags) { inter::window::SetFlags(window.get(), flags); }
+		void Focus(const Ref<Window> &window) { inter::window::Focus(window.get()); }
+		bool Close(const Ref<Window> &window) { return inter::window::Close(window.get()); }
 	}
 
 	void HandleKeyboardFocus(Keyboard* keyboard) noexcept;
@@ -29,42 +38,42 @@ namespace hf
 	void HandleMouseFocus(Mouse* mouse, Window* window) noexcept;
 	void HandleMouseFocusLoss(Mouse* mouse) noexcept;
 
-	void WindowEvent_Title(Window* window, const char* newTitle) noexcept
+	void WindowEvent_Title(Window* win, const char* newTitle) noexcept
 	{
-		window->m_Title = std::string(newTitle);
+		win->title = std::string(newTitle);
 	}
 
-	void WindowEvent_Close(Window* window) noexcept
+	void WindowEvent_Close(Window* win) noexcept
 	{
-		window->Close();
+		inter::window::Close(win);
 	}
 
-	void WindowEvent_Show(Window* window, bool show) noexcept
+	void WindowEvent_Show(Window* win, bool show) noexcept
 	{
-		Platform_SetWindowFlag(&window->m_Flags, WindowFlags::Visible, show);
+		Platform_SetWindowFlag(&win->flags, WindowFlags::Visible, show);
 	}
 
 	void WindowEvent_Move(Window* window, ivec2 position) noexcept
 	{
-		window->m_Rect.position = position;
+		window->rect.position = position;
 	}
 
 	void WindowEvent_Resize(Window* window, ivec2 size) noexcept
 	{
-		window->m_Rect.size = size;
+		window->rect.size = size;
 	}
 
 	void WindowEvent_Focus(Window* window, bool isFocused) noexcept
 	{
 		if(isFocused)
 		{
-			HandleKeyboardFocus(window->m_Keyboard);
-			HandleMouseFocus(window->m_Mouse, window);
+			HandleKeyboardFocus(window->keyboard);
+			HandleMouseFocus(window->mouse, window);
 		}
 		else
 		{
-			HandleKeyboardFocusLoss(window->m_Keyboard);
-			HandleMouseFocusLoss(window->m_Mouse);
+			HandleKeyboardFocusLoss(window->keyboard);
+			HandleMouseFocusLoss(window->mouse);
 		}
 	}
 	
@@ -72,7 +81,7 @@ namespace hf
 	{
 		for(const auto& window : windows)
 		{
-			auto& eventData = window->m_EventData;
+			auto& eventData = window->eventData;
 
 #define EVENT_HANDLING(type, loc, evLoc, sys, t)\
 			for (auto& currentState : loc)\
@@ -105,20 +114,20 @@ namespace hf
 				}\
 			}
 
-			EVENT_HANDLING(Key, eventData.keyStates, window->m_Keyboard, Keyboard, m_Key)
-			EVENT_HANDLING(Button, eventData.buttonStates, window->m_Mouse, Mouse, m_Button)
+			EVENT_HANDLING(Key, eventData.keyStates, window->keyboard, Keyboard, m_Key)
+			EVENT_HANDLING(Button, eventData.buttonStates, window->mouse, Mouse, m_Button)
 
 			eventData.charData = "";
-			while(!window->m_Keyboard->CharIsEmpty())
+			while(!window->keyboard->CharIsEmpty())
 			{
-				eventData.charData += window->m_Keyboard->ReadChar();
+				eventData.charData += window->keyboard->ReadChar();
 			}
 
-			eventData.scrollDelta = window->m_Mouse->GetScrollDelta();
-			window->m_Mouse->m_ScrollDelta = glm::vec2{ 0, 0 };
+			eventData.scrollDelta = window->mouse->GetScrollDelta();
+			window->mouse->m_ScrollDelta = glm::vec2{ 0, 0 };
 
-			eventData.pointerDelta = window->m_Mouse->GetPosition() - eventData.pointerPosition;
-			eventData.pointerPosition = window->m_Mouse->GetPosition();
+			eventData.pointerDelta = window->mouse->GetPosition() - eventData.pointerPosition;
+			eventData.pointerPosition = window->mouse->GetPosition();
 		}
 	}
 
@@ -179,4 +188,13 @@ namespace hf
 		mouse->m_ScrollDelta = { 0, 0 };
 	};
 	//endregion
+
+	namespace inter::window
+	{
+		void Update(const Window* win)
+		{
+			win->renderer->StartFrame();
+			win->renderer->EndFrame();
+		}
+	}
 }

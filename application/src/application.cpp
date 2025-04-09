@@ -40,7 +40,7 @@ namespace app
 		}
 		if (hf::input::IsDown(hf::Key::Space) && wn)
 		{
-			wn->Close();
+			hf::window::Close(wn);
 		}
 
 		auto delta = hf::input::GetScrollDelta();
@@ -55,7 +55,7 @@ namespace app
 			std::ostringstream oss;
 			oss << "[Hyperflow] " << hf::time::GetFrameRate();
 			// oss << "[Hyperflow] " << hf::Time::GetTimePassed();
-			hf::GetMainWindow()->SetTitle(oss.str().c_str());
+			hf::window::SetTitle(hf::GetMainWindow(), oss.str().c_str());
 			reqCount = cReq;
 		}
 	}
