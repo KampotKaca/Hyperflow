@@ -30,19 +30,51 @@ target_link_libraries(${PROJECT_NAME}
         Hyperflow_Engine
 )
 
-#region resources
-if(CMAKE_BUILD_TYPE STREQUAL "Debug")
-    target_compile_definitions("${CMAKE_PROJECT_NAME}" PUBLIC RES_PATH="${CMAKE_CURRENT_SOURCE_DIR}/application/res/") #DEBUG
-elseif(CMAKE_BUILD_TYPE STREQUAL "Release")
-    file(COPY ${CMAKE_SOURCE_DIR}/application/res DESTINATION ${CMAKE_BINARY_DIR})
-    target_compile_definitions("${CMAKE_PROJECT_NAME}" PUBLIC RES_PATH="${CMAKE_BINARY_DIR}./res/") #BUILD
+#region Prebuild
+find_program(GLSLC_EXECUTABLE glslc REQUIRED)
+
+if(NOT GLSLC_EXECUTABLE)
+    message(FATAL_ERROR "glslc not found! Please install Vulkan SDK or add glslc to PATH.")
 endif()
 
-add_custom_target(copy_res ALL
-        COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/application/res ${CMAKE_BINARY_DIR}/res
-        COMMENT "Copying resource files..."
+file(COPY ${CMAKE_SOURCE_DIR}/application/res DESTINATION ${CMAKE_BINARY_DIR})
+target_compile_definitions("${CMAKE_PROJECT_NAME}" PUBLIC RES_PATH="${CMAKE_BINARY_DIR}./res/") #BUILD
+
+set(SHADER_SOURCE_DIR "${CMAKE_SOURCE_DIR}/application/shaders/vulkan")
+set(SHADER_BINARY_DIR "${CMAKE_BINARY_DIR}/res/shaders")
+
+# Find all shader source files
+file(GLOB_RECURSE SHADER_SOURCES
+        "${SHADER_SOURCE_DIR}/*.vert"
+        "${SHADER_SOURCE_DIR}/*.frag"
 )
 
-# Make the custom target a dependency of the main project
-add_dependencies(${CMAKE_PROJECT_NAME} copy_res)
+# Create the output directory
+file(MAKE_DIRECTORY ${SHADER_BINARY_DIR})
+
+# List to hold all compiled shader files
+set(COMPILED_SHADERS)
+
+foreach(SHADER ${SHADER_SOURCES})
+    # Get the filename without path
+    get_filename_component(FILE_NAME ${SHADER} NAME)
+    # Output file path
+    set(OUTPUT_FILE "${SHADER_BINARY_DIR}/${FILE_NAME}.spv")
+
+    add_custom_command(
+            OUTPUT ${OUTPUT_FILE}
+            COMMAND ${GLSLC_EXECUTABLE} ${SHADER} -o ${OUTPUT_FILE}
+            DEPENDS ${SHADER}
+            COMMENT "Compiling shader ${FILE_NAME}"
+            VERBATIM
+    )
+
+    list(APPEND COMPILED_SHADERS ${OUTPUT_FILE})
+endforeach()
+
+add_custom_target(Prebuild
+        ALL DEPENDS ${COMPILED_SHADERS}
+        COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/application/res ${CMAKE_BINARY_DIR}/res
+)
 #endregion
+add_dependencies(${CMAKE_PROJECT_NAME} Prebuild)
