@@ -235,20 +235,62 @@ namespace hf
         VK_HANDLE_EXCEPT(vkGetSwapchainImagesKHR(rendererData->defaultDevice->logicalDevice.device,
             rendererData->swapchain.swapchain, &imageCount, nullptr));
 
-        rendererData->swapchain.swapchainImages = std::vector<VkImage>(imageCount);
+        auto& images = rendererData->swapchain.images;
+        images = std::vector<VkImage>(imageCount);
         VK_HANDLE_EXCEPT(vkGetSwapchainImagesKHR(rendererData->defaultDevice->logicalDevice.device,
             rendererData->swapchain.swapchain, &imageCount,
-            rendererData->swapchain.swapchainImages.data()));
+            images.data()));
+
+        auto& imageViews = rendererData->swapchain.imageViews;
+        imageViews = std::vector<VkImageView>(imageCount);
+        for (uint32_t i = 0; i < imageCount; i++)
+        {
+            VkImageViewCreateInfo createInfo
+            {
+                .sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO,
+                .image = images[i],
+                .viewType = VK_IMAGE_VIEW_TYPE_2D,
+                .format = details.format.format,
+                .components =
+                {
+                    .r = VK_COMPONENT_SWIZZLE_IDENTITY,
+                    .g = VK_COMPONENT_SWIZZLE_IDENTITY,
+                    .b = VK_COMPONENT_SWIZZLE_IDENTITY,
+                    .a = VK_COMPONENT_SWIZZLE_IDENTITY,
+                },
+                .subresourceRange =
+                {
+                    .aspectMask = VK_IMAGE_ASPECT_COLOR_BIT,
+                    .baseMipLevel = 0,
+                    .levelCount = 1,
+                    .baseArrayLayer = 0,
+                    .layerCount = 1,
+                }
+            };
+
+            VK_HANDLE_EXCEPT(vkCreateImageView(rendererData->defaultDevice->logicalDevice.device,
+                &createInfo, nullptr, &imageViews[i]));
+        }
+
     }
 
     void Graphics_UnloadSwapchain(VKRendererData* rendererData)
     {
         if (rendererData->defaultDevice != nullptr)
         {
+            for (uint32_t i = 0; i < rendererData->swapchain.imageViews.size(); i++)
+            {
+                vkDestroyImageView(rendererData->defaultDevice->logicalDevice.device,
+                    rendererData->swapchain.imageViews[i], nullptr);
+            }
+
+            rendererData->swapchain.imageViews.clear();
+            rendererData->swapchain.images.clear();
+
             vkDestroySwapchainKHR(rendererData->defaultDevice->logicalDevice.device,
                 rendererData->swapchain.swapchain, nullptr);
             rendererData->swapchain.swapchain = VK_NULL_HANDLE;
-            rendererData->swapchain.swapchainImages.clear();
+            rendererData->defaultDevice = nullptr;
         }
     }
 

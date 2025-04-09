@@ -82,7 +82,8 @@ namespace hf
     struct GraphicsSwapChain
     {
         VkSwapchainKHR swapchain = VK_NULL_HANDLE;
-        std::vector<VkImage> swapchainImages{};
+        std::vector<VkImage> images{};
+        std::vector<VkImageView> imageViews{};
         GraphicsSwapchainDetails details{};
     };
 
