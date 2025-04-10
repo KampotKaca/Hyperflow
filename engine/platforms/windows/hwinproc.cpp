@@ -1,11 +1,6 @@
 #include "hwindows.h"
 
-#define private public
 #include "hwindow.h"
-#include "hkeyboard.h"
-#include "hmouse.h"
-#undef private
-
 #include "hwinproc.h"
 #include "hplatform.h"
 
@@ -240,7 +235,7 @@ namespace hf
 	LRESULT Platform_HandleEvents_KeyboardChar(Window* window, WPARAM wparam,
 	                                           __attribute__((unused)) LPARAM lparam) noexcept
 	{
-		KeyboardEvent_Char(window->m_Keyboard, (char) wparam);
+		KeyboardEvent_Char(window->keyboard, (char) wparam);
 		return 0;
 	}
 
@@ -255,12 +250,12 @@ namespace hf
 			case Keyboard::Event::Type::Invalid: LOG_WARN("Invalid Event thrown"); break;
 			case Keyboard::Event::Type::Press:
 
-				if(!(lparam & 0x40000000) || window->m_Keyboard->IsAutoRepeatEnabled())
-					KeyboardEvent_Key(window->m_Keyboard, key, type);
+				if(!(lparam & 0x40000000) || window->keyboard.autoRepeatEnabled)
+					KeyboardEvent_Key(window->keyboard, key, type);
 
 				break;
 			case Keyboard::Event::Type::Release:
-				if(window->m_Keyboard->IsPressed(key)) KeyboardEvent_Key(window->m_Keyboard, key, type);
+				if(window->keyboard.states[(uint8_t)key]) KeyboardEvent_Key(window->keyboard, key, type);
 				break;
 		}
 		return 0;
@@ -268,38 +263,38 @@ namespace hf
 
 	LRESULT Platform_HandleEvents_MouseButton(Window* window, WPARAM wparam, LPARAM lparam, Button button, Mouse::Event::Type type) noexcept
 	{
-		MouseEvent_Button(window->m_Mouse, button, type);
+		MouseEvent_Button(window->mouse, button, type);
 		return 0;
 	}
 
 	LRESULT Platform_HandleEvents_MouseButtonExtra(Window* window, WPARAM wparam, LPARAM lparam, Mouse::Event::Type type) noexcept
 	{
-		if(wparam & MK_XBUTTON1) MouseEvent_Button(window->m_Mouse, Button::Extra1, type);
-		if(wparam & MK_XBUTTON2) MouseEvent_Button(window->m_Mouse, Button::Extra2, type);
+		if(wparam & MK_XBUTTON1) MouseEvent_Button(window->mouse, Button::Extra1, type);
+		if(wparam & MK_XBUTTON2) MouseEvent_Button(window->mouse, Button::Extra2, type);
 		return 0;
 	}
 
 	LRESULT Platform_HandleEvents_MouseMove(Window* window, WPARAM wparam, LPARAM lparam) noexcept
 	{
 		const POINTS pt = MAKEPOINTS(lparam);
-		auto rect = window->m_Rect;
+		auto rect = window->rect;
 
 		if(pt.x >= 0 && pt.x < rect.size.x && pt.y > 0 && pt.y < rect.size.y)
 		{
-			MouseEvent_Moved(window->m_Mouse, ivec2{ pt.x, pt.y });
-			if(!window->m_Mouse->m_IsInClientRegion)
+			MouseEvent_Moved(window->mouse, ivec2{ pt.x, pt.y });
+			if(!window->mouse.isInClientRegion)
 			{
-				SetCapture((HWND)window->m_Handle);
-				window->m_Mouse->m_IsInClientRegion = true;
+				SetCapture((HWND)window->handle);
+				window->mouse.isInClientRegion = true;
 			}
 		}
 		else
 		{
-			if(wparam & (MK_LBUTTON | MK_RBUTTON)) MouseEvent_Moved(window->m_Mouse, ivec2{ pt.x, pt.y });
+			if(wparam & (MK_LBUTTON | MK_RBUTTON)) MouseEvent_Moved(window->mouse, ivec2{ pt.x, pt.y });
 			else
 			{
 				ReleaseCapture();
-				window->m_Mouse->m_IsInClientRegion = false;
+				window->mouse.isInClientRegion = false;
 			}
 		}
 
@@ -308,7 +303,7 @@ namespace hf
 			GET_X_LPARAM(lparam),
 			GET_Y_LPARAM(lparam)
 		};
-		MouseEvent_Moved(window->m_Mouse, position);
+		MouseEvent_Moved(window->mouse, position);
 
 		return 0;
 	}
@@ -317,7 +312,7 @@ namespace hf
 	{
 		auto delta = GET_WHEEL_DELTA_WPARAM(wparam) / (float)WHEEL_DELTA;
 
-		MouseEvent_Scroll(window->m_Mouse, (vec2)direction * delta);
+		MouseEvent_Scroll(window->mouse, (vec2)direction * delta);
 
 		return 0;
 	}

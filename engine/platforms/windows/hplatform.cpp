@@ -143,11 +143,11 @@ namespace hf
 		CloseHandle(WaitTimer);
 	}
 
-	ivec2 Platform_GetPointerPosition(Window* window)
+	ivec2 Platform_GetPointerPosition(const Window* window)
 	{
 		POINT point;
 		if(!GetCursorPos(&point)) throw WND_LAST_EXCEPT();
-		if(!ScreenToClient((HWND)window->GetHandle(), &point)) throw WND_LAST_EXCEPT();
+		if(!ScreenToClient((HWND)window->handle, &point)) throw WND_LAST_EXCEPT();
 		return { (int32_t)point.x, (int32_t)point.y };
 	}
 }

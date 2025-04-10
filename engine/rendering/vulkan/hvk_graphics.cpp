@@ -529,7 +529,12 @@ namespace hf
 
         result->extent = extents;
         if (!(mask & (1 << 0))) LOG_WARN("[Vulkan] %s", "Unable to choose target swapchain surface format");
-        if (!(mask & (1 << 1))) LOG_WARN("[Vulkan] %s", "Unable to choose target swapchain present mode");
+        if (!(mask & (1 << 1)))
+        {
+            result->presentMode = VK_PRESENT_MODE_FIFO_KHR;
+            mask |= 1 << 1;
+            LOG_WARN("[Vulkan] %s", "Unable to choose target swapchain present mode, defaulted to FIFO");
+        }
 
         return mask == (1 << 2) - 1;
     }

@@ -3,8 +3,6 @@
 
 #include "hwindows.h"
 #include "hwindow.h"
-#include "hkeyboard.h"
-#include "hmouse.h"
 
 namespace hf
 {

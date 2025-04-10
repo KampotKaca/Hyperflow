@@ -1,26 +1,30 @@
 #include "hd3d_graphics.h"
 #include "hrenderer.h"
 #include "hwindow.h"
+#include "hinternal.h"
 
 namespace hf
 {
 	Renderer::Renderer(const Ref<Window>& window, const char* version)
 	{
-		m_GraphicsHandle = new Graphics((HWND)window->GetHandle());
+		handle = new Graphics((HWND)window->handle);
 	}
 
 	Renderer::~Renderer()
 	{
-		delete (Graphics*)m_GraphicsHandle;
+		delete (Graphics*)handle;
 	}
 
-	void Renderer::StartFrame()
+	namespace inter::rendering
 	{
-		((Graphics*)m_GraphicsHandle)->StartFrame();
-	}
+		void StartFrame(Renderer* renderer)
+		{
+			((Graphics*)renderer->handle)->StartFrame();
+		}
 
-	void Renderer::EndFrame()
-	{
-		((Graphics*)m_GraphicsHandle)->EndFrame();
+		void EndFrame(Renderer* renderer)
+		{
+			((Graphics*)renderer->handle)->EndFrame();
+		}
 	}
 }

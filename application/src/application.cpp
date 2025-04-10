@@ -45,7 +45,7 @@ namespace app
 
 		// auto delta = hf::input::GetScrollDelta();
 		// if (delta != hf::vec2(0, 0)) LOG_INFO("Scroll (X: %f, Y: %f)", delta.x, delta.y);
-
+		//
 		// auto mDelta = hf::input::GetPointerDelta();
 		// if (mDelta != hf::ivec2(0, 0)) LOG_INFO("Move: (X: %i, Y: %i)", mDelta.x, mDelta.y);
 
