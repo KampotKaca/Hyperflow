@@ -1,9 +1,8 @@
 #define private public
-#include "hwindow.h"
 #include "hkeyboard.h"
-#include "hmouse.h"
 #undef private
 
+#include "hwindow.h"
 #include "hlnx_eventhandling.h"
 #include "hyperflow.h"
 #include "hinternal.h"
@@ -31,11 +30,11 @@ namespace hf
 	static void Platform_HandleFocusOut	        (XEvent& event, Window* window);
 	static void Platform_HandleExpose	        (XEvent& event, Window* window);
 
-	static void Platform_HandleKeyPress			(XEvent& event, const Window* window);
-	static void Platform_HandleButtonPress		(const XEvent& event, const Window* window);
-	static void Platform_HandleKeyRelease		(XEvent& event, const Window* window);
-	static void Platform_HandleButtonRelease	(const XEvent& event, const Window* window);
-	static void Platform_HandleMotionNotify		(XEvent& event, const Window* window);
+	static void Platform_HandleKeyPress			(XEvent& event, Window* window);
+	static void Platform_HandleButtonPress		(const XEvent& event, Window* window);
+	static void Platform_HandleKeyRelease		(XEvent& event, Window* window);
+	static void Platform_HandleButtonRelease	(const XEvent& event, Window* window);
+	static void Platform_HandleMotionNotify		(XEvent& event, Window* window);
 
     void Platform_HandleNextEvent()
     {
@@ -130,13 +129,13 @@ namespace hf
 	}
 
 	//region Input
-	static void Platform_HandleKeyPress(XEvent& event, const Window* window)
+	static void Platform_HandleKeyPress(XEvent& event, Window* window)
     {
     	auto key = Platform_TransformToKey(XLookupKeysym(&event.xkey, 0));
     	KeyboardEvent_Key(window->keyboard, key, Keyboard::Event::Type::Press);
     }
 
-	static void Platform_HandleButtonPress(const XEvent& event, const Window* window)
+	static void Platform_HandleButtonPress(const XEvent& event, Window* window)
     {
     	switch (event.xbutton.button)
     	{
@@ -156,13 +155,13 @@ namespace hf
 	    }
     }
 
-	static void Platform_HandleKeyRelease(XEvent& event, const Window* window)
+	static void Platform_HandleKeyRelease(XEvent& event, Window* window)
     {
     	auto key = Platform_TransformToKey(XLookupKeysym(&event.xkey, 0));
     	KeyboardEvent_Key(window->keyboard, key, Keyboard::Event::Type::Release);
     }
 
-	static void Platform_HandleButtonRelease(const XEvent& event, const Window* window)
+	static void Platform_HandleButtonRelease(const XEvent& event, Window* window)
 	{
     	switch (event.xbutton.button)
     	{
@@ -175,7 +174,7 @@ namespace hf
     	}
 	}
 
-	static void Platform_HandleMotionNotify(XEvent& event, const Window* window)
+	static void Platform_HandleMotionNotify(XEvent& event, Window* window)
 	{
     	MouseEvent_Moved(window->mouse, { event.xmotion.x, event.xmotion.y });
 	}

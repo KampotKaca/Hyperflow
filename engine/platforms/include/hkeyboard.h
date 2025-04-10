@@ -5,47 +5,28 @@
 
 namespace hf
 {
-	class Keyboard
+	struct Keyboard
 	{
-	public:
-		class Event
+		struct Event
 		{
-		public:
 			enum class Type { Invalid, Press, Release, };
 			Event();
-			Event(Key key, Type type);
+			Event(Key key, Type t);
 			
-			[[nodiscard]] Key GetKey() const noexcept;
-			[[nodiscard]] Type GetType() const noexcept;
 			[[nodiscard]] bool IsValid() const noexcept;
 		
-		private:
-			Key m_Key;
-			Type m_Type;
+			Key key;
+			Type type;
 		};
 		
 		Keyboard() = default;
 		Keyboard(const Keyboard&) = delete;
 		Keyboard& operator=(const Keyboard&) = delete;
 		
-		[[nodiscard]] bool IsPressed(Key key) const noexcept;
-		[[nodiscard]] bool IsEmpty() const noexcept;
-		[[nodiscard]] bool CharIsEmpty() const noexcept;
-		[[nodiscard]] bool IsAutoRepeatEnabled() const noexcept;
-		
-		Event Read() noexcept;
-		void Dispose() noexcept;
-		char ReadChar() noexcept;
-		void DisposeChar() noexcept;
-		void DisposeAll() noexcept;
-		
-		void SetAutoRepeat(bool enable) noexcept;
-		
-	private:
-		bool m_AutoRepeatEnabled = false;
-		std::bitset<256> m_States = 0;
-		std::queue<Event> m_Buffer;
-		std::queue<char> m_CharBuffer;
+		bool autoRepeatEnabled = false;
+		std::bitset<256> states = 0;
+		std::queue<Event> buffer;
+		std::queue<char> charBuffer;
 	};
 }
 

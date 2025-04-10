@@ -5,24 +5,19 @@
 
 namespace hf
 {
-	class Time
+	struct Time
 	{
-	public:
 		Time();
 		~Time();
 
-		void Update();
+		void StartFrame();
 
-		[[nodiscard]] uint64_t GetFrameCount() const;
-		[[nodiscard]] double GetDeltaTime() const;
 		[[nodiscard]] double GetTimePassed() const;
 		[[nodiscard]] double GetAbsoluteTimePassed() const;
-		[[nodiscard]] int16_t GetTargetFrameRate() const;
 		[[nodiscard]] int32_t GetFrameRate() const;
 
 		void SetTargetFrameRate(int16_t targetFrameRate);
 
-	private:
 		int16_t targetFrameRate = 50;
 		double targetFrameDuration = (1.0 / targetFrameRate);
 		double creationTime = 0;

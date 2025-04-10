@@ -4,6 +4,7 @@
 
 #include "hrenderer.h"
 #include "hvk_graphics.h"
+#include "hinternal.h"
 
 namespace hf
 {
@@ -19,30 +20,33 @@ namespace hf
 
         Graphics_LoadPhysicalDevices(rendererData);
         Graphics_LoadSwapchain(rendererData, 0);
-        m_GraphicsHandle = rendererData;
+        handle = rendererData;
     }
 
     Renderer::~Renderer()
     {
-        const auto data = (VKRendererData*)m_GraphicsHandle;
+        const auto data = (VKRendererData*)handle;
 
         Graphics_UnloadSwapchain(data);
         Graphics_UnloadPhysicalDevices(data);
 
         delete(data);
-        m_GraphicsHandle = nullptr;
+        handle = nullptr;
 
         GRAPHICS_DATA.rendererCount--;
         if (GRAPHICS_DATA.rendererCount == 0) Graphics_Unload();
     }
 
-    void Renderer::StartFrame()
+    namespace inter::rendering
     {
+        void StartFrame(Renderer* renderer)
+        {
 
-    }
+        }
 
-    void Renderer::EndFrame()
-    {
+        void EndFrame(Renderer* renderer)
+        {
 
+        }
     }
 }

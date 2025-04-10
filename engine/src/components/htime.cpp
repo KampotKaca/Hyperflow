@@ -1,7 +1,4 @@
-#define private public
 #include "components/htime.h"
-#undef private
-
 #include <chrono>
 #include <thread>
 #include "hplatform.h"
@@ -18,7 +15,7 @@ namespace hf
 
 	Time::~Time() = default;
 
-	void Time::Update()
+	void Time::StartFrame()
 	{
 		double cTime = time::GetSystemTime();
 
@@ -36,15 +33,12 @@ namespace hf
 		currentTime = cTime;
 		frameCount++;
 
-		double current = 1.0 / GetDeltaTime();
+		double current = 1.0 / deltaTime;
 		frameRate = std::lerp(frameRate, current, 5 * deltaTime);
 	}
 
-	uint64_t Time::GetFrameCount() const { return frameCount; }
-	double Time::GetDeltaTime() const { return deltaTime; }
 	double Time::GetTimePassed() const { return currentTime - creationTime; }
 	double Time::GetAbsoluteTimePassed() const { return time::GetSystemTime() - creationTime; }
-	int16_t Time::GetTargetFrameRate() const { return targetFrameRate; }
 
 	void Time::SetTargetFrameRate(int16_t targetFrameRate)
 	{
@@ -56,11 +50,11 @@ namespace hf
 
 	namespace time
 	{
-		uint64_t GetFrameCount() { return inter::HF.time.GetFrameCount(); }
-		double GetDeltaTime(){ return inter::HF.time.GetDeltaTime(); }
+		uint64_t GetFrameCount() { return inter::HF.time.frameCount; }
+		double GetDeltaTime(){ return inter::HF.time.deltaTime; }
 		double GetTimePassed() { return inter::HF.time.GetTimePassed(); }
 		double GetAbsoluteTimePassed() { return inter::HF.time.GetAbsoluteTimePassed(); }
-		int16_t GetTargetFrameRate() { return inter::HF.time.GetTargetFrameRate(); }
+		int16_t GetTargetFrameRate() { return inter::HF.time.targetFrameRate; }
 		int32_t GetFrameRate() { return inter::HF.time.GetFrameRate(); }
 		void SetTargetFrameRate(int16_t targetFrameRate) { return inter::HF.time.SetTargetFrameRate(targetFrameRate); }
 

@@ -1,8 +1,3 @@
-#define private public
-#include "hkeyboard.h"
-#include "hmouse.h"
-#undef private
-
 #include "hinternal.h"
 #include "hyperflow.h"
 #include "hwindow.h"
@@ -33,10 +28,10 @@ namespace hf
 		bool Close(const Ref<Window> &window) { return inter::window::Close(window.get()); }
 	}
 
-	void HandleKeyboardFocus(Keyboard* keyboard) noexcept;
-	void HandleKeyboardFocusLoss(Keyboard* keyboard) noexcept;
-	void HandleMouseFocus(Mouse* mouse, Window* window) noexcept;
-	void HandleMouseFocusLoss(Mouse* mouse) noexcept;
+	void HandleKeyboardFocus(Keyboard& keyboard) noexcept;
+	void HandleKeyboardFocusLoss(Keyboard& keyboard) noexcept;
+	void HandleMouseFocus(Mouse& mouse, Window* window) noexcept;
+	void HandleMouseFocusLoss(Mouse& mouse) noexcept;
 
 	void WindowEvent_Title(Window* win, const char* newTitle) noexcept
 	{
@@ -83,7 +78,7 @@ namespace hf
 		{
 			auto& eventData = window->eventData;
 
-#define EVENT_HANDLING(type, loc, evLoc, sys, t)\
+#define EVENT_HANDLING(loc, evLoc, sys, t)\
 			for (auto& currentState : loc)\
 			{\
 				switch (currentState)\
@@ -94,98 +89,103 @@ namespace hf
 					case KeyState::DownContinues: break;\
 				}\
 			}\
-			while(!evLoc->IsEmpty())\
+			while(!evLoc.buffer.empty())\
 			{\
-				auto e = evLoc->Read();\
+				auto e = evLoc.buffer.front();\
+				evLoc.buffer.pop();\
 				if(!e.IsValid()) continue;\
 				auto& currentState = loc[(uint8_t)e.t];\
 				switch (currentState)\
 				{\
 					case KeyState::None:\
 					case KeyState::Up:\
-						if(e.m_Type == sys::Event::Type::Press)\
+						if(e.type == sys::Event::Type::Press)\
 							currentState = KeyState::Down;\
 						break;\
 					case KeyState::Down:\
 					case KeyState::DownContinues:\
-						if(e.m_Type == sys::Event::Type::Release)\
+						if(e.type == sys::Event::Type::Release)\
 							currentState = KeyState::Up;\
 						break;\
 				}\
 			}
 
-			EVENT_HANDLING(Key, eventData.keyStates, window->keyboard, Keyboard, m_Key)
-			EVENT_HANDLING(Button, eventData.buttonStates, window->mouse, Mouse, m_Button)
+			EVENT_HANDLING(eventData.keyStates, window->keyboard, Keyboard, key)
+			EVENT_HANDLING(eventData.buttonStates, window->mouse, Mouse, button)
 
 			eventData.charData = "";
-			while(!window->keyboard->CharIsEmpty())
+			while(!window->keyboard.charBuffer.empty())
 			{
-				eventData.charData += window->keyboard->ReadChar();
+				auto newChar = window->keyboard.charBuffer.front();
+				window->keyboard.charBuffer.pop();
+				eventData.charData += newChar;
 			}
 
-			eventData.scrollDelta = window->mouse->GetScrollDelta();
-			window->mouse->m_ScrollDelta = glm::vec2{ 0, 0 };
+			eventData.scrollDelta = window->mouse.scrollDelta;
+			window->mouse.scrollDelta = glm::vec2{ 0, 0 };
 
-			eventData.pointerDelta = window->mouse->GetPosition() - eventData.pointerPosition;
-			eventData.pointerPosition = window->mouse->GetPosition();
+			eventData.pointerDelta = window->mouse.position - eventData.pointerPosition;
+			eventData.pointerPosition = window->mouse.position;
 		}
 	}
 
 	//region Focus Control
-	void HandleKeyboardFocus(Keyboard* keyboard) noexcept
+	void HandleKeyboardFocus(Keyboard& keyboard) noexcept
 	{
 	}
 
-	void HandleKeyboardFocusLoss(Keyboard* keyboard) noexcept
+	void HandleKeyboardFocusLoss(Keyboard& keyboard) noexcept
 	{
-		keyboard->DisposeChar();
+		keyboard.charBuffer = std::queue<char>();
 		std::queue<Keyboard::Event> tempBuffer;
 
-		while (!keyboard->IsEmpty())
+		while (!keyboard.buffer.empty())
 		{
-			auto e = keyboard->Read();
+			auto e = keyboard.buffer.front();
+			keyboard.buffer.pop();
 			if(e.IsValid())
 			{
-				if(e.GetType() == Keyboard::Event::Type::Release) tempBuffer.push(e);
-				else keyboard->m_States[(uint8_t)e.GetKey()] = false;
+				if(e.type == Keyboard::Event::Type::Release) tempBuffer.push(e);
+				else keyboard.states[(uint8_t)e.key] = false;
 			}
 		}
 
 		for (uint32_t i = 0; i < 256; ++i)
 		{
-			if(keyboard->m_States[i]) tempBuffer.emplace((Key)i, Keyboard::Event::Type::Release);
+			if(keyboard.states[i]) tempBuffer.emplace((Key)i, Keyboard::Event::Type::Release);
 		}
 
-		keyboard->m_States = 0;
-		keyboard->m_Buffer = tempBuffer;
+		keyboard.states = 0;
+		keyboard.buffer = tempBuffer;
 	}
 
-	void HandleMouseFocus(Mouse* mouse, Window* window) noexcept
+	void HandleMouseFocus(Mouse& mouse, Window* window) noexcept
 	{
-		mouse->m_Position = Platform_GetPointerPosition(window);
+		mouse.position = Platform_GetPointerPosition(window);
 	}
 
-	void HandleMouseFocusLoss(Mouse* mouse) noexcept
+	void HandleMouseFocusLoss(Mouse& mouse) noexcept
 	{
 		std::queue<Mouse::Event> tempBuffer;
-		while (!mouse->IsEmpty())
+		while (!mouse.buffer.empty())
 		{
-			auto e = mouse->Read();
+			auto e = mouse.buffer.front();
+			mouse.buffer.pop();
 			if(e.IsValid())
 			{
-				if(e.GetType() == Mouse::Event::Type::Release) tempBuffer.push(e);
-				else mouse->m_States[(uint8_t)e.GetButton()] = false;
+				if(e.type == Mouse::Event::Type::Release) tempBuffer.push(e);
+				else mouse.states[(uint8_t)e.button] = false;
 			}
 		}
 
 		for (uint32_t i = 0; i < 256; ++i)
 		{
-			if(mouse->m_States[i]) tempBuffer.emplace((Button)i, Mouse::Event::Type::Release);
+			if(mouse.states[i]) tempBuffer.emplace((Button)i, Mouse::Event::Type::Release);
 		}
 
-		mouse->m_States = 0;
-		mouse->m_Buffer = tempBuffer;
-		mouse->m_ScrollDelta = { 0, 0 };
+		mouse.states = 0;
+		mouse.buffer = tempBuffer;
+		mouse.scrollDelta = { 0, 0 };
 	};
 	//endregion
 
@@ -193,8 +193,8 @@ namespace hf
 	{
 		void Update(const Window* win)
 		{
-			win->renderer->StartFrame();
-			win->renderer->EndFrame();
+			rendering::StartFrame(win->renderer);
+			rendering::EndFrame(win->renderer);
 		}
 	}
 }

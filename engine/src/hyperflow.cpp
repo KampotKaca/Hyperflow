@@ -1,7 +1,4 @@
-#define private public
 #include "hwindow.h"
-#undef private
-
 #include "hyperflow.h"
 #include "../../application/appconfig.h"
 
@@ -39,7 +36,7 @@ namespace hf
 			LOG_LOG("Loading Time: %f", inter::HF.time.GetAbsoluteTimePassed());
 			while (IsRunning())
 			{
-				inter::HF.time.Update();
+				inter::HF.time.StartFrame();
 
 				Platform_HandleEvents(inter::HF.updateType);
 				Window_HandleInput(inter::HF.windows);

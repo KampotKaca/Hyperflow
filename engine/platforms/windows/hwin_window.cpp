@@ -1,12 +1,7 @@
 #include "hwin_shared.h"
 
-#define private public
-#include <hyperflow.h>
+#include "hyperflow.h"
 #include "hwindow.h"
-#include "hkeyboard.h"
-#include "hmouse.h"
-#undef private
-
 #include "hplatform.h"
 #include "exceptions/hwindowexception.h"
 

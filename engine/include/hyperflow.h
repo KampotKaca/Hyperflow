@@ -2,8 +2,8 @@
 #define HYPERFLOW_H
 
 #include "hshared.h"
-#include "hrenderer.h"
 #include "hexception.h"
+#include "hgenericexception.h"
 
 namespace hf
 {
@@ -82,6 +82,11 @@ namespace hf
 		double GetSystemTime();
 		int32_t GetFrameRate();
 		void SetTargetFrameRate(int16_t targetFrameRate);
+	}
+
+	namespace rendering
+	{
+
 	}
 
 	namespace utils

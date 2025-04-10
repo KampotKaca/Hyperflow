@@ -1,7 +1,4 @@
-#define private public
 #include "hwindow.h"
-#undef private
-
 #include "hexception.h"
 #include "hyperflow.h"
 

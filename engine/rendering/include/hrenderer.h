@@ -5,17 +5,12 @@
 
 namespace hf
 {
-	class Renderer
+	struct  Renderer
 	{
-	public:
 		Renderer(const Ref<Window>& window, const char* version);
 		~Renderer();
-		[[nodiscard]] void* GetGraphicsHandle() const;
-		void StartFrame();
-		void EndFrame();
 
-	private:
-		void* m_GraphicsHandle;
+		void* handle;
 	};
 }
 

@@ -1,54 +1,31 @@
-#define private public
 #include "hmouse.h"
-#undef private
 
 namespace hf
 {
-	Mouse::Mouse(ivec2 position, bool isInClientRegion) : m_Position(position), m_IsInClientRegion(isInClientRegion) { }
+	Mouse::Mouse(ivec2 position, bool isInClientRegion) : position(position), isInClientRegion(isInClientRegion) { }
 	
-	Mouse::Event::Event() : m_Button(Button::None), m_Type(Type::Invalid) { }
-	Mouse::Event::Event(Button button, Mouse::Event::Type type) : m_Button(button), m_Type(type) { }
-	
-	Button Mouse::Event::GetButton() const noexcept { return m_Button; }
-	Mouse::Event::Type Mouse::Event::GetType() const noexcept { return m_Type; }
-	bool Mouse::Event::IsValid() const noexcept { return m_Button != Button::None && m_Type != Type::Invalid; }
+	Mouse::Event::Event() : button(Button::None), type(Type::Invalid) { }
+	Mouse::Event::Event(Button button, Type type) : button(button), type(type) { }
 
-	ivec2 Mouse::GetPosition() const noexcept { return m_Position; }
-	vec2 Mouse::GetScrollDelta() const noexcept { return m_ScrollDelta; }
-	bool Mouse::IsPressed(Button button) const noexcept { return m_States[(uint8_t)button]; }
-	bool Mouse::IsEmpty() const noexcept { return m_Buffer.empty(); }
-	
-	Mouse::Event Mouse::Read() noexcept
-	{
-		if(!m_Buffer.empty())
-		{
-			auto e = m_Buffer.front();
-			m_Buffer.pop();
-			return e;
-		}
-		return {};
-	}
-	
-	void Mouse::Dispose() noexcept
-	{
-		m_Buffer = std::queue<Event>();
-	}
+	bool Mouse::Event::IsValid() const noexcept { return button != Button::None && type != Type::Invalid; }
 
-	void MouseEvent_Button(Mouse* mouse, Button button, Mouse::Event::Type type) noexcept
+	bool IsValid(const Mouse::Event& event) { return event.button != Button::None && event.type != Mouse::Event::Type::Invalid; }
+
+	void MouseEvent_Button(Mouse& mouse, Button button, Mouse::Event::Type type) noexcept
 	{
 		if(type == Mouse::Event::Type::Invalid) return;
 
-		mouse->m_States[(uint8_t)button] = type == Mouse::Event::Type::Press;
-		mouse->m_Buffer.emplace(button, type);
+		mouse.states[(uint8_t)button] = type == Mouse::Event::Type::Press;
+		mouse.buffer.emplace(button, type);
 	}
 	
-	void MouseEvent_Moved(Mouse* mouse, ivec2 position) noexcept
+	void MouseEvent_Moved(Mouse& mouse, ivec2 position) noexcept
 	{
-		mouse->m_Position = position;
+		mouse.position = position;
 	}
 
-	void MouseEvent_Scroll(Mouse* mouse, vec2 delta) noexcept
+	void MouseEvent_Scroll(Mouse& mouse, vec2 delta) noexcept
 	{
-		mouse->m_ScrollDelta += delta;
+		mouse.scrollDelta += delta;
 	}
 }

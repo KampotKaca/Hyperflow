@@ -182,6 +182,7 @@ namespace hf
 	};
 
 	struct Window;
+	struct Renderer;
 
 	//endregion
 

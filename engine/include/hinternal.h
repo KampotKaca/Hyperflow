@@ -32,6 +32,12 @@ namespace hf::inter
         bool Close(Window* win);
         void Update(const Window* win);
     }
+
+    namespace rendering
+    {
+        void StartFrame(Renderer* renderer);
+        void EndFrame(Renderer* renderer);
+    }
 }
 
 #endif //HINTERNAL_H

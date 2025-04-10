@@ -1,8 +1,3 @@
-#define private public
-#include "hkeyboard.h"
-#include "hmouse.h"
-#undef private
-
 #include <hyperflow.h>
 #include "hwindow.h"
 #include "hinternal.h"
@@ -73,9 +68,9 @@ namespace hf
 		XSetIOErrorHandler(XIOErrorHandler);
 
 		auto pPos = Platform_GetPointerPosition(this);
-		mouse = new Mouse(pPos, pPos.x >= 0 && pPos.x < rect.size.x && pPos.y > 0 && pPos.y < rect.size.y);
-		keyboard = new Keyboard();
-		eventData.pointerPosition = mouse->GetPosition();
+		mouse.position = pPos;
+		mouse.isInClientRegion = pPos.x >= 0 && pPos.x < rect.size.x && pPos.y > 0 && pPos.y < rect.size.y;
+		eventData.pointerPosition = mouse.position;
 
 		inter::window::SetFlags(this, data.flags);
 		inter::window::Focus(this);
@@ -84,8 +79,6 @@ namespace hf
 
 	Window::~Window()
 	{
-		delete(mouse);
-		delete(keyboard);
 		inter::window::Close(this);
 	}
 

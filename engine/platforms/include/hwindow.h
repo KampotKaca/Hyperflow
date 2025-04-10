@@ -2,13 +2,12 @@
 #define HWINDOW_H
 
 #include "hshared.h"
+#include "hmouse.h"
+#include "hkeyboard.h"
+#include "hrenderer.h"
 
 namespace hf
 {
-	class Keyboard;
-	class Mouse;
-	class Renderer;
-
 	struct Window
 	{
 		Window(const WindowData& data, const Ref<Window>& parent);
@@ -26,15 +25,15 @@ namespace hf
 
 		std::string title{};
 		IRect rect{};
-		void* handle;
-		WindowStyle style;
-		WindowFlags flags;
-		Ref<Window> parent;
+		void* handle{};
+		WindowStyle style{};
+		WindowFlags flags{};
+		Ref<Window> parent{};
 
-		Keyboard* keyboard;
-		Mouse* mouse;
-		EventData eventData;
-		Renderer* renderer;
+		Keyboard keyboard{};
+		Mouse mouse{};
+		EventData eventData{};
+		Renderer* renderer{};
 	};
 }
 
