@@ -56,10 +56,12 @@ namespace hf
 	}
 
 	template <typename T, typename... Args>
-	Ref<T> MakeURef(Args&&... args)
+	URef<T> MakeURef(Args&&... args)
 	{
 		return std::make_unique<T>(std::forward<Args>(args)...);
 	}
+
+#define TO_RES_PATH(x) (std::string(RES_PATH) + (x))
 
 	//endregion
 
@@ -183,6 +185,7 @@ namespace hf
 
 	struct Window;
 	struct Renderer;
+	struct Shader;
 
 	//endregion
 

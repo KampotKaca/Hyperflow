@@ -35,8 +35,8 @@ namespace hf::inter
 
     namespace rendering
     {
-        void StartFrame(Renderer* renderer);
-        void EndFrame(Renderer* renderer);
+        void StartFrame(const Window* win);
+        void EndFrame(const Window* win);
     }
 }
 

@@ -39,12 +39,12 @@ namespace hf
 
     namespace inter::rendering
     {
-        void StartFrame(Renderer* renderer)
+        void StartFrame(const Window* win)
         {
 
         }
 
-        void EndFrame(Renderer* renderer)
+        void EndFrame(const Window* win)
         {
 
         }

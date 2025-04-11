@@ -15,7 +15,6 @@ namespace hf
 		WindowFlags GetFlags(const Ref<Window> &window) { return window->flags; }
 		WindowStyle GetStyle(const Ref<Window> &window) { return window->style; }
 		void* GetHandle(const Ref<Window> &window) { return window->handle; }
-		const Renderer* GetRenderer(const Ref<Window> &window) { return window->renderer; }
 		bool IsClosing(const Ref<Window> &window) { return window->handle == nullptr; }
 
 		void SetTitle(const Ref<Window> &window, const char* title) { inter::window::SetTitle(window.get(), title); }
@@ -193,8 +192,8 @@ namespace hf
 	{
 		void Update(const Window* win)
 		{
-			rendering::StartFrame(win->renderer);
-			rendering::EndFrame(win->renderer);
+			rendering::StartFrame(win);
+			rendering::EndFrame(win);
 		}
 	}
 }

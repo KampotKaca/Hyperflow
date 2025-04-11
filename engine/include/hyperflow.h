@@ -59,7 +59,6 @@ namespace hf
 		WindowFlags GetFlags(const Ref<Window> &window);
 		WindowStyle GetStyle(const Ref<Window> &window);
 		void* GetHandle(const Ref<Window> &window);
-		const Renderer* GetRenderer(const Ref<Window> &window);
 
 		void SetTitle(const Ref<Window> &window, const char* title);
 		void SetSize(const Ref<Window> &window, ivec2 size);
@@ -89,10 +88,15 @@ namespace hf
 
 	}
 
+	namespace shader
+	{
+		bool IsAlive(const Ref<Shader>& shader);
+	}
+
 	namespace utils
 	{
 		ivec3 ConvertVersion(const char* version);
-		bool ReadFile(const std::string& filename, std::vector<char>& location);
+		bool ReadFile(const std::string& filename, std::vector<char>& result);
 	}
 }
 

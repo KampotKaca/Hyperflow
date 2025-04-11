@@ -135,3 +135,5 @@ target_include_directories(${PROJECT_NAME}
         platforms/include
         rendering/include
 )
+
+target_compile_definitions("${PROJECT_NAME}" PUBLIC RES_PATH="${CMAKE_BINARY_DIR}./res/")

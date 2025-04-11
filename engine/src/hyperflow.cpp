@@ -78,7 +78,7 @@ namespace hf
 	Ref<Window> OpenWindow(const WindowData &data, const Ref<Window> &parent)
 	{
 		auto newWindow = MakeRef<Window>(data, parent);
-		newWindow->renderer = new Renderer(newWindow, APP_VERSION);
+		newWindow->renderer = MakeURef<Renderer>(newWindow, APP_VERSION);
 		inter::HF.windows.push_back(newWindow);
 		return newWindow;
 	}
