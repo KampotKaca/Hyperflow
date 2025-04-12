@@ -1,6 +1,5 @@
 #include "hwindow.h"
 #include "hyperflow.h"
-#include "../../application/appconfig.h"
 
 #include "hplatform.h"
 #include "hrenderer.h"
@@ -78,7 +77,7 @@ namespace hf
 	Ref<Window> OpenWindow(const WindowData &data, const Ref<Window> &parent)
 	{
 		auto newWindow = MakeRef<Window>(data, parent);
-		newWindow->renderer = new Renderer(newWindow, APP_VERSION);
+		newWindow->renderer = MakeRef<Renderer>(newWindow);
 		inter::HF.windows.push_back(newWindow);
 		return newWindow;
 	}

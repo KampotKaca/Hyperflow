@@ -90,7 +90,7 @@ namespace hf
 
 	namespace shader
 	{
-		bool IsAlive(const Ref<Shader>& shader);
+		bool IsRunning(const Ref<Shader>& shader);
 	}
 
 	namespace utils

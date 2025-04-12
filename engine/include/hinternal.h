@@ -16,6 +16,7 @@ namespace hf::inter
         Time time;
         Ref<Window> mainWindow;
         std::vector<Ref<Window>> windows;
+        uint32_t rendererCount;
     };
 
     extern Hyperflow HF;
@@ -35,8 +36,25 @@ namespace hf::inter
 
     namespace rendering
     {
-        void StartFrame(const Window* win);
-        void EndFrame(const Window* win);
+        struct ShaderCreationInfo
+        {
+            const char* vCode;
+            uint32_t vCodeSize;
+            const char* fCode;
+            uint32_t fCodeSize;
+        };
+
+        void Load(const char* version);
+        void Unload();
+
+        void* CreateInstance(const Window* window);
+        void DestroyInstance(void* rnInstance);
+
+        void* CreateShader(const ShaderCreationInfo& info, const Shader* shader);
+        void DestroyShader(void* shader);
+
+        void StartFrame(const Ref<Renderer>& rn);
+        void EndFrame(const Ref<Renderer>& rn);
     }
 }
 

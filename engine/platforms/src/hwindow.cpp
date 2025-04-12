@@ -192,8 +192,8 @@ namespace hf
 	{
 		void Update(const Window* win)
 		{
-			rendering::StartFrame(win);
-			rendering::EndFrame(win);
+			rendering::StartFrame(win->renderer);
+			rendering::EndFrame(win->renderer);
 		}
 	}
 }

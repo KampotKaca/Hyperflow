@@ -20,7 +20,7 @@
 
 #endif
 
-namespace hf
+namespace hf::inter::rendering
 {
     const std::vector<const char*> REQUIRED_EXTENSIONS =
     {
@@ -42,7 +42,7 @@ namespace hf
 
 #if PLATFORM_WINDOWS
 
-    void Graphics_LoadSurface(VKRendererData* rendererData)
+    void CreatePlatformSurface(VKRendererData* rendererData)
     {
         VkWin32SurfaceCreateInfoKHR createInfo
         {
@@ -58,7 +58,7 @@ namespace hf
 
 #if X11
 
-    void Graphics_LoadSurface(VKRendererData* rendererData)
+    void CreatePlatformSurface(VKRendererData* rendererData)
     {
         VkXlibSurfaceCreateInfoKHR createInfo
         {
@@ -72,7 +72,7 @@ namespace hf
 
 #elif WAYLAND
 
-    void Graphics_LoadSurface(VKRendererData* rendererData)
+    void CreatePlatformSurface(VKRendererData* rendererData)
     {
 
     }
@@ -81,7 +81,7 @@ namespace hf
 
 #endif
 
-    void Graphics_UnloadSurface(VKRendererData* rendererData)
+    void DestroyPlatformSurface(VKRendererData* rendererData)
     {
         vkDestroySurfaceKHR(GRAPHICS_DATA.instance, rendererData->surface, nullptr);
         rendererData->surface = nullptr;

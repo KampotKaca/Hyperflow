@@ -6,112 +6,27 @@
 #include "exceptions/hgraphicsexception.h"
 #include "hyperflow.h"
 #include "../config.h"
+#include "hinternal.h"
 
-namespace hf
+namespace hf::inter::rendering
 {
     GraphicsData GRAPHICS_DATA;
-    const std::vector<const char*> DEVICE_EXTENSIONS
-    {
-        VK_KHR_SWAPCHAIN_EXTENSION_NAME
-    };
 
-#if DEBUG
-    const std::vector<const char*> DEBUG_VALIDATION_LAYERS =
-    {
-        "VK_LAYER_KHRONOS_validation",
-    };
+    //Logical devices are destroyed in loader
+    static void CreateLogicalDevice(GraphicsDevice& device);
 
-    VKAPI_ATTR VkBool32 VKAPI_CALL DebugCallback(
-        VkDebugUtilsMessageSeverityFlagBitsEXT severity,
-        VkDebugUtilsMessageTypeFlagsEXT type,
-        const VkDebugUtilsMessengerCallbackDataEXT* callbackData,
-        void* userData)
-    {
-        switch (severity)
-        {
-        case VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT:
-            LOG_LOG("[Vulkan Debug Callback] %s", callbackData->pMessage);
-            break;
-        case VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT:
-            LOG_WARN("[Vulkan Debug Callback] %s", callbackData->pMessage);
-            break;
-        case VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT:
-            LOG_ERROR("[Vulkan Debug Callback] %s", callbackData->pMessage);
-            break;
-        default: break;
-        }
-        return VK_FALSE;
-    }
+    static void CreateSwapchain(VKRendererData* rendererData, const SwapChainSupportDetails& scs);
+    static void DestroySwapchain(VKRendererData* rendererData);
 
-    VkResult Debug_CreateUtilsMessengerEXT(
-        VkInstance instance,
-        const VkDebugUtilsMessengerCreateInfoEXT* pCreateInfo,
-        const VkAllocationCallbacks* pAllocator,
-        VkDebugUtilsMessengerEXT* pDebugMessenger)
-    {
-        auto func = (PFN_vkCreateDebugUtilsMessengerEXT) vkGetInstanceProcAddr(instance, "vkCreateDebugUtilsMessengerEXT");
-        if (func != nullptr) return func(instance, pCreateInfo, pAllocator, pDebugMessenger);
-        return VK_ERROR_EXTENSION_NOT_PRESENT;
-    }
+    static bool SetupPhysicalDevice(const VKRendererData* renderer, VkPhysicalDevice device, GraphicsDevice* deviceData);
+    static bool CheckDeviceExtensionSupport(const VkPhysicalDevice& device);
 
-    void Debug_DestroyUtilsMessengerEXT(VkInstance instance, VkDebugUtilsMessengerEXT debugMessenger, const VkAllocationCallbacks* pAllocator)
-    {
-        auto func = (PFN_vkDestroyDebugUtilsMessengerEXT) vkGetInstanceProcAddr(instance, "vkDestroyDebugUtilsMessengerEXT");
-        if (func != nullptr) func(instance, debugMessenger, pAllocator);
-    }
-#endif
-
-    void InitLayers();
-    void InitExtensions();
-    void InitInstanceVersion();
-
-    void CreateInstance(VkApplicationInfo& appInfo);
-    void DestroyInstance();
-
-    void CreateLogicalDevice(GraphicsDevice& device);
-    void DestroyLogicalDevice(LogicalDevice& device);
-
-    bool SetupPhysicalDevice(const VKRendererData* renderer, VkPhysicalDevice device, GraphicsDevice* deviceData);
-    bool CheckDeviceExtensionSupport(const VkPhysicalDevice& device);
-
-    void QuerySwapChainSupport(const VkPhysicalDevice& device, const VkSurfaceKHR& surface, SwapChainSupportDetails* supportDetails);
-    bool GetAvailableSurfaceDetails(const SwapChainSupportDetails& swapChainSupportDetails,
+    static void QuerySwapChainSupport(const VkPhysicalDevice& device, const VkSurfaceKHR& surface, SwapChainSupportDetails* supportDetails);
+    static bool GetAvailableSurfaceDetails(const SwapChainSupportDetails& swapChainSupportDetails,
                                     VkFormat targetFormat, VkPresentModeKHR targetPresentMode, uvec2 targetExtents,
                                     GraphicsSwapchainDetails* result);
 
-    void Graphics_Load(const char* appVersion)
-    {
-        auto engineV = utils::ConvertVersion(VERSION);
-        auto appV = utils::ConvertVersion(appVersion);
-        VkApplicationInfo appInfo{};
-        appInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
-        appInfo.pApplicationName = GetApplicationTitle().c_str();
-        appInfo.applicationVersion = VK_MAKE_VERSION(appV.x, appV.y, appV.z);
-        appInfo.pEngineName = HF_ENGINE_TITLE;
-        appInfo.engineVersion = VK_MAKE_VERSION(engineV.x, engineV.y, engineV.z);
-        appInfo.apiVersion = VULKAN_API_VERSION;
-
-        InitLayers();
-        InitExtensions();
-        InitInstanceVersion();
-
-#if DEBUG
-        for (const char* layer : DEBUG_VALIDATION_LAYERS)
-        {
-            if (!Graphics_IsLayerSupported(layer))
-                throw GENERIC_EXCEPT("[Vulkan Debug]", "Unsupported validation layer [%s]", layer);
-        }
-#endif
-
-        CreateInstance(appInfo);
-    }
-
-    void Graphics_Unload()
-    {
-        DestroyInstance();
-    }
-
-    bool Graphics_IsLayerSupported(const char* layer)
+    bool IsLayerSupported(const char* layer)
     {
         for (const auto& availableLayer : GRAPHICS_DATA.availableLayers)
         {
@@ -120,71 +35,77 @@ namespace hf
         return false;
     }
 
-    bool Graphics_IsExtensionSupported(const char* extension)
+    bool IsExtensionSupported(const char* extension)
     {
         return GRAPHICS_DATA.availableExtensionNames.contains(extension);
     }
 
     //------------------------------------------------------------------------------------
 
-    void Graphics_LoadPhysicalDevices(VKRendererData* rendererData)
+    void CreateSurface(VKRendererData* rendererData)
     {
-        uint32_t deviceCount = 0;
-        VK_HANDLE_EXCEPT(vkEnumeratePhysicalDevices(GRAPHICS_DATA.instance,
-            &deviceCount, nullptr));
-
-        if (deviceCount == 0) throw GENERIC_EXCEPT("[Vulkan]", "No Graphics device found");
-
-        std::vector<VkPhysicalDevice> availableDevices(deviceCount);
-        VK_HANDLE_EXCEPT(vkEnumeratePhysicalDevices(GRAPHICS_DATA.instance,
-            &deviceCount, availableDevices.data()));
-
-        Graphics_LoadSurface(rendererData);
-
-        for (const auto& device : availableDevices)
+        SwapChainSupportDetails swapChainSupport{};
+        if (!GRAPHICS_DATA.devicesAreLoaded)
         {
-            GraphicsDevice deviceData{};
-            if (SetupPhysicalDevice(rendererData, device, &deviceData) &&
-                CheckDeviceExtensionSupport(device))
-            {
-                QuerySwapChainSupport(device, rendererData->surface, &deviceData.swapChainSupport);
+            uint32_t deviceCount = 0;
+            VK_HANDLE_EXCEPT(vkEnumeratePhysicalDevices(GRAPHICS_DATA.instance,
+                &deviceCount, nullptr));
 
-                if (!deviceData.swapChainSupport.formats.empty() &&
-                    !deviceData.swapChainSupport.presentModes.empty())
+            if (deviceCount == 0) throw GENERIC_EXCEPT("[Vulkan]", "No Graphics device found");
+
+            std::vector<VkPhysicalDevice> availableDevices(deviceCount);
+            VK_HANDLE_EXCEPT(vkEnumeratePhysicalDevices(GRAPHICS_DATA.instance,
+                &deviceCount, availableDevices.data()));
+
+            CreatePlatformSurface(rendererData);
+
+            for (const auto& device : availableDevices)
+            {
+                GraphicsDevice deviceData{};
+                if (SetupPhysicalDevice(rendererData, device, &deviceData) &&
+                    CheckDeviceExtensionSupport(device))
                 {
-                    CreateLogicalDevice(deviceData);
-                    rendererData->suitableDevices.push_back(deviceData);
+                    QuerySwapChainSupport(device, rendererData->surface, &swapChainSupport);
+
+                    if (!swapChainSupport.formats.empty() &&
+                        !swapChainSupport.presentModes.empty())
+                    {
+                        CreateLogicalDevice(deviceData);
+                        GRAPHICS_DATA.suitableDevices.push_back(deviceData);
+                    }
                 }
             }
+
+            if (GRAPHICS_DATA.suitableDevices.empty())
+                throw GENERIC_EXCEPT("[Vulkan]", "No suitable graphics device found");
+
+            std::ranges::stable_sort(GRAPHICS_DATA.suitableDevices,
+                                     [](const GraphicsDevice& a, const GraphicsDevice& b)
+                                     { return a.score > b.score; });
+            GRAPHICS_DATA.devicesAreLoaded = true;
         }
-
-        if (rendererData->suitableDevices.empty())
-            throw GENERIC_EXCEPT("[Vulkan]", "No suitable graphics device found");
-
-        std::ranges::stable_sort(rendererData->suitableDevices,
-                                 [](const GraphicsDevice& a, const GraphicsDevice& b)
-                                 { return a.score > b.score; });
+        else
+        {
+            CreatePlatformSurface(rendererData);
+            QuerySwapChainSupport(GRAPHICS_DATA.defaultDevice->device, rendererData->surface, &swapChainSupport);
+        }
+        CreateSwapchain(rendererData, swapChainSupport);
     }
 
-    void Graphics_UnloadPhysicalDevices(VKRendererData* rendererData)
+    void DestroySurface(VKRendererData* rendererData)
     {
-        Graphics_UnloadSurface(rendererData);
-        for (auto& device : rendererData->suitableDevices)
-            DestroyLogicalDevice(device.logicalDevice);
+        DestroySwapchain(rendererData);
+        DestroyPlatformSurface(rendererData);
     }
 
-    uint32_t Graphics_GetDeviceCount(const VKRendererData* rendererData) { return rendererData->suitableDevices.size(); }
+    uint32_t GetDeviceCount(const VKRendererData* rendererData) { return GRAPHICS_DATA.suitableDevices.size(); }
 
-    void Graphics_LoadSwapchain(VKRendererData* rendererData, uint32_t deviceIndex)
+    void CreateSwapchain(VKRendererData* rendererData, const SwapChainSupportDetails& scs)
     {
-        if (deviceIndex >= rendererData->suitableDevices.size())
-            throw GENERIC_EXCEPT("[Vulkan]", "Invalid device index [%d]", deviceIndex);
+        DestroySwapchain(rendererData);
+        GRAPHICS_DATA.defaultDevice = &GRAPHICS_DATA.suitableDevices[0];
+        LOG_LOG("Graphics device found [%s]", GRAPHICS_DATA.defaultDevice->properties.deviceName);
 
-        Graphics_UnloadSwapchain(rendererData);
-        rendererData->defaultDevice = &rendererData->suitableDevices[deviceIndex];
-        LOG_LOG("Graphics device found [%s]", rendererData->defaultDevice->properties.deviceName);
-
-        auto& scs = rendererData->defaultDevice->swapChainSupport;
         GraphicsSwapchainDetails details{};
         if (GetAvailableSurfaceDetails(scs,
             VULKAN_API_COLOR_FORMAT, VULKAN_API_PRESENT_MODE, ivec2(1080, 1920), &details))
@@ -210,7 +131,7 @@ namespace hf
                 .oldSwapchain = VK_NULL_HANDLE
             };
 
-            auto& indices = rendererData->defaultDevice->familyIndices;
+            auto& indices = GRAPHICS_DATA.defaultDevice->familyIndices;
             if (indices.graphicsFamily != indices.presentFamily)
             {
                 uint32_t familyIndices[] = { indices.graphicsFamily.value(), indices.presentFamily.value() };
@@ -225,19 +146,19 @@ namespace hf
                 createInfo.pQueueFamilyIndices = nullptr;
             }
 
-            VK_HANDLE_EXCEPT(vkCreateSwapchainKHR(rendererData->defaultDevice->logicalDevice.device, &createInfo,
+            VK_HANDLE_EXCEPT(vkCreateSwapchainKHR(GRAPHICS_DATA.defaultDevice->logicalDevice.device, &createInfo,
                 nullptr, &rendererData->swapchain.swapchain));
             rendererData->swapchain.details = details;
         }
         else throw GENERIC_EXCEPT("[Vulkan]", "Unable to create swapchain");
 
         uint32_t imageCount;
-        VK_HANDLE_EXCEPT(vkGetSwapchainImagesKHR(rendererData->defaultDevice->logicalDevice.device,
+        VK_HANDLE_EXCEPT(vkGetSwapchainImagesKHR(GRAPHICS_DATA.defaultDevice->logicalDevice.device,
             rendererData->swapchain.swapchain, &imageCount, nullptr));
 
         auto& images = rendererData->swapchain.images;
         images = std::vector<VkImage>(imageCount);
-        VK_HANDLE_EXCEPT(vkGetSwapchainImagesKHR(rendererData->defaultDevice->logicalDevice.device,
+        VK_HANDLE_EXCEPT(vkGetSwapchainImagesKHR(GRAPHICS_DATA.defaultDevice->logicalDevice.device,
             rendererData->swapchain.swapchain, &imageCount,
             images.data()));
 
@@ -268,33 +189,29 @@ namespace hf
                 }
             };
 
-            VK_HANDLE_EXCEPT(vkCreateImageView(rendererData->defaultDevice->logicalDevice.device,
+            VK_HANDLE_EXCEPT(vkCreateImageView(GRAPHICS_DATA.defaultDevice->logicalDevice.device,
                 &createInfo, nullptr, &imageViews[i]));
         }
 
     }
 
-    void Graphics_UnloadSwapchain(VKRendererData* rendererData)
+    void DestroySwapchain(VKRendererData* rendererData)
     {
-        if (rendererData->defaultDevice != nullptr)
+        if (rendererData->swapchain.swapchain != VK_NULL_HANDLE)
         {
+            auto& device = GRAPHICS_DATA.defaultDevice->logicalDevice.device;
             for (uint32_t i = 0; i < rendererData->swapchain.imageViews.size(); i++)
-            {
-                vkDestroyImageView(rendererData->defaultDevice->logicalDevice.device,
-                    rendererData->swapchain.imageViews[i], nullptr);
-            }
+                vkDestroyImageView(device, rendererData->swapchain.imageViews[i], nullptr);
 
             rendererData->swapchain.imageViews.clear();
             rendererData->swapchain.images.clear();
 
-            vkDestroySwapchainKHR(rendererData->defaultDevice->logicalDevice.device,
-                rendererData->swapchain.swapchain, nullptr);
+            vkDestroySwapchainKHR(device, rendererData->swapchain.swapchain, nullptr);
             rendererData->swapchain.swapchain = VK_NULL_HANDLE;
-            rendererData->defaultDevice = nullptr;
         }
     }
 
-    void Graphics_SetupViewportAndScissor(VKRendererData* rendererData)
+    void SetupViewportAndScissor(VKRendererData* rendererData)
     {
         rendererData->viewport =
         {
@@ -313,76 +230,121 @@ namespace hf
         };
     }
 
-    //------------------------------------------------------------------------------------
-
-    void InitLayers()
+    void CreatePipeline(const VkPipelineCreationInfo& info, VkPipelineLayout* result)
     {
-        uint32_t layerCount = 0;
-        VK_HANDLE_EXCEPT(vkEnumerateInstanceLayerProperties(&layerCount, nullptr));
-        GRAPHICS_DATA.availableLayers = std::vector<VkLayerProperties>(layerCount);
-        VK_HANDLE_EXCEPT(vkEnumerateInstanceLayerProperties(&layerCount, GRAPHICS_DATA.availableLayers.data()));
-    }
-
-    void InitExtensions()
-    {
-        uint32_t extensionCount = 0;
-        VK_HANDLE_EXCEPT(vkEnumerateInstanceExtensionProperties(nullptr, &extensionCount, nullptr));
-        GRAPHICS_DATA.availableExtensions = std::vector<VkExtensionProperties>(extensionCount);
-        VK_HANDLE_EXCEPT(vkEnumerateInstanceExtensionProperties(nullptr,
-            &extensionCount, GRAPHICS_DATA.availableExtensions.data()));
-
-        for (const auto& ext : GRAPHICS_DATA.availableExtensions)
-            GRAPHICS_DATA.availableExtensionNames.insert(ext.extensionName);
-
-        for(auto& extension : REQUIRED_EXTENSIONS)
+        VkPipelineVertexInputStateCreateInfo vertexInputInfo
         {
-            if (!Graphics_IsExtensionSupported(extension))
-                throw GENERIC_EXCEPT("[Vulkan]", "[Required extension not supported]\n%s", extension);
-        }
-    }
-
-    void InitInstanceVersion()
-    {
-        VK_HANDLE_EXCEPT(vkEnumerateInstanceVersion(&GRAPHICS_DATA.supportedVersion));
-        LOG_LOG("Supported Vulkan API Version: (%i.%i.%i)",
-            VK_VERSION_MAJOR(GRAPHICS_DATA.supportedVersion),
-            VK_VERSION_MINOR(GRAPHICS_DATA.supportedVersion),
-            VK_VERSION_PATCH(GRAPHICS_DATA.supportedVersion));
-    }
-
-    //------------------------------------------------------------------------------------
-
-    void CreateInstance(VkApplicationInfo& appInfo)
-    {
-        VkInstanceCreateInfo createInfo
-        {
-            .sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO,
-            .pApplicationInfo = &appInfo,
-            .enabledLayerCount = 0,
-            .enabledExtensionCount = (uint32_t)REQUIRED_EXTENSIONS.size(),
-            .ppEnabledExtensionNames = REQUIRED_EXTENSIONS.data(),
+            .sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO,
+            .vertexBindingDescriptionCount = 0,
+            .pVertexBindingDescriptions = nullptr,
+            .vertexAttributeDescriptionCount = 0,
+            .pVertexAttributeDescriptions = nullptr
         };
 
-#if DEBUG
-        createInfo.ppEnabledLayerNames = DEBUG_VALIDATION_LAYERS.data();
-        createInfo.enabledLayerCount = DEBUG_VALIDATION_LAYERS.size();
-        createInfo.pNext = (VkDebugUtilsMessengerCreateInfoEXT*)&GRAPHICS_DATA.debugCreateInfo;
-#endif
+        VkPipelineInputAssemblyStateCreateInfo inputAssembly
+        {
+            .sType = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO,
+            .topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST,
+            .primitiveRestartEnable = VK_FALSE
+        };
 
-        VK_HANDLE_EXCEPT(vkCreateInstance(&createInfo, nullptr, &GRAPHICS_DATA.instance));
+        std::vector<VkDynamicState> dynamicStates =
+        {
+            VK_DYNAMIC_STATE_VIEWPORT,
+            VK_DYNAMIC_STATE_SCISSOR
+        };
 
-#if DEBUG
-        VK_HANDLE_EXCEPT(Debug_CreateUtilsMessengerEXT(GRAPHICS_DATA.instance, &GRAPHICS_DATA.debugCreateInfo,
-                        nullptr, &GRAPHICS_DATA.debugMessenger));
-#endif
-    }
-    void DestroyInstance()
-    {
-#if DEBUG
-        Debug_DestroyUtilsMessengerEXT(GRAPHICS_DATA.instance, GRAPHICS_DATA.debugMessenger, nullptr);
-#endif
+        VkPipelineDynamicStateCreateInfo dynamicState
+        {
+            .sType = VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO,
+            .dynamicStateCount = (uint32_t)dynamicStates.size(),
+            .pDynamicStates = dynamicStates.data()
+        };
 
-        vkDestroyInstance(GRAPHICS_DATA.instance, nullptr);
+        VkPipelineViewportStateCreateInfo viewportState
+        {
+            .sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO,
+            .viewportCount = 1,
+            .pViewports = &info.viewport,
+            .scissorCount = 1,
+            .pScissors = &info.scissor,
+        };
+
+        VkPipelineRasterizationStateCreateInfo rasterizer
+        {
+            .sType = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO,
+            .depthClampEnable = VK_FALSE,
+            .rasterizerDiscardEnable = VK_FALSE,
+            .polygonMode = VK_POLYGON_MODE_FILL,
+            .lineWidth = 1.0f,
+            .cullMode = VK_CULL_MODE_BACK_BIT,
+            .frontFace = VK_FRONT_FACE_CLOCKWISE,
+            .depthBiasEnable = VK_FALSE,
+            .depthBiasConstantFactor = 0.0f,
+            .depthBiasClamp = 0.0f,
+            .depthBiasSlopeFactor = 0.0f,
+        };
+
+        VkPipelineMultisampleStateCreateInfo multisampling
+        {
+            .sType = VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO,
+            .sampleShadingEnable = VK_FALSE,
+            .rasterizationSamples = VK_SAMPLE_COUNT_1_BIT,
+            .minSampleShading = 1.0f,
+            .pSampleMask = nullptr,
+            .alphaToCoverageEnable = VK_FALSE,
+            .alphaToOneEnable = VK_FALSE,
+        };
+
+        VkPipelineColorBlendAttachmentState colorBlendAttachment
+        {
+            .colorWriteMask = VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT,
+        };
+
+        if (info.blendingMode == PipelineBlendType::Alpha)
+        {
+            colorBlendAttachment.blendEnable = VK_TRUE;
+            colorBlendAttachment.srcColorBlendFactor = VK_BLEND_FACTOR_SRC_ALPHA;
+            colorBlendAttachment.dstColorBlendFactor = VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA;
+            colorBlendAttachment.colorBlendOp = VK_BLEND_OP_ADD;
+            colorBlendAttachment.srcAlphaBlendFactor = VK_BLEND_FACTOR_ONE;
+            colorBlendAttachment.dstAlphaBlendFactor = VK_BLEND_FACTOR_ZERO;
+            colorBlendAttachment.alphaBlendOp = VK_BLEND_OP_ADD;
+        }
+        else if (info.blendingMode == PipelineBlendType::None)
+        {
+            colorBlendAttachment.blendEnable = VK_FALSE;
+            colorBlendAttachment.srcColorBlendFactor = VK_BLEND_FACTOR_ONE;
+            colorBlendAttachment.dstColorBlendFactor = VK_BLEND_FACTOR_ZERO;
+            colorBlendAttachment.colorBlendOp = VK_BLEND_OP_ADD;
+            colorBlendAttachment.srcAlphaBlendFactor = VK_BLEND_FACTOR_ONE;
+            colorBlendAttachment.dstAlphaBlendFactor = VK_BLEND_FACTOR_ZERO;
+            colorBlendAttachment.alphaBlendOp = VK_BLEND_OP_ADD;
+        }
+
+        VkPipelineColorBlendStateCreateInfo colorBlending
+        {
+            .sType = VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO,
+            .logicOpEnable = info.blendingMode == PipelineBlendType::Logical,
+            .logicOp = VK_LOGIC_OP_XOR,
+            .attachmentCount = 1,
+            .pAttachments = &colorBlendAttachment,
+            .blendConstants[0] = 0.0f,
+            .blendConstants[1] = 0.0f,
+            .blendConstants[2] = 0.0f,
+            .blendConstants[3] = 0.0f,
+        };
+
+        VkPipelineLayoutCreateInfo pipelineLayoutInfo
+        {
+            .sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO,
+            .setLayoutCount = 0,
+            .pSetLayouts = nullptr,
+            .pushConstantRangeCount = 0,
+            .pPushConstantRanges = nullptr,
+        };
+
+        // VK_HANDLE_EXCEPT(vkCreatePipelineLayout(info.device, &pipelineLayoutInfo, nullptr, ));
     }
 
     //------------------------------------------------------------------------------------
@@ -430,11 +392,6 @@ namespace hf
 
         vkGetDeviceQueue(device.logicalDevice.device, device.familyIndices.presentFamily.value(),
             0, &device.logicalDevice.presentQueue);
-    }
-
-    void DestroyLogicalDevice(LogicalDevice& device)
-    {
-        vkDestroyDevice(device.device, nullptr);
     }
 
     //------------------------------------------------------------------------------------
@@ -559,4 +516,9 @@ namespace hf
     }
 
     bool QueueFamilyIndices::IsComplete() const { return graphicsFamily.has_value() && presentFamily.has_value(); }
+}
+
+namespace hf::inter::rendering
+{
+
 }

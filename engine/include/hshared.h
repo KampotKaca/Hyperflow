@@ -30,6 +30,7 @@ extern "C"
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <memory>
+#include <atomic>
 
 #include "components/hmath.h"
 

@@ -4,7 +4,7 @@
 #include "hshared.h"
 #include <vulkan/vulkan.h>
 
-namespace hf
+namespace hf::inter::rendering
 {
 #if DEBUG
     extern const std::vector<const char*> DEBUG_VALIDATION_LAYERS;
@@ -47,7 +47,6 @@ namespace hf
 
         QueueFamilyIndices familyIndices{};
         LogicalDevice logicalDevice{};
-        SwapChainSupportDetails swapChainSupport{};
     };
 
     struct GraphicsData
@@ -59,6 +58,9 @@ namespace hf
         VkInstance instance{};
         uint32_t supportedVersion;
         std::set<std::string> availableExtensionNames{};
+        std::vector<GraphicsDevice> suitableDevices{};
+        GraphicsDevice* defaultDevice;
+        bool devicesAreLoaded = false;
 
 #if DEBUG
         VkDebugUtilsMessengerCreateInfoEXT debugCreateInfo
@@ -92,30 +94,37 @@ namespace hf
         void* windowHandle = nullptr;
         VkSurfaceKHR surface = VK_NULL_HANDLE;
         GraphicsSwapChain swapchain{};
-        std::vector<GraphicsDevice> suitableDevices{};
-        GraphicsDevice* defaultDevice;
         VkViewport viewport{};
         VkRect2D scissor{};
     };
 
+    enum class PipelineBlendType { None, Alpha, Logical };
+    struct VkPipelineCreationInfo
+    {
+        VkDevice device{};
+        VkPipelineShaderStageCreateInfo* pStages = nullptr;
+        uint32_t stageCount = 0;
+        VkViewport viewport{};
+        VkRect2D scissor{};
+        PipelineBlendType blendingMode = PipelineBlendType::None;
+        VkLogicOp blendingOp = VK_LOGIC_OP_XOR; //Setting will be used only if you use Logical Blending
+    };
+
     extern GraphicsData GRAPHICS_DATA;
 
-    extern void Graphics_Load(const char* appVersion);
-    extern void Graphics_Unload();
-    extern bool Graphics_IsLayerSupported(const char* layer);
-    extern bool Graphics_IsExtensionSupported(const char* extension);
+    bool IsLayerSupported(const char* layer);
+    bool IsExtensionSupported(const char* extension);
 
-    extern void Graphics_LoadSurface(VKRendererData* rendererData);
-    extern void Graphics_UnloadSurface(VKRendererData* rendererData);
+    void CreatePlatformSurface(VKRendererData* rendererData);
+    void DestroyPlatformSurface(VKRendererData* rendererData);
 
-    extern void Graphics_LoadPhysicalDevices(VKRendererData* rendererData);
-    extern void Graphics_UnloadPhysicalDevices(VKRendererData* rendererData);
+    void CreateSurface(VKRendererData* rendererData);
+    void DestroySurface(VKRendererData* rendererData);
 
-    extern uint32_t Graphics_GetDeviceCount(const VKRendererData* rendererData);
-    extern void Graphics_LoadSwapchain(VKRendererData* rendererData, uint32_t deviceIndex);
-    extern void Graphics_UnloadSwapchain(VKRendererData* rendererData);
+    uint32_t GetDeviceCount(const VKRendererData* rendererData);
 
-    extern void Graphics_SetupViewportAndScissor(VKRendererData* rendererData);
+    void SetupViewportAndScissor(VKRendererData* rendererData);
+    void CreatePipeline(const VkPipelineCreationInfo& info, VkPipelineLayout* result);
 
     extern const std::vector<const char*> REQUIRED_EXTENSIONS;
     extern const std::vector<const char*> DEVICE_EXTENSIONS;

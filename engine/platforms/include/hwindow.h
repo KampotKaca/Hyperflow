@@ -33,7 +33,7 @@ namespace hf
 		Keyboard keyboard{};
 		Mouse mouse{};
 		EventData eventData{};
-		Renderer* renderer{};
+		Ref<Renderer> renderer{};
 	};
 }
 

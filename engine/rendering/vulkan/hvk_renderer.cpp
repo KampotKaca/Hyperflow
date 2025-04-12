@@ -6,48 +6,15 @@
 #include "hvk_graphics.h"
 #include "hinternal.h"
 
-namespace hf
+namespace hf::inter::rendering
 {
-    Renderer::Renderer(const Ref<Window>& window, const char* version)
+    void StartFrame(const Ref<Renderer>& rn)
     {
-        if (GRAPHICS_DATA.rendererCount == 0) Graphics_Load(version);
-        GRAPHICS_DATA.rendererCount++;
 
-        auto rendererData = new VKRendererData
-        {
-            .windowHandle = window->handle
-        };
-
-        Graphics_LoadPhysicalDevices(rendererData);
-        Graphics_LoadSwapchain(rendererData, 0);
-        Graphics_SetupViewportAndScissor(rendererData);
-        handle = rendererData;
     }
 
-    Renderer::~Renderer()
+    void EndFrame(const Ref<Renderer>& rn)
     {
-        const auto data = (VKRendererData*)handle;
 
-        Graphics_UnloadSwapchain(data);
-        Graphics_UnloadPhysicalDevices(data);
-
-        delete(data);
-        handle = nullptr;
-
-        GRAPHICS_DATA.rendererCount--;
-        if (GRAPHICS_DATA.rendererCount == 0) Graphics_Unload();
-    }
-
-    namespace inter::rendering
-    {
-        void StartFrame(const Window* win)
-        {
-
-        }
-
-        void EndFrame(const Window* win)
-        {
-
-        }
     }
 }

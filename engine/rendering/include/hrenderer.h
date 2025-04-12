@@ -5,9 +5,9 @@
 
 namespace hf
 {
-	struct  Renderer
+	struct Renderer
 	{
-		Renderer(const Ref<Window>& window, const char* version);
+		Renderer(const Ref<Window>& window);
 		~Renderer();
 
 		void* handle;
