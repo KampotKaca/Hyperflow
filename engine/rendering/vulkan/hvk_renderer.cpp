@@ -20,6 +20,7 @@ namespace hf
 
         Graphics_LoadPhysicalDevices(rendererData);
         Graphics_LoadSwapchain(rendererData, 0);
+        Graphics_SetupViewportAndScissor(rendererData);
         handle = rendererData;
     }
 

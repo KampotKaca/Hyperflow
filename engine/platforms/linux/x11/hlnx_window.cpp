@@ -175,7 +175,7 @@ namespace hf
 
 				WIN_REGISTRY.erase(window);
 				XDestroyWindow(PLATFORM_DATA.display, window);
-				win->renderer = nullptr;
+				delete(win->renderer);
 				delete((LnxWindowData*)win->handle);
 				win->handle = nullptr;
 				return true;

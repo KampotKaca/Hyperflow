@@ -294,6 +294,25 @@ namespace hf
         }
     }
 
+    void Graphics_SetupViewportAndScissor(VKRendererData* rendererData)
+    {
+        rendererData->viewport =
+        {
+            .x = 0.0f,
+            .y = 0.0f,
+            .width = (float)rendererData->swapchain.details.extent.width,
+            .height = (float)rendererData->swapchain.details.extent.height,
+            .minDepth = 0.0f,
+            .maxDepth = 1.0f,
+        };
+
+        rendererData->scissor =
+        {
+            .offset = { 0, 0 },
+            .extent = rendererData->swapchain.details.extent
+        };
+    }
+
     //------------------------------------------------------------------------------------
 
     void InitLayers()

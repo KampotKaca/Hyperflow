@@ -94,6 +94,8 @@ namespace hf
         GraphicsSwapChain swapchain{};
         std::vector<GraphicsDevice> suitableDevices{};
         GraphicsDevice* defaultDevice;
+        VkViewport viewport{};
+        VkRect2D scissor{};
     };
 
     extern GraphicsData GRAPHICS_DATA;
@@ -112,6 +114,8 @@ namespace hf
     extern uint32_t Graphics_GetDeviceCount(const VKRendererData* rendererData);
     extern void Graphics_LoadSwapchain(VKRendererData* rendererData, uint32_t deviceIndex);
     extern void Graphics_UnloadSwapchain(VKRendererData* rendererData);
+
+    extern void Graphics_SetupViewportAndScissor(VKRendererData* rendererData);
 
     extern const std::vector<const char*> REQUIRED_EXTENSIONS;
     extern const std::vector<const char*> DEVICE_EXTENSIONS;
