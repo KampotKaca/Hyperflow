@@ -7,15 +7,14 @@
 
 namespace hf::inter::rendering
 {
-    static bool CreateShaderModule(const char* code, uint32_t codeSize, VkShaderModule* result);
+    static void CreateShaderModule(const char* code, uint32_t codeSize, VkShaderModule* result);
+    static void CreateRenderPass(const ShaderCreationInfo& info, VkRenderPass* renderPass);
+    static void CreatePipelineLayout(const ShaderCreationInfo& info, VkPipelineLayout* pipelineLayout);
+    static void CreatePipeline(const VkPipelineInfo& info, VkPipeline* pipeline);
 
-    void* CreateShader(const ShaderCreationInfo& info, const Shader* shader)
+    VkShader::VkShader(const ShaderCreationInfo& info, const Shader* shader)
+    : shader(shader)
     {
-        auto vShader = new VkShader
-        {
-            .shader = shader
-        };
-
         using namespace inter;
         VkShaderModule vertModule{}, fragModule{};
         CreateShaderModule(info.vCode, info.vCodeSize, &vertModule);
@@ -27,29 +26,55 @@ namespace hf::inter::rendering
                 .sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO,
                 .stage = VK_SHADER_STAGE_VERTEX_BIT,
                 .module = vertModule,
-                .pName = shader->vPath.c_str(),
+                .pName = "main",
             },
             {//fragment
                 .sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO,
                 .stage = VK_SHADER_STAGE_FRAGMENT_BIT,
                 .module = fragModule,
-                .pName = shader->fPath.c_str()
+                .pName = "main"
             }
         };
+
+        CreateRenderPass(info, &renderPass);
+        CreatePipelineLayout(info, &pipelineLayout);
+
+        VkPipelineInfo pipelineCreationInfo
+        {
+            .pStages = shaderStages,
+            .stageCount = 2,
+            .blendingMode = PipelineBlendType::None,
+            .blendingOp = VK_LOGIC_OP_XOR,
+            .layout = pipelineLayout,
+            .renderPass = renderPass,
+        };
+
+        CreatePipeline(pipelineCreationInfo, &pipeline);
 
         auto& device = GRAPHICS_DATA.defaultDevice->logicalDevice.device;
         vkDestroyShaderModule(device, vertModule, nullptr);
         vkDestroyShaderModule(device, fragModule, nullptr);
-        return vShader;
+    }
+
+    VkShader::~VkShader()
+    {
+        auto& device = GRAPHICS_DATA.defaultDevice->logicalDevice.device;
+        vkDestroyPipeline(device, pipeline, nullptr);
+        vkDestroyRenderPass(device, renderPass, nullptr);
+        vkDestroyPipelineLayout(device, pipelineLayout, nullptr);
+    }
+
+    void* CreateShader(const ShaderCreationInfo& info, const Shader* shader)
+    {
+        return new VkShader(info, shader);
     }
 
     void DestroyShader(void* shader)
     {
-        auto sh = (VkShader*)shader;
-        delete(sh);
+        delete (VkShader*)shader;
     }
 
-    bool CreateShaderModule(const char* code, uint32_t codeSize, VkShaderModule* result)
+    void CreateShaderModule(const char* code, uint32_t codeSize, VkShaderModule* result)
     {
         using namespace inter;
         VkShaderModuleCreateInfo createInfo
@@ -60,7 +85,189 @@ namespace hf::inter::rendering
         };
         VK_HANDLE_EXCEPT(vkCreateShaderModule(GRAPHICS_DATA.defaultDevice->logicalDevice.device,
             &createInfo, nullptr, result));
+    }
 
-        return true;
+    void CreateRenderPass(const ShaderCreationInfo& info, VkRenderPass* renderPass)
+    {
+        VkAttachmentDescription colorAttachment
+        {
+            .format = VK_FORMAT_B8G8R8A8_SRGB,
+            .samples = VK_SAMPLE_COUNT_1_BIT,
+            .loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR,
+            .storeOp = VK_ATTACHMENT_STORE_OP_STORE,
+            .stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE,
+            .stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE,
+            .initialLayout = VK_IMAGE_LAYOUT_UNDEFINED,
+            .finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR,
+        };
+
+        VkAttachmentReference colorAttachmentRef
+        {
+            .attachment = 0,
+            .layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL
+        };
+
+        VkSubpassDescription subpass
+        {
+            .pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS,
+            .colorAttachmentCount = 1,
+            .pColorAttachments = &colorAttachmentRef
+        };
+
+        VkRenderPassCreateInfo renderPassInfo
+        {
+            .sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO,
+            .attachmentCount = 1,
+            .pAttachments = &colorAttachment,
+            .subpassCount = 1,
+            .pSubpasses = &subpass,
+        };
+
+        VK_HANDLE_EXCEPT(vkCreateRenderPass(GRAPHICS_DATA.defaultDevice->logicalDevice.device,
+            &renderPassInfo, nullptr, renderPass));
+    }
+
+    void CreatePipelineLayout(const ShaderCreationInfo& info, VkPipelineLayout* pipelineLayout)
+    {
+        VkPipelineLayoutCreateInfo pipelineLayoutInfo
+        {
+            .sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO,
+            .setLayoutCount = 0,
+            .pSetLayouts = nullptr,
+            .pushConstantRangeCount = 0,
+            .pPushConstantRanges = nullptr,
+        };
+
+        VK_HANDLE_EXCEPT(vkCreatePipelineLayout(GRAPHICS_DATA.defaultDevice->logicalDevice.device,
+            &pipelineLayoutInfo, nullptr, pipelineLayout));
+    }
+
+    void CreatePipeline(const VkPipelineInfo& info, VkPipeline* pipeline)
+    {
+        VkPipelineVertexInputStateCreateInfo vertexInputInfo
+        {
+            .sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO,
+            .vertexBindingDescriptionCount = 0,
+            .pVertexBindingDescriptions = nullptr,
+            .vertexAttributeDescriptionCount = 0,
+            .pVertexAttributeDescriptions = nullptr
+        };
+
+        VkPipelineInputAssemblyStateCreateInfo inputAssembly
+        {
+            .sType = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO,
+            .topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST,
+            .primitiveRestartEnable = VK_FALSE
+        };
+
+        std::vector<VkDynamicState> dynamicStates =
+        {
+            VK_DYNAMIC_STATE_VIEWPORT,
+            VK_DYNAMIC_STATE_SCISSOR
+        };
+
+        VkPipelineDynamicStateCreateInfo dynamicState
+        {
+            .sType = VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO,
+            .dynamicStateCount = (uint32_t)dynamicStates.size(),
+            .pDynamicStates = dynamicStates.data()
+        };
+
+        VkPipelineViewportStateCreateInfo viewportState
+        {
+            .sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO,
+            .viewportCount = 1,
+            .pViewports = nullptr,
+            .scissorCount = 1,
+            .pScissors = nullptr,
+        };
+
+        VkPipelineRasterizationStateCreateInfo rasterizer
+        {
+            .sType = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO,
+            .depthClampEnable = VK_FALSE,
+            .rasterizerDiscardEnable = VK_FALSE,
+            .polygonMode = VK_POLYGON_MODE_FILL,
+            .lineWidth = 1.0f,
+            .cullMode = VK_CULL_MODE_BACK_BIT,
+            .frontFace = VK_FRONT_FACE_CLOCKWISE,
+            .depthBiasEnable = VK_FALSE,
+            .depthBiasConstantFactor = 0.0f,
+            .depthBiasClamp = 0.0f,
+            .depthBiasSlopeFactor = 0.0f,
+        };
+
+        VkPipelineMultisampleStateCreateInfo multisampling
+        {
+            .sType = VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO,
+            .sampleShadingEnable = VK_FALSE,
+            .rasterizationSamples = VK_SAMPLE_COUNT_1_BIT,
+            .minSampleShading = 1.0f,
+            .pSampleMask = nullptr,
+            .alphaToCoverageEnable = VK_FALSE,
+            .alphaToOneEnable = VK_FALSE,
+        };
+
+        VkPipelineColorBlendAttachmentState colorBlendAttachment
+        {
+            .colorWriteMask = VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT,
+        };
+
+        if (info.blendingMode == PipelineBlendType::Alpha)
+        {
+            colorBlendAttachment.blendEnable = VK_TRUE;
+            colorBlendAttachment.srcColorBlendFactor = VK_BLEND_FACTOR_SRC_ALPHA;
+            colorBlendAttachment.dstColorBlendFactor = VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA;
+            colorBlendAttachment.colorBlendOp = VK_BLEND_OP_ADD;
+            colorBlendAttachment.srcAlphaBlendFactor = VK_BLEND_FACTOR_ONE;
+            colorBlendAttachment.dstAlphaBlendFactor = VK_BLEND_FACTOR_ZERO;
+            colorBlendAttachment.alphaBlendOp = VK_BLEND_OP_ADD;
+        }
+        else if (info.blendingMode == PipelineBlendType::None)
+        {
+            colorBlendAttachment.blendEnable = VK_FALSE;
+            colorBlendAttachment.srcColorBlendFactor = VK_BLEND_FACTOR_ONE;
+            colorBlendAttachment.dstColorBlendFactor = VK_BLEND_FACTOR_ZERO;
+            colorBlendAttachment.colorBlendOp = VK_BLEND_OP_ADD;
+            colorBlendAttachment.srcAlphaBlendFactor = VK_BLEND_FACTOR_ONE;
+            colorBlendAttachment.dstAlphaBlendFactor = VK_BLEND_FACTOR_ZERO;
+            colorBlendAttachment.alphaBlendOp = VK_BLEND_OP_ADD;
+        }
+
+        VkPipelineColorBlendStateCreateInfo colorBlending
+        {
+            .sType = VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO,
+            .logicOpEnable = info.blendingMode == PipelineBlendType::Logical,
+            .logicOp = VK_LOGIC_OP_XOR,
+            .attachmentCount = 1,
+            .pAttachments = &colorBlendAttachment,
+            .blendConstants[0] = 0.0f,
+            .blendConstants[1] = 0.0f,
+            .blendConstants[2] = 0.0f,
+            .blendConstants[3] = 0.0f,
+        };
+
+        VkGraphicsPipelineCreateInfo pipelineInfo
+        {
+            .sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO,
+            .stageCount = info.stageCount,
+            .pStages = info.pStages,
+            .pVertexInputState = &vertexInputInfo,
+            .pInputAssemblyState = &inputAssembly,
+            .pViewportState = &viewportState,
+            .pRasterizationState = &rasterizer,
+            .pMultisampleState = &multisampling,
+            .pDepthStencilState = nullptr,
+            .pColorBlendState = &colorBlending,
+            .pDynamicState = &dynamicState,
+            .layout = info.layout,
+            .renderPass = info.renderPass,
+            .subpass = 0,
+            .basePipelineHandle = VK_NULL_HANDLE,
+            .basePipelineIndex = -1,
+        };
+
+        VK_HANDLE_EXCEPT(vkCreateGraphicsPipelines(GRAPHICS_DATA.defaultDevice->logicalDevice.device,
+            VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, pipeline));
     }
 }

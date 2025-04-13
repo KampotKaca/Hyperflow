@@ -3,12 +3,19 @@
 
 #include "hinternal.h"
 #include "hshader.h"
+#include <vulkan/vulkan.h>
 
 namespace hf::inter::rendering
 {
     struct VkShader
     {
-        const Shader* shader;
+        VkShader(const ShaderCreationInfo& info, const Shader* shader);
+        ~VkShader();
+
+        const Shader* shader{};
+        VkPipelineLayout pipelineLayout{};
+        VkRenderPass renderPass{};
+        VkPipeline pipeline{};
     };
 }
 

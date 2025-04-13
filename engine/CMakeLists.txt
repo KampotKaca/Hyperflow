@@ -136,4 +136,4 @@ target_include_directories(${PROJECT_NAME}
         rendering/include
 )
 
-target_compile_definitions("${PROJECT_NAME}" PUBLIC RES_PATH="${CMAKE_BINARY_DIR}./res/")
+target_compile_definitions("${PROJECT_NAME}" PUBLIC RES_PATH="${CMAKE_BINARY_DIR}/res/")

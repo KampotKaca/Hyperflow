@@ -23,8 +23,11 @@ namespace hf::utils
     bool ReadFile(const std::string& filename, std::vector<char>& result)
     {
         std::ifstream file(filename, std::ios::ate | std::ios::binary);
-        if (!file.is_open()) return false;
-
+        if (!file.is_open())
+        {
+            LOG_ERROR("Unable to open file at location %s", filename.c_str());
+            return false;
+        }
         size_t fileSize = file.tellg();
         result = std::vector<char>(fileSize);
         file.seekg(0);

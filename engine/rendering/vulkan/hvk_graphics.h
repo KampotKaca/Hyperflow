@@ -99,15 +99,14 @@ namespace hf::inter::rendering
     };
 
     enum class PipelineBlendType { None, Alpha, Logical };
-    struct VkPipelineCreationInfo
+    struct VkPipelineInfo
     {
-        VkDevice device{};
         VkPipelineShaderStageCreateInfo* pStages = nullptr;
         uint32_t stageCount = 0;
-        VkViewport viewport{};
-        VkRect2D scissor{};
         PipelineBlendType blendingMode = PipelineBlendType::None;
         VkLogicOp blendingOp = VK_LOGIC_OP_XOR; //Setting will be used only if you use Logical Blending
+        VkPipelineLayout layout{};
+        VkRenderPass renderPass{};
     };
 
     extern GraphicsData GRAPHICS_DATA;
@@ -124,7 +123,6 @@ namespace hf::inter::rendering
     uint32_t GetDeviceCount(const VKRendererData* rendererData);
 
     void SetupViewportAndScissor(VKRendererData* rendererData);
-    void CreatePipeline(const VkPipelineCreationInfo& info, VkPipelineLayout* result);
 
     extern const std::vector<const char*> REQUIRED_EXTENSIONS;
     extern const std::vector<const char*> DEVICE_EXTENSIONS;

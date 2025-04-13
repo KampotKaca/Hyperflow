@@ -8,10 +8,12 @@ namespace app
 	hf::Ref<hf::Window> wn;
 	int reqCount = 0;
 	int32_t lastReq = -1;
+	hf::Ref<hf::Shader> shader;
 
 	void Application::Start()
 	{
 		count = 0;
+		shader = hf::shader::Create("shaders/vulkan/default.vert.spv", "shaders/vulkan/default.frag.spv");
 	}
 
 	void Application::Update()

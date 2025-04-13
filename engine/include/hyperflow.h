@@ -85,11 +85,14 @@ namespace hf
 
 	namespace rendering
 	{
-
+		void UnloadAllResources();
 	}
 
 	namespace shader
 	{
+		Ref<Shader> Create(const std::string& vertPath, const std::string& fragPath);
+		void Destroy(const Ref<Shader>& shader);
+		void DestroyAll();
 		bool IsRunning(const Ref<Shader>& shader);
 	}
 

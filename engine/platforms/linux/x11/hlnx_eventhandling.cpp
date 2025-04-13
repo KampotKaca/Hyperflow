@@ -4,7 +4,6 @@
 
 #include "hwindow.h"
 #include "hlnx_eventhandling.h"
-#include "hyperflow.h"
 #include "hinternal.h"
 #include <X11/Xlib.h>
 #include <X11/keysym.h>

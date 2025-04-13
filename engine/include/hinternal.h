@@ -12,11 +12,13 @@ namespace hf::inter
         EngineLifecycleCallbacks lifecycleCallbacks{};
         EngineUpdateType updateType = EngineUpdateType::Continues;
         bool isRunning{};
-        std::string appTitle;
-        Time time;
-        Ref<Window> mainWindow;
-        std::vector<Ref<Window>> windows;
-        uint32_t rendererCount;
+        std::string appTitle{};
+        Time time{};
+        Ref<Window> mainWindow{};
+        std::vector<Ref<Window>> windows{};
+        uint32_t rendererCount{};
+
+        std::unordered_map<Shader*, Ref<Shader>> shaders{};
     };
 
     extern Hyperflow HF;
@@ -32,6 +34,11 @@ namespace hf::inter
         void Focus(const Window* win);
         bool Close(Window* win);
         void Update(const Window* win);
+    }
+
+    namespace shader
+    {
+        bool Destroy(Shader* shader);
     }
 
     namespace rendering

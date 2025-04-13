@@ -50,6 +50,7 @@ namespace hf
 			}
 			if(inter::HF.lifecycleCallbacks.onUpdateCallback) inter::HF.lifecycleCallbacks.onQuitCallback();
 
+			rendering::UnloadAllResources();
 			for (const auto& window : inter::HF.windows) inter::window::Close(window.get());
 			inter::HF.windows.clear();
 			Platform_EndTemporarySystemTimer(1);

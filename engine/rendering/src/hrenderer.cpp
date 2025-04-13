@@ -1,4 +1,7 @@
 #include "hrenderer.h"
+
+#include <hyperflow.h>
+
 #include "hinternal.h"
 #include "../config.h"
 
@@ -13,9 +16,22 @@ namespace hf
 
     Renderer::~Renderer()
     {
+        if (inter::HF.rendererCount == 1)
+        {
+            rendering::UnloadAllResources();
+        }
+
         inter::rendering::DestroyInstance(handle);
         handle = nullptr;
         inter::HF.rendererCount--;
         if (inter::HF.rendererCount == 0) inter::rendering::Unload();
+    }
+
+    namespace rendering
+    {
+        void UnloadAllResources()
+        {
+            shader::DestroyAll();
+        }
     }
 }
