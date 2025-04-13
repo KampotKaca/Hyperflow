@@ -5,38 +5,26 @@
 #include "hshared.h"
 #include <dxgi.h>
 
-namespace hf
+namespace hf::inter::rendering
 {
-	class Graphics
+	struct GraphicsData
 	{
-	public:
-		Graphics(HWND windowHandle);
-		Graphics(const Graphics&) = delete;
-		Graphics& operator=(const Graphics&) = delete;
-		~Graphics();
-
-		void StartFrame();
-		void EndFrame();
-
-		void ClearFrame(const glm::vec4& color);
-
-		static ID3D11DeviceContext* GetContext();
-
-	private:
-		HWND m_WindowHandle;
-		IDXGISwapChain* m_SwapChain;
-		ID3D11RenderTargetView* m_RenderTexture;
-
-		static int32_t s_RefCount;
-		static ID3D11Device* s_Device;
-		static IDXGIDevice* s_DxgiDevice;
-		static ID3D11DeviceContext* s_Context;
-		static IDXGIFactory* s_Factory;
-		static IDXGIAdapter* s_Adapter;
-
-		static void Init();
-		static void Dispose();
+		int32_t refCount = 0;
+		ID3D11Device* device{};
+		IDXGIDevice* dxgiDevice{};
+		ID3D11DeviceContext* context{};
+		IDXGIFactory* factory{};
+		IDXGIAdapter* adapter{};
 	};
+
+	struct D3DRendererData
+	{
+		HWND windowHandle{};
+		IDXGISwapChain* swapChain{};
+		ID3D11RenderTargetView* renderTexture{};
+	};
+
+	extern GraphicsData GRAPHICS_DATA;
 }
 
 #endif //HD3D_GRAPHICS_H
