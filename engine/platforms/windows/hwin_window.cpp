@@ -113,9 +113,10 @@ namespace hf
 		{
 			if (win->handle && IsWindow((HWND)win->handle))
 			{
-				delete(win->renderer);
+				win->renderer = nullptr;
 				if(!DestroyWindow((HWND)win->handle)) throw WND_LAST_EXCEPT();
 				win->handle = nullptr;
+				win->parent = nullptr;
 				return true;
 			}
 

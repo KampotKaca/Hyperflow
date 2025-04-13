@@ -18,10 +18,10 @@ namespace hf
 
         inter::rendering::ShaderCreationInfo creationInfo
         {
-            .vCodeSize = (uint32_t)vertexCode.size(),
             .vCode = vertexCode.data(),
-            .fCodeSize = (uint32_t)fragmentCode.size(),
+            .vCodeSize = (uint32_t)vertexCode.size(),
             .fCode = fragmentCode.data(),
+            .fCodeSize = (uint32_t)fragmentCode.size(),
         };
 
         handle = inter::rendering::CreateShader(creationInfo, this);

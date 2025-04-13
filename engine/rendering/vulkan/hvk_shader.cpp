@@ -188,20 +188,20 @@ namespace hf::inter::rendering
             .depthClampEnable = VK_FALSE,
             .rasterizerDiscardEnable = VK_FALSE,
             .polygonMode = VK_POLYGON_MODE_FILL,
-            .lineWidth = 1.0f,
             .cullMode = VK_CULL_MODE_BACK_BIT,
             .frontFace = VK_FRONT_FACE_CLOCKWISE,
             .depthBiasEnable = VK_FALSE,
             .depthBiasConstantFactor = 0.0f,
             .depthBiasClamp = 0.0f,
             .depthBiasSlopeFactor = 0.0f,
+            .lineWidth = 1.0f,
         };
 
         VkPipelineMultisampleStateCreateInfo multisampling
         {
             .sType = VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO,
-            .sampleShadingEnable = VK_FALSE,
             .rasterizationSamples = VK_SAMPLE_COUNT_1_BIT,
+            .sampleShadingEnable = VK_FALSE,
             .minSampleShading = 1.0f,
             .pSampleMask = nullptr,
             .alphaToCoverageEnable = VK_FALSE,
@@ -241,10 +241,7 @@ namespace hf::inter::rendering
             .logicOp = VK_LOGIC_OP_XOR,
             .attachmentCount = 1,
             .pAttachments = &colorBlendAttachment,
-            .blendConstants[0] = 0.0f,
-            .blendConstants[1] = 0.0f,
-            .blendConstants[2] = 0.0f,
-            .blendConstants[3] = 0.0f,
+            .blendConstants = { 0.0f, 0.0f, 0.0f, 0.0f },
         };
 
         VkGraphicsPipelineCreateInfo pipelineInfo
