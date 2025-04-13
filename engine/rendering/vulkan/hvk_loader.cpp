@@ -64,7 +64,6 @@ namespace hf::inter::rendering
         auto rendererData = new VKRendererData();
         if (window) rendererData->windowHandle = window->handle;
         CreateSurface(rendererData);
-        SetupViewportAndScissor(rendererData);
         return rendererData;
     }
 
@@ -113,6 +112,8 @@ namespace hf::inter::rendering
 
     void Unload()
     {
+        DestroyRenderPass(GRAPHICS_DATA.renderPass);
+
         for (auto& device : GRAPHICS_DATA.suitableDevices)
             DestroyLogicalDevice(device.logicalDevice);
 

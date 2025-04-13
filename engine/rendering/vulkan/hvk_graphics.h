@@ -4,6 +4,8 @@
 #include "hshared.h"
 #include <vulkan/vulkan.h>
 
+#include "hvk_framebuffer.h"
+
 namespace hf::inter::rendering
 {
 #if DEBUG
@@ -62,6 +64,8 @@ namespace hf::inter::rendering
         GraphicsDevice* defaultDevice;
         bool devicesAreLoaded = false;
 
+        VkRenderPass renderPass{};
+
 #if DEBUG
         VkDebugUtilsMessengerCreateInfoEXT debugCreateInfo
         {
@@ -87,6 +91,7 @@ namespace hf::inter::rendering
         std::vector<VkImage> images{};
         std::vector<VkImageView> imageViews{};
         GraphicsSwapchainDetails details{};
+        std::vector<VkFrameBuffer*> frameBuffers{};
     };
 
     struct VKRendererData
@@ -120,9 +125,8 @@ namespace hf::inter::rendering
     void CreateSurface(VKRendererData* rendererData);
     void DestroySurface(VKRendererData* rendererData);
 
-    uint32_t GetDeviceCount(const VKRendererData* rendererData);
-
-    void SetupViewportAndScissor(VKRendererData* rendererData);
+    void CreateRenderPass(VkRenderPass* renderPass);
+    void DestroyRenderPass(const VkRenderPass& renderPass);
 
     extern const std::vector<const char*> REQUIRED_EXTENSIONS;
     extern const std::vector<const char*> DEVICE_EXTENSIONS;

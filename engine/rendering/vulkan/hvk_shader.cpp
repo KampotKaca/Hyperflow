@@ -1,4 +1,4 @@
-#include "hvkshader.h"
+#include "hvk_shader.h"
 #include "hshader.h"
 #include "hinternal.h"
 #include "hyperflow.h"
@@ -8,7 +8,6 @@
 namespace hf::inter::rendering
 {
     static void CreateShaderModule(const char* code, uint32_t codeSize, VkShaderModule* result);
-    static void CreateRenderPass(const ShaderCreationInfo& info, VkRenderPass* renderPass);
     static void CreatePipelineLayout(const ShaderCreationInfo& info, VkPipelineLayout* pipelineLayout);
     static void CreatePipeline(const VkPipelineInfo& info, VkPipeline* pipeline);
 
@@ -36,7 +35,6 @@ namespace hf::inter::rendering
             }
         };
 
-        CreateRenderPass(info, &renderPass);
         CreatePipelineLayout(info, &pipelineLayout);
 
         VkPipelineInfo pipelineCreationInfo
@@ -46,7 +44,7 @@ namespace hf::inter::rendering
             .blendingMode = PipelineBlendType::None,
             .blendingOp = VK_LOGIC_OP_XOR,
             .layout = pipelineLayout,
-            .renderPass = renderPass,
+            .renderPass = GRAPHICS_DATA.renderPass,
         };
 
         CreatePipeline(pipelineCreationInfo, &pipeline);
@@ -60,7 +58,6 @@ namespace hf::inter::rendering
     {
         auto& device = GRAPHICS_DATA.defaultDevice->logicalDevice.device;
         vkDestroyPipeline(device, pipeline, nullptr);
-        vkDestroyRenderPass(device, renderPass, nullptr);
         vkDestroyPipelineLayout(device, pipelineLayout, nullptr);
     }
 
@@ -85,46 +82,6 @@ namespace hf::inter::rendering
         };
         VK_HANDLE_EXCEPT(vkCreateShaderModule(GRAPHICS_DATA.defaultDevice->logicalDevice.device,
             &createInfo, nullptr, result));
-    }
-
-    void CreateRenderPass(const ShaderCreationInfo& info, VkRenderPass* renderPass)
-    {
-        VkAttachmentDescription colorAttachment
-        {
-            .format = VK_FORMAT_B8G8R8A8_SRGB,
-            .samples = VK_SAMPLE_COUNT_1_BIT,
-            .loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR,
-            .storeOp = VK_ATTACHMENT_STORE_OP_STORE,
-            .stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE,
-            .stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE,
-            .initialLayout = VK_IMAGE_LAYOUT_UNDEFINED,
-            .finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR,
-        };
-
-        VkAttachmentReference colorAttachmentRef
-        {
-            .attachment = 0,
-            .layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL
-        };
-
-        VkSubpassDescription subpass
-        {
-            .pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS,
-            .colorAttachmentCount = 1,
-            .pColorAttachments = &colorAttachmentRef
-        };
-
-        VkRenderPassCreateInfo renderPassInfo
-        {
-            .sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO,
-            .attachmentCount = 1,
-            .pAttachments = &colorAttachment,
-            .subpassCount = 1,
-            .pSubpasses = &subpass,
-        };
-
-        VK_HANDLE_EXCEPT(vkCreateRenderPass(GRAPHICS_DATA.defaultDevice->logicalDevice.device,
-            &renderPassInfo, nullptr, renderPass));
     }
 
     void CreatePipelineLayout(const ShaderCreationInfo& info, VkPipelineLayout* pipelineLayout)

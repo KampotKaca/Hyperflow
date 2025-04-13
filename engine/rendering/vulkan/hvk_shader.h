@@ -14,7 +14,6 @@ namespace hf::inter::rendering
 
         const Shader* shader{};
         VkPipelineLayout pipelineLayout{};
-        VkRenderPass renderPass{};
         VkPipeline pipeline{};
     };
 }

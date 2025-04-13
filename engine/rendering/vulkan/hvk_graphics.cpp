@@ -1,5 +1,6 @@
 #include "hvk_graphics.h"
 
+#include <hframebuffer.h>
 #include <bits/ranges_algo.h>
 
 #include "hgenericexception.h"
@@ -25,6 +26,8 @@ namespace hf::inter::rendering
     static bool GetAvailableSurfaceDetails(const SwapChainSupportDetails& swapChainSupportDetails,
                                     VkFormat targetFormat, VkPresentModeKHR targetPresentMode, uvec2 targetExtents,
                                     GraphicsSwapchainDetails* result);
+
+    static void SetupViewportAndScissor(VKRendererData* rendererData);
 
     bool IsLayerSupported(const char* layer)
     {
@@ -83,6 +86,10 @@ namespace hf::inter::rendering
                                      [](const GraphicsDevice& a, const GraphicsDevice& b)
                                      { return a.score > b.score; });
             GRAPHICS_DATA.devicesAreLoaded = true;
+
+            CreateSwapchain(rendererData, swapChainSupport);
+            SetupViewportAndScissor(rendererData);
+            CreateRenderPass(&GRAPHICS_DATA.renderPass);
         }
         else
         {
@@ -92,17 +99,33 @@ namespace hf::inter::rendering
             if (swapChainSupport.formats.empty() ||
                 swapChainSupport.presentModes.empty())
                 throw GENERIC_EXCEPT("[Vulkan]", "Device is not suitable!!!");
+
+            CreateSwapchain(rendererData, swapChainSupport);
+            SetupViewportAndScissor(rendererData);
         }
-        CreateSwapchain(rendererData, swapChainSupport);
+
+        auto& imageViews = rendererData->swapchain.imageViews;
+        rendererData->swapchain.frameBuffers = std::vector<VkFrameBuffer*>(imageViews.size());
+        for (uint32_t i = 0; i < imageViews.size(); ++i)
+        {
+            rendererData->swapchain.frameBuffers[i] = new VkFrameBuffer(&rendererData->swapchain.imageViews[i],
+                1, GRAPHICS_DATA.renderPass,
+                VkExtent2D
+                {
+                    .width = (uint32_t)rendererData->viewport.width,
+                    .height = (uint32_t)rendererData->viewport.height
+                });
+        }
     }
 
     void DestroySurface(VKRendererData* rendererData)
     {
+        for (auto& frameBuffer : rendererData->swapchain.frameBuffers)
+            delete frameBuffer;
+        rendererData->swapchain.frameBuffers.clear();
         DestroySwapchain(rendererData);
         DestroyPlatformSurface(rendererData);
     }
-
-    uint32_t GetDeviceCount(const VKRendererData* rendererData) { return GRAPHICS_DATA.suitableDevices.size(); }
 
     void CreateSwapchain(VKRendererData* rendererData, const SwapChainSupportDetails& scs)
     {
@@ -204,8 +227,8 @@ namespace hf::inter::rendering
         if (rendererData->swapchain.swapchain != VK_NULL_HANDLE)
         {
             auto& device = GRAPHICS_DATA.defaultDevice->logicalDevice.device;
-            for (uint32_t i = 0; i < rendererData->swapchain.imageViews.size(); i++)
-                vkDestroyImageView(device, rendererData->swapchain.imageViews[i], nullptr);
+            for (auto& imageView : rendererData->swapchain.imageViews)
+                vkDestroyImageView(device, imageView, nullptr);
 
             rendererData->swapchain.imageViews.clear();
             rendererData->swapchain.images.clear();
@@ -403,9 +426,4 @@ namespace hf::inter::rendering
     }
 
     bool QueueFamilyIndices::IsComplete() const { return graphicsFamily.has_value() && presentFamily.has_value(); }
-}
-
-namespace hf::inter::rendering
-{
-
 }

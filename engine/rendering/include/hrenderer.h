@@ -10,7 +10,7 @@ namespace hf
 		Renderer(const Ref<Window>& window);
 		~Renderer();
 
-		void* handle;
+		void* handle{};
 	};
 }
 
