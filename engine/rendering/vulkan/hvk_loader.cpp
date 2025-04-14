@@ -63,14 +63,14 @@ namespace hf::inter::rendering
     {
         auto rendererData = new VKRendererData();
         if (window) rendererData->windowHandle = window->handle;
-        CreateSurface(rendererData);
+        CreateVulkanRenderer(rendererData);
         return rendererData;
     }
 
     void DestroyInstance(void* rnInstance)
     {
         const auto data = (VKRendererData*)rnInstance;
-        DestroySurface(data);
+        DestroyVulkanRenderer(data);
         delete(data);
     }
 

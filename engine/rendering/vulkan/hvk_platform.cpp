@@ -58,7 +58,7 @@ namespace hf::inter::rendering
 
 #if X11
 
-    void CreatePlatformSurface(VKRendererData* rendererData)
+    void CreateSurface(VKRendererData* rendererData)
     {
         VkXlibSurfaceCreateInfoKHR createInfo
         {
@@ -81,7 +81,7 @@ namespace hf::inter::rendering
 
 #endif
 
-    void DestroyPlatformSurface(VKRendererData* rendererData)
+    void DestroySurface(VKRendererData* rendererData)
     {
         vkDestroySurfaceKHR(GRAPHICS_DATA.instance, rendererData->surface, nullptr);
         rendererData->surface = nullptr;

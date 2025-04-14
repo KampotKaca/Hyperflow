@@ -15,37 +15,12 @@ namespace hf::inter::rendering
 
     //Logical devices are destroyed in loader
     static void CreateLogicalDevice(GraphicsDevice& device);
-
-    static void CreateSwapchain(VKRendererData* rendererData, const SwapChainSupportDetails& scs);
-    static void DestroySwapchain(VKRendererData* rendererData);
-
     static bool SetupPhysicalDevice(const VKRendererData* renderer, VkPhysicalDevice device, GraphicsDevice* deviceData);
-    static bool CheckDeviceExtensionSupport(const VkPhysicalDevice& device);
-
-    static void QuerySwapChainSupport(const VkPhysicalDevice& device, const VkSurfaceKHR& surface, SwapChainSupportDetails* supportDetails);
-    static bool GetAvailableSurfaceDetails(const SwapChainSupportDetails& swapChainSupportDetails,
-                                    VkFormat targetFormat, VkPresentModeKHR targetPresentMode, uvec2 targetExtents,
-                                    GraphicsSwapchainDetails* result);
-
     static void SetupViewportAndScissor(VKRendererData* rendererData);
-
-    bool IsLayerSupported(const char* layer)
-    {
-        for (const auto& availableLayer : GRAPHICS_DATA.availableLayers)
-        {
-            if (strcmp(layer, availableLayer.layerName) == 0) return true;
-        }
-        return false;
-    }
-
-    bool IsExtensionSupported(const char* extension)
-    {
-        return GRAPHICS_DATA.availableExtensionNames.contains(extension);
-    }
 
     //------------------------------------------------------------------------------------
 
-    void CreateSurface(VKRendererData* rendererData)
+    void CreateVulkanRenderer(VKRendererData* rendererData)
     {
         SwapChainSupportDetails swapChainSupport{};
         if (!GRAPHICS_DATA.devicesAreLoaded)
@@ -60,7 +35,7 @@ namespace hf::inter::rendering
             VK_HANDLE_EXCEPT(vkEnumeratePhysicalDevices(GRAPHICS_DATA.instance,
                 &deviceCount, availableDevices.data()));
 
-            CreatePlatformSurface(rendererData);
+            CreateSurface(rendererData);
 
             for (const auto& device : availableDevices)
             {
@@ -87,20 +62,20 @@ namespace hf::inter::rendering
                                      { return a.score > b.score; });
             GRAPHICS_DATA.devicesAreLoaded = true;
 
-            CreateSwapchain(rendererData, swapChainSupport);
+            CreateSwapchain(rendererData->surface, swapChainSupport, &rendererData->swapchain);
             SetupViewportAndScissor(rendererData);
             CreateRenderPass(&GRAPHICS_DATA.renderPass);
         }
         else
         {
-            CreatePlatformSurface(rendererData);
+            CreateSurface(rendererData);
             QuerySwapChainSupport(GRAPHICS_DATA.defaultDevice->device, rendererData->surface, &swapChainSupport);
 
             if (swapChainSupport.formats.empty() ||
                 swapChainSupport.presentModes.empty())
                 throw GENERIC_EXCEPT("[Vulkan]", "Device is not suitable!!!");
 
-            CreateSwapchain(rendererData, swapChainSupport);
+            CreateSwapchain(rendererData->surface, swapChainSupport, &rendererData->swapchain);
             SetupViewportAndScissor(rendererData);
         }
 
@@ -118,124 +93,13 @@ namespace hf::inter::rendering
         }
     }
 
-    void DestroySurface(VKRendererData* rendererData)
+    void DestroyVulkanRenderer(VKRendererData* rendererData)
     {
         for (auto& frameBuffer : rendererData->swapchain.frameBuffers)
             delete frameBuffer;
         rendererData->swapchain.frameBuffers.clear();
-        DestroySwapchain(rendererData);
-        DestroyPlatformSurface(rendererData);
-    }
-
-    void CreateSwapchain(VKRendererData* rendererData, const SwapChainSupportDetails& scs)
-    {
-        DestroySwapchain(rendererData);
-        GRAPHICS_DATA.defaultDevice = &GRAPHICS_DATA.suitableDevices[0];
-        LOG_LOG("Graphics device found [%s]", GRAPHICS_DATA.defaultDevice->properties.deviceName);
-
-        GraphicsSwapchainDetails details{};
-        if (GetAvailableSurfaceDetails(scs,
-            VULKAN_API_COLOR_FORMAT, VULKAN_API_PRESENT_MODE, ivec2(1080, 1920), &details))
-        {
-            uint32_t imageCount = scs.capabilities.minImageCount + 1;
-            uint32_t maxImageCount = scs.capabilities.maxImageCount;
-            if (maxImageCount > 0 && imageCount > maxImageCount) imageCount = maxImageCount;
-
-            VkSwapchainCreateInfoKHR createInfo
-            {
-                .sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR,
-                .surface = rendererData->surface,
-                .minImageCount = imageCount,
-                .imageFormat = details.format.format,
-                .imageColorSpace = details.format.colorSpace,
-                .imageExtent = details.extent,
-                .imageArrayLayers = 1,
-                .imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT,
-                .preTransform = scs.capabilities.currentTransform,
-                .compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR,
-                .presentMode = details.presentMode,
-                .clipped = VK_TRUE,
-                .oldSwapchain = VK_NULL_HANDLE
-            };
-
-            auto& indices = GRAPHICS_DATA.defaultDevice->familyIndices;
-            if (indices.graphicsFamily != indices.presentFamily)
-            {
-                uint32_t familyIndices[] = { indices.graphicsFamily.value(), indices.presentFamily.value() };
-                createInfo.imageSharingMode = VK_SHARING_MODE_CONCURRENT;
-                createInfo.queueFamilyIndexCount = 2;
-                createInfo.pQueueFamilyIndices = familyIndices;
-            }
-            else
-            {
-                createInfo.imageSharingMode = VK_SHARING_MODE_EXCLUSIVE;
-                createInfo.queueFamilyIndexCount = 0;
-                createInfo.pQueueFamilyIndices = nullptr;
-            }
-
-            VK_HANDLE_EXCEPT(vkCreateSwapchainKHR(GRAPHICS_DATA.defaultDevice->logicalDevice.device, &createInfo,
-                nullptr, &rendererData->swapchain.swapchain));
-            rendererData->swapchain.details = details;
-        }
-        else throw GENERIC_EXCEPT("[Vulkan]", "Unable to create swapchain");
-
-        uint32_t imageCount;
-        VK_HANDLE_EXCEPT(vkGetSwapchainImagesKHR(GRAPHICS_DATA.defaultDevice->logicalDevice.device,
-            rendererData->swapchain.swapchain, &imageCount, nullptr));
-
-        auto& images = rendererData->swapchain.images;
-        images = std::vector<VkImage>(imageCount);
-        VK_HANDLE_EXCEPT(vkGetSwapchainImagesKHR(GRAPHICS_DATA.defaultDevice->logicalDevice.device,
-            rendererData->swapchain.swapchain, &imageCount,
-            images.data()));
-
-        auto& imageViews = rendererData->swapchain.imageViews;
-        imageViews = std::vector<VkImageView>(imageCount);
-        for (uint32_t i = 0; i < imageCount; i++)
-        {
-            VkImageViewCreateInfo createInfo
-            {
-                .sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO,
-                .image = images[i],
-                .viewType = VK_IMAGE_VIEW_TYPE_2D,
-                .format = details.format.format,
-                .components =
-                {
-                    .r = VK_COMPONENT_SWIZZLE_IDENTITY,
-                    .g = VK_COMPONENT_SWIZZLE_IDENTITY,
-                    .b = VK_COMPONENT_SWIZZLE_IDENTITY,
-                    .a = VK_COMPONENT_SWIZZLE_IDENTITY,
-                },
-                .subresourceRange =
-                {
-                    .aspectMask = VK_IMAGE_ASPECT_COLOR_BIT,
-                    .baseMipLevel = 0,
-                    .levelCount = 1,
-                    .baseArrayLayer = 0,
-                    .layerCount = 1,
-                }
-            };
-
-            VK_HANDLE_EXCEPT(vkCreateImageView(GRAPHICS_DATA.defaultDevice->logicalDevice.device,
-                &createInfo, nullptr, &imageViews[i]));
-        }
-
-    }
-
-    void DestroySwapchain(VKRendererData* rendererData)
-    {
-        if (rendererData->swapchain.swapchain != VK_NULL_HANDLE)
-        {
-            auto& device = GRAPHICS_DATA.defaultDevice->logicalDevice.device;
-            for (auto& imageView : rendererData->swapchain.imageViews)
-                vkDestroyImageView(device, imageView, nullptr);
-
-            rendererData->swapchain.imageViews.clear();
-            rendererData->swapchain.images.clear();
-
-            vkDestroySwapchainKHR(device, rendererData->swapchain.swapchain, nullptr);
-            rendererData->swapchain.swapchain = VK_NULL_HANDLE;
-        }
+        DestroySwapchain(rendererData->swapchain);
+        DestroySurface(rendererData);
     }
 
     void SetupViewportAndScissor(VKRendererData* rendererData)
@@ -341,89 +205,4 @@ namespace hf::inter::rendering
 
         return true;
     }
-
-    void QuerySwapChainSupport(const VkPhysicalDevice& device, const VkSurfaceKHR& surface, SwapChainSupportDetails* supportDetails)
-    {
-        VK_HANDLE_EXCEPT(vkGetPhysicalDeviceSurfaceCapabilitiesKHR(device, surface, &supportDetails->capabilities));
-
-        uint32_t formatCount;
-        VK_HANDLE_EXCEPT(vkGetPhysicalDeviceSurfaceFormatsKHR(device, surface, &formatCount, nullptr));
-        if (formatCount > 0)
-        {
-            supportDetails->formats = std::vector<VkSurfaceFormatKHR>(formatCount);
-            vkGetPhysicalDeviceSurfaceFormatsKHR(device, surface, &formatCount,
-                supportDetails->formats.data());
-        }
-
-        uint32_t presentModeCount;
-        VK_HANDLE_EXCEPT(vkGetPhysicalDeviceSurfacePresentModesKHR(device, surface, &presentModeCount, nullptr));
-
-        if (presentModeCount > 0)
-        {
-            supportDetails->presentModes = std::vector<VkPresentModeKHR>(presentModeCount);
-            VK_HANDLE_EXCEPT(vkGetPhysicalDeviceSurfacePresentModesKHR(device, surface, &presentModeCount,
-                supportDetails->presentModes.data()));
-        }
-    }
-
-    bool CheckDeviceExtensionSupport(const VkPhysicalDevice& device)
-    {
-        uint32_t extensionCount;
-        VK_HANDLE_EXCEPT(vkEnumerateDeviceExtensionProperties(device, nullptr, &extensionCount, nullptr));
-
-        std::vector<VkExtensionProperties> availableExtensions(extensionCount);
-        VK_HANDLE_EXCEPT(vkEnumerateDeviceExtensionProperties(device, nullptr, &extensionCount, availableExtensions.data()));
-
-        std::set<std::string> requiredExtensions(DEVICE_EXTENSIONS.begin(), DEVICE_EXTENSIONS.end());
-
-        for (const auto& extension : availableExtensions)
-            requiredExtensions.erase(extension.extensionName);
-
-        return requiredExtensions.empty();
-    }
-
-    bool GetAvailableSurfaceDetails(const SwapChainSupportDetails& swapChainSupportDetails,
-    VkFormat targetFormat, VkPresentModeKHR targetPresentMode, uvec2 targetExtents,
-    GraphicsSwapchainDetails* result)
-    {
-        int mask = 0;
-        for (auto& format : swapChainSupportDetails.formats)
-        {
-            if (format.format == targetFormat)
-            {
-                result->format = format;
-                mask |= 1 << 0;
-                break;
-            }
-        }
-
-        for (auto& presentMode : swapChainSupportDetails.presentModes)
-        {
-            if (presentMode == targetPresentMode)
-            {
-                result->presentMode = presentMode;
-                mask |= 1 << 1;
-                break;
-            }
-        }
-
-        VkExtent2D extents = { targetExtents.x, targetExtents.y };
-        extents.width = std::clamp(extents.width, swapChainSupportDetails.capabilities.minImageExtent.width,
-            swapChainSupportDetails.capabilities.maxImageExtent.width);
-        extents.height = std::clamp(extents.height, swapChainSupportDetails.capabilities.minImageExtent.height,
-            swapChainSupportDetails.capabilities.maxImageExtent.height);
-
-        result->extent = extents;
-        if (!(mask & (1 << 0))) LOG_WARN("[Vulkan] %s", "Unable to choose target swapchain surface format");
-        if (!(mask & (1 << 1)))
-        {
-            result->presentMode = VK_PRESENT_MODE_FIFO_KHR;
-            mask |= 1 << 1;
-            LOG_WARN("[Vulkan] %s", "Unable to choose target swapchain present mode, defaulted to FIFO");
-        }
-
-        return mask == (1 << 2) - 1;
-    }
-
-    bool QueueFamilyIndices::IsComplete() const { return graphicsFamily.has_value() && presentFamily.has_value(); }
 }

@@ -116,17 +116,26 @@ namespace hf::inter::rendering
 
     extern GraphicsData GRAPHICS_DATA;
 
-    bool IsLayerSupported(const char* layer);
-    bool IsExtensionSupported(const char* extension);
-
-    void CreatePlatformSurface(VKRendererData* rendererData);
-    void DestroyPlatformSurface(VKRendererData* rendererData);
+    void CreateVulkanRenderer(VKRendererData* rendererData);
+    void DestroyVulkanRenderer(VKRendererData* rendererData);
 
     void CreateSurface(VKRendererData* rendererData);
     void DestroySurface(VKRendererData* rendererData);
 
+    void CreateSwapchain(VkSurfaceKHR surface, const SwapChainSupportDetails& scs, GraphicsSwapChain* result);
+    void DestroySwapchain(GraphicsSwapChain& swapchain);
+
     void CreateRenderPass(VkRenderPass* renderPass);
     void DestroyRenderPass(const VkRenderPass& renderPass);
+
+    bool GetAvailableSurfaceDetails(const SwapChainSupportDetails& swapChainSupportDetails,
+                                    VkFormat targetFormat, VkPresentModeKHR targetPresentMode, uvec2 targetExtents,
+                                    GraphicsSwapchainDetails* result);
+    bool CheckDeviceExtensionSupport(const VkPhysicalDevice& device);
+    void QuerySwapChainSupport(const VkPhysicalDevice& device, const VkSurfaceKHR& surface, SwapChainSupportDetails* supportDetails);
+
+    bool IsLayerSupported(const char* layer);
+    bool IsExtensionSupported(const char* extension);
 
     extern const std::vector<const char*> REQUIRED_EXTENSIONS;
     extern const std::vector<const char*> DEVICE_EXTENSIONS;
