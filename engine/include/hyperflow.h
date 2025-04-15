@@ -94,6 +94,9 @@ namespace hf
 		void Destroy(const Ref<Shader>& shader);
 		void DestroyAll();
 		bool IsRunning(const Ref<Shader>& shader);
+
+		void Bind(const Ref<Shader>& shader);
+		void Bind(const Ref<Renderer>& renderer, const Ref<Shader>& shader);
 	}
 
 	namespace utils

@@ -224,4 +224,10 @@ namespace hf::inter::rendering
         VK_HANDLE_EXCEPT(vkCreateGraphicsPipelines(GRAPHICS_DATA.defaultDevice->logicalDevice.device,
             VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, pipeline));
     }
+
+    void BindShader(const Renderer* renderer, const Shader* shader)
+    {
+        vkCmdBindPipeline(((VKRendererData*)renderer->handle)->currentCommand, VK_PIPELINE_BIND_POINT_GRAPHICS,
+            ((VkShader*)shader->handle)->pipeline);
+    }
 }

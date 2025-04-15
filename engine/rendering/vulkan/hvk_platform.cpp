@@ -42,7 +42,7 @@ namespace hf::inter::rendering
 
 #if PLATFORM_WINDOWS
 
-    void CreatePlatformSurface(VKRendererData* rendererData)
+    void CreateSurface(VKRendererData* rendererData)
     {
         VkWin32SurfaceCreateInfoKHR createInfo
         {
@@ -72,7 +72,7 @@ namespace hf::inter::rendering
 
 #elif WAYLAND
 
-    void CreatePlatformSurface(VKRendererData* rendererData)
+    void CreateSurface(VKRendererData* rendererData)
     {
 
     }

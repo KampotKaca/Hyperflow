@@ -36,11 +36,6 @@ namespace hf::inter
         void Update(const Window* win);
     }
 
-    namespace shader
-    {
-        bool Destroy(Shader* shader);
-    }
-
     namespace rendering
     {
         struct ShaderCreationInfo
@@ -59,6 +54,9 @@ namespace hf::inter
 
         void* CreateShader(const ShaderCreationInfo& info, const Shader* shader);
         void DestroyShader(void* shader);
+        bool DestroyShader_i(Shader* shader);
+
+        void BindShader(const Renderer* renderer, const Shader* shader);
 
         void StartFrame(const Ref<Renderer>& rn);
         void EndFrame(const Ref<Renderer>& rn);

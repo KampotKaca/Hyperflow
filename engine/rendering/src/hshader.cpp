@@ -30,7 +30,7 @@ namespace hf
 
     Shader::~Shader()
     {
-        inter::shader::Destroy(this);
+        inter::rendering::DestroyShader_i(this);
     }
 
     namespace shader
@@ -44,28 +44,38 @@ namespace hf
 
         void Destroy(const Ref<Shader>& shader)
         {
-            if (inter::shader::Destroy(shader.get()))
+            if (inter::rendering::DestroyShader_i(shader.get()))
                 inter::HF.shaders.erase(shader.get());
         }
 
         void DestroyAll()
         {
             for (const auto& shader : std::ranges::views::values(inter::HF.shaders))
-                inter::shader::Destroy(shader.get());
+                inter::rendering::DestroyShader_i(shader.get());
             inter::HF.shaders.clear();
         }
 
         bool IsRunning(const Ref<Shader>& shader) { return shader->isRunning; }
+
+        void Bind(const Ref<Shader>& shader)
+        {
+            inter::rendering::BindShader(inter::HF.mainWindow->renderer.get(), shader.get());
+        }
+
+        void Bind(const Ref<Renderer>& renderer, const Ref<Shader>& shader)
+        {
+            inter::rendering::BindShader(renderer.get(), shader.get());
+        }
     }
 
-    namespace inter::shader
+    namespace inter::rendering
     {
-        bool Destroy(Shader* shader)
+        bool DestroyShader_i(Shader* shader)
         {
             if (shader->isRunning)
             {
                 shader->isRunning = false;
-                rendering::DestroyShader(shader->handle);
+                DestroyShader(shader->handle);
                 shader->handle = nullptr;
                 return true;
             }

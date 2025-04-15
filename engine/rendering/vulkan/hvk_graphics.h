@@ -94,6 +94,12 @@ namespace hf::inter::rendering
         std::vector<VkFrameBuffer*> frameBuffers{};
     };
 
+    struct CommandPool
+    {
+        VkCommandPool pool{};
+        std::vector<VkCommandBuffer> buffers{};
+    };
+
     struct VKRendererData
     {
         void* windowHandle = nullptr;
@@ -101,6 +107,10 @@ namespace hf::inter::rendering
         GraphicsSwapChain swapchain{};
         VkViewport viewport{};
         VkRect2D scissor{};
+        CommandPool commandPool{};
+
+        VkCommandBuffer currentCommand{};
+        VkRenderPass currentPass{};
     };
 
     enum class PipelineBlendType { None, Alpha, Logical };
@@ -128,6 +138,17 @@ namespace hf::inter::rendering
     void CreateRenderPass(VkRenderPass* renderPass);
     void DestroyRenderPass(const VkRenderPass& renderPass);
 
+    void BeginRenderPass(const VkRenderPass& renderPass, VKRendererData* renderer);
+    void EndRenderPass(VKRendererData* renderer);
+
+    void CreateCommandPool(const GraphicsDevice& device, CommandPool* result);
+    void DestroyCommandPool(const GraphicsDevice& device, CommandPool& pool);
+
+    void CreateCommandBuffer(const GraphicsDevice& device, CommandPool* pool, VkCommandBuffer* result);
+
+    void BeginCommandBuffer(VKRendererData* renderer, VkCommandBuffer buffer);
+    void EndCommandBuffer(VKRendererData* renderer);
+
     bool GetAvailableSurfaceDetails(const SwapChainSupportDetails& swapChainSupportDetails,
                                     VkFormat targetFormat, VkPresentModeKHR targetPresentMode, uvec2 targetExtents,
                                     GraphicsSwapchainDetails* result);
@@ -136,6 +157,8 @@ namespace hf::inter::rendering
 
     bool IsLayerSupported(const char* layer);
     bool IsExtensionSupported(const char* extension);
+
+    void SetViewportAndScissor(const VKRendererData* renderer, const GraphicsSwapChain& swapChain);
 
     extern const std::vector<const char*> REQUIRED_EXTENSIONS;
     extern const std::vector<const char*> DEVICE_EXTENSIONS;

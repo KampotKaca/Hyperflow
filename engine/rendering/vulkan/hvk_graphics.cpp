@@ -91,10 +91,15 @@ namespace hf::inter::rendering
                     .height = (uint32_t)rendererData->viewport.height
                 });
         }
+
+        VkCommandBuffer commandBuffer;
+        CreateCommandPool(*GRAPHICS_DATA.defaultDevice, &rendererData->commandPool);
+        CreateCommandBuffer(*GRAPHICS_DATA.defaultDevice, &rendererData->commandPool, &commandBuffer);
     }
 
     void DestroyVulkanRenderer(VKRendererData* rendererData)
     {
+        DestroyCommandPool(*GRAPHICS_DATA.defaultDevice, rendererData->commandPool);
         for (auto& frameBuffer : rendererData->swapchain.frameBuffers)
             delete frameBuffer;
         rendererData->swapchain.frameBuffers.clear();

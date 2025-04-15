@@ -102,4 +102,26 @@ namespace hf::inter::rendering
     }
 
     bool QueueFamilyIndices::IsComplete() const { return graphicsFamily.has_value() && presentFamily.has_value(); }
+
+    void SetViewportAndScissor(const VKRendererData* renderer, const GraphicsSwapChain& swapChain)
+    {
+        VkViewport viewport =
+        {
+            .x = 0.0f,
+            .y = 0.0f,
+            .width = (float)swapChain.details.extent.width,
+            .height = (float)swapChain.details.extent.height,
+            .minDepth = 0.0f,
+            .maxDepth = 1.0f
+        };
+
+        VkRect2D scissor =
+        {
+            .offset = { 0, 0 },
+            .extent = swapChain.details.extent
+        };
+
+        vkCmdSetViewport(renderer->currentCommand, 0, 1, &viewport);
+        vkCmdSetScissor(renderer->currentCommand, 0, 1, &scissor);
+    }
 }

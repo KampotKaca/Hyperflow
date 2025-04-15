@@ -47,4 +47,39 @@ namespace hf::inter::rendering
     {
         vkDestroyRenderPass(GRAPHICS_DATA.defaultDevice->logicalDevice.device, renderPass, nullptr);
     }
+
+    void BeginRenderPass(const VkRenderPass& renderPass, VKRendererData* renderer)
+    {
+        VkClearValue clearColor =
+        {
+            .color = { 0.0f, 0.0f, 0.0f, 1.0f },
+        };
+
+        const auto frameBuffer = renderer->swapchain.frameBuffers[0];
+        VkRenderPassBeginInfo renderPassInfo
+        {
+            .sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO,
+            .renderPass = renderPass,
+            .framebuffer = frameBuffer->buffer,
+            .renderArea =
+            {
+                .offset = {0, 0},
+                .extent = frameBuffer->extent,
+            },
+            .clearValueCount = 1,
+            .pClearValues = &clearColor
+        };
+
+        vkCmdBeginRenderPass(renderer->currentCommand, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
+        renderer->currentPass = renderPass;
+    }
+
+    void EndRenderPass(VKRendererData* renderer)
+    {
+        if (renderer->currentPass != VK_NULL_HANDLE)
+        {
+            vkCmdEndRenderPass(renderer->currentCommand);
+            renderer->currentPass = VK_NULL_HANDLE;
+        }
+    }
 }
