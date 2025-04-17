@@ -49,6 +49,7 @@ namespace hf::inter::rendering
 
         QueueFamilyIndices familyIndices{};
         LogicalDevice logicalDevice{};
+        VkFence isInFlight{};
     };
 
     struct GraphicsData
@@ -87,6 +88,7 @@ namespace hf::inter::rendering
 
     struct GraphicsSwapChain
     {
+        VkSurfaceKHR surface = VK_NULL_HANDLE;
         VkSwapchainKHR swapchain = VK_NULL_HANDLE;
         std::vector<VkImage> images{};
         std::vector<VkImageView> imageViews{};
@@ -103,7 +105,6 @@ namespace hf::inter::rendering
     struct VKRendererData
     {
         void* windowHandle = nullptr;
-        VkSurfaceKHR surface = VK_NULL_HANDLE;
         GraphicsSwapChain swapchain{};
         VkViewport viewport{};
         VkRect2D scissor{};
@@ -114,7 +115,8 @@ namespace hf::inter::rendering
 
         VkSemaphore isImageAvailable{};
         VkSemaphore isRenderingFinished{};
-        VkFence isInFlight{};
+
+        uint32_t imageIndex{};
     };
 
     enum class SemaphoreType { Boolean, Timeline };
@@ -139,6 +141,7 @@ namespace hf::inter::rendering
 
     void CreateSwapchain(VkSurfaceKHR surface, const SwapChainSupportDetails& scs, GraphicsSwapChain* result);
     void DestroySwapchain(GraphicsSwapChain& swapchain);
+    void PresentSwapchain(VKRendererData* rn);
 
     void CreateRenderPass(VkRenderPass* renderPass);
     void DestroyRenderPass(const VkRenderPass& renderPass);

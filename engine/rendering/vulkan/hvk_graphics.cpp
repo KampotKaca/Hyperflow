@@ -43,7 +43,7 @@ namespace hf::inter::rendering
                 if (SetupPhysicalDevice(rn, device, &deviceData) &&
                     CheckDeviceExtensionSupport(device))
                 {
-                    QuerySwapChainSupport(device, rn->surface, &swapChainSupport);
+                    QuerySwapChainSupport(device, rn->swapchain.surface, &swapChainSupport);
 
                     if (!swapChainSupport.formats.empty() &&
                         !swapChainSupport.presentModes.empty())
@@ -62,20 +62,21 @@ namespace hf::inter::rendering
                                      { return a.score > b.score; });
             GRAPHICS_DATA.devicesAreLoaded = true;
 
-            CreateSwapchain(rn->surface, swapChainSupport, &rn->swapchain);
+            CreateSwapchain(rn->swapchain.surface, swapChainSupport, &rn->swapchain);
             SetupViewportAndScissor(rn);
             CreateRenderPass(&GRAPHICS_DATA.renderPass);
+            CreateFence(*GRAPHICS_DATA.defaultDevice, &GRAPHICS_DATA.defaultDevice->isInFlight, true);
         }
         else
         {
             CreateSurface(rn);
-            QuerySwapChainSupport(GRAPHICS_DATA.defaultDevice->device, rn->surface, &swapChainSupport);
+            QuerySwapChainSupport(GRAPHICS_DATA.defaultDevice->device, rn->swapchain.surface, &swapChainSupport);
 
             if (swapChainSupport.formats.empty() ||
                 swapChainSupport.presentModes.empty())
                 throw GENERIC_EXCEPT("[Vulkan]", "Device is not suitable!!!");
 
-            CreateSwapchain(rn->surface, swapChainSupport, &rn->swapchain);
+            CreateSwapchain(rn->swapchain.surface, swapChainSupport, &rn->swapchain);
             SetupViewportAndScissor(rn);
         }
 
@@ -98,14 +99,12 @@ namespace hf::inter::rendering
 
         CreateSemaphore(*GRAPHICS_DATA.defaultDevice, &rn->isImageAvailable, SemaphoreType::Boolean);
         CreateSemaphore(*GRAPHICS_DATA.defaultDevice, &rn->isRenderingFinished, SemaphoreType::Boolean);
-        CreateFence(*GRAPHICS_DATA.defaultDevice, &rn->isInFlight, true);
     }
 
     void DestroyVulkanRenderer(VKRendererData* rn)
     {
         DestroySemaphore(*GRAPHICS_DATA.defaultDevice, rn->isImageAvailable);
         DestroySemaphore(*GRAPHICS_DATA.defaultDevice, rn->isRenderingFinished);
-        DestroyFence(*GRAPHICS_DATA.defaultDevice, rn->isInFlight);
 
         DestroyCommandPool(*GRAPHICS_DATA.defaultDevice, rn->commandPool);
         for (auto& frameBuffer : rn->swapchain.frameBuffers)
@@ -203,7 +202,7 @@ namespace hf::inter::rendering
                 deviceData->familyIndices.graphicsFamily = i;
 
             VkBool32 presentSupport = false;
-            VK_HANDLE_EXCEPT(vkGetPhysicalDeviceSurfaceSupportKHR(device, i, renderer->surface, &presentSupport));
+            VK_HANDLE_EXCEPT(vkGetPhysicalDeviceSurfaceSupportKHR(device, i, renderer->swapchain.surface, &presentSupport));
 
             if (presentSupport) deviceData->familyIndices.presentFamily = i;
             if (deviceData->familyIndices.IsComplete()) break;

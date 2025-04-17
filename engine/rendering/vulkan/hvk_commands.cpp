@@ -41,8 +41,6 @@ namespace hf::inter::rendering
         VkCommandBufferBeginInfo beginInfo
         {
             .sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO,
-            .flags = 0,
-            .pInheritanceInfo = nullptr
         };
 
         VK_HANDLE_EXCEPT(vkBeginCommandBuffer(buffer, &beginInfo));
@@ -75,6 +73,6 @@ namespace hf::inter::rendering
         };
 
         VK_HANDLE_EXCEPT(vkQueueSubmit(GRAPHICS_DATA.defaultDevice->logicalDevice.graphicsQueue,
-            1, &submitInfo, rn->isInFlight));
+            1, &submitInfo, GRAPHICS_DATA.defaultDevice->isInFlight));
     }
 }

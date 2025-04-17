@@ -51,7 +51,7 @@ namespace hf::inter::rendering
             .hwnd = (HWND)rendererData->windowHandle,
         };
 
-        VK_HANDLE_EXCEPT(vkCreateWin32SurfaceKHR(GRAPHICS_DATA.instance, &createInfo, nullptr, &rendererData->surface));
+        VK_HANDLE_EXCEPT(vkCreateWin32SurfaceKHR(GRAPHICS_DATA.instance, &createInfo, nullptr, &rendererData->swapchain.surface));
     }
 
 #elif PLATFORM_LINUX
@@ -67,7 +67,7 @@ namespace hf::inter::rendering
             .window = ((LnxWindowData*)rn->windowHandle)->window,
         };
 
-        VK_HANDLE_EXCEPT(vkCreateXlibSurfaceKHR(GRAPHICS_DATA.instance, &createInfo, nullptr, &rn->surface));
+        VK_HANDLE_EXCEPT(vkCreateXlibSurfaceKHR(GRAPHICS_DATA.instance, &createInfo, nullptr, &rn->swapchain.surface));
     }
 
 #elif WAYLAND
@@ -83,7 +83,7 @@ namespace hf::inter::rendering
 
     void DestroySurface(VKRendererData* rn)
     {
-        vkDestroySurfaceKHR(GRAPHICS_DATA.instance, rn->surface, nullptr);
-        rn->surface = nullptr;
+        vkDestroySurfaceKHR(GRAPHICS_DATA.instance, rn->swapchain.surface, nullptr);
+        rn->swapchain.surface = nullptr;
     }
 }

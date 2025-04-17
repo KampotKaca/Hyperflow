@@ -115,4 +115,21 @@ namespace hf::inter::rendering
             swapchain.swapchain = VK_NULL_HANDLE;
         }
     }
+
+    void PresentSwapchain(VKRendererData* rn)
+    {
+        VkPresentInfoKHR presentInfo
+        {
+            .sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR,
+            .waitSemaphoreCount = 1,
+            .pWaitSemaphores = &rn->isRenderingFinished,
+            .swapchainCount = 1,
+            .pSwapchains = &rn->swapchain.swapchain,
+            .pImageIndices = &rn->imageIndex,
+            .pResults = nullptr,
+        };
+
+        VK_HANDLE_EXCEPT(vkQueuePresentKHR(GRAPHICS_DATA.defaultDevice->logicalDevice.presentQueue,
+            &presentInfo));
+    }
 }

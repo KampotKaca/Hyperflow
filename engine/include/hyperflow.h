@@ -95,6 +95,7 @@ namespace hf
 	{
 		Ref<Shader> Create(const std::string& vertPath, const std::string& fragPath);
 		void Destroy(const Ref<Shader>& shader);
+		void Destroy(const Ref<Shader>* pShaders, uint32_t count);
 		void DestroyAll();
 		bool IsRunning(const Ref<Shader>& shader);
 

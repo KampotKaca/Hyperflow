@@ -64,6 +64,7 @@ namespace hf::inter
         void EndFrame(Renderer* rn);
 
         void Draw(Renderer* rn);
+        void WaitForRendering();
     }
 }
 

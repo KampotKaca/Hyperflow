@@ -10,13 +10,6 @@ namespace hf::inter::rendering
             .sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO
         };
 
-        switch (type)
-        {
-        case SemaphoreType::Boolean: break;
-        case SemaphoreType::Timeline: break;
-        default: ;
-        }
-
         VK_HANDLE_EXCEPT(vkCreateSemaphore(device.logicalDevice.device, &semaphoreInfo, nullptr, semaphore));
     }
 

@@ -48,7 +48,6 @@ namespace hf
 			}
 			if(inter::HF.lifecycleCallbacks.onUpdateCallback) inter::HF.lifecycleCallbacks.onQuitCallback();
 
-			rendering::UnloadAllResources();
 			window::CloseAll();
 			Platform_EndTemporarySystemTimer(1);
 			Platform_Dispose();

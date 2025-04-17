@@ -12,11 +12,10 @@ namespace hf::inter::rendering
     {
         auto renderer = (VKRendererData*)rn->handle;
 
-        WaitForFences(*GRAPHICS_DATA.defaultDevice, &renderer->isInFlight, 1, true);
+        WaitForFences(*GRAPHICS_DATA.defaultDevice, &GRAPHICS_DATA.defaultDevice->isInFlight, 1, true);
 
-        uint32_t imageIndex;
-        vkAcquireNextImageKHR(GRAPHICS_DATA.defaultDevice->logicalDevice.device, renderer->swapchain.swapchain,
-            UINT64_MAX, renderer->isImageAvailable, VK_NULL_HANDLE, &imageIndex);
+        VK_HANDLE_EXCEPT(vkAcquireNextImageKHR(GRAPHICS_DATA.defaultDevice->logicalDevice.device, renderer->swapchain.swapchain,
+            UINT64_MAX, renderer->isImageAvailable, VK_NULL_HANDLE, &renderer->imageIndex));
 
         BeginCommandBuffer(renderer, renderer->commandPool.buffers[0]);
         BeginRenderPass(GRAPHICS_DATA.renderPass, renderer);
@@ -29,6 +28,7 @@ namespace hf::inter::rendering
         EndRenderPass(renderer);
         EndCommandBuffer(renderer);
         SubmitCommands(renderer);
+        PresentSwapchain(renderer);
     }
 
     void Draw(Renderer* rn)

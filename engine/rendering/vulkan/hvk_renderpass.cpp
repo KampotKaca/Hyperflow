@@ -5,6 +5,16 @@ namespace hf::inter::rendering
 {
     void CreateRenderPass(VkRenderPass* renderPass)
     {
+        VkSubpassDependency dependency
+        {
+            .srcSubpass = VK_SUBPASS_EXTERNAL,
+            .dstSubpass = 0,
+            .srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
+            .srcAccessMask = 0,
+            .dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
+            .dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,
+        };
+
         VkAttachmentDescription colorAttachment
         {
             .format = VK_FORMAT_B8G8R8A8_SRGB,
@@ -37,6 +47,8 @@ namespace hf::inter::rendering
             .pAttachments = &colorAttachment,
             .subpassCount = 1,
             .pSubpasses = &subpass,
+            .dependencyCount = 1,
+            .pDependencies = &dependency,
         };
 
         VK_HANDLE_EXCEPT(vkCreateRenderPass(GRAPHICS_DATA.defaultDevice->logicalDevice.device,
@@ -55,7 +67,7 @@ namespace hf::inter::rendering
             .color = { 0.0f, 0.0f, 0.0f, 1.0f },
         };
 
-        const auto frameBuffer = rn->swapchain.frameBuffers[0];
+        const auto frameBuffer = rn->swapchain.frameBuffers[rn->imageIndex];
         VkRenderPassBeginInfo renderPassInfo
         {
             .sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO,
