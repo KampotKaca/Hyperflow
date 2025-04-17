@@ -111,8 +111,13 @@ namespace hf::inter::rendering
 
         VkCommandBuffer currentCommand{};
         VkRenderPass currentPass{};
+
+        VkSemaphore isImageAvailable{};
+        VkSemaphore isRenderingFinished{};
+        VkFence isInFlight{};
     };
 
+    enum class SemaphoreType { Boolean, Timeline };
     enum class PipelineBlendType { None, Alpha, Logical };
     struct VkPipelineInfo
     {
@@ -126,11 +131,11 @@ namespace hf::inter::rendering
 
     extern GraphicsData GRAPHICS_DATA;
 
-    void CreateVulkanRenderer(VKRendererData* rendererData);
-    void DestroyVulkanRenderer(VKRendererData* rendererData);
+    void CreateVulkanRenderer(VKRendererData* rn);
+    void DestroyVulkanRenderer(VKRendererData* rn);
 
-    void CreateSurface(VKRendererData* rendererData);
-    void DestroySurface(VKRendererData* rendererData);
+    void CreateSurface(VKRendererData* rn);
+    void DestroySurface(VKRendererData* rn);
 
     void CreateSwapchain(VkSurfaceKHR surface, const SwapChainSupportDetails& scs, GraphicsSwapChain* result);
     void DestroySwapchain(GraphicsSwapChain& swapchain);
@@ -138,16 +143,17 @@ namespace hf::inter::rendering
     void CreateRenderPass(VkRenderPass* renderPass);
     void DestroyRenderPass(const VkRenderPass& renderPass);
 
-    void BeginRenderPass(const VkRenderPass& renderPass, VKRendererData* renderer);
-    void EndRenderPass(VKRendererData* renderer);
+    void BeginRenderPass(const VkRenderPass& renderPass, VKRendererData* rn);
+    void EndRenderPass(VKRendererData* rn);
 
     void CreateCommandPool(const GraphicsDevice& device, CommandPool* result);
     void DestroyCommandPool(const GraphicsDevice& device, CommandPool& pool);
 
     void CreateCommandBuffer(const GraphicsDevice& device, CommandPool* pool, VkCommandBuffer* result);
 
-    void BeginCommandBuffer(VKRendererData* renderer, VkCommandBuffer buffer);
-    void EndCommandBuffer(VKRendererData* renderer);
+    void BeginCommandBuffer(VKRendererData* rn, VkCommandBuffer buffer);
+    void EndCommandBuffer(VKRendererData* rn);
+    void SubmitCommands(VKRendererData* rn);
 
     bool GetAvailableSurfaceDetails(const SwapChainSupportDetails& swapChainSupportDetails,
                                     VkFormat targetFormat, VkPresentModeKHR targetPresentMode, uvec2 targetExtents,
@@ -159,6 +165,13 @@ namespace hf::inter::rendering
     bool IsExtensionSupported(const char* extension);
 
     void SetViewportAndScissor(const VKRendererData* renderer, const GraphicsSwapChain& swapChain);
+
+    void CreateSemaphore(const GraphicsDevice& device, VkSemaphore* semaphore, SemaphoreType type);
+    void DestroySemaphore(const GraphicsDevice& device, VkSemaphore& semaphore);
+    void CreateFence(const GraphicsDevice& device, VkFence* fence, bool startSignaled);
+    void DestroyFence(const GraphicsDevice& device, VkFence& fence);
+
+    void WaitForFences(const GraphicsDevice& device, const VkFence* fences, uint32_t count, bool waitAll);
 
     extern const std::vector<const char*> REQUIRED_EXTENSIONS;
     extern const std::vector<const char*> DEVICE_EXTENSIONS;

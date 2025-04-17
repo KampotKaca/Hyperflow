@@ -13,7 +13,9 @@ namespace app
 	void Application::Start()
 	{
 		count = 0;
-		shader = hf::shader::Create("shaders/vulkan/default.vert.spv", "shaders/vulkan/default.frag.spv");
+		shader = hf::shader::Create(
+			"shaders/vulkan/default.vert.spv",
+			"shaders/vulkan/default.frag.spv");
 	}
 
 	void Application::Update()
@@ -37,7 +39,7 @@ namespace app
 				.position = { 100, 100 },
 				.size = { 200, 200 }
 			};
-			wn = hf::OpenWindow(data, nullptr);
+			wn = hf::window::Open(data, nullptr);
 			count++;
 		}
 		if (hf::input::IsDown(hf::Key::Space) && wn)
@@ -62,13 +64,14 @@ namespace app
 		}
 	}
 
-	void Application::Render()
+	void Application::Quit()
 	{
 
 	}
 
-	void Application::Quit()
+	void Application::OnMainWindowRender()
 	{
-
+		hf::shader::Bind(shader);
+		hf::rendering::Draw();
 	}
 }

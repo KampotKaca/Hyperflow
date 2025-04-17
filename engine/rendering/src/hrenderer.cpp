@@ -29,6 +29,12 @@ namespace hf
 
     namespace rendering
     {
+        void Draw() { Draw(inter::HF.mainWindow->renderer); }
+        void Draw(const Ref<Renderer>& renderer)
+        {
+            inter::rendering::Draw(renderer.get());
+        }
+
         void UnloadAllResources()
         {
             shader::DestroyAll();

@@ -1,5 +1,6 @@
-#define private public
 #include "hyperflow.h"
+
+#define private public
 #include "application.h"
 #undef private
 
@@ -13,7 +14,6 @@ int main()
 		{
 			.onStartCallback    = app::Application::Start,
 			.onUpdateCallback   = app::Application::Update,
-			.onRenderCallback   = app::Application::Render,
 			.onQuitCallback     = app::Application::Quit,
 		},
 		.windowData =
@@ -23,6 +23,7 @@ int main()
 			.style     = hf::WindowStyle::Default,
 			.position  = { 200, 200 },
 			.size      = { 640, 480 },
+			.onRenderCallback = app::Application::OnMainWindowRender,
 		}
 	};
 

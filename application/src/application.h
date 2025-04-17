@@ -10,8 +10,9 @@ namespace app
 	private:
 		static void Start();
 		static void Update();
-		static void Render();
 		static void Quit();
+
+		static void OnMainWindowRender();
 	};
 }
 

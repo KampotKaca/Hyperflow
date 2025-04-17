@@ -24,64 +24,6 @@ namespace hf
 		throw WND_EXCEPT(EXIT_FAILURE);
 	}
 
-	Window::Window(const WindowData& data, const Ref<Window>& parent)
-	{
-		title = data.title;
-		style = data.style;
-		this->parent = parent;
-		flags = (WindowFlags)0;
-		rect =
-		{
-			.position = data.position,
-			.size = data.size
-		};
-		renderer = nullptr;
-
-		auto display = PLATFORM_DATA.display;
-		int screen = DefaultScreen(display);
-
-		auto attributes = (XSetWindowAttributes)
-		{
-			.background_pixel = WhitePixel(display, screen),
-			.event_mask = (1L << 25) - 1,
-		};
-
-		auto root = RootWindow(display, screen);
-		if (parent) root = ((LnxWindowData*)parent->handle)->window;
-		auto lnxData = new LnxWindowData();
-		handle = lnxData;
-
-		lnxData->window = XCreateWindow(display, root,
-		data.position.x, data.position.y,
-		data.size.x, data.size.y, 1,
-		DefaultDepth(display, screen), InputOutput,
-		DefaultVisual(display, screen),
-		CWBackPixel | CWEventMask, &attributes);
-
-		if(parent) XSetTransientForHint(display, lnxData->window, root);
-
-		WIN_REGISTRY[lnxData->window] = this;
-
-		XSetWMProtocols(display, lnxData->window, &PLATFORM_DATA.closeMessage, 1);
-
-		XSetErrorHandler(XErrorHandler);
-		XSetIOErrorHandler(XIOErrorHandler);
-
-		auto pPos = Platform_GetPointerPosition(this);
-		mouse.position = pPos;
-		mouse.isInClientRegion = pPos.x >= 0 && pPos.x < rect.size.x && pPos.y > 0 && pPos.y < rect.size.y;
-		eventData.pointerPosition = mouse.position;
-
-		inter::window::SetFlags(this, data.flags);
-		inter::window::Focus(this);
-		inter::window::SetTitle(this, title.c_str());
-	}
-
-	Window::~Window()
-	{
-		inter::window::Close(this);
-	}
-
 	namespace inter::window
 	{
 		void SetTitle(const Window* win, const char* title)
@@ -165,6 +107,39 @@ namespace hf
 
 			XSendEvent(display, DefaultRootWindow(display), False, SubstructureNotifyMask | SubstructureRedirectMask, &event);
 			XFlush(display);
+		}
+
+		void Open(Window* win)
+		{
+			auto display = PLATFORM_DATA.display;
+			int screen = DefaultScreen(display);
+
+			auto attributes = (XSetWindowAttributes)
+			{
+				.background_pixel = WhitePixel(display, screen),
+				.event_mask = (1L << 25) - 1,
+			};
+
+			auto root = RootWindow(display, screen);
+			if (win->parent) root = ((LnxWindowData*)win->parent->handle)->window;
+			auto lnxData = new LnxWindowData();
+			win->handle = lnxData;
+
+			lnxData->window = XCreateWindow(display, root,
+			win->rect.position.x, win->rect.position.y,
+			win->rect.size.x, win->rect.size.y, 1,
+			DefaultDepth(display, screen), InputOutput,
+			DefaultVisual(display, screen),
+			CWBackPixel | CWEventMask, &attributes);
+
+			if(win->parent) XSetTransientForHint(display, lnxData->window, root);
+
+			WIN_REGISTRY[lnxData->window] = win;
+
+			XSetWMProtocols(display, lnxData->window, &PLATFORM_DATA.closeMessage, 1);
+
+			XSetErrorHandler(XErrorHandler);
+			XSetIOErrorHandler(XIOErrorHandler);
 		}
 
 		bool Close(Window* win)

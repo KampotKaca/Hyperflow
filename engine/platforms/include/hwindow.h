@@ -34,6 +34,8 @@ namespace hf
 		Mouse mouse{};
 		EventData eventData{};
 		Ref<Renderer> renderer{};
+
+		void (*onRenderCallback)();
 	};
 }
 

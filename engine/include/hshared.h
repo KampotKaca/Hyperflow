@@ -151,11 +151,13 @@ namespace hf
 
 	struct WindowData
 	{
-		std::string title;
-		WindowFlags flags;
-		WindowStyle style;
-		ivec2 position;
-		ivec2 size;
+		std::string title = "Untitled";
+		WindowFlags flags = WindowFlags::Default;
+		WindowStyle style = WindowStyle::Default;
+		ivec2 position = ivec2{ 300, 300 };
+		ivec2 size = ivec2{ 200, 200 };
+
+		void (*onRenderCallback)(){};
 	};
 
 	//endregion
@@ -170,18 +172,17 @@ namespace hf
 
 	struct EngineLifecycleCallbacks
 	{
-		void (*onStartCallback)();
-		void (*onUpdateCallback)();
-		void (*onRenderCallback)();
-		void (*onQuitCallback)();
+		void (*onStartCallback)(){};
+		void (*onUpdateCallback)(){};
+		void (*onQuitCallback)(){};
 	};
 
 	struct EngineData
 	{
-		std::string appTitle;
-		EngineUpdateType updateType;
-		EngineLifecycleCallbacks lifecycleCallbacks;
-		WindowData windowData;
+		std::string appTitle = "Hyperflow";
+		EngineUpdateType updateType = EngineUpdateType::EventRaised;
+		EngineLifecycleCallbacks lifecycleCallbacks{};
+		WindowData windowData{};
 	};
 
 	struct Window;

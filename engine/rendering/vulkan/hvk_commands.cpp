@@ -35,9 +35,9 @@ namespace hf::inter::rendering
         pool->buffers.push_back(*result);
     }
 
-    void BeginCommandBuffer(VKRendererData* renderer, VkCommandBuffer buffer)
+    void BeginCommandBuffer(VKRendererData* rn, VkCommandBuffer buffer)
     {
-        EndCommandBuffer(renderer);
+        vkResetCommandBuffer(buffer, 0);
         VkCommandBufferBeginInfo beginInfo
         {
             .sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO,
@@ -46,15 +46,35 @@ namespace hf::inter::rendering
         };
 
         VK_HANDLE_EXCEPT(vkBeginCommandBuffer(buffer, &beginInfo));
-        renderer->currentCommand = buffer;
+        rn->currentCommand = buffer;
     }
 
-    void EndCommandBuffer(VKRendererData* renderer)
+    void EndCommandBuffer(VKRendererData* rn)
     {
-        if (renderer->currentCommand != VK_NULL_HANDLE)
+        if (rn->currentCommand != VK_NULL_HANDLE)
         {
-            VK_HANDLE_EXCEPT(vkEndCommandBuffer(renderer->currentCommand));
-            renderer->currentCommand = VK_NULL_HANDLE;
+            VK_HANDLE_EXCEPT(vkEndCommandBuffer(rn->currentCommand));
+            rn->currentCommand = VK_NULL_HANDLE;
         }
+    }
+
+    void SubmitCommands(VKRendererData* rn)
+    {
+        constexpr VkPipelineStageFlags waitStages[] = { VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT };
+
+        VkSubmitInfo submitInfo
+        {
+            .sType = VK_STRUCTURE_TYPE_SUBMIT_INFO,
+            .waitSemaphoreCount = 1,
+            .pWaitSemaphores = &rn->isImageAvailable,
+            .pWaitDstStageMask = waitStages,
+            .commandBufferCount = (uint32_t)rn->commandPool.buffers.size(),
+            .pCommandBuffers = rn->commandPool.buffers.data(),
+            .signalSemaphoreCount = 1,
+            .pSignalSemaphores = &rn->isRenderingFinished,
+        };
+
+        VK_HANDLE_EXCEPT(vkQueueSubmit(GRAPHICS_DATA.defaultDevice->logicalDevice.graphicsQueue,
+            1, &submitInfo, rn->isInFlight));
     }
 }

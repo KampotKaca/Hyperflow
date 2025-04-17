@@ -11,8 +11,6 @@ namespace hf
 	bool IsRunning();
 	Ref<Window> GetMainWindow();
 	const std::string& GetApplicationTitle();
-
-	Ref<Window> OpenWindow(const WindowData& data, const Ref<Window>& parent);
 	void Terminate();
 
 	namespace input
@@ -52,6 +50,10 @@ namespace hf
 
 	namespace window
 	{
+		Ref<Window> Open(const WindowData& data, const Ref<Window>& parent);
+		bool Close(const Ref<Window> &window);
+		void CloseAll();
+
 		const std::string& GetTitle(const Ref<Window> &window);
 		ivec2 GetSize(const Ref<Window> &window);
 		ivec2 GetPosition(const Ref<Window> &window);
@@ -68,7 +70,6 @@ namespace hf
 		bool IsClosing(const Ref<Window> &window);
 		void SetFlags(const Ref<Window> &window, WindowFlags flags);
 		void Focus(const Ref<Window> &window);
-		bool Close(const Ref<Window> &window);
 	}
 
 	namespace time
@@ -85,6 +86,8 @@ namespace hf
 
 	namespace rendering
 	{
+		void Draw(const Ref<Renderer>& renderer);
+		void Draw();
 		void UnloadAllResources();
 	}
 

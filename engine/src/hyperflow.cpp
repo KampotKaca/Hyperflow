@@ -11,8 +11,6 @@ namespace hf
 {
 	inter::Hyperflow inter::HF;
 
-	void ClearWindow(const Window* window);
-
 	void Run(const EngineData& engineData)
 	{
 		try
@@ -26,7 +24,7 @@ namespace hf
 			inter::HF.updateType = engineData.updateType;
 			inter::HF.appTitle = engineData.appTitle;
 
-			inter::HF.mainWindow = OpenWindow(engineData.windowData, nullptr);
+			inter::HF.mainWindow = window::Open(engineData.windowData, nullptr);
 
 			inter::HF.isRunning = true;
 
@@ -51,8 +49,7 @@ namespace hf
 			if(inter::HF.lifecycleCallbacks.onUpdateCallback) inter::HF.lifecycleCallbacks.onQuitCallback();
 
 			rendering::UnloadAllResources();
-			for (const auto& window : inter::HF.windows) inter::window::Close(window.get());
-			inter::HF.windows.clear();
+			window::CloseAll();
 			Platform_EndTemporarySystemTimer(1);
 			Platform_Dispose();
 		}
@@ -75,21 +72,5 @@ namespace hf
 	Ref<Window> GetMainWindow() { return inter::HF.mainWindow; }
 	const std::string& GetApplicationTitle() { return inter::HF.appTitle; }
 
-	Ref<Window> OpenWindow(const WindowData &data, const Ref<Window> &parent)
-	{
-		auto newWindow = MakeRef<Window>(data, parent);
-		newWindow->renderer = MakeRef<Renderer>(newWindow);
-		inter::HF.windows.push_back(newWindow);
-		return newWindow;
-	}
-
 	void Terminate() { inter::HF.isRunning = false; }
-
-	void ClearWindow(const Window* window)
-	{
-		std::erase_if(inter::HF.windows, [&](Ref<Window> &w)
-		{
-			return w.get() == window;
-		});
-	}
 }

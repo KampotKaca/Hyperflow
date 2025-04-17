@@ -25,6 +25,9 @@ namespace hf::inter
 
     namespace window
     {
+        void Open(Window* win);
+        bool Close(Window* win);
+
         void SetTitle(const Window* win, const char* title);
         void SetSize(const Window* win, ivec2 size);
         void SetPosition(const Window* win, ivec2 position);
@@ -32,7 +35,6 @@ namespace hf::inter
 
         void SetFlags(Window* win, WindowFlags flags);
         void Focus(const Window* win);
-        bool Close(Window* win);
         void Update(const Window* win);
     }
 
@@ -58,8 +60,10 @@ namespace hf::inter
 
         void BindShader(const Renderer* renderer, const Shader* shader);
 
-        void StartFrame(const Ref<Renderer>& rn);
-        void EndFrame(const Ref<Renderer>& rn);
+        void StartFrame(Renderer* rn);
+        void EndFrame(Renderer* rn);
+
+        void Draw(Renderer* rn);
     }
 }
 

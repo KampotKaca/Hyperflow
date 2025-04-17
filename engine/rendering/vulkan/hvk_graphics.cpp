@@ -20,7 +20,7 @@ namespace hf::inter::rendering
 
     //------------------------------------------------------------------------------------
 
-    void CreateVulkanRenderer(VKRendererData* rendererData)
+    void CreateVulkanRenderer(VKRendererData* rn)
     {
         SwapChainSupportDetails swapChainSupport{};
         if (!GRAPHICS_DATA.devicesAreLoaded)
@@ -35,15 +35,15 @@ namespace hf::inter::rendering
             VK_HANDLE_EXCEPT(vkEnumeratePhysicalDevices(GRAPHICS_DATA.instance,
                 &deviceCount, availableDevices.data()));
 
-            CreateSurface(rendererData);
+            CreateSurface(rn);
 
             for (const auto& device : availableDevices)
             {
                 GraphicsDevice deviceData{};
-                if (SetupPhysicalDevice(rendererData, device, &deviceData) &&
+                if (SetupPhysicalDevice(rn, device, &deviceData) &&
                     CheckDeviceExtensionSupport(device))
                 {
-                    QuerySwapChainSupport(device, rendererData->surface, &swapChainSupport);
+                    QuerySwapChainSupport(device, rn->surface, &swapChainSupport);
 
                     if (!swapChainSupport.formats.empty() &&
                         !swapChainSupport.presentModes.empty())
@@ -62,49 +62,57 @@ namespace hf::inter::rendering
                                      { return a.score > b.score; });
             GRAPHICS_DATA.devicesAreLoaded = true;
 
-            CreateSwapchain(rendererData->surface, swapChainSupport, &rendererData->swapchain);
-            SetupViewportAndScissor(rendererData);
+            CreateSwapchain(rn->surface, swapChainSupport, &rn->swapchain);
+            SetupViewportAndScissor(rn);
             CreateRenderPass(&GRAPHICS_DATA.renderPass);
         }
         else
         {
-            CreateSurface(rendererData);
-            QuerySwapChainSupport(GRAPHICS_DATA.defaultDevice->device, rendererData->surface, &swapChainSupport);
+            CreateSurface(rn);
+            QuerySwapChainSupport(GRAPHICS_DATA.defaultDevice->device, rn->surface, &swapChainSupport);
 
             if (swapChainSupport.formats.empty() ||
                 swapChainSupport.presentModes.empty())
                 throw GENERIC_EXCEPT("[Vulkan]", "Device is not suitable!!!");
 
-            CreateSwapchain(rendererData->surface, swapChainSupport, &rendererData->swapchain);
-            SetupViewportAndScissor(rendererData);
+            CreateSwapchain(rn->surface, swapChainSupport, &rn->swapchain);
+            SetupViewportAndScissor(rn);
         }
 
-        auto& imageViews = rendererData->swapchain.imageViews;
-        rendererData->swapchain.frameBuffers = std::vector<VkFrameBuffer*>(imageViews.size());
+        auto& imageViews = rn->swapchain.imageViews;
+        rn->swapchain.frameBuffers = std::vector<VkFrameBuffer*>(imageViews.size());
         for (uint32_t i = 0; i < imageViews.size(); ++i)
         {
-            rendererData->swapchain.frameBuffers[i] = new VkFrameBuffer(&rendererData->swapchain.imageViews[i],
+            rn->swapchain.frameBuffers[i] = new VkFrameBuffer(&rn->swapchain.imageViews[i],
                 1, GRAPHICS_DATA.renderPass,
                 VkExtent2D
                 {
-                    .width = (uint32_t)rendererData->viewport.width,
-                    .height = (uint32_t)rendererData->viewport.height
+                    .width = (uint32_t)rn->viewport.width,
+                    .height = (uint32_t)rn->viewport.height
                 });
         }
 
         VkCommandBuffer commandBuffer;
-        CreateCommandPool(*GRAPHICS_DATA.defaultDevice, &rendererData->commandPool);
-        CreateCommandBuffer(*GRAPHICS_DATA.defaultDevice, &rendererData->commandPool, &commandBuffer);
+        CreateCommandPool(*GRAPHICS_DATA.defaultDevice, &rn->commandPool);
+        CreateCommandBuffer(*GRAPHICS_DATA.defaultDevice, &rn->commandPool, &commandBuffer);
+
+        CreateSemaphore(*GRAPHICS_DATA.defaultDevice, &rn->isImageAvailable, SemaphoreType::Boolean);
+        CreateSemaphore(*GRAPHICS_DATA.defaultDevice, &rn->isRenderingFinished, SemaphoreType::Boolean);
+        CreateFence(*GRAPHICS_DATA.defaultDevice, &rn->isInFlight, true);
     }
 
-    void DestroyVulkanRenderer(VKRendererData* rendererData)
+    void DestroyVulkanRenderer(VKRendererData* rn)
     {
-        DestroyCommandPool(*GRAPHICS_DATA.defaultDevice, rendererData->commandPool);
-        for (auto& frameBuffer : rendererData->swapchain.frameBuffers)
+        DestroySemaphore(*GRAPHICS_DATA.defaultDevice, rn->isImageAvailable);
+        DestroySemaphore(*GRAPHICS_DATA.defaultDevice, rn->isRenderingFinished);
+        DestroyFence(*GRAPHICS_DATA.defaultDevice, rn->isInFlight);
+
+        DestroyCommandPool(*GRAPHICS_DATA.defaultDevice, rn->commandPool);
+        for (auto& frameBuffer : rn->swapchain.frameBuffers)
             delete frameBuffer;
-        rendererData->swapchain.frameBuffers.clear();
-        DestroySwapchain(rendererData->swapchain);
-        DestroySurface(rendererData);
+        rn->swapchain.frameBuffers.clear();
+        DestroySwapchain(rn->swapchain);
+        DestroySurface(rn);
     }
 
     void SetupViewportAndScissor(VKRendererData* rendererData)

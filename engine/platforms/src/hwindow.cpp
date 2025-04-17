@@ -6,8 +6,63 @@
 
 namespace hf
 {
+	Window::Window(const WindowData& data, const Ref<Window>& parent)
+	{
+		title = data.title;
+		style = data.style;
+		this->parent = parent;
+		flags = (WindowFlags)0;
+		rect =
+		{
+			.position = data.position,
+			.size = data.size
+		};
+		renderer = nullptr;
+		onRenderCallback = data.onRenderCallback;
+
+		inter::window::Open(this);
+
+		auto pPos = Platform_GetPointerPosition(this);
+		mouse.position = pPos;
+		mouse.isInClientRegion = pPos.x >= 0 && pPos.x < rect.size.x && pPos.y > 0 && pPos.y < rect.size.y;
+		eventData.pointerPosition = mouse.position;
+
+		inter::window::SetFlags(this, data.flags);
+		inter::window::Focus(this);
+		inter::window::SetTitle(this, title.c_str());
+	}
+
+	Window::~Window()
+	{
+		inter::window::Close(this);
+	}
+
 	namespace window
 	{
+		Ref<Window> Open(const WindowData &data, const Ref<Window> &parent)
+		{
+			auto newWindow = MakeRef<Window>(data, parent);
+			newWindow->renderer = MakeRef<Renderer>(newWindow);
+			inter::HF.windows.push_back(newWindow);
+			return newWindow;
+		}
+
+		bool Close(const Ref<Window> &window)
+		{
+			std::erase_if(inter::HF.windows, [&](Ref<Window> &w)
+			{
+				return w.get() == window.get();
+			});
+			return inter::window::Close(window.get());
+		}
+
+		void CloseAll()
+		{
+			for (auto& window : inter::HF.windows)
+				inter::window::Close(window.get());
+			inter::HF.windows.clear();
+		}
+
 		const std::string& GetTitle(const Ref<Window> &window) { return window->title; }
 		ivec2 GetSize(const Ref<Window> &window) { return window->rect.size; }
 		ivec2 GetPosition(const Ref<Window> &window) { return window->rect.size; }
@@ -18,13 +73,12 @@ namespace hf
 		bool IsClosing(const Ref<Window> &window) { return window->handle == nullptr; }
 
 		void SetTitle(const Ref<Window> &window, const char* title) { inter::window::SetTitle(window.get(), title); }
-		void SetSize(const Ref<Window> &window, ivec2 size) { inter::window::SetSize(window.get(), size); }
-		void SetPosition(const Ref<Window> &window, ivec2 position) { inter::window::SetPosition(window.get(), position); }
-		void SetRect(const Ref<Window> &window, IRect rect) { inter::window::SetRect(window.get(), rect); }
+		void SetSize(const Ref<Window> &window, const ivec2 size) { inter::window::SetSize(window.get(), size); }
+		void SetPosition(const Ref<Window> &window, const ivec2 position) { inter::window::SetPosition(window.get(), position); }
+		void SetRect(const Ref<Window> &window, const IRect rect) { inter::window::SetRect(window.get(), rect); }
 
-		void SetFlags(const Ref<Window> &window, WindowFlags flags) { inter::window::SetFlags(window.get(), flags); }
+		void SetFlags(const Ref<Window> &window, const WindowFlags flags) { inter::window::SetFlags(window.get(), flags); }
 		void Focus(const Ref<Window> &window) { inter::window::Focus(window.get()); }
-		bool Close(const Ref<Window> &window) { return inter::window::Close(window.get()); }
 	}
 
 	void HandleKeyboardFocus(Keyboard& keyboard) noexcept;
@@ -192,8 +246,10 @@ namespace hf
 	{
 		void Update(const Window* win)
 		{
-			rendering::StartFrame(win->renderer);
-			rendering::EndFrame(win->renderer);
+			auto rn = win->renderer.get();
+			rendering::StartFrame(rn);
+			if (win->onRenderCallback) win->onRenderCallback();
+			rendering::EndFrame(rn);
 		}
 	}
 }

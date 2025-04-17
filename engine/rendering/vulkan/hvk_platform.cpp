@@ -58,16 +58,16 @@ namespace hf::inter::rendering
 
 #if X11
 
-    void CreateSurface(VKRendererData* rendererData)
+    void CreateSurface(VKRendererData* rn)
     {
         VkXlibSurfaceCreateInfoKHR createInfo
         {
             .sType = VK_STRUCTURE_TYPE_XLIB_SURFACE_CREATE_INFO_KHR,
             .dpy = PLATFORM_DATA.display,
-            .window = ((LnxWindowData*)rendererData->windowHandle)->window,
+            .window = ((LnxWindowData*)rn->windowHandle)->window,
         };
 
-        VK_HANDLE_EXCEPT(vkCreateXlibSurfaceKHR(GRAPHICS_DATA.instance, &createInfo, nullptr, &rendererData->surface));
+        VK_HANDLE_EXCEPT(vkCreateXlibSurfaceKHR(GRAPHICS_DATA.instance, &createInfo, nullptr, &rn->surface));
     }
 
 #elif WAYLAND
@@ -81,9 +81,9 @@ namespace hf::inter::rendering
 
 #endif
 
-    void DestroySurface(VKRendererData* rendererData)
+    void DestroySurface(VKRendererData* rn)
     {
-        vkDestroySurfaceKHR(GRAPHICS_DATA.instance, rendererData->surface, nullptr);
-        rendererData->surface = nullptr;
+        vkDestroySurfaceKHR(GRAPHICS_DATA.instance, rn->surface, nullptr);
+        rn->surface = nullptr;
     }
 }
