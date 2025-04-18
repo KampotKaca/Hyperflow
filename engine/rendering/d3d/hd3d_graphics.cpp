@@ -18,4 +18,9 @@ namespace hf::inter::rendering
 		auto rnData = (D3DRendererData*)rn->handle;
 		D3D11_HANDLE_EXCEPT(rnData->swapChain->Present(1u, 0));
 	}
+
+	void Draw(Renderer* rn)
+	{
+
+	}
 }

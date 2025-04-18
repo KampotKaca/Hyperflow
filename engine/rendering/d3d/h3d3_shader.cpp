@@ -1,18 +1,20 @@
 ﻿#include "hd3d_graphics.h"
 #include "hinternal.h"
 
-namespace hf::inter
+
+namespace hf::inter::rendering
 {
-    namespace rendering
+    void* CreateShader(const ShaderCreationInfo& info, const Shader* shader)
     {
-        void* CreateShader(const ShaderCreationInfo& info, const Shader* shader)
-        {
-            return nullptr;
-        }
+        return nullptr;
+    }
 
-        void DestroyShader(void* shader)
-        {
+    void DestroyShader(void* shader)
+    {
+    }
 
-        }
+    void BindShader(const Renderer* renderer, const Shader* shader)
+    {
+
     }
 }
