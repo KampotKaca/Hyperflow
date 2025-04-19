@@ -34,14 +34,14 @@ namespace hf::inter::rendering
             swapChainSupportDetails.capabilities.maxImageExtent.width);
         extents.height = std::clamp(extents.height, swapChainSupportDetails.capabilities.minImageExtent.height,
             swapChainSupportDetails.capabilities.maxImageExtent.height);
-
         result->extent = extents;
+
         if (!(mask & (1 << 0))) LOG_WARN("[Vulkan] %s", "Unable to choose target swapchain surface format");
         if (!(mask & (1 << 1)))
         {
             result->presentMode = VK_PRESENT_MODE_FIFO_KHR;
             mask |= 1 << 1;
-            LOG_WARN("[Vulkan] %s", "Unable to choose target swapchain present mode, defaulted to FIFO");
+            // LOG_WARN("[Vulkan] %s", "Unable to choose target swapchain present mode, defaulted to FIFO");
         }
 
         return mask == (1 << 2) - 1;
@@ -61,6 +61,24 @@ namespace hf::inter::rendering
             requiredExtensions.erase(extension.extensionName);
 
         return requiredExtensions.empty();
+    }
+
+    void CreateRendererFrameBuffers(VKRendererData* rn)
+    {
+        auto& imageViews = rn->swapchain.imageViews;
+        rn->swapchain.frameBuffers = std::vector<VkFrameBuffer*>(imageViews.size());
+        for (uint32_t i = 0; i < imageViews.size(); ++i)
+        {
+            rn->swapchain.frameBuffers[i] = new VkFrameBuffer(&rn->swapchain.imageViews[i],
+                1, GRAPHICS_DATA.renderPass,
+                rn->swapchain.details.extent);
+        }
+    }
+
+    void DestroyRendererFrameBuffers(VKRendererData* rn)
+    {
+        for (auto& frameBuffer : rn->swapchain.frameBuffers) delete frameBuffer;
+        rn->swapchain.frameBuffers.clear();
     }
 
     void QuerySwapChainSupport(const VkPhysicalDevice& device, const VkSurfaceKHR& surface, SwapChainSupportDetails* supportDetails)
@@ -103,25 +121,29 @@ namespace hf::inter::rendering
 
     bool QueueFamilyIndices::IsComplete() const { return graphicsFamily.has_value() && presentFamily.has_value(); }
 
-    void SetViewportAndScissor(const VKRendererData* renderer, const GraphicsSwapChain& swapChain)
+    void SetupViewportAndScissor(VKRendererData* rn)
     {
-        VkViewport viewport =
+        auto& extent = rn->swapchain.details.extent;
+        rn->viewport =
         {
             .x = 0.0f,
             .y = 0.0f,
-            .width = (float)swapChain.details.extent.width,
-            .height = (float)swapChain.details.extent.height,
+            .width = (float)extent.width,
+            .height = (float)extent.height,
             .minDepth = 0.0f,
-            .maxDepth = 1.0f
+            .maxDepth = 1.0f,
         };
 
-        VkRect2D scissor =
+        rn->scissor =
         {
             .offset = { 0, 0 },
-            .extent = swapChain.details.extent
+            .extent = extent
         };
+    }
 
-        vkCmdSetViewport(renderer->currentCommand, 0, 1, &viewport);
-        vkCmdSetScissor(renderer->currentCommand, 0, 1, &scissor);
+    void UploadViewportAndScissor(const VKRendererData* rn)
+    {
+        vkCmdSetViewport(rn->currentCommand, 0, 1, &rn->viewport);
+        vkCmdSetScissor(rn->currentCommand, 0, 1, &rn->scissor);
     }
 }

@@ -8,20 +8,18 @@
 
 namespace hf::inter::rendering
 {
-    void StartFrame(Renderer* rn)
+    bool StartFrame(Renderer* rn)
     {
         auto renderer = (VKRendererData*)rn->handle;
+        if (renderer->targetSize.x == 0 || renderer->targetSize.y == 0) return false;
         auto& frame = renderer->frames[renderer->currentFrame];
-        WaitForFences(*GRAPHICS_DATA.defaultDevice, &frame.isInFlight, 1, true);
-
-        VK_HANDLE_EXCEPT(vkAcquireNextImageKHR(GRAPHICS_DATA.defaultDevice->logicalDevice.device,
-            renderer->swapchain.swapchain, UINT64_MAX,
-            frame.isImageAvailable, VK_NULL_HANDLE, &renderer->imageIndex));
+        if(!AcquireNextImage(renderer)) return false;
 
         frame.usedCommandCount = 0;
         BeginCommandBuffer(renderer, renderer->commandPool.buffers[renderer->currentFrame]);
         BeginRenderPass(GRAPHICS_DATA.renderPass, renderer);
-        SetViewportAndScissor(renderer, renderer->swapchain);
+        UploadViewportAndScissor(renderer);
+        return true;
     }
 
     void EndFrame(Renderer* rn)
@@ -39,5 +37,12 @@ namespace hf::inter::rendering
     {
         auto renderer = (VKRendererData*)rn->handle;
         vkCmdDraw(renderer->currentCommand, 3, 1, 0, 0);
+    }
+
+    void RegisterFrameBufferChange(Renderer* rn, uvec2 newSize)
+    {
+        auto renderer = (VKRendererData*)rn->handle;
+        renderer->targetSize = newSize;
+        renderer->frameBufferResized = true;
     }
 }

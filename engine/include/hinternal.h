@@ -51,7 +51,7 @@ namespace hf::inter
         void Load(const char* version);
         void Unload();
 
-        void* CreateInstance(const Window* window);
+        void* CreateInstance(void* handle, uvec2 size);
         void DestroyInstance(void* rnInstance);
 
         void* CreateShader(const ShaderCreationInfo& info, const Shader* shader);
@@ -60,8 +60,9 @@ namespace hf::inter
 
         void BindShader(const Renderer* renderer, const Shader* shader);
 
-        void StartFrame(Renderer* rn);
+        bool StartFrame(Renderer* rn);
         void EndFrame(Renderer* rn);
+        void RegisterFrameBufferChange(Renderer* rn, uvec2 newSize);
 
         void Draw(Renderer* rn);
         void WaitForRendering();

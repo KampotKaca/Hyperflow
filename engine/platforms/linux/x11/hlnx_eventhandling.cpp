@@ -105,11 +105,14 @@ namespace hf
 
 	static void Platform_HandleConfigureNotify(const XEvent& event, Window* window)
 	{
-    	window->rect = (IRect)
+    	auto newRect = (IRect)
 		{
 			.position = ivec2(event.xconfigure.x, event.xconfigure.y),
 			.size = ivec2(event.xconfigure.width, event.xconfigure.height),
 		};
+
+    	if (window->rect.position != newRect.position) WindowEvent_Move(window, newRect.position);
+    	if (window->rect.size != newRect.size) WindowEvent_Resize(window, newRect.size);
 	}
 	static void Platform_HandleFocusIn(XEvent& event, Window* window)
 	{

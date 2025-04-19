@@ -2,18 +2,21 @@
 #include "../config.h"
 #include "exceptions/hgraphicsexception.h"
 #include "hgenericexception.h"
+#include "hinternal.h"
 
 namespace hf::inter::rendering
 {
-    void CreateSwapchain(VkSurfaceKHR surface, const SwapChainSupportDetails& scs, GraphicsSwapChain* result)
-    {
-        DestroySwapchain(*result);
-        GRAPHICS_DATA.defaultDevice = &GRAPHICS_DATA.suitableDevices[0];
-        LOG_LOG("Graphics device found [%s]", GRAPHICS_DATA.defaultDevice->properties.deviceName);
+    static void DestroyExistingViews(GraphicsSwapChain& swapchain);
 
+    void CreateSwapchain(VkSurfaceKHR surface, const SwapChainSupportDetails& scs, uvec2 targetSize, GraphicsSwapChain* result)
+    {
+        if (result->swapchain == VK_NULL_HANDLE)
+            LOG_LOG("Graphics device found [%s]", GRAPHICS_DATA.defaultDevice->properties.deviceName);
+
+        DestroyExistingViews(*result);
         GraphicsSwapchainDetails details{};
         if (GetAvailableSurfaceDetails(scs,
-            VULKAN_API_COLOR_FORMAT, VULKAN_API_PRESENT_MODE, ivec2(1080, 1920), &details))
+            VULKAN_API_COLOR_FORMAT, VULKAN_API_PRESENT_MODE, targetSize, &details))
         {
             uint32_t imageCount = scs.capabilities.minImageCount + 1;
             uint32_t maxImageCount = scs.capabilities.maxImageCount;
@@ -33,7 +36,7 @@ namespace hf::inter::rendering
                 .compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR,
                 .presentMode = details.presentMode,
                 .clipped = VK_TRUE,
-                .oldSwapchain = VK_NULL_HANDLE
+                .oldSwapchain = result->swapchain
             };
 
             auto& indices = GRAPHICS_DATA.defaultDevice->familyIndices;
@@ -61,13 +64,13 @@ namespace hf::inter::rendering
         VK_HANDLE_EXCEPT(vkGetSwapchainImagesKHR(GRAPHICS_DATA.defaultDevice->logicalDevice.device,
             result->swapchain, &imageCount, nullptr));
 
-        auto& images = result->images;
+        auto images = std::vector<VkImage>(imageCount);
         images = std::vector<VkImage>(imageCount);
         VK_HANDLE_EXCEPT(vkGetSwapchainImagesKHR(GRAPHICS_DATA.defaultDevice->logicalDevice.device,
             result->swapchain, &imageCount,
             images.data()));
 
-        auto& imageViews = result->imageViews;
+        auto imageViews = std::vector<VkImageView>(imageCount);
         imageViews = std::vector<VkImageView>(imageCount);
         for (uint32_t i = 0; i < imageCount; i++)
         {
@@ -98,22 +101,40 @@ namespace hf::inter::rendering
                 &createInfo, nullptr, &imageViews[i]));
         }
 
+        result->images = images;
+        result->imageViews = imageViews;
+    }
+
+    void DestroyExistingViews(GraphicsSwapChain& swapchain)
+    {
+        auto& device = GRAPHICS_DATA.defaultDevice->logicalDevice.device;
+        for (auto& imageView : swapchain.imageViews)
+            vkDestroyImageView(device, imageView, nullptr);
+
+        swapchain.imageViews.clear();
+        swapchain.images.clear();
     }
 
     void DestroySwapchain(GraphicsSwapChain& swapchain)
     {
         if (swapchain.swapchain != VK_NULL_HANDLE)
         {
+            DestroyExistingViews(swapchain);
             auto& device = GRAPHICS_DATA.defaultDevice->logicalDevice.device;
-            for (auto& imageView : swapchain.imageViews)
-                vkDestroyImageView(device, imageView, nullptr);
-
-            swapchain.imageViews.clear();
-            swapchain.images.clear();
-
             vkDestroySwapchainKHR(device, swapchain.swapchain, nullptr);
             swapchain.swapchain = VK_NULL_HANDLE;
         }
+    }
+
+    void RecreateSwapchain(VKRendererData* rn)
+    {
+        rn->frameBufferResized = false;
+        WaitForRendering();
+        DestroyRendererFrameBuffers(rn);
+
+        CreateSwapchain(rn->swapchain.surface, rn->swapchainSupport, rn->targetSize, &rn->swapchain);
+        SetupViewportAndScissor(rn);
+        CreateRendererFrameBuffers(rn);
     }
 
     void PresentSwapchain(VKRendererData* rn)
@@ -130,7 +151,37 @@ namespace hf::inter::rendering
             .pResults = nullptr,
         };
 
-        VK_HANDLE_EXCEPT(vkQueuePresentKHR(GRAPHICS_DATA.defaultDevice->logicalDevice.presentQueue,
-            &presentInfo));
+        auto result = vkQueuePresentKHR(GRAPHICS_DATA.defaultDevice->logicalDevice.presentQueue, &presentInfo);
+        if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR || rn->frameBufferResized)
+            RecreateSwapchain(rn);
+        else if (result != VK_SUCCESS) throw GENERIC_EXCEPT("[Vulkan]", "Failed to present swapchain");
+    }
+
+    bool AcquireNextImage(VKRendererData* rn)
+    {
+        auto& frame = rn->frames[rn->currentFrame];
+        auto& device = GRAPHICS_DATA.defaultDevice->logicalDevice.device;
+
+        vkWaitForFences(device, 1, &frame.isInFlight, true, VULKAN_API_MAX_TIMEOUT);
+
+        uint32_t tryCount = 0;
+        tryAgain:
+        auto result = vkAcquireNextImageKHR(device,
+                            rn->swapchain.swapchain, VULKAN_API_MAX_TIMEOUT,
+                            frame.isImageAvailable, VK_NULL_HANDLE, &rn->imageIndex);
+        if (result == VK_ERROR_OUT_OF_DATE_KHR)
+        {
+            if (rn->targetSize.x == 0 || rn->targetSize.y == 0) return false;
+            RecreateSwapchain(rn);
+            tryCount++;
+            if (tryCount < 3) goto tryAgain;
+            LOG_WARN("Recreating swapchain failed 3 times");
+        }
+
+        if (result != VK_SUCCESS)
+            throw GENERIC_EXCEPT("[Vulkan]", "Unable to acquire image from swapchain!");
+
+        if (tryCount == 0) vkResetFences(device, 1, &frame.isInFlight);
+        return tryCount == 0;
     }
 }

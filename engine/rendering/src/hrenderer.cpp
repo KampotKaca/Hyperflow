@@ -11,7 +11,7 @@ namespace hf
     {
         if (inter::HF.rendererCount == 0) inter::rendering::Load(VERSION);
         inter::HF.rendererCount++;
-        handle = inter::rendering::CreateInstance(window.get());
+        handle = inter::rendering::CreateInstance(window->handle, window->rect.size);
     }
 
     Renderer::~Renderer()

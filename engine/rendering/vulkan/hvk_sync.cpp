@@ -3,7 +3,7 @@
 
 namespace hf::inter::rendering
 {
-    void CreateSemaphore(const GraphicsDevice& device, VkSemaphore* semaphore, SemaphoreType type)
+    void CreateSemaphore(const GraphicsDevice& device, VkSemaphore* semaphore)
     {
         VkSemaphoreCreateInfo semaphoreInfo
         {
@@ -39,7 +39,7 @@ namespace hf::inter::rendering
 
     void WaitForFences(const GraphicsDevice& device, const VkFence* fences, const uint32_t count, const bool waitAll)
     {
-        vkWaitForFences(device.logicalDevice.device, count, fences, waitAll, UINT64_MAX);
+        vkWaitForFences(device.logicalDevice.device, count, fences, waitAll, VULKAN_API_MAX_TIMEOUT);
         vkResetFences(device.logicalDevice.device, count, fences);
     }
 }

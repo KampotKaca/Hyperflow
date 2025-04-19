@@ -22,7 +22,7 @@ int main()
 			.flags     = hf::WindowFlags::Default,
 			.style     = hf::WindowStyle::Default,
 			.position  = { 200, 200 },
-			.size      = { 640, 480 },
+			.size      = { 1280, 720 },
 			.onRenderCallback = app::Application::OnMainWindowRender,
 		}
 	};

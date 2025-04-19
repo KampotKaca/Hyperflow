@@ -117,7 +117,9 @@ namespace hf
 			auto attributes = (XSetWindowAttributes)
 			{
 				.background_pixel = WhitePixel(display, screen),
-				.event_mask = (1L << 25) - 1,
+				.event_mask = StructureNotifyMask | ExposureMask | FocusChangeMask | KeyPressMask |
+			  				  KeyReleaseMask | ButtonPressMask | ButtonReleaseMask |
+			  				  PointerMotionMask | EnterWindowMask | LeaveWindowMask,
 			};
 
 			auto root = RootWindow(display, screen);

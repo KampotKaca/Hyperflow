@@ -6,11 +6,12 @@
 
 namespace hf::inter::rendering
 {
-	void StartFrame(Renderer* rn)
+	bool StartFrame(Renderer* rn)
 	{
 		auto rnData = (D3DRendererData*)rn->handle;
 		float c[4] = { glm::abs(std::sin((float)time::GetTimePassed())), 0, 0, 1 };
 		GRAPHICS_DATA.context->ClearRenderTargetView(rnData->renderTexture, c);
+		return true;
 	}
 
 	void EndFrame(Renderer* rn)

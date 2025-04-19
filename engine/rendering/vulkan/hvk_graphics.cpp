@@ -5,9 +5,7 @@
 
 #include "hgenericexception.h"
 #include "exceptions/hgraphicsexception.h"
-#include "hyperflow.h"
 #include "../config.h"
-#include "hinternal.h"
 
 namespace hf::inter::rendering
 {
@@ -16,13 +14,11 @@ namespace hf::inter::rendering
     //Logical devices are destroyed in loader
     static void CreateLogicalDevice(GraphicsDevice& device);
     static bool SetupPhysicalDevice(const VKRendererData* renderer, VkPhysicalDevice device, GraphicsDevice* deviceData);
-    static void SetupViewportAndScissor(VKRendererData* rendererData);
 
     //------------------------------------------------------------------------------------
 
     void CreateVulkanRenderer(VKRendererData* rn)
     {
-        SwapChainSupportDetails swapChainSupport{};
         if (!GRAPHICS_DATA.devicesAreLoaded)
         {
             uint32_t deviceCount = 0;
@@ -43,10 +39,10 @@ namespace hf::inter::rendering
                 if (SetupPhysicalDevice(rn, device, &deviceData) &&
                     CheckDeviceExtensionSupport(device))
                 {
-                    QuerySwapChainSupport(device, rn->swapchain.surface, &swapChainSupport);
+                    QuerySwapChainSupport(device, rn->swapchain.surface, &rn->swapchainSupport);
 
-                    if (!swapChainSupport.formats.empty() &&
-                        !swapChainSupport.presentModes.empty())
+                    if (!rn->swapchainSupport.formats.empty() &&
+                        !rn->swapchainSupport.presentModes.empty())
                     {
                         CreateLogicalDevice(deviceData);
                         GRAPHICS_DATA.suitableDevices.push_back(deviceData);
@@ -61,37 +57,26 @@ namespace hf::inter::rendering
                                      [](const GraphicsDevice& a, const GraphicsDevice& b)
                                      { return a.score > b.score; });
             GRAPHICS_DATA.devicesAreLoaded = true;
+            GRAPHICS_DATA.defaultDevice = &GRAPHICS_DATA.suitableDevices[0];
 
-            CreateSwapchain(rn->swapchain.surface, swapChainSupport, &rn->swapchain);
+            CreateSwapchain(rn->swapchain.surface, rn->swapchainSupport, rn->targetSize, &rn->swapchain);
             SetupViewportAndScissor(rn);
             CreateRenderPass(&GRAPHICS_DATA.renderPass);
         }
         else
         {
             CreateSurface(rn);
-            QuerySwapChainSupport(GRAPHICS_DATA.defaultDevice->device, rn->swapchain.surface, &swapChainSupport);
+            QuerySwapChainSupport(GRAPHICS_DATA.defaultDevice->device, rn->swapchain.surface, &rn->swapchainSupport);
 
-            if (swapChainSupport.formats.empty() ||
-                swapChainSupport.presentModes.empty())
+            if (rn->swapchainSupport.formats.empty() ||
+                rn->swapchainSupport.presentModes.empty())
                 throw GENERIC_EXCEPT("[Vulkan]", "Device is not suitable!!!");
 
-            CreateSwapchain(rn->swapchain.surface, swapChainSupport, &rn->swapchain);
+            CreateSwapchain(rn->swapchain.surface, rn->swapchainSupport, rn->targetSize, &rn->swapchain);
             SetupViewportAndScissor(rn);
         }
 
-        auto& imageViews = rn->swapchain.imageViews;
-        rn->swapchain.frameBuffers = std::vector<VkFrameBuffer*>(imageViews.size());
-        for (uint32_t i = 0; i < imageViews.size(); ++i)
-        {
-            rn->swapchain.frameBuffers[i] = new VkFrameBuffer(&rn->swapchain.imageViews[i],
-                1, GRAPHICS_DATA.renderPass,
-                VkExtent2D
-                {
-                    .width = (uint32_t)rn->viewport.width,
-                    .height = (uint32_t)rn->viewport.height
-                });
-        }
-
+        CreateRendererFrameBuffers(rn);
         CreateCommandPool(*GRAPHICS_DATA.defaultDevice, &rn->commandPool);
         CreateCommandBuffers(*GRAPHICS_DATA.defaultDevice, &rn->commandPool, FRAMES_IN_FLIGHT);
 
@@ -99,8 +84,8 @@ namespace hf::inter::rendering
         for (uint32_t i = 0; i < FRAMES_IN_FLIGHT; ++i)
         {
             VkFrame availability{};
-            CreateSemaphore(*GRAPHICS_DATA.defaultDevice, &availability.isImageAvailable, SemaphoreType::Boolean);
-            CreateSemaphore(*GRAPHICS_DATA.defaultDevice, &availability.isRenderingFinished, SemaphoreType::Boolean);
+            CreateSemaphore(*GRAPHICS_DATA.defaultDevice, &availability.isImageAvailable);
+            CreateSemaphore(*GRAPHICS_DATA.defaultDevice, &availability.isRenderingFinished);
             CreateFence(*GRAPHICS_DATA.defaultDevice, &availability.isInFlight, true);
             rn->frames[i] = availability;
         }
@@ -108,40 +93,18 @@ namespace hf::inter::rendering
 
     void DestroyVulkanRenderer(VKRendererData* rn)
     {
-        for (uint32_t i = 0; i < rn->frames.size(); ++i)
+        for (auto frame : rn->frames)
         {
-            auto availability = rn->frames[i];
-            DestroySemaphore(*GRAPHICS_DATA.defaultDevice, availability.isImageAvailable);
-            DestroySemaphore(*GRAPHICS_DATA.defaultDevice, availability.isRenderingFinished);
-            DestroyFence(*GRAPHICS_DATA.defaultDevice, availability.isInFlight);
+            DestroySemaphore(*GRAPHICS_DATA.defaultDevice, frame.isImageAvailable);
+            DestroySemaphore(*GRAPHICS_DATA.defaultDevice, frame.isRenderingFinished);
+            DestroyFence(*GRAPHICS_DATA.defaultDevice, frame.isInFlight);
         }
         rn->frames.clear();
 
         DestroyCommandPool(*GRAPHICS_DATA.defaultDevice, rn->commandPool);
-        for (auto& frameBuffer : rn->swapchain.frameBuffers)
-            delete frameBuffer;
-        rn->swapchain.frameBuffers.clear();
+        DestroyRendererFrameBuffers(rn);
         DestroySwapchain(rn->swapchain);
         DestroySurface(rn);
-    }
-
-    void SetupViewportAndScissor(VKRendererData* rendererData)
-    {
-        rendererData->viewport =
-        {
-            .x = 0.0f,
-            .y = 0.0f,
-            .width = (float)rendererData->swapchain.details.extent.width,
-            .height = (float)rendererData->swapchain.details.extent.height,
-            .minDepth = 0.0f,
-            .maxDepth = 1.0f,
-        };
-
-        rendererData->scissor =
-        {
-            .offset = { 0, 0 },
-            .extent = rendererData->swapchain.details.extent
-        };
     }
 
     //------------------------------------------------------------------------------------

@@ -59,10 +59,11 @@ namespace hf::inter::rendering
     }
 #endif
 
-    void* CreateInstance(const Window* window)
+    void* CreateInstance(void* handle, uvec2 size)
     {
         auto rendererData = new VKRendererData();
-        if (window) rendererData->windowHandle = window->handle;
+        if (handle) rendererData->windowHandle = handle;
+        rendererData->targetSize = size;
         CreateVulkanRenderer(rendererData);
         return rendererData;
     }
@@ -70,6 +71,7 @@ namespace hf::inter::rendering
     void DestroyInstance(void* rnInstance)
     {
         const auto data = (VKRendererData*)rnInstance;
+        WaitForRendering();
         DestroyVulkanRenderer(data);
         delete(data);
     }

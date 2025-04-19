@@ -107,8 +107,8 @@ namespace hf::inter::rendering
         VkSemaphore isImageAvailable{};
         VkSemaphore isRenderingFinished{};
         VkFence isInFlight{};
-        VkCommandBuffer usedCommands[VULKAN_API_MAX_COMMANDS_PER_FRAME];
-        uint32_t usedCommandCount;
+        VkCommandBuffer usedCommands[VULKAN_API_MAX_COMMANDS_PER_FRAME]{};
+        uint32_t usedCommandCount = 0;
     };
 
     struct VKRendererData
@@ -118,6 +118,8 @@ namespace hf::inter::rendering
         VkViewport viewport{};
         VkRect2D scissor{};
         CommandPool commandPool{};
+        uvec2 targetSize{};
+        SwapChainSupportDetails swapchainSupport{};
 
         VkCommandBuffer currentCommand{};
         VkRenderPass currentPass{};
@@ -125,9 +127,9 @@ namespace hf::inter::rendering
         std::vector<VkFrame> frames{};
         uint32_t currentFrame = 0;
         uint32_t imageIndex{};
+        bool frameBufferResized = false;
     };
 
-    enum class SemaphoreType { Boolean, Timeline };
     enum class PipelineBlendType { None, Alpha, Logical };
     struct VkPipelineInfo
     {
@@ -147,9 +149,11 @@ namespace hf::inter::rendering
     void CreateSurface(VKRendererData* rn);
     void DestroySurface(VKRendererData* rn);
 
-    void CreateSwapchain(VkSurfaceKHR surface, const SwapChainSupportDetails& scs, GraphicsSwapChain* result);
+    void SetupViewportAndScissor(VKRendererData* rn);
+    void CreateSwapchain(VkSurfaceKHR surface, const SwapChainSupportDetails& scs, uvec2 targetSize, GraphicsSwapChain* result);
     void DestroySwapchain(GraphicsSwapChain& swapchain);
     void PresentSwapchain(VKRendererData* rn);
+    bool AcquireNextImage(VKRendererData* rn);
 
     void CreateRenderPass(VkRenderPass* renderPass);
     void DestroyRenderPass(const VkRenderPass& renderPass);
@@ -169,15 +173,18 @@ namespace hf::inter::rendering
     bool GetAvailableSurfaceDetails(const SwapChainSupportDetails& swapChainSupportDetails,
                                     VkFormat targetFormat, VkPresentModeKHR targetPresentMode, uvec2 targetExtents,
                                     GraphicsSwapchainDetails* result);
+
     bool CheckDeviceExtensionSupport(const VkPhysicalDevice& device);
+    void CreateRendererFrameBuffers(VKRendererData* rn);
+    void DestroyRendererFrameBuffers(VKRendererData* rn);
     void QuerySwapChainSupport(const VkPhysicalDevice& device, const VkSurfaceKHR& surface, SwapChainSupportDetails* supportDetails);
 
     bool IsLayerSupported(const char* layer);
     bool IsExtensionSupported(const char* extension);
 
-    void SetViewportAndScissor(const VKRendererData* renderer, const GraphicsSwapChain& swapChain);
+    void UploadViewportAndScissor(const VKRendererData* rn);
 
-    void CreateSemaphore(const GraphicsDevice& device, VkSemaphore* semaphore, SemaphoreType type);
+    void CreateSemaphore(const GraphicsDevice& device, VkSemaphore* semaphore);
     void DestroySemaphore(const GraphicsDevice& device, VkSemaphore& semaphore);
     void CreateFence(const GraphicsDevice& device, VkFence* fence, bool startSignaled);
     void DestroyFence(const GraphicsDevice& device, VkFence& fence);
