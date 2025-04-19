@@ -5,6 +5,7 @@
 #include <vulkan/vulkan.h>
 
 #include "hvk_framebuffer.h"
+#include "../config.h"
 
 namespace hf::inter::rendering
 {
@@ -49,7 +50,6 @@ namespace hf::inter::rendering
 
         QueueFamilyIndices familyIndices{};
         LogicalDevice logicalDevice{};
-        VkFence isInFlight{};
     };
 
     struct GraphicsData
@@ -102,6 +102,15 @@ namespace hf::inter::rendering
         std::vector<VkCommandBuffer> buffers{};
     };
 
+    struct VkFrame
+    {
+        VkSemaphore isImageAvailable{};
+        VkSemaphore isRenderingFinished{};
+        VkFence isInFlight{};
+        VkCommandBuffer usedCommands[VULKAN_API_MAX_COMMANDS_PER_FRAME];
+        uint32_t usedCommandCount;
+    };
+
     struct VKRendererData
     {
         void* windowHandle = nullptr;
@@ -113,9 +122,8 @@ namespace hf::inter::rendering
         VkCommandBuffer currentCommand{};
         VkRenderPass currentPass{};
 
-        VkSemaphore isImageAvailable{};
-        VkSemaphore isRenderingFinished{};
-
+        std::vector<VkFrame> frames{};
+        uint32_t currentFrame = 0;
         uint32_t imageIndex{};
     };
 
@@ -152,7 +160,7 @@ namespace hf::inter::rendering
     void CreateCommandPool(const GraphicsDevice& device, CommandPool* result);
     void DestroyCommandPool(const GraphicsDevice& device, CommandPool& pool);
 
-    void CreateCommandBuffer(const GraphicsDevice& device, CommandPool* pool, VkCommandBuffer* result);
+    void CreateCommandBuffers(const GraphicsDevice& device, CommandPool* pool, uint32_t count);
 
     void BeginCommandBuffer(VKRendererData* rn, VkCommandBuffer buffer);
     void EndCommandBuffer(VKRendererData* rn);

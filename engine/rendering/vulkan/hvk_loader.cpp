@@ -113,7 +113,6 @@ namespace hf::inter::rendering
     void Unload()
     {
         WaitForRendering();
-        DestroyFence(*GRAPHICS_DATA.defaultDevice, GRAPHICS_DATA.defaultDevice->isInFlight);
         DestroyRenderPass(GRAPHICS_DATA.renderPass);
 
         for (auto& device : GRAPHICS_DATA.suitableDevices)

@@ -65,7 +65,6 @@ namespace hf::inter::rendering
             CreateSwapchain(rn->swapchain.surface, swapChainSupport, &rn->swapchain);
             SetupViewportAndScissor(rn);
             CreateRenderPass(&GRAPHICS_DATA.renderPass);
-            CreateFence(*GRAPHICS_DATA.defaultDevice, &GRAPHICS_DATA.defaultDevice->isInFlight, true);
         }
         else
         {
@@ -93,18 +92,30 @@ namespace hf::inter::rendering
                 });
         }
 
-        VkCommandBuffer commandBuffer;
         CreateCommandPool(*GRAPHICS_DATA.defaultDevice, &rn->commandPool);
-        CreateCommandBuffer(*GRAPHICS_DATA.defaultDevice, &rn->commandPool, &commandBuffer);
+        CreateCommandBuffers(*GRAPHICS_DATA.defaultDevice, &rn->commandPool, FRAMES_IN_FLIGHT);
 
-        CreateSemaphore(*GRAPHICS_DATA.defaultDevice, &rn->isImageAvailable, SemaphoreType::Boolean);
-        CreateSemaphore(*GRAPHICS_DATA.defaultDevice, &rn->isRenderingFinished, SemaphoreType::Boolean);
+        rn->frames = std::vector<VkFrame>(FRAMES_IN_FLIGHT);
+        for (uint32_t i = 0; i < FRAMES_IN_FLIGHT; ++i)
+        {
+            VkFrame availability{};
+            CreateSemaphore(*GRAPHICS_DATA.defaultDevice, &availability.isImageAvailable, SemaphoreType::Boolean);
+            CreateSemaphore(*GRAPHICS_DATA.defaultDevice, &availability.isRenderingFinished, SemaphoreType::Boolean);
+            CreateFence(*GRAPHICS_DATA.defaultDevice, &availability.isInFlight, true);
+            rn->frames[i] = availability;
+        }
     }
 
     void DestroyVulkanRenderer(VKRendererData* rn)
     {
-        DestroySemaphore(*GRAPHICS_DATA.defaultDevice, rn->isImageAvailable);
-        DestroySemaphore(*GRAPHICS_DATA.defaultDevice, rn->isRenderingFinished);
+        for (uint32_t i = 0; i < rn->frames.size(); ++i)
+        {
+            auto availability = rn->frames[i];
+            DestroySemaphore(*GRAPHICS_DATA.defaultDevice, availability.isImageAvailable);
+            DestroySemaphore(*GRAPHICS_DATA.defaultDevice, availability.isRenderingFinished);
+            DestroyFence(*GRAPHICS_DATA.defaultDevice, availability.isInFlight);
+        }
+        rn->frames.clear();
 
         DestroyCommandPool(*GRAPHICS_DATA.defaultDevice, rn->commandPool);
         for (auto& frameBuffer : rn->swapchain.frameBuffers)

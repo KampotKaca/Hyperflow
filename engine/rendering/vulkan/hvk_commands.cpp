@@ -1,5 +1,8 @@
 #include "hvk_graphics.h"
 #include "exceptions/hgraphicsexception.h"
+#include <vector>
+
+#include "hgenericexception.h"
 
 namespace hf::inter::rendering
 {
@@ -21,22 +24,27 @@ namespace hf::inter::rendering
         pool.pool = VK_NULL_HANDLE;
     }
 
-    void CreateCommandBuffer(const GraphicsDevice& device, CommandPool* pool, VkCommandBuffer* result)
+    void CreateCommandBuffers(const GraphicsDevice& device, CommandPool* pool, const uint32_t count)
     {
         VkCommandBufferAllocateInfo allocInfo
         {
             .sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO,
             .commandPool = pool->pool,
             .level = VK_COMMAND_BUFFER_LEVEL_PRIMARY,
-            .commandBufferCount = 1,
+            .commandBufferCount = count,
         };
 
-        VK_HANDLE_EXCEPT(vkAllocateCommandBuffers(device.logicalDevice.device, &allocInfo, result));
-        pool->buffers.push_back(*result);
+        std::vector<VkCommandBuffer> commandBuffers(count);
+        VK_HANDLE_EXCEPT(vkAllocateCommandBuffers(device.logicalDevice.device, &allocInfo, commandBuffers.data()));
+        for (uint32_t i = 0; i < count; i++) pool->buffers.push_back(commandBuffers[i]);
     }
 
     void BeginCommandBuffer(VKRendererData* rn, VkCommandBuffer buffer)
     {
+        auto& frame = rn->frames[rn->currentFrame];
+        if (frame.usedCommandCount >= VULKAN_API_MAX_COMMANDS_PER_FRAME)
+            throw GENERIC_EXCEPT("[Vulkan]", "Please increase MAX_COMMANDS_PER_FRAME");
+
         vkResetCommandBuffer(buffer, 0);
         VkCommandBufferBeginInfo beginInfo
         {
@@ -51,6 +59,9 @@ namespace hf::inter::rendering
     {
         if (rn->currentCommand != VK_NULL_HANDLE)
         {
+            auto& frame = rn->frames[rn->currentFrame];
+            frame.usedCommands[frame.usedCommandCount] = rn->currentCommand;
+            frame.usedCommandCount++;
             VK_HANDLE_EXCEPT(vkEndCommandBuffer(rn->currentCommand));
             rn->currentCommand = VK_NULL_HANDLE;
         }
@@ -59,20 +70,21 @@ namespace hf::inter::rendering
     void SubmitCommands(VKRendererData* rn)
     {
         constexpr VkPipelineStageFlags waitStages[] = { VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT };
+        auto& frame = rn->frames[rn->currentFrame];
 
         VkSubmitInfo submitInfo
         {
             .sType = VK_STRUCTURE_TYPE_SUBMIT_INFO,
             .waitSemaphoreCount = 1,
-            .pWaitSemaphores = &rn->isImageAvailable,
+            .pWaitSemaphores = &frame.isImageAvailable,
             .pWaitDstStageMask = waitStages,
-            .commandBufferCount = (uint32_t)rn->commandPool.buffers.size(),
-            .pCommandBuffers = rn->commandPool.buffers.data(),
+            .commandBufferCount = frame.usedCommandCount,
+            .pCommandBuffers = frame.usedCommands,
             .signalSemaphoreCount = 1,
-            .pSignalSemaphores = &rn->isRenderingFinished,
+            .pSignalSemaphores = &frame.isRenderingFinished,
         };
 
         VK_HANDLE_EXCEPT(vkQueueSubmit(GRAPHICS_DATA.defaultDevice->logicalDevice.graphicsQueue,
-            1, &submitInfo, GRAPHICS_DATA.defaultDevice->isInFlight));
+            1, &submitInfo, frame.isInFlight));
     }
 }

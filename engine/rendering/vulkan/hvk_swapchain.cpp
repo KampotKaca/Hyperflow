@@ -118,11 +118,12 @@ namespace hf::inter::rendering
 
     void PresentSwapchain(VKRendererData* rn)
     {
+        auto frame = rn->frames[rn->currentFrame];
         VkPresentInfoKHR presentInfo
         {
             .sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR,
             .waitSemaphoreCount = 1,
-            .pWaitSemaphores = &rn->isRenderingFinished,
+            .pWaitSemaphores = &frame.isRenderingFinished,
             .swapchainCount = 1,
             .pSwapchains = &rn->swapchain.swapchain,
             .pImageIndices = &rn->imageIndex,
