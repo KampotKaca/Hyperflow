@@ -124,8 +124,11 @@ namespace hf::inter::rendering
 
     extern GraphicsData GRAPHICS_DATA;
 
-    void CreateSwapchain(VkSurfaceKHR surface, const SwapChainSupportDetails& scs, uvec2 targetSize, GraphicsSwapChain* result);
-    void DestroySwapchain(GraphicsSwapChain& swapchain);
+    void CreateSwapchain(VkSurfaceKHR surface, uvec2 targetSize, GraphicsSwapChain* result);
+    void DestroySwapchain(GraphicsSwapChain& gc, VkSwapchainKHR* swapchain);
+
+    void CreateFrame(VkFrame* result);
+    void DestroyFrame(VkFrame& frame);
 
     void CreateRenderPass(VkRenderPass* renderPass);
     void DestroyRenderPass(const VkRenderPass& renderPass);

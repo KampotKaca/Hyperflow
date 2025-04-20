@@ -9,8 +9,16 @@ namespace hf::inter::rendering
 {
     static void DestroyExistingViews(GraphicsSwapChain& swapchain);
 
-    void CreateSwapchain(VkSurfaceKHR surface, const SwapChainSupportDetails& scs, uvec2 targetSize, GraphicsSwapChain* result)
+    void CreateSwapchain(VkSurfaceKHR surface, uvec2 targetSize, GraphicsSwapChain* result)
     {
+        SwapChainSupportDetails scs{};
+        QuerySwapChainSupport(GRAPHICS_DATA.defaultDevice->device, surface, &scs);
+
+        if (scs.formats.empty() ||
+            scs.presentModes.empty())
+            throw GENERIC_EXCEPT("[Vulkan]", "Device is not suitable!!!");
+
+        auto oldSwapchain = result->swapchain;
         GraphicsSwapchainDetails details{};
         if (GetAvailableSurfaceDetails(scs,
             VULKAN_API_COLOR_FORMAT, VULKAN_API_PRESENT_MODE, targetSize, &details))
@@ -33,7 +41,7 @@ namespace hf::inter::rendering
                 .compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR,
                 .presentMode = details.presentMode,
                 .clipped = VK_TRUE,
-                .oldSwapchain = VK_NULL_HANDLE
+                .oldSwapchain = oldSwapchain
             };
 
             auto& indices = GRAPHICS_DATA.defaultDevice->familyIndices;
@@ -95,6 +103,7 @@ namespace hf::inter::rendering
                 &createInfo, nullptr, &imageViews[i]));
         }
 
+        DestroySwapchain(*result, &oldSwapchain);
         result->images = images;
         result->imageViews = imageViews;
     }
@@ -109,14 +118,14 @@ namespace hf::inter::rendering
         swapchain.images.clear();
     }
 
-    void DestroySwapchain(GraphicsSwapChain& swapchain)
+    void DestroySwapchain(GraphicsSwapChain& gc, VkSwapchainKHR* swapchain)
     {
-        if (swapchain.swapchain != VK_NULL_HANDLE)
+        if (*swapchain != VK_NULL_HANDLE)
         {
-            DestroyExistingViews(swapchain);
+            DestroyExistingViews(gc);
             auto& device = GRAPHICS_DATA.defaultDevice->logicalDevice.device;
-            vkDestroySwapchainKHR(device, swapchain.swapchain, nullptr);
-            swapchain.swapchain = VK_NULL_HANDLE;
+            vkDestroySwapchainKHR(device, *swapchain, nullptr);
+            *swapchain = VK_NULL_HANDLE;
         }
     }
 
@@ -124,10 +133,9 @@ namespace hf::inter::rendering
     {
         rn->frameBufferResized = false;
         WaitForRendering();
-        DestroyRendererFrameBuffers(rn);
-        DestroySwapchain(rn->swapchain);
 
-        CreateSwapchain(rn->swapchain.surface, rn->swapchainSupport, rn->targetSize, &rn->swapchain);
+        DestroyRendererFrameBuffers(rn);
+        CreateSwapchain(rn->swapchain.surface, rn->targetSize, &rn->swapchain);
         SetupViewportAndScissor(rn);
         CreateRendererFrameBuffers(rn);
     }
@@ -157,10 +165,10 @@ namespace hf::inter::rendering
         auto& frame = rn->frames[rn->currentFrame];
         auto& device = GRAPHICS_DATA.defaultDevice->logicalDevice.device;
 
+        tryAgain:
         vkWaitForFences(device, 1, &frame.isInFlight, true, VULKAN_API_MAX_TIMEOUT);
 
         uint32_t tryCount = 0;
-        tryAgain:
         auto result = vkAcquireNextImageKHR(device,
                             rn->swapchain.swapchain, VULKAN_API_MAX_TIMEOUT,
                             frame.isImageAvailable, VK_NULL_HANDLE, &rn->imageIndex);
@@ -176,7 +184,7 @@ namespace hf::inter::rendering
         if (result != VK_SUCCESS && result != VK_SUBOPTIMAL_KHR)
             throw GENERIC_EXCEPT("[Vulkan]", "Unable to acquire image from swapchain!");
 
-        if (tryCount == 0) vkResetFences(device, 1, &frame.isInFlight);
-        return tryCount == 0;
+        vkResetFences(device, 1, &frame.isInFlight);
+        return true;
     }
 }

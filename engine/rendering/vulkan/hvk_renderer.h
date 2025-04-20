@@ -16,7 +16,6 @@ namespace hf::inter::rendering
         VkRect2D scissor{};
         CommandPool commandPool{};
         uvec2 targetSize{};
-        SwapChainSupportDetails swapchainSupport{};
 
         VkCommandBuffer currentCommand{};
         VkRenderPass currentPass{};

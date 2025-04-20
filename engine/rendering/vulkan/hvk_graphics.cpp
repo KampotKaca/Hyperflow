@@ -41,10 +41,11 @@ namespace hf::inter::rendering
                 if (SetupPhysicalDevice(this, device, &deviceData) &&
                     CheckDeviceExtensionSupport(device))
                 {
-                    QuerySwapChainSupport(device, swapchain.surface, &swapchainSupport);
+                    SwapChainSupportDetails scs{};
+                    QuerySwapChainSupport(device, swapchain.surface, &scs);
 
-                    if (!swapchainSupport.formats.empty() &&
-                        !swapchainSupport.presentModes.empty())
+                    if (!scs.formats.empty() &&
+                        !scs.presentModes.empty())
                     {
                         CreateLogicalDevice(deviceData);
                         GRAPHICS_DATA.suitableDevices.push_back(deviceData);
@@ -62,20 +63,14 @@ namespace hf::inter::rendering
             GRAPHICS_DATA.defaultDevice = &GRAPHICS_DATA.suitableDevices[0];
             LOG_LOG("Graphics device found [%s]", GRAPHICS_DATA.defaultDevice->properties.deviceName);
 
-            CreateSwapchain(swapchain.surface, swapchainSupport, targetSize, &swapchain);
+            CreateSwapchain(swapchain.surface, targetSize, &swapchain);
             SetupViewportAndScissor(this);
             CreateRenderPass(&GRAPHICS_DATA.renderPass);
         }
         else
         {
             CreateSurface(this);
-            QuerySwapChainSupport(GRAPHICS_DATA.defaultDevice->device, swapchain.surface, &swapchainSupport);
-
-            if (swapchainSupport.formats.empty() ||
-                swapchainSupport.presentModes.empty())
-                throw GENERIC_EXCEPT("[Vulkan]", "Device is not suitable!!!");
-
-            CreateSwapchain(swapchain.surface, swapchainSupport, targetSize, &swapchain);
+            CreateSwapchain(swapchain.surface, targetSize, &swapchain);
             SetupViewportAndScissor(this);
         }
 
@@ -84,30 +79,32 @@ namespace hf::inter::rendering
         CreateCommandBuffers(*GRAPHICS_DATA.defaultDevice, &commandPool, FRAMES_IN_FLIGHT);
 
         frames = std::vector<VkFrame>(FRAMES_IN_FLIGHT);
-        for (uint32_t i = 0; i < FRAMES_IN_FLIGHT; ++i)
-        {
-            VkFrame availability{};
-            CreateSemaphore(*GRAPHICS_DATA.defaultDevice, &availability.isImageAvailable);
-            CreateSemaphore(*GRAPHICS_DATA.defaultDevice, &availability.isRenderingFinished);
-            CreateFence(*GRAPHICS_DATA.defaultDevice, &availability.isInFlight, true);
-            frames[i] = availability;
-        }
+        for (uint32_t i = 0; i < FRAMES_IN_FLIGHT; ++i) CreateFrame(&frames[i]);
     }
 
     VKRenderer::~VKRenderer()
     {
-        for (auto& frame : frames)
-        {
-            DestroySemaphore(*GRAPHICS_DATA.defaultDevice, frame.isImageAvailable);
-            DestroySemaphore(*GRAPHICS_DATA.defaultDevice, frame.isRenderingFinished);
-            DestroyFence(*GRAPHICS_DATA.defaultDevice, frame.isInFlight);
-        }
+        for (auto& frame : frames) DestroyFrame(frame);
         frames.clear();
 
         DestroyRendererFrameBuffers(this);
-        DestroySwapchain(swapchain);
+        DestroySwapchain(swapchain, &swapchain.swapchain);
         DestroyCommandPool(*GRAPHICS_DATA.defaultDevice, commandPool);
         DestroySurface(this);
+    }
+
+    void CreateFrame(VkFrame* result)
+    {
+        CreateSemaphore(*GRAPHICS_DATA.defaultDevice, &result->isImageAvailable);
+        CreateSemaphore(*GRAPHICS_DATA.defaultDevice, &result->isRenderingFinished);
+        CreateFence(*GRAPHICS_DATA.defaultDevice, &result->isInFlight, true);
+    }
+
+    void DestroyFrame(VkFrame& frame)
+    {
+        DestroySemaphore(*GRAPHICS_DATA.defaultDevice, frame.isImageAvailable);
+        DestroySemaphore(*GRAPHICS_DATA.defaultDevice, frame.isRenderingFinished);
+        DestroyFence(*GRAPHICS_DATA.defaultDevice, frame.isInFlight);
     }
 
     //------------------------------------------------------------------------------------
