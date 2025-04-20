@@ -109,7 +109,7 @@ namespace hf
 	void WindowEvent_Resize(Window* window, ivec2 size) noexcept
 	{
 		window->rect.size = size;
-		inter::rendering::RegisterFrameBufferChange(window->renderer.get(), size);
+		if (window->renderer) inter::rendering::RegisterFrameBufferChange(window->renderer.get(), size);
 	}
 
 	void WindowEvent_Focus(Window* window, bool isFocused) noexcept
