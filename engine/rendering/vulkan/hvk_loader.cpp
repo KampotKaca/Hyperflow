@@ -1,4 +1,5 @@
 #include "hvk_graphics.h"
+#include "hvk_renderer.h"
 #include "hinternal.h"
 #include "hshared.h"
 #include "exceptions/hgraphicsexception.h"
@@ -61,18 +62,13 @@ namespace hf::inter::rendering
 
     void* CreateInstance(void* handle, uvec2 size)
     {
-        auto rendererData = new VKRendererData();
-        if (handle) rendererData->windowHandle = handle;
-        rendererData->targetSize = size;
-        CreateVulkanRenderer(rendererData);
-        return rendererData;
+        return new VKRenderer(handle, size);
     }
 
     void DestroyInstance(void* rnInstance)
     {
-        const auto data = (VKRendererData*)rnInstance;
+        auto data = (VKRenderer*)rnInstance;
         WaitForRendering();
-        DestroyVulkanRenderer(data);
         delete(data);
     }
 
@@ -203,6 +199,10 @@ namespace hf::inter::rendering
 
     void DestroyLogicalDevice(LogicalDevice& device)
     {
-        vkDestroyDevice(device.device, nullptr);
+        if (device.device != VK_NULL_HANDLE)
+        {
+            vkDestroyDevice(device.device, nullptr);
+            device.device = VK_NULL_HANDLE;
+        }
     }
 }

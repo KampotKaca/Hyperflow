@@ -1,4 +1,5 @@
 #include "hvk_graphics.h"
+#include "hvk_renderer.h"
 #include "exceptions/hgraphicsexception.h"
 #include "hgenericexception.h"
 
@@ -58,7 +59,7 @@ namespace hf::inter::rendering
 
 #if X11
 
-    void CreateSurface(VKRendererData* rn)
+    void CreateSurface(VKRenderer* rn)
     {
         VkXlibSurfaceCreateInfoKHR createInfo
         {
@@ -81,7 +82,7 @@ namespace hf::inter::rendering
 
 #endif
 
-    void DestroySurface(VKRendererData* rn)
+    void DestroySurface(VKRenderer* rn)
     {
         vkDestroySurfaceKHR(GRAPHICS_DATA.instance, rn->swapchain.surface, nullptr);
         rn->swapchain.surface = nullptr;

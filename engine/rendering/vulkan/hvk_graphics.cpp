@@ -1,4 +1,5 @@
 #include "hvk_graphics.h"
+#include "hvk_renderer.h"
 
 #include <hframebuffer.h>
 #include <bits/ranges_algo.h>
@@ -13,11 +14,12 @@ namespace hf::inter::rendering
 
     //Logical devices are destroyed in loader
     static void CreateLogicalDevice(GraphicsDevice& device);
-    static bool SetupPhysicalDevice(const VKRendererData* renderer, VkPhysicalDevice device, GraphicsDevice* deviceData);
+    static bool SetupPhysicalDevice(const VKRenderer* renderer, VkPhysicalDevice device, GraphicsDevice* deviceData);
 
     //------------------------------------------------------------------------------------
 
-    void CreateVulkanRenderer(VKRendererData* rn)
+    VKRenderer::VKRenderer(void* handle, uvec2 size) :
+    windowHandle(handle), targetSize(size)
     {
         if (!GRAPHICS_DATA.devicesAreLoaded)
         {
@@ -31,18 +33,18 @@ namespace hf::inter::rendering
             VK_HANDLE_EXCEPT(vkEnumeratePhysicalDevices(GRAPHICS_DATA.instance,
                 &deviceCount, availableDevices.data()));
 
-            CreateSurface(rn);
+            CreateSurface(this);
 
             for (const auto& device : availableDevices)
             {
                 GraphicsDevice deviceData{};
-                if (SetupPhysicalDevice(rn, device, &deviceData) &&
+                if (SetupPhysicalDevice(this, device, &deviceData) &&
                     CheckDeviceExtensionSupport(device))
                 {
-                    QuerySwapChainSupport(device, rn->swapchain.surface, &rn->swapchainSupport);
+                    QuerySwapChainSupport(device, swapchain.surface, &swapchainSupport);
 
-                    if (!rn->swapchainSupport.formats.empty() &&
-                        !rn->swapchainSupport.presentModes.empty())
+                    if (!swapchainSupport.formats.empty() &&
+                        !swapchainSupport.presentModes.empty())
                     {
                         CreateLogicalDevice(deviceData);
                         GRAPHICS_DATA.suitableDevices.push_back(deviceData);
@@ -58,53 +60,54 @@ namespace hf::inter::rendering
                                      { return a.score > b.score; });
             GRAPHICS_DATA.devicesAreLoaded = true;
             GRAPHICS_DATA.defaultDevice = &GRAPHICS_DATA.suitableDevices[0];
+            LOG_LOG("Graphics device found [%s]", GRAPHICS_DATA.defaultDevice->properties.deviceName);
 
-            CreateSwapchain(rn->swapchain.surface, rn->swapchainSupport, rn->targetSize, &rn->swapchain);
-            SetupViewportAndScissor(rn);
+            CreateSwapchain(swapchain.surface, swapchainSupport, targetSize, &swapchain);
+            SetupViewportAndScissor(this);
             CreateRenderPass(&GRAPHICS_DATA.renderPass);
         }
         else
         {
-            CreateSurface(rn);
-            QuerySwapChainSupport(GRAPHICS_DATA.defaultDevice->device, rn->swapchain.surface, &rn->swapchainSupport);
+            CreateSurface(this);
+            QuerySwapChainSupport(GRAPHICS_DATA.defaultDevice->device, swapchain.surface, &swapchainSupport);
 
-            if (rn->swapchainSupport.formats.empty() ||
-                rn->swapchainSupport.presentModes.empty())
+            if (swapchainSupport.formats.empty() ||
+                swapchainSupport.presentModes.empty())
                 throw GENERIC_EXCEPT("[Vulkan]", "Device is not suitable!!!");
 
-            CreateSwapchain(rn->swapchain.surface, rn->swapchainSupport, rn->targetSize, &rn->swapchain);
-            SetupViewportAndScissor(rn);
+            CreateSwapchain(swapchain.surface, swapchainSupport, targetSize, &swapchain);
+            SetupViewportAndScissor(this);
         }
 
-        CreateRendererFrameBuffers(rn);
-        CreateCommandPool(*GRAPHICS_DATA.defaultDevice, &rn->commandPool);
-        CreateCommandBuffers(*GRAPHICS_DATA.defaultDevice, &rn->commandPool, FRAMES_IN_FLIGHT);
+        CreateRendererFrameBuffers(this);
+        CreateCommandPool(*GRAPHICS_DATA.defaultDevice, &commandPool);
+        CreateCommandBuffers(*GRAPHICS_DATA.defaultDevice, &commandPool, FRAMES_IN_FLIGHT);
 
-        rn->frames = std::vector<VkFrame>(FRAMES_IN_FLIGHT);
+        frames = std::vector<VkFrame>(FRAMES_IN_FLIGHT);
         for (uint32_t i = 0; i < FRAMES_IN_FLIGHT; ++i)
         {
             VkFrame availability{};
             CreateSemaphore(*GRAPHICS_DATA.defaultDevice, &availability.isImageAvailable);
             CreateSemaphore(*GRAPHICS_DATA.defaultDevice, &availability.isRenderingFinished);
             CreateFence(*GRAPHICS_DATA.defaultDevice, &availability.isInFlight, true);
-            rn->frames[i] = availability;
+            frames[i] = availability;
         }
     }
 
-    void DestroyVulkanRenderer(VKRendererData* rn)
+    VKRenderer::~VKRenderer()
     {
-        for (auto frame : rn->frames)
+        for (auto& frame : frames)
         {
             DestroySemaphore(*GRAPHICS_DATA.defaultDevice, frame.isImageAvailable);
             DestroySemaphore(*GRAPHICS_DATA.defaultDevice, frame.isRenderingFinished);
             DestroyFence(*GRAPHICS_DATA.defaultDevice, frame.isInFlight);
         }
-        rn->frames.clear();
+        frames.clear();
 
-        DestroyCommandPool(*GRAPHICS_DATA.defaultDevice, rn->commandPool);
-        DestroyRendererFrameBuffers(rn);
-        DestroySwapchain(rn->swapchain);
-        DestroySurface(rn);
+        DestroyRendererFrameBuffers(this);
+        DestroySwapchain(swapchain);
+        DestroyCommandPool(*GRAPHICS_DATA.defaultDevice, commandPool);
+        DestroySurface(this);
     }
 
     //------------------------------------------------------------------------------------
@@ -156,7 +159,7 @@ namespace hf::inter::rendering
 
     //------------------------------------------------------------------------------------
 
-    bool SetupPhysicalDevice(const VKRendererData* renderer, VkPhysicalDevice device, GraphicsDevice* deviceData)
+    bool SetupPhysicalDevice(const VKRenderer* renderer, VkPhysicalDevice device, GraphicsDevice* deviceData)
     {
         deviceData->device = device;
         vkGetPhysicalDeviceProperties(device, &deviceData->properties);

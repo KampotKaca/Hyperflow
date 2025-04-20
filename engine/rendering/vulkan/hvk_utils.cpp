@@ -1,4 +1,5 @@
 #include "hvk_graphics.h"
+#include "hvk_renderer.h"
 #include "exceptions/hgraphicsexception.h"
 #include "hgenericexception.h"
 
@@ -63,7 +64,7 @@ namespace hf::inter::rendering
         return requiredExtensions.empty();
     }
 
-    void CreateRendererFrameBuffers(VKRendererData* rn)
+    void CreateRendererFrameBuffers(VKRenderer* rn)
     {
         auto& imageViews = rn->swapchain.imageViews;
         rn->swapchain.frameBuffers = std::vector<VkFrameBuffer*>(imageViews.size());
@@ -75,7 +76,7 @@ namespace hf::inter::rendering
         }
     }
 
-    void DestroyRendererFrameBuffers(VKRendererData* rn)
+    void DestroyRendererFrameBuffers(VKRenderer* rn)
     {
         for (auto& frameBuffer : rn->swapchain.frameBuffers) delete frameBuffer;
         rn->swapchain.frameBuffers.clear();
@@ -121,7 +122,7 @@ namespace hf::inter::rendering
 
     bool QueueFamilyIndices::IsComplete() const { return graphicsFamily.has_value() && presentFamily.has_value(); }
 
-    void SetupViewportAndScissor(VKRendererData* rn)
+    void SetupViewportAndScissor(VKRenderer* rn)
     {
         auto& extent = rn->swapchain.details.extent;
         rn->viewport =
@@ -141,7 +142,7 @@ namespace hf::inter::rendering
         };
     }
 
-    void UploadViewportAndScissor(const VKRendererData* rn)
+    void UploadViewportAndScissor(const VKRenderer* rn)
     {
         vkCmdSetViewport(rn->currentCommand, 0, 1, &rn->viewport);
         vkCmdSetScissor(rn->currentCommand, 0, 1, &rn->scissor);

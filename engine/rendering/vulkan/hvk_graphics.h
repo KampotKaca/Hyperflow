@@ -111,25 +111,6 @@ namespace hf::inter::rendering
         uint32_t usedCommandCount = 0;
     };
 
-    struct VKRendererData
-    {
-        void* windowHandle = nullptr;
-        GraphicsSwapChain swapchain{};
-        VkViewport viewport{};
-        VkRect2D scissor{};
-        CommandPool commandPool{};
-        uvec2 targetSize{};
-        SwapChainSupportDetails swapchainSupport{};
-
-        VkCommandBuffer currentCommand{};
-        VkRenderPass currentPass{};
-
-        std::vector<VkFrame> frames{};
-        uint32_t currentFrame = 0;
-        uint32_t imageIndex{};
-        bool frameBufferResized = false;
-    };
-
     enum class PipelineBlendType { None, Alpha, Logical };
     struct VkPipelineInfo
     {
@@ -143,46 +124,26 @@ namespace hf::inter::rendering
 
     extern GraphicsData GRAPHICS_DATA;
 
-    void CreateVulkanRenderer(VKRendererData* rn);
-    void DestroyVulkanRenderer(VKRendererData* rn);
-
-    void CreateSurface(VKRendererData* rn);
-    void DestroySurface(VKRendererData* rn);
-
-    void SetupViewportAndScissor(VKRendererData* rn);
     void CreateSwapchain(VkSurfaceKHR surface, const SwapChainSupportDetails& scs, uvec2 targetSize, GraphicsSwapChain* result);
     void DestroySwapchain(GraphicsSwapChain& swapchain);
-    void PresentSwapchain(VKRendererData* rn);
-    bool AcquireNextImage(VKRendererData* rn);
 
     void CreateRenderPass(VkRenderPass* renderPass);
     void DestroyRenderPass(const VkRenderPass& renderPass);
-
-    void BeginRenderPass(const VkRenderPass& renderPass, VKRendererData* rn);
-    void EndRenderPass(VKRendererData* rn);
 
     void CreateCommandPool(const GraphicsDevice& device, CommandPool* result);
     void DestroyCommandPool(const GraphicsDevice& device, CommandPool& pool);
 
     void CreateCommandBuffers(const GraphicsDevice& device, CommandPool* pool, uint32_t count);
 
-    void BeginCommandBuffer(VKRendererData* rn, VkCommandBuffer buffer);
-    void EndCommandBuffer(VKRendererData* rn);
-    void SubmitCommands(VKRendererData* rn);
-
     bool GetAvailableSurfaceDetails(const SwapChainSupportDetails& swapChainSupportDetails,
                                     VkFormat targetFormat, VkPresentModeKHR targetPresentMode, uvec2 targetExtents,
                                     GraphicsSwapchainDetails* result);
 
     bool CheckDeviceExtensionSupport(const VkPhysicalDevice& device);
-    void CreateRendererFrameBuffers(VKRendererData* rn);
-    void DestroyRendererFrameBuffers(VKRendererData* rn);
     void QuerySwapChainSupport(const VkPhysicalDevice& device, const VkSurfaceKHR& surface, SwapChainSupportDetails* supportDetails);
 
     bool IsLayerSupported(const char* layer);
     bool IsExtensionSupported(const char* extension);
-
-    void UploadViewportAndScissor(const VKRendererData* rn);
 
     void CreateSemaphore(const GraphicsDevice& device, VkSemaphore* semaphore);
     void DestroySemaphore(const GraphicsDevice& device, VkSemaphore& semaphore);

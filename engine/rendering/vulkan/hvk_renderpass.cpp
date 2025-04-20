@@ -1,4 +1,5 @@
 #include "hvk_graphics.h"
+#include "hvk_renderer.h"
 #include "exceptions/hgraphicsexception.h"
 
 namespace hf::inter::rendering
@@ -60,7 +61,7 @@ namespace hf::inter::rendering
         vkDestroyRenderPass(GRAPHICS_DATA.defaultDevice->logicalDevice.device, renderPass, nullptr);
     }
 
-    void BeginRenderPass(const VkRenderPass& renderPass, VKRendererData* rn)
+    void BeginRenderPass(VKRenderer* rn, const VkRenderPass& renderPass)
     {
         VkClearValue clearColor =
         {
@@ -86,7 +87,7 @@ namespace hf::inter::rendering
         rn->currentPass = renderPass;
     }
 
-    void EndRenderPass(VKRendererData* rn)
+    void EndRenderPass(VKRenderer* rn)
     {
         if (rn->currentPass != VK_NULL_HANDLE)
         {

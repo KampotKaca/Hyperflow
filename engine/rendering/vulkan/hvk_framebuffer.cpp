@@ -25,6 +25,9 @@ namespace hf::inter::rendering
 
     VkFrameBuffer::~VkFrameBuffer()
     {
-        vkDestroyFramebuffer(GRAPHICS_DATA.defaultDevice->logicalDevice.device, buffer, nullptr);
+        if (buffer != VK_NULL_HANDLE)
+        {
+            vkDestroyFramebuffer(GRAPHICS_DATA.defaultDevice->logicalDevice.device, buffer, nullptr);
+        }
     }
 }

@@ -1,4 +1,5 @@
 #include "hvk_graphics.h"
+#include "hvk_renderer.h"
 #include "exceptions/hgraphicsexception.h"
 #include <vector>
 
@@ -39,7 +40,7 @@ namespace hf::inter::rendering
         for (uint32_t i = 0; i < count; i++) pool->buffers.push_back(commandBuffers[i]);
     }
 
-    void BeginCommandBuffer(VKRendererData* rn, VkCommandBuffer buffer)
+    void BeginCommandBuffer(VKRenderer* rn, VkCommandBuffer buffer)
     {
         auto& frame = rn->frames[rn->currentFrame];
         if (frame.usedCommandCount >= VULKAN_API_MAX_COMMANDS_PER_FRAME)
@@ -55,7 +56,7 @@ namespace hf::inter::rendering
         rn->currentCommand = buffer;
     }
 
-    void EndCommandBuffer(VKRendererData* rn)
+    void EndCommandBuffer(VKRenderer* rn)
     {
         if (rn->currentCommand != VK_NULL_HANDLE)
         {
@@ -67,7 +68,7 @@ namespace hf::inter::rendering
         }
     }
 
-    void SubmitCommands(VKRendererData* rn)
+    void SubmitCommands(VKRenderer* rn)
     {
         constexpr VkPipelineStageFlags waitStages[] = { VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT };
         auto& frame = rn->frames[rn->currentFrame];

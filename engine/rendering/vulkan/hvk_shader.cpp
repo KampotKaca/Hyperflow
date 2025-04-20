@@ -3,6 +3,7 @@
 #include "hinternal.h"
 #include "hyperflow.h"
 #include "hvk_graphics.h"
+#include "hvk_renderer.h"
 #include "exceptions/hgraphicsexception.h"
 
 namespace hf::inter::rendering
@@ -227,7 +228,7 @@ namespace hf::inter::rendering
 
     void BindShader(const Renderer* renderer, const Shader* shader)
     {
-        vkCmdBindPipeline(((VKRendererData*)renderer->handle)->currentCommand, VK_PIPELINE_BIND_POINT_GRAPHICS,
+        vkCmdBindPipeline(((VKRenderer*)renderer->handle)->currentCommand, VK_PIPELINE_BIND_POINT_GRAPHICS,
             ((VkShader*)shader->handle)->pipeline);
     }
 }

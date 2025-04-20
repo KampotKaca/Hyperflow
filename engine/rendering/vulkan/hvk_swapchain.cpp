@@ -1,4 +1,5 @@
 #include "hvk_graphics.h"
+#include "hvk_renderer.h"
 #include "../config.h"
 #include "exceptions/hgraphicsexception.h"
 #include "hgenericexception.h"
@@ -10,10 +11,6 @@ namespace hf::inter::rendering
 
     void CreateSwapchain(VkSurfaceKHR surface, const SwapChainSupportDetails& scs, uvec2 targetSize, GraphicsSwapChain* result)
     {
-        if (result->swapchain == VK_NULL_HANDLE)
-            LOG_LOG("Graphics device found [%s]", GRAPHICS_DATA.defaultDevice->properties.deviceName);
-
-        DestroyExistingViews(*result);
         GraphicsSwapchainDetails details{};
         if (GetAvailableSurfaceDetails(scs,
             VULKAN_API_COLOR_FORMAT, VULKAN_API_PRESENT_MODE, targetSize, &details))
@@ -36,7 +33,7 @@ namespace hf::inter::rendering
                 .compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR,
                 .presentMode = details.presentMode,
                 .clipped = VK_TRUE,
-                .oldSwapchain = result->swapchain
+                .oldSwapchain = VK_NULL_HANDLE
             };
 
             auto& indices = GRAPHICS_DATA.defaultDevice->familyIndices;
@@ -65,13 +62,10 @@ namespace hf::inter::rendering
             result->swapchain, &imageCount, nullptr));
 
         auto images = std::vector<VkImage>(imageCount);
-        images = std::vector<VkImage>(imageCount);
         VK_HANDLE_EXCEPT(vkGetSwapchainImagesKHR(GRAPHICS_DATA.defaultDevice->logicalDevice.device,
-            result->swapchain, &imageCount,
-            images.data()));
+            result->swapchain, &imageCount, images.data()));
 
         auto imageViews = std::vector<VkImageView>(imageCount);
-        imageViews = std::vector<VkImageView>(imageCount);
         for (uint32_t i = 0; i < imageCount; i++)
         {
             VkImageViewCreateInfo createInfo
@@ -126,18 +120,19 @@ namespace hf::inter::rendering
         }
     }
 
-    void RecreateSwapchain(VKRendererData* rn)
+    void RecreateSwapchain(VKRenderer* rn)
     {
         rn->frameBufferResized = false;
         WaitForRendering();
         DestroyRendererFrameBuffers(rn);
+        DestroySwapchain(rn->swapchain);
 
         CreateSwapchain(rn->swapchain.surface, rn->swapchainSupport, rn->targetSize, &rn->swapchain);
         SetupViewportAndScissor(rn);
         CreateRendererFrameBuffers(rn);
     }
 
-    void PresentSwapchain(VKRendererData* rn)
+    void PresentSwapchain(VKRenderer* rn)
     {
         auto frame = rn->frames[rn->currentFrame];
         VkPresentInfoKHR presentInfo
@@ -157,7 +152,7 @@ namespace hf::inter::rendering
         else if (result != VK_SUCCESS) throw GENERIC_EXCEPT("[Vulkan]", "Failed to present swapchain");
     }
 
-    bool AcquireNextImage(VKRendererData* rn)
+    bool AcquireNextImage(VKRenderer* rn)
     {
         auto& frame = rn->frames[rn->currentFrame];
         auto& device = GRAPHICS_DATA.defaultDevice->logicalDevice.device;
@@ -178,7 +173,7 @@ namespace hf::inter::rendering
             LOG_WARN("Recreating swapchain failed 3 times");
         }
 
-        if (result != VK_SUCCESS)
+        if (result != VK_SUCCESS && result != VK_SUBOPTIMAL_KHR)
             throw GENERIC_EXCEPT("[Vulkan]", "Unable to acquire image from swapchain!");
 
         if (tryCount == 0) vkResetFences(device, 1, &frame.isInFlight);
