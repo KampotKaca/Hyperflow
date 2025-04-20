@@ -3,6 +3,7 @@
 
 #include "hplatform.h"
 #include "hrenderer.h"
+#include "hallocator.h"
 #include "components/htime.h"
 
 #include "hinternal.h"
@@ -13,6 +14,7 @@ namespace hf
 
 	void Run(const EngineData& engineData)
 	{
+		LoadAllocator();
 		try
 		{
 			inter::HF.time = Time();
@@ -44,7 +46,11 @@ namespace hf
 					if (!window::IsClosing(window)) inter::window::Update(window.get());
 				}
 
-				if(input::IsDown(Key::Escape)) Terminate();
+				if(input::IsDown(Key::Escape))
+				{
+					LogThreadMemoryStats();
+					Terminate();
+				}
 			}
 			if(inter::HF.lifecycleCallbacks.onUpdateCallback) inter::HF.lifecycleCallbacks.onQuitCallback();
 
@@ -64,6 +70,8 @@ namespace hf
 		{
 			LOG_FATAL("No Details Are Available");
 		}
+
+		UnloadAllocator();
 	}
 
 	bool IsRunning() { return inter::HF.isRunning && !window::IsClosing(inter::HF.mainWindow); }

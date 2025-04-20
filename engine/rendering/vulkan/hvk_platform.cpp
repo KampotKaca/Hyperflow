@@ -23,7 +23,7 @@
 
 namespace hf::inter::rendering
 {
-    const std::vector<const char*> REQUIRED_EXTENSIONS =
+    const char* REQUIRED_EXTENSIONS[NUM_REQUIRED_EXTENSIONS] =
     {
         VK_KHR_SURFACE_EXTENSION_NAME,
 #if PLATFORM_WINDOWS
@@ -39,6 +39,11 @@ namespace hf::inter::rendering
 #if DEBUG
         "VK_EXT_debug_utils"
 #endif
+    };
+
+    const char* DEVICE_EXTENSIONS[NUM_DEVICE_EXTENSIONS] =
+    {
+        VK_KHR_SWAPCHAIN_EXTENSION_NAME
     };
 
 #if PLATFORM_WINDOWS
@@ -85,6 +90,6 @@ namespace hf::inter::rendering
     void DestroySurface(VKRenderer* rn)
     {
         vkDestroySurfaceKHR(GRAPHICS_DATA.instance, rn->swapchain.surface, nullptr);
-        rn->swapchain.surface = nullptr;
+        rn->swapchain.surface = VK_NULL_HANDLE;
     }
 }

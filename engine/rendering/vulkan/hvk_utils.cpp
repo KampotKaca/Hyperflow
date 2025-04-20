@@ -56,12 +56,23 @@ namespace hf::inter::rendering
         std::vector<VkExtensionProperties> availableExtensions(extensionCount);
         VK_HANDLE_EXCEPT(vkEnumerateDeviceExtensionProperties(device, nullptr, &extensionCount, availableExtensions.data()));
 
-        std::set<std::string> requiredExtensions(DEVICE_EXTENSIONS.begin(), DEVICE_EXTENSIONS.end());
+        for (uint32_t i = 0; i < NUM_DEVICE_EXTENSIONS; i++)
+        {
+            auto& ext = DEVICE_EXTENSIONS[i];
+            bool found = false;
+            for (const auto& extension : availableExtensions)
+            {
+                if (strcmp(extension.extensionName, ext))
+                {
+                    found = true;
+                    break;
+                }
+            }
 
-        for (const auto& extension : availableExtensions)
-            requiredExtensions.erase(extension.extensionName);
+            if (!found) return false;
+        }
 
-        return requiredExtensions.empty();
+        return true;
     }
 
     void CreateRendererFrameBuffers(VKRenderer* rn)

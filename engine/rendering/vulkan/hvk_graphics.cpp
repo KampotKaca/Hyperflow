@@ -135,14 +135,14 @@ namespace hf::inter::rendering
             .queueCreateInfoCount = (uint32_t)queueCreateInfos.size(),
             .pQueueCreateInfos = queueCreateInfos.data(),
             .enabledLayerCount = 0,
-            .enabledExtensionCount = (uint32_t)DEVICE_EXTENSIONS.size(),
-            .ppEnabledExtensionNames = DEVICE_EXTENSIONS.data(),
+            .enabledExtensionCount = NUM_DEVICE_EXTENSIONS,
+            .ppEnabledExtensionNames = DEVICE_EXTENSIONS,
             .pEnabledFeatures = &device.features,
         };
 
 #if DEBUG
-        createInfo.ppEnabledLayerNames = DEBUG_VALIDATION_LAYERS.data();
-        createInfo.enabledLayerCount = DEBUG_VALIDATION_LAYERS.size();
+        createInfo.ppEnabledLayerNames = DEBUG_VALIDATION_LAYERS;
+        createInfo.enabledLayerCount = NUM_VK_VALIDATION_LAYERS;
 #endif
 
         VK_HANDLE_EXCEPT(vkCreateDevice(device.device, &createInfo, nullptr, &device.logicalDevice.device));

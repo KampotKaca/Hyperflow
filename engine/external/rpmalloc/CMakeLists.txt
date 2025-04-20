@@ -1,0 +1,2 @@
+file(GLOB_RECURSE RPMALLOC_SRC CONFIGURE_DEPENDS *.c)
+add_library(rpmalloc ${RPMALLOC_SRC})

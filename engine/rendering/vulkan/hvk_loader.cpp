@@ -9,13 +9,9 @@
 
 namespace hf::inter::rendering
 {
-    const std::vector<const char*> DEVICE_EXTENSIONS
-    {
-        VK_KHR_SWAPCHAIN_EXTENSION_NAME
-    };
-
 #if DEBUG
-    const std::vector<const char*> DEBUG_VALIDATION_LAYERS =
+
+    const char* DEBUG_VALIDATION_LAYERS[NUM_VK_VALIDATION_LAYERS] =
     {
         "VK_LAYER_KHRONOS_validation",
     };
@@ -145,8 +141,9 @@ namespace hf::inter::rendering
         for (const auto& ext : GRAPHICS_DATA.availableExtensions)
             GRAPHICS_DATA.availableExtensionNames.insert(ext.extensionName);
 
-        for(auto& extension : REQUIRED_EXTENSIONS)
+        for (uint32_t i = 0; i < NUM_REQUIRED_EXTENSIONS; ++i)
         {
+            auto& extension = REQUIRED_EXTENSIONS[i];
             if (!IsExtensionSupported(extension))
                 throw GENERIC_EXCEPT("[Vulkan]", "[Required extension not supported]\n%s", extension);
         }
@@ -170,13 +167,13 @@ namespace hf::inter::rendering
             .sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO,
             .pApplicationInfo = &appInfo,
             .enabledLayerCount = 0,
-            .enabledExtensionCount = (uint32_t)REQUIRED_EXTENSIONS.size(),
-            .ppEnabledExtensionNames = REQUIRED_EXTENSIONS.data(),
+            .enabledExtensionCount = NUM_REQUIRED_EXTENSIONS,
+            .ppEnabledExtensionNames = REQUIRED_EXTENSIONS,
         };
 
 #if DEBUG
-        createInfo.ppEnabledLayerNames = DEBUG_VALIDATION_LAYERS.data();
-        createInfo.enabledLayerCount = DEBUG_VALIDATION_LAYERS.size();
+        createInfo.ppEnabledLayerNames = DEBUG_VALIDATION_LAYERS;
+        createInfo.enabledLayerCount = NUM_VK_VALIDATION_LAYERS;
         createInfo.pNext = (VkDebugUtilsMessengerCreateInfoEXT*)&GRAPHICS_DATA.debugCreateInfo;
 #endif
 

@@ -63,6 +63,10 @@ elseif (VULKAN STREQUAL "ON")
     file(GLOB_RECURSE RENDERER CONFIGURE_DEPENDS rendering/vulkan/*.cpp)
 endif ()
 
+if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+    add_definitions(-DENABLE_STATISTICS=1)
+endif ()
+
 #endregion
 
 file(GLOB_RECURSE RENDERER_SRC CONFIGURE_DEPENDS rendering/src/*.cpp)
@@ -72,6 +76,7 @@ file(GLOB_RECURSE ENGINE_SRC CONFIGURE_DEPENDS src/*.cpp)
 add_subdirectory(external/glm)
 add_subdirectory(external/stb)
 add_subdirectory(external/logc)
+add_subdirectory(external/rpmalloc)
 
 add_library(${PROJECT_NAME} ${ENGINE_SRC} ${PLATFORM} ${RENDERER} ${PLATFORM_SRC} ${RENDERER_SRC})
 
@@ -81,6 +86,7 @@ target_link_libraries(${PROJECT_NAME}
         glm
         stb
         logc
+        rpmalloc
 )
 
 target_compile_definitions(${PROJECT_NAME}
@@ -126,6 +132,7 @@ target_include_directories(${PROJECT_NAME}
         external/stb/include
         external/glm
         external/logc/include
+        external/rpmalloc
         PRIVATE
 )
 

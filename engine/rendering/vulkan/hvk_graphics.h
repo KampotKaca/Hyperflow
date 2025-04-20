@@ -10,7 +10,8 @@
 namespace hf::inter::rendering
 {
 #if DEBUG
-    extern const std::vector<const char*> DEBUG_VALIDATION_LAYERS;
+#define NUM_VK_VALIDATION_LAYERS 1
+    extern const char* DEBUG_VALIDATION_LAYERS[NUM_VK_VALIDATION_LAYERS];
 
     VKAPI_ATTR VkBool32 VKAPI_CALL DebugCallback(
         VkDebugUtilsMessageSeverityFlagBitsEXT severity,
@@ -122,6 +123,13 @@ namespace hf::inter::rendering
         VkRenderPass renderPass{};
     };
 
+#if DEBUG
+#define NUM_REQUIRED_EXTENSIONS 3
+#else
+#define NUM_REQUIRED_EXTENSIONS 2
+#endif
+#define NUM_DEVICE_EXTENSIONS 1
+
     extern GraphicsData GRAPHICS_DATA;
 
     void CreateSwapchain(VkSurfaceKHR surface, uvec2 targetSize, GraphicsSwapChain* result);
@@ -155,8 +163,8 @@ namespace hf::inter::rendering
 
     void WaitForFences(const GraphicsDevice& device, const VkFence* fences, uint32_t count, bool waitAll);
 
-    extern const std::vector<const char*> REQUIRED_EXTENSIONS;
-    extern const std::vector<const char*> DEVICE_EXTENSIONS;
+    extern const char* REQUIRED_EXTENSIONS[NUM_REQUIRED_EXTENSIONS];
+    extern const char* DEVICE_EXTENSIONS[NUM_DEVICE_EXTENSIONS];
 }
 
 #endif //HVK_GRAPHICS_H
