@@ -135,6 +135,8 @@ namespace hf
 
 	//region Window
 
+	struct Renderer;
+
 	enum class WindowStyle
 	{
 		Default
@@ -157,7 +159,7 @@ namespace hf
 		ivec2 position = ivec2{ 300, 300 };
 		ivec2 size = ivec2{ 200, 200 };
 
-		void (*onRenderCallback)(){};
+		void (*onRenderCallback)(const Ref<Renderer>&){};
 	};
 
 	//endregion
@@ -186,7 +188,6 @@ namespace hf
 	};
 
 	struct Window;
-	struct Renderer;
 	struct Shader;
 
 	//endregion

@@ -37,7 +37,8 @@ namespace app
 				.flags = hf::WindowFlags::Default,
 				.style = hf::WindowStyle::Default,
 				.position = { 100, 100 },
-				.size = { 200, 200 }
+				.size = { 200, 200 },
+				.onRenderCallback = OnMainWindowRender
 			};
 			wn = hf::window::Open(data, nullptr);
 			count++;
@@ -69,9 +70,9 @@ namespace app
 
 	}
 
-	void Application::OnMainWindowRender()
+	void Application::OnMainWindowRender(const hf::Ref<hf::Renderer>& rn)
 	{
-		hf::shader::Bind(shader);
-		hf::rendering::Draw();
+		hf::shader::Bind(rn, shader);
+		hf::rendering::Draw(rn);
 	}
 }

@@ -250,7 +250,7 @@ namespace hf
 			auto rn = win->renderer.get();
 			if(rendering::StartFrame(rn))
 			{
-				if (win->onRenderCallback) win->onRenderCallback();
+				if (win->onRenderCallback) win->onRenderCallback(win->renderer);
 				rendering::EndFrame(rn);
 			}
 		}

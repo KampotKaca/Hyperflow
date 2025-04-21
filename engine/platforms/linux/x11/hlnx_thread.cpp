@@ -4,8 +4,7 @@
 
 #include <pthread.h>
 #include <dlfcn.h>
-#include <iostream>
-#include "hallocator.h"
+#include "hinternal.h"
 
 using PthreadCreateType = int (*)(pthread_t*, const pthread_attr_t*, void* (*)(void*), void*);
 
@@ -21,12 +20,12 @@ int pthread_create(pthread_t* thread, const pthread_attr_t* attr, void* (*start_
 
     auto thread_wrapper = [](void* wrapper_arg) -> void*
     {
-        hf::LoadAllocatorThread();
+        hf::inter::alloc::LoadAllocatorThread();
         auto wrapper = (ThreadWrapper*)wrapper_arg;
         void* result = wrapper->original_start_routine(wrapper->original_arg);
 
         delete wrapper;
-        hf::UnloadAllocatorThread();
+        hf::inter::alloc::UnloadAllocatorThread();
         return result;
     };
 

@@ -29,7 +29,7 @@ namespace hf
 		void SetTitle(const Window* win, const std::string& title)
 		{
 			if (!win->handle) return;
-			XStoreName(PLATFORM_DATA.display, ((LnxWindowData*)win->handle)->window, title);
+			XStoreName(PLATFORM_DATA.display, ((LnxWindowData*)win->handle)->window, title.c_str());
 			XFlush(PLATFORM_DATA.display);
 		}
 		void SetSize(const Window* win, const ivec2 size)

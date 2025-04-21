@@ -22,6 +22,11 @@ namespace hf
         void* Allocate(std::size_t n)
         {
             EnsureAllocatorInit();
+
+#if DEBUG
+            inter::alloc::LoadAllocatorThread();
+#endif
+
             void* memory = rpmalloc(n);
             if (!memory) throw std::bad_alloc();
             return memory;

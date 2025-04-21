@@ -35,7 +35,7 @@ namespace hf
 		EventData eventData{};
 		Ref<Renderer> renderer{};
 
-		void (*onRenderCallback)();
+		void (*onRenderCallback)(const Ref<Renderer>&);
 	};
 }
 
