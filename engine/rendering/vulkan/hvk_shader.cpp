@@ -1,19 +1,16 @@
-#include "hvk_shader.h"
-#include "hshader.h"
+#include "include/hvk_shader.h"
 #include "hinternal.h"
 #include "hyperflow.h"
-#include "hvk_graphics.h"
-#include "hvk_renderer.h"
+#include "include/hvk_graphics.h"
+#include "include/hvk_renderer.h"
 #include "exceptions/hgraphicsexception.h"
 
 namespace hf::inter::rendering
 {
     static void CreateShaderModule(const char* code, uint32_t codeSize, VkShaderModule* result);
-    static void CreatePipelineLayout(const ShaderCreationInfo& info, VkPipelineLayout* pipelineLayout);
     static void CreatePipeline(const VkPipelineInfo& info, VkPipeline* pipeline);
 
-    VkShader::VkShader(const ShaderCreationInfo& info, const Shader* shader)
-    : shader(shader)
+    VkShader::VkShader(const ShaderCreationInfo& info)
     {
         using namespace inter;
         VkShaderModule vertModule{}, fragModule{};
@@ -36,19 +33,24 @@ namespace hf::inter::rendering
             }
         };
 
-        CreatePipelineLayout(info, &pipelineLayout);
-
         VkPipelineInfo pipelineCreationInfo
         {
-            .pStages = shaderStages,
             .stageCount = 2,
+            .pStages = shaderStages,
             .blendingMode = PipelineBlendType::None,
             .blendingOp = VK_LOGIC_OP_XOR,
-            .layout = pipelineLayout,
+            .layout = GRAPHICS_DATA.pipelineLayout,
             .renderPass = GRAPHICS_DATA.renderPass,
         };
 
-        CreatePipeline(pipelineCreationInfo, &pipeline);
+        for (uint32_t i = 0; i < info.supportedAttribCount; i++)
+        {
+            auto attrib = info.pSupportedAttribs[i];
+            pipelineCreationInfo.attrib = attrib;
+            VkPipeline pipeline{};
+            CreatePipeline(pipelineCreationInfo, &pipeline);
+            pipelines[attrib] = pipeline;
+        }
 
         auto& device = GRAPHICS_DATA.defaultDevice->logicalDevice.device;
         vkDestroyShaderModule(device, vertModule, nullptr);
@@ -58,13 +60,15 @@ namespace hf::inter::rendering
     VkShader::~VkShader()
     {
         auto& device = GRAPHICS_DATA.defaultDevice->logicalDevice.device;
-        vkDestroyPipeline(device, pipeline, nullptr);
-        vkDestroyPipelineLayout(device, pipelineLayout, nullptr);
+        for (auto& pipeline : pipelines | std::views::values)
+            vkDestroyPipeline(device, pipeline, nullptr);
+
+        pipelines.clear();
     }
 
-    void* CreateShader(const ShaderCreationInfo& info, const Shader* shader)
+    void* CreateShader(const ShaderCreationInfo& info)
     {
-        return new VkShader(info, shader);
+        return new VkShader(info);
     }
 
     void DestroyShader(void* shader)
@@ -85,31 +89,9 @@ namespace hf::inter::rendering
             &createInfo, nullptr, result));
     }
 
-    void CreatePipelineLayout(const ShaderCreationInfo& info, VkPipelineLayout* pipelineLayout)
-    {
-        VkPipelineLayoutCreateInfo pipelineLayoutInfo
-        {
-            .sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO,
-            .setLayoutCount = 0,
-            .pSetLayouts = nullptr,
-            .pushConstantRangeCount = 0,
-            .pPushConstantRanges = nullptr,
-        };
-
-        VK_HANDLE_EXCEPT(vkCreatePipelineLayout(GRAPHICS_DATA.defaultDevice->logicalDevice.device,
-            &pipelineLayoutInfo, nullptr, pipelineLayout));
-    }
-
     void CreatePipeline(const VkPipelineInfo& info, VkPipeline* pipeline)
     {
-        VkPipelineVertexInputStateCreateInfo vertexInputInfo
-        {
-            .sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO,
-            .vertexBindingDescriptionCount = 0,
-            .pVertexBindingDescriptions = nullptr,
-            .vertexAttributeDescriptionCount = 0,
-            .pVertexAttributeDescriptions = nullptr
-        };
+        if (GRAPHICS_DATA.bufferAttribs.size() < info.attrib) throw GENERIC_EXCEPT("[Vulkan]", "Invalid vertex attribute");
 
         VkPipelineInputAssemblyStateCreateInfo inputAssembly
         {
@@ -202,6 +184,16 @@ namespace hf::inter::rendering
             .blendConstants = { 0.0f, 0.0f, 0.0f, 0.0f },
         };
 
+        auto& attribute = GRAPHICS_DATA.bufferAttribs[info.attrib - 1];
+
+        VkPipelineVertexInputStateCreateInfo vertexInputInfo
+        {
+            .sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO,
+            .pVertexBindingDescriptions = &attribute.bindingDescription,
+            .vertexAttributeDescriptionCount = (uint32_t)attribute.attribDescriptions.size(),
+            .pVertexAttributeDescriptions = attribute.attribDescriptions.data(),
+        };
+
         VkGraphicsPipelineCreateInfo pipelineInfo
         {
             .sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO,
@@ -226,9 +218,10 @@ namespace hf::inter::rendering
             VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, pipeline));
     }
 
-    void BindShader(const Renderer* renderer, const Shader* shader)
+    void BindShader(const void* renderer, const void* shader, BufferAttrib attrib)
     {
-        vkCmdBindPipeline(((VKRenderer*)renderer->handle)->currentCommand, VK_PIPELINE_BIND_POINT_GRAPHICS,
-            ((VkShader*)shader->handle)->pipeline);
+        const auto rn = (VKRenderer*)renderer;
+        const auto sh = (VkShader*)shader;
+        vkCmdBindPipeline(rn->currentCommand, VK_PIPELINE_BIND_POINT_GRAPHICS, sh->pipelines[attrib]);
     }
 }

@@ -1,11 +1,10 @@
-#include "hvk_graphics.h"
-#include "hvk_renderer.h"
+#include "include/hvk_graphics.h"
+#include "include/hvk_renderer.h"
 #include "hinternal.h"
 #include "hshared.h"
 #include "exceptions/hgraphicsexception.h"
 #include "hyperflow.h"
 #include "../config.h"
-#include "hwindow.h"
 
 namespace hf::inter::rendering
 {
@@ -107,7 +106,8 @@ namespace hf::inter::rendering
     void Unload()
     {
         WaitForRendering();
-        DestroyRenderPass(GRAPHICS_DATA.renderPass);
+        DestroyRenderPass(&GRAPHICS_DATA.renderPass);
+        DestroyPipelineLayout(&GRAPHICS_DATA.pipelineLayout);
 
         for (auto& device : GRAPHICS_DATA.suitableDevices)
             DestroyLogicalDevice(device.logicalDevice);

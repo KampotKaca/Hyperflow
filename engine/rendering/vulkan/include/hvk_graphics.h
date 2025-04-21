@@ -5,6 +5,7 @@
 #include <vulkan/vulkan.h>
 
 #include "hvk_framebuffer.h"
+#include "hvk_bufferattrib.h"
 #include "../config.h"
 
 namespace hf::inter::rendering
@@ -67,6 +68,8 @@ namespace hf::inter::rendering
         bool devicesAreLoaded = false;
 
         VkRenderPass renderPass{};
+        VkPipelineLayout pipelineLayout{};
+        std::vector<VkBufferAttrib> bufferAttribs{};
 
 #if DEBUG
         VkDebugUtilsMessengerCreateInfoEXT debugCreateInfo
@@ -112,15 +115,17 @@ namespace hf::inter::rendering
         uint32_t usedCommandCount = 0;
     };
 
-    enum class PipelineBlendType { None, Alpha, Logical };
-    struct VkPipelineInfo
+    struct VkPipelineLayoutCreationInfo
     {
-        VkPipelineShaderStageCreateInfo* pStages = nullptr;
-        uint32_t stageCount = 0;
-        PipelineBlendType blendingMode = PipelineBlendType::None;
-        VkLogicOp blendingOp = VK_LOGIC_OP_XOR; //Setting will be used only if you use Logical Blending
-        VkPipelineLayout layout{};
-        VkRenderPass renderPass{};
+        uint32_t layoutCount = 0;
+    };
+
+    enum class VkRenderPassAttachmentType { Color };
+
+    struct VkRenderPassCreationInfo
+    {
+        const VkRenderPassAttachmentType* pAttachments;
+        uint32_t attachmentCount = 0;
     };
 
 #if DEBUG
@@ -138,8 +143,11 @@ namespace hf::inter::rendering
     void CreateFrame(VkFrame* result);
     void DestroyFrame(VkFrame& frame);
 
-    void CreateRenderPass(VkRenderPass* renderPass);
-    void DestroyRenderPass(const VkRenderPass& renderPass);
+    void CreatePipelineLayout(const VkPipelineLayoutCreationInfo& info, VkPipelineLayout* pipelineLayout);
+    void DestroyPipelineLayout(VkPipelineLayout* pipelineLayout);
+
+    void CreateRenderPass(const VkRenderPassCreationInfo& info, VkRenderPass* renderPass);
+    void DestroyRenderPass(VkRenderPass* renderPass);
 
     void CreateCommandPool(const GraphicsDevice& device, CommandPool* result);
     void DestroyCommandPool(const GraphicsDevice& device, CommandPool& pool);

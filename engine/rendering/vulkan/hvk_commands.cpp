@@ -1,5 +1,5 @@
-#include "hvk_graphics.h"
-#include "hvk_renderer.h"
+#include "include/hvk_graphics.h"
+#include "include/hvk_renderer.h"
 #include "exceptions/hgraphicsexception.h"
 #include <vector>
 

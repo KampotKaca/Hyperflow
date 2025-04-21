@@ -15,6 +15,7 @@
 #include <mutex>
 #include <condition_variable>
 #include <atomic>
+#include <ranges>
 
 #include <bitset>
 #include <queue>
@@ -133,9 +134,46 @@ namespace hf
 
 	//endregion
 
-	//region Window
+	//region Rendering
 
 	struct Renderer;
+	struct Shader;
+	struct VertBuffer;
+	typedef uint32_t BufferAttrib;
+
+	enum class VertBufferDataType { U8, I8, U16, I16, U32, I32, U64, I64, F16, F32, F64, Count };
+
+	struct BufferAttribFormat
+	{
+		VertBufferDataType type = VertBufferDataType::F32;
+		uint32_t size = 1;
+	};
+
+	struct BufferAttribCreateInfo
+	{
+		uint32_t formatCount = 0;
+		const BufferAttribFormat* pFormats = nullptr;
+	};
+
+	struct VertBufferCreationInfo
+	{
+		BufferAttrib bufferAttrib = 0;
+		bool enableReadWrite = false;
+		uint32_t vertexCount = 0;
+		void* vertices = nullptr;
+	};
+
+	struct ShaderCreationInfo
+	{
+		uint32_t supportedAttribCount{};
+		const BufferAttrib* pSupportedAttribs{};
+		const std::string& vertexShaderLoc{};
+		const std::string& fragmentShaderLoc{};
+	};
+
+	//endregion
+
+	//region Window
 
 	enum class WindowStyle
 	{
@@ -188,7 +226,6 @@ namespace hf
 	};
 
 	struct Window;
-	struct Shader;
 
 	//endregion
 

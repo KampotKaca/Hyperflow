@@ -96,14 +96,24 @@ namespace hf
 
 	namespace shader
 	{
-		Ref<Shader> Create(const std::string& vertPath, const std::string& fragPath);
+		Ref<Shader> Create(const ShaderCreationInfo& info);
 		void Destroy(const Ref<Shader>& shader);
 		void Destroy(const Ref<Shader>* pShaders, uint32_t count);
 		void DestroyAll();
 		bool IsRunning(const Ref<Shader>& shader);
 
-		void Bind(const Ref<Shader>& shader);
-		void Bind(const Ref<Renderer>& renderer, const Ref<Shader>& shader);
+		void Bind(const Ref<Shader>& shader, BufferAttrib attrib);
+		void Bind(const Ref<Renderer>& renderer, const Ref<Shader>& shader, BufferAttrib attrib);
+	}
+
+	namespace vertbuffer
+	{
+		BufferAttrib CreateAttrib(const BufferAttribCreateInfo& info);
+		Ref<VertBuffer> Create(const VertBufferCreationInfo& info);
+		void Destroy(const Ref<VertBuffer>& buffer);
+		void Destroy(const Ref<VertBuffer>* pBuffers, uint32_t count);
+		void DestroyAll();
+		bool IsRunning(const Ref<VertBuffer>& buffer);
 	}
 
 	namespace utils

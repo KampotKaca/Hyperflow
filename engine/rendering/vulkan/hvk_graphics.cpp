@@ -1,5 +1,5 @@
-#include "hvk_graphics.h"
-#include "hvk_renderer.h"
+#include "include/hvk_graphics.h"
+#include "include/hvk_renderer.h"
 
 #include <hframebuffer.h>
 #include <bits/ranges_algo.h>
@@ -65,7 +65,23 @@ namespace hf::inter::rendering
 
             CreateSwapchain(swapchain.surface, targetSize, &swapchain);
             SetupViewportAndScissor(this);
-            CreateRenderPass(&GRAPHICS_DATA.renderPass);
+
+            VkRenderPassAttachmentType attachments[] =
+            {
+                VkRenderPassAttachmentType::Color,
+            };
+            VkRenderPassCreationInfo renderPassInfo
+            {
+                .attachmentCount = 1,
+                .pAttachments = attachments,
+            };
+            CreateRenderPass(renderPassInfo, &GRAPHICS_DATA.renderPass);
+
+            VkPipelineLayoutCreationInfo pipelineLayoutInfo
+            {
+                .layoutCount = 0
+            };
+            CreatePipelineLayout(pipelineLayoutInfo, &GRAPHICS_DATA.pipelineLayout);
         }
         else
         {

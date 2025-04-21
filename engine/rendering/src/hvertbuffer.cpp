@@ -1,0 +1,81 @@
+#include "hvertbuffer.h"
+#include "hinternal.h"
+#include "hyperflow.h"
+
+namespace hf
+{
+    VertBuffer::VertBuffer(const VertBufferCreationInfo& info)
+    {
+        if (info.bufferAttrib == 0) throw GENERIC_EXCEPT("[Hyperflow]", "buffer attribute must be set");
+        handle = inter::rendering::CreateVertBuffer(info);
+    }
+
+    VertBuffer::~VertBuffer()
+    {
+        inter::rendering::DestroyVertBuffer_i(this);
+    }
+
+    namespace vertbuffer
+    {
+        BufferAttrib CreateAttrib(const BufferAttribCreateInfo& info)
+        {
+            uint32_t fullStride = 0;
+            for (uint32_t i = 0; i < info.formatCount; i++)
+            {
+                auto& stride = info.pFormats[i];
+                fullStride += stride.size;
+            }
+
+            return inter::rendering::CreateBufferAttrib(info, fullStride);
+        }
+
+        Ref<VertBuffer> Create(const VertBufferCreationInfo& info)
+        {
+            Ref<VertBuffer> buffer = MakeRef<VertBuffer>(info);
+            inter::HF.vertBuffers[buffer.get()] = buffer;
+            return buffer;
+        }
+
+        void Destroy(const Ref<VertBuffer>& buffer)
+        {
+            inter::rendering::WaitForRendering();
+            if (inter::rendering::DestroyVertBuffer_i(buffer.get()))
+                inter::HF.vertBuffers.erase(buffer.get());
+        }
+
+        void Destroy(const Ref<VertBuffer>* pBuffers, uint32_t count)
+        {
+            inter::rendering::WaitForRendering();
+            for (uint32_t i = 0; i < count; i++)
+            {
+                auto buffer = pBuffers[i];
+                if (inter::rendering::DestroyVertBuffer_i(buffer.get()))
+                    inter::HF.vertBuffers.erase(buffer.get());
+            }
+        }
+
+        void DestroyAll()
+        {
+            inter::rendering::WaitForRendering();
+            for (const auto& buffer : std::ranges::views::values(inter::HF.vertBuffers))
+                inter::rendering::DestroyVertBuffer_i(buffer.get());
+            inter::HF.vertBuffers.clear();
+        }
+
+        bool IsRunning(const Ref<VertBuffer>& buffer) { return buffer->handle; }
+    }
+
+    namespace inter::rendering
+    {
+        bool DestroyVertBuffer_i(VertBuffer* buffer)
+        {
+            if (buffer->handle)
+            {
+                DestroyVertBuffer(buffer->handle);
+                buffer->handle = nullptr;
+                return true;
+            }
+            return false;
+        }
+    }
+}

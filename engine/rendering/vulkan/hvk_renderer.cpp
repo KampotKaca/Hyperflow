@@ -1,8 +1,8 @@
-#include "hvk_renderer.h"
+#include "include/hvk_renderer.h"
 #include "exceptions/hgraphicsexception.h"
 
 #include "hrenderer.h"
-#include "hvk_graphics.h"
+#include "include/hvk_graphics.h"
 #include "hinternal.h"
 
 namespace hf::inter::rendering

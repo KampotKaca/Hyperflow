@@ -1,31 +1,30 @@
 #include "hshader.h"
 
-#include <ranges>
-
 #include "hshared.h"
 #include "hinternal.h"
 #include "hyperflow.h"
 
 namespace hf
 {
-    Shader::Shader(const std::string& vertPath, const std::string& fragPath)
+    Shader::Shader(const ShaderCreationInfo& info)
     {
-        vPath = vertPath;
-        fPath = fragPath;
+        vPath = info.vertexShaderLoc;
+        fPath = info.fragmentShaderLoc;
         std::vector<char> vertexCode{}, fragmentCode{};
-        utils::ReadFile(TO_RES_PATH(vertPath), vertexCode);
-        utils::ReadFile(TO_RES_PATH(fragPath), fragmentCode);
+        utils::ReadFile(TO_RES_PATH(info.vertexShaderLoc), vertexCode);
+        utils::ReadFile(TO_RES_PATH(info.fragmentShaderLoc), fragmentCode);
 
         inter::rendering::ShaderCreationInfo creationInfo
         {
+            .supportedAttribCount = info.supportedAttribCount,
+            .pSupportedAttribs = info.pSupportedAttribs,
             .vCode = vertexCode.data(),
             .vCodeSize = (uint32_t)vertexCode.size(),
             .fCode = fragmentCode.data(),
             .fCodeSize = (uint32_t)fragmentCode.size(),
         };
 
-        handle = inter::rendering::CreateShader(creationInfo, this);
-        isRunning = true;
+        handle = inter::rendering::CreateShader(creationInfo);
     }
 
     Shader::~Shader()
@@ -35,9 +34,9 @@ namespace hf
 
     namespace shader
     {
-        Ref<Shader> Create(const std::string& vertPath, const std::string& fragPath)
+        Ref<Shader> Create(const ShaderCreationInfo& info)
         {
-            Ref<Shader> shader = MakeRef<Shader>(vertPath, fragPath);
+            Ref<Shader> shader = MakeRef<Shader>(info);
             inter::HF.shaders[shader.get()] = shader;
             return shader;
         }
@@ -68,16 +67,16 @@ namespace hf
             inter::HF.shaders.clear();
         }
 
-        bool IsRunning(const Ref<Shader>& shader) { return shader->isRunning; }
+        bool IsRunning(const Ref<Shader>& shader) { return shader->handle; }
 
-        void Bind(const Ref<Shader>& shader)
+        void Bind(const Ref<Shader>& shader, BufferAttrib attrib)
         {
-            inter::rendering::BindShader(inter::HF.mainWindow->renderer.get(), shader.get());
+            inter::rendering::BindShader(inter::HF.mainWindow->renderer.get(), shader.get(), attrib);
         }
 
-        void Bind(const Ref<Renderer>& renderer, const Ref<Shader>& shader)
+        void Bind(const Ref<Renderer>& renderer, const Ref<Shader>& shader, BufferAttrib attrib)
         {
-            inter::rendering::BindShader(renderer.get(), shader.get());
+            inter::rendering::BindShader(renderer->handle, shader->handle, attrib);
         }
     }
 
@@ -85,9 +84,8 @@ namespace hf
     {
         bool DestroyShader_i(Shader* shader)
         {
-            if (shader->isRunning)
+            if (shader->handle)
             {
-                shader->isRunning = false;
                 DestroyShader(shader->handle);
                 shader->handle = nullptr;
                 return true;

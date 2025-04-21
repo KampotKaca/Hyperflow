@@ -1,10 +1,14 @@
-#include "hvk_graphics.h"
-#include "hvk_renderer.h"
+#include "hgenericexception.h"
+#include "include/hvk_graphics.h"
+#include "include/hvk_renderer.h"
 #include "exceptions/hgraphicsexception.h"
 
 namespace hf::inter::rendering
 {
-    void CreateRenderPass(VkRenderPass* renderPass)
+    void CreateRenderPassColorAttachment(std::vector<VkAttachmentDescription>& attachments,
+                                         std::vector<VkAttachmentReference>& attachmentRefs);
+
+    void CreateRenderPass(const VkRenderPassCreationInfo& info, VkRenderPass* renderPass)
     {
         VkSubpassDependency dependency
         {
@@ -16,36 +20,30 @@ namespace hf::inter::rendering
             .dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,
         };
 
-        VkAttachmentDescription colorAttachment
-        {
-            .format = VK_FORMAT_B8G8R8A8_SRGB,
-            .samples = VK_SAMPLE_COUNT_1_BIT,
-            .loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR,
-            .storeOp = VK_ATTACHMENT_STORE_OP_STORE,
-            .stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE,
-            .stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE,
-            .initialLayout = VK_IMAGE_LAYOUT_UNDEFINED,
-            .finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR,
-        };
+        std::vector<VkAttachmentDescription> attachments;
+        std::vector<VkAttachmentReference> attachmentRefs;
 
-        VkAttachmentReference colorAttachmentRef
+        for (uint32_t i = 0; i < info.attachmentCount; i++)
         {
-            .attachment = 0,
-            .layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL
-        };
+            switch (info.pAttachments[i])
+            {
+                case VkRenderPassAttachmentType::Color: CreateRenderPassColorAttachment(attachments, attachmentRefs); break;
+                default: throw GENERIC_EXCEPT("[Hyperflow]", "Unsupported type of render pass attachment.");
+            }
+        }
 
         VkSubpassDescription subpass
         {
             .pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS,
-            .colorAttachmentCount = 1,
-            .pColorAttachments = &colorAttachmentRef
+            .colorAttachmentCount = (uint32_t)attachmentRefs.size(),
+            .pColorAttachments = attachmentRefs.data()
         };
 
         VkRenderPassCreateInfo renderPassInfo
         {
             .sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO,
-            .attachmentCount = 1,
-            .pAttachments = &colorAttachment,
+            .attachmentCount = (uint32_t)attachments.size(),
+            .pAttachments = attachments.data(),
             .subpassCount = 1,
             .pSubpasses = &subpass,
             .dependencyCount = 1,
@@ -56,9 +54,13 @@ namespace hf::inter::rendering
             &renderPassInfo, nullptr, renderPass));
     }
 
-    void DestroyRenderPass(const VkRenderPass& renderPass)
+    void DestroyRenderPass(VkRenderPass* renderPass)
     {
-        vkDestroyRenderPass(GRAPHICS_DATA.defaultDevice->logicalDevice.device, renderPass, nullptr);
+        if (*renderPass != VK_NULL_HANDLE)
+        {
+            vkDestroyRenderPass(GRAPHICS_DATA.defaultDevice->logicalDevice.device, *renderPass, nullptr);
+            *renderPass = VK_NULL_HANDLE;
+        }
     }
 
     void BeginRenderPass(VKRenderer* rn, const VkRenderPass& renderPass)
@@ -94,5 +96,31 @@ namespace hf::inter::rendering
             vkCmdEndRenderPass(rn->currentCommand);
             rn->currentPass = VK_NULL_HANDLE;
         }
+    }
+
+    void CreateRenderPassColorAttachment(std::vector<VkAttachmentDescription>& attachments,
+                                         std::vector<VkAttachmentReference>& attachmentRefs)
+    {
+        uint32_t attachmentIndex = attachments.size();
+        VkAttachmentDescription colorAttachment
+        {
+            .format = VULKAN_API_COLOR_FORMAT,
+            .samples = VK_SAMPLE_COUNT_1_BIT,
+            .loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR,
+            .storeOp = VK_ATTACHMENT_STORE_OP_STORE,
+            .stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE,
+            .stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE,
+            .initialLayout = VK_IMAGE_LAYOUT_UNDEFINED,
+            .finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR,
+        };
+
+        VkAttachmentReference colorAttachmentRef
+        {
+            .attachment = attachmentIndex,
+            .layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL
+        };
+
+        attachments.push_back(colorAttachment);
+        attachmentRefs.push_back(colorAttachmentRef);
     }
 }

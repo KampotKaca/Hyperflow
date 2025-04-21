@@ -3,6 +3,7 @@
 
 #include "hwindow.h"
 #include "hshared.h"
+#include "hvertbuffer.h"
 #include "components/htime.h"
 
 namespace hf::inter
@@ -19,6 +20,7 @@ namespace hf::inter
         uint32_t rendererCount{};
 
         std::unordered_map<Shader*, Ref<Shader>> shaders{};
+        std::unordered_map<VertBuffer*, Ref<VertBuffer>> vertBuffers{};
     };
 
     extern Hyperflow HF;
@@ -52,6 +54,9 @@ namespace hf::inter
     {
         struct ShaderCreationInfo
         {
+            uint32_t supportedAttribCount{};
+            const BufferAttrib* pSupportedAttribs{};
+
             const char* vCode;
             uint32_t vCodeSize;
             const char* fCode;
@@ -64,11 +69,17 @@ namespace hf::inter
         void* CreateInstance(void* handle, uvec2 size);
         void DestroyInstance(void* rnInstance);
 
-        void* CreateShader(const ShaderCreationInfo& info, const Shader* shader);
+        void* CreateShader(const ShaderCreationInfo& info);
         void DestroyShader(void* shader);
         bool DestroyShader_i(Shader* shader);
 
-        void BindShader(const Renderer* renderer, const Shader* shader);
+        uint32_t CreateBufferAttrib(const BufferAttribCreateInfo& info, uint32_t fullStride);
+
+        void* CreateVertBuffer(const VertBufferCreationInfo& info);
+        void DestroyVertBuffer(void* handle);
+        bool DestroyVertBuffer_i(VertBuffer* buffer);
+
+        void BindShader(const void* renderer, const void* shader, BufferAttrib attrib);
 
         bool StartFrame(Renderer* rn);
         void EndFrame(Renderer* rn);

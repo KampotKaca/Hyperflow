@@ -7,11 +7,10 @@ namespace hf
 {
     struct Shader
     {
-        Shader(const std::string& vertPath, const std::string& fragPath);
+        Shader(const ShaderCreationInfo& info);
         ~Shader();
 
         std::string vPath{}, fPath{};
-        bool isRunning{};
         void* handle{};
     };
 }

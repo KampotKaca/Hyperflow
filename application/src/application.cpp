@@ -4,18 +4,63 @@
 
 namespace app
 {
+	struct Vertex
+	{
+		hf::vec2 pos{};
+		hf::vec3 color{};
+	};
+
+	constexpr Vertex vertices[]
+	{
+		{{0.0f, -0.5f}, {1.0f, 0.0f, 0.0f}},
+		{{0.5f, 0.5f}, {0.0f, 1.0f, 0.0f}},
+		{{-0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}}
+	};
+
 	int count;
 	hf::Ref<hf::Window> wn;
 	int reqCount = 0;
 	int32_t lastReq = -1;
 	hf::Ref<hf::Shader> shader;
+	hf::Ref<hf::VertBuffer> buffer;
+	hf::BufferAttrib bufferAttrib;
+
+	constexpr hf::BufferAttribFormat formats[]
+	{
+		{ .type = hf::VertBufferDataType::F32, .size = 2 },
+		{ .type = hf::VertBufferDataType::F32, .size = 3 },
+	};
+
+	hf::BufferAttribCreateInfo bufferAttribCreateInfo
+	{
+		.formatCount = 2,
+		.pFormats = formats
+	};
 
 	void Application::Start()
 	{
+		bufferAttrib = hf::vertbuffer::CreateAttrib(bufferAttribCreateInfo);
+
+		hf::VertBufferCreationInfo bufferInfo
+		{
+			.vertexCount = 3,
+			.vertices = (void*)vertices,
+			.bufferAttrib = bufferAttrib
+		};
+
+		buffer = hf::vertbuffer::Create(bufferInfo);
+
+		hf::ShaderCreationInfo shaderInfo
+		{
+			.supportedAttribCount = 1,
+			.pSupportedAttribs = &bufferAttrib,
+			.vertexShaderLoc = "shaders/vulkan/default.vert.spv",
+			.fragmentShaderLoc = "shaders/vulkan/default.frag.spv"
+		};
+
+		shader = hf::shader::Create(shaderInfo);
+
 		count = 0;
-		shader = hf::shader::Create(
-			"shaders/vulkan/default.vert.spv",
-			"shaders/vulkan/default.frag.spv");
 	}
 
 	void Application::Update()
@@ -72,7 +117,7 @@ namespace app
 
 	void Application::OnMainWindowRender(const hf::Ref<hf::Renderer>& rn)
 	{
-		hf::shader::Bind(rn, shader);
+		hf::shader::Bind(rn, shader, bufferAttrib);
 		hf::rendering::Draw(rn);
 	}
 }
