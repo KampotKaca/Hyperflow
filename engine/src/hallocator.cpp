@@ -1,10 +1,19 @@
 #include "hallocator.h"
 #include "hshared.h"
+#include <stdlib.h>
+#include <dlfcn.h>
 #include "hgenericexception.h"
 #include "rpmalloc.h"
 
 namespace hf
 {
+    struct AllocatorData
+    {
+        std::atomic<bool> isInitialized = false;
+    };
+
+    AllocatorData ALLOCATOR_DATA;
+
     double ToMB(size_t bytes)
     {
         return bytes * (1.0 / (1024.0 * 1024.0));
@@ -12,27 +21,32 @@ namespace hf
 
     void LoadAllocator()
     {
-        rpmalloc_initialize();
-        rpmalloc_thread_initialize();
+        if (!ALLOCATOR_DATA.isInitialized)
+        {
+            rpmalloc_initialize();
+            rpmalloc_thread_initialize();
+            ALLOCATOR_DATA.isInitialized = true;
+        }
     }
 
     void UnloadAllocator()
     {
-#if DEBUG
-        LogMemoryStats();
-#endif
-        rpmalloc_thread_finalize(true);
-        rpmalloc_finalize();
+        if (ALLOCATOR_DATA.isInitialized)
+        {
+            rpmalloc_thread_finalize(1);
+            rpmalloc_finalize();
+            ALLOCATOR_DATA.isInitialized = false;
+        }
     }
 
     void LoadAllocatorThread()
     {
-        if (!rpmalloc_is_thread_initialized()) rpmalloc_thread_initialize();
+        if (ALLOCATOR_DATA.isInitialized && !rpmalloc_is_thread_initialized()) rpmalloc_thread_initialize();
     }
 
     void UnloadAllocatorThread()
     {
-        if (rpmalloc_is_thread_initialized()) rpmalloc_thread_finalize(true);
+        if (ALLOCATOR_DATA.isInitialized && rpmalloc_is_thread_initialized()) rpmalloc_thread_finalize(true);
     }
 
     void LogMemoryStats()
@@ -90,3 +104,44 @@ void operator delete[](void* ptr) noexcept
 {
     rpfree(ptr);
 }
+
+// void* malloc(size_t size) noexcept
+// {
+//     static void* (*system_malloc)(size_t) = (void* (*)(size_t))dlsym(RTLD_NEXT, "malloc");
+//
+// #if DEBUG
+//     hf::LoadAllocatorThread();
+// #endif
+//     void* memory = hf::ALLOCATOR_DATA.isInitialized ? rpmalloc(size) : system_malloc(size);
+//
+//     if (!memory) fprintf(stderr, "Unable to allocate memory");
+//     return memory;
+// }
+//
+// void free(void* ptr)
+// {
+//     rpfree(ptr);
+// }
+//
+// void* calloc(size_t num, size_t size) noexcept
+// {
+//     static void* (*system_calloc)(size_t, size_t) = (void* (*)(size_t, size_t))dlsym(RTLD_NEXT, "calloc");
+//
+// #if DEBUG
+//     hf::LoadAllocatorThread();
+// #endif
+//     void* memory = hf::ALLOCATOR_DATA.isInitialized ? rpcalloc(num, size) : system_calloc(num, size);
+//     if (!memory) fprintf(stderr, "Unable to allocate memory");
+//     return memory;
+// }
+//
+// void* realloc(void* ptr, size_t size) noexcept
+// {
+//     static void* (*system_realloc)(void*, size_t) = (void* (*)(void*, size_t))dlsym(RTLD_NEXT, "realloc");
+// #if DEBUG
+//     hf::LoadAllocatorThread();
+// #endif
+//     void* memory = hf::ALLOCATOR_DATA.isInitialized ? rprealloc(ptr, size) : system_realloc(ptr, size);
+//     if (!memory) fprintf(stderr, "Unable to allocate memory");
+//     return memory;
+// }

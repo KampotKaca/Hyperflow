@@ -12,9 +12,18 @@ namespace hf
 {
 	inter::Hyperflow inter::HF;
 
-	void Run(const EngineData& engineData)
+	void Preload()
 	{
 		LoadAllocator();
+	}
+
+	void Shutdown()
+	{
+		UnloadAllocator();
+	}
+
+	void Run(const EngineData& engineData)
+	{
 		try
 		{
 			inter::HF.time = Time();
@@ -70,8 +79,6 @@ namespace hf
 		{
 			LOG_FATAL("No Details Are Available");
 		}
-
-		UnloadAllocator();
 	}
 
 	bool IsRunning() { return inter::HF.isRunning && !window::IsClosing(inter::HF.mainWindow); }

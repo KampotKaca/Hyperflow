@@ -7,6 +7,9 @@
 
 namespace hf
 {
+	void Preload();
+	void Shutdown();
+
 	void Run(const EngineData& engineData);
 	bool IsRunning();
 	Ref<Window> GetMainWindow();
