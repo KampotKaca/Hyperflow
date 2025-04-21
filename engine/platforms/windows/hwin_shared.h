@@ -16,6 +16,7 @@ namespace hf
 	};
 
 	extern Win_Platform_Data PLATFORM_DATA;
+	void InitThreadHook();
 }
 
 #endif //HWIN_SHARED_H

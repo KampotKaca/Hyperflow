@@ -53,15 +53,15 @@ namespace app
 		// auto mDelta = hf::input::GetPointerDelta();
 		// if (mDelta != hf::ivec2(0, 0)) LOG_INFO("Move: (X: %i, Y: %i)", mDelta.x, mDelta.y);
 
-		auto cReq = (int32_t)(hf::time::GetTimePassed() / 0.2);
-		if (cReq != reqCount)
-		{
-			std::ostringstream oss;
-			oss << "[Hyperflow] " << hf::time::GetFrameRate();
-			// oss << "[Hyperflow] " << hf::Time::GetTimePassed();
-			hf::window::SetTitle(hf::GetMainWindow(), oss.str().c_str());
-			reqCount = cReq;
-		}
+		// auto cReq = (int32_t)(hf::time::GetTimePassed() / 0.2);
+		// if (cReq != reqCount)
+		// {
+		// 	std::ostringstream oss;
+		// 	oss << "[Hyperflow] " << hf::time::GetFrameRate();
+		// 	// oss << "[Hyperflow] " << hf::Time::GetTimePassed();
+		// 	hf::window::SetTitle(hf::GetMainWindow(), oss.str());
+		// 	reqCount = cReq;
+		// }
 	}
 
 	void Application::Quit()

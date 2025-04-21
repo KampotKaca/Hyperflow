@@ -101,7 +101,7 @@ target_compile_definitions(${PROJECT_NAME}
 
 # Link winmm only on Windows
 if (WINDOWS)
-    target_link_libraries(${PROJECT_NAME} PRIVATE winmm)
+    target_link_libraries(${PROJECT_NAME} PRIVATE winmm Dbghelp)
 elseif (LINUX)
     target_link_libraries(${PROJECT_NAME}
             PRIVATE

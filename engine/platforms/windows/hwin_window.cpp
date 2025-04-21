@@ -48,9 +48,9 @@ namespace hf::inter::window
         return false;
     }
 
-    void SetTitle(const Window* win, const char* title)
+    void SetTitle(const Window* win, const std::string& title)
     {
-        if (!SetWindowText((HWND)win->handle, title)) throw WND_LAST_EXCEPT();
+        if (!SetWindowText((HWND)win->handle, &title[0])) throw WND_LAST_EXCEPT();
     }
 
     void SetSize(const Window* win, ivec2 size)

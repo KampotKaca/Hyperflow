@@ -26,7 +26,7 @@ namespace hf
 
 	namespace inter::window
 	{
-		void SetTitle(const Window* win, const char* title)
+		void SetTitle(const Window* win, const std::string& title)
 		{
 			if (!win->handle) return;
 			XStoreName(PLATFORM_DATA.display, ((LnxWindowData*)win->handle)->window, title);

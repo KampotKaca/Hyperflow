@@ -141,9 +141,8 @@ namespace hf::inter::rendering
         for (const auto& ext : GRAPHICS_DATA.availableExtensions)
             GRAPHICS_DATA.availableExtensionNames.insert(ext.extensionName);
 
-        for (uint32_t i = 0; i < NUM_REQUIRED_EXTENSIONS; ++i)
+        for (auto& extension : REQUIRED_EXTENSIONS)
         {
-            auto& extension = REQUIRED_EXTENSIONS[i];
             if (!IsExtensionSupported(extension))
                 throw GENERIC_EXCEPT("[Vulkan]", "[Required extension not supported]\n%s", extension);
         }

@@ -65,7 +65,7 @@ namespace hf
 		WindowStyle GetStyle(const Ref<Window> &window);
 		void* GetHandle(const Ref<Window> &window);
 
-		void SetTitle(const Ref<Window> &window, const char* title);
+		void SetTitle(const Ref<Window> &window, const std::string& title);
 		void SetSize(const Ref<Window> &window, ivec2 size);
 		void SetPosition(const Ref<Window> &window, ivec2 position);
 		void SetRect(const Ref<Window> &window, IRect rect);
@@ -110,6 +110,11 @@ namespace hf
 	{
 		ivec3 ConvertVersion(const char* version);
 		bool ReadFile(const std::string& filename, std::vector<char>& result);
+
+		[[nodiscard]] void* Allocate(std::size_t n);
+		[[nodiscard]] void* AllocateAligned(std::size_t n, std::align_val_t align);
+		void Deallocate(void* p);
+		void DeallocateAligned(void* p, std::align_val_t align);
 	}
 }
 

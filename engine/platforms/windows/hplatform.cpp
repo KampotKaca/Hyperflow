@@ -93,6 +93,8 @@ namespace hf
 
 	void Platform_Initialize()
 	{
+		InitThreadHook();
+
 		HINSTANCE hinstance = GetModuleHandle(nullptr);
 
 		WNDCLASSEX wndClass;

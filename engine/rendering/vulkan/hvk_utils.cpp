@@ -128,7 +128,9 @@ namespace hf::inter::rendering
 
     bool IsExtensionSupported(const char* extension)
     {
-        return GRAPHICS_DATA.availableExtensionNames.contains(extension);
+        for (const auto& availableExtension : GRAPHICS_DATA.availableExtensions)
+            if (strcmp(extension, availableExtension.extensionName) != 0) return true;
+        return false;
     }
 
     bool QueueFamilyIndices::IsComplete() const { return graphicsFamily.has_value() && presentFamily.has_value(); }

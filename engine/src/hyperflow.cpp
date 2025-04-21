@@ -3,7 +3,6 @@
 
 #include "hplatform.h"
 #include "hrenderer.h"
-#include "hallocator.h"
 #include "components/htime.h"
 
 #include "hinternal.h"
@@ -14,12 +13,12 @@ namespace hf
 
 	void Preload()
 	{
-		LoadAllocator();
+
 	}
 
 	void Shutdown()
 	{
-		UnloadAllocator();
+		inter::alloc::UnloadAllocator();
 	}
 
 	void Run(const EngineData& engineData)
@@ -57,7 +56,7 @@ namespace hf
 
 				if(input::IsDown(Key::Escape))
 				{
-					LogThreadMemoryStats();
+					inter::alloc::LogThreadMemoryStats();
 					Terminate();
 				}
 			}
