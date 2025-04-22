@@ -72,8 +72,8 @@ namespace hf::inter::rendering
             };
             VkRenderPassCreationInfo renderPassInfo
             {
-                .attachmentCount = 1,
                 .pAttachments = attachments,
+                .attachmentCount = 1,
             };
             CreateRenderPass(renderPassInfo, &GRAPHICS_DATA.renderPass);
 

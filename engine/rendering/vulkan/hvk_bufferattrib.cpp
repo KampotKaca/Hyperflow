@@ -43,8 +43,8 @@ namespace hf::inter::rendering
             auto& stride = info.pFormats[i];
             VkVertexInputAttributeDescription description =
             {
-                .binding = 0,
                 .location = location,
+                .binding = 0,
                 .format = BUFFER_FORMAT[(uint32_t)VertBufferDataType::Count * (stride.size - 1) + (uint32_t)stride.type],
                 .offset = currentOffset
             };
