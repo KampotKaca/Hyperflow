@@ -2,10 +2,8 @@
 #define HD3D_GRAPHICS_H
 
 #include "hd3d_shared.h"
-#include "hshared.h"
-#include <dxgi.h>
 
-namespace hf::inter::rendering
+namespace hf
 {
 	struct GraphicsData
 	{
@@ -17,14 +15,10 @@ namespace hf::inter::rendering
 		IDXGIAdapter* adapter{};
 	};
 
-	struct D3DRendererData
-	{
-		HWND windowHandle{};
-		IDXGISwapChain* swapChain{};
-		ID3D11RenderTargetView* renderTexture{};
-	};
-
 	extern GraphicsData GRAPHICS_DATA;
+
+	void Direct3DLoad();
+	void Direct3DUnload();
 }
 
 #endif //HD3D_GRAPHICS_H

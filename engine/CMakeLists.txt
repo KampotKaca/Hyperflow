@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.30)
 file(READ "config.h" CONFIG_H_CONTENTS)
 string(REGEX MATCH "#define VERSION \"([0-9]+\\.[0-9]+\\.[0-9]+)\"" VERSION_MATCH "${CONFIG_H_CONTENTS}")
 
-#option(BUILD_D3D "build_d3d" ON)
+option(BUILD_D3D "build_d3d" ON)
 #option(BUILD_VULKAN "build_vulkan" ON)
 
 # Set CMake project version

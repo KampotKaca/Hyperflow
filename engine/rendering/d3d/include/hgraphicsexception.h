@@ -1,7 +1,7 @@
 #ifndef HGRAPHICSEXCEPTION_H
 #define HGRAPHICSEXCEPTION_H
 
-#include "../hd3d_shared.h"
+#include "../../../platforms/windows/hwindows.h"
 #include "hexception.h"
 
 namespace hf
