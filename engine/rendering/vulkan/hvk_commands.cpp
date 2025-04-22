@@ -1,11 +1,7 @@
 #include "include/hvk_graphics.h"
 #include "include/hvk_renderer.h"
-#include "exceptions/hgraphicsexception.h"
-#include <vector>
 
-#include "hgenericexception.h"
-
-namespace hf::inter::rendering
+namespace hf
 {
     void CreateCommandPool(const GraphicsDevice& device, CommandPool* result)
     {

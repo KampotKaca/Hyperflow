@@ -1,9 +1,10 @@
 #ifndef HVK_RENDERER_H
 #define HVK_RENDERER_H
 
+#include "hvk_shared.h"
 #include "hvk_graphics.h"
 
-namespace hf::inter::rendering
+namespace hf
 {
     struct VKRenderer
     {
@@ -45,6 +46,11 @@ namespace hf::inter::rendering
     void DestroyRendererFrameBuffers(VKRenderer* rn);
 
     void UploadViewportAndScissor(const VKRenderer* rn);
+
+    bool StartFrame(VKRenderer* rn);
+    void EndFrame(VKRenderer* rn);
+    void RegisterFrameBufferChange(VKRenderer* rn, uvec2 newSize);
+    void Draw(VKRenderer* rn);
 }
 
 #endif //HVK_RENDERER_H

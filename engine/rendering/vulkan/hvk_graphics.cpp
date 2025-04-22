@@ -2,13 +2,8 @@
 #include "include/hvk_renderer.h"
 
 #include <hframebuffer.h>
-#include <bits/ranges_algo.h>
 
-#include "hgenericexception.h"
-#include "exceptions/hgraphicsexception.h"
-#include "../config.h"
-
-namespace hf::inter::rendering
+namespace hf
 {
     GraphicsData GRAPHICS_DATA;
 

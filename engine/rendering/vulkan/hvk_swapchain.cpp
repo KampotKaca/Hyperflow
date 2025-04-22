@@ -1,11 +1,7 @@
 #include "include/hvk_graphics.h"
 #include "include/hvk_renderer.h"
-#include "../config.h"
-#include "exceptions/hgraphicsexception.h"
-#include "hgenericexception.h"
-#include "hinternal.h"
 
-namespace hf::inter::rendering
+namespace hf
 {
     static void DestroyExistingViews(GraphicsSwapChain& swapchain);
 
@@ -132,7 +128,7 @@ namespace hf::inter::rendering
     void RecreateSwapchain(VKRenderer* rn)
     {
         rn->frameBufferResized = false;
-        WaitForRendering();
+        DelayThreadUntilRenderingFinish();
 
         DestroyRendererFrameBuffers(rn);
         CreateSwapchain(rn->swapchain.surface, rn->targetSize, &rn->swapchain);

@@ -1,10 +1,9 @@
 #ifndef HVK_FRAMEBUFFER_H
 #define HVK_FRAMEBUFFER_H
 
-#include <vulkan/vulkan.h>
-#include "hshared.h"
+#include "hvk_shared.h"
 
-namespace hf::inter::rendering
+namespace hf
 {
     struct VkFrameBuffer
     {

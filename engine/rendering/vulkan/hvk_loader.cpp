@@ -1,12 +1,7 @@
 #include "include/hvk_graphics.h"
 #include "include/hvk_renderer.h"
-#include "hinternal.h"
-#include "hshared.h"
-#include "exceptions/hgraphicsexception.h"
-#include "hyperflow.h"
-#include "../config.h"
 
-namespace hf::inter::rendering
+namespace hf
 {
 #if DEBUG
 
@@ -55,18 +50,6 @@ namespace hf::inter::rendering
     }
 #endif
 
-    void* CreateInstance(void* handle, uvec2 size)
-    {
-        return new VKRenderer(handle, size);
-    }
-
-    void DestroyInstance(void* rnInstance)
-    {
-        auto data = (VKRenderer*)rnInstance;
-        WaitForRendering();
-        delete(data);
-    }
-
     static void InitLayers();
     static void InitExtensions();
     static void InitInstanceVersion();
@@ -76,7 +59,7 @@ namespace hf::inter::rendering
 
     static void DestroyLogicalDevice(LogicalDevice& device);
 
-    void Load(const char* appVersion)
+    void LoadVulkan(const char* appVersion)
     {
         auto engineV = utils::ConvertVersion(VERSION);
         auto appV = utils::ConvertVersion(appVersion);
@@ -103,9 +86,9 @@ namespace hf::inter::rendering
         CreateInstance(appInfo);
     }
 
-    void Unload()
+    void UnloadVulkan()
     {
-        WaitForRendering();
+        DelayThreadUntilRenderingFinish();
         DestroyRenderPass(&GRAPHICS_DATA.renderPass);
         DestroyPipelineLayout(&GRAPHICS_DATA.pipelineLayout);
 
@@ -117,7 +100,7 @@ namespace hf::inter::rendering
 
     //--------------------------------------------------------------------------
 
-    void WaitForRendering()
+    void DelayThreadUntilRenderingFinish()
     {
         VK_HANDLE_EXCEPT(vkDeviceWaitIdle(GRAPHICS_DATA.defaultDevice->logicalDevice.device));
     }

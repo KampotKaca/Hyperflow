@@ -1,16 +1,13 @@
 #include "include/hvk_shader.h"
-#include "hinternal.h"
-#include "hyperflow.h"
 #include "include/hvk_graphics.h"
 #include "include/hvk_renderer.h"
-#include "exceptions/hgraphicsexception.h"
 
-namespace hf::inter::rendering
+namespace hf
 {
     static void CreateShaderModule(const char* code, uint32_t codeSize, VkShaderModule* result);
     static void CreatePipeline(const VkPipelineInfo& info, VkPipeline* pipeline);
 
-    VkShader::VkShader(const ShaderCreationInfo& info)
+    VkShader::VkShader(const inter::rendering::ShaderCreationInfo& info)
     {
         using namespace inter;
         VkShaderModule vertModule{}, fragModule{};
@@ -64,16 +61,6 @@ namespace hf::inter::rendering
             vkDestroyPipeline(device, pipeline, nullptr);
 
         pipelines.clear();
-    }
-
-    void* CreateShader(const ShaderCreationInfo& info)
-    {
-        return new VkShader(info);
-    }
-
-    void DestroyShader(void* shader)
-    {
-        delete (VkShader*)shader;
     }
 
     void CreateShaderModule(const char* code, uint32_t codeSize, VkShaderModule* result)
@@ -218,10 +205,8 @@ namespace hf::inter::rendering
             VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, pipeline));
     }
 
-    void BindShader(const void* renderer, const void* shader, BufferAttrib attrib)
+    void BindShader(const VKRenderer* rn, VkShader* shader, BufferAttrib attrib)
     {
-        const auto rn = (VKRenderer*)renderer;
-        const auto sh = (VkShader*)shader;
-        vkCmdBindPipeline(rn->currentCommand, VK_PIPELINE_BIND_POINT_GRAPHICS, sh->pipelines[attrib]);
+        vkCmdBindPipeline(rn->currentCommand, VK_PIPELINE_BIND_POINT_GRAPHICS, shader->pipelines[attrib]);
     }
 }

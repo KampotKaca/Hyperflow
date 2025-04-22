@@ -57,10 +57,10 @@ namespace hf::inter
             uint32_t supportedAttribCount{};
             const BufferAttrib* pSupportedAttribs{};
 
-            const char* vCode;
-            uint32_t vCodeSize;
-            const char* fCode;
-            uint32_t fCodeSize;
+            const char* vCode{};
+            uint32_t vCodeSize = 0;
+            const char* fCode{};
+            uint32_t fCodeSize = 0;
         };
 
         void Load(const char* version);
@@ -73,13 +73,13 @@ namespace hf::inter
         void DestroyShader(void* shader);
         bool DestroyShader_i(Shader* shader);
 
+        void BindShader(const void* renderer, const void* shader, BufferAttrib attrib);
+
         uint32_t CreateBufferAttrib(const BufferAttribCreateInfo& info, uint32_t fullStride);
 
         void* CreateVertBuffer(const VertBufferCreationInfo& info);
         void DestroyVertBuffer(void* handle);
         bool DestroyVertBuffer_i(VertBuffer* buffer);
-
-        void BindShader(const void* renderer, const void* shader, BufferAttrib attrib);
 
         bool StartFrame(Renderer* rn);
         void EndFrame(Renderer* rn);

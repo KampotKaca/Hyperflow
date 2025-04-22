@@ -1,47 +1,39 @@
 #include "include/hvk_renderer.h"
-#include "exceptions/hgraphicsexception.h"
-
-#include "hrenderer.h"
 #include "include/hvk_graphics.h"
-#include "hinternal.h"
 
-namespace hf::inter::rendering
+namespace hf
 {
-    bool StartFrame(Renderer* rn)
+    bool StartFrame(VKRenderer* rn)
     {
-        auto renderer = (VKRenderer*)rn->handle;
-        if (renderer->targetSize.x == 0 || renderer->targetSize.y == 0) return false;
-        auto& frame = renderer->frames[renderer->currentFrame];
-        if(!AcquireNextImage(renderer)) return false;
+        if (rn->targetSize.x == 0 || rn->targetSize.y == 0) return false;
+        auto& frame = rn->frames[rn->currentFrame];
+        if(!AcquireNextImage(rn)) return false;
 
         frame.usedCommandCount = 0;
-        BeginCommandBuffer(renderer, renderer->commandPool.buffers[renderer->currentFrame]);
-        BeginRenderPass(renderer, GRAPHICS_DATA.renderPass);
-        UploadViewportAndScissor(renderer);
+        BeginCommandBuffer(rn, rn->commandPool.buffers[rn->currentFrame]);
+        BeginRenderPass(rn, GRAPHICS_DATA.renderPass);
+        UploadViewportAndScissor(rn);
         return true;
     }
 
-    void EndFrame(Renderer* rn)
+    void EndFrame(VKRenderer* rn)
     {
-        auto renderer = (VKRenderer*)rn->handle;
-        EndRenderPass(renderer);
-        EndCommandBuffer(renderer);
-        SubmitCommands(renderer);
-        PresentSwapchain(renderer);
+        EndRenderPass(rn);
+        EndCommandBuffer(rn);
+        SubmitCommands(rn);
+        PresentSwapchain(rn);
 
-        renderer->currentFrame = (renderer->currentFrame + 1) % renderer->frames.size();
+        rn->currentFrame = (rn->currentFrame + 1) % rn->frames.size();
     }
 
-    void Draw(Renderer* rn)
+    void RegisterFrameBufferChange(VKRenderer* rn, uvec2 newSize)
     {
-        auto renderer = (VKRenderer*)rn->handle;
-        vkCmdDraw(renderer->currentCommand, 3, 1, 0, 0);
+        rn->targetSize = newSize;
+        rn->frameBufferResized = true;
     }
 
-    void RegisterFrameBufferChange(Renderer* rn, uvec2 newSize)
+    void Draw(VKRenderer* rn)
     {
-        auto renderer = (VKRenderer*)rn->handle;
-        renderer->targetSize = newSize;
-        renderer->frameBufferResized = true;
+        vkCmdDraw(rn->currentCommand, 3, 1, 0, 0);
     }
 }

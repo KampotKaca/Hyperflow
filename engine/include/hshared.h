@@ -16,6 +16,7 @@
 #include <condition_variable>
 #include <atomic>
 #include <ranges>
+#include <algorithm>
 
 #include <bitset>
 #include <queue>

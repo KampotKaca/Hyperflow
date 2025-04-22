@@ -1,10 +1,9 @@
 #ifndef HVK_VERTBUFFER_H
 #define HVK_VERTBUFFER_H
 
-#include "hshared.h"
-#include <vulkan/vulkan.h>
+#include "hvk_shared.h"
 
-namespace hf::inter::rendering
+namespace hf
 {
     struct VkVertBuffer
     {

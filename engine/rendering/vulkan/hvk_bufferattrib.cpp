@@ -1,8 +1,7 @@
 #include "include/hvk_bufferattrib.h"
-#include "hgenericexception.h"
 #include "include/hvk_graphics.h"
 
-namespace hf::inter::rendering
+namespace hf
 {
     constexpr uint32_t BUFFER_SIZE[(uint32_t)VertBufferDataType::Count] = { 1, 1, 2, 2, 4, 4, 8, 8, 2, 4, 8 };
     constexpr VkFormat BUFFER_FORMAT[(uint32_t)VertBufferDataType::Count * 4] =
@@ -62,11 +61,5 @@ namespace hf::inter::rendering
     VkBufferAttrib::~VkBufferAttrib()
     {
         attribDescriptions.clear();
-    }
-
-    uint32_t CreateBufferAttrib(const BufferAttribCreateInfo& info, uint32_t fullStride)
-    {
-        GRAPHICS_DATA.bufferAttribs.push_back(VkBufferAttrib(info, fullStride));
-        return GRAPHICS_DATA.bufferAttribs.size();
     }
 }

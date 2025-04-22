@@ -1,7 +1,6 @@
 #include "include/hvk_graphics.h"
-#include "exceptions/hgraphicsexception.h"
 
-namespace hf::inter::rendering
+namespace hf
 {
     void CreateSemaphore(const GraphicsDevice& device, VkSemaphore* semaphore)
     {

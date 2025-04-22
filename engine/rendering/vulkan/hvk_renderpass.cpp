@@ -1,9 +1,7 @@
-#include "hgenericexception.h"
 #include "include/hvk_graphics.h"
 #include "include/hvk_renderer.h"
-#include "exceptions/hgraphicsexception.h"
 
-namespace hf::inter::rendering
+namespace hf
 {
     void CreateRenderPassColorAttachment(std::vector<VkAttachmentDescription>& attachments,
                                          std::vector<VkAttachmentReference>& attachmentRefs);

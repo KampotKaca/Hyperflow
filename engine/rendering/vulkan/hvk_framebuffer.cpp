@@ -1,8 +1,7 @@
 #include "include/hvk_graphics.h"
 #include "include/hvk_framebuffer.h"
-#include "exceptions/hgraphicsexception.h"
 
-namespace hf::inter::rendering
+namespace hf
 {
     VkFrameBuffer::VkFrameBuffer(VkImageView* pAttachments, uint32_t attachmentCount,
         VkRenderPass rnPass, const VkExtent2D& extent)

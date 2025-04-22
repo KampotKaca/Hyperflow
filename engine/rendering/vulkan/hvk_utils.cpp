@@ -1,9 +1,7 @@
 #include "include/hvk_graphics.h"
 #include "include/hvk_renderer.h"
-#include "exceptions/hgraphicsexception.h"
-#include "hgenericexception.h"
 
-namespace hf::inter::rendering
+namespace hf
 {
     bool GetAvailableSurfaceDetails(const SwapChainSupportDetails& swapChainSupportDetails,
     VkFormat targetFormat, VkPresentModeKHR targetPresentMode, uvec2 targetExtents,

@@ -1,11 +1,6 @@
 #include "include/hvk_vertbuffer.h"
-#include "hyperflow.h"
-#include "hinternal.h"
 
-#include "hgenericexception.h"
-#include "../config.h"
-
-namespace hf::inter::rendering
+namespace hf
 {
     VkVertBuffer::VkVertBuffer(const VertBufferCreationInfo& info)
     {
@@ -22,15 +17,5 @@ namespace hf::inter::rendering
     VkVertBuffer::~VkVertBuffer()
     {
 
-    }
-
-    void* CreateVertBuffer(const VertBufferCreationInfo& info)
-    {
-        return new VkVertBuffer(info);
-    }
-
-    void DestroyVertBuffer(void* handle)
-    {
-        delete (VkVertBuffer*)handle;
     }
 }

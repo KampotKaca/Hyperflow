@@ -1,14 +1,11 @@
 #ifndef HVK_GRAPHICS_H
 #define HVK_GRAPHICS_H
 
-#include "hshared.h"
-#include <vulkan/vulkan.h>
-
+#include "hvk_shared.h"
 #include "hvk_framebuffer.h"
 #include "hvk_bufferattrib.h"
-#include "../config.h"
 
-namespace hf::inter::rendering
+namespace hf
 {
 #if DEBUG
 #define NUM_VK_VALIDATION_LAYERS 1
@@ -136,6 +133,11 @@ namespace hf::inter::rendering
 #define NUM_DEVICE_EXTENSIONS 1
 
     extern GraphicsData GRAPHICS_DATA;
+
+    void LoadVulkan(const char* appVersion);
+    void UnloadVulkan();
+
+    void DelayThreadUntilRenderingFinish();
 
     void CreateSwapchain(VkSurfaceKHR surface, uvec2 targetSize, GraphicsSwapChain* result);
     void DestroySwapchain(GraphicsSwapChain& gc, VkSwapchainKHR* swapchain);

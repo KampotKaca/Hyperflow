@@ -1,10 +1,9 @@
 #ifndef HVK_BUFFERATTRIB_H
 #define HVK_BUFFERATTRIB_H
 
-#include "hinternal.h"
-#include <vulkan/vulkan.h>
+#include "hvk_shared.h"
 
-namespace hf::inter::rendering
+namespace hf
 {
     struct VkBufferAttrib
     {

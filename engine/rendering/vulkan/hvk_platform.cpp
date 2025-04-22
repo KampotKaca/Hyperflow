@@ -1,7 +1,5 @@
 #include "include/hvk_graphics.h"
 #include "include/hvk_renderer.h"
-#include "exceptions/hgraphicsexception.h"
-#include "hgenericexception.h"
 
 // #ifdef VkResult
 // #undef VkResult
@@ -21,7 +19,7 @@
 
 #endif
 
-namespace hf::inter::rendering
+namespace hf
 {
     const char* REQUIRED_EXTENSIONS[NUM_REQUIRED_EXTENSIONS] =
     {

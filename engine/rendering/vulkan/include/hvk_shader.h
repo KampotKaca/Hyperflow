@@ -1,10 +1,10 @@
 #ifndef HVKSHADER_H
 #define HVKSHADER_H
 
-#include "hinternal.h"
-#include <vulkan/vulkan.h>
+#include "hvk_shared.h"
+#include "hvk_renderer.h"
 
-namespace hf::inter::rendering
+namespace hf
 {
     enum class PipelineBlendType { None, Alpha, Logical };
     struct VkPipelineInfo
@@ -20,11 +20,13 @@ namespace hf::inter::rendering
 
     struct VkShader
     {
-        VkShader(const ShaderCreationInfo& info);
+        VkShader(const inter::rendering::ShaderCreationInfo& info);
         ~VkShader();
 
         std::unordered_map<BufferAttrib, VkPipeline> pipelines;
     };
+
+    void BindShader(const VKRenderer* rn, VkShader* shader, BufferAttrib attrib);
 }
 
 #endif //HVKSHADER_H
