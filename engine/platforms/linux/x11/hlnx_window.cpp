@@ -152,6 +152,7 @@ namespace hf
 
 				WIN_REGISTRY.erase(window);
 				XDestroyWindow(PLATFORM_DATA.display, window);
+				rendering::DestroyRenderer(win->renderer.get());
 				win->renderer = nullptr;
 				delete((LnxWindowData*)win->handle);
 				win->handle = nullptr;

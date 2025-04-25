@@ -1,4 +1,4 @@
-#include "include/hd3d_renderer.h"
+#include "../include/hd3d_renderer.h"
 
 namespace hf
 {
@@ -58,7 +58,7 @@ namespace hf
 
     bool StartFrame(D3DRenderer* rn)
     {
-        float c[4] = { glm::abs(std::sin((float)time::GetTimePassed())), 0, 0, 1 };
+        float c[4] = { 1, 0, 0, 1 };
         GRAPHICS_DATA.context->ClearRenderTargetView(rn->renderTexture, c);
         return true;
     }

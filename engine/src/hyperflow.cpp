@@ -36,6 +36,8 @@ namespace hf
 
 			inter::HF.mainWindow = window::Open(engineData.windowData, nullptr);
 
+			inter::rendering::LoadApi(engineData.renderingApi);
+			if(inter::HF.lifecycleCallbacks.onResourcesLoad) inter::HF.lifecycleCallbacks.onResourcesLoad();
 			inter::HF.isRunning = true;
 
 			if(inter::HF.lifecycleCallbacks.onStartCallback) inter::HF.lifecycleCallbacks.onStartCallback();

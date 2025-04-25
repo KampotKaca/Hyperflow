@@ -38,6 +38,7 @@ namespace hf::inter::window
     {
         if (win->handle && IsWindow((HWND)win->handle))
         {
+            rendering::DestroyRenderer(win->renderer.get());
             win->renderer = nullptr;
             if (!DestroyWindow((HWND)win->handle)) throw WND_LAST_EXCEPT();
             win->handle = nullptr;
@@ -104,5 +105,18 @@ namespace hf::inter::window
     {
         SetFocus((HWND)win->handle);
         SetForegroundWindow((HWND)win->handle);
+    }
+}
+
+namespace hf::inter
+{
+    void* LoadDll(const char* dllName)
+    {
+        return LoadLibraryA(dllName);
+    }
+
+    void UnloadDll(void* dll)
+    {
+        FreeLibrary((HMODULE)dll);
     }
 }

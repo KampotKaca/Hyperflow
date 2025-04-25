@@ -1,43 +1,157 @@
 #include "hrenderer.h"
-
 #include <hyperflow.h>
-
 #include "hinternal.h"
 #include "../config.h"
+#include "../../../application/appconfig.h"
+#include "export/hex_renderer.h"
 
 namespace hf
 {
-    Renderer::Renderer(const Ref<Window>& window)
+    Renderer::Renderer(uvec2 initialSize)
     {
-        if (inter::HF.rendererCount == 0) inter::rendering::Load(VERSION);
-        inter::HF.rendererCount++;
-        handle = inter::rendering::CreateInstance(window->handle, window->rect.size);
+        size = initialSize;
+        inter::rendering::CreateRenderer(this);
+    }
+
+    Renderer::Renderer(const Window* window)
+    {
+        windowHandle = window->handle;
+        size = window->rect.size;
+        inter::rendering::CreateRenderer(this);
     }
 
     Renderer::~Renderer()
     {
-        if (inter::HF.rendererCount == 1)
-        {
-            rendering::UnloadAllResources();
-        }
-
-        inter::rendering::DestroyInstance(handle);
-        handle = nullptr;
-        inter::HF.rendererCount--;
-        if (inter::HF.rendererCount == 0) inter::rendering::Unload();
+        inter::rendering::DestroyRenderer(this);
     }
 
-    namespace rendering
+    namespace renderer
     {
-        void Draw() { Draw(inter::HF.mainWindow->renderer); }
+        Ref<Renderer> Create(uvec2 size)
+        {
+            return MakeRef<Renderer>(size);
+        }
+
+        void Destroy(Ref<Renderer> rn)
+        {
+            inter::rendering::DestroyRenderer(rn.get());
+        }
+
+        bool IsRunning(const Ref<Renderer>& rn) { return rn->handle; }
+
+        bool IsApiSupported(RenderingApi targetApi)
+        {
+            return true;
+        }
+
+        void QuerySupportedApis(std::vector<RenderingApi>& apis)
+        {
+
+        }
+
+        void ChangeApi(RenderingApi targetApi)
+        {
+            if (targetApi == inter::HF.renderingApi) return;
+            inter::rendering::UnloadCurrentApi(false);
+            inter::rendering::LoadApi(targetApi);
+        }
+
+        void Resize(Ref<Renderer> rn, uvec2 size)
+        {
+            if (rn->windowHandle != nullptr) throw GENERIC_EXCEPT("[Hyperflow]", "Cannot resize renderer connected to the window");
+            rn->size = size;
+            inter::rendering::RegisterFrameBufferChange(rn->handle, size);
+        }
+
         void Draw(const Ref<Renderer>& renderer)
         {
-            inter::rendering::Draw(renderer.get());
+            inter::rendering::Draw(renderer->handle);
         }
+
+        void Draw() { Draw(inter::HF.mainWindow->renderer); }
 
         void UnloadAllResources()
         {
             shader::DestroyAll();
+        }
+    }
+
+    namespace inter::rendering
+    {
+        void LoadApi(RenderingApi api)
+        {
+            if (HF.renderingApi != RenderingApi::None) throw GENERIC_EXCEPT("[Hyperflow]", "Cannot load multiple rendering APIs, need unload current one first");
+
+            switch (api)
+            {
+                case RenderingApi::None: throw GENERIC_EXCEPT("[Hyperflow]", "Cannot run the engine without rendering");
+                case RenderingApi::Vulkan:
+                    break;
+                case RenderingApi::Direct3D:
+                    LoadDll("d3d.dll");
+                    break;
+                default: break;
+            }
+
+            for (auto& win : HF.windows)
+            {
+                if (win->renderer) CreateRenderer(win->renderer.get());
+                else win->renderer = MakeRef<Renderer>(win.get());
+            }
+
+            HF.renderingApi = api;
+        }
+
+        void UnloadCurrentApi(bool retainReferences)
+        {
+            if (HF.renderingApi == RenderingApi::None) return;
+
+            for (auto& window : HF.windows)
+            {
+                if (window->renderer)
+                {
+                    DestroyRenderer(window->renderer.get());
+                    if (!retainReferences) window->renderer = nullptr;
+                }
+            }
+
+            HF.renderingApi = RenderingApi::None;
+        }
+
+        void CreateRenderer(Renderer* rn)
+        {
+            if (HF.rendererCount == 0)
+            {
+                auto engineV = utils::ConvertVersion(VERSION);
+                auto appV = utils::ConvertVersion(APP_VERSION);
+
+                RendererLoadInfo loadInfo
+                {
+                    .appVersion = appV,
+                    .engineVersion = engineV,
+                    .applicationTitle = HF.appTitle.c_str()
+                };
+
+                Load(loadInfo);
+            }
+            HF.rendererCount++;
+            rn->handle = CreateInstance(rn->windowHandle, rn->size);
+        }
+
+        void DestroyRenderer(Renderer* rn)
+        {
+            if (rn->handle)
+            {
+                if (HF.rendererCount == 1)
+                {
+                    renderer::UnloadAllResources();
+                }
+
+                DestroyInstance(rn->handle);
+                rn->handle = nullptr;
+                HF.rendererCount--;
+                if (HF.rendererCount == 0) Unload();
+            }
         }
     }
 }

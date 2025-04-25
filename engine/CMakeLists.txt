@@ -63,7 +63,7 @@ if(NOT D3D STREQUAL "ON")
 endif ()
 
 if(D3D STREQUAL "ON")
-    file(GLOB_RECURSE RENDERER CONFIGURE_DEPENDS rendering/d3d/*.cpp)
+    add_subdirectory(rendering/d3d)
 elseif (VULKAN STREQUAL "ON")
     file(GLOB_RECURSE RENDERER CONFIGURE_DEPENDS rendering/vulkan/*.cpp)
 endif ()
@@ -113,20 +113,14 @@ elseif (LINUX)
     )
 endif ()
 
-if (D3D)
-    target_link_libraries(${PROJECT_NAME}
-            PRIVATE
-            d3d11
-            dxgi
-    )
-endif ()
-
 if(VULKAN)
     find_package(Vulkan REQUIRED)
-    target_link_libraries(${PROJECT_NAME}
-            PRIVATE
-            Vulkan::Vulkan
-    )
+
+    if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+        target_link_libraries(${PROJECT_NAME} PRIVATE Vulkan::Vulkan)
+    else ()
+        message(FATAL_ERROR "Vulkan libraries on windows can only be compiled with gcc")
+    endif()
 endif ()
 
 # Set include directories
@@ -147,5 +141,8 @@ target_include_directories(${PROJECT_NAME}
         platforms/include
         rendering/include
 )
+
+get_target_property(LIBS ${PROJECT_NAME} LINK_LIBRARIES)
+message(STATUS "Linking libraries: ${LIBS}")
 
 target_compile_definitions("${PROJECT_NAME}" PUBLIC RES_PATH="${CMAKE_BINARY_DIR}/res/")

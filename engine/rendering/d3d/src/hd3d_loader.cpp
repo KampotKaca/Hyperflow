@@ -1,5 +1,5 @@
-﻿#include "include/hd3d_graphics.h"
-#include "include/hd3d_renderer.h"
+﻿#include "../include/hd3d_graphics.h"
+#include "../include/hd3d_renderer.h"
 
 namespace hf
 {

@@ -134,7 +134,7 @@ namespace hf
 
     extern GraphicsData GRAPHICS_DATA;
 
-    void LoadVulkan(const char* appVersion);
+    void LoadVulkan(const inter::rendering::RendererLoadInfo& info);
     void UnloadVulkan();
 
     void DelayThreadUntilRenderingFinish();

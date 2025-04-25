@@ -59,16 +59,14 @@ namespace hf
 
     static void DestroyLogicalDevice(LogicalDevice& device);
 
-    void LoadVulkan(const char* appVersion)
+    void LoadVulkan(const inter::rendering::RendererLoadInfo& info)
     {
-        auto engineV = utils::ConvertVersion(VERSION);
-        auto appV = utils::ConvertVersion(appVersion);
         VkApplicationInfo appInfo{};
         appInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
-        appInfo.pApplicationName = GetApplicationTitle().c_str();
-        appInfo.applicationVersion = VK_MAKE_VERSION(appV.x, appV.y, appV.z);
+        appInfo.pApplicationName = info.applicationTitle;
+        appInfo.applicationVersion = VK_MAKE_VERSION(info.appVersion.x, info.appVersion.y, info.appVersion.z);
         appInfo.pEngineName = HF_ENGINE_TITLE;
-        appInfo.engineVersion = VK_MAKE_VERSION(engineV.x, engineV.y, engineV.z);
+        appInfo.engineVersion = VK_MAKE_VERSION(info.engineVersion.x, info.engineVersion.y, info.engineVersion.z);
         appInfo.apiVersion = VULKAN_API_VERSION;
 
         InitLayers();

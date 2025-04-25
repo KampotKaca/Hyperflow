@@ -7,9 +7,12 @@ namespace hf
 {
 	struct Renderer
 	{
-		Renderer(const Ref<Window>& window);
+		Renderer(uvec2 initialSize);
+		Renderer(const Window* window);
 		~Renderer();
 
+		uvec2 size{};
+		void* windowHandle{};
 		void* handle{};
 	};
 }

@@ -172,6 +172,8 @@ namespace hf
 		const std::string& fragmentShaderLoc{};
 	};
 
+	enum class RenderingApi { None, Vulkan, Direct3D };
+
 	//endregion
 
 	//region Window
@@ -213,6 +215,7 @@ namespace hf
 
 	struct EngineLifecycleCallbacks
 	{
+		void (*onResourcesLoad)(){};
 		void (*onStartCallback)(){};
 		void (*onUpdateCallback)(){};
 		void (*onQuitCallback)(){};
@@ -221,6 +224,7 @@ namespace hf
 	struct EngineData
 	{
 		std::string appTitle = "Hyperflow";
+		RenderingApi renderingApi = RenderingApi::Vulkan;
 		EngineUpdateType updateType = EngineUpdateType::EventRaised;
 		EngineLifecycleCallbacks lifecycleCallbacks{};
 		WindowData windowData{};
@@ -233,7 +237,6 @@ namespace hf
 	//region Helpers
 
 	uint32_t TrailingZeros64(uint64_t n);
-	uint32_t TrailingZeros128(__int128 n);
 
 	//endregion
 }

@@ -87,8 +87,19 @@ namespace hf
 		void SetTargetFrameRate(int16_t targetFrameRate);
 	}
 
-	namespace rendering
+	namespace renderer
 	{
+		Ref<Renderer> Create(uvec2 size);
+		void Destroy(Ref<Renderer> rn);
+		bool IsRunning(const Ref<Renderer>& rn);
+
+		bool IsApiSupported(RenderingApi targetApi);
+		void QuerySupportedApis(std::vector<RenderingApi>& apis);
+		//Destroy every renderer which is not connected to the window, before you try to change api
+
+		void ChangeApi(RenderingApi targetApi);
+
+		void Resize(Ref<Renderer> rn, uvec2 size);
 		void Draw(const Ref<Renderer>& renderer);
 		void Draw();
 		void UnloadAllResources();

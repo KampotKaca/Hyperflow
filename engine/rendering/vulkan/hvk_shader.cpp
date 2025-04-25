@@ -176,6 +176,7 @@ namespace hf
         VkPipelineVertexInputStateCreateInfo vertexInputInfo
         {
             .sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO,
+            .vertexBindingDescriptionCount = 1,
             .pVertexBindingDescriptions = &attribute.bindingDescription,
             .vertexAttributeDescriptionCount = (uint32_t)attribute.attribDescriptions.size(),
             .pVertexAttributeDescriptions = attribute.attribDescriptions.data(),

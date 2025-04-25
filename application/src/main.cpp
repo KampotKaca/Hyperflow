@@ -19,9 +19,11 @@ int main()
 	hf::EngineData engineData =
 	{
 		.appTitle = "Hyperflow",
+		.renderingApi = hf::RenderingApi::Direct3D,
 		.updateType = hf::EngineUpdateType::Continues,
 		.lifecycleCallbacks =
 		{
+			.onResourcesLoad    = app::Application::LoadResources,
 			.onStartCallback    = app::Application::Start,
 			.onUpdateCallback   = app::Application::Update,
 			.onQuitCallback     = app::Application::Quit,

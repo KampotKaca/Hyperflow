@@ -37,7 +37,7 @@ namespace app
 		.pFormats = formats
 	};
 
-	void Application::Start()
+	void Application::LoadResources()
 	{
 		bufferAttrib = hf::vertbuffer::CreateAttrib(bufferAttribCreateInfo);
 
@@ -59,7 +59,10 @@ namespace app
 		};
 
 		shader = hf::shader::Create(shaderInfo);
+	}
 
+	void Application::Start()
+	{
 		count = 0;
 	}
 
@@ -118,6 +121,6 @@ namespace app
 	void Application::OnMainWindowRender(const hf::Ref<hf::Renderer>& rn)
 	{
 		hf::shader::Bind(rn, shader, bufferAttrib);
-		hf::rendering::Draw(rn);
+		hf::renderer::Draw(rn);
 	}
 }

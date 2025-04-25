@@ -3,6 +3,7 @@
 #include "hwindow.h"
 #include "hplatform.h"
 #include "hrenderer.h"
+#include "export/hex_renderer.h"
 
 namespace hf
 {
@@ -42,7 +43,7 @@ namespace hf
 		Ref<Window> Open(const WindowData &data, const Ref<Window> &parent)
 		{
 			auto newWindow = MakeRef<Window>(data, parent);
-			newWindow->renderer = MakeRef<Renderer>(newWindow);
+			if (inter::HF.renderingApi != RenderingApi::None) newWindow->renderer = MakeRef<Renderer>(newWindow.get());
 			inter::HF.windows.push_back(newWindow);
 			return newWindow;
 		}
@@ -109,7 +110,11 @@ namespace hf
 	void WindowEvent_Resize(Window* window, ivec2 size) noexcept
 	{
 		window->rect.size = size;
-		if (window->renderer) inter::rendering::RegisterFrameBufferChange(window->renderer.get(), size);
+		if (window->renderer)
+		{
+			window->renderer->size = size;
+			inter::rendering::RegisterFrameBufferChange(window->renderer->handle, size);
+		}
 	}
 
 	void WindowEvent_Focus(Window* window, bool isFocused) noexcept
@@ -248,10 +253,10 @@ namespace hf
 		void Update(const Window* win)
 		{
 			auto rn = win->renderer.get();
-			if(rendering::StartFrame(rn))
+			if(rendering::StartFrame(rn->handle))
 			{
 				if (win->onRenderCallback) win->onRenderCallback(win->renderer);
-				rendering::EndFrame(rn);
+				rendering::EndFrame(rn->handle);
 			}
 		}
 	}
