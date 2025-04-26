@@ -6,6 +6,9 @@
 #include "exceptions/hwindowexception.h"
 #include "hlnx_window.h"
 
+#include <dlfcn.h>
+#include <bits/dlfcn.h>
+
 namespace hf
 {
 	LnxPlatformData PLATFORM_DATA{};
@@ -160,6 +163,47 @@ namespace hf
 				return true;
 			}
 			return false;
+		}
+
+		void* GetWindowHandle(const Window* win)
+		{
+			return (void*)((LnxWindowData*)win->handle)->window;
+		}
+	}
+
+	namespace inter
+	{
+		void* LoadDll(const char* dllName)
+		{
+			char exePath[PATH_MAX];
+			ssize_t count = readlink("/proc/self/exe", exePath, PATH_MAX);
+			std::string baseDir = std::string(exePath, (count > 0) ? count : 0);
+
+			size_t lastSlash = baseDir.find_last_of('/');
+			std::string exeDir = baseDir.substr(0, lastSlash + 1);
+
+			std::string path = exeDir + "lib" + dllName + ".so";
+			if (!utils::FileExists(path.c_str()))
+				throw GENERIC_EXCEPT("[Hyperflow]", "Unable to find dll at path %s", path.c_str());
+
+			void* dll = dlopen(path.c_str(), RTLD_NOW);
+			if (!dll) throw GENERIC_EXCEPT("[Hyperflow]", "Unable to load dll\n[Error] %s", dlerror());
+			return dll;
+		}
+
+		void* GetFuncPtr(void* dll, const char* funcName)
+		{
+			return dlsym(dll, funcName);
+		}
+
+		void UnloadDll(void* dll)
+		{
+			dlclose(dll);
+		}
+
+		void* GetPlatformInstance()
+		{
+			return PLATFORM_DATA.display;
 		}
 	}
 }

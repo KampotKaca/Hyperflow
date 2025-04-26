@@ -87,8 +87,7 @@ namespace hf::inter::rendering
         DelayThreadUntilRenderingFinish();
     }
 
-    extern "C" __declspec(dllexport)
-    RendererAPI* GetAPI()
+    API RendererAPI* GetAPI()
     {
         static RendererAPI api =
         {

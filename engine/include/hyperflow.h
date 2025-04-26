@@ -131,6 +131,7 @@ namespace hf
 	{
 		ivec3 ConvertVersion(const char* version);
 		bool ReadFile(const std::string& filename, std::vector<char>& result);
+		bool FileExists(const char* path);
 
 		[[nodiscard]] void* Allocate(std::size_t n);
 		[[nodiscard]] void* AllocateAligned(std::size_t n, std::align_val_t align);

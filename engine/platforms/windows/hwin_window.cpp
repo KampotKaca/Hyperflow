@@ -106,13 +106,23 @@ namespace hf::inter::window
         SetFocus((HWND)win->handle);
         SetForegroundWindow((HWND)win->handle);
     }
+
+    void* GetWindowHandle(const Window* win)
+    {
+        return win->handle;
+    }
 }
 
 namespace hf::inter
 {
     void* LoadDll(const char* dllName)
     {
-        return LoadLibraryA(dllName);
+        const std::string path = std::string("lib") + dllName + ".dll";
+        if (!utils::FileExists(path.c_str()))
+            throw GENERIC_EXCEPT("[Hyperflow]", "Unable to find dll at path %s", path.c_str());
+        void* dll = LoadLibraryA(path.c_str());
+        if (!dll) throw WND_LAST_EXCEPT();
+        return dll;
     }
 
     void* GetFuncPtr(void* dll, const char* funcName)

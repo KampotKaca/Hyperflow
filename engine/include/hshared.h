@@ -71,6 +71,11 @@ namespace hf
 
 #define TO_RES_PATH(x) (std::string(RES_PATH) + (x))
 
+#if PLATFORM_WINDOWS
+#define API extern "C" __declspec(dllexport)
+#elif PLATFORM_LINUX
+#define API extern "C" __attribute__((visibility("default")))
+#endif
 	//endregion
 
 	//region Definitions

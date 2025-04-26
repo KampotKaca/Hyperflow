@@ -15,7 +15,7 @@ namespace hf
 
     Renderer::Renderer(const Window* window)
     {
-        windowHandle = window->handle;
+        windowHandle = inter::window::GetWindowHandle(window);
         size = window->rect.size;
         inter::rendering::CreateRenderer(this);
     }
@@ -87,10 +87,10 @@ namespace hf
             {
                 case RenderingApiType::None: throw GENERIC_EXCEPT("[Hyperflow]", "Cannot run the engine without rendering");
                 case RenderingApiType::Vulkan:
-                    newApi.handle = LoadDll("libvk.dll");
+                    newApi.handle = LoadDll("vk");
                     break;
                 case RenderingApiType::Direct3D:
-                    newApi.handle = LoadDll("libd3d.dll");
+                    newApi.handle = LoadDll("d3d");
                     break;
                 default: break;
             }

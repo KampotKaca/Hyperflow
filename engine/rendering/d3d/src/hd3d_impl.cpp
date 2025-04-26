@@ -83,8 +83,7 @@ namespace hf::inter::rendering
 
         }
 
-        extern "C" __declspec(dllexport)
-        RendererAPI* GetAPI()
+        API RendererAPI* GetAPI()
         {
             static RendererAPI api =
             {

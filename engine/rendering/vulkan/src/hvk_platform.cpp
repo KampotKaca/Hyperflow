@@ -67,8 +67,8 @@ namespace hf
         VkXlibSurfaceCreateInfoKHR createInfo
         {
             .sType = VK_STRUCTURE_TYPE_XLIB_SURFACE_CREATE_INFO_KHR,
-            .dpy = PLATFORM_DATA.display,
-            .window = ((LnxWindowData*)rn->windowHandle)->window,
+            .dpy = (Display*)GRAPHICS_DATA.platformInstance,
+            .window = (::Window)rn->windowHandle,
         };
 
         VK_HANDLE_EXCEPT(vkCreateXlibSurfaceKHR(GRAPHICS_DATA.instance, &createInfo, nullptr, &rn->swapchain.surface));

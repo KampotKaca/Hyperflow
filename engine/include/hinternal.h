@@ -7,6 +7,12 @@
 #include "components/htime.h"
 #include "export/hex_renderer.h"
 
+#if PLATFORM_LINUX
+#ifdef None
+#undef None;
+#endif
+#endif
+
 namespace hf::inter
 {
     struct RenderingApi
@@ -48,6 +54,8 @@ namespace hf::inter
         void SetSize(const Window* win, ivec2 size);
         void SetPosition(const Window* win, ivec2 position);
         void SetRect(const Window* win, IRect rect);
+
+        void* GetWindowHandle(const Window* win);
 
         void SetFlags(Window* win, WindowFlags flags);
         void Focus(const Window* win);
