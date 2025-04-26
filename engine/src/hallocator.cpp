@@ -1,5 +1,5 @@
 #include "hshared.h"
-#include "hgenericexception.h"
+#include "../others/exception/include/hgenericexception.h"
 #include "hinternal.h"
 #include "rpmalloc.h"
 #include "hyperflow.h"

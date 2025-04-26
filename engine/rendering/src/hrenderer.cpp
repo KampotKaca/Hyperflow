@@ -39,19 +39,19 @@ namespace hf
 
         bool IsRunning(const Ref<Renderer>& rn) { return rn->handle; }
 
-        bool IsApiSupported(RenderingApi targetApi)
+        bool IsApiSupported(RenderingApiType targetApi)
         {
             return true;
         }
 
-        void QuerySupportedApis(std::vector<RenderingApi>& apis)
+        void QuerySupportedApis(std::vector<RenderingApiType>& apis)
         {
 
         }
 
-        void ChangeApi(RenderingApi targetApi)
+        void ChangeApi(RenderingApiType targetApi)
         {
-            if (targetApi == inter::HF.renderingApi) return;
+            if (targetApi == inter::HF.renderingApi.type) return;
             inter::rendering::UnloadCurrentApi(false);
             inter::rendering::LoadApi(targetApi);
         }
@@ -60,12 +60,12 @@ namespace hf
         {
             if (rn->windowHandle != nullptr) throw GENERIC_EXCEPT("[Hyperflow]", "Cannot resize renderer connected to the window");
             rn->size = size;
-            inter::rendering::RegisterFrameBufferChange(rn->handle, size);
+            inter::HF.renderingApi.api.RegisterFrameBufferChange(rn->handle, size);
         }
 
         void Draw(const Ref<Renderer>& renderer)
         {
-            inter::rendering::Draw(renderer->handle);
+            inter::HF.renderingApi.api.Draw(renderer->handle);
         }
 
         void Draw() { Draw(inter::HF.mainWindow->renderer); }
@@ -78,33 +78,40 @@ namespace hf
 
     namespace inter::rendering
     {
-        void LoadApi(RenderingApi api)
+        void LoadApi(RenderingApiType api)
         {
-            if (HF.renderingApi != RenderingApi::None) throw GENERIC_EXCEPT("[Hyperflow]", "Cannot load multiple rendering APIs, need unload current one first");
+            if (HF.renderingApi.type != RenderingApiType::None) throw GENERIC_EXCEPT("[Hyperflow]", "Cannot load multiple rendering APIs, need unload current one first");
 
+            RenderingApi newApi{};
             switch (api)
             {
-                case RenderingApi::None: throw GENERIC_EXCEPT("[Hyperflow]", "Cannot run the engine without rendering");
-                case RenderingApi::Vulkan:
+                case RenderingApiType::None: throw GENERIC_EXCEPT("[Hyperflow]", "Cannot run the engine without rendering");
+                case RenderingApiType::Vulkan:
+                    newApi.handle = LoadDll("libvk.dll");
                     break;
-                case RenderingApi::Direct3D:
-                    LoadDll("d3d.dll");
+                case RenderingApiType::Direct3D:
+                    newApi.handle = LoadDll("libd3d.dll");
                     break;
                 default: break;
             }
+
+            if (!newApi.handle) throw GENERIC_EXCEPT("[Hyperflow]", "Cannot load rendering API");
+            auto func = (RendererAPI*(*)())GetFuncPtr(newApi.handle, "GetAPI");
+            if (!func) throw GENERIC_EXCEPT("[Hyperflow]", "Unable to fund GetAPI function in the rendering dll");
+            newApi.api = *func();
+            newApi.type = api;
+            HF.renderingApi = newApi;
 
             for (auto& win : HF.windows)
             {
                 if (win->renderer) CreateRenderer(win->renderer.get());
                 else win->renderer = MakeRef<Renderer>(win.get());
             }
-
-            HF.renderingApi = api;
         }
 
         void UnloadCurrentApi(bool retainReferences)
         {
-            if (HF.renderingApi == RenderingApi::None) return;
+            if (HF.renderingApi.type == RenderingApiType::None) return;
 
             for (auto& window : HF.windows)
             {
@@ -115,7 +122,13 @@ namespace hf
                 }
             }
 
-            HF.renderingApi = RenderingApi::None;
+            UnloadDll(HF.renderingApi.handle);
+
+            HF.renderingApi = RenderingApi
+            {
+                .type = RenderingApiType::None,
+                .handle = nullptr,
+            };
         }
 
         void CreateRenderer(Renderer* rn)
@@ -129,13 +142,19 @@ namespace hf
                 {
                     .appVersion = appV,
                     .engineVersion = engineV,
-                    .applicationTitle = HF.appTitle.c_str()
+                    .applicationTitle = HF.appTitle.c_str(),
+                    .platformInstance = GetPlatformInstance()
                 };
 
-                Load(loadInfo);
+                HF.renderingApi.api.Load(loadInfo);
             }
             HF.rendererCount++;
-            rn->handle = CreateInstance(rn->windowHandle, rn->size);
+            RendererInstanceCreationInfo createInfo
+            {
+                .handle = rn->windowHandle,
+                .size = rn->size,
+            };
+            rn->handle = HF.renderingApi.api.CreateInstance(createInfo);
         }
 
         void DestroyRenderer(Renderer* rn)
@@ -147,10 +166,10 @@ namespace hf
                     renderer::UnloadAllResources();
                 }
 
-                DestroyInstance(rn->handle);
+                HF.renderingApi.api.DestroyInstance(rn->handle);
                 rn->handle = nullptr;
                 HF.rendererCount--;
-                if (HF.rendererCount == 0) Unload();
+                if (HF.rendererCount == 0) HF.renderingApi.api.Unload();
             }
         }
     }

@@ -8,7 +8,7 @@ namespace hf
     VertBuffer::VertBuffer(const VertBufferCreationInfo& info)
     {
         if (info.bufferAttrib == 0) throw GENERIC_EXCEPT("[Hyperflow]", "buffer attribute must be set");
-        handle = inter::rendering::CreateVertBuffer(info);
+        handle = inter::HF.renderingApi.api.CreateVertBuffer(info);
     }
 
     VertBuffer::~VertBuffer()
@@ -27,7 +27,7 @@ namespace hf
                 fullStride += stride.size;
             }
 
-            return inter::rendering::CreateBufferAttrib(info, fullStride);
+            return inter::HF.renderingApi.api.CreateBufferAttrib(info, fullStride);
         }
 
         Ref<VertBuffer> Create(const VertBufferCreationInfo& info)
@@ -39,14 +39,14 @@ namespace hf
 
         void Destroy(const Ref<VertBuffer>& buffer)
         {
-            inter::rendering::WaitForRendering();
+            inter::HF.renderingApi.api.WaitForRendering();
             if (inter::rendering::DestroyVertBuffer_i(buffer.get()))
                 inter::HF.vertBuffers.erase(buffer.get());
         }
 
         void Destroy(const Ref<VertBuffer>* pBuffers, uint32_t count)
         {
-            inter::rendering::WaitForRendering();
+            inter::HF.renderingApi.api.WaitForRendering();
             for (uint32_t i = 0; i < count; i++)
             {
                 auto buffer = pBuffers[i];
@@ -57,7 +57,7 @@ namespace hf
 
         void DestroyAll()
         {
-            inter::rendering::WaitForRendering();
+            inter::HF.renderingApi.api.WaitForRendering();
             for (const auto& buffer : std::ranges::views::values(inter::HF.vertBuffers))
                 inter::rendering::DestroyVertBuffer_i(buffer.get());
             inter::HF.vertBuffers.clear();
@@ -72,7 +72,7 @@ namespace hf
         {
             if (buffer->handle)
             {
-                DestroyVertBuffer(buffer->handle);
+                HF.renderingApi.api.DestroyVertBuffer(buffer->handle);
                 buffer->handle = nullptr;
                 return true;
             }

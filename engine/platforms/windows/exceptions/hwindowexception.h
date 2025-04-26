@@ -3,7 +3,7 @@
 
 #include "../hwindows.h"
 #include "hshared.h"
-#include "hexception.h"
+#include "../../../others/exception/include/hexception.h"
 
 namespace hf
 {

@@ -22,8 +22,6 @@
 #include <queue>
 #include <optional>
 
-#include "glm/fwd.hpp"
-
 extern "C"
 {
 #include "log.h"
@@ -63,6 +61,13 @@ namespace hf
 	{
 		return std::make_unique<T>(std::forward<Args>(args)...);
 	}
+
+	template<typename T>
+	struct DllApi
+	{
+		void* handle;
+		T api;
+	};
 
 #define TO_RES_PATH(x) (std::string(RES_PATH) + (x))
 
@@ -172,7 +177,7 @@ namespace hf
 		const std::string& fragmentShaderLoc{};
 	};
 
-	enum class RenderingApi { None, Vulkan, Direct3D };
+	enum class RenderingApiType { None, Vulkan, Direct3D };
 
 	//endregion
 
@@ -224,7 +229,7 @@ namespace hf
 	struct EngineData
 	{
 		std::string appTitle = "Hyperflow";
-		RenderingApi renderingApi = RenderingApi::Vulkan;
+		RenderingApiType renderingApi = RenderingApiType::Vulkan;
 		EngineUpdateType updateType = EngineUpdateType::EventRaised;
 		EngineLifecycleCallbacks lifecycleCallbacks{};
 		WindowData windowData{};

@@ -1,5 +1,5 @@
-#include "../include/hgraphicsexception.h"
 #include <sstream>
+#include "hgraphicsexception.h"
 
 namespace hf
 {

@@ -10,6 +10,7 @@
 
 #include "glm/mat4x4.hpp"
 #include "glm/common.hpp"
+#include "glm/fwd.hpp"
 
 namespace hf
 {

@@ -1,6 +1,6 @@
-#include "include/hvk_shader.h"
-#include "include/hvk_graphics.h"
-#include "include/hvk_renderer.h"
+#include "hvk_shader.h"
+#include "hvk_graphics.h"
+#include "hvk_renderer.h"
 
 namespace hf
 {

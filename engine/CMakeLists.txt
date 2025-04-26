@@ -4,7 +4,7 @@ file(READ "config.h" CONFIG_H_CONTENTS)
 string(REGEX MATCH "#define VERSION \"([0-9]+\\.[0-9]+\\.[0-9]+)\"" VERSION_MATCH "${CONFIG_H_CONTENTS}")
 
 option(BUILD_D3D "build_d3d" ON)
-#option(BUILD_VULKAN "build_vulkan" ON)
+option(BUILD_VULKAN "build_vulkan" ON)
 
 # Set CMake project version
 if(VERSION_MATCH)
@@ -28,6 +28,9 @@ if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
     option(WINDOWS "Windows" ON)
     file(GLOB_RECURSE PLATFORM CONFIGURE_DEPENDS platforms/windows/*.cpp)
 
+    option(VULKAN "vulkan" ON)
+    add_definitions(-DRENDERER_VULKAN)
+
     if(BUILD_D3D STREQUAL "ON")
         option(D3D "d3d" ON)
         add_definitions(-DRENDERER_D3D)
@@ -36,6 +39,9 @@ if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
 elseif (CMAKE_SYSTEM_NAME STREQUAL "Linux")
     add_definitions(-DPLATFORM_LINUX)
     option(LINUX "Linux" ON)
+
+    option(VULKAN "vulkan" ON)
+    add_definitions(-DRENDERER_VULKAN)
 
     find_package(X11)
     if(X11_FOUND)
@@ -57,15 +63,11 @@ else()
     message(FATAL_ERROR "Unsupported platform: ${CMAKE_SYSTEM_NAME}")
 endif()
 
-if(NOT D3D STREQUAL "ON")
-    option(VULKAN "vulkan" ON)
-    add_definitions(-DRENDERER_VULKAN)
-endif ()
-
 if(D3D STREQUAL "ON")
     add_subdirectory(rendering/d3d)
-elseif (VULKAN STREQUAL "ON")
-    file(GLOB_RECURSE RENDERER CONFIGURE_DEPENDS rendering/vulkan/*.cpp)
+endif ()
+if (VULKAN STREQUAL "ON")
+    add_subdirectory(rendering/vulkan)
 endif ()
 
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
@@ -82,8 +84,9 @@ add_subdirectory(external/glm)
 add_subdirectory(external/stb)
 add_subdirectory(external/logc)
 add_subdirectory(external/rpmalloc)
+add_subdirectory(others/exception)
 
-add_library(${PROJECT_NAME} ${ENGINE_SRC} ${PLATFORM} ${RENDERER} ${PLATFORM_SRC} ${RENDERER_SRC})
+add_library(${PROJECT_NAME} ${ENGINE_SRC} ${PLATFORM} ${PLATFORM_SRC} ${RENDERER_SRC})
 
 # Using keyword-based signature consistently
 target_link_libraries(${PROJECT_NAME}
@@ -92,7 +95,16 @@ target_link_libraries(${PROJECT_NAME}
         stb
         logc
         rpmalloc
+        ext
 )
+
+if(D3D)
+    add_dependencies(${PROJECT_NAME} d3d)
+endif ()
+
+if(VULKAN)
+    add_dependencies(${PROJECT_NAME} vk)
+endif ()
 
 target_compile_definitions(${PROJECT_NAME}
         PRIVATE
@@ -111,16 +123,6 @@ elseif (LINUX)
             Xi
             dl
     )
-endif ()
-
-if(VULKAN)
-    find_package(Vulkan REQUIRED)
-
-    if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-        target_link_libraries(${PROJECT_NAME} PRIVATE Vulkan::Vulkan)
-    else ()
-        message(FATAL_ERROR "Vulkan libraries on windows can only be compiled with gcc")
-    endif()
 endif ()
 
 # Set include directories

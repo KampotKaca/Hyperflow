@@ -1,5 +1,5 @@
-#include "include/hvk_renderer.h"
-#include "include/hvk_graphics.h"
+#include "hvk_renderer.h"
+#include "hvk_graphics.h"
 
 namespace hf
 {

@@ -58,6 +58,7 @@ namespace hf
         std::vector<VkExtensionProperties> availableExtensions{};
 
         VkInstance instance{};
+        void* platformInstance{};
         uint32_t supportedVersion;
         std::set<std::string> availableExtensionNames{};
         std::vector<GraphicsDevice> suitableDevices{};

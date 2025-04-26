@@ -43,7 +43,7 @@ namespace hf
 		Ref<Window> Open(const WindowData &data, const Ref<Window> &parent)
 		{
 			auto newWindow = MakeRef<Window>(data, parent);
-			if (inter::HF.renderingApi != RenderingApi::None) newWindow->renderer = MakeRef<Renderer>(newWindow.get());
+			if (inter::HF.renderingApi.type != RenderingApiType::None) newWindow->renderer = MakeRef<Renderer>(newWindow.get());
 			inter::HF.windows.push_back(newWindow);
 			return newWindow;
 		}
@@ -113,7 +113,7 @@ namespace hf
 		if (window->renderer)
 		{
 			window->renderer->size = size;
-			inter::rendering::RegisterFrameBufferChange(window->renderer->handle, size);
+			inter::HF.renderingApi.api.RegisterFrameBufferChange(window->renderer->handle, size);
 		}
 	}
 
@@ -253,10 +253,10 @@ namespace hf
 		void Update(const Window* win)
 		{
 			auto rn = win->renderer.get();
-			if(rendering::StartFrame(rn->handle))
+			if(HF.renderingApi.api.StartFrame(rn->handle))
 			{
 				if (win->onRenderCallback) win->onRenderCallback(win->renderer);
-				rendering::EndFrame(rn->handle);
+				HF.renderingApi.api.EndFrame(rn->handle);
 			}
 		}
 	}

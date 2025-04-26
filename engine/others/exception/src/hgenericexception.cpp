@@ -1,8 +1,6 @@
 #include "hgenericexception.h"
 #include <cstdarg>
 #include <sstream>
-#include <stdio.h>
-#include "hshared.h"
 
 namespace hf
 {
@@ -30,6 +28,6 @@ namespace hf
         va_end(args);
 
         vsprintf(res, error, args);
-        return GenericException(lineNum, file, type, res);
+        return {lineNum, file, type, res};
     }
 }

@@ -115,8 +115,18 @@ namespace hf::inter
         return LoadLibraryA(dllName);
     }
 
+    void* GetFuncPtr(void* dll, const char* funcName)
+    {
+       return (void*)GetProcAddress((HMODULE)dll, funcName);
+    }
+
     void UnloadDll(void* dll)
     {
         FreeLibrary((HMODULE)dll);
+    }
+
+    void* GetPlatformInstance()
+    {
+        return PLATFORM_DATA.instance;
     }
 }

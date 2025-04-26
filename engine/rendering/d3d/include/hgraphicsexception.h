@@ -1,8 +1,8 @@
 #ifndef HGRAPHICSEXCEPTION_H
 #define HGRAPHICSEXCEPTION_H
 
-#include "../../../platforms/windows/hwindows.h"
-#include "hexception.h"
+#include "hwindows.h"
+#include "../../../others/exception/include/hexception.h"
 
 namespace hf
 {

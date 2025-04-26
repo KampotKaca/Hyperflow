@@ -24,7 +24,7 @@ namespace hf
             .fCodeSize = (uint32_t)fragmentCode.size(),
         };
 
-        handle = inter::rendering::CreateShader(creationInfo);
+        handle = inter::HF.renderingApi.api.CreateShader(creationInfo);
     }
 
     Shader::~Shader()
@@ -43,14 +43,14 @@ namespace hf
 
         void Destroy(const Ref<Shader>& shader)
         {
-            inter::rendering::WaitForRendering();
+            inter::HF.renderingApi.api.WaitForRendering();
             if (inter::rendering::DestroyShader_i(shader.get()))
                 inter::HF.shaders.erase(shader.get());
         }
 
         void Destroy(const Ref<Shader>* pShaders, uint32_t count)
         {
-            inter::rendering::WaitForRendering();
+            inter::HF.renderingApi.api.WaitForRendering();
             for (uint32_t i = 0; i < count; i++)
             {
                 auto shader = pShaders[i];
@@ -61,7 +61,7 @@ namespace hf
 
         void DestroyAll()
         {
-            inter::rendering::WaitForRendering();
+            inter::HF.renderingApi.api.WaitForRendering();
             for (const auto& shader : std::ranges::views::values(inter::HF.shaders))
                 inter::rendering::DestroyShader_i(shader.get());
             inter::HF.shaders.clear();
@@ -71,12 +71,12 @@ namespace hf
 
         void Bind(const Ref<Shader>& shader, BufferAttrib attrib)
         {
-            inter::rendering::BindShader(inter::HF.mainWindow->renderer.get(), shader.get(), attrib);
+            inter::HF.renderingApi.api.BindShader(inter::HF.mainWindow->renderer.get(), shader.get(), attrib);
         }
 
         void Bind(const Ref<Renderer>& renderer, const Ref<Shader>& shader, BufferAttrib attrib)
         {
-            inter::rendering::BindShader(renderer->handle, shader->handle, attrib);
+            inter::HF.renderingApi.api.BindShader(renderer->handle, shader->handle, attrib);
         }
     }
 
@@ -86,7 +86,7 @@ namespace hf
         {
             if (shader->handle)
             {
-                DestroyShader(shader->handle);
+                HF.renderingApi.api.DestroyShader(shader->handle);
                 shader->handle = nullptr;
                 return true;
             }

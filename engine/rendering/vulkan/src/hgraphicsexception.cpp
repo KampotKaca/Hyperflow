@@ -1,4 +1,4 @@
-#include "include/hgraphicsexception.h"
+#include "hgraphicsexception.h"
 #include <sstream>
 
 namespace hf

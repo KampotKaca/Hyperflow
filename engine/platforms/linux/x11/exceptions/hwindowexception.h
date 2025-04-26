@@ -2,7 +2,7 @@
 #define HWINDOWEXCEPTION_H
 
 #include "hshared.h"
-#include "hexception.h"
+#include "../../../../others/exception/include/hexception.h"
 #include <inttypes.h>
 
 namespace hf

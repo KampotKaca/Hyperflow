@@ -5,9 +5,17 @@
 #include "hshared.h"
 #include "hvertbuffer.h"
 #include "components/htime.h"
+#include "export/hex_renderer.h"
 
 namespace hf::inter
 {
+    struct RenderingApi
+    {
+        RenderingApiType type = RenderingApiType::None;
+        void* handle{};
+        rendering::RendererAPI api{};
+    };
+
     struct Hyperflow
     {
         EngineLifecycleCallbacks lifecycleCallbacks{};
@@ -18,7 +26,7 @@ namespace hf::inter
         Ref<Window> mainWindow{};
         std::vector<Ref<Window>> windows{};
         uint32_t rendererCount{};
-        RenderingApi renderingApi = RenderingApi::None;
+        RenderingApi renderingApi{};
 
         std::unordered_map<Shader*, Ref<Shader>> shaders{};
         std::unordered_map<VertBuffer*, Ref<VertBuffer>> vertBuffers{};
@@ -28,6 +36,8 @@ namespace hf::inter
 
     void* LoadDll(const char* dllName);
     void UnloadDll(void* dll);
+    void* GetFuncPtr(void* dll, const char* funcName);
+    void* GetPlatformInstance();
 
     namespace window
     {
@@ -56,7 +66,7 @@ namespace hf::inter
 
     namespace rendering
     {
-        void LoadApi(RenderingApi api);
+        void LoadApi(RenderingApiType api);
         void UnloadCurrentApi(bool retainReferences);
 
         void CreateRenderer(Renderer* rn);

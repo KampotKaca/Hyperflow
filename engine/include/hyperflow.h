@@ -2,8 +2,8 @@
 #define HYPERFLOW_H
 
 #include "hshared.h"
-#include "hexception.h"
-#include "hgenericexception.h"
+#include "../others/exception/include/hexception.h"
+#include "../others/exception/include/hgenericexception.h"
 
 namespace hf
 {
@@ -93,11 +93,11 @@ namespace hf
 		void Destroy(Ref<Renderer> rn);
 		bool IsRunning(const Ref<Renderer>& rn);
 
-		bool IsApiSupported(RenderingApi targetApi);
-		void QuerySupportedApis(std::vector<RenderingApi>& apis);
+		bool IsApiSupported(RenderingApiType targetApi);
+		void QuerySupportedApis(std::vector<RenderingApiType>& apis);
 		//Destroy every renderer which is not connected to the window, before you try to change api
 
-		void ChangeApi(RenderingApi targetApi);
+		void ChangeApi(RenderingApiType targetApi);
 
 		void Resize(Ref<Renderer> rn, uvec2 size);
 		void Draw(const Ref<Renderer>& renderer);

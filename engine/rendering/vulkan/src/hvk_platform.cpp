@@ -1,12 +1,12 @@
-#include "include/hvk_graphics.h"
-#include "include/hvk_renderer.h"
+#include "hvk_graphics.h"
+#include "hvk_renderer.h"
 
 // #ifdef VkResult
 // #undef VkResult
 // #endif
 
 #if PLATFORM_WINDOWS
-#include "../platforms/windows/hwin_shared.h"
+#include "../platforms/windows/hwindows.h"
 #include <vulkan/vulkan_win32.h>
 #elif PLATFORM_LINUX
 
@@ -51,7 +51,7 @@ namespace hf
         VkWin32SurfaceCreateInfoKHR createInfo
         {
             .sType = VK_STRUCTURE_TYPE_WIN32_SURFACE_CREATE_INFO_KHR,
-            .hinstance = PLATFORM_DATA.instance,
+            .hinstance = (HINSTANCE)GRAPHICS_DATA.platformInstance,
             .hwnd = (HWND)rendererData->windowHandle,
         };
 

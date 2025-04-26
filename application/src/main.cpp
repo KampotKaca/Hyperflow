@@ -19,7 +19,7 @@ int main()
 	hf::EngineData engineData =
 	{
 		.appTitle = "Hyperflow",
-		.renderingApi = hf::RenderingApi::Direct3D,
+		.renderingApi = hf::RenderingApiType::Vulkan,
 		.updateType = hf::EngineUpdateType::Continues,
 		.lifecycleCallbacks =
 		{

@@ -1,5 +1,5 @@
-#include "include/hvk_bufferattrib.h"
-#include "include/hvk_graphics.h"
+#include "hvk_bufferattrib.h"
+#include "hvk_graphics.h"
 
 namespace hf
 {

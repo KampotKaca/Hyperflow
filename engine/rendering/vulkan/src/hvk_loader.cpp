@@ -1,5 +1,5 @@
-#include "include/hvk_graphics.h"
-#include "include/hvk_renderer.h"
+#include "hvk_graphics.h"
+#include "hvk_renderer.h"
 
 namespace hf
 {
@@ -61,6 +61,7 @@ namespace hf
 
     void LoadVulkan(const inter::rendering::RendererLoadInfo& info)
     {
+        GRAPHICS_DATA.platformInstance = info.platformInstance;
         VkApplicationInfo appInfo{};
         appInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
         appInfo.pApplicationName = info.applicationTitle;
