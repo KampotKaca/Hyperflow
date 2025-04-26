@@ -33,7 +33,7 @@ namespace hf
         Ref<VertBuffer> Create(const VertBufferCreationInfo& info)
         {
             Ref<VertBuffer> buffer = MakeRef<VertBuffer>(info);
-            inter::HF.vertBuffers[buffer.get()] = buffer;
+            inter::HF.graphicsResources.vertBuffers[buffer.get()] = buffer;
             return buffer;
         }
 
@@ -41,7 +41,7 @@ namespace hf
         {
             inter::HF.renderingApi.api.WaitForRendering();
             if (inter::rendering::DestroyVertBuffer_i(buffer.get()))
-                inter::HF.vertBuffers.erase(buffer.get());
+                inter::HF.graphicsResources.vertBuffers.erase(buffer.get());
         }
 
         void Destroy(const Ref<VertBuffer>* pBuffers, uint32_t count)
@@ -51,16 +51,17 @@ namespace hf
             {
                 auto buffer = pBuffers[i];
                 if (inter::rendering::DestroyVertBuffer_i(buffer.get()))
-                    inter::HF.vertBuffers.erase(buffer.get());
+                    inter::HF.graphicsResources.vertBuffers.erase(buffer.get());
             }
         }
 
         void DestroyAll()
         {
             inter::HF.renderingApi.api.WaitForRendering();
-            for (const auto& buffer : std::ranges::views::values(inter::HF.vertBuffers))
+            auto& vertBuffers = inter::HF.graphicsResources.vertBuffers;
+            for (const auto& buffer : std::ranges::views::values(vertBuffers))
                 inter::rendering::DestroyVertBuffer_i(buffer.get());
-            inter::HF.vertBuffers.clear();
+            vertBuffers.clear();
         }
 
         bool IsRunning(const Ref<VertBuffer>& buffer) { return buffer->handle; }

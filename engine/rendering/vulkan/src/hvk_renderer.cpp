@@ -32,8 +32,9 @@ namespace hf
         rn->frameBufferResized = true;
     }
 
-    void Draw(VKRenderer* rn)
+    void Draw(const VkDrawInfo& info)
     {
-        vkCmdDraw(rn->currentCommand, 3, 1, 0, 0);
+        vkCmdBindVertexBuffers(info.renderer->currentCommand, 0, info.bufferCount, info.pBuffers, info.pOffsets);
+        vkCmdDraw(info.renderer->currentCommand, info.vertCount, info.instanceCount, 0, 0);
     }
 }

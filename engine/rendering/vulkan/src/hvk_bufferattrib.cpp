@@ -25,10 +25,12 @@ namespace hf
 
     VkBufferAttrib::VkBufferAttrib(const BufferAttribCreateInfo& info, uint32_t fullStride)
     {
+        bindingId = info.bindingId;
         attribCount = info.formatCount;
+        vertexSize = fullStride;
         bindingDescription =
         {
-            .binding = 0,
+            .binding = bindingId,
             .stride = fullStride,
             .inputRate = VK_VERTEX_INPUT_RATE_VERTEX
         };
@@ -43,7 +45,7 @@ namespace hf
             VkVertexInputAttributeDescription description =
             {
                 .location = location,
-                .binding = 0,
+                .binding = bindingId,
                 .format = BUFFER_FORMAT[(uint32_t)VertBufferDataType::Count * (stride.size - 1) + (uint32_t)stride.type],
                 .offset = currentOffset
             };
@@ -61,5 +63,16 @@ namespace hf
     VkBufferAttrib::~VkBufferAttrib()
     {
         attribDescriptions.clear();
+    }
+
+    bool IsValid(BufferAttrib attrib)
+    {
+        return attrib > 0 && attrib <= GRAPHICS_DATA.bufferAttribs.size();
+    }
+
+    const VkBufferAttrib& GetAttrib(BufferAttrib attrib)
+    {
+        if (!IsValid(attrib)) throw GENERIC_EXCEPT("[Hyperflow]", "Invalid buffer attribute");
+        return GRAPHICS_DATA.bufferAttribs[attrib - 1];
     }
 }

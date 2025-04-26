@@ -95,13 +95,12 @@ namespace hf
 
 		bool IsApiSupported(RenderingApiType targetApi);
 		void QuerySupportedApis(std::vector<RenderingApiType>& apis);
-		//Destroy every renderer which is not connected to the window, before you try to change api
 
+		//Destroy every renderer which is not connected to the window, before you try to change api
 		void ChangeApi(RenderingApiType targetApi);
 
 		void Resize(Ref<Renderer> rn, uvec2 size);
-		void Draw(const Ref<Renderer>& renderer);
-		void Draw();
+		void Draw(const DrawCallInfo& info);
 		void UnloadAllResources();
 	}
 

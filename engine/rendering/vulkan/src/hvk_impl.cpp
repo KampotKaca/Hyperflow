@@ -13,6 +13,7 @@ namespace hf::inter::rendering
     void Unload()
     {
         UnloadVulkan();
+        GRAPHICS_DATA = {};
     }
 
     void* CreateInstance(const RendererInstanceCreationInfo& info)
@@ -22,9 +23,7 @@ namespace hf::inter::rendering
 
     void DestroyInstance(void* rnInstance)
     {
-        auto data = (VKRenderer*)rnInstance;
-        DelayThreadUntilRenderingFinish();
-        delete(data);
+        delete((VKRenderer*)rnInstance);
     }
 
     void* CreateShader(const ShaderCreationInfo& info)
@@ -76,10 +75,32 @@ namespace hf::inter::rendering
         RegisterFrameBufferChange(renderer, newSize);
     }
 
-    void Draw(void* rn)
+    void Draw(const DrawCallInfo& info)
     {
-        auto renderer = (VKRenderer*)rn;
-        Draw(renderer);
+        auto* rn = (VKRenderer*)info.renderer;
+
+        uint32_t offset = 0;
+        uint32_t vertCount = 0;
+        for (uint32_t i = 0; i < info.bufferCount; i++)
+        {
+            auto buffer = (VkVertBuffer*)info.pBuffers[i];
+            rn->drawBuffers[i] = buffer->buffer;
+            rn->drawOffsets[i] = offset;
+            offset += GetAttrib(buffer->attrib).vertexSize;
+            vertCount = buffer->vertCount;
+        }
+
+        VkDrawInfo drawInfo
+        {
+            .renderer = rn,
+            .bufferCount = info.bufferCount,
+            .pBuffers = rn->drawBuffers,
+            .pOffsets = rn->drawOffsets,
+            .vertCount = vertCount,
+            .instanceCount = info.instanceCount
+        };
+
+        Draw(drawInfo);
     }
 
     void WaitForRendering()

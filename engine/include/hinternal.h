@@ -22,6 +22,12 @@ namespace hf::inter
         rendering::RendererAPI api{};
     };
 
+    struct GraphicsResources
+    {
+        std::unordered_map<Shader*, Ref<Shader>> shaders{};
+        std::unordered_map<VertBuffer*, Ref<VertBuffer>> vertBuffers{};
+    };
+
     struct Hyperflow
     {
         EngineLifecycleCallbacks lifecycleCallbacks{};
@@ -34,8 +40,7 @@ namespace hf::inter
         uint32_t rendererCount{};
         RenderingApi renderingApi{};
 
-        std::unordered_map<Shader*, Ref<Shader>> shaders{};
-        std::unordered_map<VertBuffer*, Ref<VertBuffer>> vertBuffers{};
+        GraphicsResources graphicsResources{};
     };
 
     extern Hyperflow HF;

@@ -49,6 +49,7 @@ namespace hf
 
         QueueFamilyIndices familyIndices{};
         LogicalDevice logicalDevice{};
+        VkPhysicalDeviceMemoryProperties memProps{};
     };
 
     struct GraphicsData

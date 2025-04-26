@@ -13,7 +13,12 @@ namespace hf
         VkVertexInputBindingDescription bindingDescription{};
         std::vector<VkVertexInputAttributeDescription> attribDescriptions{};
         uint32_t attribCount = 0;
+        uint32_t vertexSize = 0;
+        uint32_t bindingId = 0;
     };
+
+    bool IsValid(BufferAttrib attrib);
+    const VkBufferAttrib& GetAttrib(BufferAttrib attrib);
 }
 
 #endif //HVK_BUFFERATTRIB_H

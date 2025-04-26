@@ -63,15 +63,29 @@ namespace hf
             inter::HF.renderingApi.api.RegisterFrameBufferChange(rn->handle, size);
         }
 
-        void Draw(const Ref<Renderer>& renderer)
+        void Draw(const DrawCallInfo& info)
         {
-            inter::HF.renderingApi.api.Draw(renderer->handle);
-        }
+            if (info.bufferCount > VULKAN_API_MAX_NUM_DRAW_BUFFER)
+                throw GENERIC_EXCEPT("[Hyperflow]", "Trying to draw too many buffers at once, max is %i",
+                    VULKAN_API_MAX_NUM_DRAW_BUFFER);
 
-        void Draw() { Draw(inter::HF.mainWindow->renderer); }
+            for (uint32_t i = 0; i < info.bufferCount; i++)
+                info.renderer->drawBufferCache[i] = info.pVertBuffers[i]->handle;
+
+            inter::rendering::DrawCallInfo drawInfo
+            {
+                .renderer = info.renderer->handle,
+                .pBuffers = info.renderer->drawBufferCache,
+                .bufferCount = info.bufferCount,
+                .instanceCount = info.instanceCount
+            };
+
+            inter::HF.renderingApi.api.Draw(drawInfo);
+        }
 
         void UnloadAllResources()
         {
+            vertbuffer::DestroyAll();
             shader::DestroyAll();
         }
     }
@@ -166,6 +180,7 @@ namespace hf
                     renderer::UnloadAllResources();
                 }
 
+                HF.renderingApi.api.WaitForRendering();
                 HF.renderingApi.api.DestroyInstance(rn->handle);
                 rn->handle = nullptr;
                 HF.rendererCount--;

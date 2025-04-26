@@ -198,6 +198,7 @@ namespace hf
         score += (int32_t)deviceData->properties.limits.maxImageDimension2D;
         deviceData->score = score;
 
+        vkGetPhysicalDeviceMemoryProperties(deviceData->device, &deviceData->memProps);
         return true;
     }
 }

@@ -37,7 +37,7 @@ namespace hf
         Ref<Shader> Create(const ShaderCreationInfo& info)
         {
             Ref<Shader> shader = MakeRef<Shader>(info);
-            inter::HF.shaders[shader.get()] = shader;
+            inter::HF.graphicsResources.shaders[shader.get()] = shader;
             return shader;
         }
 
@@ -45,7 +45,7 @@ namespace hf
         {
             inter::HF.renderingApi.api.WaitForRendering();
             if (inter::rendering::DestroyShader_i(shader.get()))
-                inter::HF.shaders.erase(shader.get());
+                inter::HF.graphicsResources.shaders.erase(shader.get());
         }
 
         void Destroy(const Ref<Shader>* pShaders, uint32_t count)
@@ -55,16 +55,18 @@ namespace hf
             {
                 auto shader = pShaders[i];
                 if (inter::rendering::DestroyShader_i(shader.get()))
-                    inter::HF.shaders.erase(shader.get());
+                    inter::HF.graphicsResources.shaders.erase(shader.get());
             }
         }
 
         void DestroyAll()
         {
             inter::HF.renderingApi.api.WaitForRendering();
-            for (const auto& shader : std::ranges::views::values(inter::HF.shaders))
+
+            auto& shaders = inter::HF.graphicsResources.shaders;
+            for (const auto& shader : std::ranges::views::values(shaders))
                 inter::rendering::DestroyShader_i(shader.get());
-            inter::HF.shaders.clear();
+            shaders.clear();
         }
 
         bool IsRunning(const Ref<Shader>& shader) { return shader->handle; }

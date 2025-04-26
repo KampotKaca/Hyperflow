@@ -10,7 +10,10 @@ namespace hf
         VkVertBuffer(const VertBufferCreationInfo& info);
         ~VkVertBuffer();
 
-        uint64_t dataSize = 0;
+        VkBuffer buffer{};
+        VkDeviceMemory bufferMemory{};
+        BufferAttrib attrib{};
+        uint32_t vertCount = 0;
         void* data{};
         bool enableReadWrite = false;
     };

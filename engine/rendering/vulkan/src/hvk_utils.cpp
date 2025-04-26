@@ -158,4 +158,15 @@ namespace hf
         vkCmdSetViewport(rn->currentCommand, 0, 1, &rn->viewport);
         vkCmdSetScissor(rn->currentCommand, 0, 1, &rn->scissor);
     }
+
+    uint32_t GetMemoryType(uint32_t filter, VkMemoryPropertyFlags props)
+    {
+        auto& memProps = GRAPHICS_DATA.defaultDevice->memProps;
+        for (uint32_t i = 0; i < memProps.memoryTypeCount; i++)
+        {
+            if ((filter & (1 << i)) && (memProps.memoryTypes[i].propertyFlags & props) == props) return i;
+        }
+
+        throw GENERIC_EXCEPT("[Hyperflow]", "Unable to allocate graphics memory");
+    }
 }

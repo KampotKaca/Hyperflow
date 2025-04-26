@@ -162,6 +162,7 @@ namespace hf
 
 	struct BufferAttribCreateInfo
 	{
+		uint32_t bindingId = 0;
 		uint32_t formatCount = 0;
 		const BufferAttribFormat* pFormats = nullptr;
 	};
@@ -171,7 +172,7 @@ namespace hf
 		BufferAttrib bufferAttrib = 0;
 		bool enableReadWrite = false;
 		uint32_t vertexCount = 0;
-		void* vertices = nullptr;
+		void* pVertices = nullptr;
 	};
 
 	struct ShaderCreationInfo
@@ -183,6 +184,14 @@ namespace hf
 	};
 
 	enum class RenderingApiType { None, Vulkan, Direct3D };
+
+	struct DrawCallInfo
+	{
+		Ref<Renderer> renderer;
+		Ref<VertBuffer>* pVertBuffers;
+		uint32_t bufferCount = 0;
+		uint32_t instanceCount = 0;
+	};
 
 	//endregion
 

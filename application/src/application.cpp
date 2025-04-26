@@ -33,6 +33,7 @@ namespace app
 
 	hf::BufferAttribCreateInfo bufferAttribCreateInfo
 	{
+		.bindingId = 0,
 		.formatCount = 2,
 		.pFormats = formats
 	};
@@ -45,7 +46,8 @@ namespace app
 		{
 			.bufferAttrib = bufferAttrib,
 			.vertexCount = 3,
-			.vertices = (void*)vertices,
+			.pVertices = (void*)vertices,
+			.enableReadWrite = false
 		};
 
 		buffer = hf::vertbuffer::Create(bufferInfo);
@@ -121,6 +123,14 @@ namespace app
 	void Application::OnMainWindowRender(const hf::Ref<hf::Renderer>& rn)
 	{
 		hf::shader::Bind(rn, shader, bufferAttrib);
-		hf::renderer::Draw(rn);
+		hf::DrawCallInfo drawCallInfo
+		{
+			.renderer = rn,
+			.pVertBuffers = &buffer,
+			.bufferCount = 1,
+			.instanceCount = 1
+		};
+
+		hf::renderer::Draw(drawCallInfo);
 	}
 }

@@ -78,7 +78,16 @@ namespace hf
 
     void CreatePipeline(const VkPipelineInfo& info, VkPipeline* pipeline)
     {
-        if (GRAPHICS_DATA.bufferAttribs.size() < info.attrib) throw GENERIC_EXCEPT("[Vulkan]", "Invalid vertex attribute");
+        const auto& attribute = GetAttrib(info.attrib);
+
+        VkPipelineVertexInputStateCreateInfo vertexInputInfo
+        {
+            .sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO,
+            .vertexBindingDescriptionCount = 1,
+            .pVertexBindingDescriptions = &attribute.bindingDescription,
+            .vertexAttributeDescriptionCount = (uint32_t)attribute.attribDescriptions.size(),
+            .pVertexAttributeDescriptions = attribute.attribDescriptions.data(),
+        };
 
         VkPipelineInputAssemblyStateCreateInfo inputAssembly
         {
@@ -169,17 +178,6 @@ namespace hf
             .attachmentCount = 1,
             .pAttachments = &colorBlendAttachment,
             .blendConstants = { 0.0f, 0.0f, 0.0f, 0.0f },
-        };
-
-        auto& attribute = GRAPHICS_DATA.bufferAttribs[info.attrib - 1];
-
-        VkPipelineVertexInputStateCreateInfo vertexInputInfo
-        {
-            .sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO,
-            .vertexBindingDescriptionCount = 1,
-            .pVertexBindingDescriptions = &attribute.bindingDescription,
-            .vertexAttributeDescriptionCount = (uint32_t)attribute.attribDescriptions.size(),
-            .pVertexAttributeDescriptions = attribute.attribDescriptions.data(),
         };
 
         VkGraphicsPipelineCreateInfo pipelineInfo

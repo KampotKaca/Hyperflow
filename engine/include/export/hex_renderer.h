@@ -31,6 +31,14 @@ namespace hf::inter::rendering
         uvec2 size;
     };
 
+    struct DrawCallInfo
+    {
+        void* renderer;
+        void** pBuffers;
+        uint32_t bufferCount;
+        uint32_t instanceCount;
+    };
+
     struct RendererAPI
     {
         void (*Load)(const RendererLoadInfo& info);
@@ -46,7 +54,7 @@ namespace hf::inter::rendering
         bool (*StartFrame)(void* rn);
         void (*EndFrame)(void* rn);
         void (*RegisterFrameBufferChange)(void* rn, uvec2 newSize);
-        void (*Draw)(void* rn);
+        void (*Draw)(const DrawCallInfo& info);
         void (*WaitForRendering)();
     };
 }
