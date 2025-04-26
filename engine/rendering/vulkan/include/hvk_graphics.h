@@ -20,9 +20,9 @@ namespace hf
 
     struct SwapChainSupportDetails
     {
-        VkSurfaceCapabilitiesKHR capabilities;
-        std::vector<VkSurfaceFormatKHR> formats;
-        std::vector<VkPresentModeKHR> presentModes;
+        VkSurfaceCapabilitiesKHR capabilities{};
+        std::vector<VkSurfaceFormatKHR> formats{};
+        std::vector<VkPresentModeKHR> presentModes{};
     };
 
     struct QueueFamilyIndices
@@ -123,7 +123,7 @@ namespace hf
 
     struct VkRenderPassCreationInfo
     {
-        const VkRenderPassAttachmentType* pAttachments;
+        const VkRenderPassAttachmentType* pAttachments{};
         uint32_t attachmentCount = 0;
     };
 

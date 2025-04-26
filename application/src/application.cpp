@@ -25,10 +25,10 @@ namespace app
 	hf::Ref<hf::VertBuffer> buffer;
 	hf::BufferAttrib bufferAttrib;
 
-	constexpr hf::BufferAttribFormat formats[]
+	hf::BufferAttribFormat formats[]
 	{
-		{ .type = hf::VertBufferDataType::F32, .size = 2 },
-		{ .type = hf::VertBufferDataType::F32, .size = 3 },
+		{ .type = hf::VertBufferDataType::F32, .size = 2, },
+		{ .type = hf::VertBufferDataType::F32, .size = 3, },
 	};
 
 	hf::BufferAttribCreateInfo bufferAttribCreateInfo

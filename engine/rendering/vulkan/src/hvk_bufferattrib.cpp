@@ -3,7 +3,6 @@
 
 namespace hf
 {
-    constexpr uint32_t BUFFER_SIZE[(uint32_t)VertBufferDataType::Count] = { 1, 1, 2, 2, 4, 4, 8, 8, 2, 4, 8 };
     constexpr VkFormat BUFFER_FORMAT[(uint32_t)VertBufferDataType::Count * 4] =
     {
         VK_FORMAT_R8_UINT, VK_FORMAT_R8_SINT, VK_FORMAT_R16_UINT, VK_FORMAT_R16_SINT,
@@ -50,13 +49,11 @@ namespace hf
                 .offset = currentOffset
             };
             attribDescriptions[i] = description;
-            auto currentSize = stride.size * BUFFER_SIZE[(uint32_t)stride.type];
-            if (currentSize % 4 != 0)
+            if (stride.lSize % 4 != 0)
                 throw GENERIC_EXCEPT("[Hyperflow]", "Vertex buffer attribute size should be multiple of 4");
 
-            if (currentSize > 16) location++;
-            currentOffset += currentSize;
-            location++;
+            location += ((stride.lSize - 1) / 16) + 1;
+            currentOffset += stride.lSize;
         }
     }
 

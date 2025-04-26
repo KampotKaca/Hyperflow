@@ -158,13 +158,15 @@ namespace hf
 	{
 		VertBufferDataType type = VertBufferDataType::F32;
 		uint32_t size = 1;
+		//Do not implement lSize
+		uint32_t lSize = 1;
 	};
 
 	struct BufferAttribCreateInfo
 	{
 		uint32_t bindingId = 0;
 		uint32_t formatCount = 0;
-		const BufferAttribFormat* pFormats = nullptr;
+		BufferAttribFormat* pFormats = nullptr;
 	};
 
 	struct VertBufferCreationInfo
