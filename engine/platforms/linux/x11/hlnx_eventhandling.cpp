@@ -1,8 +1,8 @@
 #define private public
-#include "hkeyboard.h"
+#include "../../../include/hkeyboard.h"
 #undef private
 
-#include "hwindow.h"
+#include "../../../include/hwindow.h"
 #include "hlnx_eventhandling.h"
 #include "hinternal.h"
 #include <X11/Xlib.h>
@@ -11,7 +11,7 @@
 #include <X11/extensions/XInput2.h>
 
 #include "hlnx_window.h"
-#include "hplatform.h"
+#include "../../../include/hplatform.h"
 
 #ifdef None
 #undef None;

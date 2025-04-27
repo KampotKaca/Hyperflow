@@ -1,4 +1,4 @@
-#include "../include/hshader.h"
+#include "hshader.h"
 #include "hshared.h"
 #include "hinternal.h"
 #include "hyperflow.h"

@@ -1,7 +1,7 @@
 #ifndef HLNX_EVENTHANDLING_H
 #define HLNX_EVENTHANDLING_H
 
-#include "hwindow.h"
+#include "../../../include/hwindow.h"
 #include <X11/Xlib.h>
 
 namespace hf

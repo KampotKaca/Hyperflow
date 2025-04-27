@@ -1,10 +1,8 @@
 #include "hwindow.h"
 #include "hyperflow.h"
-
 #include "hplatform.h"
-#include "../include/hrenderer.h"
-#include "../include/htime.h"
-
+#include "hrenderer.h"
+#include "htime.h"
 #include "hinternal.h"
 
 namespace hf

@@ -4,7 +4,7 @@
 #include "hshared.h"
 #include "hmouse.h"
 #include "hkeyboard.h"
-#include "../../include/hrenderer.h"
+#include "hrenderer.h"
 
 namespace hf
 {

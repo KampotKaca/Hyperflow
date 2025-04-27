@@ -1,5 +1,5 @@
 #include "hwindow.h"
-#include "../others/exception/include/hexception.h"
+#include "hexception.h"
 #include "hyperflow.h"
 
 namespace hf::input

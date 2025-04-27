@@ -1,4 +1,4 @@
-#include "../include/hframebuffer.h"
+#include "hframebuffer.h"
 
 namespace hf
 {

@@ -1,7 +1,7 @@
 #include <hyperflow.h>
-#include "hwindow.h"
+#include "../../../include/hwindow.h"
 #include "hinternal.h"
-#include "hplatform.h"
+#include "../../../include/hplatform.h"
 #include "hlnx_eventhandling.h"
 #include "exceptions/hwindowexception.h"
 #include "hlnx_window.h"

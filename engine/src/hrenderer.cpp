@@ -1,4 +1,4 @@
-#include "../include/hrenderer.h"
+#include "hrenderer.h"
 #include <hyperflow.h>
 #include "hinternal.h"
 #include "../config.h"

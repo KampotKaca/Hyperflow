@@ -1,4 +1,4 @@
-#include "hplatform.h"
+#include "../../../include/hplatform.h"
 #include "hgenericexception.h"
 
 #include <hyperflow.h>
