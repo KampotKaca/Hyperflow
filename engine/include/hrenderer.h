@@ -2,7 +2,7 @@
 #define HRENDERER_H
 
 #include "hshared.h"
-#include "../../config.h"
+#include "../config.h"
 
 namespace hf
 {

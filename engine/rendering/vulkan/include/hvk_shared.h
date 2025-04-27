@@ -3,7 +3,7 @@
 
 #include <vulkan/vulkan.h>
 #include "hgraphicsexception.h"
-#include "export/hex_renderer.h"
+#include "../../include/hex_renderer.h"
 #include "../config.h"
 
 #endif //HVK_SHARED_H

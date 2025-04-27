@@ -1,9 +1,9 @@
-#include "hrenderer.h"
+#include "../include/hrenderer.h"
 #include <hyperflow.h>
 #include "hinternal.h"
 #include "../config.h"
-#include "../../../application/appconfig.h"
-#include "export/hex_renderer.h"
+#include "../../application/appconfig.h"
+#include "../rendering/include/hex_renderer.h"
 
 namespace hf
 {

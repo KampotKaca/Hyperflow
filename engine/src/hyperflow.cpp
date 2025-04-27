@@ -2,8 +2,8 @@
 #include "hyperflow.h"
 
 #include "hplatform.h"
-#include "hrenderer.h"
-#include "components/htime.h"
+#include "../include/hrenderer.h"
+#include "../include/htime.h"
 
 #include "hinternal.h"
 

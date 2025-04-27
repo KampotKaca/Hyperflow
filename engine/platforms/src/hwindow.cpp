@@ -2,8 +2,8 @@
 #include "hyperflow.h"
 #include "hwindow.h"
 #include "hplatform.h"
-#include "hrenderer.h"
-#include "export/hex_renderer.h"
+#include "../../include/hrenderer.h"
+#include "../../rendering/include/hex_renderer.h"
 
 namespace hf
 {

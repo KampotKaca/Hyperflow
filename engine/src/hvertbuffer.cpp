@@ -1,7 +1,7 @@
-#include "hvertbuffer.h"
+#include "../include/hvertbuffer.h"
 #include "hinternal.h"
 #include "hyperflow.h"
-#include "export/hex_renderer.h"
+#include "../rendering/include/hex_renderer.h"
 
 namespace hf
 {

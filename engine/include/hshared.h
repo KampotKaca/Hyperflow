@@ -32,7 +32,7 @@ extern "C"
 #include <memory>
 #include <atomic>
 
-#include "components/hmath.h"
+#include "hmath.h"
 
 #if PLATFORM_LINUX
 #ifdef None

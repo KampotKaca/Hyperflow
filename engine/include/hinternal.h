@@ -4,8 +4,8 @@
 #include "hwindow.h"
 #include "hshared.h"
 #include "hvertbuffer.h"
-#include "components/htime.h"
-#include "export/hex_renderer.h"
+#include "htime.h"
+#include "../rendering/include/hex_renderer.h"
 
 #if PLATFORM_LINUX
 #ifdef None

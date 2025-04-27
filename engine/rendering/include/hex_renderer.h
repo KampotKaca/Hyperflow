@@ -1,7 +1,7 @@
 ﻿#ifndef RENDEREREXPORT_H
 #define RENDEREREXPORT_H
 
-#include "../hshared.h"
+#include "hshared.h"
 #include "../../others/exception/include/hgenericexception.h"
 
 namespace hf::inter::rendering

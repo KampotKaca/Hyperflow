@@ -18,16 +18,10 @@ target_link_libraries(d3d
 )
 
 target_include_directories(d3d PUBLIC include)
-target_include_directories(d3d PUBLIC ../include)
 target_include_directories(d3d PUBLIC ../../include)
 target_include_directories(d3d PUBLIC ../../platforms/windows)
 target_compile_definitions(d3d PRIVATE RENDERER_DLL)
 
-#add_custom_command(TARGET d3d POST_BUILD
-#        COMMAND ${CMAKE_COMMAND} -E copy_if_different
-#        $<TARGET_FILE:d3d>
-#        ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/$<CONFIG>
-#)
 add_custom_command(TARGET d3d POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy_if_different
         $<TARGET_FILE:d3d>

@@ -28,7 +28,6 @@ else ()
 endif ()
 
 target_include_directories(vk PUBLIC include)
-target_include_directories(vk PUBLIC ../include)
 target_include_directories(vk PUBLIC ../../include)
 target_compile_definitions(vk PRIVATE RENDERER_DLL)
 
