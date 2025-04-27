@@ -43,14 +43,12 @@ namespace hf
 
         void Destroy(const Ref<Shader>& shader)
         {
-            inter::HF.renderingApi.api.WaitForRendering();
             if (inter::rendering::DestroyShader_i(shader.get()))
                 inter::HF.graphicsResources.shaders.erase(shader.get());
         }
 
         void Destroy(const Ref<Shader>* pShaders, uint32_t count)
         {
-            inter::HF.renderingApi.api.WaitForRendering();
             for (uint32_t i = 0; i < count; i++)
             {
                 auto shader = pShaders[i];
@@ -61,8 +59,6 @@ namespace hf
 
         void DestroyAll()
         {
-            inter::HF.renderingApi.api.WaitForRendering();
-
             auto& shaders = inter::HF.graphicsResources.shaders;
             for (const auto& shader : std::ranges::views::values(shaders))
                 inter::rendering::DestroyShader_i(shader.get());

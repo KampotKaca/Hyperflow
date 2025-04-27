@@ -36,6 +36,7 @@ namespace hf
 		Ref<Renderer> renderer{};
 
 		void (*onRenderCallback)(const Ref<Renderer>&);
+		void (*onPreRenderCallback)(const Ref<Renderer>&);
 	};
 }
 

@@ -47,7 +47,7 @@ namespace app
 			.bufferAttrib = bufferAttrib,
 			.vertexCount = 3,
 			.pVertices = (void*)vertices,
-			.enableReadWrite = false
+			.memoryType = hf::VertBufferMemoryType::DynamicWrite
 		};
 
 		buffer = hf::vertbuffer::Create(bufferInfo);
@@ -88,7 +88,7 @@ namespace app
 				.style = hf::WindowStyle::Default,
 				.position = { 100, 100 },
 				.size = { 200, 200 },
-				.onRenderCallback = OnMainWindowRender
+				.onRenderCallback = OnRender
 			};
 			wn = hf::window::Open(data, nullptr);
 			count++;
@@ -104,15 +104,16 @@ namespace app
 		// auto mDelta = hf::input::GetPointerDelta();
 		// if (mDelta != hf::ivec2(0, 0)) LOG_INFO("Move: (X: %i, Y: %i)", mDelta.x, mDelta.y);
 
-		// auto cReq = (int32_t)(hf::time::GetTimePassed() / 0.2);
-		// if (cReq != reqCount)
-		// {
-		// 	std::ostringstream oss;
-		// 	oss << "[Hyperflow] " << hf::time::GetFrameRate();
-		// 	// oss << "[Hyperflow] " << hf::Time::GetTimePassed();
-		// 	hf::window::SetTitle(hf::GetMainWindow(), oss.str());
-		// 	reqCount = cReq;
-		// }
+		auto cReq = (int32_t)(hf::time::GetTimePassed() / 0.2);
+		if (cReq != reqCount)
+		{
+			// std::ostringstream oss;
+			// oss << "[Hyperflow] " << hf::time::GetFrameRate();
+			// oss << "[Hyperflow] " << hf::Time::GetTimePassed();
+			std::string str = std::string("[Hyperflow] ") + std::to_string(hf::time::GetFrameRate());
+			hf::window::SetTitle(hf::GetMainWindow(), str);
+			reqCount = cReq;
+		}
 	}
 
 	void Application::Quit()
@@ -120,7 +121,12 @@ namespace app
 
 	}
 
-	void Application::OnMainWindowRender(const hf::Ref<hf::Renderer>& rn)
+	void Application::OnPreRender(const hf::Ref<hf::Renderer>& rn)
+	{
+
+	}
+
+	void Application::OnRender(const hf::Ref<hf::Renderer>& rn)
 	{
 		hf::shader::Bind(rn, shader, bufferAttrib);
 		hf::DrawCallInfo drawCallInfo

@@ -3,6 +3,13 @@
 
 namespace hf
 {
+    static constexpr uint32_t VK_MEMORY_TYPE[(uint32_t)VertBufferMemoryType::Count]
+    {
+        VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
+        VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
+        VK_MEMORY_PROPERTY_HOST_CACHED_BIT
+    };
+
     bool GetAvailableSurfaceDetails(const SwapChainSupportDetails& swapChainSupportDetails,
     VkFormat targetFormat, VkPresentModeKHR targetPresentMode, uvec2 targetExtents,
     GraphicsSwapchainDetails* result)
@@ -131,7 +138,7 @@ namespace hf
         return false;
     }
 
-    bool QueueFamilyIndices::IsComplete() const { return graphicsFamily.has_value() && presentFamily.has_value(); }
+    bool QueueFamilyIndices::IsComplete() const { return graphicsFamily.has_value() && presentFamily.has_value() && transferFamily.has_value(); }
 
     void SetupViewportAndScissor(VKRenderer* rn)
     {
@@ -168,5 +175,31 @@ namespace hf
         }
 
         throw GENERIC_EXCEPT("[Hyperflow]", "Unable to allocate graphics memory");
+    }
+
+    void CreateBuffer(const VkCreateBufferInfo& info, VkBuffer* bufferResult, VkDeviceMemory* memResult)
+    {
+        VkBufferCreateInfo bufferInfo
+        {
+            .sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO,
+            .size = info.size,
+            .usage = info.usage,
+            .sharingMode = info.sharingMode
+        };
+
+        auto device = GRAPHICS_DATA.defaultDevice->logicalDevice.device;
+        VK_HANDLE_EXCEPT(vkCreateBuffer(device, &bufferInfo, nullptr, bufferResult));
+        VkMemoryRequirements memReqs{};
+        vkGetBufferMemoryRequirements(device, *bufferResult, &memReqs);
+
+        VkMemoryAllocateInfo allocInfo
+        {
+            .sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO,
+            .allocationSize = memReqs.size,
+            .memoryTypeIndex = GetMemoryType(memReqs.memoryTypeBits, VK_MEMORY_TYPE[(uint32_t)info.memoryType])
+        };
+
+        VK_HANDLE_EXCEPT(vkAllocateMemory(device, &allocInfo, nullptr, memResult));
+        VK_HANDLE_EXCEPT(vkBindBufferMemory(device, *bufferResult, *memResult, 0));
     }
 }

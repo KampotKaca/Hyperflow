@@ -124,6 +124,7 @@ namespace hf
 		void Destroy(const Ref<VertBuffer>* pBuffers, uint32_t count);
 		void DestroyAll();
 		bool IsRunning(const Ref<VertBuffer>& buffer);
+		void Upload(const VertBufferUploadInfo& info);
 	}
 
 	namespace utils

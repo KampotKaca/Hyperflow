@@ -19,6 +19,7 @@ namespace hf::inter
     {
         RenderingApiType type = RenderingApiType::None;
         void* handle{};
+        bool isLoaded = false;
         rendering::RendererAPI api{};
     };
 

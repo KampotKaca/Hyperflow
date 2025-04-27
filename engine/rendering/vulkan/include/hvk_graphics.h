@@ -29,6 +29,7 @@ namespace hf
     {
         std::optional<uint32_t> graphicsFamily;
         std::optional<uint32_t> presentFamily;
+        std::optional<uint32_t> transferFamily;
 
         [[nodiscard]] bool IsComplete() const;
     };
@@ -38,6 +39,7 @@ namespace hf
         VkDevice device{};
         VkQueue graphicsQueue{};
         VkQueue presentQueue{};
+        VkQueue transferQueue{};
     };
 
     struct GraphicsDevice
@@ -127,6 +129,14 @@ namespace hf
         uint32_t attachmentCount = 0;
     };
 
+    struct VkCreateBufferInfo
+    {
+        VkDeviceSize size;
+        VkBufferUsageFlags usage;
+        VkSharingMode sharingMode;
+        VertBufferMemoryType memoryType;
+    };
+
 #if DEBUG
 #define NUM_REQUIRED_EXTENSIONS 3
 #else
@@ -153,7 +163,7 @@ namespace hf
     void CreateRenderPass(const VkRenderPassCreationInfo& info, VkRenderPass* renderPass);
     void DestroyRenderPass(VkRenderPass* renderPass);
 
-    void CreateCommandPool(const GraphicsDevice& device, CommandPool* result);
+    void CreateCommandPool(const GraphicsDevice& device, uint32_t familyIndex, CommandPool* result);
     void DestroyCommandPool(const GraphicsDevice& device, CommandPool& pool);
 
     void CreateCommandBuffers(const GraphicsDevice& device, CommandPool* pool, uint32_t count);
@@ -174,6 +184,7 @@ namespace hf
     void DestroyFence(const GraphicsDevice& device, VkFence& fence);
 
     void WaitForFences(const GraphicsDevice& device, const VkFence* fences, uint32_t count, bool waitAll);
+    void CreateBuffer(const VkCreateBufferInfo& info, VkBuffer* bufferResult, VkDeviceMemory* memResult);
 
     extern const char* REQUIRED_EXTENSIONS[NUM_REQUIRED_EXTENSIONS];
     extern const char* DEVICE_EXTENSIONS[NUM_DEVICE_EXTENSIONS];

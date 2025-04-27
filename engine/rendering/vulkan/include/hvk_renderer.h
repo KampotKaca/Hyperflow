@@ -16,6 +16,7 @@ namespace hf
         VkViewport viewport{};
         VkRect2D scissor{};
         CommandPool commandPool{};
+        CommandPool transferPool{};
         uvec2 targetSize{};
 
         VkCommandBuffer currentCommand{};
@@ -61,7 +62,8 @@ namespace hf
     void UploadViewportAndScissor(const VKRenderer* rn);
     uint32_t GetMemoryType(uint32_t filter, VkMemoryPropertyFlags props);
 
-    bool StartFrame(VKRenderer* rn);
+    bool GetReadyForRendering(VKRenderer* rn);
+    void StartFrame(VKRenderer* rn);
     void EndFrame(VKRenderer* rn);
     void RegisterFrameBufferChange(VKRenderer* rn, uvec2 newSize);
     void Draw(const VkDrawInfo& info);

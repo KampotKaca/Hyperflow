@@ -153,6 +153,7 @@ namespace hf
 	typedef uint32_t BufferAttrib;
 
 	enum class VertBufferDataType { U8, I8, U16, I16, U32, I32, U64, I64, F16, F32, F64, Count };
+	enum class VertBufferMemoryType { Static, DynamicWrite, DynamicReadWrite, Count };
 
 	struct BufferAttribFormat
 	{
@@ -172,9 +173,17 @@ namespace hf
 	struct VertBufferCreationInfo
 	{
 		BufferAttrib bufferAttrib = 0;
-		bool enableReadWrite = false;
+		VertBufferMemoryType memoryType;
 		uint32_t vertexCount = 0;
 		void* pVertices = nullptr;
+	};
+
+	struct VertBufferUploadInfo
+	{
+		const Ref<VertBuffer>& buffer;
+		const void* data;
+		uint32_t offset;
+		uint32_t vertCount;
 	};
 
 	struct ShaderCreationInfo
@@ -221,6 +230,7 @@ namespace hf
 		ivec2 position = ivec2{ 300, 300 };
 		ivec2 size = ivec2{ 200, 200 };
 
+		void (*onPreRenderCallback)(const Ref<Renderer>&){};
 		void (*onRenderCallback)(const Ref<Renderer>&){};
 	};
 

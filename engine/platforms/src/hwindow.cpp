@@ -20,6 +20,7 @@ namespace hf
 		};
 		renderer = nullptr;
 		onRenderCallback = data.onRenderCallback;
+		onPreRenderCallback = data.onPreRenderCallback;
 
 		inter::window::Open(this);
 
@@ -253,8 +254,10 @@ namespace hf
 		void Update(const Window* win)
 		{
 			auto rn = win->renderer.get();
-			if(HF.renderingApi.api.StartFrame(rn->handle))
+			if(HF.renderingApi.api.GetReadyForRendering(rn->handle))
 			{
+				if (win->onPreRenderCallback) win->onPreRenderCallback(win->renderer);
+				HF.renderingApi.api.StartFrame(rn->handle);
 				if (win->onRenderCallback) win->onRenderCallback(win->renderer);
 				HF.renderingApi.api.EndFrame(rn->handle);
 			}

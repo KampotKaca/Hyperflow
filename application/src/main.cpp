@@ -23,19 +23,20 @@ int main()
 		.updateType = hf::EngineUpdateType::Continues,
 		.lifecycleCallbacks =
 		{
-			.onResourcesLoad    = app::Application::LoadResources,
-			.onStartCallback    = app::Application::Start,
-			.onUpdateCallback   = app::Application::Update,
-			.onQuitCallback     = app::Application::Quit,
+			.onResourcesLoad     = app::Application::LoadResources,
+			.onStartCallback     = app::Application::Start,
+			.onUpdateCallback    = app::Application::Update,
+			.onQuitCallback      = app::Application::Quit,
 		},
 		.windowData =
 		{
-			.title     = "Hyperflow",
-			.flags     = hf::WindowFlags::Default,
-			.style     = hf::WindowStyle::Default,
-			.position  = { 200, 200 },
-			.size      = { 920, 480 },
-			.onRenderCallback = app::Application::OnMainWindowRender,
+			.title        		 = "Hyperflow",
+			.flags        		 = hf::WindowFlags::Default,
+			.style        		 = hf::WindowStyle::Default,
+			.position     		 = { 200, 200 },
+			.size         		 = { 920, 480 },
+			.onRenderCallback    = app::Application::OnRender,
+			.onPreRenderCallback = app::Application::OnPreRender,
 		}
 	};
 

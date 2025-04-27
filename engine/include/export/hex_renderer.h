@@ -25,6 +25,14 @@ namespace hf::inter::rendering
         void* platformInstance;
     };
 
+    struct VertBufferUploadInfo
+    {
+        const void* buffer;
+        const void* data;
+        uint32_t offset;
+        uint32_t vertexCount;
+    };
+
     struct RendererInstanceCreationInfo
     {
         void* handle;
@@ -51,7 +59,9 @@ namespace hf::inter::rendering
         uint32_t (*CreateBufferAttrib)(const BufferAttribCreateInfo& info, uint32_t fullStride);
         void* (*CreateVertBuffer)(const VertBufferCreationInfo& info);
         void (*DestroyVertBuffer)(void* handle);
-        bool (*StartFrame)(void* rn);
+        void (*UploadVertBuffer)(const VertBufferUploadInfo& info);
+        bool (*GetReadyForRendering)(void* rn);
+        void (*StartFrame)(void* rn);
         void (*EndFrame)(void* rn);
         void (*RegisterFrameBufferChange)(void* rn, uvec2 newSize);
         void (*Draw)(const DrawCallInfo& info);

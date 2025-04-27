@@ -41,14 +41,12 @@ namespace hf
 
         void Destroy(const Ref<VertBuffer>& buffer)
         {
-            inter::HF.renderingApi.api.WaitForRendering();
             if (inter::rendering::DestroyVertBuffer_i(buffer.get()))
                 inter::HF.graphicsResources.vertBuffers.erase(buffer.get());
         }
 
         void Destroy(const Ref<VertBuffer>* pBuffers, uint32_t count)
         {
-            inter::HF.renderingApi.api.WaitForRendering();
             for (uint32_t i = 0; i < count; i++)
             {
                 auto buffer = pBuffers[i];
@@ -59,7 +57,6 @@ namespace hf
 
         void DestroyAll()
         {
-            inter::HF.renderingApi.api.WaitForRendering();
             auto& vertBuffers = inter::HF.graphicsResources.vertBuffers;
             for (const auto& buffer : std::ranges::views::values(vertBuffers))
                 inter::rendering::DestroyVertBuffer_i(buffer.get());
@@ -67,6 +64,18 @@ namespace hf
         }
 
         bool IsRunning(const Ref<VertBuffer>& buffer) { return buffer->handle; }
+
+        void Upload(const VertBufferUploadInfo& info)
+        {
+            inter::rendering::VertBufferUploadInfo uploadInfo
+            {
+                .buffer = info.buffer->handle,
+                .data = info.data,
+                .offset = info.offset,
+                .vertexCount = info.vertCount
+            };
+            inter::HF.renderingApi.api.UploadVertBuffer(uploadInfo);
+        }
     }
 
     namespace inter::rendering

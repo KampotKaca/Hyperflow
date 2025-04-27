@@ -3,17 +3,19 @@
 
 namespace hf
 {
-    bool StartFrame(VKRenderer* rn)
+    bool GetReadyForRendering(VKRenderer* rn)
     {
         if (rn->targetSize.x == 0 || rn->targetSize.y == 0) return false;
-        auto& frame = rn->frames[rn->currentFrame];
-        if(!AcquireNextImage(rn)) return false;
+        return AcquireNextImage(rn);
+    }
 
+    void StartFrame(VKRenderer* rn)
+    {
+        auto& frame = rn->frames[rn->currentFrame];
         frame.usedCommandCount = 0;
         BeginCommandBuffer(rn, rn->commandPool.buffers[rn->currentFrame]);
         BeginRenderPass(rn, GRAPHICS_DATA.renderPass);
         UploadViewportAndScissor(rn);
-        return true;
     }
 
     void EndFrame(VKRenderer* rn)

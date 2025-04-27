@@ -85,6 +85,7 @@ namespace hf
 
         void UnloadAllResources()
         {
+            if (inter::HF.renderingApi.isLoaded) inter::HF.renderingApi.api.WaitForRendering();
             vertbuffer::DestroyAll();
             shader::DestroyAll();
         }
@@ -161,6 +162,7 @@ namespace hf
                 };
 
                 HF.renderingApi.api.Load(loadInfo);
+                HF.renderingApi.isLoaded = true;
             }
             HF.rendererCount++;
             RendererInstanceCreationInfo createInfo
@@ -184,7 +186,11 @@ namespace hf
                 HF.renderingApi.api.DestroyInstance(rn->handle);
                 rn->handle = nullptr;
                 HF.rendererCount--;
-                if (HF.rendererCount == 0) HF.renderingApi.api.Unload();
+                if (HF.rendererCount == 0)
+                {
+                    HF.renderingApi.isLoaded = false;
+                    HF.renderingApi.api.Unload();
+                }
             }
         }
     }

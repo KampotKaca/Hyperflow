@@ -14,9 +14,10 @@ namespace hf
         VkDeviceMemory bufferMemory{};
         BufferAttrib attrib{};
         uint32_t vertCount = 0;
-        void* data{};
-        bool enableReadWrite = false;
+        VertBufferMemoryType memoryType = VertBufferMemoryType::Static;
     };
+
+    void UploadVertBuffer(const VkVertBuffer* buffer, const void* data, uint32_t offset, uint32_t vertCount);
 }
 
 #endif //HVK_VERTBUFFER_H

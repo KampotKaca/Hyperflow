@@ -11,8 +11,7 @@ namespace hf
 
     //------------------------------------------------------------------------------------
 
-    VKRenderer::VKRenderer(void* handle, uvec2 size) :
-    windowHandle(handle), targetSize(size)
+    VKRenderer::VKRenderer(void* handle, uvec2 size) : windowHandle(handle), targetSize(size)
     {
         if (!GRAPHICS_DATA.devicesAreLoaded)
         {
@@ -84,8 +83,10 @@ namespace hf
         }
 
         CreateRendererFrameBuffers(this);
-        CreateCommandPool(*GRAPHICS_DATA.defaultDevice, &commandPool);
+        CreateCommandPool(*GRAPHICS_DATA.defaultDevice, GRAPHICS_DATA.defaultDevice->familyIndices.graphicsFamily.value(), &commandPool);
+        CreateCommandPool(*GRAPHICS_DATA.defaultDevice, GRAPHICS_DATA.defaultDevice->familyIndices.transferFamily.value(), &transferPool);
         CreateCommandBuffers(*GRAPHICS_DATA.defaultDevice, &commandPool, FRAMES_IN_FLIGHT);
+        CreateCommandBuffers(*GRAPHICS_DATA.defaultDevice, &transferPool, 1);
 
         frames = std::vector<VkFrame>(FRAMES_IN_FLIGHT);
         for (uint32_t i = 0; i < FRAMES_IN_FLIGHT; ++i) CreateFrame(&frames[i]);
@@ -99,6 +100,7 @@ namespace hf
         DestroyRendererFrameBuffers(this);
         DestroySwapchain(swapchain, &swapchain.swapchain);
         DestroyCommandPool(*GRAPHICS_DATA.defaultDevice, commandPool);
+        DestroyCommandPool(*GRAPHICS_DATA.defaultDevice, transferPool);
         DestroySurface(this);
     }
 
@@ -124,7 +126,8 @@ namespace hf
         std::set<uint32_t> uniqueQueueFamilies =
         {
             device.familyIndices.graphicsFamily.value(),
-            device.familyIndices.presentFamily.value()
+            device.familyIndices.presentFamily.value(),
+            device.familyIndices.transferFamily.value()
         };
 
         float queuePriority = 1.0f;
@@ -161,6 +164,9 @@ namespace hf
 
         vkGetDeviceQueue(device.logicalDevice.device, device.familyIndices.presentFamily.value(),
             0, &device.logicalDevice.presentQueue);
+
+        vkGetDeviceQueue(device.logicalDevice.device, device.familyIndices.transferFamily.value(),
+            0, &device.logicalDevice.transferQueue);
     }
 
     //------------------------------------------------------------------------------------
@@ -183,6 +189,8 @@ namespace hf
         {
             if (queueFamilies[i].queueFlags & VK_QUEUE_GRAPHICS_BIT)
                 deviceData->familyIndices.graphicsFamily = i;
+            else if (queueFamilies[i].queueFlags & VK_QUEUE_TRANSFER_BIT)
+                deviceData->familyIndices.transferFamily = i;
 
             VkBool32 presentSupport = false;
             VK_HANDLE_EXCEPT(vkGetPhysicalDeviceSurfaceSupportKHR(device, i, renderer->swapchain.surface, &presentSupport));

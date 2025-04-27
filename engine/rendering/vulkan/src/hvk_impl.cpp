@@ -57,10 +57,21 @@ namespace hf::inter::rendering
         delete (VkVertBuffer*)handle;
     }
 
-    bool StartFrame(void* rn)
+    void UploadVertBuffer(const VertBufferUploadInfo& info)
+    {
+        hf::UploadVertBuffer((VkVertBuffer*)info.buffer, info.data, info.offset, info.vertexCount);
+    }
+
+    bool GetReadyForRendering(void* rn)
     {
         auto renderer = (VKRenderer*)rn;
-        return StartFrame(renderer);
+        return GetReadyForRendering(renderer);
+    }
+
+    void StartFrame(void* rn)
+    {
+        auto renderer = (VKRenderer*)rn;
+        StartFrame(renderer);
     }
 
     void EndFrame(void* rn)
@@ -122,6 +133,8 @@ namespace hf::inter::rendering
             &CreateBufferAttrib,
             &CreateVertBuffer,
             &DestroyVertBuffer,
+            &UploadVertBuffer,
+            &GetReadyForRendering,
             &StartFrame,
             &EndFrame,
             &RegisterFrameBufferChange,

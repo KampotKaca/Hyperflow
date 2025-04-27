@@ -3,13 +3,13 @@
 
 namespace hf
 {
-    void CreateCommandPool(const GraphicsDevice& device, CommandPool* result)
+    void CreateCommandPool(const GraphicsDevice& device, uint32_t familyIndex, CommandPool* result)
     {
         VkCommandPoolCreateInfo poolCreateInfo
         {
             .sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO,
             .flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT,
-            .queueFamilyIndex = device.familyIndices.graphicsFamily.value()
+            .queueFamilyIndex = familyIndex
         };
 
         VK_HANDLE_EXCEPT(vkCreateCommandPool(device.logicalDevice.device, &poolCreateInfo, nullptr, &result->pool));

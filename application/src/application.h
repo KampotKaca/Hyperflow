@@ -15,7 +15,8 @@ namespace app
 		static void Update();
 		static void Quit();
 
-		static void OnMainWindowRender(const hf::Ref<hf::Renderer>& rn);
+		static void OnPreRender(const hf::Ref<hf::Renderer>& rn);
+		static void OnRender(const hf::Ref<hf::Renderer>& rn);
 	};
 }
 

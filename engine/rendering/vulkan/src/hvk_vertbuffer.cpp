@@ -1,6 +1,5 @@
 #include "hvk_vertbuffer.h"
 #include "hvk_graphics.h"
-#include "hvk_renderer.h"
 
 namespace hf
 {
@@ -8,39 +7,32 @@ namespace hf
     {
         attrib = info.bufferAttrib;
         vertCount = info.vertexCount;
-        enableReadWrite = info.enableReadWrite;
+        memoryType = info.memoryType;
         const auto& bufferAttrib = GetAttrib(attrib);
         uint64_t fullSize = (uint64_t)bufferAttrib.vertexSize * info.vertexCount;
 
-        VkBufferCreateInfo bufferInfo
+        VkCreateBufferInfo createInfo
         {
-            .sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO,
             .size = fullSize,
             .usage = VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
-            .sharingMode = VK_SHARING_MODE_EXCLUSIVE
+            .sharingMode = VK_SHARING_MODE_EXCLUSIVE,
+            .memoryType = memoryType
         };
 
-        auto device = GRAPHICS_DATA.defaultDevice->logicalDevice.device;
-        VK_HANDLE_EXCEPT(vkCreateBuffer(device, &bufferInfo, nullptr, &buffer));
+        CreateBuffer(createInfo, &buffer, &bufferMemory);
 
-        VkMemoryRequirements memReqs{};
-        vkGetBufferMemoryRequirements(device, buffer, &memReqs);
-        VkMemoryAllocateInfo allocInfo
+        switch (memoryType)
         {
-            .sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO,
-            .allocationSize = memReqs.size,
-            .memoryTypeIndex = GetMemoryType(memReqs.memoryTypeBits,
-                                             VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
-                                             VK_MEMORY_PROPERTY_HOST_COHERENT_BIT)
-        };
-
-        VK_HANDLE_EXCEPT(vkAllocateMemory(device, &allocInfo, nullptr, &bufferMemory));
-        VK_HANDLE_EXCEPT(vkBindBufferMemory(device, buffer, bufferMemory, 0));
-
-        void* data;
-        VK_HANDLE_EXCEPT(vkMapMemory(device, bufferMemory, 0, bufferInfo.size, 0, &data));
-        memcpy(data, info.pVertices, fullSize);
-        vkUnmapMemory(device, bufferMemory);
+            case VertBufferMemoryType::Static:
+                break;
+            case VertBufferMemoryType::DynamicWrite:
+                if (info.pVertices) UploadVertBuffer(this, info.pVertices, 0, info.vertexCount);
+                break;
+            case VertBufferMemoryType::DynamicReadWrite:
+                if (info.pVertices) UploadVertBuffer(this, info.pVertices, 0, info.vertexCount);
+                break;
+            default: throw GENERIC_EXCEPT("[Hyperflow]", "Unknown memory type");
+        }
     }
 
     VkVertBuffer::~VkVertBuffer()
@@ -48,5 +40,19 @@ namespace hf
         auto device = GRAPHICS_DATA.defaultDevice->logicalDevice.device;
         vkDestroyBuffer(device, buffer, nullptr);
         vkFreeMemory(device, bufferMemory, nullptr);
+    }
+
+    void UploadVertBuffer(const VkVertBuffer* buffer, const void* data, uint32_t offset, uint32_t vertCount)
+    {
+        if (buffer->memoryType == VertBufferMemoryType::Static)
+            throw GENERIC_EXCEPT("[Hyperflow]", "Cannot modify static buffer");
+
+        auto& attribute = GetAttrib(buffer->attrib);
+        auto device = GRAPHICS_DATA.defaultDevice->logicalDevice.device;
+        auto fullSize = attribute.vertexSize * vertCount;
+        void* mapping;
+        VK_HANDLE_EXCEPT(vkMapMemory(device, buffer->bufferMemory, offset * vertCount, fullSize, 0, &mapping));
+        memcpy(mapping, data, fullSize);
+        vkUnmapMemory(device, buffer->bufferMemory);
     }
 }
