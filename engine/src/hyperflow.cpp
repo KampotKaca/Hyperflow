@@ -38,6 +38,7 @@ namespace hf
 
 			inter::rendering::LoadApi(engineData.renderingApi);
 			if(inter::HF.lifecycleCallbacks.onResourcesLoad) inter::HF.lifecycleCallbacks.onResourcesLoad();
+			inter::HF.renderingApi.api.SubmitStagedCopyOperations();
 			inter::HF.isRunning = true;
 
 			if(inter::HF.lifecycleCallbacks.onStartCallback) inter::HF.lifecycleCallbacks.onStartCallback();

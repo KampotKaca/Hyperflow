@@ -42,12 +42,12 @@ namespace hf
         if (frame.usedCommandCount >= VULKAN_API_MAX_COMMANDS_PER_FRAME)
             throw GENERIC_EXCEPT("[Vulkan]", "Please increase MAX_COMMANDS_PER_FRAME");
 
-        vkResetCommandBuffer(buffer, 0);
         VkCommandBufferBeginInfo beginInfo
         {
             .sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO,
         };
 
+        VK_HANDLE_EXCEPT(vkResetCommandBuffer(buffer, 0));
         VK_HANDLE_EXCEPT(vkBeginCommandBuffer(buffer, &beginInfo));
         rn->currentCommand = buffer;
     }

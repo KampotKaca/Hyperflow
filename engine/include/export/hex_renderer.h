@@ -60,6 +60,7 @@ namespace hf::inter::rendering
         void* (*CreateVertBuffer)(const VertBufferCreationInfo& info);
         void (*DestroyVertBuffer)(void* handle);
         void (*UploadVertBuffer)(const VertBufferUploadInfo& info);
+        void (*SubmitStagedCopyOperations)();
         bool (*GetReadyForRendering)(void* rn);
         void (*StartFrame)(void* rn);
         void (*EndFrame)(void* rn);

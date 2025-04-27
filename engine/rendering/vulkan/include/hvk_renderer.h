@@ -16,7 +16,6 @@ namespace hf
         VkViewport viewport{};
         VkRect2D scissor{};
         CommandPool commandPool{};
-        CommandPool transferPool{};
         uvec2 targetSize{};
 
         VkCommandBuffer currentCommand{};

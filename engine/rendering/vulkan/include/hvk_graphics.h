@@ -4,6 +4,7 @@
 #include "hvk_shared.h"
 #include "hvk_framebuffer.h"
 #include "hvk_bufferattrib.h"
+#include "hvk_vertbuffer.h"
 
 namespace hf
 {
@@ -17,6 +18,12 @@ namespace hf
         const VkDebugUtilsMessengerCallbackDataEXT* callbackData,
         void* userData);
 #endif
+
+    struct CommandPool
+    {
+        VkCommandPool pool{};
+        std::vector<VkCommandBuffer> buffers{};
+    };
 
     struct SwapChainSupportDetails
     {
@@ -70,7 +77,9 @@ namespace hf
 
         VkRenderPass renderPass{};
         VkPipelineLayout pipelineLayout{};
+        CommandPool transferPool{};
         std::vector<VkBufferAttrib> bufferAttribs{};
+        std::vector<VkCopyBufferOperation> bufferCopyOperations{};
 
 #if DEBUG
         VkDebugUtilsMessengerCreateInfoEXT debugCreateInfo
@@ -101,12 +110,6 @@ namespace hf
         std::vector<VkFrameBuffer*> frameBuffers{};
     };
 
-    struct CommandPool
-    {
-        VkCommandPool pool{};
-        std::vector<VkCommandBuffer> buffers{};
-    };
-
     struct VkFrame
     {
         VkSemaphore isImageAvailable{};
@@ -131,10 +134,12 @@ namespace hf
 
     struct VkCreateBufferInfo
     {
-        VkDeviceSize size;
-        VkBufferUsageFlags usage;
-        VkSharingMode sharingMode;
-        VertBufferMemoryType memoryType;
+        VkDeviceSize size{};
+        VkBufferUsageFlags usage{};
+        VkSharingMode sharingMode{};
+        VertBufferMemoryType memoryType{};
+        uint32_t* pQueueFamilies{};
+        uint32_t familyCount{};
     };
 
 #if DEBUG

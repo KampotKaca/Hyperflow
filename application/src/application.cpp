@@ -47,7 +47,7 @@ namespace app
 			.bufferAttrib = bufferAttrib,
 			.vertexCount = 3,
 			.pVertices = (void*)vertices,
-			.memoryType = hf::VertBufferMemoryType::DynamicWrite
+			.memoryType = hf::VertBufferMemoryType::Static
 		};
 
 		buffer = hf::vertbuffer::Create(bufferInfo);

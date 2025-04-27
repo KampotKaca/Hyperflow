@@ -74,6 +74,8 @@ namespace hf
                 .layoutCount = 0
             };
             CreatePipelineLayout(pipelineLayoutInfo, &GRAPHICS_DATA.pipelineLayout);
+            CreateCommandPool(*GRAPHICS_DATA.defaultDevice, GRAPHICS_DATA.defaultDevice->familyIndices.transferFamily.value(), &GRAPHICS_DATA.transferPool);
+            CreateCommandBuffers(*GRAPHICS_DATA.defaultDevice, &GRAPHICS_DATA.transferPool, 1);
         }
         else
         {
@@ -84,9 +86,7 @@ namespace hf
 
         CreateRendererFrameBuffers(this);
         CreateCommandPool(*GRAPHICS_DATA.defaultDevice, GRAPHICS_DATA.defaultDevice->familyIndices.graphicsFamily.value(), &commandPool);
-        CreateCommandPool(*GRAPHICS_DATA.defaultDevice, GRAPHICS_DATA.defaultDevice->familyIndices.transferFamily.value(), &transferPool);
         CreateCommandBuffers(*GRAPHICS_DATA.defaultDevice, &commandPool, FRAMES_IN_FLIGHT);
-        CreateCommandBuffers(*GRAPHICS_DATA.defaultDevice, &transferPool, 1);
 
         frames = std::vector<VkFrame>(FRAMES_IN_FLIGHT);
         for (uint32_t i = 0; i < FRAMES_IN_FLIGHT; ++i) CreateFrame(&frames[i]);
@@ -100,7 +100,6 @@ namespace hf
         DestroyRendererFrameBuffers(this);
         DestroySwapchain(swapchain, &swapchain.swapchain);
         DestroyCommandPool(*GRAPHICS_DATA.defaultDevice, commandPool);
-        DestroyCommandPool(*GRAPHICS_DATA.defaultDevice, transferPool);
         DestroySurface(this);
     }
 

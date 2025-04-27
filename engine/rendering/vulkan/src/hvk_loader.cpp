@@ -87,7 +87,9 @@ namespace hf
 
     void UnloadVulkan()
     {
+        SubmitStagedCopyOperations();
         DelayThreadUntilRenderingFinish();
+        DestroyCommandPool(*GRAPHICS_DATA.defaultDevice, GRAPHICS_DATA.transferPool);
         DestroyRenderPass(&GRAPHICS_DATA.renderPass);
         DestroyPipelineLayout(&GRAPHICS_DATA.pipelineLayout);
 

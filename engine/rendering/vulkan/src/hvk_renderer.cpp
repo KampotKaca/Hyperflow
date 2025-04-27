@@ -5,6 +5,7 @@ namespace hf
 {
     bool GetReadyForRendering(VKRenderer* rn)
     {
+        SubmitStagedCopyOperations();
         if (rn->targetSize.x == 0 || rn->targetSize.y == 0) return false;
         return AcquireNextImage(rn);
     }

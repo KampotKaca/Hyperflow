@@ -59,7 +59,20 @@ namespace hf::inter::rendering
 
     void UploadVertBuffer(const VertBufferUploadInfo& info)
     {
-        hf::UploadVertBuffer((VkVertBuffer*)info.buffer, info.data, info.offset, info.vertexCount);
+        auto buffer = (VkVertBuffer*)info.buffer;
+        if (buffer->memoryType == VertBufferMemoryType::Static)
+            throw GENERIC_EXCEPT("[Hyperflow]", "Cannot modify static buffer");
+
+        auto& attribute = GetAttrib(buffer->attrib);
+        auto fullSize = attribute.vertexSize * info.vertexCount;
+        auto fullOffset = info.offset * info.vertexCount;
+
+        UploadBufferMemory(buffer->bufferMemory, info.data, fullOffset, fullSize);
+    }
+
+    void SubmitStagedCopyOperations()
+    {
+        hf::SubmitStagedCopyOperations();
     }
 
     bool GetReadyForRendering(void* rn)
@@ -134,6 +147,7 @@ namespace hf::inter::rendering
             &CreateVertBuffer,
             &DestroyVertBuffer,
             &UploadVertBuffer,
+            &SubmitStagedCopyOperations,
             &GetReadyForRendering,
             &StartFrame,
             &EndFrame,
