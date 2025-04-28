@@ -1,9 +1,10 @@
 #include "hwin_shared.h"
-#include "hwindowexception.h"
+#include "hwin_window.h"
+#include "hwin_exception.h"
 
-namespace hf::inter::window
+namespace hf
 {
-    void Open(Window* win)
+    void Win_WindowOpen(Window* win)
     {
         HWND parentHandle = nullptr;
         if (win->parent != nullptr) parentHandle = (HWND)win->parent->handle;
@@ -29,40 +30,32 @@ namespace hf::inter::window
         if (win->handle == nullptr) throw WND_LAST_EXCEPT();
     }
 
-    bool Close(Window* win)
+    void Win_WindowClose(Window* win)
     {
-        if (win->handle && IsWindow((HWND)win->handle))
-        {
-            rendering::DestroyRenderer(win->renderer.get());
-            win->renderer = nullptr;
-            if (!DestroyWindow((HWND)win->handle)) throw WND_LAST_EXCEPT();
-            win->handle = nullptr;
-            win->parent = nullptr;
-            return true;
-        }
-
-        return false;
+        if (!DestroyWindow((HWND)win->handle)) throw WND_LAST_EXCEPT();
+        win->handle = nullptr;
+        win->parent = nullptr;
     }
 
-    void SetTitle(const Window* win, const std::string& title)
+    void Win_WindowSetTitle(const Window* win, const std::string& title)
     {
         if (!SetWindowText((HWND)win->handle, &title[0])) throw WND_LAST_EXCEPT();
     }
 
-    void SetSize(const Window* win, ivec2 size)
+    void Win_WindowSetSize(const Window* win, ivec2 size)
     {
         Windows_ConvertSize(win, size);
         if (!SetWindowPos((HWND)win->handle, nullptr, 0, 0, size[0], size[1], SWP_NOMOVE))
             throw WND_LAST_EXCEPT();
     }
 
-    void SetPosition(const Window* win, ivec2 position)
+    void Win_WindowSetPosition(const Window* win, ivec2 position)
     {
         if (!SetWindowPos((HWND)win->handle, nullptr, position[0], position[1], 0, 0, SWP_NOSIZE))
             throw WND_LAST_EXCEPT();
     }
 
-    void SetRect(const Window* win, IRect rect)
+    void Win_WindowSetRect(const Window* win, IRect rect)
     {
         Windows_ConvertSize(win, rect.size);
         if (!SetWindowPos((HWND)win->handle, nullptr, rect.position[0], rect.position[1], rect.size[0], rect.size[1],
@@ -70,7 +63,7 @@ namespace hf::inter::window
             throw WND_LAST_EXCEPT();
     }
 
-    void SetFlags(Window* win, WindowFlags flags)
+    void Win_WindowSetFlags(Window* win, WindowFlags flags)
     {
         if (win->flags == flags) return;
 
@@ -96,42 +89,14 @@ namespace hf::inter::window
         win->flags = flags;
     }
 
-    void Focus(const Window* win)
+    void Win_WindowFocus(const Window* win)
     {
         SetFocus((HWND)win->handle);
         SetForegroundWindow((HWND)win->handle);
     }
 
-    void* GetWindowHandle(const Window* win)
+    void* Win_GetWindowHandle(const Window* win)
     {
         return win->handle;
-    }
-}
-
-namespace hf::inter
-{
-    void* LoadDll(const char* dllName)
-    {
-        const std::string path = std::string("lib") + dllName + ".dll";
-        // if (!utils::FileExists(path.c_str()))
-        //     throw GENERIC_EXCEPT("[Hyperflow]", "Unable to find dll at path %s", path.c_str());
-        void* dll = LoadLibraryA(path.c_str());
-        if (!dll) throw WND_LAST_EXCEPT();
-        return dll;
-    }
-
-    void* GetFuncPtr(void* dll, const char* funcName)
-    {
-       return (void*)GetProcAddress((HMODULE)dll, funcName);
-    }
-
-    void UnloadDll(void* dll)
-    {
-        FreeLibrary((HMODULE)dll);
-    }
-
-    void* GetPlatformInstance()
-    {
-        return PLATFORM_DATA.instance;
     }
 }

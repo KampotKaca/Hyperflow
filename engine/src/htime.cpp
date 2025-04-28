@@ -24,7 +24,7 @@ namespace hf
 			auto diff = targetFrameDuration - (cTime - currentTime);
 			if(diff > .001)
 			{
-				Platform_Sleep(diff);
+				inter::platform::Sleep(diff);
 				cTime = time::GetSystemTime();
 			}
 		}

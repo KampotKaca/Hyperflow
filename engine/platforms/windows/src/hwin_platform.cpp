@@ -1,42 +1,10 @@
 #include "hwin_shared.h"
-#include "hwinproc.h"
-#include "hwindowexception.h"
+#include "hwin_eventhandling.h"
+#include "hwin_exception.h"
 
 namespace hf
 {
-	void Platform_SetWindowFlag(WindowFlags* flags, WindowFlags target, uint32_t value)
-	{
-		*flags = (WindowFlags)(((int32_t)*flags & ~(int32_t)target) | (-value & (int32_t)target));
-	}
-
-	void Platform_HandleEvents(EngineUpdateType updateType)
-	{
-		MSG msg;
-		switch (updateType)
-		{
-			case EngineUpdateType::Continues:
-
-				if (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE))
-				{
-					TranslateMessage(&msg);
-					DispatchMessage(&msg);
-				}
-
-				break;
-			case EngineUpdateType::EventRaised:
-			default:
-
-				if(GetMessage(&msg, nullptr, 0, 0) > 0)
-				{
-					TranslateMessage(&msg);
-					DispatchMessage(&msg);
-				}
-
-				break;
-		}
-	}
-
-	LRESULT CALLBACK Platform_WindowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
+	static LRESULT CALLBACK Win_WindowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
 	{
 		auto* window = (Window*)(GetWindowLongPtr(hwnd, GWLP_USERDATA));
 
@@ -78,19 +46,19 @@ namespace hf
 		return DefWindowProcA(hwnd, msg, wparam, lparam);
 	}
 
-	LRESULT CALLBACK Platform_WindowProc_Create(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
+	static LRESULT CALLBACK Win_WindowProcCreate(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
 	{
 		if(msg == WM_NCCREATE)
 		{
 			auto* pCreate = (CREATESTRUCT*)lparam;
 			auto* window = (Window*)pCreate->lpCreateParams;
 			SetWindowLongPtr(hwnd, GWLP_USERDATA, (LONG_PTR)window);
-			SetWindowLongPtr(hwnd, GWLP_WNDPROC, (LONG_PTR)Platform_WindowProc);
+			SetWindowLongPtr(hwnd, GWLP_WNDPROC, (LONG_PTR)Win_WindowProc);
 		}
 		return DefWindowProcA(hwnd, msg, wparam, lparam);
 	}
 
-	void Platform_Initialize()
+	void Win_Load()
 	{
 		InitThreadHook();
 
@@ -105,7 +73,7 @@ namespace hf
 		wndClass.hbrBackground = nullptr;
 		wndClass.lpszMenuName = nullptr;
 		wndClass.hInstance = hinstance;
-		wndClass.lpfnWndProc = Platform_WindowProc_Create;
+		wndClass.lpfnWndProc = Win_WindowProcCreate;
 		wndClass.cbClsExtra = 0;
 		wndClass.cbWndExtra = 0;
 		wndClass.hIconSm = nullptr;
@@ -115,21 +83,21 @@ namespace hf
 		PLATFORM_DATA.instance = hinstance;
 	}
 
-	void Platform_Dispose()
+	void Win_Unload()
     {
 
     }
 
-	void Platform_BeginTemporarySystemTimer(uint16_t millisecondPrecision)
+	void Win_BeginTemporarySystemTimer(uint16_t millisecondPrecision)
 	{
 		timeBeginPeriod(millisecondPrecision);
 	}
-	void Platform_EndTemporarySystemTimer(uint16_t millisecondPrecision)
+	void Win_EndTemporarySystemTimer(uint16_t millisecondPrecision)
 	{
 		timeEndPeriod(millisecondPrecision);
 	}
 
-	void Platform_Sleep(double seconds)
+	void Win_Sleep(double seconds)
 	{
 		// A waitable timer seems to be better than the Windows Sleep().
 		HANDLE WaitTimer;
@@ -144,11 +112,60 @@ namespace hf
 		CloseHandle(WaitTimer);
 	}
 
-	ivec2 Platform_GetPointerPosition(const Window* window)
+	ivec2 Win_GetPointerPosition(const Window* window)
 	{
 		POINT point;
 		if(!GetCursorPos(&point)) throw WND_LAST_EXCEPT();
 		if(!ScreenToClient((HWND)window->handle, &point)) throw WND_LAST_EXCEPT();
 		return { (int32_t)point.x, (int32_t)point.y };
+	}
+
+	void Win_SetWindowFlag(WindowFlags* flags, WindowFlags target, uint32_t value)
+	{
+		*flags = (WindowFlags)(((int32_t)*flags & ~(int32_t)target) | (-value & (int32_t)target));
+	}
+
+	void Win_HandleEvents(EngineUpdateType updateType)
+	{
+		MSG msg;
+		switch (updateType)
+		{
+		case EngineUpdateType::Continues:
+
+			if (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE))
+			{
+				TranslateMessage(&msg);
+				DispatchMessage(&msg);
+			}
+
+			break;
+		case EngineUpdateType::EventRaised:
+		default:
+
+			if(GetMessage(&msg, nullptr, 0, 0) > 0)
+			{
+				TranslateMessage(&msg);
+				DispatchMessage(&msg);
+			}
+
+			break;
+		}
+	}
+
+	HMODULE Win_LoadDll(const char* dllPath)
+	{
+		auto dll = LoadLibraryA(dllPath);
+		if (!dll) throw WND_LAST_EXCEPT();
+		return dll;
+	}
+
+	void Win_UnloadDll(HMODULE dll)
+	{
+		FreeLibrary(dll);
+	}
+
+	FARPROC Win_GetFuncPtr(void* dll, const char* funcName)
+	{
+		return GetProcAddress((HMODULE)dll, funcName);
 	}
 }

@@ -101,16 +101,16 @@ namespace hf
             {
                 case RenderingApiType::None: throw GENERIC_EXCEPT("[Hyperflow]", "Cannot run the engine without rendering");
                 case RenderingApiType::Vulkan:
-                    newApi.handle = LoadDll("vk");
+                    newApi.handle = platform::LoadDll("vk");
                     break;
                 case RenderingApiType::Direct3D:
-                    newApi.handle = LoadDll("d3d");
+                    newApi.handle = platform::LoadDll("d3d");
                     break;
                 default: break;
             }
 
             if (!newApi.handle) throw GENERIC_EXCEPT("[Hyperflow]", "Cannot load rendering API");
-            auto func = (RendererAPI*(*)())GetFuncPtr(newApi.handle, "GetAPI");
+            auto func = (RendererAPI*(*)())platform::GetFuncPtr(newApi.handle, "GetAPI");
             if (!func) throw GENERIC_EXCEPT("[Hyperflow]", "Unable to fund GetAPI function in the rendering dll");
             newApi.api = *func();
             newApi.type = api;
@@ -136,7 +136,7 @@ namespace hf
                 }
             }
 
-            UnloadDll(HF.renderingApi.handle);
+            platform::UnloadDll(HF.renderingApi.handle);
 
             HF.renderingApi = RenderingApi
             {
@@ -157,7 +157,7 @@ namespace hf
                     .appVersion = appV,
                     .engineVersion = engineV,
                     .applicationTitle = HF.appTitle.c_str(),
-                    .platformInstance = GetPlatformInstance()
+                    .platformInstance = platform::GetPlatformInstance()
                 };
 
                 HF.renderingApi.api.Load(loadInfo);

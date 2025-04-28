@@ -1,4 +1,4 @@
-#include "hwindowexception.h"
+#include "hwin_exception.h"
 #include <sstream>
 
 namespace hf

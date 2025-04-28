@@ -58,7 +58,6 @@
 
 #include "hshared.h"
 #include "hwindow.h"
-#include "hplatform.h"
 #include <dbghelp.h>
 #include "hinternal.h"
 

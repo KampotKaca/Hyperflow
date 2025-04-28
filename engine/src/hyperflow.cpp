@@ -24,8 +24,7 @@ namespace hf
 		try
 		{
 			inter::HF.time = Time();
-			Platform_Initialize();
-			Platform_BeginTemporarySystemTimer(1);
+			inter::platform::Load();
 			log_set_level(LOG_TRACE);
 
 			inter::HF.lifecycleCallbacks = engineData.lifecycleCallbacks;
@@ -45,28 +44,26 @@ namespace hf
 			while (IsRunning())
 			{
 				inter::HF.time.StartFrame();
-
-				Platform_HandleEvents(inter::HF.updateType);
+				inter::platform::HandleEvents(inter::HF.updateType);
 				Window_HandleInput(inter::HF.windows);
 				if(inter::HF.lifecycleCallbacks.onUpdateCallback) inter::HF.lifecycleCallbacks.onUpdateCallback();
-
-				for(auto& window : inter::HF.windows)
-				{
-					if (!window::IsClosing(window)) inter::window::Update(window.get());
-				}
 
 				if(input::IsDown(Key::Escape))
 				{
 					inter::alloc::LogThreadMemoryStats();
 					Terminate();
 				}
+
+				for(auto& window : inter::HF.windows)
+				{
+					if (!window::IsClosing(window)) inter::window::Update(window.get());
+				}
 			}
 			if (inter::HF.renderingApi.isLoaded) inter::HF.renderingApi.api.WaitForRendering();
-			if(inter::HF.lifecycleCallbacks.onQuitCallback) inter::HF.lifecycleCallbacks.onQuitCallback();
+			if (inter::HF.lifecycleCallbacks.onQuitCallback) inter::HF.lifecycleCallbacks.onQuitCallback();
 
 			window::CloseAll();
-			Platform_EndTemporarySystemTimer(1);
-			Platform_Dispose();
+			inter::platform::Unload();
 		}
 		catch(const HyperException& e)
 		{

@@ -24,14 +24,14 @@ namespace hf
 
 		inter::window::Open(this);
 
-		auto pPos = Platform_GetPointerPosition(this);
+		auto pPos = inter::platform::GetPointerPosition(this);
 		mouse.position = pPos;
 		mouse.isInClientRegion = pPos.x >= 0 && pPos.x < rect.size.x && pPos.y > 0 && pPos.y < rect.size.y;
 		eventData.pointerPosition = mouse.position;
 
 		inter::window::SetFlags(this, data.flags);
 		inter::window::Focus(this);
-		inter::window::SetTitle(this, title.c_str());
+		inter::window::SetTitle(this, title);
 	}
 
 	Window::~Window()
@@ -100,7 +100,7 @@ namespace hf
 
 	void WindowEvent_Show(Window* win, bool show) noexcept
 	{
-		Platform_SetWindowFlag(&win->flags, WindowFlags::Visible, show);
+		inter::platform::SetWindowFlag(&win->flags, WindowFlags::Visible, show);
 	}
 
 	void WindowEvent_Move(Window* window, ivec2 position) noexcept
@@ -221,7 +221,7 @@ namespace hf
 
 	void HandleMouseFocus(Mouse& mouse, Window* window) noexcept
 	{
-		mouse.position = Platform_GetPointerPosition(window);
+		mouse.position = inter::platform::GetPointerPosition(window);
 	}
 
 	void HandleMouseFocusLoss(Mouse& mouse) noexcept

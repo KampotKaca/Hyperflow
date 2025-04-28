@@ -1,5 +1,6 @@
 #include "hwin_shared.h"
-#include "hwinproc.h"
+#include "hwin_eventhandling.h"
+#include "hplatform.h"
 
 namespace hf
 {

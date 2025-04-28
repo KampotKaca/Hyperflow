@@ -19,7 +19,6 @@ namespace hf
 	LRESULT Platform_HandleEvents_MouseButtonExtra  (Window* window, WPARAM wparam, LPARAM lparam, Mouse::Event::Type type) noexcept;
 	LRESULT Platform_HandleEvents_MouseMove         (Window* window, WPARAM wparam, LPARAM lparam) noexcept;
 	LRESULT Platform_HandleEvents_MouseScroll       (Window* window, WPARAM wparam, LPARAM lparam, ivec2 direction) noexcept;
-
 }
 
 #endif //HWINPROC_H

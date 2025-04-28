@@ -8,16 +8,6 @@
 
 namespace hf
 {
-	void Platform_SetWindowFlag(WindowFlags* flags, WindowFlags target, uint32_t value);
-	void Platform_HandleEvents(EngineUpdateType updateType);
-	void Platform_Initialize();
-	void Platform_Dispose();
-	void Platform_BeginTemporarySystemTimer(uint16_t millisecondPrecision);
-	void Platform_EndTemporarySystemTimer(uint16_t millisecondPrecision);
-	void Platform_Sleep(double seconds);
-
-	ivec2 Platform_GetPointerPosition(const Window* window);
-
    	void KeyboardEvent_Key(Keyboard& keyboard, Key key, Keyboard::Event::Type type) noexcept;
 	void KeyboardEvent_Char(Keyboard& keyboard, char character) noexcept;
 

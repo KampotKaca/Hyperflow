@@ -1,5 +1,5 @@
 #include "hwin_shared.h"
-#include "hwindowexception.h"
+#include "hwin_exception.h"
 
 namespace hf
 {
