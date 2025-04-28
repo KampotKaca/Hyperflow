@@ -19,7 +19,7 @@ find_package(Vulkan REQUIRED)
 
 if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
     if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-        target_link_libraries(vk PRIVATE Vulkan::Vulkan)
+        target_link_libraries(vk PRIVATE Vulkan::Vulkan win)
     else ()
         message(FATAL_ERROR "Vulkan libraries on windows can only be compiled with gcc")
     endif()

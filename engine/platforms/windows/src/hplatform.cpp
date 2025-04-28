@@ -1,7 +1,6 @@
 #include "hwin_shared.h"
-#include "hplatform.h"
 #include "hwinproc.h"
-#include "exceptions/hwindowexception.h"
+#include "hwindowexception.h"
 
 namespace hf
 {

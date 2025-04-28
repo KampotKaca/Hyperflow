@@ -15,7 +15,7 @@ namespace hf
 		uvec2 size{};
 		void* windowHandle{};
 		void* handle{};
-		void* drawBufferCache[VULKAN_API_MAX_NUM_DRAW_BUFFER]{};
+		void* drawBufferCache[MAX_NUM_DRAW_BUFFER]{};
 	};
 }
 

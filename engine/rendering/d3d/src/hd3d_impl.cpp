@@ -17,12 +17,12 @@ namespace hf::inter::rendering
 
         void* CreateInstance(const RendererInstanceCreationInfo& info)
         {
-            return CreateRenderer((HWND)info.handle);
+            return hf::CreateRenderer((HWND)info.handle);
         }
 
         void DestroyInstance(void* rnInstance)
         {
-            DestroyRenderer((D3DRenderer*)rnInstance);
+            hf::DestroyRenderer((D3DRenderer*)rnInstance);
         }
 
         void* CreateShader(const ShaderCreationInfo& info)

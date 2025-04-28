@@ -21,8 +21,8 @@ namespace hf
         VkCommandBuffer currentCommand{};
         VkRenderPass currentPass{};
 
-        VkBuffer drawBuffers[VULKAN_API_MAX_NUM_DRAW_BUFFER]{};
-        VkDeviceSize drawOffsets[VULKAN_API_MAX_NUM_DRAW_BUFFER]{};
+        VkBuffer drawBuffers[MAX_NUM_DRAW_BUFFER]{};
+        VkDeviceSize drawOffsets[MAX_NUM_DRAW_BUFFER]{};
 
         std::vector<VkFrame> frames{};
         uint32_t currentFrame = 0;

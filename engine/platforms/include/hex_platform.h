@@ -1,0 +1,4 @@
+#ifndef HEX_PLATFORM_H
+#define HEX_PLATFORM_H
+
+#endif //HEX_PLATFORM_H

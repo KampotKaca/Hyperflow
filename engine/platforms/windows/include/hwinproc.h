@@ -1,7 +1,7 @@
 #ifndef HWINPROC_H
 #define HWINPROC_H
 
-#include "hwindows.h"
+#include "hwin_shared.h"
 #include "hwindow.h"
 
 namespace hf

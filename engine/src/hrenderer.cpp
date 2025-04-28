@@ -65,9 +65,8 @@ namespace hf
 
         void Draw(const DrawCallInfo& info)
         {
-            if (info.bufferCount > VULKAN_API_MAX_NUM_DRAW_BUFFER)
-                throw GENERIC_EXCEPT("[Hyperflow]", "Trying to draw too many buffers at once, max is %i",
-                    VULKAN_API_MAX_NUM_DRAW_BUFFER);
+            if (info.bufferCount > MAX_NUM_DRAW_BUFFER)
+                throw GENERIC_EXCEPT("[Hyperflow]", "Trying to draw too many buffers at once, max is %i", MAX_NUM_DRAW_BUFFER);
 
             for (uint32_t i = 0; i < info.bufferCount; i++)
                 info.renderer->drawBufferCache[i] = info.pVertBuffers[i]->handle;

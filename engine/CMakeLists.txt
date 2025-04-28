@@ -26,7 +26,7 @@ endif()
 if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
     add_definitions(-DPLATFORM_WINDOWS)
     option(WINDOWS "Windows" ON)
-    file(GLOB_RECURSE PLATFORM CONFIGURE_DEPENDS platforms/windows/*.cpp)
+    add_subdirectory(platforms/windows)
 
     option(VULKAN "vulkan" ON)
     add_definitions(-DRENDERER_VULKAN)
@@ -76,8 +76,6 @@ endif ()
 
 #endregion
 
-file(GLOB_RECURSE RENDERER_SRC CONFIGURE_DEPENDS rendering/src/*.cpp)
-file(GLOB_RECURSE PLATFORM_SRC CONFIGURE_DEPENDS platforms/src/*.cpp)
 file(GLOB_RECURSE ENGINE_SRC CONFIGURE_DEPENDS src/*.cpp)
 
 add_subdirectory(external/glm)
@@ -86,7 +84,7 @@ add_subdirectory(external/logc)
 add_subdirectory(external/rpmalloc)
 add_subdirectory(others/exception)
 
-add_library(${PROJECT_NAME} ${ENGINE_SRC} ${PLATFORM} ${PLATFORM_SRC} ${RENDERER_SRC})
+add_library(${PROJECT_NAME} ${ENGINE_SRC} ${PLATFORM})
 
 # Using keyword-based signature consistently
 target_link_libraries(${PROJECT_NAME}
@@ -113,7 +111,7 @@ target_compile_definitions(${PROJECT_NAME}
 
 # Link winmm only on Windows
 if (WINDOWS)
-    target_link_libraries(${PROJECT_NAME} PRIVATE winmm Dbghelp)
+    target_link_libraries(${PROJECT_NAME} PRIVATE win)
 elseif (LINUX)
     target_link_libraries(${PROJECT_NAME}
             PRIVATE

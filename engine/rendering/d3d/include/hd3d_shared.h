@@ -1,7 +1,7 @@
 #ifndef HD3D_SHARED_H
 #define HD3D_SHARED_H
 
-#include "hwindows.h"
+#include "../../../platforms/windows/include/hwin_shared.h"
 #include <d3d11.h>
 #include <dxgi.h>
 #include "hgraphicsexception.h"

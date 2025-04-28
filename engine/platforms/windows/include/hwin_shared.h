@@ -1,5 +1,5 @@
-#ifndef HWINDOWS_H
-#define HWINDOWS_H
+#ifndef HWIN_SHARED_H
+#define HWIN_SHARED_H
 
 //Windows 7 or later
 #ifndef _WIN32_WINNT
@@ -56,6 +56,27 @@
 #define _UNICODE
 #include <windowsx.h>
 
-constexpr char WINDOWS_CLASS_NAME[] = "HyperflowClass";
+#include "hshared.h"
+#include "hwindow.h"
+#include "hplatform.h"
+#include <dbghelp.h>
+#include "hinternal.h"
 
-#endif //HWINDOWS_H
+namespace hf
+{
+	constexpr char WINDOWS_CLASS_NAME[] = "HyperflowClass";
+
+	void Windows_ConvertSize(const Window* window, ivec2& size);
+	uint64_t Windows_GetTicks();
+	uint32_t Windows_GetStyleID(WindowStyle style);
+
+	struct Win_Platform_Data
+	{
+		HINSTANCE instance;
+	};
+
+	extern Win_Platform_Data PLATFORM_DATA;
+	void InitThreadHook();
+}
+
+#endif //HWIN_SHARED_H

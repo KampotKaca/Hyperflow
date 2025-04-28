@@ -1,9 +1,8 @@
 #ifndef HWINDOWEXCEPTION_H
 #define HWINDOWEXCEPTION_H
 
-#include "../hwindows.h"
-#include "hshared.h"
-#include "../../../others/exception/include/hexception.h"
+#include "hwin_shared.h"
+#include "hexception.h"
 
 namespace hf
 {

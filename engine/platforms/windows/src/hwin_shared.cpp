@@ -1,7 +1,5 @@
-#include "hwindows.h"
 #include "hwin_shared.h"
-#include "exceptions/hwindowexception.h"
-#include "hwindow.h"
+#include "hwindowexception.h"
 
 namespace hf
 {

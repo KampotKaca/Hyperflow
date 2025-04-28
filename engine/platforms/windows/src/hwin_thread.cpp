@@ -1,7 +1,4 @@
 ﻿#include "hwin_shared.h"
-#include <iostream>
-#include <dbghelp.h>
-#include "hinternal.h"
 
 using CreateThreadType = HANDLE(WINAPI*)(
     LPSECURITY_ATTRIBUTES, SIZE_T, LPTHREAD_START_ROUTINE, LPVOID, DWORD, LPDWORD);

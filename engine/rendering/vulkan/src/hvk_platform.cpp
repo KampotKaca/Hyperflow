@@ -6,7 +6,7 @@
 // #endif
 
 #if PLATFORM_WINDOWS
-#include "../platforms/windows/hwindows.h"
+#include "../../../platforms/windows/include/hwin_shared.h"
 #include <vulkan/vulkan_win32.h>
 #elif PLATFORM_LINUX
 
