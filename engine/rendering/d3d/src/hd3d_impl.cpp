@@ -54,10 +54,26 @@ namespace hf::inter::rendering
 
         }
 
-        bool StartFrame(void* rn)
+        void UploadVertBuffer(const VertBufferUploadInfo& info)
+        {
+
+        }
+
+        void SubmitStagedCopyOperations()
+        {
+
+        }
+
+        bool GetReadyForRendering(void* rn)
         {
             auto renderer = (D3DRenderer*)rn;
-            return StartFrame(renderer);
+            return GetReadyForRendering(renderer);
+        }
+
+        void StartFrame(void* rn)
+        {
+            auto renderer = (D3DRenderer*)rn;
+            StartFrame(renderer);
         }
 
         void EndFrame(void* rn)
@@ -72,9 +88,9 @@ namespace hf::inter::rendering
             RegisterFrameBufferChange(renderer, newSize);
         }
 
-        void Draw(void* rn)
+        void Draw(const DrawCallInfo& info)
         {
-            auto renderer = (D3DRenderer*)rn;
+            auto renderer = (D3DRenderer*)info.renderer;
             Draw(renderer);
         }
 
@@ -97,6 +113,9 @@ namespace hf::inter::rendering
                 &CreateBufferAttrib,
                 &CreateVertBuffer,
                 &DestroyVertBuffer,
+                &UploadVertBuffer,
+                &SubmitStagedCopyOperations,
+                &GetReadyForRendering,
                 &StartFrame,
                 &EndFrame,
                 &RegisterFrameBufferChange,

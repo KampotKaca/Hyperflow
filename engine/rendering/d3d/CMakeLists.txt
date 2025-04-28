@@ -18,6 +18,7 @@ target_link_libraries(d3d
 )
 
 target_include_directories(d3d PUBLIC include)
+target_include_directories(d3d PUBLIC ../include)
 target_include_directories(d3d PUBLIC ../../include)
 target_include_directories(d3d PUBLIC ../../platforms/windows)
 target_compile_definitions(d3d PRIVATE RENDERER_DLL)

@@ -173,7 +173,7 @@ namespace hf
 	struct VertBufferCreationInfo
 	{
 		BufferAttrib bufferAttrib = 0;
-		VertBufferMemoryType memoryType;
+		VertBufferMemoryType memoryType = VertBufferMemoryType::Static;
 		uint32_t vertexCount = 0;
 		void* pVertices = nullptr;
 	};

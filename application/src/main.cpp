@@ -35,8 +35,8 @@ int main()
 			.style        		 = hf::WindowStyle::Default,
 			.position     		 = { 200, 200 },
 			.size         		 = { 920, 480 },
-			.onRenderCallback    = app::Application::OnRender,
 			.onPreRenderCallback = app::Application::OnPreRender,
+			.onRenderCallback    = app::Application::OnRender,
 		}
 	};
 

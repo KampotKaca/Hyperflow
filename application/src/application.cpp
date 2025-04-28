@@ -45,9 +45,9 @@ namespace app
 		hf::VertBufferCreationInfo bufferInfo
 		{
 			.bufferAttrib = bufferAttrib,
+			.memoryType = hf::VertBufferMemoryType::Static,
 			.vertexCount = 3,
 			.pVertices = (void*)vertices,
-			.memoryType = hf::VertBufferMemoryType::Static
 		};
 
 		buffer = hf::vertbuffer::Create(bufferInfo);

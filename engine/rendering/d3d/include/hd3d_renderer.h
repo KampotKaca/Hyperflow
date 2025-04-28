@@ -15,7 +15,8 @@ namespace hf
     D3DRenderer* CreateRenderer(HWND window);
     void DestroyRenderer(D3DRenderer* instance);
 
-    bool StartFrame(D3DRenderer* rn);
+    bool GetReadyForRendering(D3DRenderer* rn);
+    void StartFrame(D3DRenderer* rn);
     void EndFrame(D3DRenderer* rn);
     void RegisterFrameBufferChange(D3DRenderer* rn, uvec2 newSize);
     void Draw(D3DRenderer* rn);

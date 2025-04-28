@@ -117,9 +117,9 @@ namespace hf::inter::rendering
         VkDrawInfo drawInfo
         {
             .renderer = rn,
-            .bufferCount = info.bufferCount,
             .pBuffers = rn->drawBuffers,
             .pOffsets = rn->drawOffsets,
+            .bufferCount = info.bufferCount,
             .vertCount = vertCount,
             .instanceCount = info.instanceCount
         };

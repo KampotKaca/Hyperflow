@@ -56,11 +56,16 @@ namespace hf
         }
     }
 
-    bool StartFrame(D3DRenderer* rn)
+    bool GetReadyForRendering(D3DRenderer* rn)
     {
         float c[4] = { 1, 0, 0, 1 };
         GRAPHICS_DATA.context->ClearRenderTargetView(rn->renderTexture, c);
         return true;
+    }
+
+    void StartFrame(D3DRenderer* rn)
+    {
+
     }
 
     void EndFrame(D3DRenderer* rn)
