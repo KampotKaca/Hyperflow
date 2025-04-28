@@ -1,7 +1,6 @@
 #include "htime.h"
 #include <chrono>
 #include <thread>
-#include "hplatform.h"
 #include "hyperflow.h"
 #include "hinternal.h"
 

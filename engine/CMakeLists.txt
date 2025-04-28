@@ -39,6 +39,7 @@ if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
 elseif (CMAKE_SYSTEM_NAME STREQUAL "Linux")
     add_definitions(-DPLATFORM_LINUX)
     option(LINUX "Linux" ON)
+    add_subdirectory(platforms/linux)
 
     option(VULKAN "vulkan" ON)
     add_definitions(-DRENDERER_VULKAN)
@@ -46,11 +47,10 @@ elseif (CMAKE_SYSTEM_NAME STREQUAL "Linux")
     find_package(X11)
     if(X11_FOUND)
         add_definitions(-DX11)
-        file(GLOB_RECURSE PLATFORM CONFIGURE_DEPENDS platforms/linux/x11/*.cpp)
+        add_subdirectory(platforms/x11)
     else()
         find_package(PkgConfig REQUIRED)
         pkg_check_modules(WAYLAND wayland-client)
-        file(GLOB_RECURSE PLATFORM CONFIGURE_DEPENDS platforms/linux/wayland/*.cpp)
 
         if(WAYLAND_FOUND)
             add_definitions(-DWAYLAND)
@@ -58,7 +58,6 @@ elseif (CMAKE_SYSTEM_NAME STREQUAL "Linux")
             message(FATAL_ERROR "Unsupported display server detected")
         endif()
     endif()
-
 else()
     message(FATAL_ERROR "Unsupported platform: ${CMAKE_SYSTEM_NAME}")
 endif()
@@ -84,7 +83,7 @@ add_subdirectory(external/logc)
 add_subdirectory(external/rpmalloc)
 add_subdirectory(others/exception)
 
-add_library(${PROJECT_NAME} ${ENGINE_SRC} ${PLATFORM})
+add_library(${PROJECT_NAME} ${ENGINE_SRC})
 
 # Using keyword-based signature consistently
 target_link_libraries(${PROJECT_NAME}
@@ -113,14 +112,13 @@ target_compile_definitions(${PROJECT_NAME}
 if (WINDOWS)
     target_link_libraries(${PROJECT_NAME} PRIVATE win)
 elseif (LINUX)
-    target_link_libraries(${PROJECT_NAME}
-            PRIVATE
-            X11
-            Xxf86vm
-            Xrandr
-            Xi
-            dl
-    )
+    target_link_libraries(${PROJECT_NAME} PRIVATE lnx)
+
+    if(X11)
+        target_link_libraries(${PROJECT_NAME} PRIVATE lnxx11)
+    elseif (WAYLAND)
+
+    endif ()
 endif ()
 
 # Set include directories

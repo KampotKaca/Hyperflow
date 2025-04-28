@@ -1,6 +1,5 @@
 #include "hwindow.h"
 #include "hyperflow.h"
-#include "hplatform.h"
 #include "hrenderer.h"
 #include "htime.h"
 #include "hinternal.h"
@@ -24,7 +23,23 @@ namespace hf
 		try
 		{
 			inter::HF.time = Time();
-			inter::platform::Load();
+
+			inter::PlatformCallbacks platformCallbacks
+			{
+				.KeyboardEvent_Key = KeyboardEvent_Key,
+				.KeyboardEvent_Char = KeyboardEvent_Char,
+				.MouseEvent_Button = MouseEvent_Button,
+				.MouseEvent_Moved = MouseEvent_Moved,
+				.MouseEvent_Scroll = MouseEvent_Scroll,
+				.WindowEvent_Title = WindowEvent_Title,
+				.WindowEvent_Close = WindowEvent_Close,
+				.WindowEvent_Show = WindowEvent_Show,
+				.WindowEvent_Move = WindowEvent_Move,
+				.WindowEvent_Resize = WindowEvent_Resize,
+				.WindowEvent_Focus = WindowEvent_Focus,
+			};
+			inter::platform::Load(platformCallbacks);
+
 			log_set_level(LOG_TRACE);
 
 			inter::HF.lifecycleCallbacks = engineData.lifecycleCallbacks;

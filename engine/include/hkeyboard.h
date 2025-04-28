@@ -28,6 +28,9 @@ namespace hf
 		std::queue<Event> buffer;
 		std::queue<char> charBuffer;
 	};
+
+	void KeyboardEvent_Key(Keyboard& keyboard, Key key, Keyboard::Event::Type type) noexcept;
+	void KeyboardEvent_Char(Keyboard& keyboard, char character) noexcept;
 }
 
 #endif //HKEYBOARD_H

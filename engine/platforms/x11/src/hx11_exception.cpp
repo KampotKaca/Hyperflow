@@ -1,10 +1,8 @@
-#include "hwindowexception.h"
+#include "hx11_shared.h"
+#include "hx11_exception.h"
+#include "hx11_platform.h"
 #include <sstream>
-#include "hyperflow.h"
-#include <X11/Xlib.h>
-#include <X11/Xutil.h>
-
-#include "../hlnx_window.h"
+#include <X11/extensions/XInput2.h>
 
 namespace hf
 {

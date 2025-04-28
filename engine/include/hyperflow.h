@@ -2,8 +2,8 @@
 #define HYPERFLOW_H
 
 #include "hshared.h"
-#include "../others/exception/include/hexception.h"
-#include "../others/exception/include/hgenericexception.h"
+#include "hexception.h"
+#include "hgenericexception.h"
 
 namespace hf
 {

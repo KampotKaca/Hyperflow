@@ -10,12 +10,12 @@
 #include <vulkan/vulkan_win32.h>
 #elif PLATFORM_LINUX
 
-    #if X11
-    #include "../platforms/linux/x11/hlnx_window.h"
-    #include <vulkan/vulkan_xlib.h>
-    #elif WAYLAND
+#if X11
+#include "../../../platforms/x11/include/hx11_shared.h"
+#include <vulkan/vulkan_xlib.h>
+#elif WAYLAND
 
-    #endif
+#endif
 
 #endif
 

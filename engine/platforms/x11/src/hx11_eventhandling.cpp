@@ -1,20 +1,13 @@
-#define private public
-#include "../../../include/hkeyboard.h"
-#undef private
+#include "hx11_shared.h"
+#include "hx11_platform.h"
 
-#include "../../../include/hwindow.h"
-#include "hlnx_eventhandling.h"
-#include "hinternal.h"
-#include <X11/Xlib.h>
+#include <X11/Xutil.h>
 #include <X11/keysym.h>
-#include <X11/Xatom.h>
 #include <X11/extensions/XInput2.h>
-
-#include "hlnx_window.h"
-#include "../../../include/hplatform.h"
+#include "hwindow.h"
 
 #ifdef None
-#undef None;
+#undef None
 #endif
 
 namespace hf
@@ -35,7 +28,7 @@ namespace hf
 	static void Platform_HandleButtonRelease	(const XEvent& event, Window* window);
 	static void Platform_HandleMotionNotify		(XEvent& event, Window* window);
 
-    void Platform_HandleNextEvent()
+    void X11_HandleNextEvent()
     {
         XEvent event;
         XNextEvent(PLATFORM_DATA.display, &event);
@@ -95,12 +88,12 @@ namespace hf
     {
     	if (!window) return;
     	auto message = (Atom)event.xclient.data.l[0];
-    	if (message == PLATFORM_DATA.closeMessage) inter::window::Close(window);
+    	if (message == PLATFORM_DATA.closeMessage) PLATFORM_DATA.callbacks.WindowEvent_Close(window);
     }
 
 	static void Platform_HandleDestroyNotify(XEvent& event, Window* window)
     {
-    	if (window) inter::window::Close(window);
+    	if (window) PLATFORM_DATA.callbacks.WindowEvent_Close(window);
     }
 
 	static void Platform_HandleConfigureNotify(const XEvent& event, Window* window)
@@ -111,48 +104,48 @@ namespace hf
 			.size = ivec2(event.xconfigure.width, event.xconfigure.height),
 		};
 
-    	if (window->rect.position != newRect.position) WindowEvent_Move(window, newRect.position);
-    	if (window->rect.size != newRect.size) WindowEvent_Resize(window, newRect.size);
+    	if (window->rect.position != newRect.position) PLATFORM_DATA.callbacks.WindowEvent_Move(window, newRect.position);
+    	if (window->rect.size != newRect.size) PLATFORM_DATA.callbacks.WindowEvent_Resize(window, newRect.size);
 	}
 	static void Platform_HandleFocusIn(XEvent& event, Window* window)
 	{
     	if (!window) return;
-		WindowEvent_Focus(window, true);
+		PLATFORM_DATA.callbacks.WindowEvent_Focus(window, true);
 	}
 	static void Platform_HandleFocusOut(XEvent& event, Window* window)
 	{
     	if (!window) return;
-    	WindowEvent_Focus(window, false);
+    	PLATFORM_DATA.callbacks.WindowEvent_Focus(window, false);
 	}
 	static void Platform_HandleExpose(XEvent& event, Window* window)
 	{
     	if (!window) return;
-    	WindowEvent_Show(window, true);
+    	PLATFORM_DATA.callbacks.WindowEvent_Show(window, true);
 	}
 
 	//region Input
 	static void Platform_HandleKeyPress(XEvent& event, Window* window)
     {
     	auto key = Platform_TransformToKey(XLookupKeysym(&event.xkey, 0));
-    	KeyboardEvent_Key(window->keyboard, key, Keyboard::Event::Type::Press);
+    	PLATFORM_DATA.callbacks.KeyboardEvent_Key(window->keyboard, key, Keyboard::Event::Type::Press);
     }
 
 	static void Platform_HandleButtonPress(const XEvent& event, Window* window)
     {
     	switch (event.xbutton.button)
     	{
-    	    case Button1: MouseEvent_Button(window->mouse, Button::Left, Mouse::Event::Type::Press);   break;
-    	    case Button2: MouseEvent_Button(window->mouse, Button::Wheel, Mouse::Event::Type::Press);  break;
-    	    case Button3: MouseEvent_Button(window->mouse, Button::Right, Mouse::Event::Type::Press);  break;
+    	    case Button1: PLATFORM_DATA.callbacks.MouseEvent_Button(window->mouse, Button::Left, Mouse::Event::Type::Press);   break;
+    	    case Button2: PLATFORM_DATA.callbacks.MouseEvent_Button(window->mouse, Button::Wheel, Mouse::Event::Type::Press);  break;
+    	    case Button3: PLATFORM_DATA.callbacks.MouseEvent_Button(window->mouse, Button::Right, Mouse::Event::Type::Press);  break;
 
-    	    case 8:       MouseEvent_Button(window->mouse, Button::Extra1, Mouse::Event::Type::Press); break;
-    	    case 9:       MouseEvent_Button(window->mouse, Button::Extra2, Mouse::Event::Type::Press); break;
+    	    case 8:       PLATFORM_DATA.callbacks.MouseEvent_Button(window->mouse, Button::Extra1, Mouse::Event::Type::Press); break;
+    	    case 9:       PLATFORM_DATA.callbacks.MouseEvent_Button(window->mouse, Button::Extra2, Mouse::Event::Type::Press); break;
 
-    		case Button4: MouseEvent_Scroll(window->mouse, vec2(0, 1));  break;
-    		case Button5: MouseEvent_Scroll(window->mouse, vec2(0, -1)); break;
+    		case Button4: PLATFORM_DATA.callbacks.MouseEvent_Scroll(window->mouse, vec2(0, 1));  break;
+    		case Button5: PLATFORM_DATA.callbacks.MouseEvent_Scroll(window->mouse, vec2(0, -1)); break;
 
-    	    case 6: MouseEvent_Scroll(window->mouse, vec2(1, 0));  break;
-    	    case 7: MouseEvent_Scroll(window->mouse, vec2(-1, 0)); break;
+    	    case 6: PLATFORM_DATA.callbacks.MouseEvent_Scroll(window->mouse, vec2(1, 0));  break;
+    	    case 7: PLATFORM_DATA.callbacks.MouseEvent_Scroll(window->mouse, vec2(-1, 0)); break;
 			default: break;
 	    }
     }
@@ -167,18 +160,18 @@ namespace hf
 	{
     	switch (event.xbutton.button)
     	{
-    	    case Button1: MouseEvent_Button(window->mouse, Button::Left, Mouse::Event::Type::Release);   break;
-    	    case Button2: MouseEvent_Button(window->mouse, Button::Wheel, Mouse::Event::Type::Release);  break;
-    	    case Button3: MouseEvent_Button(window->mouse, Button::Right, Mouse::Event::Type::Release);  break;
-    	    case 8:       MouseEvent_Button(window->mouse, Button::Extra1, Mouse::Event::Type::Release); break;
-    	    case 9:       MouseEvent_Button(window->mouse, Button::Extra2, Mouse::Event::Type::Release); break;
+    	    case Button1: PLATFORM_DATA.callbacks.MouseEvent_Button(window->mouse, Button::Left, Mouse::Event::Type::Release);   break;
+    	    case Button2: PLATFORM_DATA.callbacks.MouseEvent_Button(window->mouse, Button::Wheel, Mouse::Event::Type::Release);  break;
+    	    case Button3: PLATFORM_DATA.callbacks.MouseEvent_Button(window->mouse, Button::Right, Mouse::Event::Type::Release);  break;
+    	    case 8:       PLATFORM_DATA.callbacks.MouseEvent_Button(window->mouse, Button::Extra1, Mouse::Event::Type::Release); break;
+    	    case 9:       PLATFORM_DATA.callbacks.MouseEvent_Button(window->mouse, Button::Extra2, Mouse::Event::Type::Release); break;
     	    default: break;
     	}
 	}
 
 	static void Platform_HandleMotionNotify(XEvent& event, Window* window)
 	{
-    	MouseEvent_Moved(window->mouse, { event.xmotion.x, event.xmotion.y });
+    	PLATFORM_DATA.callbacks.MouseEvent_Moved(window->mouse, { event.xmotion.x, event.xmotion.y });
 	}
 
 	//endregion

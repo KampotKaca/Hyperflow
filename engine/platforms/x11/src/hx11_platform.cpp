@@ -1,47 +1,14 @@
-#include "../../../include/hplatform.h"
+#include "hx11_shared.h"
+#include "hx11_platform.h"
 #include "hgenericexception.h"
+#include "hwindow.h"
 
-#include <hyperflow.h>
-#include <X11/extensions/XInput2.h>
-#include <X11/Xlib.h>
 #include <X11/Xutil.h>
-#include "hlnx_eventhandling.h"
-#include "hlnx_window.h"
-#include <ctime>
+#include <X11/extensions/XInput2.h>
 
 namespace hf
 {
-	void Platform_SetWindowFlag(WindowFlags* flags, WindowFlags target, uint32_t value)
-	{
-		*flags = (WindowFlags)(((int32_t)*flags & ~(int32_t)target) | (-value & (int32_t)target));
-	}
-
-	void Platform_HandleEvents(EngineUpdateType updateType)
-	{
-		auto display = PLATFORM_DATA.display;
-		switch (updateType)
-		{
-		case EngineUpdateType::Continues:
-
-				while (XPending(display))
-				{
-					Platform_HandleNextEvent();
-				}
-
-			break;
-			case EngineUpdateType::EventRaised:
-			default:
-
-				do
-				{
-					Platform_HandleNextEvent();
-				}while (XPending(display));
-
-			break;
-		}
-	}
-
-	void Platform_Initialize()
+	void X11_Load()
 	{
 		auto display = XOpenDisplay(nullptr);
 		auto rootWindow = XRootWindow(display, 0);
@@ -76,30 +43,14 @@ namespace hf
 		PLATFORM_DATA.xiOpcode = xi_opcode;
 	}
 
-	void Platform_Dispose()
+	void X11_Unload()
     {
 		XCloseDisplay(PLATFORM_DATA.display);
     }
 
-	void Platform_BeginTemporarySystemTimer(uint16_t millisecondPrecision)
+	ivec2 X11_GetPointerPosition(const Window* window)
 	{
-
-	}
-	void Platform_EndTemporarySystemTimer(uint16_t millisecondPrecision)
-	{
-	}
-
-	void Platform_Sleep(double seconds)
-	{
-		timespec ts{};
-		ts.tv_sec = (time_t)seconds;
-		ts.tv_nsec = (long)((seconds - (double)ts.tv_sec) * 1e9);
-		nanosleep(&ts, nullptr);
-	}
-
-	ivec2 Platform_GetPointerPosition(const Window* window)
-	{
-		auto winHandle = (LnxWindowData*)window->handle;
+		auto winHandle = (X11Window*)window->handle;
 		::Window root, child;
 		ivec2 rootPos{}, winPos{};
 		unsigned int mask_return;
@@ -110,5 +61,30 @@ namespace hf
 
 		if (!retval) return { 0, 0 };
 		return rootPos;
+	}
+
+	void X11_HandleEvents(EngineUpdateType updateType)
+	{
+		auto display = PLATFORM_DATA.display;
+		switch (updateType)
+		{
+		case EngineUpdateType::Continues:
+
+			while (XPending(display))
+			{
+				X11_HandleNextEvent();
+			}
+
+			break;
+		case EngineUpdateType::EventRaised:
+		default:
+
+			do
+			{
+				X11_HandleNextEvent();
+			}while (XPending(display));
+
+			break;
+		}
 	}
 }

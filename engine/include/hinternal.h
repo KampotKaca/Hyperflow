@@ -10,7 +10,7 @@
 
 #if PLATFORM_LINUX
 #ifdef None
-#undef None;
+#undef None
 #endif
 #endif
 
