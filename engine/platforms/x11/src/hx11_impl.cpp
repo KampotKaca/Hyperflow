@@ -6,9 +6,8 @@ namespace hf::inter
 {
     namespace platform
     {
-        void Load(const PlatformCallbacks& callbacks)
+        void Load()
         {
-            PLATFORM_DATA.callbacks = callbacks;
             X11_Load();
         }
 

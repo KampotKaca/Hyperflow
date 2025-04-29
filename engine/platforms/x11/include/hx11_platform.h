@@ -13,7 +13,6 @@ namespace hf
 
 	struct X11Platform
 	{
-		inter::PlatformCallbacks& callbacks;
 		Display* display;
 		int32_t xiOpcode;
 
