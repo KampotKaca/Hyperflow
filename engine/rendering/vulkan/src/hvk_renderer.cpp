@@ -43,7 +43,13 @@ namespace hf
 
     void Draw(const VkDrawInfo& info)
     {
-        vkCmdBindVertexBuffers(info.renderer->currentCommand, 0, info.bufferCount, info.pBuffers, info.pOffsets);
-        vkCmdDraw(info.renderer->currentCommand, info.vertCount, info.instanceCount, 0, 0);
+        auto command = info.renderer->currentCommand;
+        vkCmdBindVertexBuffers(command, 0, info.bufferCount, info.pBuffers, info.pOffsets);
+        if (info.indexBuffer)
+        {
+            vkCmdBindIndexBuffer(command, info.indexBuffer, 0, info.indexType);
+            vkCmdDrawIndexed(command, info.indexCount, info.instanceCount, 0, 0, 0);
+        }
+        else vkCmdDraw(command, info.vertCount, info.instanceCount, 0, 0);
     }
 }

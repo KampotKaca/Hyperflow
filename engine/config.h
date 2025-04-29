@@ -14,6 +14,6 @@
 #define VULKAN_API_MAX_NUM_COPY_REGIONS 8
 #endif
 
-#define MAX_NUM_DRAW_BUFFER 16
+#define MAX_NUM_BUFFER_CACHE 16
 
 #endif //CONFIG_H

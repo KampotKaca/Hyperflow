@@ -127,6 +127,16 @@ namespace hf
 		void Upload(const VertBufferUploadInfo& info);
 	}
 
+	namespace indexbuffer
+	{
+		Ref<IndexBuffer> Create(const IndexBufferCreationInfo& info);
+		void Destroy(const Ref<IndexBuffer>& buffer);
+		void Destroy(const Ref<IndexBuffer>* pBuffers, uint32_t count);
+		void DestroyAll();
+		bool IsRunning(const Ref<IndexBuffer>& buffer);
+		void Upload(const IndexBufferUploadInfo& info);
+	}
+
 	namespace utils
 	{
 		ivec3 ConvertVersion(const char* version);

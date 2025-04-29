@@ -35,6 +35,14 @@ namespace hf::inter::rendering
         uint32_t vertexCount;
     };
 
+    struct IndexBufferUploadInfo
+    {
+        const void* buffer;
+        const void* data;
+        uint32_t offset;
+        uint32_t indexCount;
+    };
+
     struct RendererInstanceCreationInfo
     {
         void* handle;
@@ -44,25 +52,38 @@ namespace hf::inter::rendering
     struct DrawCallInfo
     {
         void* renderer;
-        void** pBuffers;
+        void** pVertBuffers;
         uint32_t bufferCount;
+
+        void* indexBuffer;
         uint32_t instanceCount;
     };
 
     struct RendererAPI
     {
+        //Creation
         void (*Load)(const RendererLoadInfo& info);
         void (*Unload)();
         void* (*CreateInstance)(const RendererInstanceCreationInfo& info);
         void (*DestroyInstance)(void* rnInstance);
+
+        //Shaders
         void* (*CreateShader)(const ShaderCreationInfo& info);
         void (*DestroyShader)(void* shader);
         void (*BindShader)(const void* renderer, const void* shader, BufferAttrib attrib);
+
+        //Buffers
         uint32_t (*CreateBufferAttrib)(const BufferAttribCreateInfo& info, uint32_t fullStride);
         void* (*CreateVertBuffer)(const VertBufferCreationInfo& info);
         void (*DestroyVertBuffer)(void* handle);
         void (*UploadVertBuffer)(const VertBufferUploadInfo& info);
+
+        void* (*CreateIndexBuffer)(const IndexBufferCreationInfo& info);
+        void (*DestroyIndexBuffer)(void* handle);
+        void (*UploadIndexBuffer)(const IndexBufferUploadInfo& info);
         void (*SubmitStagedCopyOperations)();
+
+        //RenderingOperations
         bool (*GetReadyForRendering)(void* rn);
         void (*StartFrame)(void* rn);
         void (*EndFrame)(void* rn);

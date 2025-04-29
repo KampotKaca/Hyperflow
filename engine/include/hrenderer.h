@@ -15,7 +15,7 @@ namespace hf
 		uvec2 size{};
 		void* windowHandle{};
 		void* handle{};
-		void* drawBufferCache[MAX_NUM_DRAW_BUFFER]{};
+		void* vertBufferCache[MAX_NUM_BUFFER_CACHE]{};
 	};
 }
 

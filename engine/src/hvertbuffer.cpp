@@ -18,14 +18,13 @@ namespace hf
 
     namespace vertbuffer
     {
-        static constexpr uint32_t BUFFER_SIZE[(uint32_t)VertBufferDataType::Count] = { 1, 1, 2, 2, 4, 4, 8, 8, 2, 4, 8 };
         BufferAttrib CreateAttrib(const BufferAttribCreateInfo& info)
         {
             uint32_t fullStride = 0;
             for (uint32_t i = 0; i < info.formatCount; i++)
             {
                 auto& stride = info.pFormats[i];
-                stride.lSize = stride.size * BUFFER_SIZE[(uint32_t)stride.type];
+                stride.lSize = stride.size * BUFFER_DATA_SIZE[(uint32_t)stride.type];
                 fullStride += stride.lSize;
             }
 

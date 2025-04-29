@@ -4,6 +4,7 @@
 #include "hwindow.h"
 #include "hshared.h"
 #include "hvertbuffer.h"
+#include "hindexbuffer.h"
 #include "htime.h"
 #include "../rendering/include/hex_renderer.h"
 #include "../platforms/include/hex_platform.h"
@@ -29,6 +30,7 @@ namespace hf::inter
     {
         std::unordered_map<Shader*, Ref<Shader>> shaders{};
         std::unordered_map<VertBuffer*, Ref<VertBuffer>> vertBuffers{};
+        std::unordered_map<IndexBuffer*, Ref<IndexBuffer>> indexBuffers{};
     };
 
     struct Hyperflow
@@ -68,6 +70,7 @@ namespace hf::inter
 
         bool DestroyShader_i(Shader* shader);
         bool DestroyVertBuffer_i(VertBuffer* buffer);
+        bool DestroyIndexBuffer_i(IndexBuffer* buffer);
     }
 }
 

@@ -21,8 +21,8 @@ namespace hf
         VkCommandBuffer currentCommand{};
         VkRenderPass currentPass{};
 
-        VkBuffer drawBuffers[MAX_NUM_DRAW_BUFFER]{};
-        VkDeviceSize drawOffsets[MAX_NUM_DRAW_BUFFER]{};
+        VkBuffer vertBufferCache[MAX_NUM_BUFFER_CACHE]{};
+        VkDeviceSize drawOffsets[MAX_NUM_BUFFER_CACHE]{};
 
         std::vector<VkFrame> frames{};
         uint32_t currentFrame = 0;
@@ -32,12 +32,17 @@ namespace hf
 
     struct VkDrawInfo
     {
-        const VKRenderer* renderer;
-        const VkBuffer* pBuffers;
-        const VkDeviceSize* pOffsets;
-        uint32_t bufferCount;
-        uint32_t vertCount;
-        uint32_t instanceCount;
+        VKRenderer* renderer{};
+        VkBuffer* pBuffers{};
+        VkDeviceSize* pOffsets{};
+
+        VkBuffer indexBuffer{};
+        VkIndexType indexType{};
+        uint32_t indexCount{};
+
+        uint32_t bufferCount{};
+        uint32_t vertCount{};
+        uint32_t instanceCount{};
     };
     
     void DestroySurface(VKRenderer* rn);
@@ -56,9 +61,7 @@ namespace hf
 
     void CreateRendererFrameBuffers(VKRenderer* rn);
     void DestroyRendererFrameBuffers(VKRenderer* rn);
-
     void UploadViewportAndScissor(const VKRenderer* rn);
-    uint32_t GetMemoryType(uint32_t filter, VkMemoryPropertyFlags props);
 
     bool GetReadyForRendering(VKRenderer* rn);
     void StartFrame(VKRenderer* rn);

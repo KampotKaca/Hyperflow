@@ -65,17 +65,18 @@ namespace hf
 
         void Draw(const DrawCallInfo& info)
         {
-            if (info.bufferCount > MAX_NUM_DRAW_BUFFER)
-                throw GENERIC_EXCEPT("[Hyperflow]", "Trying to draw too many buffers at once, max is %i", MAX_NUM_DRAW_BUFFER);
+            if (info.bufferCount > MAX_NUM_BUFFER_CACHE)
+                throw GENERIC_EXCEPT("[Hyperflow]", "Trying to draw too many buffers at once, max is %i", MAX_NUM_BUFFER_CACHE);
 
             for (uint32_t i = 0; i < info.bufferCount; i++)
-                info.renderer->drawBufferCache[i] = info.pVertBuffers[i]->handle;
+                info.renderer->vertBufferCache[i] = info.pVertBuffers[i]->handle;
 
             inter::rendering::DrawCallInfo drawInfo
             {
                 .renderer = info.renderer->handle,
-                .pBuffers = info.renderer->drawBufferCache,
+                .pVertBuffers = info.renderer->vertBufferCache,
                 .bufferCount = info.bufferCount,
+                .indexBuffer = info.indexBuffer ? info.indexBuffer->handle : nullptr,
                 .instanceCount = info.instanceCount
             };
 
@@ -86,6 +87,7 @@ namespace hf
         {
             if (inter::HF.renderingApi.isLoaded) inter::HF.renderingApi.api.WaitForRendering();
             vertbuffer::DestroyAll();
+            indexbuffer::DestroyAll();
             shader::DestroyAll();
         }
     }

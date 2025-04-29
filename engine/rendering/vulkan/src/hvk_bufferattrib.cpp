@@ -3,7 +3,7 @@
 
 namespace hf
 {
-    constexpr VkFormat BUFFER_FORMAT[(uint32_t)VertBufferDataType::Count * 4] =
+    constexpr VkFormat BUFFER_FORMAT[(uint32_t)BufferDataType::Count * 4] =
     {
         VK_FORMAT_R8_UINT, VK_FORMAT_R8_SINT, VK_FORMAT_R16_UINT, VK_FORMAT_R16_SINT,
         VK_FORMAT_R32_UINT, VK_FORMAT_R32_SINT, VK_FORMAT_R64_UINT, VK_FORMAT_R64_SINT,
@@ -45,7 +45,7 @@ namespace hf
             {
                 .location = location,
                 .binding = bindingId,
-                .format = BUFFER_FORMAT[(uint32_t)VertBufferDataType::Count * (stride.size - 1) + (uint32_t)stride.type],
+                .format = BUFFER_FORMAT[(uint32_t)BufferDataType::Count * (stride.size - 1) + (uint32_t)stride.type],
                 .offset = currentOffset
             };
             attribDescriptions[i] = description;

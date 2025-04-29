@@ -1,4 +1,5 @@
 #include "hvk_graphics.h"
+#include "hvk_indexbuffer.h"
 #include "hvk_renderer.h"
 #include "hvk_shader.h"
 #include "hvk_vertbuffer.h"
@@ -66,12 +67,34 @@ namespace hf::inter::rendering
     void UploadVertBuffer(const VertBufferUploadInfo& info)
     {
         auto buffer = (VkVertBuffer*)info.buffer;
-        if (buffer->memoryType == VertBufferMemoryType::Static)
+        if (buffer->memoryType == BufferMemoryType::Static)
             throw GENERIC_EXCEPT("[Hyperflow]", "Cannot modify static buffer");
 
         auto& attribute = GetAttrib(buffer->attrib);
-        auto fullSize = attribute.vertexSize * info.vertexCount;
-        auto fullOffset = info.offset * info.vertexCount;
+        auto fullSize = (uint64_t)attribute.vertexSize * info.vertexCount;
+        auto fullOffset = (uint64_t)info.offset * info.vertexCount;
+
+        UploadBufferMemory(buffer->bufferMemory, info.data, fullOffset, fullSize);
+    }
+
+    void* CreateIndexBuffer(const IndexBufferCreationInfo& info)
+    {
+        return new VkIndexBuffer(info);
+    }
+
+    void DestroyIndexBuffer(void* handle)
+    {
+        delete (VkIndexBuffer*)handle;
+    }
+
+    void UploadIndexBuffer(const IndexBufferUploadInfo& info)
+    {
+        auto buffer = (VkIndexBuffer*)info.buffer;
+        if (buffer->memoryType == BufferMemoryType::Static)
+            throw GENERIC_EXCEPT("[Hyperflow]", "Cannot modify static buffer");
+
+        auto fullSize = (uint64_t)BUFFER_DATA_SIZE[(uint32_t)buffer->indexFormat] * info.indexCount;
+        auto fullOffset = (uint64_t)info.offset * info.indexCount;
 
         UploadBufferMemory(buffer->bufferMemory, info.data, fullOffset, fullSize);
     }
@@ -113,22 +136,30 @@ namespace hf::inter::rendering
         uint32_t vertCount = 0;
         for (uint32_t i = 0; i < info.bufferCount; i++)
         {
-            auto buffer = (VkVertBuffer*)info.pBuffers[i];
-            rn->drawBuffers[i] = buffer->buffer;
+            auto vertBuffer = (VkVertBuffer*)info.pVertBuffers[i];
+            rn->vertBufferCache[i] = vertBuffer->buffer;
             rn->drawOffsets[i] = offset;
-            offset += GetAttrib(buffer->attrib).vertexSize;
-            vertCount = buffer->vertCount;
+            offset += GetAttrib(vertBuffer->attrib).vertexSize;
+            vertCount = vertBuffer->vertCount;
         }
 
         VkDrawInfo drawInfo
         {
             .renderer = rn,
-            .pBuffers = rn->drawBuffers,
+            .pBuffers = rn->vertBufferCache,
             .pOffsets = rn->drawOffsets,
             .bufferCount = info.bufferCount,
             .vertCount = vertCount,
             .instanceCount = info.instanceCount
         };
+
+        if (info.indexBuffer)
+        {
+            auto indexBuffer = (VkIndexBuffer*)info.indexBuffer;
+            drawInfo.indexBuffer = indexBuffer->buffer;
+            drawInfo.indexType = indexBuffer->indexType;
+            drawInfo.indexCount = indexBuffer->indexCount;
+        }
 
         Draw(drawInfo);
     }
@@ -142,24 +173,27 @@ namespace hf::inter::rendering
     {
         static RendererAPI api =
         {
-            &Load,
-            &Unload,
-            &CreateInstance,
-            &DestroyInstance,
-            &CreateShader,
-            &DestroyShader,
-            &BindShader,
-            &CreateBufferAttrib,
-            &CreateVertBuffer,
-            &DestroyVertBuffer,
-            &UploadVertBuffer,
-            &SubmitStagedCopyOperations,
-            &GetReadyForRendering,
-            &StartFrame,
-            &EndFrame,
-            &RegisterFrameBufferChange,
-            &Draw,
-            &WaitForRendering
+            .Load                       = &Load,
+            .Unload                     = &Unload,
+            .CreateInstance             = &CreateInstance,
+            .DestroyInstance            = &DestroyInstance,
+            .CreateShader               = &CreateShader,
+            .DestroyShader              = &DestroyShader,
+            .BindShader                 = &BindShader,
+            .CreateBufferAttrib         = &CreateBufferAttrib,
+            .CreateVertBuffer           = &CreateVertBuffer,
+            .DestroyVertBuffer          = &DestroyVertBuffer,
+            .UploadVertBuffer           = &UploadVertBuffer,
+            .CreateIndexBuffer          = &CreateIndexBuffer,
+            .DestroyIndexBuffer         = &DestroyIndexBuffer,
+            .UploadIndexBuffer          = &UploadIndexBuffer,
+            .SubmitStagedCopyOperations = &SubmitStagedCopyOperations,
+            .GetReadyForRendering       = &GetReadyForRendering,
+            .StartFrame                 = &StartFrame,
+            .EndFrame                   = &EndFrame,
+            .RegisterFrameBufferChange  = &RegisterFrameBufferChange,
+            .Draw                       = &Draw,
+            .WaitForRendering           = &WaitForRendering
         };
         return &api;
     }

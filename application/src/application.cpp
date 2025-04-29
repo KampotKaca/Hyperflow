@@ -12,9 +12,15 @@ namespace app
 
 	constexpr Vertex vertices[]
 	{
-		{{0.0f, -0.5f}, {1.0f, 0.0f, 0.0f}},
-		{{0.5f, 0.5f}, {0.0f, 1.0f, 0.0f}},
-		{{-0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}}
+		{{-0.5f, -0.5f}, {1.0f, 0.0f, 0.0f}},
+		{{0.5f, -0.5f}, {0.0f, 1.0f, 0.0f}},
+		{{0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}},
+		{{-0.5f, 0.5f}, {1.0f, 1.0f, 1.0f}}
+	};
+
+	constexpr uint16_t indices[]
+	{
+		0, 1, 2, 2, 3, 0
 	};
 
 	int count;
@@ -22,13 +28,14 @@ namespace app
 	int reqCount = 0;
 	int32_t lastReq = -1;
 	hf::Ref<hf::Shader> shader;
-	hf::Ref<hf::VertBuffer> buffer;
+	hf::Ref<hf::VertBuffer> vertBuffer;
+	hf::Ref<hf::IndexBuffer> indexBuffer;
 	hf::BufferAttrib bufferAttrib;
 
 	hf::BufferAttribFormat formats[]
 	{
-		{ .type = hf::VertBufferDataType::F32, .size = 2, },
-		{ .type = hf::VertBufferDataType::F32, .size = 3, },
+		{ .type = hf::BufferDataType::F32, .size = 2, },
+		{ .type = hf::BufferDataType::F32, .size = 3, },
 	};
 
 	hf::BufferAttribCreateInfo bufferAttribCreateInfo
@@ -42,15 +49,25 @@ namespace app
 	{
 		bufferAttrib = hf::vertbuffer::CreateAttrib(bufferAttribCreateInfo);
 
-		hf::VertBufferCreationInfo bufferInfo
+		hf::VertBufferCreationInfo vertBufferInfo
 		{
 			.bufferAttrib = bufferAttrib,
-			.memoryType = hf::VertBufferMemoryType::Static,
-			.vertexCount = 3,
+			.memoryType = hf::BufferMemoryType::Static,
+			.vertexCount = 4,
 			.pVertices = (void*)vertices,
 		};
 
-		buffer = hf::vertbuffer::Create(bufferInfo);
+		vertBuffer = hf::vertbuffer::Create(vertBufferInfo);
+
+		hf::IndexBufferCreationInfo indexBufferInfo
+		{
+			.indexFormat = hf::BufferDataType::U16,
+			.memoryType = hf::BufferMemoryType::Static,
+			.indexCount = 6,
+			.pIndices = (void*)indices,
+		};
+
+		indexBuffer = hf::indexbuffer::Create(indexBufferInfo);
 
 		hf::ShaderCreationInfo shaderInfo
 		{
@@ -132,8 +149,9 @@ namespace app
 		hf::DrawCallInfo drawCallInfo
 		{
 			.renderer = rn,
-			.pVertBuffers = &buffer,
+			.pVertBuffers = &vertBuffer,
 			.bufferCount = 1,
+			.indexBuffer = indexBuffer,
 			.instanceCount = 1
 		};
 

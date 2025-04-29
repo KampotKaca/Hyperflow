@@ -150,14 +150,17 @@ namespace hf
 	struct Renderer;
 	struct Shader;
 	struct VertBuffer;
+	struct IndexBuffer;
 	typedef uint32_t BufferAttrib;
 
-	enum class VertBufferDataType { U8, I8, U16, I16, U32, I32, U64, I64, F16, F32, F64, Count };
-	enum class VertBufferMemoryType { Static, DynamicWrite, Count };
+	enum class BufferDataType { U8, I8, U16, I16, U32, I32, U64, I64, F16, F32, F64, Count };
+	enum class BufferMemoryType { Static, DynamicWrite, Count };
+
+	constexpr uint32_t BUFFER_DATA_SIZE[(uint32_t)BufferDataType::Count] = { 1, 1, 2, 2, 4, 4, 8, 8, 2, 4, 8 };
 
 	struct BufferAttribFormat
 	{
-		VertBufferDataType type = VertBufferDataType::F32;
+		BufferDataType type = BufferDataType::F32;
 		uint32_t size = 1;
 		//Do not implement lSize
 		uint32_t lSize = 1;
@@ -173,9 +176,17 @@ namespace hf
 	struct VertBufferCreationInfo
 	{
 		BufferAttrib bufferAttrib = 0;
-		VertBufferMemoryType memoryType = VertBufferMemoryType::Static;
+		BufferMemoryType memoryType = BufferMemoryType::Static;
 		uint32_t vertexCount = 0;
 		void* pVertices = nullptr;
+	};
+
+	struct IndexBufferCreationInfo
+	{
+		BufferDataType indexFormat = BufferDataType::U16;
+		BufferMemoryType memoryType = BufferMemoryType::Static;
+		uint32_t indexCount = 0;
+		void* pIndices = nullptr;
 	};
 
 	struct VertBufferUploadInfo
@@ -184,6 +195,14 @@ namespace hf
 		const void* data;
 		uint32_t offset;
 		uint32_t vertCount;
+	};
+
+	struct IndexBufferUploadInfo
+	{
+		const Ref<IndexBuffer>& buffer;
+		const void* data;
+		uint32_t offset;
+		uint32_t indexCount;
 	};
 
 	struct ShaderCreationInfo
@@ -201,6 +220,8 @@ namespace hf
 		Ref<Renderer> renderer;
 		Ref<VertBuffer>* pVertBuffers;
 		uint32_t bufferCount = 0;
+
+		Ref<IndexBuffer> indexBuffer;
 		uint32_t instanceCount = 0;
 	};
 
