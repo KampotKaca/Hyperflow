@@ -23,6 +23,8 @@ namespace hf::inter::rendering
         uvec3 engineVersion;
         const char* applicationTitle;
         void* platformInstance;
+        void* platformDll;
+        void* (*getFuncFromDll)(void* dll, const char* funcName);
     };
 
     struct VertBufferUploadInfo

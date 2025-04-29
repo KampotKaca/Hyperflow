@@ -5,6 +5,7 @@
 #include "hvk_framebuffer.h"
 #include "hvk_bufferattrib.h"
 #include "hvk_vertbuffer.h"
+#include "hvk_platform.h"
 
 namespace hf
 {
@@ -61,6 +62,13 @@ namespace hf
         VkPhysicalDeviceMemoryProperties memProps{};
     };
 
+    struct VkPlatform
+    {
+        void* instance{};
+        void* platformDll{};
+        VulkanPlatformAPI* api{};
+    };
+
     struct GraphicsData
     {
         int32_t rendererCount = 0;
@@ -68,7 +76,8 @@ namespace hf
         std::vector<VkExtensionProperties> availableExtensions{};
 
         VkInstance instance{};
-        void* platformInstance{};
+        VkPlatform platform{};
+
         uint32_t supportedVersion;
         std::set<std::string> availableExtensionNames{};
         std::vector<GraphicsDevice> suitableDevices{};
@@ -142,13 +151,6 @@ namespace hf
         uint32_t familyCount{};
     };
 
-#if DEBUG
-#define NUM_REQUIRED_EXTENSIONS 3
-#else
-#define NUM_REQUIRED_EXTENSIONS 2
-#endif
-#define NUM_DEVICE_EXTENSIONS 1
-
     extern GraphicsData GRAPHICS_DATA;
 
     void LoadVulkan(const inter::rendering::RendererLoadInfo& info);
@@ -190,9 +192,6 @@ namespace hf
 
     void WaitForFences(const GraphicsDevice& device, const VkFence* fences, uint32_t count, bool waitAll);
     void CreateBuffer(const VkCreateBufferInfo& info, VkBuffer* bufferResult, VkDeviceMemory* memResult);
-
-    extern const char* REQUIRED_EXTENSIONS[NUM_REQUIRED_EXTENSIONS];
-    extern const char* DEVICE_EXTENSIONS[NUM_DEVICE_EXTENSIONS];
 }
 
 #endif //HVK_GRAPHICS_H

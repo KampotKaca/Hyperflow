@@ -39,8 +39,7 @@ namespace hf
         uint32_t vertCount;
         uint32_t instanceCount;
     };
-
-    void CreateSurface(VKRenderer* rn);
+    
     void DestroySurface(VKRenderer* rn);
 
     void SetupViewportAndScissor(VKRenderer* rn);

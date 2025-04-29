@@ -3,6 +3,12 @@
 
 namespace hf
 {
+    void DestroySurface(VKRenderer* rn)
+    {
+        vkDestroySurfaceKHR(GRAPHICS_DATA.instance, rn->swapchain.surface, nullptr);
+        rn->swapchain.surface = VK_NULL_HANDLE;
+    }
+
     bool GetReadyForRendering(VKRenderer* rn)
     {
         SubmitStagedCopyOperations();

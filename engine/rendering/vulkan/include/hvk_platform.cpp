@@ -1,10 +1,6 @@
 #include "hvk_graphics.h"
 #include "hvk_renderer.h"
 
-// #ifdef VkResult
-// #undef VkResult
-// #endif
-
 #if PLATFORM_WINDOWS
 #include "../../../platforms/windows/include/hwin_shared.h"
 #include <vulkan/vulkan_win32.h>

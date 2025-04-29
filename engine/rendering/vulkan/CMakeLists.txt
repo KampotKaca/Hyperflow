@@ -4,9 +4,21 @@ elseif(CMAKE_BUILD_TYPE STREQUAL "Release")
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O2")
 endif()
 
+if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
+add_subdirectory(windows)
+elseif (CMAKE_SYSTEM_NAME STREQUAL "Linux")
+
+endif ()
+
 file(GLOB_RECURSE VULKAN_SRC CONFIGURE_DEPENDS src/*.cpp)
 
 add_library(vk SHARED ${VULKAN_SRC})
+
+if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
+    add_dependencies(vk vkwin)
+elseif (CMAKE_SYSTEM_NAME STREQUAL "Linux")
+
+endif ()
 
 target_link_libraries(vk
         PRIVATE
@@ -19,7 +31,7 @@ find_package(Vulkan REQUIRED)
 
 if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
     if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-        target_link_libraries(vk PRIVATE Vulkan::Vulkan win)
+        target_link_libraries(vk PRIVATE Vulkan::Vulkan)
     else ()
         message(FATAL_ERROR "Vulkan libraries on windows can only be compiled with gcc")
     endif()

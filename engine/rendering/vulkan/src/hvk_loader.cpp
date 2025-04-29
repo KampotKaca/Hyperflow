@@ -61,7 +61,6 @@ namespace hf
 
     void LoadVulkan(const inter::rendering::RendererLoadInfo& info)
     {
-        GRAPHICS_DATA.platformInstance = info.platformInstance;
         VkApplicationInfo appInfo{};
         appInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
         appInfo.pApplicationName = info.applicationTitle;
@@ -125,10 +124,11 @@ namespace hf
         for (const auto& ext : GRAPHICS_DATA.availableExtensions)
             GRAPHICS_DATA.availableExtensionNames.insert(ext.extensionName);
 
-        for (auto& extension : REQUIRED_EXTENSIONS)
+        for (uint32_t i = 0; i < GRAPHICS_DATA.platform.api->requiredExtensionCount; ++i)
         {
-            if (!IsExtensionSupported(extension))
-                throw GENERIC_EXCEPT("[Vulkan]", "[Required extension not supported]\n%s", extension);
+            auto& ext = GRAPHICS_DATA.platform.api->requiredExtension[i];
+            if (!IsExtensionSupported(ext))
+                throw GENERIC_EXCEPT("[Vulkan]", "[Required extension not supported]\n%s", ext);
         }
     }
 
@@ -150,8 +150,8 @@ namespace hf
             .sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO,
             .pApplicationInfo = &appInfo,
             .enabledLayerCount = 0,
-            .enabledExtensionCount = NUM_REQUIRED_EXTENSIONS,
-            .ppEnabledExtensionNames = REQUIRED_EXTENSIONS,
+            .enabledExtensionCount = GRAPHICS_DATA.platform.api->requiredExtensionCount,
+            .ppEnabledExtensionNames = GRAPHICS_DATA.platform.api->requiredExtension,
         };
 
 #if DEBUG

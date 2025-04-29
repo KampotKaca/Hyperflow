@@ -7,6 +7,12 @@ namespace hf::inter::rendering
 {
     void Load(const RendererLoadInfo& info)
     {
+        GRAPHICS_DATA.platform.instance = info.platformInstance;
+        GRAPHICS_DATA.platform.platformDll = info.platformDll;
+        auto func = (VulkanPlatformAPI*(*)())info.getFuncFromDll(GRAPHICS_DATA.platform.platformDll, "GetAPI");
+
+        if (!func) throw GENERIC_EXCEPT("[Hyperflow]", "Failed to get vulkan platform API");
+        GRAPHICS_DATA.platform.api = func();
         LoadVulkan(info);
     }
 

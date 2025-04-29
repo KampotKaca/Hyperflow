@@ -157,8 +157,15 @@ namespace hf
                     .appVersion = appV,
                     .engineVersion = engineV,
                     .applicationTitle = HF.appTitle.c_str(),
-                    .platformInstance = platform::GetPlatformInstance()
+                    .platformInstance = platform::GetPlatformInstance(),
+                    .getFuncFromDll = platform::GetFuncPtr
                 };
+
+                if (HF.renderingApi.type == RenderingApiType::Vulkan)
+                {
+                    HF.renderingApi.additionalDll = platform::LoadDll(VK_DLL);
+                    loadInfo.platformDll = HF.renderingApi.additionalDll;
+                }
 
                 HF.renderingApi.api.Load(loadInfo);
                 HF.renderingApi.isLoaded = true;
@@ -189,6 +196,11 @@ namespace hf
                 {
                     HF.renderingApi.isLoaded = false;
                     HF.renderingApi.api.Unload();
+                    if (HF.renderingApi.additionalDll)
+                    {
+                        platform::UnloadDll(HF.renderingApi.additionalDll);
+                        HF.renderingApi.additionalDll = nullptr;
+                    }
                 }
             }
         }

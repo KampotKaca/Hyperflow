@@ -25,7 +25,7 @@ namespace hf
             VK_HANDLE_EXCEPT(vkEnumeratePhysicalDevices(GRAPHICS_DATA.instance,
                 &deviceCount, availableDevices.data()));
 
-            CreateSurface(this);
+            GRAPHICS_DATA.platform.api->CreateSurface(GRAPHICS_DATA.platform.instance, windowHandle, GRAPHICS_DATA.instance, &swapchain.surface);
 
             for (const auto& device : availableDevices)
             {
@@ -79,7 +79,7 @@ namespace hf
         }
         else
         {
-            CreateSurface(this);
+            GRAPHICS_DATA.platform.api->CreateSurface(GRAPHICS_DATA.platform.instance, windowHandle, GRAPHICS_DATA.instance, &swapchain.surface);
             CreateSwapchain(swapchain.surface, targetSize, &swapchain);
             SetupViewportAndScissor(this);
         }
@@ -146,8 +146,8 @@ namespace hf
             .queueCreateInfoCount = (uint32_t)queueCreateInfos.size(),
             .pQueueCreateInfos = queueCreateInfos.data(),
             .enabledLayerCount = 0,
-            .enabledExtensionCount = NUM_DEVICE_EXTENSIONS,
-            .ppEnabledExtensionNames = DEVICE_EXTENSIONS,
+            .enabledExtensionCount = GRAPHICS_DATA.platform.api->deviceExtensionCount,
+            .ppEnabledExtensionNames = GRAPHICS_DATA.platform.api->deviceExtension,
             .pEnabledFeatures = &device.features,
         };
 
