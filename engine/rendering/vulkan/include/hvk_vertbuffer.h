@@ -11,7 +11,7 @@ namespace hf
         ~VkVertBuffer();
 
         VkBuffer buffer{};
-        VkDeviceMemory bufferMemory{};
+        VmaAllocation bufferMemory{};
         BufferAttrib attrib{};
         uint32_t vertCount = 0;
         BufferMemoryType memoryType = BufferMemoryType::Static;

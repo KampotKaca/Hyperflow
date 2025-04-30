@@ -7,82 +7,17 @@ namespace hf
 
     //Logical devices are destroyed in loader
     static void CreateLogicalDevice(GraphicsDevice& device);
-    static bool SetupPhysicalDevice(const VKRenderer* renderer, VkPhysicalDevice device, GraphicsDevice* deviceData);
+    static bool SetupPhysicalDevice(VkSurfaceKHR surface, VkPhysicalDevice device, GraphicsDevice* deviceData);
 
     //------------------------------------------------------------------------------------
 
     VKRenderer::VKRenderer(void* handle, uvec2 size) : windowHandle(handle), targetSize(size)
     {
-        if (!GRAPHICS_DATA.devicesAreLoaded)
-        {
-            uint32_t deviceCount = 0;
-            VK_HANDLE_EXCEPT(vkEnumeratePhysicalDevices(GRAPHICS_DATA.instance,
-                &deviceCount, nullptr));
+        if (!GRAPHICS_DATA.devicesAreLoaded) LoadDevice(handle, &swapchain.surface);
+        else GRAPHICS_DATA.platform.api->CreateSurface(GRAPHICS_DATA.platform.instance, windowHandle, GRAPHICS_DATA.instance, &swapchain.surface);
 
-            if (deviceCount == 0) throw GENERIC_EXCEPT("[Vulkan]", "No Graphics device found");
-
-            std::vector<VkPhysicalDevice> availableDevices(deviceCount);
-            VK_HANDLE_EXCEPT(vkEnumeratePhysicalDevices(GRAPHICS_DATA.instance,
-                &deviceCount, availableDevices.data()));
-
-            GRAPHICS_DATA.platform.api->CreateSurface(GRAPHICS_DATA.platform.instance, windowHandle, GRAPHICS_DATA.instance, &swapchain.surface);
-
-            for (const auto& device : availableDevices)
-            {
-                GraphicsDevice deviceData{};
-                if (SetupPhysicalDevice(this, device, &deviceData) &&
-                    CheckDeviceExtensionSupport(device))
-                {
-                    SwapChainSupportDetails scs{};
-                    QuerySwapChainSupport(device, swapchain.surface, &scs);
-
-                    if (!scs.formats.empty() &&
-                        !scs.presentModes.empty())
-                    {
-                        CreateLogicalDevice(deviceData);
-                        GRAPHICS_DATA.suitableDevices.push_back(deviceData);
-                    }
-                }
-            }
-
-            if (GRAPHICS_DATA.suitableDevices.empty())
-                throw GENERIC_EXCEPT("[Vulkan]", "No suitable graphics device found");
-
-            std::ranges::stable_sort(GRAPHICS_DATA.suitableDevices,
-                                     [](const GraphicsDevice& a, const GraphicsDevice& b)
-                                     { return a.score > b.score; });
-            GRAPHICS_DATA.devicesAreLoaded = true;
-            GRAPHICS_DATA.defaultDevice = &GRAPHICS_DATA.suitableDevices[0];
-            LOG_LOG("Graphics device found [%s]", GRAPHICS_DATA.defaultDevice->properties.deviceName);
-
-            CreateSwapchain(swapchain.surface, targetSize, &swapchain);
-            SetupViewportAndScissor(this);
-
-            VkRenderPassAttachmentType attachments[] =
-            {
-                VkRenderPassAttachmentType::Color,
-            };
-            VkRenderPassCreationInfo renderPassInfo
-            {
-                .pAttachments = attachments,
-                .attachmentCount = 1,
-            };
-            CreateRenderPass(renderPassInfo, &GRAPHICS_DATA.renderPass);
-
-            VkPipelineLayoutCreationInfo pipelineLayoutInfo
-            {
-                .layoutCount = 0
-            };
-            CreatePipelineLayout(pipelineLayoutInfo, &GRAPHICS_DATA.pipelineLayout);
-            CreateCommandPool(*GRAPHICS_DATA.defaultDevice, GRAPHICS_DATA.defaultDevice->familyIndices.transferFamily.value(), &GRAPHICS_DATA.transferPool);
-            CreateCommandBuffers(*GRAPHICS_DATA.defaultDevice, &GRAPHICS_DATA.transferPool, 1);
-        }
-        else
-        {
-            GRAPHICS_DATA.platform.api->CreateSurface(GRAPHICS_DATA.platform.instance, windowHandle, GRAPHICS_DATA.instance, &swapchain.surface);
-            CreateSwapchain(swapchain.surface, targetSize, &swapchain);
-            SetupViewportAndScissor(this);
-        }
+        CreateSwapchain(swapchain.surface, targetSize, &swapchain);
+        SetupViewportAndScissor(this);
 
         CreateRendererFrameBuffers(this);
         CreateCommandPool(*GRAPHICS_DATA.defaultDevice, GRAPHICS_DATA.defaultDevice->familyIndices.graphicsFamily.value(), &commandPool);
@@ -170,7 +105,7 @@ namespace hf
 
     //------------------------------------------------------------------------------------
 
-    bool SetupPhysicalDevice(const VKRenderer* renderer, VkPhysicalDevice device, GraphicsDevice* deviceData)
+    bool SetupPhysicalDevice(VkSurfaceKHR surface, VkPhysicalDevice device, GraphicsDevice* deviceData)
     {
         deviceData->device = device;
         vkGetPhysicalDeviceProperties(device, &deviceData->properties);
@@ -192,7 +127,7 @@ namespace hf
                 deviceData->familyIndices.transferFamily = i;
 
             VkBool32 presentSupport = false;
-            VK_HANDLE_EXCEPT(vkGetPhysicalDeviceSurfaceSupportKHR(device, i, renderer->swapchain.surface, &presentSupport));
+            VK_HANDLE_EXCEPT(vkGetPhysicalDeviceSurfaceSupportKHR(device, i, surface, &presentSupport));
 
             if (presentSupport) deviceData->familyIndices.presentFamily = i;
             if (deviceData->familyIndices.IsComplete()) break;
@@ -207,5 +142,100 @@ namespace hf
 
         vkGetPhysicalDeviceMemoryProperties(deviceData->device, &deviceData->memProps);
         return true;
+    }
+
+    void LoadDevice(void* windowHandle, VkSurfaceKHR* resultSurface)
+    {
+        uint32_t deviceCount = 0;
+        VK_HANDLE_EXCEPT(vkEnumeratePhysicalDevices(GRAPHICS_DATA.instance,
+            &deviceCount, nullptr));
+
+        if (deviceCount == 0) throw GENERIC_EXCEPT("[Vulkan]", "No Graphics device found");
+
+        std::vector<VkPhysicalDevice> availableDevices(deviceCount);
+        VK_HANDLE_EXCEPT(vkEnumeratePhysicalDevices(GRAPHICS_DATA.instance,
+                &deviceCount, availableDevices.data()));
+
+        GRAPHICS_DATA.platform.api->CreateSurface(GRAPHICS_DATA.platform.instance,
+            windowHandle, GRAPHICS_DATA.instance, resultSurface);
+
+        for (const auto& device : availableDevices)
+        {
+            GraphicsDevice deviceData{};
+            if (SetupPhysicalDevice(*resultSurface, device, &deviceData) &&
+                CheckDeviceExtensionSupport(device))
+            {
+                SwapChainSupportDetails scs{};
+                QuerySwapChainSupport(device, *resultSurface, &scs);
+
+                if (!scs.formats.empty() &&
+                    !scs.presentModes.empty())
+                {
+                    CreateLogicalDevice(deviceData);
+                    GRAPHICS_DATA.suitableDevices.push_back(deviceData);
+                }
+            }
+        }
+
+        if (GRAPHICS_DATA.suitableDevices.empty())
+            throw GENERIC_EXCEPT("[Vulkan]", "No suitable graphics device found");
+
+        std::ranges::stable_sort(GRAPHICS_DATA.suitableDevices,
+            [](const GraphicsDevice& a, const GraphicsDevice& b)
+            { return a.score > b.score; });
+        GRAPHICS_DATA.devicesAreLoaded = true;
+        GRAPHICS_DATA.defaultDevice = &GRAPHICS_DATA.suitableDevices[0];
+        LOG_LOG("Graphics device found [%s]", GRAPHICS_DATA.defaultDevice->properties.deviceName);
+
+        VmaAllocatorCreateInfo allocatorInfo
+        {
+            .physicalDevice = GRAPHICS_DATA.defaultDevice->device,
+            .device = GRAPHICS_DATA.defaultDevice->logicalDevice.device,
+            .pAllocationCallbacks = nullptr,
+            .instance = GRAPHICS_DATA.instance,
+            .pHeapSizeLimit = nullptr,
+            .pVulkanFunctions = nullptr,
+        };
+
+        VK_HANDLE_EXCEPT(vmaCreateAllocator(&allocatorInfo, &GRAPHICS_DATA.allocator));
+
+        VkRenderPassAttachmentType attachments[] =
+        {
+            VkRenderPassAttachmentType::Color,
+        };
+        VkRenderPassCreationInfo renderPassInfo
+        {
+            .pAttachments = attachments,
+            .attachmentCount = 1,
+        };
+        CreateRenderPass(renderPassInfo, &GRAPHICS_DATA.renderPass);
+
+        VkPipelineLayoutCreationInfo pipelineLayoutInfo
+        {
+            .layoutCount = 0
+        };
+        CreatePipelineLayout(pipelineLayoutInfo, &GRAPHICS_DATA.pipelineLayout);
+        CreateCommandPool(*GRAPHICS_DATA.defaultDevice, GRAPHICS_DATA.defaultDevice->familyIndices.transferFamily.value(), &GRAPHICS_DATA.transferPool);
+        CreateCommandBuffers(*GRAPHICS_DATA.defaultDevice, &GRAPHICS_DATA.transferPool, 1);
+    }
+
+    static void DestroyLogicalDevice(LogicalDevice& device)
+    {
+        if (device.device != VK_NULL_HANDLE)
+        {
+            vkDestroyDevice(device.device, nullptr);
+            device.device = VK_NULL_HANDLE;
+        }
+    }
+
+    void UnloadDevice()
+    {
+        vmaDestroyAllocator(GRAPHICS_DATA.allocator);
+        DestroyCommandPool(*GRAPHICS_DATA.defaultDevice, GRAPHICS_DATA.transferPool);
+        DestroyRenderPass(&GRAPHICS_DATA.renderPass);
+        DestroyPipelineLayout(&GRAPHICS_DATA.pipelineLayout);
+
+        for (auto& device : GRAPHICS_DATA.suitableDevices)
+            DestroyLogicalDevice(device.logicalDevice);
     }
 }

@@ -57,8 +57,6 @@ namespace hf
     static void CreateInstance(VkApplicationInfo& appInfo);
     static void DestroyInstance();
 
-    static void DestroyLogicalDevice(LogicalDevice& device);
-
     void LoadVulkan(const inter::rendering::RendererLoadInfo& info)
     {
         VkApplicationInfo appInfo{};
@@ -88,13 +86,7 @@ namespace hf
     {
         SubmitStagedCopyOperations();
         DelayThreadUntilRenderingFinish();
-        DestroyCommandPool(*GRAPHICS_DATA.defaultDevice, GRAPHICS_DATA.transferPool);
-        DestroyRenderPass(&GRAPHICS_DATA.renderPass);
-        DestroyPipelineLayout(&GRAPHICS_DATA.pipelineLayout);
-
-        for (auto& device : GRAPHICS_DATA.suitableDevices)
-            DestroyLogicalDevice(device.logicalDevice);
-
+        UnloadDevice();
         DestroyInstance();
     }
 
@@ -175,14 +167,5 @@ namespace hf
 #endif
 
         vkDestroyInstance(GRAPHICS_DATA.instance, nullptr);
-    }
-
-    void DestroyLogicalDevice(LogicalDevice& device)
-    {
-        if (device.device != VK_NULL_HANDLE)
-        {
-            vkDestroyDevice(device.device, nullptr);
-            device.device = VK_NULL_HANDLE;
-        }
     }
 }

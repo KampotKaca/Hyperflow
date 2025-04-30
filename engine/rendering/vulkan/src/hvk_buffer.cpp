@@ -2,12 +2,6 @@
 
 namespace hf
 {
-    static constexpr uint32_t VK_MEMORY_TYPE[(uint32_t)BufferMemoryType::Count]
-    {
-        VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
-        VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
-    };
-
     uint32_t GetMemoryType(uint32_t filter, VkMemoryPropertyFlags props)
     {
         auto& memProps = GRAPHICS_DATA.defaultDevice->memProps;
@@ -19,7 +13,7 @@ namespace hf
         throw GENERIC_EXCEPT("[Hyperflow]", "Unable to allocate graphics memory");
     }
 
-    void CreateBuffer(const VkCreateBufferInfo& info, VkBuffer* bufferResult, VkDeviceMemory* memResult)
+    void CreateBuffer(const VkCreateBufferInfo& info, VkBuffer* bufferResult, VmaAllocation* memResult)
     {
         VkBufferCreateInfo bufferInfo
         {
@@ -31,20 +25,28 @@ namespace hf
             .pQueueFamilyIndices = info.pQueueFamilies
         };
 
-        auto device = GRAPHICS_DATA.defaultDevice->logicalDevice.device;
-        VK_HANDLE_EXCEPT(vkCreateBuffer(device, &bufferInfo, nullptr, bufferResult));
-        VkMemoryRequirements memReqs{};
-        vkGetBufferMemoryRequirements(device, *bufferResult, &memReqs);
-
-        VkMemoryAllocateInfo allocInfo
+        VmaAllocationCreateInfo vmaAllocInfo{};
+        switch (info.memoryType)
         {
-            .sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO,
-            .allocationSize = memReqs.size,
-            .memoryTypeIndex = GetMemoryType(memReqs.memoryTypeBits, VK_MEMORY_TYPE[(uint32_t)info.memoryType])
-        };
+            case BufferMemoryType::Static:
+                vmaAllocInfo.usage = VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE;
+                vmaAllocInfo.flags = 0;
+                break;
+            case BufferMemoryType::WriteOnly:
+                vmaAllocInfo.usage = VMA_MEMORY_USAGE_AUTO;
+                vmaAllocInfo.flags = VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT |
+                                     VMA_ALLOCATION_CREATE_MAPPED_BIT;
+                break;
+            case BufferMemoryType::ReadWrite:
+                vmaAllocInfo.usage = VMA_MEMORY_USAGE_AUTO;
+                vmaAllocInfo.flags = VMA_ALLOCATION_CREATE_HOST_ACCESS_RANDOM_BIT |
+                                     VMA_ALLOCATION_CREATE_MAPPED_BIT;
+                break;
+            default: throw GENERIC_EXCEPT("[Hyperflow]", "Unknown memory type");
+        }
 
-        VK_HANDLE_EXCEPT(vkAllocateMemory(device, &allocInfo, nullptr, memResult));
-        VK_HANDLE_EXCEPT(vkBindBufferMemory(device, *bufferResult, *memResult, 0));
+        VmaAllocationInfo resultInfo{};
+        VK_HANDLE_EXCEPT(vmaCreateBuffer(GRAPHICS_DATA.allocator, &bufferInfo, &vmaAllocInfo, bufferResult, memResult, &resultInfo));
     }
 
     void StageCopyOperation(const VkCopyBufferOperation& operation)
@@ -62,13 +64,12 @@ namespace hf
         }
     }
 
-    void UploadBufferMemory(VkDeviceMemory memory, const void* data, uint64_t fullOffset, uint64_t fullSize)
+    void UploadBufferMemory(VmaAllocation memory, const void* data, uint64_t fullOffset, uint64_t fullSize)
     {
         void* mapping;
-        auto device = GRAPHICS_DATA.defaultDevice->logicalDevice.device;
-        VK_HANDLE_EXCEPT(vkMapMemory(device, memory, fullOffset, fullSize, 0, &mapping));
-        memcpy(mapping, data, fullSize);
-        vkUnmapMemory(device, memory);
+        VK_HANDLE_EXCEPT(vmaMapMemory(GRAPHICS_DATA.allocator, memory, &mapping));
+        memcpy((u_char*)mapping + fullOffset, data, fullSize);
+        vmaUnmapMemory(GRAPHICS_DATA.allocator, memory);
     }
 
     void CopyBufferContents(const VkCopyBufferOperation* pOperations, uint32_t operationCount)
@@ -101,15 +102,11 @@ namespace hf
         vkQueueSubmit(queue, 1, &submitInfo, VK_NULL_HANDLE);
         vkQueueWaitIdle(queue);
 
-        auto device = GRAPHICS_DATA.defaultDevice->logicalDevice.device;
         for (uint32_t i = 0; i < operationCount; i++)
         {
             auto& operation = pOperations[i];
             if (operation.deleteSrcAfterCopy)
-            {
-                vkDestroyBuffer(device, operation.srcBuffer, nullptr);
-                vkFreeMemory(device, operation.srcMemory, nullptr);
-            }
+                vmaDestroyBuffer(GRAPHICS_DATA.allocator, operation.srcBuffer, operation.srcMemory);
         }
     }
 }

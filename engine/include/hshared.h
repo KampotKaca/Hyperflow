@@ -154,7 +154,7 @@ namespace hf
 	typedef uint32_t BufferAttrib;
 
 	enum class BufferDataType { U8, I8, U16, I16, U32, I32, U64, I64, F16, F32, F64, Count };
-	enum class BufferMemoryType { Static, DynamicWrite, Count };
+	enum class BufferMemoryType { Static, WriteOnly, ReadWrite, Count };
 
 	constexpr uint32_t BUFFER_DATA_SIZE[(uint32_t)BufferDataType::Count] = { 1, 1, 2, 2, 4, 4, 8, 8, 2, 4, 8 };
 

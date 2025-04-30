@@ -11,7 +11,7 @@ namespace hf
         ~VkIndexBuffer();
 
         VkBuffer buffer{};
-        VkDeviceMemory bufferMemory{};
+        VmaAllocation bufferMemory{};
         uint32_t indexCount = 0;
         BufferMemoryType memoryType = BufferMemoryType::Static;
         BufferDataType indexFormat = BufferDataType::U16;

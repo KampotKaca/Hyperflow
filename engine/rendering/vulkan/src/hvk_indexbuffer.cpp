@@ -37,11 +37,11 @@ namespace hf
 
                 createInfo.usage = VK_BUFFER_USAGE_TRANSFER_SRC_BIT;
                 createInfo.sharingMode = VK_SHARING_MODE_CONCURRENT;
-                createInfo.memoryType = BufferMemoryType::DynamicWrite;
+                createInfo.memoryType = BufferMemoryType::WriteOnly;
                 createInfo.pQueueFamilies = queus;
                 createInfo.familyCount = 2;
                 VkBuffer stagingBuffer;
-                VkDeviceMemory stagingBufferMemory;
+                VmaAllocation stagingBufferMemory;
                 CreateBuffer(createInfo, &stagingBuffer, &stagingBufferMemory);
 
                 UploadBufferMemory(stagingBufferMemory, info.pIndices, 0, bufferSize);
@@ -71,11 +71,11 @@ namespace hf
                 StageCopyOperation(copyOperation);
             }
             break;
-            case BufferMemoryType::DynamicWrite:
+            case BufferMemoryType::WriteOnly:
             {
                 createInfo.usage = VK_BUFFER_USAGE_INDEX_BUFFER_BIT;
                 createInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
-                createInfo.memoryType = BufferMemoryType::DynamicWrite;
+                createInfo.memoryType = BufferMemoryType::WriteOnly;
                 CreateBuffer(createInfo, &buffer, &bufferMemory);
                 if (info.pIndices) UploadBufferMemory(bufferMemory, info.pIndices, 0, bufferSize);
             }
@@ -86,8 +86,6 @@ namespace hf
 
     VkIndexBuffer::~VkIndexBuffer()
     {
-        auto device = GRAPHICS_DATA.defaultDevice->logicalDevice.device;
-        vkDestroyBuffer(device, buffer, nullptr);
-        vkFreeMemory(device, bufferMemory, nullptr);
+        vmaDestroyBuffer(GRAPHICS_DATA.allocator, buffer, bufferMemory);
     }
 }

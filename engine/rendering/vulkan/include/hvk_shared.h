@@ -2,6 +2,7 @@
 #define HVK_SHARED_H
 
 #include <vulkan/vulkan.h>
+#include <vk_mem_alloc.h>
 #include "hgraphicsexception.h"
 #include "../../include/hex_renderer.h"
 #include "../config.h"

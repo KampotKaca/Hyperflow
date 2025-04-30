@@ -72,9 +72,9 @@ namespace hf
     struct VkCopyBufferOperation
     {
         VkBuffer srcBuffer{};
-        VkDeviceMemory srcMemory{};
+        VmaAllocation srcMemory{};
         VkBuffer dstBuffer{};
-        VkDeviceMemory dstMemory{};
+        VmaAllocation dstMemory{};
 
         VkBufferCopy pRegions[VULKAN_API_MAX_NUM_COPY_REGIONS]{};
         uint32_t regionCount = 0;
@@ -99,6 +99,8 @@ namespace hf
         VkRenderPass renderPass{};
         VkPipelineLayout pipelineLayout{};
         CommandPool transferPool{};
+        VmaAllocator allocator;
+
         std::vector<VkBufferAttrib> bufferAttribs{};
         std::vector<VkCopyBufferOperation> bufferCopyOperations{};
 
@@ -168,6 +170,9 @@ namespace hf
     void LoadVulkan(const inter::rendering::RendererLoadInfo& info);
     void UnloadVulkan();
 
+    void LoadDevice(void* windowHandle, VkSurfaceKHR* resultSurface);
+    void UnloadDevice();
+
     void DelayThreadUntilRenderingFinish();
 
     void CreateSwapchain(VkSurfaceKHR surface, uvec2 targetSize, GraphicsSwapChain* result);
@@ -203,13 +208,13 @@ namespace hf
     void DestroyFence(const GraphicsDevice& device, VkFence& fence);
 
     void WaitForFences(const GraphicsDevice& device, const VkFence* fences, uint32_t count, bool waitAll);
-    void CreateBuffer(const VkCreateBufferInfo& info, VkBuffer* bufferResult, VkDeviceMemory* memResult);
+    void CreateBuffer(const VkCreateBufferInfo& info, VkBuffer* bufferResult,  VmaAllocation* memResult);
 
     uint32_t GetMemoryType(uint32_t filter, VkMemoryPropertyFlags props);
     void StageCopyOperation(const VkCopyBufferOperation& operation);
     void SubmitStagedCopyOperations();
 
-    void UploadBufferMemory(VkDeviceMemory memory, const void* data, uint64_t fullOffset, uint64_t fullSize);
+    void UploadBufferMemory(VmaAllocation memory, const void* data, uint64_t fullOffset, uint64_t fullSize);
     void CopyBufferContents(const VkCopyBufferOperation* pOperations, uint32_t operationCount);
 }
 
