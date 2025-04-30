@@ -57,6 +57,21 @@ namespace hf::inter::rendering
 
     }
 
+    void* CreateIndexBuffer(const IndexBufferCreationInfo& info)
+    {
+        return nullptr;
+    }
+
+    void DestroyIndexBuffer(void* handle)
+    {
+
+    }
+
+    void UploadIndexBuffer(const IndexBufferUploadInfo& info)
+    {
+
+    }
+
     void SubmitStagedCopyOperations()
     {
 
@@ -101,24 +116,30 @@ namespace hf::inter::rendering
     {
         static RendererAPI api =
         {
-            &Load,
-            &Unload,
-            &CreateInstance,
-            &DestroyInstance,
-            &CreateShader,
-            &DestroyShader,
-            &BindShader,
-            &CreateBufferAttrib,
-            &CreateVertBuffer,
-            &DestroyVertBuffer,
-            &UploadVertBuffer,
-            &SubmitStagedCopyOperations,
-            &GetReadyForRendering,
-            &StartFrame,
-            &EndFrame,
-            &RegisterFrameBufferChange,
-            &Draw,
-            &WaitForRendering
+            .Load = &Load,
+            .Unload = &Unload,
+            .CreateInstance = &CreateInstance,
+            .DestroyInstance = &DestroyInstance,
+
+            .CreateShader = &CreateShader,
+            .DestroyShader = &DestroyShader,
+            .BindShader = &BindShader,
+
+            .CreateBufferAttrib = &CreateBufferAttrib,
+            .CreateVertBuffer = &CreateVertBuffer,
+            .DestroyVertBuffer = &DestroyVertBuffer,
+            .UploadVertBuffer = &UploadVertBuffer,
+            .CreateIndexBuffer = &CreateIndexBuffer,
+            .DestroyIndexBuffer = &DestroyIndexBuffer,
+            .UploadIndexBuffer = &UploadIndexBuffer,
+
+            .SubmitStagedCopyOperations = &SubmitStagedCopyOperations,
+            .GetReadyForRendering = &GetReadyForRendering,
+            .StartFrame = &StartFrame,
+            .EndFrame = &EndFrame,
+            .RegisterFrameBufferChange = &RegisterFrameBufferChange,
+            .Draw = &Draw,
+            .WaitForRendering = &WaitForRendering
         };
         return &api;
     }

@@ -73,13 +73,13 @@ namespace hf
 		void* GetHandle(const Ref<Window> &window) { return window->handle; }
 		bool IsClosing(const Ref<Window> &window) { return window->handle == nullptr; }
 
-		void SetTitle(const Ref<Window> &window, const std::string& title) { inter::window::SetTitle(window.get(), title); }
-		void SetSize(const Ref<Window> &window, const ivec2 size) { inter::window::SetSize(window.get(), size); }
-		void SetPosition(const Ref<Window> &window, const ivec2 position) { inter::window::SetPosition(window.get(), position); }
-		void SetRect(const Ref<Window> &window, const IRect rect) { inter::window::SetRect(window.get(), rect); }
+		void SetTitle(const Ref<Window> &window, const std::string& title) { if (!IsClosing(window)) inter::window::SetTitle(window.get(), title); }
+		void SetSize(const Ref<Window> &window, const ivec2 size) { if (!IsClosing(window)) inter::window::SetSize(window.get(), size); }
+		void SetPosition(const Ref<Window> &window, const ivec2 position) { if (!IsClosing(window)) inter::window::SetPosition(window.get(), position); }
+		void SetRect(const Ref<Window> &window, const IRect rect) { if (!IsClosing(window)) inter::window::SetRect(window.get(), rect); }
 
-		void SetFlags(const Ref<Window> &window, const WindowFlags flags) { inter::window::SetFlags(window.get(), flags); }
-		void Focus(const Ref<Window> &window) { inter::window::Focus(window.get()); }
+		void SetFlags(const Ref<Window> &window, const WindowFlags flags) { if (!IsClosing(window)) inter::window::SetFlags(window.get(), flags); }
+		void Focus(const Ref<Window> &window) { if (!IsClosing(window)) inter::window::Focus(window.get()); }
 	}
 
 	void HandleKeyboardFocus(Keyboard& keyboard) noexcept;
