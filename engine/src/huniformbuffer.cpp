@@ -1,9 +1,10 @@
 #include "hyperflow.h"
+#include "hinternal.h"
 
 namespace hf::uniformbuffer
 {
-    UniformBuffer Create(const UniformBufferCreateInfo& info)
+    UniformBuffer Define(const UniformBufferDefinitionInfo& info)
     {
-        return 0;
+        return inter::HF.renderingApi.api.DefineUniformBuffer(info);
     }
 }

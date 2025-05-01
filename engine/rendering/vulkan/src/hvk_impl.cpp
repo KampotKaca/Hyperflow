@@ -10,6 +10,7 @@ namespace hf::inter::rendering
     {
         GRAPHICS_DATA.platform.instance = info.platformInstance;
         GRAPHICS_DATA.platform.platformDll = info.platformDll;
+        GRAPHICS_DATA.rendererPreloadCallback = info.rendererPreloadCallback;
         auto func = (VulkanPlatformAPI*(*)())info.getFuncFromDll(GRAPHICS_DATA.platform.platformDll, "GetAPI");
 
         if (!func) throw GENERIC_EXCEPT("[Hyperflow]", "Failed to get vulkan platform API");
@@ -48,10 +49,16 @@ namespace hf::inter::rendering
         BindShader((VKRenderer*)renderer, (VkShader*)shader, attrib);
     }
 
-    uint32_t CreateBufferAttrib(const BufferAttribCreateInfo& info, uint32_t fullStride)
+    uint32_t DefineVertBufferAttrib(const BufferAttribDefinitionInfo& info, uint32_t fullStride)
     {
         GRAPHICS_DATA.bufferAttribs.emplace_back(info, fullStride);
         return GRAPHICS_DATA.bufferAttribs.size();
+    }
+
+    uint32_t DefineUniformBuffer(const UniformBufferDefinitionInfo& info)
+    {
+        GRAPHICS_DATA.uniformBuffers.emplace_back(info);
+        return GRAPHICS_DATA.uniformBuffers.size();
     }
 
     void* CreateVertBuffer(const VertBufferCreationInfo& info)
@@ -102,6 +109,11 @@ namespace hf::inter::rendering
     void SubmitStagedCopyOperations()
     {
         hf::SubmitStagedCopyOperations();
+    }
+
+    void DefineUniformBuffer()
+    {
+
     }
 
     bool GetReadyForRendering(void* rn)
@@ -173,21 +185,37 @@ namespace hf::inter::rendering
     {
         static RendererAPI api =
         {
+            //loading
             .Load                       = &Load,
             .Unload                     = &Unload,
             .CreateInstance             = &CreateInstance,
             .DestroyInstance            = &DestroyInstance,
+
+            //shader
             .CreateShader               = &CreateShader,
             .DestroyShader              = &DestroyShader,
             .BindShader                 = &BindShader,
-            .CreateBufferAttrib         = &CreateBufferAttrib,
+
+            //buffer attribute
+            .DefineVertBufferAttrib     = &DefineVertBufferAttrib,
+
+            //uniform buffer
+            .DefineUniformBuffer        = &DefineUniformBuffer,
+
+            //vertex buffer
             .CreateVertBuffer           = &CreateVertBuffer,
             .DestroyVertBuffer          = &DestroyVertBuffer,
             .UploadVertBuffer           = &UploadVertBuffer,
+
+            //index buffer
             .CreateIndexBuffer          = &CreateIndexBuffer,
             .DestroyIndexBuffer         = &DestroyIndexBuffer,
             .UploadIndexBuffer          = &UploadIndexBuffer,
+
+            //buffer operations
             .SubmitStagedCopyOperations = &SubmitStagedCopyOperations,
+
+            //rendering
             .GetReadyForRendering       = &GetReadyForRendering,
             .StartFrame                 = &StartFrame,
             .EndFrame                   = &EndFrame,

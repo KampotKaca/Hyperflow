@@ -7,8 +7,8 @@ namespace hf
         VkPipelineLayoutCreateInfo pipelineLayoutInfo
         {
             .sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO,
-            .setLayoutCount = info.layoutCount,
-            .pSetLayouts = nullptr,
+            .setLayoutCount = info.setLayoutCount,
+            .pSetLayouts = info.pSetLayouts,
             .pushConstantRangeCount = 0,
             .pPushConstantRanges = nullptr,
         };

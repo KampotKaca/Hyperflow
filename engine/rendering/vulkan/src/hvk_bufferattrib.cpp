@@ -22,7 +22,7 @@ namespace hf
         VK_FORMAT_R16G16B16A16_SFLOAT, VK_FORMAT_R32G32B32A32_SFLOAT, VK_FORMAT_R64G64B64A64_SFLOAT,
     };
 
-    VkBufferAttrib::VkBufferAttrib(const BufferAttribCreateInfo& info, uint32_t fullStride)
+    VkBufferAttrib::VkBufferAttrib(const BufferAttribDefinitionInfo& info, uint32_t fullStride)
     {
         bindingId = info.bindingId;
         attribCount = info.formatCount;

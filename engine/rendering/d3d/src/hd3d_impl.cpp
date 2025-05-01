@@ -37,7 +37,7 @@ namespace hf::inter::rendering
 
     }
 
-    uint32_t CreateBufferAttrib(const BufferAttribCreateInfo& info, uint32_t fullStride)
+    uint32_t CreateBufferAttrib(const BufferAttribDefinitionInfo& info, uint32_t fullStride)
     {
         return 1;
     }
@@ -125,7 +125,7 @@ namespace hf::inter::rendering
             .DestroyShader = &DestroyShader,
             .BindShader = &BindShader,
 
-            .CreateBufferAttrib = &CreateBufferAttrib,
+            .DefineVertBufferAttrib = &CreateBufferAttrib,
             .CreateVertBuffer = &CreateVertBuffer,
             .DestroyVertBuffer = &DestroyVertBuffer,
             .UploadVertBuffer = &UploadVertBuffer,

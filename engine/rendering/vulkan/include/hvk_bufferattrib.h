@@ -7,7 +7,7 @@ namespace hf
 {
     struct VkBufferAttrib
     {
-        VkBufferAttrib(const BufferAttribCreateInfo& info, uint32_t fullStride);
+        VkBufferAttrib(const BufferAttribDefinitionInfo& info, uint32_t fullStride);
         ~VkBufferAttrib();
 
         VkVertexInputBindingDescription bindingDescription{};

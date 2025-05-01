@@ -167,7 +167,7 @@ namespace hf
 		uint32_t lSize = 1;
 	};
 
-	struct BufferAttribCreateInfo
+	struct BufferAttribDefinitionInfo
 	{
 		uint32_t bindingId = 0;
 		uint32_t formatCount = 0;
@@ -214,9 +214,19 @@ namespace hf
 		const std::string& fragmentShaderLoc{};
 	};
 
-	struct UniformBufferCreateInfo
+	enum class UniformBufferStage
 	{
+		None = 0,
+		Vertex = (1u << 0), TessellationControl = (1u << 1), TessellationEvaluation = (1u << 2),
+		Geometry = (1u << 3), Fragment = (1u << 4), Compute = (1u << 5),
+		AllGraphics = Vertex | TessellationControl | TessellationEvaluation | Geometry | Fragment,
+		All = Vertex | TessellationControl | TessellationEvaluation | Geometry | Fragment | Compute,
+	};
 
+	struct UniformBufferDefinitionInfo
+	{
+		uint32_t bindingId{};
+		UniformBufferStage usageStage{};
 	};
 
 	enum class RenderingApiType { None, Vulkan, Direct3D };
@@ -273,6 +283,7 @@ namespace hf
 
 	struct EngineLifecycleCallbacks
 	{
+		void (*rendererPreloadCallback)(){};
 		void (*onResourcesLoad)(){};
 		void (*onStartCallback)(){};
 		void (*onUpdateCallback)(){};

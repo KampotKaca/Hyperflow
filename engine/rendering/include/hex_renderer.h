@@ -25,6 +25,7 @@ namespace hf::inter::rendering
         void* platformInstance;
         void* platformDll;
         void* (*getFuncFromDll)(void* dll, const char* funcName);
+        void (*rendererPreloadCallback)(){};
     };
 
     struct VertBufferUploadInfo
@@ -72,12 +73,18 @@ namespace hf::inter::rendering
         void (*DestroyShader)(void* shader);
         void (*BindShader)(const void* renderer, const void* shader, BufferAttrib attrib);
 
-        //Buffers
-        uint32_t (*CreateBufferAttrib)(const BufferAttribCreateInfo& info, uint32_t fullStride);
+        //buffer attribute
+        uint32_t (*DefineVertBufferAttrib)(const BufferAttribDefinitionInfo& info, uint32_t fullStride);
+
+        //uniform buffer
+        uint32_t (*DefineUniformBuffer)(const UniformBufferDefinitionInfo& info);
+
+        //vertex buffer
         void* (*CreateVertBuffer)(const VertBufferCreationInfo& info);
         void (*DestroyVertBuffer)(void* handle);
         void (*UploadVertBuffer)(const VertBufferUploadInfo& info);
 
+        //index buffer
         void* (*CreateIndexBuffer)(const IndexBufferCreationInfo& info);
         void (*DestroyIndexBuffer)(void* handle);
         void (*UploadIndexBuffer)(const IndexBufferUploadInfo& info);

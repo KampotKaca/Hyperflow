@@ -193,8 +193,6 @@ namespace hf
             .device = GRAPHICS_DATA.defaultDevice->logicalDevice.device,
             .pAllocationCallbacks = nullptr,
             .instance = GRAPHICS_DATA.instance,
-            .pHeapSizeLimit = nullptr,
-            .pVulkanFunctions = nullptr,
         };
 
         VK_HANDLE_EXCEPT(vmaCreateAllocator(&allocatorInfo, &GRAPHICS_DATA.allocator));
@@ -210,9 +208,13 @@ namespace hf
         };
         CreateRenderPass(renderPassInfo, &GRAPHICS_DATA.renderPass);
 
+        if (GRAPHICS_DATA.rendererPreloadCallback) GRAPHICS_DATA.rendererPreloadCallback();
+        std::vector<VkDescriptorSetLayout> setLayoutBindings(GRAPHICS_DATA.uniformBuffers.size());
+        for (uint32_t i = 0; i < GRAPHICS_DATA.uniformBuffers.size(); ++i) setLayoutBindings[i] = GRAPHICS_DATA.uniformBuffers[i].layout;
         VkPipelineLayoutCreationInfo pipelineLayoutInfo
         {
-            .layoutCount = 0
+            .pSetLayouts = setLayoutBindings.data(),
+            .setLayoutCount = (uint32_t)setLayoutBindings.size()
         };
         CreatePipelineLayout(pipelineLayoutInfo, &GRAPHICS_DATA.pipelineLayout);
         CreateCommandPool(*GRAPHICS_DATA.defaultDevice, GRAPHICS_DATA.defaultDevice->familyIndices.transferFamily.value(), &GRAPHICS_DATA.transferPool);

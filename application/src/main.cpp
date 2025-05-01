@@ -23,10 +23,11 @@ int main()
 		.updateType = hf::EngineUpdateType::Continues,
 		.lifecycleCallbacks =
 		{
-			.onResourcesLoad     = app::Application::LoadResources,
-			.onStartCallback     = app::Application::Start,
-			.onUpdateCallback    = app::Application::Update,
-			.onQuitCallback      = app::Application::Quit,
+			.rendererPreloadCallback = app::Application::RendererPreload,
+			.onResourcesLoad     	 = app::Application::LoadResources,
+			.onStartCallback     	 = app::Application::Start,
+			.onUpdateCallback    	 = app::Application::Update,
+			.onQuitCallback      	 = app::Application::Quit,
 		},
 		.windowData =
 		{

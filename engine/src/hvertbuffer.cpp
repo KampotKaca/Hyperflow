@@ -18,19 +18,6 @@ namespace hf
 
     namespace vertbuffer
     {
-        BufferAttrib CreateAttrib(const BufferAttribCreateInfo& info)
-        {
-            uint32_t fullStride = 0;
-            for (uint32_t i = 0; i < info.formatCount; i++)
-            {
-                auto& stride = info.pFormats[i];
-                stride.lSize = stride.size * BUFFER_DATA_SIZE[(uint32_t)stride.type];
-                fullStride += stride.lSize;
-            }
-
-            return inter::HF.renderingApi.api.CreateBufferAttrib(info, fullStride);
-        }
-
         Ref<VertBuffer> Create(const VertBufferCreationInfo& info)
         {
             Ref<VertBuffer> buffer = MakeRef<VertBuffer>(info);

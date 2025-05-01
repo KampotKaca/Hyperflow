@@ -5,6 +5,7 @@
 #include "hvk_framebuffer.h"
 #include "hvk_bufferattrib.h"
 #include "hvk_vertbuffer.h"
+#include "hvk_uniformbuffer.h"
 #include "hvk_platform.h"
 
 namespace hf
@@ -94,6 +95,8 @@ namespace hf
         std::set<std::string> availableExtensionNames{};
         std::vector<GraphicsDevice> suitableDevices{};
         GraphicsDevice* defaultDevice;
+        void (*rendererPreloadCallback)(){};
+        
         bool devicesAreLoaded = false;
 
         VkRenderPass renderPass{};
@@ -102,6 +105,7 @@ namespace hf
         VmaAllocator allocator;
 
         std::vector<VkBufferAttrib> bufferAttribs{};
+        std::vector<VkUniformBuffer> uniformBuffers{};
         std::vector<VkCopyBufferOperation> bufferCopyOperations{};
 
 #if DEBUG
@@ -144,7 +148,8 @@ namespace hf
 
     struct VkPipelineLayoutCreationInfo
     {
-        uint32_t layoutCount = 0;
+        VkDescriptorSetLayout* pSetLayouts{};
+        uint32_t setLayoutCount = 0;
     };
 
     enum class VkRenderPassAttachmentType { Color };

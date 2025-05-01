@@ -68,7 +68,7 @@ namespace hf
     {
         void* mapping;
         VK_HANDLE_EXCEPT(vmaMapMemory(GRAPHICS_DATA.allocator, memory, &mapping));
-        memcpy((u_char*)mapping + fullOffset, data, fullSize);
+        memcpy((uint8_t*)mapping + fullOffset, data, fullSize);
         vmaUnmapMemory(GRAPHICS_DATA.allocator, memory);
     }
 

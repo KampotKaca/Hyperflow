@@ -32,19 +32,6 @@ namespace app
 	hf::Ref<hf::IndexBuffer> indexBuffer;
 	hf::BufferAttrib bufferAttrib;
 
-	hf::BufferAttribFormat formats[]
-	{
-		{ .type = hf::BufferDataType::F32, .size = 2, },
-		{ .type = hf::BufferDataType::F32, .size = 3, },
-	};
-
-	hf::BufferAttribCreateInfo bufferAttribCreateInfo
-	{
-		.bindingId = 0,
-		.formatCount = 2,
-		.pFormats = formats
-	};
-
 	struct Camera
 	{
 		hf::mat4 model;
@@ -53,10 +40,26 @@ namespace app
 		hf::mat4 viewProj;
 	};
 
+	void Application::RendererPreload()
+	{
+		hf::BufferAttribFormat formats[]
+		{
+			{ .type = hf::BufferDataType::F32, .size = 2, },
+			{ .type = hf::BufferDataType::F32, .size = 3, },
+		};
+
+		hf::BufferAttribDefinitionInfo bufferAttribCreateInfo
+		{
+			.bindingId = 0,
+			.formatCount = 2,
+			.pFormats = formats
+		};
+
+		bufferAttrib = hf::bufferattrib::Define(bufferAttribCreateInfo);
+	}
+
 	void Application::LoadResources()
 	{
-		bufferAttrib = hf::vertbuffer::CreateAttrib(bufferAttribCreateInfo);
-
 		hf::VertBufferCreationInfo vertBufferInfo
 		{
 			.bufferAttrib = bufferAttrib,

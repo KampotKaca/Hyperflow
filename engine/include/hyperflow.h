@@ -116,9 +116,18 @@ namespace hf
 		void Bind(const Ref<Renderer>& renderer, const Ref<Shader>& shader, BufferAttrib attrib);
 	}
 
+	namespace bufferattrib
+	{
+		BufferAttrib Define(const BufferAttribDefinitionInfo& info);
+	}
+
+	namespace uniformbuffer
+	{
+		UniformBuffer Define(const UniformBufferDefinitionInfo& info);
+	}
+
 	namespace vertbuffer
 	{
-		BufferAttrib CreateAttrib(const BufferAttribCreateInfo& info);
 		Ref<VertBuffer> Create(const VertBufferCreationInfo& info);
 		void Destroy(const Ref<VertBuffer>& buffer);
 		void Destroy(const Ref<VertBuffer>* pBuffers, uint32_t count);
@@ -135,11 +144,6 @@ namespace hf
 		void DestroyAll();
 		bool IsRunning(const Ref<IndexBuffer>& buffer);
 		void Upload(const IndexBufferUploadInfo& info);
-	}
-
-	namespace uniformbuffer
-	{
-		UniformBuffer Create(const UniformBufferCreateInfo& info);
 	}
 
 	namespace utils

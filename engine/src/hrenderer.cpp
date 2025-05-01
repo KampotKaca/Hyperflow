@@ -160,7 +160,8 @@ namespace hf
                     .engineVersion = engineV,
                     .applicationTitle = HF.appTitle.c_str(),
                     .platformInstance = platform::GetPlatformInstance(),
-                    .getFuncFromDll = platform::GetFuncPtr
+                    .getFuncFromDll = platform::GetFuncPtr,
+                    .rendererPreloadCallback = HF.lifecycleCallbacks.rendererPreloadCallback
                 };
 
                 if (HF.renderingApi.type == RenderingApiType::Vulkan)
