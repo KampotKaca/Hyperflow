@@ -6,6 +6,7 @@
 #include "hvk_bufferattrib.h"
 #include "hvk_vertbuffer.h"
 #include "hvk_uniformbuffer.h"
+#include "hvk_uniformstorage.h"
 #include "hvk_platform.h"
 
 namespace hf
@@ -95,17 +96,16 @@ namespace hf
         std::set<std::string> availableExtensionNames{};
         std::vector<GraphicsDevice> suitableDevices{};
         GraphicsDevice* defaultDevice;
-        void (*rendererPreloadCallback)(){};
-        
+
         bool devicesAreLoaded = false;
 
         VkRenderPass renderPass{};
-        VkPipelineLayout pipelineLayout{};
         CommandPool transferPool{};
         VmaAllocator allocator;
 
         std::vector<VkBufferAttrib> bufferAttribs{};
         std::vector<VkUniformBuffer> uniformBuffers{};
+        std::vector<VkUniformStorage> uniformStorages{};
         std::vector<VkCopyBufferOperation> bufferCopyOperations{};
 
 #if DEBUG
@@ -146,12 +146,6 @@ namespace hf
         uint32_t usedCommandCount = 0;
     };
 
-    struct VkPipelineLayoutCreationInfo
-    {
-        VkDescriptorSetLayout* pSetLayouts{};
-        uint32_t setLayoutCount = 0;
-    };
-
     enum class VkRenderPassAttachmentType { Color };
 
     struct VkRenderPassCreationInfo
@@ -185,9 +179,6 @@ namespace hf
 
     void CreateFrame(VkFrame* result);
     void DestroyFrame(VkFrame& frame);
-
-    void CreatePipelineLayout(const VkPipelineLayoutCreationInfo& info, VkPipelineLayout* pipelineLayout);
-    void DestroyPipelineLayout(VkPipelineLayout* pipelineLayout);
 
     void CreateRenderPass(const VkRenderPassCreationInfo& info, VkRenderPass* renderPass);
     void DestroyRenderPass(VkRenderPass* renderPass);

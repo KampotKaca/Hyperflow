@@ -68,6 +68,7 @@ namespace hf
     void EndFrame(VKRenderer* rn);
     void RegisterFrameBufferChange(VKRenderer* rn, uvec2 newSize);
     void Draw(const VkDrawInfo& info);
+    void UploadUniform(const VKRenderer* rn, UniformBuffer buffer, const void* data, uint32_t offset, uint32_t size);
 }
 
 #endif //HVK_RENDERER_H

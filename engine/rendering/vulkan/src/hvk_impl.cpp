@@ -3,6 +3,7 @@
 #include "hvk_renderer.h"
 #include "hvk_shader.h"
 #include "hvk_vertbuffer.h"
+#include "hvk_uniformbuffer.h"
 
 namespace hf::inter::rendering
 {
@@ -10,7 +11,6 @@ namespace hf::inter::rendering
     {
         GRAPHICS_DATA.platform.instance = info.platformInstance;
         GRAPHICS_DATA.platform.platformDll = info.platformDll;
-        GRAPHICS_DATA.rendererPreloadCallback = info.rendererPreloadCallback;
         auto func = (VulkanPlatformAPI*(*)())info.getFuncFromDll(GRAPHICS_DATA.platform.platformDll, "GetAPI");
 
         if (!func) throw GENERIC_EXCEPT("[Hyperflow]", "Failed to get vulkan platform API");
@@ -29,9 +29,9 @@ namespace hf::inter::rendering
         return new VKRenderer(info.handle, info.size);
     }
 
-    void DestroyInstance(void* rnInstance)
+    void DestroyInstance(void* rn)
     {
-        delete((VKRenderer*)rnInstance);
+        delete((VKRenderer*)rn);
     }
 
     void* CreateShader(const ShaderCreationInfo& info)
@@ -44,9 +44,9 @@ namespace hf::inter::rendering
         delete (VkShader*)shader;
     }
 
-    void BindShader(const void* renderer, const void* shader, BufferAttrib attrib)
+    void BindShader(const void* rn, const void* shader, BufferAttrib attrib)
     {
-        BindShader((VKRenderer*)renderer, (VkShader*)shader, attrib);
+        BindShader((VKRenderer*)rn, (VkShader*)shader, attrib);
     }
 
     uint32_t DefineVertBufferAttrib(const BufferAttribDefinitionInfo& info, uint32_t fullStride)
@@ -59,6 +59,17 @@ namespace hf::inter::rendering
     {
         GRAPHICS_DATA.uniformBuffers.emplace_back(info);
         return GRAPHICS_DATA.uniformBuffers.size();
+    }
+
+    void UploadUniformBuffer(const void* rn, const UniformBufferUploadInfo& info)
+    {
+        UploadUniform((VKRenderer*)rn, info.uniformBuffer, info.data, info.offsetInBytes, info.sizeInBytes);
+    }
+
+    uint32_t DefineUniformStorage(const UniformStorageDefinitionInfo& info)
+    {
+        GRAPHICS_DATA.uniformStorages.emplace_back(info);
+        return GRAPHICS_DATA.uniformStorages.size();
     }
 
     void* CreateVertBuffer(const VertBufferCreationInfo& info)
@@ -111,11 +122,6 @@ namespace hf::inter::rendering
         hf::SubmitStagedCopyOperations();
     }
 
-    void DefineUniformBuffer()
-    {
-
-    }
-
     bool GetReadyForRendering(void* rn)
     {
         auto renderer = (VKRenderer*)rn;
@@ -140,26 +146,26 @@ namespace hf::inter::rendering
         RegisterFrameBufferChange(renderer, newSize);
     }
 
-    void Draw(const DrawCallInfo& info)
+    void Draw(void* rn, const DrawCallInfo& info)
     {
-        auto* rn = (VKRenderer*)info.renderer;
+        auto* vrn = (VKRenderer*)rn;
 
         uint32_t offset = 0;
         uint32_t vertCount = 0;
         for (uint32_t i = 0; i < info.bufferCount; i++)
         {
             auto vertBuffer = (VkVertBuffer*)info.pVertBuffers[i];
-            rn->vertBufferCache[i] = vertBuffer->buffer;
-            rn->drawOffsets[i] = offset;
+            vrn->vertBufferCache[i] = vertBuffer->buffer;
+            vrn->drawOffsets[i] = offset;
             offset += GetAttrib(vertBuffer->attrib).vertexSize;
             vertCount = vertBuffer->vertCount;
         }
 
         VkDrawInfo drawInfo
         {
-            .renderer = rn,
-            .pBuffers = rn->vertBufferCache,
-            .pOffsets = rn->drawOffsets,
+            .renderer = vrn,
+            .pBuffers = vrn->vertBufferCache,
+            .pOffsets = vrn->drawOffsets,
             .bufferCount = info.bufferCount,
             .vertCount = vertCount,
             .instanceCount = info.instanceCount
@@ -201,6 +207,10 @@ namespace hf::inter::rendering
 
             //uniform buffer
             .DefineUniformBuffer        = &DefineUniformBuffer,
+            .UploadUniformBuffer        = &UploadUniformBuffer,
+
+            //uniform storage
+            .DefineUniformStorage       = &DefineUniformStorage,
 
             //vertex buffer
             .CreateVertBuffer           = &CreateVertBuffer,

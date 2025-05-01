@@ -90,7 +90,7 @@ namespace hf
 	namespace renderer
 	{
 		Ref<Renderer> Create(uvec2 size);
-		void Destroy(Ref<Renderer> rn);
+		void Destroy(const Ref<Renderer>& rn);
 		bool IsRunning(const Ref<Renderer>& rn);
 
 		bool IsApiSupported(RenderingApiType targetApi);
@@ -99,8 +99,8 @@ namespace hf
 		//Destroy every renderer which is not connected to the window, before you try to change api
 		void ChangeApi(RenderingApiType targetApi);
 
-		void Resize(Ref<Renderer> rn, uvec2 size);
-		void Draw(const DrawCallInfo& info);
+		void Resize(const Ref<Renderer>& rn, uvec2 size);
+		void Draw(const Ref<Renderer>& rn, const DrawCallInfo& info);
 		void UnloadAllResources();
 	}
 
@@ -124,6 +124,12 @@ namespace hf
 	namespace uniformbuffer
 	{
 		UniformBuffer Define(const UniformBufferDefinitionInfo& info);
+		void Upload(const Ref<Renderer>& rn, const UniformBufferUploadInfo& info);
+	}
+
+	namespace uniformstorage
+	{
+		UniformStorage Define(const UniformStorageDefinitionInfo& info);
 	}
 
 	namespace vertbuffer

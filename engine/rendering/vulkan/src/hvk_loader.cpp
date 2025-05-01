@@ -86,6 +86,11 @@ namespace hf
     {
         SubmitStagedCopyOperations();
         DelayThreadUntilRenderingFinish();
+
+        GRAPHICS_DATA.uniformStorages.clear();
+        GRAPHICS_DATA.bufferAttribs.clear();
+        GRAPHICS_DATA.uniformBuffers.clear();
+
         UnloadDevice();
         DestroyInstance();
     }

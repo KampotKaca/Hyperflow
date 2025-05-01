@@ -16,6 +16,7 @@ namespace hf
 
         inter::rendering::ShaderCreationInfo creationInfo
         {
+            .uniformStorage = info.uniformStorage,
             .supportedAttribCount = info.supportedAttribCount,
             .pSupportedAttribs = info.pSupportedAttribs,
             .vCode = vertexCode.data(),

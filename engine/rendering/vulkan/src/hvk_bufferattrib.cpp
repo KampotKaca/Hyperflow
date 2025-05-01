@@ -62,14 +62,14 @@ namespace hf
         attribDescriptions.clear();
     }
 
-    bool IsValid(BufferAttrib attrib)
+    bool IsValidAttrib(BufferAttrib attrib)
     {
         return attrib > 0 && attrib <= GRAPHICS_DATA.bufferAttribs.size();
     }
 
     const VkBufferAttrib& GetAttrib(BufferAttrib attrib)
     {
-        if (!IsValid(attrib)) throw GENERIC_EXCEPT("[Hyperflow]", "Invalid buffer attribute");
+        if (!IsValidAttrib(attrib)) throw GENERIC_EXCEPT("[Hyperflow]", "Invalid buffer attribute");
         return GRAPHICS_DATA.bufferAttribs[attrib - 1];
     }
 }

@@ -153,6 +153,7 @@ namespace hf
 	struct IndexBuffer;
 	typedef uint32_t BufferAttrib;
 	typedef uint32_t UniformBuffer;
+	typedef uint32_t UniformStorage;
 
 	enum class BufferDataType { U8, I8, U16, I16, U32, I32, U64, I64, F16, F32, F64, Count };
 	enum class BufferMemoryType { Static, WriteOnly, ReadWrite, Count };
@@ -194,6 +195,8 @@ namespace hf
 	{
 		const Ref<VertBuffer>& buffer;
 		const void* data;
+
+		//data alignment will be size of the vertex, so offset should be set as how many vertices should be skipped.
 		uint32_t offset;
 		uint32_t vertCount;
 	};
@@ -208,6 +211,7 @@ namespace hf
 
 	struct ShaderCreationInfo
 	{
+		UniformStorage uniformStorage{};
 		uint32_t supportedAttribCount{};
 		const BufferAttrib* pSupportedAttribs{};
 		const std::string& vertexShaderLoc{};
@@ -223,17 +227,66 @@ namespace hf
 		All = Vertex | TessellationControl | TessellationEvaluation | Geometry | Fragment | Compute,
 	};
 
-	struct UniformBufferDefinitionInfo
+	inline UniformBufferStage operator|(UniformBufferStage a, UniformBufferStage b)
+	{
+		return (UniformBufferStage)((uint32_t)a | (uint32_t)b);
+	}
+
+	inline UniformBufferStage operator&(UniformBufferStage a, UniformBufferStage b)
+	{
+		return (UniformBufferStage)((uint32_t)a & (uint32_t)b);
+	}
+
+	inline UniformBufferStage& operator|=(UniformBufferStage& a, UniformBufferStage b)
+	{
+		a = a | b;
+		return a;
+	}
+
+	inline UniformBufferStage& operator&=(UniformBufferStage& a, UniformBufferStage b)
+	{
+		a = a & b;
+		return a;
+	}
+
+	struct UniformBufferBindingInfo
 	{
 		uint32_t bindingId{};
-		UniformBufferStage usageStage{};
+		UniformBufferStage usageStageFlags{};
+
+		//this variable describes this specific uniform buffers array size,
+		//example:
+		//layout(binding = 0) uniform Camera{} CAMERA[4], in this case you set arraySize to 4
+		uint32_t arraySize{};
+
+		//size of each array element
+		uint32_t elementSizeInBytes{};
+	};
+
+	struct UniformBufferDefinitionInfo
+	{
+		UniformBufferBindingInfo* pBindings;
+		uint32_t bindingCount;
+	};
+
+	struct UniformBufferUploadInfo
+	{
+		UniformBuffer uniformBuffer;
+		const void* data;
+		uint32_t offsetInBytes;
+		uint32_t sizeInBytes;
+	};
+
+	struct UniformStorageDefinitionInfo
+	{
+		UniformBuffer* pBuffers;
+		uint32_t bufferCount;
 	};
 
 	enum class RenderingApiType { None, Vulkan, Direct3D };
 
 	struct DrawCallInfo
 	{
-		Ref<Renderer> renderer;
 		Ref<VertBuffer>* pVertBuffers;
 		uint32_t bufferCount = 0;
 
@@ -283,7 +336,6 @@ namespace hf
 
 	struct EngineLifecycleCallbacks
 	{
-		void (*rendererPreloadCallback)(){};
 		void (*onResourcesLoad)(){};
 		void (*onStartCallback)(){};
 		void (*onUpdateCallback)(){};

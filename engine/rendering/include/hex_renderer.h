@@ -8,6 +8,7 @@ namespace hf::inter::rendering
 {
     struct ShaderCreationInfo
     {
+        UniformStorage uniformStorage{};
         uint32_t supportedAttribCount{};
         const BufferAttrib* pSupportedAttribs{};
 
@@ -25,7 +26,6 @@ namespace hf::inter::rendering
         void* platformInstance;
         void* platformDll;
         void* (*getFuncFromDll)(void* dll, const char* funcName);
-        void (*rendererPreloadCallback)(){};
     };
 
     struct VertBufferUploadInfo
@@ -52,7 +52,6 @@ namespace hf::inter::rendering
 
     struct DrawCallInfo
     {
-        void* renderer;
         void** pVertBuffers;
         uint32_t bufferCount;
 
@@ -66,18 +65,22 @@ namespace hf::inter::rendering
         void (*Load)(const RendererLoadInfo& info);
         void (*Unload)();
         void* (*CreateInstance)(const RendererInstanceCreationInfo& info);
-        void (*DestroyInstance)(void* rnInstance);
+        void (*DestroyInstance)(void* rn);
 
         //Shaders
         void* (*CreateShader)(const ShaderCreationInfo& info);
         void (*DestroyShader)(void* shader);
-        void (*BindShader)(const void* renderer, const void* shader, BufferAttrib attrib);
+        void (*BindShader)(const void* rn, const void* shader, BufferAttrib attrib);
 
         //buffer attribute
         uint32_t (*DefineVertBufferAttrib)(const BufferAttribDefinitionInfo& info, uint32_t fullStride);
 
         //uniform buffer
         uint32_t (*DefineUniformBuffer)(const UniformBufferDefinitionInfo& info);
+        void (*UploadUniformBuffer)(const void* rn, const UniformBufferUploadInfo& info);
+
+        //uniform storage
+        uint32_t (*DefineUniformStorage)(const UniformStorageDefinitionInfo& info);
 
         //vertex buffer
         void* (*CreateVertBuffer)(const VertBufferCreationInfo& info);
@@ -95,7 +98,7 @@ namespace hf::inter::rendering
         void (*StartFrame)(void* rn);
         void (*EndFrame)(void* rn);
         void (*RegisterFrameBufferChange)(void* rn, uvec2 newSize);
-        void (*Draw)(const DrawCallInfo& info);
+        void (*Draw)(void* rn, const DrawCallInfo& info);
         void (*WaitForRendering)();
     };
 }

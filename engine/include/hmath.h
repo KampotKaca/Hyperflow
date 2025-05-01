@@ -11,6 +11,7 @@
 #include "glm/mat4x4.hpp"
 #include "glm/common.hpp"
 #include "glm/fwd.hpp"
+#include "glm/gtx/transform.hpp"
 
 namespace hf
 {

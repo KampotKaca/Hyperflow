@@ -6,18 +6,6 @@
 
 namespace hf
 {
-    enum class PipelineBlendType { None, Alpha, Logical };
-    struct VkPipelineInfo
-    {
-        uint32_t stageCount = 0;
-        VkPipelineShaderStageCreateInfo* pStages = nullptr;
-        PipelineBlendType blendingMode = PipelineBlendType::None;
-        VkLogicOp blendingOp = VK_LOGIC_OP_XOR; //Setting will be used only if you use Logical Blending
-        BufferAttrib attrib{};
-        VkPipelineLayout layout{};
-        VkRenderPass renderPass{};
-    };
-
     struct VkShader
     {
         VkShader(const inter::rendering::ShaderCreationInfo& info);

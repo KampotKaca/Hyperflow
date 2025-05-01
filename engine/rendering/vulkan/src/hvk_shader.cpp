@@ -4,6 +4,18 @@
 
 namespace hf
 {
+    enum class PipelineBlendType { None, Alpha, Logical };
+    struct VkPipelineInfo
+    {
+        uint32_t stageCount = 0;
+        VkPipelineShaderStageCreateInfo* pStages = nullptr;
+        PipelineBlendType blendingMode = PipelineBlendType::None;
+        VkLogicOp blendingOp = VK_LOGIC_OP_XOR; //Setting will be used only if you use Logical Blending
+        BufferAttrib attrib{};
+        VkPipelineLayout layout{};
+        VkRenderPass renderPass{};
+    };
+
     static void CreateShaderModule(const char* code, uint32_t codeSize, VkShaderModule* result);
     static void CreatePipeline(const VkPipelineInfo& info, VkPipeline* pipeline);
 
@@ -30,13 +42,14 @@ namespace hf
             }
         };
 
+        auto& uniformStorage = GetStorage(info.uniformStorage);
         VkPipelineInfo pipelineCreationInfo
         {
             .stageCount = 2,
             .pStages = shaderStages,
             .blendingMode = PipelineBlendType::None,
             .blendingOp = VK_LOGIC_OP_XOR,
-            .layout = GRAPHICS_DATA.pipelineLayout,
+            .layout = uniformStorage.layout,
             .renderPass = GRAPHICS_DATA.renderPass,
         };
 

@@ -17,7 +17,7 @@ namespace hf
         uint32_t bindingId = 0;
     };
 
-    bool IsValid(BufferAttrib attrib);
+    bool IsValidAttrib(BufferAttrib attrib);
     const VkBufferAttrib& GetAttrib(BufferAttrib attrib);
 }
 

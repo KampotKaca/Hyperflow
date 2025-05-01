@@ -2,6 +2,8 @@
 #include <hyperflow.h>
 #include <sstream>
 
+#include "hrenderer.h"
+
 namespace app
 {
 	struct Vertex
@@ -31,16 +33,20 @@ namespace app
 	hf::Ref<hf::VertBuffer> vertBuffer;
 	hf::Ref<hf::IndexBuffer> indexBuffer;
 	hf::BufferAttrib bufferAttrib;
+	hf::UniformBuffer cameraBuffer;
+	hf::UniformStorage uniformStorage;
 
 	struct Camera
 	{
-		hf::mat4 model;
-		hf::mat4 view;
-		hf::mat4 proj;
-		hf::mat4 viewProj;
+		hf::mat4 model{};
+		hf::mat4 view{};
+		hf::mat4 proj{};
+		hf::mat4 viewProj{};
 	};
 
-	void Application::RendererPreload()
+	Camera camera;
+
+	void Application::LoadResources()
 	{
 		hf::BufferAttribFormat formats[]
 		{
@@ -48,18 +54,39 @@ namespace app
 			{ .type = hf::BufferDataType::F32, .size = 3, },
 		};
 
-		hf::BufferAttribDefinitionInfo bufferAttribCreateInfo
+		hf::BufferAttribDefinitionInfo bufferAttribDefinitionInfo
 		{
 			.bindingId = 0,
 			.formatCount = 2,
 			.pFormats = formats
 		};
 
-		bufferAttrib = hf::bufferattrib::Define(bufferAttribCreateInfo);
-	}
+		bufferAttrib = hf::bufferattrib::Define(bufferAttribDefinitionInfo);
 
-	void Application::LoadResources()
-	{
+		hf::UniformBufferBindingInfo cameraBufferBindingInfo
+		{
+			.bindingId = 0,
+			.usageStageFlags = hf::UniformBufferStage::Vertex | hf::UniformBufferStage::Fragment,
+			.arraySize = 1,
+			.elementSizeInBytes = sizeof(Camera)
+		};
+
+		hf::UniformBufferDefinitionInfo cameraBufferDefinitionInfo
+		{
+			.pBindings = &cameraBufferBindingInfo,
+			.bindingCount = 1,
+		};
+
+		cameraBuffer = hf::uniformbuffer::Define(cameraBufferDefinitionInfo);
+
+		hf::UniformStorageDefinitionInfo uniformStorageDefinitionInfo
+		{
+			.pBuffers = &cameraBuffer,
+			.bufferCount = 1,
+		};
+
+		uniformStorage = hf::uniformstorage::Define(uniformStorageDefinitionInfo);
+
 		hf::VertBufferCreationInfo vertBufferInfo
 		{
 			.bufferAttrib = bufferAttrib,
@@ -82,6 +109,7 @@ namespace app
 
 		hf::ShaderCreationInfo shaderInfo
 		{
+			.uniformStorage = uniformStorage,
 			.supportedAttribCount = 1,
 			.pSupportedAttribs = &bufferAttrib,
 			.vertexShaderLoc = "shaders/vulkan/default.vert.spv",
@@ -156,16 +184,30 @@ namespace app
 
 	void Application::OnRender(const hf::Ref<hf::Renderer>& rn)
 	{
+		camera.model = glm::rotate(hf::mat4(1.0f), (float)hf::time::GetTimePassed() * glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+		camera.view = glm::lookAt(hf::vec3(2.0f, 2.0f, 2.0f), hf::vec3(0.0f, 0.0f, 0.0f), hf::vec3(0.0f, 0.0f, 1.0f));
+		camera.proj = glm::perspective(glm::radians(45.0f), rn->size.x / (float)rn->size.y, 0.1f, 10.0f);
+		camera.proj[1][1] *= -1;
+		camera.viewProj = camera.proj * camera.view;
+
+		hf::UniformBufferUploadInfo cameraBufferUploadInfo
+		{
+			.uniformBuffer = cameraBuffer,
+			.data = &camera,
+			.offsetInBytes = 0,
+			.sizeInBytes = sizeof(Camera)
+		};;
+
+		hf::uniformbuffer::Upload(rn, cameraBufferUploadInfo);
 		hf::shader::Bind(rn, shader, bufferAttrib);
 		hf::DrawCallInfo drawCallInfo
 		{
-			.renderer = rn,
 			.pVertBuffers = &vertBuffer,
 			.bufferCount = 1,
 			.indexBuffer = indexBuffer,
 			.instanceCount = 1
 		};
 
-		hf::renderer::Draw(drawCallInfo);
+		hf::renderer::Draw(rn, drawCallInfo);
 	}
 }

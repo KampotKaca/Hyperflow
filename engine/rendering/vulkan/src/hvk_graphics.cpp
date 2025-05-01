@@ -208,15 +208,6 @@ namespace hf
         };
         CreateRenderPass(renderPassInfo, &GRAPHICS_DATA.renderPass);
 
-        if (GRAPHICS_DATA.rendererPreloadCallback) GRAPHICS_DATA.rendererPreloadCallback();
-        std::vector<VkDescriptorSetLayout> setLayoutBindings(GRAPHICS_DATA.uniformBuffers.size());
-        for (uint32_t i = 0; i < GRAPHICS_DATA.uniformBuffers.size(); ++i) setLayoutBindings[i] = GRAPHICS_DATA.uniformBuffers[i].layout;
-        VkPipelineLayoutCreationInfo pipelineLayoutInfo
-        {
-            .pSetLayouts = setLayoutBindings.data(),
-            .setLayoutCount = (uint32_t)setLayoutBindings.size()
-        };
-        CreatePipelineLayout(pipelineLayoutInfo, &GRAPHICS_DATA.pipelineLayout);
         CreateCommandPool(*GRAPHICS_DATA.defaultDevice, GRAPHICS_DATA.defaultDevice->familyIndices.transferFamily.value(), &GRAPHICS_DATA.transferPool);
         CreateCommandBuffers(*GRAPHICS_DATA.defaultDevice, &GRAPHICS_DATA.transferPool, 1);
     }
@@ -235,7 +226,6 @@ namespace hf
         vmaDestroyAllocator(GRAPHICS_DATA.allocator);
         DestroyCommandPool(*GRAPHICS_DATA.defaultDevice, GRAPHICS_DATA.transferPool);
         DestroyRenderPass(&GRAPHICS_DATA.renderPass);
-        DestroyPipelineLayout(&GRAPHICS_DATA.pipelineLayout);
 
         for (auto& device : GRAPHICS_DATA.suitableDevices)
             DestroyLogicalDevice(device.logicalDevice);

@@ -32,7 +32,7 @@ namespace hf
             return MakeRef<Renderer>(size);
         }
 
-        void Destroy(Ref<Renderer> rn)
+        void Destroy(const Ref<Renderer>& rn)
         {
             inter::rendering::DestroyRenderer(rn.get());
         }
@@ -56,31 +56,30 @@ namespace hf
             inter::rendering::LoadApi(targetApi);
         }
 
-        void Resize(Ref<Renderer> rn, uvec2 size)
+        void Resize(const Ref<Renderer>& rn, uvec2 size)
         {
             if (rn->windowHandle != nullptr) throw GENERIC_EXCEPT("[Hyperflow]", "Cannot resize renderer connected to the window");
             rn->size = size;
             inter::HF.renderingApi.api.RegisterFrameBufferChange(rn->handle, size);
         }
 
-        void Draw(const DrawCallInfo& info)
+        void Draw(const Ref<Renderer>& rn, const DrawCallInfo& info)
         {
             if (info.bufferCount > MAX_NUM_BUFFER_CACHE)
                 throw GENERIC_EXCEPT("[Hyperflow]", "Trying to draw too many buffers at once, max is %i", MAX_NUM_BUFFER_CACHE);
 
             for (uint32_t i = 0; i < info.bufferCount; i++)
-                info.renderer->vertBufferCache[i] = info.pVertBuffers[i]->handle;
+                rn->vertBufferCache[i] = info.pVertBuffers[i]->handle;
 
             inter::rendering::DrawCallInfo drawInfo
             {
-                .renderer = info.renderer->handle,
-                .pVertBuffers = info.renderer->vertBufferCache,
+                .pVertBuffers = rn->vertBufferCache,
                 .bufferCount = info.bufferCount,
                 .indexBuffer = info.indexBuffer ? info.indexBuffer->handle : nullptr,
                 .instanceCount = info.instanceCount
             };
 
-            inter::HF.renderingApi.api.Draw(drawInfo);
+            inter::HF.renderingApi.api.Draw(rn->handle, drawInfo);
         }
 
         void UnloadAllResources()
@@ -161,7 +160,6 @@ namespace hf
                     .applicationTitle = HF.appTitle.c_str(),
                     .platformInstance = platform::GetPlatformInstance(),
                     .getFuncFromDll = platform::GetFuncPtr,
-                    .rendererPreloadCallback = HF.lifecycleCallbacks.rendererPreloadCallback
                 };
 
                 if (HF.renderingApi.type == RenderingApiType::Vulkan)

@@ -108,18 +108,19 @@ target_compile_definitions(${PROJECT_NAME}
         BUILDING_HYPERFLOW
 )
 
-# Link winmm only on Windows
 if (WINDOWS)
     target_link_libraries(${PROJECT_NAME} PRIVATE win)
     target_compile_definitions("${PROJECT_NAME}" PUBLIC VK_DLL="vkwin")
 elseif (LINUX)
     target_link_libraries(${PROJECT_NAME} PRIVATE lnx)
 
-    if(X11)
+    if(X11_FOUND)
         target_link_libraries(${PROJECT_NAME} PRIVATE lnxx11)
         target_compile_definitions("${PROJECT_NAME}" PUBLIC VK_DLL="vkx11")
     elseif (WAYLAND)
-
+        target_compile_definitions("${PROJECT_NAME}" PUBLIC VK_DLL="vkwayland")
+    else ()
+        message(FATAL_ERROR "Unsupported display server detected")
     endif ()
 endif ()
 
