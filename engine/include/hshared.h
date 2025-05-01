@@ -152,6 +152,7 @@ namespace hf
 	struct VertBuffer;
 	struct IndexBuffer;
 	typedef uint32_t BufferAttrib;
+	typedef uint32_t UniformBuffer;
 
 	enum class BufferDataType { U8, I8, U16, I16, U32, I32, U64, I64, F16, F32, F64, Count };
 	enum class BufferMemoryType { Static, WriteOnly, ReadWrite, Count };
@@ -211,6 +212,11 @@ namespace hf
 		const BufferAttrib* pSupportedAttribs{};
 		const std::string& vertexShaderLoc{};
 		const std::string& fragmentShaderLoc{};
+	};
+
+	struct UniformBufferCreateInfo
+	{
+
 	};
 
 	enum class RenderingApiType { None, Vulkan, Direct3D };

@@ -27,6 +27,16 @@ namespace hf
     typedef glm::uvec4 uvec4;
 
     typedef glm::quat quaternion;
+
+    typedef glm::mat2   mat2;
+    typedef glm::mat2x3 mat2x3;
+    typedef glm::mat2x4 mat2x4;
+    typedef glm::mat3x2 mat3x2;
+    typedef glm::mat3   mat3;
+    typedef glm::mat3x4 mat3x4;
+    typedef glm::mat4x2 mat4x2;
+    typedef glm::mat4x3 mat4x3;
+    typedef glm::mat4   mat4;
 }
 
 #endif //HMATH_H

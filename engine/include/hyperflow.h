@@ -137,6 +137,11 @@ namespace hf
 		void Upload(const IndexBufferUploadInfo& info);
 	}
 
+	namespace uniformbuffer
+	{
+		UniformBuffer Create(const UniformBufferCreateInfo& info);
+	}
+
 	namespace utils
 	{
 		ivec3 ConvertVersion(const char* version);

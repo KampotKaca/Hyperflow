@@ -45,6 +45,14 @@ namespace app
 		.pFormats = formats
 	};
 
+	struct Camera
+	{
+		hf::mat4 model;
+		hf::mat4 view;
+		hf::mat4 proj;
+		hf::mat4 viewProj;
+	};
+
 	void Application::LoadResources()
 	{
 		bufferAttrib = hf::vertbuffer::CreateAttrib(bufferAttribCreateInfo);
