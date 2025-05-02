@@ -37,7 +37,10 @@ namespace app
 
 	struct Camera
 	{
-		hf::vec4 color{};
+		hf::mat4 model{};
+		hf::mat4 view{};
+		hf::mat4 proj{};
+		hf::mat4 viewProj{};
 	};
 
 	Camera camera;
@@ -182,14 +185,12 @@ namespace app
 
 	void Application::OnRender(const hf::Ref<hf::Renderer>& rn)
 	{
-		// auto size = hf::renderer::GetSize(rn);
-		// camera.model = glm::rotate(hf::mat4(1.0f), (float)hf::time::GetTimePassed() * glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
-		// camera.view = glm::lookAt(hf::vec3(2.0f, 2.0f, 2.0f), hf::vec3(0.0f, 0.0f, 0.0f), hf::vec3(0.0f, 0.0f, 1.0f));
-		// camera.proj = glm::perspective(glm::radians(45.0f), (float)size.x / (float)size.y, 0.1f, 10.0f);
-		// camera.proj[1][1] *= -1;
-		// camera.viewProj = camera.proj * camera.view;
-
-		camera.color = { 0.0f, 0.0f, 0.0f, (glm::sin(hf::time::GetTimePassed()) + 1) * .5f };
+		auto size = hf::renderer::GetSize(rn);
+		camera.model = glm::rotate(hf::mat4(1.0f), (float)hf::time::GetTimePassed() * glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+		camera.view = glm::lookAt(hf::vec3(2.0f, 2.0f, 2.0f), hf::vec3(0.0f, 0.0f, 0.0f), hf::vec3(0.0f, 0.0f, 1.0f));
+		camera.proj = glm::perspective(glm::radians(45.0f), (float)size.x / (float)size.y, 0.1f, 10.0f);
+		camera.proj[1][1] *= -1;
+		camera.viewProj = camera.proj * camera.view;
 
 		hf::uniformstorage::Bind(rn, uniformStorage);
 

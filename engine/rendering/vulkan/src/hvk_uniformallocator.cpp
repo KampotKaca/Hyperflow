@@ -5,23 +5,25 @@ namespace hf
 {
     VkUniformAllocator::VkUniformAllocator(const UniformAllocatorDefinitionInfo& info)
     {
+        uint32_t descriptorCount = info.bufferCount * FRAMES_IN_FLIGHT;
         VkDescriptorPoolSize poolSize
         {
             .type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
-            .descriptorCount = FRAMES_IN_FLIGHT,
+            .descriptorCount = descriptorCount,
         };
 
         VkDescriptorPoolCreateInfo poolInfo
         {
             .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO,
-            .maxSets = FRAMES_IN_FLIGHT,
+            .maxSets = descriptorCount,
             .poolSizeCount = 1,
             .pPoolSizes = &poolSize,
         };
 
-        VK_HANDLE_EXCEPT(vkCreateDescriptorPool(GRAPHICS_DATA.defaultDevice->logicalDevice.device, &poolInfo, nullptr, &pool));
+        auto& device = GRAPHICS_DATA.defaultDevice->logicalDevice.device;
+        VK_HANDLE_EXCEPT(vkCreateDescriptorPool(device, &poolInfo, nullptr, &pool));
 
-        std::vector<VkDescriptorSetLayout> layouts(info.bufferCount * FRAMES_IN_FLIGHT);
+        std::vector<VkDescriptorSetLayout> layouts(descriptorCount);
         for (uint32_t i = 0; i < info.bufferCount; i++)
         {
             auto& buffer = GetUniform(info.pBuffers[i]);
@@ -38,7 +40,7 @@ namespace hf
         };
 
         std::vector<VkDescriptorSet> descriptorSets(layouts.size());
-        VK_HANDLE_EXCEPT(vkAllocateDescriptorSets(GRAPHICS_DATA.defaultDevice->logicalDevice.device, &allocInfo, descriptorSets.data()));
+        VK_HANDLE_EXCEPT(vkAllocateDescriptorSets(device, &allocInfo, descriptorSets.data()));
         for (uint32_t i = 0; i < info.bufferCount; i++)
             SetupUniform(info.pBuffers[i], &descriptorSets[i * FRAMES_IN_FLIGHT]);
     }
