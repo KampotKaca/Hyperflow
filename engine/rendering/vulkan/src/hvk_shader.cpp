@@ -21,6 +21,7 @@ namespace hf
 
     VkShader::VkShader(const inter::rendering::ShaderCreationInfo& info)
     {
+        uniformStorage = info.uniformStorage;
         using namespace inter;
         VkShaderModule vertModule{}, fragModule{};
         CreateShaderModule(info.vCode, info.vCodeSize, &vertModule);
@@ -138,7 +139,7 @@ namespace hf
             .rasterizerDiscardEnable = VK_FALSE,
             .polygonMode = VK_POLYGON_MODE_FILL,
             .cullMode = VK_CULL_MODE_BACK_BIT,
-            .frontFace = VK_FRONT_FACE_CLOCKWISE,
+            .frontFace = VK_FRONT_FACE_COUNTER_CLOCKWISE,
             .depthBiasEnable = VK_FALSE,
             .depthBiasConstantFactor = 0.0f,
             .depthBiasClamp = 0.0f,
@@ -217,8 +218,9 @@ namespace hf
             VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, pipeline));
     }
 
-    void BindShader(const VKRenderer* rn, VkShader* shader, BufferAttrib attrib)
+    void BindShader(VKRenderer* rn, VkShader* shader, BufferAttrib attrib)
     {
+        if (rn->currentLayout != GetStorage(shader->uniformStorage).layout) throw GENERIC_EXCEPT("[Hyperflow]", "Bind correct uniform storage first");
         vkCmdBindPipeline(rn->currentCommand, VK_PIPELINE_BIND_POINT_GRAPHICS, shader->pipelines[attrib]);
     }
 }

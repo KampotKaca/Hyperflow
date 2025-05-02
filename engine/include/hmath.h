@@ -11,7 +11,8 @@
 #include "glm/mat4x4.hpp"
 #include "glm/common.hpp"
 #include "glm/fwd.hpp"
-#include "glm/gtx/transform.hpp"
+#include "glm/ext/matrix_clip_space.hpp"
+#include "glm/ext/matrix_transform.hpp"
 
 namespace hf
 {

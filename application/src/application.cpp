@@ -2,8 +2,6 @@
 #include <hyperflow.h>
 #include <sstream>
 
-#include "hrenderer.h"
-
 namespace app
 {
 	struct Vertex
@@ -35,13 +33,11 @@ namespace app
 	hf::BufferAttrib bufferAttrib;
 	hf::UniformBuffer cameraBuffer;
 	hf::UniformStorage uniformStorage;
+	hf::UniformAllocator uniformAllocator;
 
 	struct Camera
 	{
-		hf::mat4 model{};
-		hf::mat4 view{};
-		hf::mat4 proj{};
-		hf::mat4 viewProj{};
+		hf::vec4 color{};
 	};
 
 	Camera camera;
@@ -63,7 +59,7 @@ namespace app
 
 		bufferAttrib = hf::bufferattrib::Define(bufferAttribDefinitionInfo);
 
-		hf::UniformBufferBindingInfo cameraBufferBindingInfo
+		hf::UniformBufferDefinitionInfo cameraBufferDefinitionInfo
 		{
 			.bindingId = 0,
 			.usageStageFlags = hf::UniformBufferStage::Vertex | hf::UniformBufferStage::Fragment,
@@ -71,13 +67,15 @@ namespace app
 			.elementSizeInBytes = sizeof(Camera)
 		};
 
-		hf::UniformBufferDefinitionInfo cameraBufferDefinitionInfo
+		cameraBuffer = hf::uniformbuffer::Define(cameraBufferDefinitionInfo);
+
+		hf::UniformAllocatorDefinitionInfo uniformAllocatorDefinitionInfo
 		{
-			.pBindings = &cameraBufferBindingInfo,
-			.bindingCount = 1,
+			.pBuffers = &cameraBuffer,
+			.bufferCount = 1,
 		};
 
-		cameraBuffer = hf::uniformbuffer::Define(cameraBufferDefinitionInfo);
+		uniformAllocator = hf::uniformallocator::Define(uniformAllocatorDefinitionInfo);
 
 		hf::UniformStorageDefinitionInfo uniformStorageDefinitionInfo
 		{
@@ -184,11 +182,16 @@ namespace app
 
 	void Application::OnRender(const hf::Ref<hf::Renderer>& rn)
 	{
-		camera.model = glm::rotate(hf::mat4(1.0f), (float)hf::time::GetTimePassed() * glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
-		camera.view = glm::lookAt(hf::vec3(2.0f, 2.0f, 2.0f), hf::vec3(0.0f, 0.0f, 0.0f), hf::vec3(0.0f, 0.0f, 1.0f));
-		camera.proj = glm::perspective(glm::radians(45.0f), rn->size.x / (float)rn->size.y, 0.1f, 10.0f);
-		camera.proj[1][1] *= -1;
-		camera.viewProj = camera.proj * camera.view;
+		// auto size = hf::renderer::GetSize(rn);
+		// camera.model = glm::rotate(hf::mat4(1.0f), (float)hf::time::GetTimePassed() * glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+		// camera.view = glm::lookAt(hf::vec3(2.0f, 2.0f, 2.0f), hf::vec3(0.0f, 0.0f, 0.0f), hf::vec3(0.0f, 0.0f, 1.0f));
+		// camera.proj = glm::perspective(glm::radians(45.0f), (float)size.x / (float)size.y, 0.1f, 10.0f);
+		// camera.proj[1][1] *= -1;
+		// camera.viewProj = camera.proj * camera.view;
+
+		camera.color = { 0.0f, 0.0f, 0.0f, (glm::sin(hf::time::GetTimePassed()) + 1) * .5f };
+
+		hf::uniformstorage::Bind(rn, uniformStorage);
 
 		hf::UniformBufferUploadInfo cameraBufferUploadInfo
 		{
@@ -196,10 +199,12 @@ namespace app
 			.data = &camera,
 			.offsetInBytes = 0,
 			.sizeInBytes = sizeof(Camera)
-		};;
+		};
 
 		hf::uniformbuffer::Upload(rn, cameraBufferUploadInfo);
+
 		hf::shader::Bind(rn, shader, bufferAttrib);
+
 		hf::DrawCallInfo drawCallInfo
 		{
 			.pVertBuffers = &vertBuffer,

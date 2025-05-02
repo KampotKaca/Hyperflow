@@ -81,6 +81,10 @@ namespace hf::inter::rendering
 
         //uniform storage
         uint32_t (*DefineUniformStorage)(const UniformStorageDefinitionInfo& info);
+        void (*BindUniformStorage)(void* rn, UniformStorage);
+
+        //uniform allocator
+        uint32_t (*DefineUniformAllocator)(const UniformAllocatorDefinitionInfo& info);
 
         //vertex buffer
         void* (*CreateVertBuffer)(const VertBufferCreationInfo& info);

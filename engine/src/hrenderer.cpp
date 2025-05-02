@@ -56,6 +56,9 @@ namespace hf
             inter::rendering::LoadApi(targetApi);
         }
 
+        RenderingApiType GetApiType() { return inter::HF.renderingApi.type; }
+        uvec2 GetSize(const Ref<Renderer>& rn) { return rn->size; }
+
         void Resize(const Ref<Renderer>& rn, uvec2 size)
         {
             if (rn->windowHandle != nullptr) throw GENERIC_EXCEPT("[Hyperflow]", "Cannot resize renderer connected to the window");

@@ -22,5 +22,18 @@ namespace hf
         {
             return (UniformStorage)inter::HF.renderingApi.api.DefineUniformStorage(info);
         }
+
+        void Bind(const Ref<Renderer>& rn, UniformStorage storage)
+        {
+            inter::HF.renderingApi.api.BindUniformStorage(rn->handle, storage);
+        }
+    }
+
+    namespace uniformallocator
+    {
+        UniformAllocator Define(const UniformAllocatorDefinitionInfo& info)
+        {
+            return (UniformAllocator)inter::HF.renderingApi.api.DefineUniformAllocator(info);
+        }
     }
 }

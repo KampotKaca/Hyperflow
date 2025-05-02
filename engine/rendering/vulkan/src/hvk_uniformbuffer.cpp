@@ -6,36 +6,30 @@ namespace hf
 {
     VkUniformBuffer::VkUniformBuffer(const UniformBufferDefinitionInfo& info)
     {
-        std::vector<VkDescriptorSetLayoutBinding> bindings(info.bindingCount);
-        for (uint32_t i = 0; i < info.bindingCount; i++)
+        bindingIndex = info.bindingId;
+        elementSize = info.elementSizeInBytes;
+        elementCount = info.arraySize;
+
+        VkDescriptorSetLayoutBinding layoutBinding
         {
-            auto bindingInfo = info.pBindings[i];
-            bindings[i] =
-            {
-                .binding = bindingInfo.bindingId,
-                .descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
-                .descriptorCount = bindingInfo.arraySize,
-                .stageFlags = (uint32_t)bindingInfo.usageStageFlags,
-                .pImmutableSamplers = nullptr,
-            };
-        }
+            .binding = info.bindingId,
+            .descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
+            .descriptorCount = info.arraySize,
+            .stageFlags = (uint32_t)info.usageStageFlags,
+            .pImmutableSamplers = nullptr,
+        };
 
         VkDescriptorSetLayoutCreateInfo uboLayoutInfo
         {
             .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO,
-            .bindingCount = (uint32_t)bindings.size(),
-            .pBindings = bindings.data(),
+            .bindingCount = 1,
+            .pBindings = &layoutBinding,
         };
 
         VK_HANDLE_EXCEPT(vkCreateDescriptorSetLayout(GRAPHICS_DATA.defaultDevice->logicalDevice.device,
             &uboLayoutInfo, nullptr, &layout));
 
-        uint32_t allocationSize = 0;
-        for (uint32_t i = 0; i < info.bindingCount; i++)
-        {
-            auto& binding = info.pBindings[i];
-            allocationSize += binding.elementSizeInBytes * binding.arraySize;
-        }
+        uint32_t allocationSize = elementSize * elementCount;
 
         for (uint32_t i = 0; i < FRAMES_IN_FLIGHT; i++)
         {
@@ -75,9 +69,46 @@ namespace hf
         return GRAPHICS_DATA.uniformBuffers[buffer - 1];
     }
 
+    void SetupUniform(UniformBuffer buffer, const VkDescriptorSet* pDescriptors)
+    {
+        if (!IsValidUniform(buffer)) throw GENERIC_EXCEPT("[Hyperflow]", "Invalid uniform buffer");
+        auto& uniform = GRAPHICS_DATA.uniformBuffers[buffer - 1];
+        memcpy(uniform.descriptorSets, pDescriptors, sizeof(VkDescriptorSet) * FRAMES_IN_FLIGHT);
+
+        for (uint32_t i = 0; i < FRAMES_IN_FLIGHT; i++)
+        {
+            VkDescriptorBufferInfo bufferInfo
+            {
+                .buffer = uniform.buffers[i],
+                .offset = 0,
+                .range = uniform.elementSize * uniform.elementCount,
+            };
+
+            VkWriteDescriptorSet descriptorWrite
+            {
+                .sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
+                .dstSet = uniform.descriptorSets[i],
+                .dstBinding = uniform.bindingIndex,
+                .dstArrayElement = 0,
+                .descriptorCount = 1,
+                .descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
+                .pImageInfo = nullptr,
+                .pBufferInfo = &bufferInfo,
+                .pTexelBufferView = nullptr,
+            };
+
+            vkUpdateDescriptorSets(GRAPHICS_DATA.defaultDevice->logicalDevice.device,
+                1, &descriptorWrite, 0, nullptr);
+        }
+    }
+
     void UploadUniform(const VKRenderer* rn, UniformBuffer buffer, const void* data, uint32_t offset, uint32_t size)
     {
+        auto currentFrame = rn->currentFrame;
         auto& uniform = GetUniform(buffer);
-        memcpy(uniform.memoryMappings[rn->currentFrame], (uint8_t*)data + offset, size);
+        memcpy((uint8_t*)uniform.memoryMappings[currentFrame] + offset, data, size);
+
+        vkCmdBindDescriptorSets(rn->currentCommand, VK_PIPELINE_BIND_POINT_GRAPHICS, rn->currentLayout,
+            0, 1, &uniform.descriptorSets[currentFrame], 0, nullptr);
     }
 }

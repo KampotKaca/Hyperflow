@@ -24,6 +24,8 @@ namespace hf
         VkBuffer vertBufferCache[MAX_NUM_BUFFER_CACHE]{};
         VkDeviceSize drawOffsets[MAX_NUM_BUFFER_CACHE]{};
 
+        VkPipelineLayout currentLayout;
+
         std::vector<VkFrame> frames{};
         uint32_t currentFrame = 0;
         uint32_t imageIndex{};
@@ -68,7 +70,9 @@ namespace hf
     void EndFrame(VKRenderer* rn);
     void RegisterFrameBufferChange(VKRenderer* rn, uvec2 newSize);
     void Draw(const VkDrawInfo& info);
+
     void UploadUniform(const VKRenderer* rn, UniformBuffer buffer, const void* data, uint32_t offset, uint32_t size);
+    void BindUniformStorage(VKRenderer* rn, UniformStorage storage);
 }
 
 #endif //HVK_RENDERER_H

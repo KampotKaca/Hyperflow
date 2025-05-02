@@ -154,6 +154,7 @@ namespace hf
 	typedef uint32_t BufferAttrib;
 	typedef uint32_t UniformBuffer;
 	typedef uint32_t UniformStorage;
+	typedef uint32_t UniformAllocator;
 
 	enum class BufferDataType { U8, I8, U16, I16, U32, I32, U64, I64, F16, F32, F64, Count };
 	enum class BufferMemoryType { Static, WriteOnly, ReadWrite, Count };
@@ -249,7 +250,7 @@ namespace hf
 		return a;
 	}
 
-	struct UniformBufferBindingInfo
+	struct UniformBufferDefinitionInfo
 	{
 		uint32_t bindingId{};
 		UniformBufferStage usageStageFlags{};
@@ -263,12 +264,6 @@ namespace hf
 		uint32_t elementSizeInBytes{};
 	};
 
-	struct UniformBufferDefinitionInfo
-	{
-		UniformBufferBindingInfo* pBindings;
-		uint32_t bindingCount;
-	};
-
 	struct UniformBufferUploadInfo
 	{
 		UniformBuffer uniformBuffer;
@@ -278,6 +273,12 @@ namespace hf
 	};
 
 	struct UniformStorageDefinitionInfo
+	{
+		UniformBuffer* pBuffers;
+		uint32_t bufferCount;
+	};
+
+	struct UniformAllocatorDefinitionInfo
 	{
 		UniformBuffer* pBuffers;
 		uint32_t bufferCount;

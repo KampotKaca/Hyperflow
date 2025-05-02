@@ -37,9 +37,34 @@ namespace hf::inter::rendering
 
     }
 
-    uint32_t CreateBufferAttrib(const BufferAttribDefinitionInfo& info, uint32_t fullStride)
+    uint32_t DefineVertBufferAttrib(const BufferAttribDefinitionInfo& info, uint32_t fullStride)
     {
         return 1;
+    }
+
+    uint32_t DefineUniformBuffer(const UniformBufferDefinitionInfo& info)
+    {
+        return 1;
+    }
+
+    void UploadUniformBuffer(const void* rn, const UniformBufferUploadInfo& info)
+    {
+
+    }
+
+    uint32_t DefineUniformStorage(const UniformStorageDefinitionInfo& info)
+    {
+        return 1;
+    }
+
+    uint32_t DefineUniformAllocator(const UniformAllocatorDefinitionInfo& info)
+    {
+        return 1;
+    }
+
+    void BindUniformStorage(void* rn, UniformStorage)
+    {
+
     }
 
     void* CreateVertBuffer(const VertBufferCreationInfo& info)
@@ -101,9 +126,9 @@ namespace hf::inter::rendering
         RegisterFrameBufferChange(renderer, newSize);
     }
 
-    void Draw(const DrawCallInfo& info)
+    void Draw(void* rn, const DrawCallInfo& info)
     {
-        auto renderer = (D3DRenderer*)info.renderer;
+        auto renderer = (D3DRenderer*)rn;
         Draw(renderer);
     }
 
@@ -116,30 +141,51 @@ namespace hf::inter::rendering
     {
         static RendererAPI api =
         {
-            .Load = &Load,
-            .Unload = &Unload,
-            .CreateInstance = &CreateInstance,
-            .DestroyInstance = &DestroyInstance,
+            //loading
+            .Load                       = &Load,
+            .Unload                     = &Unload,
+            .CreateInstance             = &CreateInstance,
+            .DestroyInstance            = &DestroyInstance,
 
-            .CreateShader = &CreateShader,
-            .DestroyShader = &DestroyShader,
-            .BindShader = &BindShader,
+            //shader
+            .CreateShader               = &CreateShader,
+            .DestroyShader              = &DestroyShader,
+            .BindShader                 = &BindShader,
 
-            .DefineVertBufferAttrib = &CreateBufferAttrib,
-            .CreateVertBuffer = &CreateVertBuffer,
-            .DestroyVertBuffer = &DestroyVertBuffer,
-            .UploadVertBuffer = &UploadVertBuffer,
-            .CreateIndexBuffer = &CreateIndexBuffer,
-            .DestroyIndexBuffer = &DestroyIndexBuffer,
-            .UploadIndexBuffer = &UploadIndexBuffer,
+            //buffer attribute
+            .DefineVertBufferAttrib     = &DefineVertBufferAttrib,
 
+            //uniform buffer
+            .DefineUniformBuffer        = &DefineUniformBuffer,
+            .UploadUniformBuffer        = &UploadUniformBuffer,
+
+            //uniform storage
+            .DefineUniformStorage       = &DefineUniformStorage,
+            .BindUniformStorage         = &BindUniformStorage,
+
+            //uniform allocator
+            .DefineUniformAllocator     = &DefineUniformAllocator,
+
+            //vertex buffer
+            .CreateVertBuffer           = &CreateVertBuffer,
+            .DestroyVertBuffer          = &DestroyVertBuffer,
+            .UploadVertBuffer           = &UploadVertBuffer,
+
+            //index buffer
+            .CreateIndexBuffer          = &CreateIndexBuffer,
+            .DestroyIndexBuffer         = &DestroyIndexBuffer,
+            .UploadIndexBuffer          = &UploadIndexBuffer,
+
+            //buffer operations
             .SubmitStagedCopyOperations = &SubmitStagedCopyOperations,
-            .GetReadyForRendering = &GetReadyForRendering,
-            .StartFrame = &StartFrame,
-            .EndFrame = &EndFrame,
-            .RegisterFrameBufferChange = &RegisterFrameBufferChange,
-            .Draw = &Draw,
-            .WaitForRendering = &WaitForRendering
+
+            //rendering
+            .GetReadyForRendering       = &GetReadyForRendering,
+            .StartFrame                 = &StartFrame,
+            .EndFrame                   = &EndFrame,
+            .RegisterFrameBufferChange  = &RegisterFrameBufferChange,
+            .Draw                       = &Draw,
+            .WaitForRendering           = &WaitForRendering
         };
         return &api;
     }

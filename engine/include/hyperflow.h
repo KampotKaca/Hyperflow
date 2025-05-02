@@ -98,6 +98,8 @@ namespace hf
 
 		//Destroy every renderer which is not connected to the window, before you try to change api
 		void ChangeApi(RenderingApiType targetApi);
+		RenderingApiType GetApiType();
+		uvec2 GetSize(const Ref<Renderer>& rn);
 
 		void Resize(const Ref<Renderer>& rn, uvec2 size);
 		void Draw(const Ref<Renderer>& rn, const DrawCallInfo& info);
@@ -130,6 +132,12 @@ namespace hf
 	namespace uniformstorage
 	{
 		UniformStorage Define(const UniformStorageDefinitionInfo& info);
+		void Bind(const Ref<Renderer>& rn, UniformStorage storage);
+	}
+
+	namespace uniformallocator
+	{
+		UniformAllocator Define(const UniformAllocatorDefinitionInfo& info);
 	}
 
 	namespace vertbuffer

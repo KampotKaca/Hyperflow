@@ -1,6 +1,7 @@
 #include "hvk_uniformstorage.h"
 #include "hvk_uniformbuffer.h"
 #include "hvk_graphics.h"
+#include "hvk_renderer.h"
 
 namespace hf
 {
@@ -13,9 +14,10 @@ namespace hf
             .pPushConstantRanges = nullptr,
         };
 
+        std::vector<VkDescriptorSetLayout> layouts(info.bufferCount);
+
         if (info.bufferCount > 0)
         {
-            std::vector<VkDescriptorSetLayout> layouts(info.bufferCount);
             for (uint32_t i = 0; i < info.bufferCount; i++)
             {
                 auto& buffer = GetUniform(info.pBuffers[i]);
@@ -49,5 +51,10 @@ namespace hf
     {
         if (!IsValidStorage(storage)) throw GENERIC_EXCEPT("[Hyperflow]", "Invalid uniform storage");
         return GRAPHICS_DATA.uniformStorages[storage - 1];
+    }
+
+    void BindUniformStorage(VKRenderer* rn, UniformStorage storage)
+    {
+        rn->currentLayout = GetStorage(storage).layout;
     }
 }

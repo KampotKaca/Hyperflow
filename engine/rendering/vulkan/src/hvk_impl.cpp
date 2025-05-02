@@ -72,6 +72,17 @@ namespace hf::inter::rendering
         return GRAPHICS_DATA.uniformStorages.size();
     }
 
+    void BindUniformStorage(void* rn, UniformStorage storage)
+    {
+        hf::BindUniformStorage((VKRenderer*)rn, storage);
+    }
+
+    uint32_t DefineUniformAllocator(const UniformAllocatorDefinitionInfo& info)
+    {
+        GRAPHICS_DATA.uniformAllocators.emplace_back(info);
+        return GRAPHICS_DATA.uniformAllocators.size();
+    }
+
     void* CreateVertBuffer(const VertBufferCreationInfo& info)
     {
         return new VkVertBuffer(info);
@@ -211,6 +222,10 @@ namespace hf::inter::rendering
 
             //uniform storage
             .DefineUniformStorage       = &DefineUniformStorage,
+            .BindUniformStorage         = &BindUniformStorage,
+
+            //uniform allocator
+            .DefineUniformAllocator     = &DefineUniformAllocator,
 
             //vertex buffer
             .CreateVertBuffer           = &CreateVertBuffer,
