@@ -46,4 +46,18 @@ namespace hf::inter::platform
     {
         *flags = (WindowFlags)(((int32_t)*flags & ~(int32_t)target) | (-value & (int32_t)target));
     }
+
+    RenderingApiType GetBestRenderingApi()
+    {
+        return RenderingApiType::Vulkan;
+    }
+
+    bool IsValidRenderingApi(RenderingApiType api)
+    {
+        switch (api)
+        {
+            case RenderingApiType::Vulkan: return true;
+            default: return false;
+        }
+    }
 }

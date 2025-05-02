@@ -21,6 +21,9 @@ namespace hf::inter
         void UnloadDll(void* dll);
         void* GetFuncPtr(void* dll, const char* funcName);
         void* GetPlatformInstance();
+
+        RenderingApiType GetBestRenderingApi();
+        bool IsValidRenderingApi(RenderingApiType api);
     }
 
     namespace window

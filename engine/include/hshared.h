@@ -278,8 +278,8 @@ namespace hf
 	struct UniformBufferUploadInfo
 	{
 		UniformBufferBindingType bindingType = UniformBufferBindingType::Graphics;
-		UniformBufferUpload* pUploads;
-		uint32_t uploadCount;
+		UniformBufferUpload* pUploads{};
+		uint32_t uploadCount{};
 	};
 
 	struct UniformStorageDefinitionInfo

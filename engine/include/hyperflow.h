@@ -93,12 +93,11 @@ namespace hf
 		void Destroy(const Ref<Renderer>& rn);
 		bool IsRunning(const Ref<Renderer>& rn);
 
-		bool IsApiSupported(RenderingApiType targetApi);
-		void QuerySupportedApis(std::vector<RenderingApiType>& apis);
-
 		//Destroy every renderer which is not connected to the window, before you try to change api
 		void ChangeApi(RenderingApiType targetApi);
 		RenderingApiType GetApiType();
+		RenderingApiType GetBestApiType();
+		bool IsValidApi(RenderingApiType targetApi);
 		uvec2 GetSize(const Ref<Renderer>& rn);
 
 		void Resize(const Ref<Renderer>& rn, uvec2 size);

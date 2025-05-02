@@ -61,6 +61,21 @@ namespace hf::inter
         {
             return PLATFORM_DATA.instance;
         }
+
+        RenderingApiType GetBestRenderingApi()
+        {
+            return RenderingApiType::Direct3D;
+        }
+
+        bool IsValidRenderingApi(RenderingApiType api)
+        {
+            switch (api)
+            {
+                case RenderingApiType::Vulkan:
+                case RenderingApiType::Direct3D: return true;
+                default: return false;
+            }
+        }
     }
 
     namespace window

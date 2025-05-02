@@ -39,24 +39,26 @@ namespace hf
 
         bool IsRunning(const Ref<Renderer>& rn) { return rn->handle; }
 
-        bool IsApiSupported(RenderingApiType targetApi)
-        {
-            return true;
-        }
-
-        void QuerySupportedApis(std::vector<RenderingApiType>& apis)
-        {
-
-        }
-
         void ChangeApi(RenderingApiType targetApi)
         {
-            if (targetApi == inter::HF.renderingApi.type) return;
+            if (!IsValidApi(targetApi))
+            {
+                LOG_ERROR("[Hyperflow] %s", "Invalid render Api to load");
+                return;
+            }
             inter::rendering::UnloadCurrentApi(true);
             inter::rendering::LoadApi(targetApi);
         }
 
         RenderingApiType GetApiType() { return inter::HF.renderingApi.type; }
+        RenderingApiType GetBestApiType() { return inter::platform::GetBestRenderingApi(); }
+        bool IsValidApi(RenderingApiType targetApi)
+        {
+            if (targetApi == RenderingApiType::None ||
+                targetApi == inter::HF.renderingApi.type) return false;
+
+            return inter::platform::IsValidRenderingApi(targetApi);
+        }
         uvec2 GetSize(const Ref<Renderer>& rn) { return rn->size; }
 
         void Resize(const Ref<Renderer>& rn, uvec2 size)
