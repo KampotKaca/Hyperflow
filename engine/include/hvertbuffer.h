@@ -10,6 +10,7 @@ namespace hf
         VertBuffer(const VertBufferCreationInfo& info);
         ~VertBuffer();
 
+        VertBufferCreationInfo creationInfo{};
         void* handle{};
     };
 }

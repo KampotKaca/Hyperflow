@@ -10,6 +10,7 @@ namespace app
 	public:
 
 	private:
+		static void OnRendererLoad();
 		static void LoadResources();
 		static void Start();
 		static void Update();

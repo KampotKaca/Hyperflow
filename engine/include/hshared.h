@@ -214,7 +214,7 @@ namespace hf
 	{
 		UniformStorage uniformStorage{};
 		uint32_t supportedAttribCount{};
-		const BufferAttrib* pSupportedAttribs{};
+		BufferAttrib* pSupportedAttribs{};
 		const std::string& vertexShaderLoc{};
 		const std::string& fragmentShaderLoc{};
 	};
@@ -298,11 +298,11 @@ namespace hf
 
 	struct DrawCallInfo
 	{
-		Ref<VertBuffer>* pVertBuffers;
-		uint32_t bufferCount = 0;
+		Ref<VertBuffer>* pVertBuffers; //vertex buffers to render
+		uint32_t bufferCount = 0; //amount of buffers to render
 
-		Ref<IndexBuffer> indexBuffer;
-		uint32_t instanceCount = 0;
+		Ref<IndexBuffer> indexBuffer; //is optional property, if nullptr engine will render vertex buffer in ordered manner.
+		uint32_t instanceCount = 0; //amount of instances to render
 	};
 
 	//endregion
@@ -347,19 +347,26 @@ namespace hf
 
 	struct EngineLifecycleCallbacks
 	{
+		//Called after new renderer is loaded, this is where you should define uin32_t type rendering objects
+		//like: uniform buffer, buffer attribute and ect...
+		void (*onRendererLoad)(){};
+		//Called when initializing platform and renderer is completed.
 		void (*onResourcesLoad)(){};
+		//Called until the first frame update
 		void (*onStartCallback)(){};
+		//Called every frame
 		void (*onUpdateCallback)(){};
+		//Called when application starts releasing resources until it terminates
 		void (*onQuitCallback)(){};
 	};
 
 	struct EngineData
 	{
 		std::string appTitle = "Hyperflow";
-		RenderingApiType renderingApi = RenderingApiType::Vulkan;
-		EngineUpdateType updateType = EngineUpdateType::EventRaised;
-		EngineLifecycleCallbacks lifecycleCallbacks{};
-		WindowData windowData{};
+		RenderingApiType renderingApi = RenderingApiType::Vulkan; // type of initial api, can be changed later
+		EngineUpdateType updateType = EngineUpdateType::EventRaised; // type of application updates
+		EngineLifecycleCallbacks lifecycleCallbacks{}; //passed engine callbacks to interact with the engine
+		WindowData windowData{}; //properties of the initial window
 	};
 
 	struct Window;

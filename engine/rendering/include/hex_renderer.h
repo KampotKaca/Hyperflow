@@ -74,6 +74,7 @@ namespace hf::inter::rendering
 
         //buffer attribute
         uint32_t (*DefineVertBufferAttrib)(const BufferAttribDefinitionInfo& info, uint32_t fullStride);
+        uint32_t (*GetVertBufferAttribSize)(BufferAttrib attrib);
 
         //uniform buffer
         uint32_t (*DefineUniformBuffer)(const UniformBufferDefinitionInfo& info);

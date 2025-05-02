@@ -68,8 +68,11 @@ namespace hf::inter
         void CreateRenderer(Renderer* rn);
         void DestroyRenderer(Renderer* rn);
 
+        bool CreateShader_i(Shader* shader);
         bool DestroyShader_i(Shader* shader);
+        bool CreateVertBuffer_i(VertBuffer* buffer);
         bool DestroyVertBuffer_i(VertBuffer* buffer);
+        bool CreateIndexBuffer_i(IndexBuffer* buffer);
         bool DestroyIndexBuffer_i(IndexBuffer* buffer);
     }
 }

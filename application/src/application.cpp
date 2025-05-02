@@ -45,7 +45,7 @@ namespace app
 
 	Camera camera;
 
-	void Application::LoadResources()
+	void Application::OnRendererLoad()
 	{
 		hf::BufferAttribFormat formats[]
 		{
@@ -87,7 +87,10 @@ namespace app
 		};
 
 		uniformStorage = hf::uniformstorage::Define(uniformStorageDefinitionInfo);
+	}
 
+	void Application::LoadResources()
+	{
 		hf::VertBufferCreationInfo vertBufferInfo
 		{
 			.bufferAttrib = bufferAttrib,
@@ -113,8 +116,8 @@ namespace app
 			.uniformStorage = uniformStorage,
 			.supportedAttribCount = 1,
 			.pSupportedAttribs = &bufferAttrib,
-			.vertexShaderLoc = "shaders/vulkan/default.vert.spv",
-			.fragmentShaderLoc = "shaders/vulkan/default.frag.spv"
+			.vertexShaderLoc = "default",
+			.fragmentShaderLoc = "default"
 		};
 
 		shader = hf::shader::Create(shaderInfo);
@@ -170,6 +173,21 @@ namespace app
 			std::string str = std::string("[Hyperflow] ") + std::to_string(hf::time::GetFrameRate());
 			hf::window::SetTitle(hf::GetMainWindow(), str);
 			reqCount = cReq;
+		}
+
+		if (hf::input::IsDown(hf::Key::T))
+		{
+			switch (hf::renderer::GetApiType())
+			{
+			case hf::RenderingApiType::None:
+				break;
+			case hf::RenderingApiType::Vulkan:
+				hf::renderer::ChangeApi(hf::RenderingApiType::Direct3D);
+				break;
+			case hf::RenderingApiType::Direct3D:
+				hf::renderer::ChangeApi(hf::RenderingApiType::Vulkan);
+				break;
+			}
 		}
 	}
 

@@ -11,6 +11,7 @@ namespace hf::inter::rendering
     void Unload()
     {
         Direct3DUnload();
+        GRAPHICS_DATA = {};
     }
 
     void* CreateInstance(const RendererInstanceCreationInfo& info)
@@ -40,6 +41,11 @@ namespace hf::inter::rendering
     uint32_t DefineVertBufferAttrib(const BufferAttribDefinitionInfo& info, uint32_t fullStride)
     {
         return 1;
+    }
+
+    uint32_t GetVertBufferAttribSize(BufferAttrib attrib)
+    {
+        return 0;
     }
 
     uint32_t DefineUniformBuffer(const UniformBufferDefinitionInfo& info)
@@ -154,6 +160,7 @@ namespace hf::inter::rendering
 
             //buffer attribute
             .DefineVertBufferAttrib     = &DefineVertBufferAttrib,
+            .GetVertBufferAttribSize    = &GetVertBufferAttribSize,
 
             //uniform buffer
             .DefineUniformBuffer        = &DefineUniformBuffer,

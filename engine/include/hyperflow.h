@@ -103,7 +103,10 @@ namespace hf
 
 		void Resize(const Ref<Renderer>& rn, uvec2 size);
 		void Draw(const Ref<Renderer>& rn, const DrawCallInfo& info);
-		void UnloadAllResources();
+
+		//if true, will release internal resources, but will retain resource references
+		//it is made to be used for handling api changes.
+		void UnloadAllResources(bool internalOnly = false);
 	}
 
 	namespace shader
@@ -111,7 +114,7 @@ namespace hf
 		Ref<Shader> Create(const ShaderCreationInfo& info);
 		void Destroy(const Ref<Shader>& shader);
 		void Destroy(const Ref<Shader>* pShaders, uint32_t count);
-		void DestroyAll();
+		void DestroyAll(bool internalOnly = false);
 		bool IsRunning(const Ref<Shader>& shader);
 
 		void Bind(const Ref<Shader>& shader, BufferAttrib attrib);
@@ -145,7 +148,7 @@ namespace hf
 		Ref<VertBuffer> Create(const VertBufferCreationInfo& info);
 		void Destroy(const Ref<VertBuffer>& buffer);
 		void Destroy(const Ref<VertBuffer>* pBuffers, uint32_t count);
-		void DestroyAll();
+		void DestroyAll(bool internalOnly = false);
 		bool IsRunning(const Ref<VertBuffer>& buffer);
 		void Upload(const VertBufferUploadInfo& info);
 	}
@@ -155,7 +158,7 @@ namespace hf
 		Ref<IndexBuffer> Create(const IndexBufferCreationInfo& info);
 		void Destroy(const Ref<IndexBuffer>& buffer);
 		void Destroy(const Ref<IndexBuffer>* pBuffers, uint32_t count);
-		void DestroyAll();
+		void DestroyAll(bool internalOnly = false);
 		bool IsRunning(const Ref<IndexBuffer>& buffer);
 		void Upload(const IndexBufferUploadInfo& info);
 	}

@@ -8,28 +8,19 @@ namespace hf
 {
     Shader::Shader(const ShaderCreationInfo& info)
     {
-        vPath = info.vertexShaderLoc;
-        fPath = info.fragmentShaderLoc;
-        std::vector<char> vertexCode{}, fragmentCode{};
-        utils::ReadFile(TO_RES_PATH(info.vertexShaderLoc), vertexCode);
-        utils::ReadFile(TO_RES_PATH(info.fragmentShaderLoc), fragmentCode);
+        vertLoc = std::string(info.vertexShaderLoc);
+        fragLoc = std::string(info.fragmentShaderLoc);
 
-        inter::rendering::ShaderCreationInfo creationInfo
-        {
-            .uniformStorage = info.uniformStorage,
-            .supportedAttribCount = info.supportedAttribCount,
-            .pSupportedAttribs = info.pSupportedAttribs,
-            .vCode = vertexCode.data(),
-            .vCodeSize = (uint32_t)vertexCode.size(),
-            .fCode = fragmentCode.data(),
-            .fCodeSize = (uint32_t)fragmentCode.size(),
-        };
-
-        handle = inter::HF.renderingApi.api.CreateShader(creationInfo);
+        memcpy(&creationInfo, &info, sizeof(ShaderCreationInfo));
+        uint32_t bufferSize = sizeof(BufferAttrib) * info.supportedAttribCount;
+        creationInfo.pSupportedAttribs = (BufferAttrib*)utils::Allocate(bufferSize);
+        memcpy(creationInfo.pSupportedAttribs, info.pSupportedAttribs, bufferSize);
+        inter::rendering::CreateShader_i(this);
     }
 
     Shader::~Shader()
     {
+        utils::Deallocate(creationInfo.pSupportedAttribs);
         inter::rendering::DestroyShader_i(this);
     }
 
@@ -58,12 +49,11 @@ namespace hf
             }
         }
 
-        void DestroyAll()
+        void DestroyAll(bool internalOnly)
         {
-            auto& shaders = inter::HF.graphicsResources.shaders;
-            for (const auto& shader : std::ranges::views::values(shaders))
+            for (const auto& shader : std::ranges::views::values(inter::HF.graphicsResources.shaders))
                 inter::rendering::DestroyShader_i(shader.get());
-            shaders.clear();
+            if (!internalOnly) inter::HF.graphicsResources.shaders.clear();
         }
 
         bool IsRunning(const Ref<Shader>& shader) { return shader->handle; }
@@ -81,6 +71,41 @@ namespace hf
 
     namespace inter::rendering
     {
+        bool CreateShader_i(Shader* shader)
+        {
+            if (shader->handle) return false;
+
+            switch (HF.renderingApi.type)
+            {
+                case RenderingApiType::Vulkan:
+                {
+                    std::vector<char> vertexCode{}, fragmentCode{};
+                    utils::ReadFile(TO_RES_PATH(std::string("shaders/vulkan/") + shader->vertLoc) + ".vert.spv", vertexCode);
+                    utils::ReadFile(TO_RES_PATH(std::string("shaders/vulkan/") + shader->fragLoc) + ".frag.spv", fragmentCode);
+
+                    ShaderCreationInfo creationInfo
+                    {
+                        .uniformStorage = shader->creationInfo.uniformStorage,
+                        .supportedAttribCount = shader->creationInfo.supportedAttribCount,
+                        .pSupportedAttribs = shader->creationInfo.pSupportedAttribs,
+                        .vCode = vertexCode.data(),
+                        .vCodeSize = (uint32_t)vertexCode.size(),
+                        .fCode = fragmentCode.data(),
+                        .fCodeSize = (uint32_t)fragmentCode.size(),
+                    };
+
+                    shader->handle = HF.renderingApi.api.CreateShader(creationInfo);
+                }
+                    break;
+                case RenderingApiType::Direct3D:
+                    break;
+                case RenderingApiType::None:
+                    throw GENERIC_EXCEPT("[Hyperflow]", "Cannot create shader without loading renderer");
+            }
+
+            return true;
+        }
+
         bool DestroyShader_i(Shader* shader)
         {
             if (shader->handle)

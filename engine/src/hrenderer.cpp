@@ -52,7 +52,7 @@ namespace hf
         void ChangeApi(RenderingApiType targetApi)
         {
             if (targetApi == inter::HF.renderingApi.type) return;
-            inter::rendering::UnloadCurrentApi(false);
+            inter::rendering::UnloadCurrentApi(true);
             inter::rendering::LoadApi(targetApi);
         }
 
@@ -85,12 +85,12 @@ namespace hf
             inter::HF.renderingApi.api.Draw(rn->handle, drawInfo);
         }
 
-        void UnloadAllResources()
+        void UnloadAllResources(bool internalOnly)
         {
             if (inter::HF.renderingApi.isLoaded) inter::HF.renderingApi.api.WaitForRendering();
-            vertbuffer::DestroyAll();
-            indexbuffer::DestroyAll();
-            shader::DestroyAll();
+            vertbuffer::DestroyAll(internalOnly);
+            indexbuffer::DestroyAll(internalOnly);
+            shader::DestroyAll(internalOnly);
         }
     }
 
@@ -125,6 +125,12 @@ namespace hf
                 if (win->renderer) CreateRenderer(win->renderer.get());
                 else win->renderer = MakeRef<Renderer>(win.get());
             }
+
+            if (HF.lifecycleCallbacks.onRendererLoad) HF.lifecycleCallbacks.onRendererLoad();
+
+            for (auto& shader : std::ranges::views::values(HF.graphicsResources.shaders)) CreateShader_i(shader.get());
+            for (auto& vertBuffer : std::ranges::views::values(HF.graphicsResources.vertBuffers)) CreateVertBuffer_i(vertBuffer.get());
+            for (auto& indexBuffer : std::ranges::views::values(HF.graphicsResources.indexBuffers)) CreateIndexBuffer_i(indexBuffer.get());
         }
 
         void UnloadCurrentApi(bool retainReferences)
@@ -189,7 +195,7 @@ namespace hf
             {
                 if (HF.rendererCount == 1)
                 {
-                    renderer::UnloadAllResources();
+                    renderer::UnloadAllResources(IsRunning());
                 }
 
                 HF.renderingApi.api.WaitForRendering();

@@ -23,6 +23,7 @@ int main()
 		.updateType = hf::EngineUpdateType::Continues,
 		.lifecycleCallbacks =
 		{
+			.onRendererLoad     	 = app::Application::OnRendererLoad,
 			.onResourcesLoad     	 = app::Application::LoadResources,
 			.onStartCallback     	 = app::Application::Start,
 			.onUpdateCallback    	 = app::Application::Update,

@@ -110,6 +110,7 @@ namespace hf
         for (uint32_t i = 0; i < info.uploadCount; i++)
         {
             auto& uploadInfo = info.pUploads[i];
+            if (!uploadInfo.data) continue;
             auto& uniform = GetUniform(uploadInfo.buffer);
             memcpy((uint8_t*)uniform.memoryMappings[currentFrame] + uploadInfo.offsetInBytes,
                 uploadInfo.data, uploadInfo.sizeInBytes);

@@ -55,6 +55,12 @@ namespace hf::inter::rendering
         return GRAPHICS_DATA.bufferAttribs.size();
     }
 
+    uint32_t GetVertBufferAttribSize(BufferAttrib attrib)
+    {
+        auto& attribute = GetAttrib(attrib);
+        return attribute.vertexSize;
+    }
+
     uint32_t DefineUniformBuffer(const UniformBufferDefinitionInfo& info)
     {
         GRAPHICS_DATA.uniformBuffers.emplace_back(info);
@@ -215,6 +221,7 @@ namespace hf::inter::rendering
 
             //buffer attribute
             .DefineVertBufferAttrib     = &DefineVertBufferAttrib,
+            .GetVertBufferAttribSize    = &GetVertBufferAttribSize,
 
             //uniform buffer
             .DefineUniformBuffer        = &DefineUniformBuffer,

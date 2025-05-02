@@ -8,11 +8,17 @@ namespace hf
     VertBuffer::VertBuffer(const VertBufferCreationInfo& info)
     {
         if (info.bufferAttrib == 0) throw GENERIC_EXCEPT("[Hyperflow]", "buffer attribute must be set");
-        handle = inter::HF.renderingApi.api.CreateVertBuffer(info);
+        uint64_t bufferSize = info.vertexCount * inter::HF.renderingApi.api.GetVertBufferAttribSize(info.bufferAttrib);
+        creationInfo = info;
+        creationInfo.pVertices = utils::Allocate(bufferSize);
+        memcpy(creationInfo.pVertices, info.pVertices, bufferSize);
+
+        inter::rendering::CreateVertBuffer_i(this);
     }
 
     VertBuffer::~VertBuffer()
     {
+        utils::Deallocate(creationInfo.pVertices);
         inter::rendering::DestroyVertBuffer_i(this);
     }
 
@@ -41,12 +47,11 @@ namespace hf
             }
         }
 
-        void DestroyAll()
+        void DestroyAll(bool internalOnly)
         {
-            auto& vertBuffers = inter::HF.graphicsResources.vertBuffers;
-            for (const auto& buffer : std::ranges::views::values(vertBuffers))
+            for (const auto& buffer : std::ranges::views::values(inter::HF.graphicsResources.vertBuffers))
                 inter::rendering::DestroyVertBuffer_i(buffer.get());
-            vertBuffers.clear();
+            if (!internalOnly) inter::HF.graphicsResources.vertBuffers.clear();
         }
 
         bool IsRunning(const Ref<VertBuffer>& buffer) { return buffer->handle; }
@@ -66,6 +71,13 @@ namespace hf
 
     namespace inter::rendering
     {
+        bool CreateVertBuffer_i(VertBuffer* buffer)
+        {
+            if (buffer->handle) return false;
+            buffer->handle = HF.renderingApi.api.CreateVertBuffer(buffer->creationInfo);
+            return true;
+        }
+
         bool DestroyVertBuffer_i(VertBuffer* buffer)
         {
             if (buffer->handle)

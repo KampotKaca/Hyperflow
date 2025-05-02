@@ -8,11 +8,17 @@ namespace hf
     IndexBuffer::IndexBuffer(const IndexBufferCreationInfo& info)
     {
         if (info.indexCount % 3 != 0) throw GENERIC_EXCEPT("[Hyperflow]", "index count must be a multiple of 3");
-        handle = inter::HF.renderingApi.api.CreateIndexBuffer(info);
+        uint64_t bufferSize = info.indexCount * BUFFER_DATA_SIZE[(uint32_t)info.indexFormat];
+        creationInfo = info;
+        creationInfo.pIndices = utils::Allocate(bufferSize);
+        memcpy(creationInfo.pIndices, info.pIndices, bufferSize);
+
+        inter::rendering::CreateIndexBuffer_i(this);
     }
 
     IndexBuffer::~IndexBuffer()
     {
+        utils::Deallocate(creationInfo.pIndices);
         inter::rendering::DestroyIndexBuffer_i(this);
     }
 
@@ -41,12 +47,11 @@ namespace hf
             }
         }
 
-        void DestroyAll()
+        void DestroyAll(bool internalOnly)
         {
-            auto& indexBuffers = inter::HF.graphicsResources.indexBuffers;
-            for (const auto& buffer : std::ranges::views::values(indexBuffers))
+            for (const auto& buffer : std::ranges::views::values(inter::HF.graphicsResources.indexBuffers))
                 inter::rendering::DestroyIndexBuffer_i(buffer.get());
-            indexBuffers.clear();
+            if (!internalOnly) inter::HF.graphicsResources.indexBuffers.clear();
         }
 
         bool IsRunning(const Ref<IndexBuffer>& buffer) { return buffer->handle; }
@@ -66,6 +71,13 @@ namespace hf
 
     namespace inter::rendering
     {
+        bool CreateIndexBuffer_i(IndexBuffer* buffer)
+        {
+            if (buffer->handle) return false;
+            buffer->handle = HF.renderingApi.api.CreateIndexBuffer(buffer->creationInfo);
+            return true;
+        }
+
         bool DestroyIndexBuffer_i(IndexBuffer* buffer)
         {
             if (buffer->handle)

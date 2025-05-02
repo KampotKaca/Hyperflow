@@ -10,7 +10,8 @@ namespace hf
         Shader(const ShaderCreationInfo& info);
         ~Shader();
 
-        std::string vPath{}, fPath{};
+        std::string vertLoc{}, fragLoc{};
+        ShaderCreationInfo creationInfo{};
         void* handle{};
     };
 }
