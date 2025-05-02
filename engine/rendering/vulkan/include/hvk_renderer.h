@@ -71,7 +71,7 @@ namespace hf
     void RegisterFrameBufferChange(VKRenderer* rn, uvec2 newSize);
     void Draw(const VkDrawInfo& info);
 
-    void UploadUniform(const VKRenderer* rn, UniformBuffer buffer, const void* data, uint32_t offset, uint32_t size);
+    void UploadUniforms(const VKRenderer* rn, const UniformBufferUploadInfo& info);
     void BindUniformStorage(VKRenderer* rn, UniformStorage storage);
 }
 

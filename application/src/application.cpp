@@ -37,10 +37,10 @@ namespace app
 
 	struct Camera
 	{
-		hf::mat4 model{};
-		hf::mat4 view{};
-		hf::mat4 proj{};
-		hf::mat4 viewProj{};
+		alignas(16) hf::mat4 model{};
+		alignas(16) hf::mat4 view{};
+		alignas(16) hf::mat4 proj{};
+		alignas(16) hf::mat4 viewProj{};
 	};
 
 	Camera camera;
@@ -194,15 +194,22 @@ namespace app
 
 		hf::uniformstorage::Bind(rn, uniformStorage);
 
-		hf::UniformBufferUploadInfo cameraBufferUploadInfo
+		hf::UniformBufferUpload cameraUpload
 		{
-			.uniformBuffer = cameraBuffer,
-			.data = &camera,
+			.buffer = cameraBuffer,
 			.offsetInBytes = 0,
-			.sizeInBytes = sizeof(Camera)
+			.sizeInBytes = sizeof(Camera),
+			.data = &camera
 		};
 
-		hf::uniformbuffer::Upload(rn, cameraBufferUploadInfo);
+		hf::UniformBufferUploadInfo uniformBufferUploads
+		{
+			.bindingType = hf::UniformBufferBindingType::Graphics,
+			.pUploads = &cameraUpload,
+			.uploadCount = 1
+		};
+
+		hf::uniformbuffer::Upload(rn, uniformBufferUploads);
 
 		hf::shader::Bind(rn, shader, bufferAttrib);
 

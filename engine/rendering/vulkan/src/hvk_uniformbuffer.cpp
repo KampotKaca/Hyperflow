@@ -102,13 +102,22 @@ namespace hf
         }
     }
 
-    void UploadUniform(const VKRenderer* rn, UniformBuffer buffer, const void* data, uint32_t offset, uint32_t size)
+    void UploadUniforms(const VKRenderer* rn, const UniformBufferUploadInfo& info)
     {
         auto currentFrame = rn->currentFrame;
-        auto& uniform = GetUniform(buffer);
-        memcpy((uint8_t*)uniform.memoryMappings[currentFrame] + offset, data, size);
 
-        vkCmdBindDescriptorSets(rn->currentCommand, VK_PIPELINE_BIND_POINT_GRAPHICS, rn->currentLayout,
-            0, 1, &uniform.descriptorSets[currentFrame], 0, nullptr);
+        std::vector<VkDescriptorSet> descriptorSets(info.uploadCount);
+        for (uint32_t i = 0; i < info.uploadCount; i++)
+        {
+            auto& uploadInfo = info.pUploads[i];
+            auto& uniform = GetUniform(uploadInfo.buffer);
+            memcpy((uint8_t*)uniform.memoryMappings[currentFrame] + uploadInfo.offsetInBytes,
+                uploadInfo.data, uploadInfo.sizeInBytes);
+            descriptorSets[i] = uniform.descriptorSets[currentFrame];
+        }
+
+        vkCmdBindDescriptorSets(rn->currentCommand, (VkPipelineBindPoint)info.bindingType, rn->currentLayout,
+        0, descriptorSets.size(), descriptorSets.data(),
+        0, nullptr);
     }
 }

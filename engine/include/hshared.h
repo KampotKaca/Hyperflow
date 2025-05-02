@@ -250,6 +250,7 @@ namespace hf
 		return a;
 	}
 
+	//scalar alignment 4, vec2 -> 8 vec3 and up -> 16
 	struct UniformBufferDefinitionInfo
 	{
 		uint32_t bindingId{};
@@ -264,12 +265,21 @@ namespace hf
 		uint32_t elementSizeInBytes{};
 	};
 
-	struct UniformBufferUploadInfo
+	enum class UniformBufferBindingType { Graphics = 0, Compute = 1, RayTracing = 1000165000, HuaweiSubpassShading = 1000369003 };
+
+	struct UniformBufferUpload
 	{
-		UniformBuffer uniformBuffer;
-		const void* data;
+		UniformBuffer buffer;
 		uint32_t offsetInBytes;
 		uint32_t sizeInBytes;
+		const void* data;
+	};
+
+	struct UniformBufferUploadInfo
+	{
+		UniformBufferBindingType bindingType = UniformBufferBindingType::Graphics;
+		UniformBufferUpload* pUploads;
+		uint32_t uploadCount;
 	};
 
 	struct UniformStorageDefinitionInfo

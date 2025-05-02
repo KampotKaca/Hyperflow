@@ -63,7 +63,7 @@ namespace hf::inter::rendering
 
     void UploadUniformBuffer(const void* rn, const UniformBufferUploadInfo& info)
     {
-        UploadUniform((VKRenderer*)rn, info.uniformBuffer, info.data, info.offsetInBytes, info.sizeInBytes);
+        UploadUniforms((VKRenderer*)rn, info);
     }
 
     uint32_t DefineUniformStorage(const UniformStorageDefinitionInfo& info)
