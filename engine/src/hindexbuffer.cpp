@@ -9,16 +9,16 @@ namespace hf
     {
         if (info.indexCount % 3 != 0) throw GENERIC_EXCEPT("[Hyperflow]", "index count must be a multiple of 3");
         uint64_t bufferSize = info.indexCount * BUFFER_DATA_SIZE[(uint32_t)info.indexFormat];
-        creationInfo = info;
-        creationInfo.pIndices = utils::Allocate(bufferSize);
-        memcpy(creationInfo.pIndices, info.pIndices, bufferSize);
+        details = info;
+        details.pIndices = utils::Allocate(bufferSize);
+        memcpy(details.pIndices, info.pIndices, bufferSize);
 
         inter::rendering::CreateIndexBuffer_i(this);
     }
 
     IndexBuffer::~IndexBuffer()
     {
-        utils::Deallocate(creationInfo.pIndices);
+        utils::Deallocate(details.pIndices);
         inter::rendering::DestroyIndexBuffer_i(this);
     }
 
@@ -74,7 +74,7 @@ namespace hf
         bool CreateIndexBuffer_i(IndexBuffer* buffer)
         {
             if (buffer->handle) return false;
-            buffer->handle = HF.renderingApi.api.CreateIndexBuffer(buffer->creationInfo);
+            buffer->handle = HF.renderingApi.api.CreateIndexBuffer(buffer->details);
             return true;
         }
 

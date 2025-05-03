@@ -31,6 +31,7 @@ namespace hf::inter
         std::unordered_map<Shader*, Ref<Shader>> shaders{};
         std::unordered_map<VertBuffer*, Ref<VertBuffer>> vertBuffers{};
         std::unordered_map<IndexBuffer*, Ref<IndexBuffer>> indexBuffers{};
+        std::unordered_map<TexturePack*, Ref<TexturePack>> texturePacks{};
     };
 
     struct Hyperflow
@@ -74,6 +75,8 @@ namespace hf::inter
         bool DestroyVertBuffer_i(VertBuffer* buffer);
         bool CreateIndexBuffer_i(IndexBuffer* buffer);
         bool DestroyIndexBuffer_i(IndexBuffer* buffer);
+        bool CreateTexturePack_i(TexturePack* texPack);
+        bool DestroyTexturePack_i(TexturePack* texPack);
     }
 }
 

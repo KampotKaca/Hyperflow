@@ -151,6 +151,7 @@ namespace hf
 	struct Shader;
 	struct VertBuffer;
 	struct IndexBuffer;
+	struct TexturePack;
 	typedef uint32_t BufferAttrib;
 	typedef uint32_t UniformBuffer;
 	typedef uint32_t UniformStorage;
@@ -214,9 +215,9 @@ namespace hf
 	{
 		UniformStorage uniformStorage{};
 		uint32_t supportedAttribCount{};
-		BufferAttrib* pSupportedAttribs{};
-		const std::string& vertexShaderLoc{};
-		const std::string& fragmentShaderLoc{};
+		const BufferAttrib* pSupportedAttribs{};
+		const char* vertexShaderLoc{};
+		const char* fragmentShaderLoc{};
 	};
 
 	enum class UniformBufferStage
@@ -292,6 +293,22 @@ namespace hf
 	{
 		UniformBuffer* pBuffers;
 		uint32_t bufferCount;
+	};
+
+	enum class TextureFormat { R8G8B8A8_SRGB };
+	enum class TextureType   { Tex2D, Tex3D };
+
+	struct TextureCreationInfo
+	{
+		const char* filePath{};
+		TextureFormat format = TextureFormat::R8G8B8A8_SRGB;
+		TextureType type = TextureType::Tex2D;
+	};
+
+	struct TexturePackCreationInfo
+	{
+		TextureCreationInfo* pTextures{};
+		uint32_t textureCount{};
 	};
 
 	enum class RenderingApiType { None, Vulkan, Direct3D };

@@ -9,7 +9,7 @@ namespace hf
         IndexBuffer(const IndexBufferCreationInfo& info);
         ~IndexBuffer();
 
-        IndexBufferCreationInfo creationInfo{};
+        IndexBufferCreationInfo details{};
         void* handle{};
     };
 }

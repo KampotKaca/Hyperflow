@@ -11,16 +11,18 @@ namespace hf
         vertLoc = std::string(info.vertexShaderLoc);
         fragLoc = std::string(info.fragmentShaderLoc);
 
-        memcpy(&creationInfo, &info, sizeof(ShaderCreationInfo));
+        uniformStorage = info.uniformStorage;
+        supportedAttribCount = info.supportedAttribCount;
+
         uint32_t bufferSize = sizeof(BufferAttrib) * info.supportedAttribCount;
-        creationInfo.pSupportedAttribs = (BufferAttrib*)utils::Allocate(bufferSize);
-        memcpy(creationInfo.pSupportedAttribs, info.pSupportedAttribs, bufferSize);
+        pSupportedAttribs = (BufferAttrib*)utils::Allocate(bufferSize);
+        memcpy(pSupportedAttribs, info.pSupportedAttribs, bufferSize);
         inter::rendering::CreateShader_i(this);
     }
 
     Shader::~Shader()
     {
-        utils::Deallocate(creationInfo.pSupportedAttribs);
+        utils::Deallocate(pSupportedAttribs);
         inter::rendering::DestroyShader_i(this);
     }
 
@@ -85,9 +87,9 @@ namespace hf
 
                     ShaderCreationInfo creationInfo
                     {
-                        .uniformStorage = shader->creationInfo.uniformStorage,
-                        .supportedAttribCount = shader->creationInfo.supportedAttribCount,
-                        .pSupportedAttribs = shader->creationInfo.pSupportedAttribs,
+                        .uniformStorage = shader->uniformStorage,
+                        .supportedAttribCount = shader->supportedAttribCount,
+                        .pSupportedAttribs = shader->pSupportedAttribs,
                         .vCode = vertexCode.data(),
                         .vCodeSize = (uint32_t)vertexCode.size(),
                         .fCode = fragmentCode.data(),
