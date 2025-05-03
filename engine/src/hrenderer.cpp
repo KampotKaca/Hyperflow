@@ -133,6 +133,7 @@ namespace hf
             for (auto& shader : std::ranges::views::values(HF.graphicsResources.shaders)) CreateShader_i(shader.get());
             for (auto& vertBuffer : std::ranges::views::values(HF.graphicsResources.vertBuffers)) CreateVertBuffer_i(vertBuffer.get());
             for (auto& indexBuffer : std::ranges::views::values(HF.graphicsResources.indexBuffers)) CreateIndexBuffer_i(indexBuffer.get());
+            for (auto& texPack : std::ranges::views::values(HF.graphicsResources.texturePacks)) CreateTexturePack_i(texPack.get());
         }
 
         void UnloadCurrentApi(bool retainReferences)

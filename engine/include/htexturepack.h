@@ -10,7 +10,16 @@ namespace hf
         TexturePack(const TexturePackCreationInfo& info);
         ~TexturePack();
 
-        TexturePackCreationInfo creationInfo{};
+        struct TexturePackUploadInfo
+        {
+            std::string filePath;
+            TextureFormat format;
+            TextureType type;
+            TextureChannel desiredChannel;
+        };
+
+        TexturePackUploadInfo* pUploadInfos{};
+        uint32_t textureCount{};
         void* handle{};
     };
 }

@@ -2,8 +2,9 @@
 #include "hvk_indexbuffer.h"
 #include "hvk_renderer.h"
 #include "hvk_shader.h"
+#include "hvk_texturepack.h"
 #include "hvk_vertbuffer.h"
-#include "hvk_uniformbuffer.h"
+#include "hvk_texturepack.h"
 
 namespace hf::inter::rendering
 {
@@ -47,6 +48,16 @@ namespace hf::inter::rendering
     void BindShader(const void* rn, const void* shader, BufferAttrib attrib)
     {
         BindShader((VKRenderer*)rn, (VkShader*)shader, attrib);
+    }
+
+    void* CreateTexturePack(const TexturePackCreationInfo& info)
+    {
+        return new VkTexturePack(info);
+    }
+
+    void DestroyTexturePack(void* txPack)
+    {
+        delete (VkTexturePack*)txPack;
     }
 
     uint32_t DefineVertBufferAttrib(const BufferAttribDefinitionInfo& info, uint32_t fullStride)
@@ -218,6 +229,9 @@ namespace hf::inter::rendering
             .CreateShader               = &CreateShader,
             .DestroyShader              = &DestroyShader,
             .BindShader                 = &BindShader,
+
+            .CreateTexturePack          = &CreateTexturePack,
+            .DestroyTexturePack         = &DestroyTexturePack,
 
             //buffer attribute
             .DefineVertBufferAttrib     = &DefineVertBufferAttrib,

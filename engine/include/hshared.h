@@ -295,14 +295,16 @@ namespace hf
 		uint32_t bufferCount;
 	};
 
-	enum class TextureFormat { R8G8B8A8_SRGB };
-	enum class TextureType   { Tex2D, Tex3D };
+	enum class TextureFormat 	{ R8G8B8A8_SRGB };
+	enum class TextureType   	{ Tex2D, Tex3D };
+	enum class TextureChannel   { Default, Gray, GrayAlpha, RGB, RGBA };
 
 	struct TextureCreationInfo
 	{
 		const char* filePath{};
 		TextureFormat format = TextureFormat::R8G8B8A8_SRGB;
 		TextureType type = TextureType::Tex2D;
+		TextureChannel desiredChannel = TextureChannel::RGBA;
 	};
 
 	struct TexturePackCreationInfo

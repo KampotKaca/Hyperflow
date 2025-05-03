@@ -82,8 +82,23 @@ namespace hf
                 case RenderingApiType::Vulkan:
                 {
                     std::vector<char> vertexCode{}, fragmentCode{};
-                    utils::ReadFile(TO_RES_PATH(std::string("shaders/vulkan/") + shader->vertLoc) + ".vert.spv", vertexCode);
-                    utils::ReadFile(TO_RES_PATH(std::string("shaders/vulkan/") + shader->fragLoc) + ".frag.spv", fragmentCode);
+                    std::string vLoc = TO_RES_PATH(std::string("shaders/vulkan/") + shader->vertLoc) + ".vert.spv",
+                                fLoc = TO_RES_PATH(std::string("shaders/vulkan/") + shader->fragLoc) + ".frag.spv";
+
+                    if (!utils::FileExists(vLoc.c_str()))
+                    {
+                        LOG_ERROR("[Hyperflow] Unable to find vertex shader: %s", shader->vertLoc);
+                        return false;
+                    }
+
+                    if (!utils::FileExists(fLoc.c_str()))
+                    {
+                        LOG_ERROR("[Hyperflow] Unable to find fragment shader: %s", shader->fragLoc);
+                        return false;
+                    }
+
+                    utils::ReadFile(vLoc, vertexCode);
+                    utils::ReadFile(fLoc, fragmentCode);
 
                     ShaderCreationInfo creationInfo
                     {

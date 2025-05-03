@@ -38,6 +38,16 @@ namespace hf::inter::rendering
 
     }
 
+    void* CreateTexturePack(const TexturePackCreationInfo& info)
+    {
+        return nullptr;
+    }
+
+    void DestroyTexturePack(void* txPack)
+    {
+
+    }
+
     uint32_t DefineVertBufferAttrib(const BufferAttribDefinitionInfo& info, uint32_t fullStride)
     {
         return 1;
@@ -157,6 +167,10 @@ namespace hf::inter::rendering
             .CreateShader               = &CreateShader,
             .DestroyShader              = &DestroyShader,
             .BindShader                 = &BindShader,
+
+            //texture pack
+            .CreateTexturePack          = &CreateTexturePack,
+            .DestroyTexturePack         = &DestroyTexturePack,
 
             //buffer attribute
             .DefineVertBufferAttrib     = &DefineVertBufferAttrib,

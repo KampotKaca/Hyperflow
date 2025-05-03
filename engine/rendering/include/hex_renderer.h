@@ -50,6 +50,19 @@ namespace hf::inter::rendering
         uvec2 size;
     };
 
+    struct TextureCreationInfo
+    {
+        uvec2 size;
+        TextureChannel channel;
+        void* data{};
+    };
+
+    struct TexturePackCreationInfo
+    {
+        TextureCreationInfo* pTextures;
+        uint32_t textureCount;
+    };
+
     struct DrawCallInfo
     {
         void** pVertBuffers;
@@ -71,6 +84,10 @@ namespace hf::inter::rendering
         void* (*CreateShader)(const ShaderCreationInfo& info);
         void (*DestroyShader)(void* shader);
         void (*BindShader)(const void* rn, const void* shader, BufferAttrib attrib);
+
+        //texture pack
+        void* (*CreateTexturePack)(const TexturePackCreationInfo& info);
+        void (*DestroyTexturePack)(void* txPack);
 
         //buffer attribute
         uint32_t (*DefineVertBufferAttrib)(const BufferAttribDefinitionInfo& info, uint32_t fullStride);
