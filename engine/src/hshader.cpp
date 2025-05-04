@@ -87,13 +87,13 @@ namespace hf
 
                     if (!utils::FileExists(vLoc.c_str()))
                     {
-                        LOG_ERROR("[Hyperflow] Unable to find vertex shader: %s", shader->vertLoc);
+                        LOG_ERROR("[Hyperflow] Unable to find vertex shader: %s", shader->vertLoc.c_str());
                         return false;
                     }
 
                     if (!utils::FileExists(fLoc.c_str()))
                     {
-                        LOG_ERROR("[Hyperflow] Unable to find fragment shader: %s", shader->fragLoc);
+                        LOG_ERROR("[Hyperflow] Unable to find fragment shader: %s", shader->fragLoc.c_str());
                         return false;
                     }
 

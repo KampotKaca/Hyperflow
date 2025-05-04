@@ -72,12 +72,29 @@ namespace hf
         VulkanPlatformAPI* api{};
     };
 
-    struct VkCopyBufferOperation
+    struct VkCopyBufferToBufferOperation
     {
         VkBuffer srcBuffer{};
         VmaAllocation srcMemory{};
         VkBuffer dstBuffer{};
         VmaAllocation dstMemory{};
+
+        VkBufferCopy pRegions[VULKAN_API_MAX_NUM_COPY_REGIONS]{};
+        uint32_t regionCount = 0;
+        bool deleteSrcAfterCopy = false;
+    };
+
+    struct VkCopyBufferToImageOperation
+    {
+        VkBuffer srcBuffer{};
+        VmaAllocation srcMemory{};
+        VkImageLayout srcLayout{};
+
+        VkImage dstImage{};
+        VmaAllocation dstMemory{};
+        VkImageLayout dstLayout{};
+
+        VkFormat format{};
 
         VkBufferCopy pRegions[VULKAN_API_MAX_NUM_COPY_REGIONS]{};
         uint32_t regionCount = 0;
@@ -108,7 +125,8 @@ namespace hf
         std::vector<VkUniformBuffer> uniformBuffers{};
         std::vector<VkUniformStorage> uniformStorages{};
         std::vector<VkUniformAllocator> uniformAllocators{};
-        std::vector<VkCopyBufferOperation> bufferCopyOperations{};
+        std::vector<VkCopyBufferToBufferOperation> bufferToBufferCopyOperations{};
+        std::vector<VkCopyBufferToImageOperation> bufferToImageCopyOperations{};
 
 #if DEBUG
         VkDebugUtilsMessengerCreateInfoEXT debugCreateInfo
@@ -166,6 +184,13 @@ namespace hf
         uint32_t familyCount{};
     };
 
+    struct VkStaticBufferInfo
+    {
+        uint64_t bufferSize;
+        const void* data;
+        VkBufferUsageFlags usage;
+    };
+
     extern GraphicsData GRAPHICS_DATA;
 
     void LoadVulkan(const inter::rendering::RendererLoadInfo& info);
@@ -207,13 +232,15 @@ namespace hf
 
     void WaitForFences(const GraphicsDevice& device, const VkFence* fences, uint32_t count, bool waitAll);
     void CreateBuffer(const VkCreateBufferInfo& info, VkBuffer* bufferResult,  VmaAllocation* memResult);
+    void AllocateImage(BufferMemoryType memoryType, VkImage image, VmaAllocation* memResult);
+    void CreateStagingBuffer(uint64_t bufferSize, const void* data, VkBuffer* bufferResult, VmaAllocation* memoryResult);
+    void CreateStaticBuffer(const VkStaticBufferInfo& info, VkBuffer* bufferResult, VmaAllocation* memoryResult);
 
     uint32_t GetMemoryType(uint32_t filter, VkMemoryPropertyFlags props);
-    void StageCopyOperation(const VkCopyBufferOperation& operation);
+    void StageCopyOperation(const VkCopyBufferToBufferOperation& operation);
     void SubmitStagedCopyOperations();
 
     void UploadBufferMemory(VmaAllocation memory, const void* data, uint64_t fullOffset, uint64_t fullSize);
-    void CopyBufferContents(const VkCopyBufferOperation* pOperations, uint32_t operationCount);
 }
 
 #endif //HVK_GRAPHICS_H

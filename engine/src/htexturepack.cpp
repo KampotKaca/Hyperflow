@@ -41,16 +41,16 @@ namespace hf
 
                 if (!utils::FileExists(texLoc.c_str()))
                 {
-                    LOG_ERROR("[Hyperflow] Unable to find texture: %s", texPack->pUploadInfos[i].filePath);
+                    LOG_ERROR("[Hyperflow] Unable to find texture: %s", texPack->pUploadInfos[i].filePath.c_str());
                     continue;
                 }
 
                 auto& uploadInfo = texPack->pUploadInfos[i];
-                ivec2 size{};
+                ivec3 size{};
                 int32_t texChannels{};
                 auto* pixels = stbi_load(texLoc.c_str(), &size.x, &size.y,
                     &texChannels, (int32_t)uploadInfo.desiredChannel);
-
+                size.z = 1;
                 if (pixels)
                 {
                     auto& creationInfo = creationInfos[i];

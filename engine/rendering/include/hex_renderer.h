@@ -52,15 +52,19 @@ namespace hf::inter::rendering
 
     struct TextureCreationInfo
     {
-        uvec2 size;
+        uvec3 size;
         TextureChannel channel;
+        uint32_t mipLevels = 1;
         void* data{};
     };
 
     struct TexturePackCreationInfo
     {
-        TextureCreationInfo* pTextures;
-        uint32_t textureCount;
+        TextureCreationInfo* pTextures{};
+        uint32_t textureCount = 0;
+        TextureType type = TextureType::Tex2D;
+        TextureFormat format = TextureFormat::B8G8R8A8_Srgb;
+        BufferMemoryType memoryType = BufferMemoryType::Static;
     };
 
     struct DrawCallInfo
