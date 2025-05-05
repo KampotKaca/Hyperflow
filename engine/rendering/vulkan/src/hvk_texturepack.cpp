@@ -7,8 +7,9 @@ namespace hf
     {
         textures = std::vector<VkTexture>(info.textureCount);
         type = info.type;
-        format = info.format;
 
+        QueueFamilyIndices& familyIndices = GRAPHICS_DATA.defaultDevice->familyIndices;
+        uint32_t queus[2] = { familyIndices.transferFamily.value(), familyIndices.graphicsFamily.value() };
         auto device = GRAPHICS_DATA.defaultDevice->logicalDevice.device;
         for (uint32_t i = 0; i < info.textureCount; i++)
         {
@@ -19,61 +20,72 @@ namespace hf
             texture.size = texInfo.size;
             texture.channel = texInfo.channel;
             texture.mipLevels = texInfo.mipLevels;
-            texture.bufferSize = texInfo.size.x * texInfo.size.y * texInfo.size.z * (uint64_t)texInfo.channel;
+            texture.format = texInfo.format;
+            texture.bufferSize = texInfo.size.x * texInfo.size.y * texInfo.size.z * 4;
             texture.bufferOffset = 0;
 
             VkImageCreateInfo imageInfo
             {
                 .sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO,
                 .imageType = (VkImageType)type,
+                .format = (VkFormat)texture.format,
                 .extent = { texture.size.x, texture.size.y, texture.size.z },
                 .mipLevels = texture.mipLevels,
                 .arrayLayers = 1,
                 .samples = VK_SAMPLE_COUNT_1_BIT,
                 .tiling = VK_IMAGE_TILING_OPTIMAL,
                 .usage = VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT,
-                .sharingMode = VK_SHARING_MODE_CONCURRENT,
-                .format = (VkFormat)format,
+                .sharingMode = VK_SHARING_MODE_EXCLUSIVE,
+                .queueFamilyIndexCount = 2,
+                .pQueueFamilyIndices = queus,
                 .initialLayout = VK_IMAGE_LAYOUT_UNDEFINED,
-                .flags = 0,
             };
 
             VK_HANDLE_EXCEPT(vkCreateImage(device, &imageInfo, nullptr, &texture.image));
-
             AllocateImage(BufferMemoryType::Static, texture.image, &texture.imageMemory);
 
             VkBuffer stagingBuffer;
             VmaAllocation stagingBufferMemory;
             CreateStagingBuffer(texture.bufferSize, texInfo.data, &stagingBuffer, &stagingBufferMemory);
 
-            VkBufferCopy copyRegion
+            VkBufferImageCopy copyRegion
             {
-                .srcOffset = 0,
-                .dstOffset = 0,
-                .size = texture.bufferSize
+                .bufferOffset = 0,
+                .bufferRowLength = 0,
+                .bufferImageHeight = 0,
+                .imageSubresource =
+                {
+                    .aspectMask = VK_IMAGE_ASPECT_COLOR_BIT,
+                    .mipLevel = 0,
+                    .baseArrayLayer = 0,
+                    .layerCount = 1,
+                },
+                .imageOffset = { 0, 0, 0 },
+                .imageExtent = { texture.size.x, texture.size.y, texture.size.z },
             };
 
-            VkCopyBufferToBufferOperation copyOperation
+            VkCopyBufferToImageOperation copyOperation
             {
                 .srcBuffer = stagingBuffer,
                 .srcMemory = stagingBufferMemory,
-                .dstBuffer = *bufferResult,
-                .dstMemory = *memoryResult,
+                .srcLayout = VK_IMAGE_LAYOUT_UNDEFINED,
+                .dstImage = texture.image,
+                .dstMemory = texture.imageMemory,
+                .dstLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
+                .format = (VkFormat)texture.format,
                 .regionCount = 1,
                 .deleteSrcAfterCopy = true
             };
+
             copyOperation.pRegions[0] = copyRegion;
+            StageCopyOperation(copyOperation);
         }
     }
 
     VkTexturePack::~VkTexturePack()
     {
-        auto device = GRAPHICS_DATA.defaultDevice->logicalDevice.device;
         for (auto& texture : textures)
-        {
-            vkDestroyImage(device, texture.image, nullptr);
             vmaDestroyImage(GRAPHICS_DATA.allocator, texture.image, texture.imageMemory);
-        }
 
         textures.clear();
     }

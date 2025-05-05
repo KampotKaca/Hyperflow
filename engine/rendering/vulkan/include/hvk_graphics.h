@@ -96,7 +96,7 @@ namespace hf
 
         VkFormat format{};
 
-        VkBufferCopy pRegions[VULKAN_API_MAX_NUM_COPY_REGIONS]{};
+        VkBufferImageCopy pRegions[VULKAN_API_MAX_NUM_COPY_REGIONS]{};
         uint32_t regionCount = 0;
         bool deleteSrcAfterCopy = false;
     };
@@ -119,6 +119,7 @@ namespace hf
 
         VkRenderPass renderPass{};
         CommandPool transferPool{};
+        CommandPool graphicsPool{};
         VmaAllocator allocator;
 
         std::vector<VkBufferAttrib> bufferAttribs{};
@@ -238,7 +239,10 @@ namespace hf
 
     uint32_t GetMemoryType(uint32_t filter, VkMemoryPropertyFlags props);
     void StageCopyOperation(const VkCopyBufferToBufferOperation& operation);
-    void SubmitStagedCopyOperations();
+    void StageCopyOperation(const VkCopyBufferToImageOperation& operation);
+    void SubmitCopyOperations();
+    void SubmitBufferToBufferCopyOperations();
+    void SubmitBufferToImageCopyOperations();
 
     void UploadBufferMemory(VmaAllocation memory, const void* data, uint64_t fullOffset, uint64_t fullSize);
 }

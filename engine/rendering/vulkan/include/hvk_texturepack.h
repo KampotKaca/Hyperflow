@@ -10,6 +10,7 @@ namespace hf
         VkImage image{};
         uvec3 size{};
         TextureChannel channel{};
+        TextureFormat format{};
         uint64_t bufferOffset{};
         uint64_t bufferSize{};
         uint32_t mipLevels{};
@@ -22,7 +23,6 @@ namespace hf
         ~VkTexturePack();
 
         std::vector<VkTexture> textures{};
-        TextureFormat format{};
         TextureType type{};
     };
 

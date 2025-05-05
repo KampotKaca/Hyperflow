@@ -84,7 +84,7 @@ namespace hf
 
     void UnloadVulkan()
     {
-        SubmitStagedCopyOperations();
+        SubmitCopyOperations();
         DelayThreadUntilRenderingFinish();
 
         GRAPHICS_DATA.uniformAllocators.clear();

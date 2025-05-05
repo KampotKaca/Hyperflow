@@ -147,7 +147,7 @@ namespace hf::inter::rendering
 
     void SubmitStagedCopyOperations()
     {
-        hf::SubmitStagedCopyOperations();
+        SubmitCopyOperations();
     }
 
     bool GetReadyForRendering(void* rn)

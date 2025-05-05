@@ -210,6 +210,9 @@ namespace hf
 
         CreateCommandPool(*GRAPHICS_DATA.defaultDevice, GRAPHICS_DATA.defaultDevice->familyIndices.transferFamily.value(), &GRAPHICS_DATA.transferPool);
         CreateCommandBuffers(*GRAPHICS_DATA.defaultDevice, &GRAPHICS_DATA.transferPool, 1);
+
+        CreateCommandPool(*GRAPHICS_DATA.defaultDevice, GRAPHICS_DATA.defaultDevice->familyIndices.graphicsFamily.value(), &GRAPHICS_DATA.graphicsPool);
+        CreateCommandBuffers(*GRAPHICS_DATA.defaultDevice, &GRAPHICS_DATA.graphicsPool, 1);
     }
 
     static void DestroyLogicalDevice(LogicalDevice& device)
@@ -225,6 +228,7 @@ namespace hf
     {
         vmaDestroyAllocator(GRAPHICS_DATA.allocator);
         DestroyCommandPool(*GRAPHICS_DATA.defaultDevice, GRAPHICS_DATA.transferPool);
+        DestroyCommandPool(*GRAPHICS_DATA.defaultDevice, GRAPHICS_DATA.graphicsPool);
         DestroyRenderPass(&GRAPHICS_DATA.renderPass);
 
         for (auto& device : GRAPHICS_DATA.suitableDevices)

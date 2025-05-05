@@ -33,10 +33,10 @@ namespace hf
                 VkCreateBufferInfo createInfo
                 {
                     .size = bufferSize,
-                    .pQueueFamilies = nullptr,
-                    .familyCount = 0,
                     .usage = VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
                     .memoryType = BufferMemoryType::WriteOnly,
+                    .pQueueFamilies = nullptr,
+                    .familyCount = 0,
                 };
 
                 CreateBuffer(createInfo, &buffer, &bufferMemory);
