@@ -12,14 +12,15 @@ namespace hf
 
         struct TexturePackUploadInfo
         {
-            std::string filePath;
-            TextureFormat format;
-            TextureType type;
-            TextureChannel desiredChannel;
+            std::string filePath{};
+            TextureFormat format = TextureFormat::R8G8B8A8_Srgb;
+            TextureChannel desiredChannel = TextureChannel::RGBA;
         };
 
         TexturePackUploadInfo* pUploadInfos{};
         uint32_t textureCount{};
+        TextureType type = TextureType::Tex2D;
+        BufferMemoryType memoryType = BufferMemoryType::Static;
         void* handle{};
     };
 }

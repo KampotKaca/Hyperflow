@@ -30,6 +30,7 @@ namespace app
 	hf::Ref<hf::Shader> shader;
 	hf::Ref<hf::VertBuffer> vertBuffer;
 	hf::Ref<hf::IndexBuffer> indexBuffer;
+	hf::Ref<hf::TexturePack> texPack;
 	hf::BufferAttrib bufferAttrib;
 	hf::UniformBuffer cameraBuffer;
 	hf::UniformStorage uniformStorage;
@@ -121,6 +122,23 @@ namespace app
 		};
 
 		shader = hf::shader::Create(shaderInfo);
+
+		hf::TextureCreationInfo texInfo
+		{
+			.filePath = "greek_head.jpg",
+			.format = hf::TextureFormat::B8G8R8A8_Srgb,
+			.desiredChannel = hf::TextureChannel::RGBA
+		};
+
+		hf::TexturePackCreationInfo texPackInfo
+		{
+			.pTextures = &texInfo,
+			.textureCount = 1,
+			.type = hf::TextureType::Tex2D,
+			.memoryType = hf::BufferMemoryType::Static
+		};
+
+		texPack = hf::texture::CreatePack(texPackInfo);
 	}
 
 	void Application::Start()

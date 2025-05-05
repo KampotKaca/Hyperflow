@@ -548,7 +548,6 @@ namespace hf
 	{
 		const char* filePath{};
 		TextureFormat format = TextureFormat::R8G8B8A8_Srgb;
-		TextureType type = TextureType::Tex2D;
 		TextureChannel desiredChannel = TextureChannel::RGBA;
 	};
 
@@ -556,6 +555,8 @@ namespace hf
 	{
 		TextureCreationInfo* pTextures{};
 		uint32_t textureCount{};
+		TextureType type = TextureType::Tex2D;
+		BufferMemoryType memoryType = BufferMemoryType::Static;
 	};
 
 	enum class RenderingApiType { None, Vulkan, Direct3D };

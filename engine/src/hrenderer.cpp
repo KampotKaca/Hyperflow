@@ -93,6 +93,7 @@ namespace hf
             vertbuffer::DestroyAll(internalOnly);
             indexbuffer::DestroyAll(internalOnly);
             shader::DestroyAll(internalOnly);
+            texture::DestroyAll(internalOnly);
         }
     }
 

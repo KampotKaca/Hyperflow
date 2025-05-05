@@ -120,6 +120,15 @@ namespace hf
 		void Bind(const Ref<Renderer>& renderer, const Ref<Shader>& shader, BufferAttrib attrib);
 	}
 
+	namespace texture
+	{
+		Ref<TexturePack> CreatePack(const TexturePackCreationInfo& info);
+		void Destroy(const Ref<TexturePack>& pack);
+		void Destroy(const Ref<TexturePack>* pPacks, uint32_t count);
+		void DestroyAll(bool internalOnly = false);
+		bool IsRunning(const Ref<TexturePack>& pack);
+	}
+
 	namespace bufferattrib
 	{
 		BufferAttrib Define(const BufferAttribDefinitionInfo& info);

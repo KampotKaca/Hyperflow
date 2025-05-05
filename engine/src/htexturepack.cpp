@@ -7,23 +7,63 @@ namespace hf
 {
     TexturePack::TexturePack(const TexturePackCreationInfo& info)
     {
+        type = info.type;
+        memoryType = info.memoryType;
         textureCount = info.textureCount;
         pUploadInfos = (TexturePackUploadInfo*)utils::Allocate(info.textureCount * sizeof(TexturePackUploadInfo));
 
         for (uint32_t i = 0; i < info.textureCount; i++)
         {
+            new (&pUploadInfos[i]) TexturePackUploadInfo();
             auto& uploadInfo = pUploadInfos[i];
             auto& inputInfo = info.pTextures[i];
+            uploadInfo.filePath = inputInfo.filePath;
             uploadInfo.format = inputInfo.format;
-            uploadInfo.type = inputInfo.type;
             uploadInfo.desiredChannel = inputInfo.desiredChannel;
-            uploadInfo.filePath = std::string(inputInfo.filePath);
         }
+
+        inter::rendering::CreateTexturePack_i(this);
     }
 
     TexturePack::~TexturePack()
     {
         utils::Deallocate(pUploadInfos);
+        inter::rendering::DestroyTexturePack_i(this);
+    }
+
+    namespace texture
+    {
+        Ref<TexturePack> CreatePack(const TexturePackCreationInfo& info)
+        {
+            Ref<TexturePack> texPack = MakeRef<TexturePack>(info);
+            inter::HF.graphicsResources.texturePacks[texPack.get()] = texPack;
+            return texPack;
+        }
+
+        void Destroy(const Ref<TexturePack>& pack)
+        {
+            if (inter::rendering::DestroyTexturePack_i(pack.get()))
+                inter::HF.graphicsResources.texturePacks.erase(pack.get());
+        }
+
+        void Destroy(const Ref<TexturePack>* pPacks, uint32_t count)
+        {
+            for (uint32_t i = 0; i < count; i++)
+            {
+                auto pack = pPacks[i];
+                if (inter::rendering::DestroyTexturePack_i(pack.get()))
+                    inter::HF.graphicsResources.texturePacks.erase(pack.get());
+            }
+        }
+
+        void DestroyAll(bool internalOnly)
+        {
+            for (const auto& pack : std::ranges::views::values(inter::HF.graphicsResources.texturePacks))
+                inter::rendering::DestroyTexturePack_i(pack.get());
+            if (!internalOnly) inter::HF.graphicsResources.texturePacks.clear();
+        }
+
+        bool IsRunning(const Ref<TexturePack>& pack) { return pack->handle; }
     }
 
     namespace inter::rendering
@@ -54,9 +94,14 @@ namespace hf
                 if (pixels)
                 {
                     auto& creationInfo = creationInfos[i];
-                    creationInfo.size = size;
-                    creationInfo.channel = (TextureChannel)texChannels;
-                    creationInfo.data = pixels;
+                    creationInfo =
+                    {
+                        .size = size,
+                        .channel = (TextureChannel)texChannels,
+                        .format = uploadInfo.format,
+                        .mipLevels = 1,
+                        .data = pixels
+                    };
                     validTextureCount++;
                 }
                 else creationInfos[i] = {};
@@ -67,7 +112,9 @@ namespace hf
             TexturePackCreationInfo creationInfo
             {
                 .pTextures = creationInfos.data(),
-                .textureCount = (uint32_t)creationInfos.size()
+                .textureCount = (uint32_t)creationInfos.size(),
+                .type = texPack->type,
+                .memoryType = texPack->memoryType,
             };
 
             texPack->handle = HF.renderingApi.api.CreateTexturePack(creationInfo);

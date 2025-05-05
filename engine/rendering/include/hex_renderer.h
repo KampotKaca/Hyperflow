@@ -56,6 +56,7 @@ namespace hf::inter::rendering
         TextureChannel channel;
         uint32_t mipLevels = 1;
         void* data{};
+        TextureFormat format = TextureFormat::B8G8R8A8_Srgb;
     };
 
     struct TexturePackCreationInfo
@@ -63,7 +64,6 @@ namespace hf::inter::rendering
         TextureCreationInfo* pTextures{};
         uint32_t textureCount = 0;
         TextureType type = TextureType::Tex2D;
-        TextureFormat format = TextureFormat::B8G8R8A8_Srgb;
         BufferMemoryType memoryType = BufferMemoryType::Static;
     };
 
