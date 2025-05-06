@@ -53,21 +53,21 @@ namespace hf::inter
 
     namespace alloc
     {
-        void LoadAllocatorThread();
-        void UnloadAllocatorThread();
-        void UnloadAllocator();
+        void LoadAllocatorThread_i();
+        void UnloadAllocatorThread_i();
+        void UnloadAllocator_i();
 
-        void LogMemoryStats();
-        void LogThreadMemoryStats();
+        void LogMemoryStats_i();
+        void LogThreadMemoryStats_i();
     }
 
     namespace rendering
     {
-        void LoadApi(RenderingApiType api);
-        void UnloadCurrentApi(bool retainReferences);
+        void LoadApi_i(RenderingApiType api);
+        void UnloadCurrentApi_i(bool retainReferences);
 
-        void CreateRenderer(Renderer* rn);
-        void DestroyRenderer(Renderer* rn);
+        void CreateRenderer_i(Renderer* rn);
+        void DestroyRenderer_i(Renderer* rn);
 
         bool CreateShader_i(Shader* shader);
         bool DestroyShader_i(Shader* shader);

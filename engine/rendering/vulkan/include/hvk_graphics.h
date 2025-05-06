@@ -8,6 +8,7 @@
 #include "hvk_uniformbuffer.h"
 #include "hvk_uniformstorage.h"
 #include "hvk_uniformallocator.h"
+#include "hvk_texturesampler.h"
 #include "hvk_platform.h"
 
 namespace hf
@@ -126,6 +127,7 @@ namespace hf
         std::vector<VkUniformBuffer> uniformBuffers{};
         std::vector<VkUniformStorage> uniformStorages{};
         std::vector<VkUniformAllocator> uniformAllocators{};
+        std::vector<VkTextureSampler> textureSamplers{};
         std::vector<VkCopyBufferToBufferOperation> bufferToBufferCopyOperations{};
         std::vector<VkCopyBufferToImageOperation> bufferToImageCopyOperations{};
 

@@ -15,6 +15,7 @@ namespace hf
             std::string filePath{};
             TextureFormat format = TextureFormat::R8G8B8A8_Srgb;
             TextureChannel desiredChannel = TextureChannel::RGBA;
+            TextureSampler sampler{};
         };
 
         TexturePackUploadInfo* pUploadInfos{};

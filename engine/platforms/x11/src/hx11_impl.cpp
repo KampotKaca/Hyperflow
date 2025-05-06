@@ -43,7 +43,7 @@ namespace hf::inter
         {
             if (win->handle)
             {
-                rendering::DestroyRenderer(win->renderer.get());
+                rendering::DestroyRenderer_i(win->renderer.get());
                 win->renderer = nullptr;
                 X11_WindowClose(win);
                 return true;

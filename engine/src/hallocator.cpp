@@ -24,7 +24,7 @@ namespace hf
             EnsureAllocatorInit();
 
 #if DEBUG
-            inter::alloc::LoadAllocatorThread();
+            inter::alloc::LoadAllocatorThread_i();
 #endif
 
             void* memory = rpmalloc(n);
@@ -58,23 +58,23 @@ namespace hf
             return (double)bytes * (1.0 / (1024.0 * 1024.0));
         }
 
-        void UnloadAllocator()
+        void UnloadAllocator_i()
         {
             rpmalloc_thread_finalize(1);
             rpmalloc_finalize();
         }
 
-        void LoadAllocatorThread()
+        void LoadAllocatorThread_i()
         {
             if (!rpmalloc_is_thread_initialized()) rpmalloc_thread_initialize();
         }
 
-        void UnloadAllocatorThread()
+        void UnloadAllocatorThread_i()
         {
             if (rpmalloc_is_thread_initialized()) rpmalloc_thread_finalize(true);
         }
 
-        void LogMemoryStats()
+        void LogMemoryStats_i()
         {
             rpmalloc_global_statistics_t sts{};
             rpmalloc_global_statistics(&sts);
@@ -82,7 +82,7 @@ namespace hf
                 ToMB(sts.mapped), ToMB(sts.mapped_peak), ToMB(sts.cached), ToMB(sts.huge_alloc), ToMB(sts.huge_alloc_peak), ToMB(sts.mapped_total), ToMB(sts.unmapped_total));
         }
 
-        void LogThreadMemoryStats()
+        void LogThreadMemoryStats_i()
         {
             rpmalloc_thread_statistics_t sts{};
             rpmalloc_thread_statistics(&sts);

@@ -10,19 +10,19 @@ namespace hf
     Renderer::Renderer(uvec2 initialSize)
     {
         size = initialSize;
-        inter::rendering::CreateRenderer(this);
+        inter::rendering::CreateRenderer_i(this);
     }
 
     Renderer::Renderer(const Window* window)
     {
         windowHandle = inter::window::GetWindowHandle(window);
         size = window->rect.size;
-        inter::rendering::CreateRenderer(this);
+        inter::rendering::CreateRenderer_i(this);
     }
 
     Renderer::~Renderer()
     {
-        inter::rendering::DestroyRenderer(this);
+        inter::rendering::DestroyRenderer_i(this);
     }
 
     namespace renderer
@@ -34,7 +34,7 @@ namespace hf
 
         void Destroy(const Ref<Renderer>& rn)
         {
-            inter::rendering::DestroyRenderer(rn.get());
+            inter::rendering::DestroyRenderer_i(rn.get());
         }
 
         bool IsRunning(const Ref<Renderer>& rn) { return rn->handle; }
@@ -46,8 +46,8 @@ namespace hf
                 LOG_ERROR("[Hyperflow] %s", "Invalid render Api to load");
                 return;
             }
-            inter::rendering::UnloadCurrentApi(true);
-            inter::rendering::LoadApi(targetApi);
+            inter::rendering::UnloadCurrentApi_i(true);
+            inter::rendering::LoadApi_i(targetApi);
         }
 
         RenderingApiType GetApiType() { return inter::HF.renderingApi.type; }
@@ -93,13 +93,13 @@ namespace hf
             vertbuffer::DestroyAll(internalOnly);
             indexbuffer::DestroyAll(internalOnly);
             shader::DestroyAll(internalOnly);
-            texture::DestroyAll(internalOnly);
+            texturepack::DestroyAll(internalOnly);
         }
     }
 
     namespace inter::rendering
     {
-        void LoadApi(RenderingApiType api)
+        void LoadApi_i(RenderingApiType api)
         {
             if (HF.renderingApi.type != RenderingApiType::None) throw GENERIC_EXCEPT("[Hyperflow]", "Cannot load multiple rendering APIs, need unload current one first");
 
@@ -125,7 +125,7 @@ namespace hf
 
             for (auto& win : HF.windows)
             {
-                if (win->renderer) CreateRenderer(win->renderer.get());
+                if (win->renderer) CreateRenderer_i(win->renderer.get());
                 else win->renderer = MakeRef<Renderer>(win.get());
             }
 
@@ -137,7 +137,7 @@ namespace hf
             for (auto& texPack : std::ranges::views::values(HF.graphicsResources.texturePacks)) CreateTexturePack_i(texPack.get());
         }
 
-        void UnloadCurrentApi(bool retainReferences)
+        void UnloadCurrentApi_i(bool retainReferences)
         {
             if (HF.renderingApi.type == RenderingApiType::None) return;
 
@@ -145,7 +145,7 @@ namespace hf
             {
                 if (window->renderer)
                 {
-                    DestroyRenderer(window->renderer.get());
+                    DestroyRenderer_i(window->renderer.get());
                     if (!retainReferences) window->renderer = nullptr;
                 }
             }
@@ -159,7 +159,7 @@ namespace hf
             };
         }
 
-        void CreateRenderer(Renderer* rn)
+        void CreateRenderer_i(Renderer* rn)
         {
             if (HF.rendererCount == 0)
             {
@@ -193,7 +193,7 @@ namespace hf
             rn->handle = HF.renderingApi.api.CreateInstance(createInfo);
         }
 
-        void DestroyRenderer(Renderer* rn)
+        void DestroyRenderer_i(Renderer* rn)
         {
             if (rn->handle)
             {

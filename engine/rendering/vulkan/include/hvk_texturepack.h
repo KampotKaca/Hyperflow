@@ -8,13 +8,16 @@ namespace hf
     struct VkTexture
     {
         VkImage image{};
-        uvec3 size{};
+        VkImageView view{};
+        VmaAllocation imageMemory{};
+
         TextureChannel channel{};
         TextureFormat format{};
+
+        uvec3 size{};
         uint64_t bufferOffset{};
         uint64_t bufferSize{};
         uint32_t mipLevels{};
-        VmaAllocation imageMemory{};
     };
 
     struct VkTexturePack

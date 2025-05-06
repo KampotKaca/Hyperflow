@@ -20,6 +20,9 @@ namespace hf
             uploadInfo.filePath = inputInfo.filePath;
             uploadInfo.format = inputInfo.format;
             uploadInfo.desiredChannel = inputInfo.desiredChannel;
+            uploadInfo.sampler = inputInfo.sampler;
+
+            if (uploadInfo.sampler == 0) throw GENERIC_EXCEPT("[Hyperflow]", "Every texture needs a sampler to read");
         }
 
         inter::rendering::CreateTexturePack_i(this);
@@ -31,9 +34,9 @@ namespace hf
         inter::rendering::DestroyTexturePack_i(this);
     }
 
-    namespace texture
+    namespace texturepack
     {
-        Ref<TexturePack> CreatePack(const TexturePackCreationInfo& info)
+        Ref<TexturePack> Create(const TexturePackCreationInfo& info)
         {
             Ref<TexturePack> texPack = MakeRef<TexturePack>(info);
             inter::HF.graphicsResources.texturePacks[texPack.get()] = texPack;
@@ -64,6 +67,11 @@ namespace hf
         }
 
         bool IsRunning(const Ref<TexturePack>& pack) { return pack->handle; }
+
+        TextureSampler Define(const TextureSamplerDefinitionInfo& info)
+        {
+            return inter::HF.renderingApi.api.DefineTextureSampler(info);
+        }
     }
 
     namespace inter::rendering
@@ -98,9 +106,10 @@ namespace hf
                     {
                         .size = size,
                         .channel = (TextureChannel)texChannels,
-                        .format = uploadInfo.format,
                         .mipLevels = 1,
-                        .data = pixels
+                        .data = pixels,
+                        .format = uploadInfo.format,
+                        .sampler = uploadInfo.sampler,
                     };
                     validTextureCount++;
                 }

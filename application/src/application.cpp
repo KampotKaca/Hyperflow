@@ -35,6 +35,7 @@ namespace app
 	hf::UniformBuffer cameraBuffer;
 	hf::UniformStorage uniformStorage;
 	hf::UniformAllocator uniformAllocator;
+	hf::TextureSampler sampler;
 
 	struct Camera
 	{
@@ -88,6 +89,16 @@ namespace app
 		};
 
 		uniformStorage = hf::uniformstorage::Define(uniformStorageDefinitionInfo);
+
+		hf::TextureSamplerDefinitionInfo samplerDefinitionInfo
+		{
+			.filter = hf::TextureFilter::Cubic,
+			.anisotropicFilter = hf::TextureAnisotropicFilter::X16,
+			.repeatMode = hf::TextureRepeatMode::Repeat,
+			.useNormalizedCoordinates = false,
+			.comparison = hf::ComparisonOperation::None
+		};
+		sampler = hf::texturesampler::Define(samplerDefinitionInfo);
 	}
 
 	void Application::LoadResources()
@@ -127,7 +138,8 @@ namespace app
 		{
 			.filePath = "greek_head.jpg",
 			.format = hf::TextureFormat::B8G8R8A8_Srgb,
-			.desiredChannel = hf::TextureChannel::RGBA
+			.desiredChannel = hf::TextureChannel::RGBA,
+			.sampler = sampler
 		};
 
 		hf::TexturePackCreationInfo texPackInfo
@@ -138,7 +150,7 @@ namespace app
 			.memoryType = hf::BufferMemoryType::Static
 		};
 
-		texPack = hf::texture::CreatePack(texPackInfo);
+		texPack = hf::texturepack::Create(texPackInfo);
 	}
 
 	void Application::Start()

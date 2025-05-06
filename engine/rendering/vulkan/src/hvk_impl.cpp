@@ -60,6 +60,12 @@ namespace hf::inter::rendering
         delete (VkTexturePack*)txPack;
     }
 
+    uint32_t DefineTextureSampler(const TextureSamplerDefinitionInfo& info)
+    {
+        GRAPHICS_DATA.textureSamplers.emplace_back(info);
+        return GRAPHICS_DATA.textureSamplers.size();
+    }
+
     uint32_t DefineVertBufferAttrib(const BufferAttribDefinitionInfo& info, uint32_t fullStride)
     {
         GRAPHICS_DATA.bufferAttribs.emplace_back(info, fullStride);
@@ -230,8 +236,12 @@ namespace hf::inter::rendering
             .DestroyShader              = &DestroyShader,
             .BindShader                 = &BindShader,
 
+            //texture pack
             .CreateTexturePack          = &CreateTexturePack,
             .DestroyTexturePack         = &DestroyTexturePack,
+
+            //texture sampler
+            .DefineTextureSampler       = &DefineTextureSampler,
 
             //buffer attribute
             .DefineVertBufferAttrib     = &DefineVertBufferAttrib,

@@ -57,6 +57,7 @@ namespace hf::inter::rendering
         uint32_t mipLevels = 1;
         void* data{};
         TextureFormat format = TextureFormat::B8G8R8A8_Srgb;
+        TextureSampler sampler{};
     };
 
     struct TexturePackCreationInfo
@@ -92,6 +93,9 @@ namespace hf::inter::rendering
         //texture pack
         void* (*CreateTexturePack)(const TexturePackCreationInfo& info);
         void (*DestroyTexturePack)(void* txPack);
+
+        //texture sampler
+        uint32_t (*DefineTextureSampler)(const TextureSamplerDefinitionInfo& info);
 
         //buffer attribute
         uint32_t (*DefineVertBufferAttrib)(const BufferAttribDefinitionInfo& info, uint32_t fullStride);

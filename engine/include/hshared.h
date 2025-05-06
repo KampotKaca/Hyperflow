@@ -156,6 +156,7 @@ namespace hf
 	typedef uint32_t UniformBuffer;
 	typedef uint32_t UniformStorage;
 	typedef uint32_t UniformAllocator;
+	typedef uint32_t TextureSampler;
 
 	enum class BufferDataType { U8, I8, U16, I16, U32, I32, U64, I64, F16, F32, F64, Count };
 	enum class BufferMemoryType { Static, WriteOnly, ReadWrite, Count };
@@ -540,15 +541,29 @@ namespace hf
 	    A8_Unorm = 1000470001,
 	};
 
-
 	enum class TextureType   	{ Tex1D = 0, Tex2D = 1, Tex3D = 2 };
 	enum class TextureChannel   { Default = 0, Gray = 1, GrayAlpha = 2, RGB = 3, RGBA = 4 };
+
+	enum class TextureFilter			{ Point = 0, Bilinear = 1, Cubic = 1000015000 };
+	enum class TextureAnisotropicFilter	{ None, X2 = 2, X4 = 4, X8 = 8, X16 = 16, X32 = 32 };
+	enum class TextureRepeatMode		{ Repeat = 0, MirroredRepeat = 1, ClampToEdge = 2, ClampToBorder = 3, MirrorClampToEdge = 4 };
+	enum class ComparisonOperation		{ None = 0, Never = 1, Less = 2, Equal = 3, LessOrEqual = 4, Greater = 5, NotEqual = 6, GreaterOrEqual = 7, Always = 8 };
+
+	struct TextureSamplerDefinitionInfo
+	{
+		TextureFilter filter = TextureFilter::Bilinear;
+		TextureAnisotropicFilter anisotropicFilter = TextureAnisotropicFilter::X8;
+		TextureRepeatMode repeatMode = TextureRepeatMode::Repeat;
+		bool useNormalizedCoordinates = false;
+		ComparisonOperation comparison = ComparisonOperation::None;
+	};
 
 	struct TextureCreationInfo
 	{
 		const char* filePath{};
 		TextureFormat format = TextureFormat::R8G8B8A8_Srgb;
 		TextureChannel desiredChannel = TextureChannel::RGBA;
+		TextureSampler sampler{};
 	};
 
 	struct TexturePackCreationInfo

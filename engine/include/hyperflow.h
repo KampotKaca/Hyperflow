@@ -120,13 +120,18 @@ namespace hf
 		void Bind(const Ref<Renderer>& renderer, const Ref<Shader>& shader, BufferAttrib attrib);
 	}
 
-	namespace texture
+	namespace texturepack
 	{
-		Ref<TexturePack> CreatePack(const TexturePackCreationInfo& info);
+		Ref<TexturePack> Create(const TexturePackCreationInfo& info);
 		void Destroy(const Ref<TexturePack>& pack);
 		void Destroy(const Ref<TexturePack>* pPacks, uint32_t count);
 		void DestroyAll(bool internalOnly = false);
 		bool IsRunning(const Ref<TexturePack>& pack);
+	}
+
+	namespace texturesampler
+	{
+		TextureSampler Define(const TextureSamplerDefinitionInfo& info);
 	}
 
 	namespace bufferattrib

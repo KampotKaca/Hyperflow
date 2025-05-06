@@ -15,7 +15,7 @@ namespace hf
 
 	void Shutdown()
 	{
-		inter::alloc::UnloadAllocator();
+		inter::alloc::UnloadAllocator_i();
 	}
 
 	void Run(const EngineData& engineData)
@@ -33,7 +33,7 @@ namespace hf
 
 			inter::HF.mainWindow = window::Open(engineData.windowData, nullptr);
 
-			inter::rendering::LoadApi(engineData.renderingApi);
+			inter::rendering::LoadApi_i(engineData.renderingApi);
 			if(inter::HF.lifecycleCallbacks.onResourcesLoad) inter::HF.lifecycleCallbacks.onResourcesLoad();
 			inter::HF.renderingApi.api.SubmitStagedCopyOperations();
 			inter::HF.isRunning = true;
@@ -50,7 +50,7 @@ namespace hf
 
 				if(input::IsDown(Key::Escape))
 				{
-					inter::alloc::LogThreadMemoryStats();
+					inter::alloc::LogThreadMemoryStats_i();
 					Terminate();
 				}
 
