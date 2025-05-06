@@ -15,7 +15,6 @@ namespace hf
     {
         VK_KHR_SURFACE_EXTENSION_NAME,
         "VK_KHR_win32_surface",
-
 #if DEBUG
         "VK_EXT_debug_utils"
 #endif

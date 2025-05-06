@@ -13,13 +13,13 @@ struct ThreadWrapper
 
 DWORD WINAPI ThreadStartWrapper(LPVOID arg)
 {
-    hf::inter::alloc::LoadAllocatorThread();
+    hf::inter::alloc::LoadAllocatorThread_i();
 
-    ThreadWrapper* wrapper = (ThreadWrapper*)arg;
+    auto* wrapper = (ThreadWrapper*)arg;
     DWORD result = wrapper->original_start(wrapper->original_arg);
 
     delete wrapper;
-    hf::inter::alloc::UnloadAllocatorThread();
+    hf::inter::alloc::UnloadAllocatorThread_i();
     return result;
 }
 
@@ -36,25 +36,27 @@ HANDLE WINAPI HookedCreateThread(
     return real_CreateThread(lpThreadAttributes, dwStackSize, ThreadStartWrapper, wrapper, dwCreationFlags, lpThreadId);
 }
 
-// Simple IAT patching function
 void HookIAT(const char* funcName, void* newFunc, void** originalFuncOut)
 {
-    HMODULE hModule = GetModuleHandle(nullptr); // Main executable
+    HMODULE hModule = GetModuleHandle(nullptr);
     ULONG size;
-    PIMAGE_IMPORT_DESCRIPTOR importDesc = (PIMAGE_IMPORT_DESCRIPTOR)ImageDirectoryEntryToData(
+    auto importDesc = (PIMAGE_IMPORT_DESCRIPTOR)ImageDirectoryEntryToData(
         hModule, TRUE, IMAGE_DIRECTORY_ENTRY_IMPORT, &size);
 
-    for (; importDesc->Name; importDesc++) {
-        LPCSTR modName = (LPCSTR)((PBYTE)hModule + importDesc->Name);
+    for (; importDesc->Name; importDesc++)
+    {
+        auto modName = (LPCSTR)((PBYTE)hModule + importDesc->Name);
         HMODULE dll = GetModuleHandleA(modName);
         if (!dll) continue;
 
-        PIMAGE_THUNK_DATA origThunk = (PIMAGE_THUNK_DATA)((PBYTE)hModule + importDesc->OriginalFirstThunk);
-        PIMAGE_THUNK_DATA thunk = (PIMAGE_THUNK_DATA)((PBYTE)hModule + importDesc->FirstThunk);
+        auto origThunk = (PIMAGE_THUNK_DATA)((PBYTE)hModule + importDesc->OriginalFirstThunk);
+        auto thunk = (PIMAGE_THUNK_DATA)((PBYTE)hModule + importDesc->FirstThunk);
 
-        for (; origThunk->u1.AddressOfData; ++origThunk, ++thunk) {
-            PIMAGE_IMPORT_BY_NAME import = (PIMAGE_IMPORT_BY_NAME)((PBYTE)hModule + origThunk->u1.AddressOfData);
-            if (strcmp((char*)import->Name, funcName) == 0) {
+        for (; origThunk->u1.AddressOfData; ++origThunk, ++thunk)
+        {
+            auto import = (PIMAGE_IMPORT_BY_NAME)((PBYTE)hModule + origThunk->u1.AddressOfData);
+            if (strcmp((char*)import->Name, funcName) == 0)
+            {
                 DWORD oldProtect;
                 VirtualProtect(&thunk->u1.Function, sizeof(void*), PAGE_EXECUTE_READWRITE, &oldProtect);
 

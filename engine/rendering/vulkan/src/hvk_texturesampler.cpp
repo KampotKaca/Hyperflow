@@ -10,15 +10,15 @@ namespace hf
             .sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO,
             .magFilter = (VkFilter)info.filter,
             .minFilter = (VkFilter)info.filter,
+            .mipmapMode = VK_SAMPLER_MIPMAP_MODE_LINEAR,
             .addressModeU = (VkSamplerAddressMode)info.repeatMode,
             .addressModeV = (VkSamplerAddressMode)info.repeatMode,
             .addressModeW = (VkSamplerAddressMode)info.repeatMode,
-            .borderColor = VK_BORDER_COLOR_INT_OPAQUE_BLACK,
-            .unnormalizedCoordinates = !info.useNormalizedCoordinates,
-            .mipmapMode = VK_SAMPLER_MIPMAP_MODE_LINEAR,
             .mipLodBias = 0.0f,
             .minLod = 0.0f,
             .maxLod = 0.0f,
+            .borderColor = VK_BORDER_COLOR_INT_OPAQUE_BLACK,
+            .unnormalizedCoordinates = !info.useNormalizedCoordinates,
         };
 
         if (info.anisotropicFilter != TextureAnisotropicFilter::None &&

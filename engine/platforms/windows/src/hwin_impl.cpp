@@ -89,7 +89,7 @@ namespace hf::inter
         {
             if (win->handle && IsWindow((HWND)win->handle))
             {
-                rendering::DestroyRenderer(win->renderer.get());
+                rendering::DestroyRenderer_i(win->renderer.get());
                 win->renderer = nullptr;
                 Win_WindowClose(win);
                 return true;

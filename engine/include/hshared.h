@@ -544,7 +544,7 @@ namespace hf
 	enum class TextureType   	{ Tex1D = 0, Tex2D = 1, Tex3D = 2 };
 	enum class TextureChannel   { Default = 0, Gray = 1, GrayAlpha = 2, RGB = 3, RGBA = 4 };
 
-	enum class TextureFilter			{ Point = 0, Bilinear = 1, Cubic = 1000015000 };
+	enum class TextureFilter			{ Point = 0, Bilinear = 1 };
 	enum class TextureAnisotropicFilter	{ None, X2 = 2, X4 = 4, X8 = 8, X16 = 16, X32 = 32 };
 	enum class TextureRepeatMode		{ Repeat = 0, MirroredRepeat = 1, ClampToEdge = 2, ClampToBorder = 3, MirrorClampToEdge = 4 };
 	enum class ComparisonOperation		{ None = 0, Never = 1, Less = 2, Equal = 3, LessOrEqual = 4, Greater = 5, NotEqual = 6, GreaterOrEqual = 7, Always = 8 };
@@ -554,7 +554,7 @@ namespace hf
 		TextureFilter filter = TextureFilter::Bilinear;
 		TextureAnisotropicFilter anisotropicFilter = TextureAnisotropicFilter::X8;
 		TextureRepeatMode repeatMode = TextureRepeatMode::Repeat;
-		bool useNormalizedCoordinates = false;
+		bool useNormalizedCoordinates = true;
 		ComparisonOperation comparison = ComparisonOperation::None;
 	};
 

@@ -48,6 +48,11 @@ namespace hf::inter::rendering
 
     }
 
+    uint32_t DefineTextureSampler(const TextureSamplerDefinitionInfo& info)
+    {
+        return 1;
+    }
+
     uint32_t DefineVertBufferAttrib(const BufferAttribDefinitionInfo& info, uint32_t fullStride)
     {
         return 1;
@@ -171,6 +176,9 @@ namespace hf::inter::rendering
             //texture pack
             .CreateTexturePack          = &CreateTexturePack,
             .DestroyTexturePack         = &DestroyTexturePack,
+
+            //texture sampler
+            .DefineTextureSampler       = &DefineTextureSampler,
 
             //buffer attribute
             .DefineVertBufferAttrib     = &DefineVertBufferAttrib,

@@ -67,7 +67,10 @@ namespace hf
         }
 
         bool IsRunning(const Ref<TexturePack>& pack) { return pack->handle; }
+    }
 
+    namespace texturesampler
+    {
         TextureSampler Define(const TextureSamplerDefinitionInfo& info)
         {
             return inter::HF.renderingApi.api.DefineTextureSampler(info);

@@ -92,10 +92,10 @@ namespace app
 
 		hf::TextureSamplerDefinitionInfo samplerDefinitionInfo
 		{
-			.filter = hf::TextureFilter::Cubic,
+			.filter = hf::TextureFilter::Bilinear,
 			.anisotropicFilter = hf::TextureAnisotropicFilter::X16,
 			.repeatMode = hf::TextureRepeatMode::Repeat,
-			.useNormalizedCoordinates = false,
+			.useNormalizedCoordinates = true,
 			.comparison = hf::ComparisonOperation::None
 		};
 		sampler = hf::texturesampler::Define(samplerDefinitionInfo);
