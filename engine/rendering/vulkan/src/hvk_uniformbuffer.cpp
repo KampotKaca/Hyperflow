@@ -7,35 +7,44 @@ namespace hf
     VkUniformBuffer::VkUniformBuffer(const UniformBufferDefinitionInfo& info)
     {
         bindingIndex = info.bindingId;
-        elementSize = info.elementSizeInBytes;
-        elementCount = info.arraySize;
 
-        VkDescriptorSetLayoutBinding layoutBinding
+        std::vector<VkDescriptorSetLayoutBinding> lBindings(info.bindingCount);
+        bindings = std::vector<UniformBufferBindingInfo>(info.bindingCount);
+
+        bufferSize = 0;
+
+        for (uint32_t i = 0; i < info.bindingCount; i++)
         {
-            .binding = info.bindingId,
-            .descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
-            .descriptorCount = info.arraySize,
-            .stageFlags = (uint32_t)info.usageStageFlags,
-            .pImmutableSamplers = nullptr,
-        };
+            auto bindingInfo = info.pBindings[i];
+            bindings[i] = bindingInfo;
+
+            VkDescriptorSetLayoutBinding layout
+            {
+                .binding = info.bindingId + i,
+                .descriptorType = (VkDescriptorType)bindingInfo.type,
+                .descriptorCount = bindingInfo.arraySize,
+                .stageFlags = (uint32_t)bindingInfo.usageFlags,
+                .pImmutableSamplers = nullptr,
+            };
+            lBindings[i] = layout;
+            bufferSize += bindingInfo.elementSizeInBytes * bindingInfo.arraySize;
+        }
 
         VkDescriptorSetLayoutCreateInfo uboLayoutInfo
         {
             .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO,
-            .bindingCount = 1,
-            .pBindings = &layoutBinding,
+            .bindingCount = (uint32_t)lBindings.size(),
+            .pBindings = lBindings.data(),
         };
 
         VK_HANDLE_EXCEPT(vkCreateDescriptorSetLayout(GRAPHICS_DATA.defaultDevice->logicalDevice.device,
             &uboLayoutInfo, nullptr, &layout));
 
-        uint32_t allocationSize = elementSize * elementCount;
-
         for (uint32_t i = 0; i < FRAMES_IN_FLIGHT; i++)
         {
             VkCreateBufferInfo bufferInfo
             {
-                .size = allocationSize,
+                .size = bufferSize,
                 .usage = VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
                 .sharingMode = VK_SHARING_MODE_EXCLUSIVE,
                 .memoryType = BufferMemoryType::WriteOnly,
@@ -77,11 +86,47 @@ namespace hf
 
         for (uint32_t i = 0; i < FRAMES_IN_FLIGHT; i++)
         {
+            // std::vector<VkWriteDescriptorSet> descriptorWrites(uniform.bindings.size());
+            //
+            // for (uint32_t j = 0; j < uniform.bindings.size(); j++)
+            // {
+            //     auto& binding = uniform.bindings[j];
+            //     switch (binding.type)
+            //     {
+            //     case UniformBufferType::Sampler:
+            //     case UniformBufferType::CombinedImageSampler:
+            //     case UniformBufferType::SampledImage:
+            //     case UniformBufferType::StorageImage:
+            //     {
+            //         VkDescriptorImageInfo imageInfo
+            //         {
+            //             .imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
+            //             .imageView =
+            //         };
+            //         imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+            //         imageInfo.imageView = textureImageView;
+            //         imageInfo.sampler = textureSampler;
+            //     }
+            //         break;
+            //     case UniformBufferType::UniformTexelBuffer:
+            //     case UniformBufferType::StorageTexelBuffer:
+            //     case UniformBufferType::UniformBuffer:
+            //     case UniformBufferType::StorageBuffer:
+            //     case UniformBufferType::UniformBufferDynamic:
+            //     case UniformBufferType::StorageBufferDynamic:
+            //     {
+            //
+            //     }
+            //         break;
+            //     default: throw GENERIC_EXCEPT("[Hyperflow]", "Unsupported Uniform buffer type!"); break;
+            //     }
+            // }
+
             VkDescriptorBufferInfo bufferInfo
             {
                 .buffer = uniform.buffers[i],
                 .offset = 0,
-                .range = uniform.elementSize * uniform.elementCount,
+                .range = uniform.bufferSize,
             };
 
             VkWriteDescriptorSet descriptorWrite

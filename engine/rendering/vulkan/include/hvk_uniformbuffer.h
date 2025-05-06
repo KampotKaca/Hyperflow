@@ -10,9 +10,9 @@ namespace hf
         VkUniformBuffer(const UniformBufferDefinitionInfo& info);
         ~VkUniformBuffer();
 
-        uint32_t bindingIndex;
-        uint32_t elementSize;
-        uint32_t elementCount;
+        uint32_t bindingIndex{};
+        uint32_t bufferSize{};
+        std::vector<UniformBufferBindingInfo> bindings{};
         VkDescriptorSetLayout layout{};
         VkBuffer buffers[FRAMES_IN_FLIGHT]{};
         VmaAllocation memoryRegions[FRAMES_IN_FLIGHT]{};

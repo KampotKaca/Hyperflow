@@ -5,19 +5,45 @@ namespace hf
 {
     VkUniformAllocator::VkUniformAllocator(const UniformAllocatorDefinitionInfo& info)
     {
-        uint32_t descriptorCount = info.bufferCount * FRAMES_IN_FLIGHT;
-        VkDescriptorPoolSize poolSize
+        std::unordered_map<UniformBufferType, VkDescriptorPoolSize> poolSizes{};
+
+        for (uint32_t i = 0; i < info.bufferCount; i++)
         {
-            .type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
-            .descriptorCount = descriptorCount,
-        };
+            auto& buffer = GetUniform(info.pBuffers[i]);
+
+            for (auto& binding : buffer.bindings)
+            {
+                if (poolSizes.contains(binding.type))
+                    poolSizes[binding.type].descriptorCount += FRAMES_IN_FLIGHT;
+                else
+                {
+                    poolSizes[binding.type] =
+                    {
+                        .type = (VkDescriptorType)binding.type,
+                        .descriptorCount = FRAMES_IN_FLIGHT,
+                    };
+                }
+            }
+        }
+
+        std::vector<VkDescriptorPoolSize> pools(poolSizes.size());
+        {
+            uint32_t currentIndex = 0;
+            for (auto& size : poolSizes | std::views::values)
+            {
+                pools[currentIndex] = size;
+                currentIndex++;
+            }
+        }
+
+        uint32_t descriptorCount = info.bufferCount * FRAMES_IN_FLIGHT;
 
         VkDescriptorPoolCreateInfo poolInfo
         {
             .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO,
             .maxSets = descriptorCount,
-            .poolSizeCount = 1,
-            .pPoolSizes = &poolSize,
+            .poolSizeCount = (uint32_t)pools.size(),
+            .pPoolSizes = pools.data(),
         };
 
         auto& device = GRAPHICS_DATA.defaultDevice->logicalDevice.device;

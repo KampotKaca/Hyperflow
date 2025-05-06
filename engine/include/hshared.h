@@ -252,11 +252,23 @@ namespace hf
 		return a;
 	}
 
-	//scalar alignment 4, vec2 -> 8 vec3 and up -> 16
-	struct UniformBufferDefinitionInfo
+	enum class UniformBufferType
 	{
-		uint32_t bindingId{};
-		UniformBufferStage usageStageFlags{};
+		UniformTexelBuffer = 4, StorageTexelBuffer = 5,
+		UniformBuffer = 6, StorageBuffer = 7,
+		UniformBufferDynamic = 8, StorageBufferDynamic = 9,
+	};
+
+	enum class UniformImageType
+	{
+		Sampler = 0, CombinedImageSampler = 1,
+		SampledImage = 2, StorageImage = 3,
+	};
+
+	struct UniformBufferBindingInfo
+	{
+		UniformBufferType type = UniformBufferType::UniformBuffer;
+		UniformBufferStage usageFlags = UniformBufferStage::Vertex | UniformBufferStage::Fragment;
 
 		//this variable describes this specific uniform buffers array size,
 		//example:
@@ -265,6 +277,28 @@ namespace hf
 
 		//size of each array element
 		uint32_t elementSizeInBytes{};
+	};
+
+	struct UniformImageBindingInfo
+	{
+		UniformImageType type = UniformImageType::CombinedImageSampler;
+		UniformBufferStage usageFlags = UniformBufferStage::Vertex | UniformBufferStage::Fragment;
+
+		//this variable describes this specific uniform buffers array size,
+		//example:
+		//layout(binding = 0) uniform Camera{} CAMERA[4], in this case you set arraySize to 4
+		uint32_t arraySize{};
+
+		// Ref<TexturePack> texturePack{};
+		// uint32_t textureIndex{};
+	};
+
+	//scalar alignment 4, vec2 -> 8 vec3 and up -> 16
+	struct UniformBufferDefinitionInfo
+	{
+		uint32_t bindingId{};
+		UniformBufferBindingInfo* pBindings{};
+		uint32_t bindingCount{};
 	};
 
 	enum class UniformBufferBindingType { Graphics = 0, Compute = 1, RayTracing = 1000165000, HuaweiSubpassShading = 1000369003 };

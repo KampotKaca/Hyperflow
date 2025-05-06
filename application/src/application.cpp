@@ -64,12 +64,19 @@ namespace app
 
 		bufferAttrib = hf::bufferattrib::Define(bufferAttribDefinitionInfo);
 
+		hf::UniformBufferBindingInfo bufferBindingInfo
+		{
+			.type = hf::UniformBufferType::UniformBuffer,
+			.usageFlags = hf::UniformBufferStage::Vertex | hf::UniformBufferStage::Fragment,
+			.arraySize = 1,
+			.elementSizeInBytes = sizeof(Camera)
+		};
+
 		hf::UniformBufferDefinitionInfo cameraBufferDefinitionInfo
 		{
 			.bindingId = 0,
-			.usageStageFlags = hf::UniformBufferStage::Vertex | hf::UniformBufferStage::Fragment,
-			.arraySize = 1,
-			.elementSizeInBytes = sizeof(Camera)
+			.pBindings = &bufferBindingInfo,
+			.bindingCount = 1
 		};
 
 		cameraBuffer = hf::uniformbuffer::Define(cameraBufferDefinitionInfo);
