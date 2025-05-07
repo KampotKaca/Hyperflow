@@ -22,6 +22,7 @@ namespace hf
     VkShader::VkShader(const inter::rendering::ShaderCreationInfo& info)
     {
         uniformStorage = info.uniformStorage;
+        texturePack = (VkTexturePack*)info.texPack;
         using namespace inter;
         VkShaderModule vertModule{}, fragModule{};
         CreateShaderModule(info.vCode, info.vCodeSize, &vertModule);

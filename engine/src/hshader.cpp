@@ -2,6 +2,7 @@
 #include "hshared.h"
 #include "hinternal.h"
 #include "hyperflow.h"
+#include "htexturepack.h"
 #include "../rendering/include/hex_renderer.h"
 
 namespace hf
@@ -13,6 +14,7 @@ namespace hf
 
         uniformStorage = info.uniformStorage;
         supportedAttribCount = info.supportedAttribCount;
+        texturePack = info.texturePack;
 
         uint32_t bufferSize = sizeof(BufferAttrib) * info.supportedAttribCount;
         pSupportedAttribs = (BufferAttrib*)utils::Allocate(bufferSize);
@@ -103,6 +105,7 @@ namespace hf
                     ShaderCreationInfo creationInfo
                     {
                         .uniformStorage = shader->uniformStorage,
+                        .texPack = shader->texturePack->handle,
                         .supportedAttribCount = shader->supportedAttribCount,
                         .pSupportedAttribs = shader->pSupportedAttribs,
                         .vCode = vertexCode.data(),

@@ -2,22 +2,15 @@
 #define HVK_TEXTUREPACK_H
 
 #include "hvk_shared.h"
+#include "hvk_texture.h"
 
 namespace hf
 {
-    struct VkTexture
+    struct VkPackedTexture
     {
-        VkImage image{};
-        VkImageView view{};
-        VmaAllocation imageMemory{};
-
-        TextureChannel channel{};
-        TextureFormat format{};
-
-        uvec3 size{};
-        uint64_t bufferOffset{};
-        uint64_t bufferSize{};
-        uint32_t mipLevels{};
+        VkTexture* texture{};
+        VkDescriptorSetLayout layout{};
+        VkDescriptorSet descriptors[FRAMES_IN_FLIGHT]{};
     };
 
     struct VkTexturePack
@@ -25,11 +18,10 @@ namespace hf
         VkTexturePack(const inter::rendering::TexturePackCreationInfo& info);
         ~VkTexturePack();
 
-        std::vector<VkTexture> textures{};
-        TextureType type{};
+        std::vector<VkPackedTexture> textures{};
+        VkDescriptorPool pool{};
+        uint32_t bindingId = 0;
     };
-
-    bool IsValidTexture(const VkTexture& texture);
 }
 
 #endif //HVK_TEXTUREPACK_H

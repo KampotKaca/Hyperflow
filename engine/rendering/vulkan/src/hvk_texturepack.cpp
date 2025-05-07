@@ -5,120 +5,90 @@ namespace hf
 {
     VkTexturePack::VkTexturePack(const inter::rendering::TexturePackCreationInfo& info)
     {
-        textures = std::vector<VkTexture>(info.textureCount);
-        type = info.type;
+        textures = std::vector<VkPackedTexture>(info.textureCount);
+        bindingId = info.bindingId;
 
-        QueueFamilyIndices& familyIndices = GRAPHICS_DATA.defaultDevice->familyIndices;
-        uint32_t queus[2] = { familyIndices.transferFamily.value(), familyIndices.graphicsFamily.value() };
         auto device = GRAPHICS_DATA.defaultDevice->logicalDevice.device;
-        for (uint32_t i = 0; i < info.textureCount; i++)
+        std::vector<VkDescriptorPoolSize> poolSizes(info.textureCount);
+        uint32_t descriptorCount = info.textureCount * FRAMES_IN_FLIGHT;
+        for (uint32_t i = 0; i < info.textureCount; ++i)
         {
-            auto& texInfo = info.pTextures[i];
-            if (texInfo.data == nullptr) continue;
-
-            auto& texture = textures[i];
-            texture.size = texInfo.size;
-            texture.channel = texInfo.channel;
-            texture.mipLevels = texInfo.mipLevels;
-            texture.format = texInfo.format;
-            texture.bufferSize = texInfo.size.x * texInfo.size.y * texInfo.size.z * 4;
-            texture.bufferOffset = 0;
-
-            VkImageCreateInfo imageInfo
+            VkPackedTexture texture
             {
-                .sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO,
-                .imageType = (VkImageType)type,
-                .format = (VkFormat)texture.format,
-                .extent = { texture.size.x, texture.size.y, texture.size.z },
-                .mipLevels = texture.mipLevels,
-                .arrayLayers = 1,
-                .samples = VK_SAMPLE_COUNT_1_BIT,
-                .tiling = VK_IMAGE_TILING_OPTIMAL,
-                .usage = VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT,
-                .sharingMode = VK_SHARING_MODE_EXCLUSIVE,
-                .queueFamilyIndexCount = 2,
-                .pQueueFamilyIndices = queus,
-                .initialLayout = VK_IMAGE_LAYOUT_UNDEFINED,
+                .texture = (VkTexture*)info.pTextures[i]
             };
 
-            VK_HANDLE_EXCEPT(vkCreateImage(device, &imageInfo, nullptr, &texture.image));
-            AllocateImage(BufferMemoryType::Static, texture.image, &texture.imageMemory);
-
-            VkBuffer stagingBuffer;
-            VmaAllocation stagingBufferMemory;
-            CreateStagingBuffer(texture.bufferSize, texInfo.data, &stagingBuffer, &stagingBufferMemory);
-
-            VkBufferImageCopy copyRegion
+            VkDescriptorSetLayoutBinding samplerLayoutBinding
             {
-                .bufferOffset = 0,
-                .bufferRowLength = 0,
-                .bufferImageHeight = 0,
-                .imageSubresource =
-                {
-                    .aspectMask = VK_IMAGE_ASPECT_COLOR_BIT,
-                    .mipLevel = 0,
-                    .baseArrayLayer = 0,
-                    .layerCount = 1,
-                },
-                .imageOffset = { 0, 0, 0 },
-                .imageExtent = { texture.size.x, texture.size.y, texture.size.z },
+                .binding = bindingId + i,
+                .descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
+                .descriptorCount = 1,
+                .stageFlags = (VkShaderStageFlags)info.usageStage,
+                .pImmutableSamplers = nullptr
             };
 
-            VkCopyBufferToImageOperation copyOperation
+            VkDescriptorSetLayoutCreateInfo layoutInfo
             {
-                .srcBuffer = stagingBuffer,
-                .srcMemory = stagingBufferMemory,
-                .srcLayout = VK_IMAGE_LAYOUT_UNDEFINED,
-                .dstImage = texture.image,
-                .dstMemory = texture.imageMemory,
-                .dstLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
-                .format = (VkFormat)texture.format,
-                .regionCount = 1,
-                .deleteSrcAfterCopy = true
+                .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO,
+                .bindingCount = 1,
+                .pBindings = &samplerLayoutBinding
             };
 
-            copyOperation.pRegions[0] = copyRegion;
-            StageCopyOperation(copyOperation);
+            VK_HANDLE_EXCEPT(vkCreateDescriptorSetLayout(device, &layoutInfo, nullptr, &texture.layout));
+
+            poolSizes[i] =
+            {
+                .type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
+                .descriptorCount = FRAMES_IN_FLIGHT
+            };
+
+            textures[i] = texture;
         }
 
-        SubmitBufferToImageCopyOperations();
+        std::vector<VkDescriptorSetLayout> layouts(descriptorCount);
+
+        for (uint32_t i = 0; i < info.textureCount; i++)
+        {
+            for (uint32_t j = 0; j < FRAMES_IN_FLIGHT; j++)
+                layouts[i * FRAMES_IN_FLIGHT + j] = textures[i].layout;
+        }
+
+        VkDescriptorPoolCreateInfo poolInfo
+        {
+            .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO,
+            .maxSets = descriptorCount,
+            .poolSizeCount = (uint32_t)poolSizes.size(),
+            .pPoolSizes = poolSizes.data()
+        };
+
+        VK_HANDLE_EXCEPT(vkCreateDescriptorPool(device, &poolInfo, nullptr, &pool));
+
+        VkDescriptorSetAllocateInfo allocInfo
+        {
+            .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO,
+            .descriptorPool = pool,
+            .descriptorSetCount = (uint32_t)layouts.size(),
+            .pSetLayouts = layouts.data(),
+        };
+        std::vector<VkDescriptorSet> descriptorSets(layouts.size());
+        VK_HANDLE_EXCEPT(vkAllocateDescriptorSets(device, &allocInfo, descriptorSets.data()));
 
         for (uint32_t i = 0; i < info.textureCount; i++)
         {
             auto& texture = textures[i];
-            VkImageViewCreateInfo viewInfo
-            {
-                .sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO,
-                .image = texture.image,
-                .viewType = (VkImageViewType)info.type,
-                .format = (VkFormat)texture.format,
-                .subresourceRange =
-                {
-                    .aspectMask = VK_IMAGE_ASPECT_COLOR_BIT,
-                    .baseMipLevel = 0,
-                    .levelCount = 1,
-                    .baseArrayLayer = 0,
-                    .layerCount = 1,
-                }
-            };
+            memcpy(texture.descriptors, &descriptorSets[i * FRAMES_IN_FLIGHT],
+                sizeof(VkDescriptorSet) * FRAMES_IN_FLIGHT);
 
-            VK_HANDLE_EXCEPT(vkCreateImageView(device, &viewInfo, nullptr, &textures[i].view));
+            SetupTexture(texture.texture, bindingId + i, texture.descriptors);
         }
     }
 
     VkTexturePack::~VkTexturePack()
     {
-        for (auto& texture : textures)
-        {
-            vkDestroyImageView(GRAPHICS_DATA.defaultDevice->logicalDevice.device, texture.view, nullptr);
-            vmaDestroyImage(GRAPHICS_DATA.allocator, texture.image, texture.imageMemory);
-        }
+        auto device = GRAPHICS_DATA.defaultDevice->logicalDevice.device;
 
+        vkDestroyDescriptorPool(device, pool, nullptr);
+        for (auto& texture : textures) vkDestroyDescriptorSetLayout(device, texture.layout, nullptr);
         textures.clear();
-    }
-
-    bool IsValidTexture(const VkTexture& texture)
-    {
-        return texture.image != VK_NULL_HANDLE;
     }
 }

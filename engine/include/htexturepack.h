@@ -10,18 +10,9 @@ namespace hf
         TexturePack(const TexturePackCreationInfo& info);
         ~TexturePack();
 
-        struct TexturePackUploadInfo
-        {
-            std::string filePath{};
-            TextureFormat format = TextureFormat::R8G8B8A8_Srgb;
-            TextureChannel desiredChannel = TextureChannel::RGBA;
-            TextureSampler sampler{};
-        };
-
-        TexturePackUploadInfo* pUploadInfos{};
-        uint32_t textureCount{};
-        TextureType type = TextureType::Tex2D;
-        BufferMemoryType memoryType = BufferMemoryType::Static;
+        uint32_t bindingId = 0;
+        UniformBufferStage usageStage = UniformBufferStage::Vertex | UniformBufferStage::Fragment;
+        std::vector<Ref<Texture>> textures{};
         void* handle{};
     };
 }

@@ -3,6 +3,7 @@
 
 #include "hvk_shared.h"
 #include "hvk_renderer.h"
+#include "hvk_texturepack.h"
 
 namespace hf
 {
@@ -12,6 +13,7 @@ namespace hf
         ~VkShader();
 
         UniformStorage uniformStorage{};
+        VkTexturePack* texturePack{};
         std::unordered_map<BufferAttrib, VkPipeline> pipelines;
     };
 

@@ -120,6 +120,24 @@ namespace hf
 		void Bind(const Ref<Renderer>& renderer, const Ref<Shader>& shader, BufferAttrib attrib);
 	}
 
+	namespace texture
+	{
+		Ref<Texture> Create(const TextureCreationInfo& info);
+		void Destroy(const Ref<Texture>& texture);
+		void Destroy(const Ref<Texture>* pTextures, uint32_t count);
+		void DestroyAll(bool internalOnly = false);
+		bool IsRunning(const Ref<Texture>& texture);
+	}
+
+	namespace textureallocator
+	{
+		Ref<TextureAllocator> Create(const TextureAllocatorCreationInfo& info);
+		void Destroy(const Ref<TextureAllocator>& texAllocator);
+		void Destroy(const Ref<TextureAllocator>* pTexAllocators, uint32_t count);
+		void DestroyAll(bool internalOnly = false);
+		bool IsRunning(const Ref<TextureAllocator>& texAllocator);
+	}
+
 	namespace texturepack
 	{
 		Ref<TexturePack> Create(const TexturePackCreationInfo& info);

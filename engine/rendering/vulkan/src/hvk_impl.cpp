@@ -2,6 +2,7 @@
 #include "hvk_indexbuffer.h"
 #include "hvk_renderer.h"
 #include "hvk_shader.h"
+#include "hvk_textureallocator.h"
 #include "hvk_texturepack.h"
 #include "hvk_vertbuffer.h"
 #include "hvk_texturepack.h"
@@ -32,7 +33,7 @@ namespace hf::inter::rendering
 
     void DestroyInstance(void* rn)
     {
-        delete((VKRenderer*)rn);
+        delete (VKRenderer*)rn;
     }
 
     void* CreateShader(const ShaderCreationInfo& info)
@@ -48,6 +49,26 @@ namespace hf::inter::rendering
     void BindShader(const void* rn, const void* shader, BufferAttrib attrib)
     {
         BindShader((VKRenderer*)rn, (VkShader*)shader, attrib);
+    }
+
+    void* CreateTexture(const TextureCreationInfo& info)
+    {
+        return new VkTexture(info);
+    }
+
+    void DestroyTexture(void* tex)
+    {
+        delete (VkTexture*)tex;
+    }
+
+    void* CreateTextureAllocator(const TextureAllocatorCreationInfo& info)
+    {
+        return new VkTextureAllocator(info);
+    }
+
+    void DestroyTextureAllocator(void* texAlloc)
+    {
+        delete (VkTextureAllocator*)texAlloc;
     }
 
     void* CreateTexturePack(const TexturePackCreationInfo& info)
@@ -151,9 +172,14 @@ namespace hf::inter::rendering
         UploadBufferMemory(buffer->bufferMemory, info.data, fullOffset, fullSize);
     }
 
-    void SubmitStagedCopyOperations()
+    void SubmitBufferCopyOperations()
     {
-        SubmitCopyOperations();
+        SubmitBufferToBufferCopyOperations();
+    }
+
+    void SubmitTextureCopyOperations()
+    {
+        SubmitBufferToImageCopyOperations();
     }
 
     bool GetReadyForRendering(void* rn)
@@ -236,6 +262,14 @@ namespace hf::inter::rendering
             .DestroyShader              = &DestroyShader,
             .BindShader                 = &BindShader,
 
+            //texture
+            .CreateTexture              = &CreateTexture,
+            .DestroyTexture             = &DestroyTexture,
+
+            //texture allocator
+            .CreateTextureAllocator     = &CreateTextureAllocator,
+            .DestroyTextureAllocator    = &DestroyTextureAllocator,
+
             //texture pack
             .CreateTexturePack          = &CreateTexturePack,
             .DestroyTexturePack         = &DestroyTexturePack,
@@ -269,7 +303,8 @@ namespace hf::inter::rendering
             .UploadIndexBuffer          = &UploadIndexBuffer,
 
             //buffer operations
-            .SubmitStagedCopyOperations = &SubmitStagedCopyOperations,
+            .SubmitBufferCopyOperations  = SubmitBufferCopyOperations,
+            .SubmitTextureCopyOperations = SubmitTextureCopyOperations,
 
             //rendering
             .GetReadyForRendering       = &GetReadyForRendering,

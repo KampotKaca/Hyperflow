@@ -8,14 +8,15 @@ namespace app
 	{
 		hf::vec2 pos{};
 		hf::vec3 color{};
+		hf::vec2 texCoord{};
 	};
 
 	constexpr Vertex vertices[]
 	{
-		{{-0.5f, -0.5f}, {1.0f, 0.0f, 0.0f}},
-		{{0.5f, -0.5f}, {0.0f, 1.0f, 0.0f}},
-		{{0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}},
-		{{-0.5f, 0.5f}, {1.0f, 1.0f, 1.0f}}
+		{{-0.5f, -0.5f}, {1.0f, 0.0f, 0.0f}, {0.0f, 0.0f}},
+		{{0.5f, -0.5f}, {0.0f, 1.0f, 0.0f}, {1.0f, 0.0f}},
+		{{0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}, {1.0f, 1.0f}},
+		{{-0.5f, 0.5f}, {1.0f, 1.0f, 1.0f}, {0.0f, 1.0f}}
 	};
 
 	constexpr uint16_t indices[]
@@ -30,7 +31,11 @@ namespace app
 	hf::Ref<hf::Shader> shader;
 	hf::Ref<hf::VertBuffer> vertBuffer;
 	hf::Ref<hf::IndexBuffer> indexBuffer;
+
+	hf::Ref<hf::Texture> texture;
+	hf::Ref<hf::TextureAllocator> textureAllocator;
 	hf::Ref<hf::TexturePack> texPack;
+
 	hf::BufferAttrib bufferAttrib;
 	hf::UniformBuffer cameraBuffer;
 	hf::UniformStorage uniformStorage;
@@ -130,9 +135,41 @@ namespace app
 
 		indexBuffer = hf::indexbuffer::Create(indexBufferInfo);
 
+		hf::TextureCreationInfo texInfo
+		{
+			.filePath = "greek_head.jpg",
+			.type = hf::TextureType::Tex2D,
+			.format = hf::TextureFormat::B8G8R8A8_Srgb,
+			.desiredChannel = hf::TextureChannel::RGBA,
+			.memoryType = hf::BufferMemoryType::Static,
+			.sampler = sampler,
+			.mipLevels = 1
+		};
+
+		texture = hf::texture::Create(texInfo);
+
+		hf::TextureAllocatorCreationInfo texAllocInfo
+		{
+			.pTextures = &texture,
+			.textureCount = 1
+		};
+
+		textureAllocator = hf::textureallocator::Create(texAllocInfo);
+
+		hf::TexturePackCreationInfo texPackInfo
+		{
+			.bindingId = 1,
+			.usageStage = hf::UniformBufferStage::Vertex | hf::UniformBufferStage::Fragment,
+			.pTextures = &texture,
+			.textureCount = 1
+		};
+
+		texPack = hf::texturepack::Create(texPackInfo);
+
 		hf::ShaderCreationInfo shaderInfo
 		{
 			.uniformStorage = uniformStorage,
+			.texturePack = texPack,
 			.supportedAttribCount = 1,
 			.pSupportedAttribs = &bufferAttrib,
 			.vertexShaderLoc = "default",
@@ -140,24 +177,6 @@ namespace app
 		};
 
 		shader = hf::shader::Create(shaderInfo);
-
-		hf::TextureCreationInfo texInfo
-		{
-			.filePath = "greek_head.jpg",
-			.format = hf::TextureFormat::B8G8R8A8_Srgb,
-			.desiredChannel = hf::TextureChannel::RGBA,
-			.sampler = sampler
-		};
-
-		hf::TexturePackCreationInfo texPackInfo
-		{
-			.pTextures = &texInfo,
-			.textureCount = 1,
-			.type = hf::TextureType::Tex2D,
-			.memoryType = hf::BufferMemoryType::Static
-		};
-
-		texPack = hf::texturepack::Create(texPackInfo);
 	}
 
 	void Application::Start()

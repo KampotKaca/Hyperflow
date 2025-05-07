@@ -9,6 +9,7 @@ namespace hf::inter::rendering
     struct ShaderCreationInfo
     {
         UniformStorage uniformStorage{};
+        void* texPack{};
         uint32_t supportedAttribCount{};
         const BufferAttrib* pSupportedAttribs{};
 
@@ -56,16 +57,24 @@ namespace hf::inter::rendering
         TextureChannel channel;
         uint32_t mipLevels = 1;
         void* data{};
+        TextureType type = TextureType::Tex2D;
         TextureFormat format = TextureFormat::B8G8R8A8_Srgb;
+        BufferMemoryType memoryType = BufferMemoryType::Static;
         TextureSampler sampler{};
+    };
+
+    struct TextureAllocatorCreationInfo
+    {
+        void** pTextures{};
+        uint32_t textureCount = 0;
     };
 
     struct TexturePackCreationInfo
     {
-        TextureCreationInfo* pTextures{};
+        void** pTextures{};
         uint32_t textureCount = 0;
-        TextureType type = TextureType::Tex2D;
-        BufferMemoryType memoryType = BufferMemoryType::Static;
+        uint32_t bindingId = 0;
+        UniformBufferStage usageStage = UniformBufferStage::Vertex | UniformBufferStage::Fragment;
     };
 
     struct DrawCallInfo
@@ -90,9 +99,17 @@ namespace hf::inter::rendering
         void (*DestroyShader)(void* shader);
         void (*BindShader)(const void* rn, const void* shader, BufferAttrib attrib);
 
+        //texture
+        void* (*CreateTexture)(const TextureCreationInfo& info);
+        void (*DestroyTexture)(void* tex);
+
+        //texture allocator
+        void* (*CreateTextureAllocator)(const TextureAllocatorCreationInfo& info);
+        void (*DestroyTextureAllocator)(void* texAlloc);
+
         //texture pack
         void* (*CreateTexturePack)(const TexturePackCreationInfo& info);
-        void (*DestroyTexturePack)(void* txPack);
+        void (*DestroyTexturePack)(void* texPack);
 
         //texture sampler
         uint32_t (*DefineTextureSampler)(const TextureSamplerDefinitionInfo& info);
@@ -121,7 +138,10 @@ namespace hf::inter::rendering
         void* (*CreateIndexBuffer)(const IndexBufferCreationInfo& info);
         void (*DestroyIndexBuffer)(void* handle);
         void (*UploadIndexBuffer)(const IndexBufferUploadInfo& info);
-        void (*SubmitStagedCopyOperations)();
+
+        //copy operations
+        void (*SubmitBufferCopyOperations)();
+        void (*SubmitTextureCopyOperations)();
 
         //RenderingOperations
         bool (*GetReadyForRendering)(void* rn);

@@ -12,6 +12,7 @@ namespace hf
 
         std::string vertLoc{}, fragLoc{};
         UniformStorage uniformStorage{};
+        Ref<TexturePack> texturePack{};
 
         BufferAttrib* pSupportedAttribs{};
         uint32_t supportedAttribCount{};
