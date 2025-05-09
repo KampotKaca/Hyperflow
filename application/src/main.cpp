@@ -9,11 +9,6 @@ static void __attribute__((constructor)) global_init()
 	hf::Preload();
 }
 
-static void __attribute__((destructor)) global_shutdown()
-{
-	hf::Shutdown();
-}
-
 int main()
 {
 	hf::EngineData engineData =

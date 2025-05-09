@@ -154,12 +154,14 @@ namespace hf
 	struct Texture;
 	struct TextureAllocator;
 	struct TexturePack;
+	struct TexturePackAllocator;
 
 	typedef uint32_t BufferAttrib;
 	typedef uint32_t UniformBuffer;
-	typedef uint32_t UniformStorage;
 	typedef uint32_t UniformAllocator;
+	typedef uint32_t TextureLayout;
 	typedef uint32_t TextureSampler;
+	typedef uint32_t ShaderSetup;
 
 	enum class BufferDataType { U8, I8, U16, I16, U32, I32, U64, I64, F16, F32, F64, Count };
 	enum class BufferMemoryType { Static, WriteOnly, ReadWrite, Count };
@@ -217,7 +219,7 @@ namespace hf
 
 	struct ShaderCreationInfo
 	{
-		UniformStorage uniformStorage{};
+		ShaderSetup setup{};
 		Ref<TexturePack> texturePack{};
 		uint32_t supportedAttribCount{};
 		const BufferAttrib* pSupportedAttribs{};
@@ -225,32 +227,33 @@ namespace hf
 		const char* fragmentShaderLoc{};
 	};
 
-	enum class UniformBufferStage
+	enum class BufferUsageStage
 	{
 		None = 0,
 		Vertex = (1u << 0), TessellationControl = (1u << 1), TessellationEvaluation = (1u << 2),
 		Geometry = (1u << 3), Fragment = (1u << 4), Compute = (1u << 5),
+		Default = Vertex | Fragment,
 		AllGraphics = Vertex | TessellationControl | TessellationEvaluation | Geometry | Fragment,
 		All = Vertex | TessellationControl | TessellationEvaluation | Geometry | Fragment | Compute,
 	};
 
-	inline UniformBufferStage operator|(UniformBufferStage a, UniformBufferStage b)
+	inline BufferUsageStage operator|(BufferUsageStage a, BufferUsageStage b)
 	{
-		return (UniformBufferStage)((uint32_t)a | (uint32_t)b);
+		return (BufferUsageStage)((uint32_t)a | (uint32_t)b);
 	}
 
-	inline UniformBufferStage operator&(UniformBufferStage a, UniformBufferStage b)
+	inline BufferUsageStage operator&(BufferUsageStage a, BufferUsageStage b)
 	{
-		return (UniformBufferStage)((uint32_t)a & (uint32_t)b);
+		return (BufferUsageStage)((uint32_t)a & (uint32_t)b);
 	}
 
-	inline UniformBufferStage& operator|=(UniformBufferStage& a, UniformBufferStage b)
+	inline BufferUsageStage& operator|=(BufferUsageStage& a, BufferUsageStage b)
 	{
 		a = a | b;
 		return a;
 	}
 
-	inline UniformBufferStage& operator&=(UniformBufferStage& a, UniformBufferStage b)
+	inline BufferUsageStage& operator&=(BufferUsageStage& a, BufferUsageStage b)
 	{
 		a = a & b;
 		return a;
@@ -263,16 +266,17 @@ namespace hf
 		UniformBufferDynamic = 8, StorageBufferDynamic = 9,
 	};
 
-	enum class UniformImageType
+	enum class TextureLayoutType
 	{
 		Sampler = 0, CombinedImageSampler = 1,
 		SampledImage = 2, StorageImage = 3,
+		Count = 4
 	};
 
 	struct UniformBufferBindingInfo
 	{
 		UniformBufferType type = UniformBufferType::UniformBuffer;
-		UniformBufferStage usageFlags = UniformBufferStage::Vertex | UniformBufferStage::Fragment;
+		BufferUsageStage usageFlags = BufferUsageStage::Vertex | BufferUsageStage::Fragment;
 
 		//this variable describes this specific uniform buffers array size,
 		//example:
@@ -283,20 +287,6 @@ namespace hf
 		uint32_t elementSizeInBytes{};
 	};
 
-	struct UniformImageBindingInfo
-	{
-		UniformImageType type = UniformImageType::CombinedImageSampler;
-		UniformBufferStage usageFlags = UniformBufferStage::Vertex | UniformBufferStage::Fragment;
-
-		//this variable describes this specific uniform buffers array size,
-		//example:
-		//layout(binding = 0) uniform Camera{} CAMERA[4], in this case you set arraySize to 4
-		uint32_t arraySize{};
-
-		// Ref<TexturePack> texturePack{};
-		// uint32_t textureIndex{};
-	};
-
 	//scalar alignment 4, vec2 -> 8 vec3 and up -> 16
 	struct UniformBufferDefinitionInfo
 	{
@@ -305,7 +295,7 @@ namespace hf
 		uint32_t bindingCount{};
 	};
 
-	enum class UniformBufferBindingType { Graphics = 0, Compute = 1, RayTracing = 1000165000, HuaweiSubpassShading = 1000369003 };
+	enum class BindingType { Graphics = 0, Compute = 1, RayTracing = 1000165000, HuaweiSubpassShading = 1000369003 };
 
 	struct UniformBufferUpload
 	{
@@ -317,15 +307,43 @@ namespace hf
 
 	struct UniformBufferUploadInfo
 	{
-		UniformBufferBindingType bindingType = UniformBufferBindingType::Graphics;
+		BindingType bindingType = BindingType::Graphics;
+		uint32_t setBindingIndex = 0;
 		UniformBufferUpload* pUploads{};
 		uint32_t uploadCount{};
 	};
 
-	struct UniformStorageDefinitionInfo
+	struct TextureLayoutBindingInfo
+	{
+		uint32_t bindingId;
+		TextureLayoutType type = TextureLayoutType::CombinedImageSampler;
+		BufferUsageStage usageFlags = BufferUsageStage::Vertex | BufferUsageStage::Fragment;
+
+		//this variable describes this specific uniform buffers array size,
+		//example:
+		//layout(binding = 0) uniform Camera{} CAMERA[4], in this case you set arraySize to 4
+		uint32_t arraySize{};
+	};
+
+	struct TextureLayoutDefinitionInfo
+	{
+		TextureLayoutBindingInfo* pBindings;
+		uint32_t bindingCount;
+	};
+
+	struct TexturePackAllocatorCreationInfo
+	{
+		Ref<TexturePack>* pTexturePacks{};
+		uint32_t texturePackCount = 0;
+	};
+
+	struct ShaderSetupDefinitionInfo
 	{
 		UniformBuffer* pBuffers;
 		uint32_t bufferCount;
+
+		TextureLayout* pTextureLayouts;
+		uint32_t textureLayoutCount;
 	};
 
 	struct UniformAllocatorDefinitionInfo
@@ -431,7 +449,6 @@ namespace hf
 		TextureFormat format = TextureFormat::R8G8B8A8_Srgb;
 		TextureChannel desiredChannel = TextureChannel::RGBA;
 		BufferMemoryType memoryType = BufferMemoryType::Static;
-		TextureSampler sampler{};
 		uint32_t mipLevels = 1;
 	};
 
@@ -441,12 +458,25 @@ namespace hf
 		uint32_t textureCount{};
 	};
 
-	struct TexturePackCreationInfo
+	struct TexturePackBindingInfo
 	{
 		uint32_t bindingId = 0;
-		UniformBufferStage usageStage = UniformBufferStage::Vertex | UniformBufferStage::Fragment;
-		const Ref<Texture>* pTextures{};
-		uint32_t textureCount{};
+
+		//optional but, must be set until you try to render anything
+		TextureSampler sampler{};
+		//optional but, must be set until you try to render anything
+		Ref<Texture>* pTextures{};
+		//optional but, must be set until you try to render anything
+		uint32_t textureCount = 0;
+	};
+
+	struct TexturePackCreationInfo
+	{
+		BindingType bindingType = BindingType::Graphics;
+		uint32_t setBindingIndex = 0;
+		TexturePackBindingInfo* pBindings{};
+		uint32_t bindingCount = 0;
+		TextureLayout layout = 0;
 	};
 
 	enum class RenderingApiType { None, Vulkan, Direct3D };

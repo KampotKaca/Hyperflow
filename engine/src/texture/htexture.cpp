@@ -12,7 +12,6 @@ namespace hf
         memoryType = info.memoryType;
         format = info.format;
         desiredChannel = info.desiredChannel;
-        sampler = info.sampler;
         mipLevels = info.mipLevels;
 
         inter::rendering::CreateTexture_i(this);
@@ -88,7 +87,6 @@ namespace hf
                     .type = tex->type,
                     .format = tex->format,
                     .memoryType = tex->memoryType,
-                    .sampler = tex->sampler,
                 };
 
                 tex->handle = HF.renderingApi.api.CreateTexture(creationInfo);
@@ -119,6 +117,14 @@ namespace hf
         TextureSampler Define(const TextureSamplerDefinitionInfo& info)
         {
             return inter::HF.renderingApi.api.DefineTextureSampler(info);
+        }
+    }
+
+    namespace texturelayout
+    {
+        TextureLayout Define(const TextureLayoutDefinitionInfo& info)
+        {
+            return inter::HF.renderingApi.api.DefineTextureLayout(info);
         }
     }
 }

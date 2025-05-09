@@ -8,7 +8,7 @@ namespace hf::inter::rendering
 {
     struct ShaderCreationInfo
     {
-        UniformStorage uniformStorage{};
+        ShaderSetup shaderSetup{};
         void* texPack{};
         uint32_t supportedAttribCount{};
         const BufferAttrib* pSupportedAttribs{};
@@ -60,7 +60,6 @@ namespace hf::inter::rendering
         TextureType type = TextureType::Tex2D;
         TextureFormat format = TextureFormat::B8G8R8A8_Srgb;
         BufferMemoryType memoryType = BufferMemoryType::Static;
-        TextureSampler sampler{};
     };
 
     struct TextureAllocatorCreationInfo
@@ -69,12 +68,35 @@ namespace hf::inter::rendering
         uint32_t textureCount = 0;
     };
 
+    struct TexturePackBinding
+    {
+        uint32_t bindingId = 0;
+        TextureSampler sampler{};
+        std::vector<void*> textures{};
+    };
+
     struct TexturePackCreationInfo
     {
+        BindingType bindingType = BindingType::Graphics;
+        uint32_t setBindingIndex = 0;
+        TexturePackBinding* pBindings{};
+        uint32_t bindingCount = 0;
+        TextureLayout layout = 0;
+    };
+
+    struct TexturePackUploadInfo
+    {
+        uint32_t bindingIndex = 0;
         void** pTextures{};
+        uint32_t textureOffset = 0;
         uint32_t textureCount = 0;
-        uint32_t bindingId = 0;
-        UniformBufferStage usageStage = UniformBufferStage::Vertex | UniformBufferStage::Fragment;
+        TextureSampler sampler;
+    };
+
+    struct TexturePackAllocatorCreationInfo
+    {
+        void** pTexturePacks{};
+        uint32_t texturePackCount = 0;
     };
 
     struct DrawCallInfo
@@ -99,6 +121,10 @@ namespace hf::inter::rendering
         void (*DestroyShader)(void* shader);
         void (*BindShader)(const void* rn, const void* shader, BufferAttrib attrib);
 
+        //shader setup
+        uint32_t (*DefineShaderSetup)(const ShaderSetupDefinitionInfo& info);
+        void (*BindShaderSetup)(void* rn, ShaderSetup);
+
         //texture
         void* (*CreateTexture)(const TextureCreationInfo& info);
         void (*DestroyTexture)(void* tex);
@@ -110,9 +136,18 @@ namespace hf::inter::rendering
         //texture pack
         void* (*CreateTexturePack)(const TexturePackCreationInfo& info);
         void (*DestroyTexturePack)(void* texPack);
+        void (*UploadTexturePack)(void* texPack, const TexturePackUploadInfo& info);
+        void (*BindTexturePack)(void* rn, void* texPack);
+
+        //texture pack allocator
+        void* (*CreateTexturePackAllocator)(const TexturePackAllocatorCreationInfo& info);
+        void (*DestroyTexturePackAllocator)(void* texPackAllocator);
 
         //texture sampler
         uint32_t (*DefineTextureSampler)(const TextureSamplerDefinitionInfo& info);
+
+        //texture layout
+        uint32_t (*DefineTextureLayout)(const TextureLayoutDefinitionInfo& info);
 
         //buffer attribute
         uint32_t (*DefineVertBufferAttrib)(const BufferAttribDefinitionInfo& info, uint32_t fullStride);
@@ -121,10 +156,6 @@ namespace hf::inter::rendering
         //uniform buffer
         uint32_t (*DefineUniformBuffer)(const UniformBufferDefinitionInfo& info);
         void (*UploadUniformBuffer)(const void* rn, const UniformBufferUploadInfo& info);
-
-        //uniform storage
-        uint32_t (*DefineUniformStorage)(const UniformStorageDefinitionInfo& info);
-        void (*BindUniformStorage)(void* rn, UniformStorage);
 
         //uniform allocator
         uint32_t (*DefineUniformAllocator)(const UniformAllocatorDefinitionInfo& info);

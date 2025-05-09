@@ -93,6 +93,11 @@ namespace hf
             vertbuffer::DestroyAll(internalOnly);
             indexbuffer::DestroyAll(internalOnly);
             shader::DestroyAll(internalOnly);
+
+            textureallocator::DestroyAll(internalOnly);
+            texture::DestroyAll(internalOnly);
+
+            texturepackallocator::DestroyAll(internalOnly);
             texturepack::DestroyAll(internalOnly);
         }
     }
@@ -134,7 +139,10 @@ namespace hf
             for (auto& shader : std::ranges::views::values(HF.graphicsResources.shaders)) CreateShader_i(shader.get());
             for (auto& vertBuffer : std::ranges::views::values(HF.graphicsResources.vertBuffers)) CreateVertBuffer_i(vertBuffer.get());
             for (auto& indexBuffer : std::ranges::views::values(HF.graphicsResources.indexBuffers)) CreateIndexBuffer_i(indexBuffer.get());
+            for (auto& texture : std::ranges::views::values(HF.graphicsResources.textures)) CreateTexture_i(texture.get());
+            for (auto& texAllocator : std::ranges::views::values(HF.graphicsResources.textureAllocators)) CreateTextureAllocator_i(texAllocator.get());
             for (auto& texPack : std::ranges::views::values(HF.graphicsResources.texturePacks)) CreateTexturePack_i(texPack.get());
+            for (auto& texPackAllocator : std::ranges::views::values(HF.graphicsResources.texturePackAllocators)) CreateTexturePackAllocator_i(texPackAllocator.get());
         }
 
         void UnloadCurrentApi_i(bool retainReferences)

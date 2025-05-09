@@ -21,7 +21,7 @@ namespace hf
 
     VkShader::VkShader(const inter::rendering::ShaderCreationInfo& info)
     {
-        uniformStorage = info.uniformStorage;
+        shaderSetup = info.shaderSetup;
         texturePack = (VkTexturePack*)info.texPack;
         using namespace inter;
         VkShaderModule vertModule{}, fragModule{};
@@ -44,14 +44,14 @@ namespace hf
             }
         };
 
-        auto& uniformStorage = GetStorage(info.uniformStorage);
+        auto& shaderSetup = GetShaderSetup(info.shaderSetup);
         VkPipelineInfo pipelineCreationInfo
         {
             .stageCount = 2,
             .pStages = shaderStages,
             .blendingMode = PipelineBlendType::None,
             .blendingOp = VK_LOGIC_OP_XOR,
-            .layout = uniformStorage.layout,
+            .layout = shaderSetup.layout,
             .renderPass = GRAPHICS_DATA.renderPass,
         };
 
@@ -221,7 +221,7 @@ namespace hf
 
     void BindShader(VKRenderer* rn, VkShader* shader, BufferAttrib attrib)
     {
-        if (rn->currentLayout != GetStorage(shader->uniformStorage).layout) throw GENERIC_EXCEPT("[Hyperflow]", "Bind correct uniform storage first");
+        if (rn->currentLayout != GetShaderSetup(shader->shaderSetup).layout) throw GENERIC_EXCEPT("[Hyperflow]", "Bind correct uniform storage first");
         vkCmdBindPipeline(rn->currentCommand, VK_PIPELINE_BIND_POINT_GRAPHICS, shader->pipelines[attrib]);
     }
 }

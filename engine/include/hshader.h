@@ -11,7 +11,7 @@ namespace hf
         ~Shader();
 
         std::string vertLoc{}, fragLoc{};
-        UniformStorage uniformStorage{};
+        ShaderSetup shaderSetup{};
         Ref<TexturePack> texturePack{};
 
         BufferAttrib* pSupportedAttribs{};

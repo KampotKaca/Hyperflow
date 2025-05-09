@@ -5,14 +5,24 @@
 
 namespace hf
 {
+    struct TexturePackBinding
+    {
+        TexturePackBinding() = default;
+        ~TexturePackBinding() = default;
+        uint32_t bindingId = 0;
+        TextureSampler sampler{};
+        std::vector<Ref<Texture>> textures{};
+    };
+
     struct TexturePack
     {
         TexturePack(const TexturePackCreationInfo& info);
         ~TexturePack();
 
-        uint32_t bindingId = 0;
-        UniformBufferStage usageStage = UniformBufferStage::Vertex | UniformBufferStage::Fragment;
-        std::vector<Ref<Texture>> textures{};
+        BindingType bindingType = BindingType::Graphics;
+        std::vector<TexturePackBinding> bindings{};
+        TextureLayout layout{};
+        uint32_t setBindingIndex = 0;
         void* handle{};
     };
 }

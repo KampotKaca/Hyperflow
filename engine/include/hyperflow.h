@@ -120,6 +120,12 @@ namespace hf
 		void Bind(const Ref<Renderer>& renderer, const Ref<Shader>& shader, BufferAttrib attrib);
 	}
 
+	namespace shadersetup
+	{
+		ShaderSetup Define(const ShaderSetupDefinitionInfo& info);
+		void Bind(const Ref<Renderer>& rn, ShaderSetup setup);
+	}
+
 	namespace texture
 	{
 		Ref<Texture> Create(const TextureCreationInfo& info);
@@ -145,11 +151,30 @@ namespace hf
 		void Destroy(const Ref<TexturePack>* pPacks, uint32_t count);
 		void DestroyAll(bool internalOnly = false);
 		bool IsRunning(const Ref<TexturePack>& pack);
+
+		void SetBindingSampler(const Ref<TexturePack>& pack, uint32_t bindingIndex, TextureSampler sampler);
+		void SetBindingTextures(const Ref<TexturePack>& pack, uint32_t bindingIndex, const Ref<Texture>* pTextures, uint32_t textureCount, uint32_t textureOffset);
+		void SetBinding(const Ref<TexturePack>& pack, uint32_t bindingIndex, TextureSampler sampler, const Ref<Texture>* pTextures, uint32_t textureCount, uint32_t textureOffset);
+		void Bind(const Ref<Renderer>& rn, const Ref<TexturePack>& pack);
+	}
+
+	namespace texturepackallocator
+	{
+		Ref<TexturePackAllocator> Create(const TexturePackAllocatorCreationInfo& info);
+		void Destroy(const Ref<TexturePackAllocator>& texPackAllocator);
+		void Destroy(const Ref<TexturePackAllocator>* pTexPackAllocators, uint32_t count);
+		void DestroyAll(bool internalOnly = false);
+		bool IsRunning(const Ref<TexturePackAllocator>& texPackAllocator);
 	}
 
 	namespace texturesampler
 	{
 		TextureSampler Define(const TextureSamplerDefinitionInfo& info);
+	}
+
+	namespace texturelayout
+	{
+		TextureLayout Define(const TextureLayoutDefinitionInfo& info);
 	}
 
 	namespace bufferattrib
@@ -161,12 +186,6 @@ namespace hf
 	{
 		UniformBuffer Define(const UniformBufferDefinitionInfo& info);
 		void Upload(const Ref<Renderer>& rn, const UniformBufferUploadInfo& info);
-	}
-
-	namespace uniformstorage
-	{
-		UniformStorage Define(const UniformStorageDefinitionInfo& info);
-		void Bind(const Ref<Renderer>& rn, UniformStorage storage);
 	}
 
 	namespace uniformallocator

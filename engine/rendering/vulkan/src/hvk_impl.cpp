@@ -81,10 +81,37 @@ namespace hf::inter::rendering
         delete (VkTexturePack*)txPack;
     }
 
+    void UploadTexturePack(void* texPack, const TexturePackUploadInfo& info)
+    {
+        SetTextureBinding((VkTexturePack*)texPack, info.bindingIndex,
+            info.sampler, (VkTexture**)info.pTextures, info.textureOffset, info.textureCount);
+    }
+
+    void BindTexturePack(void* rn, void* texPack)
+    {
+        hf::BindTexturePack((VKRenderer*)rn, (VkTexturePack*)texPack);
+    }
+
+    void* CreateTexturePackAllocator(const TexturePackAllocatorCreationInfo& info)
+    {
+        return new VkTexturePackAllocator(info);
+    }
+
+    void DestroyTexturePackAllocator(void* texPackAllocator)
+    {
+        delete (VkTexturePackAllocator*)texPackAllocator;
+    }
+
     uint32_t DefineTextureSampler(const TextureSamplerDefinitionInfo& info)
     {
         GRAPHICS_DATA.textureSamplers.emplace_back(info);
         return GRAPHICS_DATA.textureSamplers.size();
+    }
+
+    uint32_t DefineTextureLayout(const TextureLayoutDefinitionInfo& info)
+    {
+        GRAPHICS_DATA.textureLayouts.emplace_back(info);
+        return GRAPHICS_DATA.textureLayouts.size();
     }
 
     uint32_t DefineVertBufferAttrib(const BufferAttribDefinitionInfo& info, uint32_t fullStride)
@@ -110,15 +137,15 @@ namespace hf::inter::rendering
         UploadUniforms((VKRenderer*)rn, info);
     }
 
-    uint32_t DefineUniformStorage(const UniformStorageDefinitionInfo& info)
+    uint32_t DefineShaderSetup(const ShaderSetupDefinitionInfo& info)
     {
-        GRAPHICS_DATA.uniformStorages.emplace_back(info);
-        return GRAPHICS_DATA.uniformStorages.size();
+        GRAPHICS_DATA.shaderSetups.emplace_back(info);
+        return GRAPHICS_DATA.shaderSetups.size();
     }
 
-    void BindUniformStorage(void* rn, UniformStorage storage)
+    void BindShaderSetup(void* rn, ShaderSetup storage)
     {
-        hf::BindUniformStorage((VKRenderer*)rn, storage);
+        hf::BindShaderSetup((VKRenderer*)rn, storage);
     }
 
     uint32_t DefineUniformAllocator(const UniformAllocatorDefinitionInfo& info)
@@ -252,67 +279,76 @@ namespace hf::inter::rendering
         static RendererAPI api =
         {
             //loading
-            .Load                       = &Load,
-            .Unload                     = &Unload,
-            .CreateInstance             = &CreateInstance,
-            .DestroyInstance            = &DestroyInstance,
+            .Load                       = Load,
+            .Unload                     = Unload,
+            .CreateInstance             = CreateInstance,
+            .DestroyInstance            = DestroyInstance,
 
             //shader
-            .CreateShader               = &CreateShader,
-            .DestroyShader              = &DestroyShader,
-            .BindShader                 = &BindShader,
-
-            //texture
-            .CreateTexture              = &CreateTexture,
-            .DestroyTexture             = &DestroyTexture,
-
-            //texture allocator
-            .CreateTextureAllocator     = &CreateTextureAllocator,
-            .DestroyTextureAllocator    = &DestroyTextureAllocator,
-
-            //texture pack
-            .CreateTexturePack          = &CreateTexturePack,
-            .DestroyTexturePack         = &DestroyTexturePack,
-
-            //texture sampler
-            .DefineTextureSampler       = &DefineTextureSampler,
-
-            //buffer attribute
-            .DefineVertBufferAttrib     = &DefineVertBufferAttrib,
-            .GetVertBufferAttribSize    = &GetVertBufferAttribSize,
-
-            //uniform buffer
-            .DefineUniformBuffer        = &DefineUniformBuffer,
-            .UploadUniformBuffer        = &UploadUniformBuffer,
+            .CreateShader               = CreateShader,
+            .DestroyShader              = DestroyShader,
+            .BindShader                 = BindShader,
 
             //uniform storage
-            .DefineUniformStorage       = &DefineUniformStorage,
-            .BindUniformStorage         = &BindUniformStorage,
+            .DefineShaderSetup          = DefineShaderSetup,
+            .BindShaderSetup            = BindShaderSetup,
+
+            //texture
+            .CreateTexture              = CreateTexture,
+            .DestroyTexture             = DestroyTexture,
+
+            //texture allocator
+            .CreateTextureAllocator     = CreateTextureAllocator,
+            .DestroyTextureAllocator    = DestroyTextureAllocator,
+
+            //texture pack
+            .CreateTexturePack          = CreateTexturePack,
+            .DestroyTexturePack         = DestroyTexturePack,
+            .UploadTexturePack          = UploadTexturePack,
+            .BindTexturePack            = BindTexturePack,
+
+            //texture pack allocator
+            .CreateTexturePackAllocator     = CreateTexturePackAllocator,
+            .DestroyTexturePackAllocator    = DestroyTexturePackAllocator,
+
+            //texture sampler
+            .DefineTextureSampler       = DefineTextureSampler,
+
+            //texture layout
+            .DefineTextureLayout        = DefineTextureLayout,
+
+            //buffer attribute
+            .DefineVertBufferAttrib     = DefineVertBufferAttrib,
+            .GetVertBufferAttribSize    = GetVertBufferAttribSize,
+
+            //uniform buffer
+            .DefineUniformBuffer        = DefineUniformBuffer,
+            .UploadUniformBuffer        = UploadUniformBuffer,
 
             //uniform allocator
-            .DefineUniformAllocator     = &DefineUniformAllocator,
+            .DefineUniformAllocator     = DefineUniformAllocator,
 
             //vertex buffer
-            .CreateVertBuffer           = &CreateVertBuffer,
-            .DestroyVertBuffer          = &DestroyVertBuffer,
-            .UploadVertBuffer           = &UploadVertBuffer,
+            .CreateVertBuffer           = CreateVertBuffer,
+            .DestroyVertBuffer          = DestroyVertBuffer,
+            .UploadVertBuffer           = UploadVertBuffer,
 
             //index buffer
-            .CreateIndexBuffer          = &CreateIndexBuffer,
-            .DestroyIndexBuffer         = &DestroyIndexBuffer,
-            .UploadIndexBuffer          = &UploadIndexBuffer,
+            .CreateIndexBuffer          = CreateIndexBuffer,
+            .DestroyIndexBuffer         = DestroyIndexBuffer,
+            .UploadIndexBuffer          = UploadIndexBuffer,
 
             //buffer operations
-            .SubmitBufferCopyOperations  = SubmitBufferCopyOperations,
-            .SubmitTextureCopyOperations = SubmitTextureCopyOperations,
+            .SubmitBufferCopyOperations   = SubmitBufferCopyOperations,
+            .SubmitTextureCopyOperations  = SubmitTextureCopyOperations,
 
             //rendering
-            .GetReadyForRendering       = &GetReadyForRendering,
-            .StartFrame                 = &StartFrame,
-            .EndFrame                   = &EndFrame,
-            .RegisterFrameBufferChange  = &RegisterFrameBufferChange,
-            .Draw                       = &Draw,
-            .WaitForRendering           = &WaitForRendering
+            .GetReadyForRendering       = GetReadyForRendering,
+            .StartFrame                 = StartFrame,
+            .EndFrame                   = EndFrame,
+            .RegisterFrameBufferChange  = RegisterFrameBufferChange,
+            .Draw                       = Draw,
+            .WaitForRendering           = WaitForRendering
         };
         return &api;
     }

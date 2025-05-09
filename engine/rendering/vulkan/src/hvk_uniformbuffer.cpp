@@ -86,42 +86,6 @@ namespace hf
 
         for (uint32_t i = 0; i < FRAMES_IN_FLIGHT; i++)
         {
-            // std::vector<VkWriteDescriptorSet> descriptorWrites(uniform.bindings.size());
-            //
-            // for (uint32_t j = 0; j < uniform.bindings.size(); j++)
-            // {
-            //     auto& binding = uniform.bindings[j];
-            //     switch (binding.type)
-            //     {
-            //     case UniformBufferType::Sampler:
-            //     case UniformBufferType::CombinedImageSampler:
-            //     case UniformBufferType::SampledImage:
-            //     case UniformBufferType::StorageImage:
-            //     {
-            //         VkDescriptorImageInfo imageInfo
-            //         {
-            //             .imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
-            //             .imageView =
-            //         };
-            //         imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-            //         imageInfo.imageView = textureImageView;
-            //         imageInfo.sampler = textureSampler;
-            //     }
-            //         break;
-            //     case UniformBufferType::UniformTexelBuffer:
-            //     case UniformBufferType::StorageTexelBuffer:
-            //     case UniformBufferType::UniformBuffer:
-            //     case UniformBufferType::StorageBuffer:
-            //     case UniformBufferType::UniformBufferDynamic:
-            //     case UniformBufferType::StorageBufferDynamic:
-            //     {
-            //
-            //     }
-            //         break;
-            //     default: throw GENERIC_EXCEPT("[Hyperflow]", "Unsupported Uniform buffer type!"); break;
-            //     }
-            // }
-
             VkDescriptorBufferInfo bufferInfo
             {
                 .buffer = uniform.buffers[i],
@@ -163,7 +127,7 @@ namespace hf
         }
 
         vkCmdBindDescriptorSets(rn->currentCommand, (VkPipelineBindPoint)info.bindingType, rn->currentLayout,
-        0, descriptorSets.size(), descriptorSets.data(),
+        info.setBindingIndex, descriptorSets.size(), descriptorSets.data(),
         0, nullptr);
     }
 }

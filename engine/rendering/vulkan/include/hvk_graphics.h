@@ -6,7 +6,10 @@
 #include "hvk_bufferattrib.h"
 #include "hvk_vertbuffer.h"
 #include "hvk_uniformbuffer.h"
-#include "hvk_uniformstorage.h"
+#include "hvk_shadersetup.h"
+#include "hvk_texturelayout.h"
+#include "hvk_texturepack.h"
+#include "hvk_texturepackallocator.h"
 #include "hvk_uniformallocator.h"
 #include "hvk_texturesampler.h"
 #include "hvk_platform.h"
@@ -125,9 +128,11 @@ namespace hf
 
         std::vector<VkBufferAttrib> bufferAttribs{};
         std::vector<VkUniformBuffer> uniformBuffers{};
-        std::vector<VkUniformStorage> uniformStorages{};
         std::vector<VkUniformAllocator> uniformAllocators{};
         std::vector<VkTextureSampler> textureSamplers{};
+        std::vector<VkTextureLayout> textureLayouts{};
+        std::vector<VkShaderSetup> shaderSetups{};
+
         std::vector<VkCopyBufferToBufferOperation> bufferToBufferCopyOperations{};
         std::vector<VkCopyBufferToImageOperation> bufferToImageCopyOperations{};
 
@@ -242,7 +247,8 @@ namespace hf
     uint32_t GetMemoryType(uint32_t filter, VkMemoryPropertyFlags props);
     void StageCopyOperation(const VkCopyBufferToBufferOperation& operation);
     void StageCopyOperation(const VkCopyBufferToImageOperation& operation);
-    void SubmitCopyOperations();
+
+    void SubmitAllOperations();
     void SubmitBufferToBufferCopyOperations();
     void SubmitBufferToImageCopyOperations();
 

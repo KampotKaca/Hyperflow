@@ -84,14 +84,15 @@ namespace hf
 
     void UnloadVulkan()
     {
-        SubmitCopyOperations();
+        SubmitAllOperations();
         DelayThreadUntilRenderingFinish();
 
         GRAPHICS_DATA.uniformAllocators.clear();
-        GRAPHICS_DATA.uniformStorages.clear();
+        GRAPHICS_DATA.shaderSetups.clear();
         GRAPHICS_DATA.bufferAttribs.clear();
         GRAPHICS_DATA.uniformBuffers.clear();
         GRAPHICS_DATA.textureSamplers.clear();
+        GRAPHICS_DATA.textureLayouts.clear();
 
         UnloadDevice();
         DestroyInstance();

@@ -72,7 +72,8 @@ namespace hf
     void Draw(const VkDrawInfo& info);
 
     void UploadUniforms(const VKRenderer* rn, const UniformBufferUploadInfo& info);
-    void BindUniformStorage(VKRenderer* rn, UniformStorage storage);
+    void BindTexturePack(VKRenderer* rn, VkTexturePack* pack);
+    void BindShaderSetup(VKRenderer* rn, ShaderSetup setup);
 }
 
 #endif //HVK_RENDERER_H

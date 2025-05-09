@@ -12,7 +12,7 @@ namespace hf
         VkShader(const inter::rendering::ShaderCreationInfo& info);
         ~VkShader();
 
-        UniformStorage uniformStorage{};
+        ShaderSetup shaderSetup{};
         VkTexturePack* texturePack{};
         std::unordered_map<BufferAttrib, VkPipeline> pipelines;
     };

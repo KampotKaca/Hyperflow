@@ -6,10 +6,12 @@
 
 namespace hf
 {
-    struct VkPackedTexture
+    struct VkTextureBinding
     {
-        VkTexture* texture{};
-        VkDescriptorSetLayout layout{};
+        uint32_t bindingId = 0;
+        TextureSampler sampler{};
+
+        std::vector<VkTexture*> textures{};
         VkDescriptorSet descriptors[FRAMES_IN_FLIGHT]{};
     };
 
@@ -18,10 +20,22 @@ namespace hf
         VkTexturePack(const inter::rendering::TexturePackCreationInfo& info);
         ~VkTexturePack();
 
-        std::vector<VkPackedTexture> textures{};
-        VkDescriptorPool pool{};
-        uint32_t bindingId = 0;
+        BindingType bindingType = BindingType::Graphics;
+        std::vector<VkTextureBinding> bindings{};
+        std::vector<VkDescriptorSet> descriptorCache[FRAMES_IN_FLIGHT]{};
+        TextureLayout layout = 0;
+        uint32_t setBindingIndex = 0;
     };
+
+    struct VkTextureWriteOperation
+    {
+        std::vector<VkDescriptorImageInfo> imageInfos{};
+        VkWriteDescriptorSet writes[FRAMES_IN_FLIGHT];
+    };
+
+    void UpdateTextureBinding(const VkTexturePack* pack, uint32_t bindingIndex, uint32_t offset, uint32_t size);
+    void SetTextureBinding(VkTexturePack* pack, uint32_t bindingIndex, TextureSampler sampler,
+        VkTexture** pTextures, uint32_t offset, uint32_t size);
 }
 
 #endif //HVK_TEXTUREPACK_H

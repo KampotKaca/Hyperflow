@@ -12,7 +12,7 @@ namespace hf
         vertLoc = std::string(info.vertexShaderLoc);
         fragLoc = std::string(info.fragmentShaderLoc);
 
-        uniformStorage = info.uniformStorage;
+        shaderSetup = info.setup;
         supportedAttribCount = info.supportedAttribCount;
         texturePack = info.texturePack;
 
@@ -104,8 +104,7 @@ namespace hf
 
                     ShaderCreationInfo creationInfo
                     {
-                        .uniformStorage = shader->uniformStorage,
-                        .texPack = shader->texturePack->handle,
+                        .shaderSetup = shader->shaderSetup,
                         .supportedAttribCount = shader->supportedAttribCount,
                         .pSupportedAttribs = shader->pSupportedAttribs,
                         .vCode = vertexCode.data(),
@@ -113,6 +112,8 @@ namespace hf
                         .fCode = fragmentCode.data(),
                         .fCodeSize = (uint32_t)fragmentCode.size(),
                     };
+
+                    if (shader->texturePack) creationInfo.texPack = shader->texturePack->handle;
 
                     shader->handle = HF.renderingApi.api.CreateShader(creationInfo);
                 }
@@ -135,6 +136,19 @@ namespace hf
                 return true;
             }
             return false;
+        }
+    }
+
+    namespace shadersetup
+    {
+        ShaderSetup Define(const ShaderSetupDefinitionInfo& info)
+        {
+            return (ShaderSetup)inter::HF.renderingApi.api.DefineShaderSetup(info);
+        }
+
+        void Bind(const Ref<Renderer>& rn, ShaderSetup setup)
+        {
+            inter::HF.renderingApi.api.BindShaderSetup(rn->handle, setup);
         }
     }
 }

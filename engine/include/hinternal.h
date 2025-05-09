@@ -34,6 +34,7 @@ namespace hf::inter
         std::unordered_map<Texture*, Ref<Texture>> textures{};
         std::unordered_map<TextureAllocator*, Ref<TextureAllocator>> textureAllocators{};
         std::unordered_map<TexturePack*, Ref<TexturePack>> texturePacks{};
+        std::unordered_map<TexturePackAllocator*, Ref<TexturePackAllocator>> texturePackAllocators{};
     };
 
     struct Hyperflow
@@ -88,6 +89,9 @@ namespace hf::inter
 
         bool CreateTexturePack_i(TexturePack* texPack);
         bool DestroyTexturePack_i(TexturePack* texPack);
+
+        bool CreateTexturePackAllocator_i(TexturePackAllocator* packAllocator);
+        bool DestroyTexturePackAllocator_i(TexturePackAllocator* packAllocator);
     }
 }
 

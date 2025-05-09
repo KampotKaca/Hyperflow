@@ -1,4 +1,5 @@
 #include "hvk_graphics.h"
+#include "hyperflow.h"
 
 namespace hf
 {
@@ -226,7 +227,7 @@ namespace hf
         }
     }
 
-    void SubmitCopyOperations()
+    void SubmitAllOperations()
     {
         SubmitBufferToBufferCopyOperations();
         SubmitBufferToImageCopyOperations();

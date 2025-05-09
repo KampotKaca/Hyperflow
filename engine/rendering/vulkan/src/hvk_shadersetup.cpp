@@ -1,11 +1,10 @@
-#include "hvk_uniformstorage.h"
-#include "hvk_uniformbuffer.h"
+#include "hvk_shadersetup.h"
 #include "hvk_graphics.h"
 #include "hvk_renderer.h"
 
 namespace hf
 {
-    VkUniformStorage::VkUniformStorage(const UniformStorageDefinitionInfo& info)
+    VkShaderSetup::VkShaderSetup(const ShaderSetupDefinitionInfo& info)
     {
         VkPipelineLayoutCreateInfo pipelineLayoutInfo
         {
@@ -14,14 +13,20 @@ namespace hf
             .pPushConstantRanges = nullptr,
         };
 
-        std::vector<VkDescriptorSetLayout> layouts(info.bufferCount);
+        std::vector<VkDescriptorSetLayout> layouts(info.bufferCount + info.textureLayoutCount);
 
-        if (info.bufferCount > 0)
+        if (info.bufferCount > 0 || info.textureLayoutCount > 0)
         {
             for (uint32_t i = 0; i < info.bufferCount; i++)
             {
                 auto& buffer = GetUniform(info.pBuffers[i]);
                 layouts[i] = buffer.layout;
+            }
+
+            for (uint32_t i = 0; i < info.textureLayoutCount; i++)
+            {
+                auto& layout = GetTextureLayout(info.pTextureLayouts[i]);
+                layouts[info.bufferCount + i] = layout.layout;
             }
 
             pipelineLayoutInfo.pSetLayouts = layouts.data();
@@ -37,24 +42,24 @@ namespace hf
                          &pipelineLayoutInfo, nullptr, &layout));
     }
 
-    VkUniformStorage::~VkUniformStorage()
+    VkShaderSetup::~VkShaderSetup()
     {
         vkDestroyPipelineLayout(GRAPHICS_DATA.defaultDevice->logicalDevice.device, layout, nullptr);
     }
 
-    bool IsValidStorage(UniformStorage storage)
+    bool IsValidShaderSetup(ShaderSetup setup)
     {
-        return storage > 0 && storage <= GRAPHICS_DATA.uniformStorages.size();
+        return setup > 0 && setup <= GRAPHICS_DATA.shaderSetups.size();
     }
 
-    const VkUniformStorage& GetStorage(UniformStorage storage)
+    const VkShaderSetup& GetShaderSetup(ShaderSetup setup)
     {
-        if (!IsValidStorage(storage)) throw GENERIC_EXCEPT("[Hyperflow]", "Invalid uniform storage");
-        return GRAPHICS_DATA.uniformStorages[storage - 1];
+        if (!IsValidShaderSetup(setup)) throw GENERIC_EXCEPT("[Hyperflow]", "Invalid shader setup");
+        return GRAPHICS_DATA.shaderSetups[setup - 1];
     }
 
-    void BindUniformStorage(VKRenderer* rn, UniformStorage storage)
+    void BindShaderSetup(VKRenderer* rn, ShaderSetup setup)
     {
-        rn->currentLayout = GetStorage(storage).layout;
+        rn->currentLayout = GetShaderSetup(setup).layout;
     }
 }

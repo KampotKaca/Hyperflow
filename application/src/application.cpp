@@ -35,12 +35,14 @@ namespace app
 	hf::Ref<hf::Texture> texture;
 	hf::Ref<hf::TextureAllocator> textureAllocator;
 	hf::Ref<hf::TexturePack> texPack;
+	hf::Ref<hf::TexturePackAllocator> texPackAllocator;
 
 	hf::BufferAttrib bufferAttrib;
 	hf::UniformBuffer cameraBuffer;
-	hf::UniformStorage uniformStorage;
+	hf::ShaderSetup shaderSetup;
 	hf::UniformAllocator uniformAllocator;
 	hf::TextureSampler sampler;
+	hf::TextureLayout layout;
 
 	struct Camera
 	{
@@ -58,12 +60,13 @@ namespace app
 		{
 			{ .type = hf::BufferDataType::F32, .size = 2, },
 			{ .type = hf::BufferDataType::F32, .size = 3, },
+			{ .type = hf::BufferDataType::F32, .size = 2, },
 		};
 
 		hf::BufferAttribDefinitionInfo bufferAttribDefinitionInfo
 		{
 			.bindingId = 0,
-			.formatCount = 2,
+			.formatCount = 3,
 			.pFormats = formats
 		};
 
@@ -72,7 +75,7 @@ namespace app
 		hf::UniformBufferBindingInfo bufferBindingInfo
 		{
 			.type = hf::UniformBufferType::UniformBuffer,
-			.usageFlags = hf::UniformBufferStage::Vertex | hf::UniformBufferStage::Fragment,
+			.usageFlags = hf::BufferUsageStage::Default,
 			.arraySize = 1,
 			.elementSizeInBytes = sizeof(Camera)
 		};
@@ -94,13 +97,21 @@ namespace app
 
 		uniformAllocator = hf::uniformallocator::Define(uniformAllocatorDefinitionInfo);
 
-		hf::UniformStorageDefinitionInfo uniformStorageDefinitionInfo
+		hf::TextureLayoutBindingInfo textureLayoutBindingInfo
 		{
-			.pBuffers = &cameraBuffer,
-			.bufferCount = 1,
+			.bindingId = 0,
+			.type = hf::TextureLayoutType::CombinedImageSampler,
+			.usageFlags = hf::BufferUsageStage::Default,
+			.arraySize = 1,
 		};
 
-		uniformStorage = hf::uniformstorage::Define(uniformStorageDefinitionInfo);
+		hf::TextureLayoutDefinitionInfo textureLayoutDefinitionInfo
+		{
+			.pBindings = &textureLayoutBindingInfo,
+			.bindingCount = 1
+		};
+
+		layout = hf::texturelayout::Define(textureLayoutDefinitionInfo);
 
 		hf::TextureSamplerDefinitionInfo samplerDefinitionInfo
 		{
@@ -111,6 +122,16 @@ namespace app
 			.comparison = hf::ComparisonOperation::None
 		};
 		sampler = hf::texturesampler::Define(samplerDefinitionInfo);
+
+		hf::ShaderSetupDefinitionInfo shaderSetupDefinitionInfo
+		{
+			.pBuffers = &cameraBuffer,
+			.bufferCount = 1,
+			.pTextureLayouts = &layout,
+			.textureLayoutCount = 1
+		};
+
+		shaderSetup = hf::shadersetup::Define(shaderSetupDefinitionInfo);
 	}
 
 	void Application::LoadResources()
@@ -142,8 +163,7 @@ namespace app
 			.format = hf::TextureFormat::B8G8R8A8_Srgb,
 			.desiredChannel = hf::TextureChannel::RGBA,
 			.memoryType = hf::BufferMemoryType::Static,
-			.sampler = sampler,
-			.mipLevels = 1
+			.mipLevels = 1,
 		};
 
 		texture = hf::texture::Create(texInfo);
@@ -156,24 +176,41 @@ namespace app
 
 		textureAllocator = hf::textureallocator::Create(texAllocInfo);
 
-		hf::TexturePackCreationInfo texPackInfo
+		hf::TexturePackBindingInfo binding
 		{
-			.bindingId = 1,
-			.usageStage = hf::UniformBufferStage::Vertex | hf::UniformBufferStage::Fragment,
+			.bindingId = 0,
+			.sampler = sampler,
 			.pTextures = &texture,
 			.textureCount = 1
 		};
 
+		hf::TexturePackCreationInfo texPackInfo
+		{
+			.bindingType = hf::BindingType::Graphics,
+			.setBindingIndex = 1,
+			.pBindings = &binding,
+			.bindingCount = 1,
+			.layout = layout,
+		};
+
 		texPack = hf::texturepack::Create(texPackInfo);
+
+		hf::TexturePackAllocatorCreationInfo texPackAllocInfo
+		{
+			.pTexturePacks = &texPack,
+			.texturePackCount = 1
+		};
+
+		texPackAllocator = hf::texturepackallocator::Create(texPackAllocInfo);
 
 		hf::ShaderCreationInfo shaderInfo
 		{
-			.uniformStorage = uniformStorage,
+			.setup = shaderSetup,
 			.texturePack = texPack,
 			.supportedAttribCount = 1,
 			.pSupportedAttribs = &bufferAttrib,
 			.vertexShaderLoc = "default",
-			.fragmentShaderLoc = "default"
+			.fragmentShaderLoc = "default",
 		};
 
 		shader = hf::shader::Create(shaderInfo);
@@ -266,7 +303,7 @@ namespace app
 		camera.proj[1][1] *= -1;
 		camera.viewProj = camera.proj * camera.view;
 
-		hf::uniformstorage::Bind(rn, uniformStorage);
+		hf::shadersetup::Bind(rn, shaderSetup);
 
 		hf::UniformBufferUpload cameraUpload
 		{
@@ -278,7 +315,8 @@ namespace app
 
 		hf::UniformBufferUploadInfo uniformBufferUploads
 		{
-			.bindingType = hf::UniformBufferBindingType::Graphics,
+			.bindingType = hf::BindingType::Graphics,
+			.setBindingIndex = 0,
 			.pUploads = &cameraUpload,
 			.uploadCount = 1
 		};
@@ -286,6 +324,7 @@ namespace app
 		hf::uniformbuffer::Upload(rn, uniformBufferUploads);
 
 		hf::shader::Bind(rn, shader, bufferAttrib);
+		hf::texturepack::Bind(rn, texPack);
 
 		hf::DrawCallInfo drawCallInfo
 		{
