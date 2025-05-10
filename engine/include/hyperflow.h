@@ -110,8 +110,8 @@ namespace hf
 
 	namespace drawpass
 	{
-		DrawPass Define(const DrawPassDefinitionInfo& info);
-		void Begin(const Ref<Renderer>& rn, DrawPass pass);
+		RenderPass Define(const RenderPassDefinitionInfo& info);
+		void Begin(const Ref<Renderer>& rn, RenderPass pass);
 		void End(const Ref<Renderer>& rn);
 	}
 

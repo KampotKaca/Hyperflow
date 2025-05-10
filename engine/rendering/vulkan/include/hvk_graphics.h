@@ -119,7 +119,7 @@ namespace hf
         std::set<std::string> availableExtensionNames{};
         std::vector<GraphicsDevice> suitableDevices{};
         GraphicsDevice* defaultDevice;
-        DrawPass presentationPass;
+        RenderPass presentationPass;
 
         bool devicesAreLoaded = false;
 
@@ -133,12 +133,12 @@ namespace hf
         std::vector<VkTextureSampler> textureSamplers{};
         std::vector<VkTextureLayout> textureLayouts{};
         std::vector<VkShaderSetup> shaderSetups{};
-        std::vector<VkDrawPass> drawPasses{};
+        std::vector<VkDrawPass> renderPasses{};
 
         std::vector<VkCopyBufferToBufferOperation> bufferToBufferCopyOperations{};
         std::vector<VkCopyBufferToImageOperation> bufferToImageCopyOperations{};
 
-        DrawPass (*onPassCreationCallback)();
+        RenderPass (*onPassCreationCallback)();
 
 #if DEBUG
         VkDebugUtilsMessengerCreateInfoEXT debugCreateInfo
@@ -176,11 +176,6 @@ namespace hf
         VkFence isInFlight{};
         VkCommandBuffer usedCommands[VULKAN_API_MAX_COMMANDS_PER_FRAME]{};
         uint32_t usedCommandCount = 0;
-    };
-
-    struct VkRenderPassCreationInfo
-    {
-        TextureAttachment attachmentFlags = TextureAttachment::Default;
     };
 
     struct VkCreateBufferInfo

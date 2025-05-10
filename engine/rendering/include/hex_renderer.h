@@ -8,7 +8,7 @@ namespace hf::inter::rendering
 {
     struct ShaderCreationInfo
     {
-        DrawPass drawPass;
+        RenderPass drawPass;
         ShaderSetup shaderSetup{};
         void* texPack{};
         uint32_t supportedAttribCount{};
@@ -28,7 +28,7 @@ namespace hf::inter::rendering
         void* platformInstance;
         void* platformDll;
         void* (*getFuncFromDll)(void* dll, const char* funcName);
-        DrawPass (*onPassCreationCallback)();
+        RenderPass (*onPassCreationCallback)();
     };
 
     struct VertBufferUploadInfo
@@ -79,7 +79,7 @@ namespace hf::inter::rendering
 
     struct TexturePackCreationInfo
     {
-        BindingType bindingType = BindingType::Graphics;
+        RenderBindingType bindingType = RenderBindingType::Graphics;
         uint32_t setBindingIndex = 0;
         TexturePackBinding* pBindings{};
         uint32_t bindingCount = 0;
@@ -118,9 +118,9 @@ namespace hf::inter::rendering
         void* (*CreateInstance)(const RendererInstanceCreationInfo& info);
         void (*DestroyInstance)(void* rn);
 
-        DrawPass (*DefineDrawPass)(const DrawPassDefinitionInfo& info);
-        void (*BeginDrawPass)(void* rn, DrawPass pass);
-        void (*EndDrawPass)(void* rn);
+        RenderPass (*DefineRenderPass)(const RenderPassDefinitionInfo& info);
+        void (*BeginRenderPass)(void* rn, RenderPass pass);
+        void (*EndRenderPass)(void* rn);
 
         //Shaders
         void* (*CreateShader)(const ShaderCreationInfo& info);

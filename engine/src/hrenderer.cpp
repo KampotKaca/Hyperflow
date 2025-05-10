@@ -231,19 +231,19 @@ namespace hf
 
     namespace drawpass
     {
-        DrawPass Define(const DrawPassDefinitionInfo& info)
+        RenderPass Define(const RenderPassDefinitionInfo& info)
         {
-            return inter::HF.renderingApi.api.DefineDrawPass(info);
+            return inter::HF.renderingApi.api.DefineRenderPass(info);
         }
 
-        void Begin(const Ref<Renderer>& rn, DrawPass pass)
+        void Begin(const Ref<Renderer>& rn, RenderPass pass)
         {
-            inter::HF.renderingApi.api.BeginDrawPass(rn->handle, pass);
+            inter::HF.renderingApi.api.BeginRenderPass(rn->handle, pass);
         }
 
         void End(const Ref<Renderer>& rn)
         {
-            inter::HF.renderingApi.api.EndDrawPass(rn->handle);
+            inter::HF.renderingApi.api.EndRenderPass(rn->handle);
         }
     }
 }

@@ -3,7 +3,7 @@
 
 namespace hf
 {
-    VkFrameBuffer::VkFrameBuffer(VkImageView* pAttachments, DrawPass pass, const VkExtent2D& extent)
+    VkFrameBuffer::VkFrameBuffer(VkImageView* pAttachments, RenderPass pass, const VkExtent2D& extent)
     {
         auto& rnPass = GetDrawPass(pass);
         this->extent = extent;

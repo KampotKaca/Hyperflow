@@ -20,7 +20,7 @@ namespace hf
         VkTexturePack(const inter::rendering::TexturePackCreationInfo& info);
         ~VkTexturePack();
 
-        BindingType bindingType = BindingType::Graphics;
+        RenderBindingType bindingType = RenderBindingType::Graphics;
         std::vector<VkTextureBinding> bindings{};
         std::vector<VkDescriptorSet> descriptorCache[FRAMES_IN_FLIGHT]{};
         TextureLayout layout = 0;

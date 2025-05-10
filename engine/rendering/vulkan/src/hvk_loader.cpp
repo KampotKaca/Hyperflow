@@ -94,7 +94,7 @@ namespace hf
         GRAPHICS_DATA.uniformBuffers.clear();
         GRAPHICS_DATA.textureSamplers.clear();
         GRAPHICS_DATA.textureLayouts.clear();
-        GRAPHICS_DATA.drawPasses.clear();
+        GRAPHICS_DATA.renderPasses.clear();
 
         UnloadDevice();
         DestroyInstance();

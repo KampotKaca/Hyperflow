@@ -49,7 +49,7 @@ namespace app
 	hf::UniformAllocator uniformAllocator;
 	hf::TextureSampler sampler;
 	hf::TextureLayout layout;
-	hf::DrawPass presentPass;
+	hf::RenderPass presentPass;
 
 	struct Camera
 	{
@@ -61,11 +61,29 @@ namespace app
 
 	Camera camera;
 
-	hf::DrawPass Application::OnPassCreationCallback()
+	hf::RenderPass Application::OnPassCreationCallback()
 	{
-		hf::DrawPassDefinitionInfo drawPassDefinitionInfo
+		hf::RenderPassDependencyInfo dependencyInfo{};
+
+		hf::RenderSubpassAttachmentInfo colorAttachment{};
+
+		hf::RenderSubpassInfo subpassInfo
 		{
-			.attachmentFlags = hf::TextureAttachment::Color
+			.bindingType = hf::RenderBindingType::Graphics,
+			.pAttachments = &colorAttachment,
+			.attachmentCount = 1,
+			.depthAttachment = nullptr
+		};
+
+		hf::RenderPassDefinitionInfo drawPassDefinitionInfo
+		{
+			.pSubpasses = &subpassInfo,
+			.subpassCount = 1,
+			.pDependencies = &dependencyInfo,
+			.dependencyCount = 1,
+			.clearColor = { 0.0f, 0.0f, 0.0f, 1.0f },
+			.depth = 0.0f,
+			.stencil = 0
 		};
 		presentPass = hf::drawpass::Define(drawPassDefinitionInfo);
 		return presentPass;
@@ -92,7 +110,7 @@ namespace app
 		hf::UniformBufferBindingInfo bufferBindingInfo
 		{
 			.type = hf::UniformBufferType::UniformBuffer,
-			.usageFlags = hf::BufferUsageStage::Default,
+			.usageFlags = hf::ShaderUsageStage::Default,
 			.arraySize = 1,
 			.elementSizeInBytes = sizeof(Camera)
 		};
@@ -118,7 +136,7 @@ namespace app
 		{
 			.bindingId = 0,
 			.type = hf::TextureLayoutType::CombinedImageSampler,
-			.usageFlags = hf::BufferUsageStage::Default,
+			.usageFlags = hf::ShaderUsageStage::Default,
 			.arraySize = 1,
 		};
 
@@ -203,7 +221,7 @@ namespace app
 
 		hf::TexturePackCreationInfo texPackInfo
 		{
-			.bindingType = hf::BindingType::Graphics,
+			.bindingType = hf::RenderBindingType::Graphics,
 			.setBindingIndex = 1,
 			.pBindings = &binding,
 			.bindingCount = 1,
@@ -335,7 +353,7 @@ namespace app
 
 		hf::UniformBufferUploadInfo uniformBufferUploads
 		{
-			.bindingType = hf::BindingType::Graphics,
+			.bindingType = hf::RenderBindingType::Graphics,
 			.setBindingIndex = 0,
 			.pUploads = &cameraUpload,
 			.uploadCount = 1

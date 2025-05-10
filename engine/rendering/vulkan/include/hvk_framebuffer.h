@@ -8,7 +8,7 @@ namespace hf
     struct VkFrameBuffer
     {
         VkFrameBuffer() = default;
-        VkFrameBuffer(VkImageView* pAttachments, DrawPass pass, const VkExtent2D& extent);
+        VkFrameBuffer(VkImageView* pAttachments, RenderPass pass, const VkExtent2D& extent);
         ~VkFrameBuffer();
 
         VkFramebuffer buffer{};

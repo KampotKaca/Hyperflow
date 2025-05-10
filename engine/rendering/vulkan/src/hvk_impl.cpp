@@ -37,18 +37,18 @@ namespace hf::inter::rendering
         delete (VkRenderer*)rn;
     }
 
-    DrawPass DefineDrawPass(const DrawPassDefinitionInfo& info)
+    RenderPass DefineRenderPass(const RenderPassDefinitionInfo& info)
     {
-        GRAPHICS_DATA.drawPasses.emplace_back(info);
-        return GRAPHICS_DATA.drawPasses.size();
+        GRAPHICS_DATA.renderPasses.emplace_back(info);
+        return GRAPHICS_DATA.renderPasses.size();
     }
 
-    void BeginDrawPass(void* rn, DrawPass pass)
+    void BeginRenderPass(void* rn, RenderPass pass)
     {
         BeginPass((VkRenderer*)rn, pass);
     }
 
-    void EndDrawPass(void* rn)
+    void EndRenderPass(void* rn)
     {
         EndPass((VkRenderer*)rn);
     }
@@ -302,9 +302,9 @@ namespace hf::inter::rendering
             .DestroyInstance            = DestroyInstance,
 
             //draw pass
-            .DefineDrawPass             = DefineDrawPass,
-            .BeginDrawPass              = BeginDrawPass,
-            .EndDrawPass                = EndDrawPass,
+            .DefineRenderPass           = DefineRenderPass,
+            .BeginRenderPass            = BeginRenderPass,
+            .EndRenderPass              = EndRenderPass,
 
             //shader
             .CreateShader               = CreateShader,

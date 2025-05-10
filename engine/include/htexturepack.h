@@ -19,7 +19,7 @@ namespace hf
         TexturePack(const TexturePackCreationInfo& info);
         ~TexturePack();
 
-        BindingType bindingType = BindingType::Graphics;
+        RenderBindingType bindingType = RenderBindingType::Graphics;
         std::vector<TexturePackBinding> bindings{};
         TextureLayout layout{};
         uint32_t setBindingIndex = 0;

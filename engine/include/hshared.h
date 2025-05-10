@@ -177,10 +177,51 @@ namespace hf
 	typedef uint32_t TextureLayout;
 	typedef uint32_t TextureSampler;
 	typedef uint32_t ShaderSetup;
-	typedef uint32_t DrawPass;
+	typedef uint32_t RenderPass;
 
 	enum class BufferDataType { U8, I8, U16, I16, U32, I32, U64, I64, F16, F32, F64, Count };
 	enum class BufferMemoryType { Static, WriteOnly, ReadWrite, Count };
+
+	enum class AccessType
+	{
+		None = 0,
+		IndirectCommandRead = (1 << 0),
+		IndexRead = (1 << 1), VertAttribRead = (1 << 2),
+		UniformRead = (1 << 3), AttachmentRead = (1 << 4),
+		ShaderRead = (1 << 5), ShaderWrite = (1 << 6),
+		ColorAttachmentRead = (1 << 7), ColorAttachmentWrite = (1 << 8),
+		DepthStencilAttachmentRead = (1 << 9), DepthStencilAttachmentWrite	= (1 << 10),
+		TransferRead = (1 << 11), TransferWrite = (1 << 12),
+		HostRead = (1 << 13), HostWrite = (1 << 14),
+		MemoryRead = (1 << 15), MemoryWrite = (1 << 16),
+	};
+	DEFINE_ENUM_FLAGS(AccessType)
+
+	enum class ShaderUsageStage
+	{
+		None = 0,
+		Vertex = (1u << 0), TessellationControl = (1u << 1), TessellationEvaluation = (1u << 2),
+		Geometry = (1u << 3), Fragment = (1u << 4), Compute = (1u << 5),
+		Default = Vertex | Fragment,
+		AllGraphics = Vertex | TessellationControl | TessellationEvaluation | Geometry | Fragment,
+		All = Vertex | TessellationControl | TessellationEvaluation | Geometry | Fragment | Compute,
+	};
+	DEFINE_ENUM_FLAGS(ShaderUsageStage)
+
+	enum class RenderPassStage
+	{
+		None = 0,
+		PreDraw = (1 << 0),
+		DrawIndirect = (1 << 1), VertexInput = (1 << 2), Vertex = (1 << 3),
+		TessellationControl = (1 << 4), TessellationEvaluation = (1 << 5),
+		Geometry = (1 << 6), Fragment = (1 << 7),
+		EarlyFragmentTest = (1 << 8), LateFragmentTest = (1 << 9), ColorAttachmentOutput = (1 << 10),
+		Compute = (1 << 11), Transfer = (1 << 12),
+		PostDraw = (1 << 13),
+		Host = (1 << 14), AllGraphics = (1 << 15), AllCommands = (1 << 16),
+		Default = Vertex | Fragment,
+	};
+	DEFINE_ENUM_FLAGS(RenderPassStage)
 
 	constexpr uint32_t BUFFER_DATA_SIZE[(uint32_t)BufferDataType::Count] = { 1, 1, 2, 2, 4, 4, 8, 8, 2, 4, 8 };
 
@@ -235,7 +276,7 @@ namespace hf
 
 	struct ShaderCreationInfo
 	{
-		DrawPass drawPass{};
+		RenderPass drawPass{};
 		ShaderSetup setup{};
 		Ref<TexturePack> texturePack{};
 		uint32_t supportedAttribCount{};
@@ -243,36 +284,6 @@ namespace hf
 		const char* vertexShaderLoc{};
 		const char* fragmentShaderLoc{};
 	};
-
-	enum class BufferUsageStage
-	{
-		None = 0,
-		Vertex = (1u << 0), TessellationControl = (1u << 1), TessellationEvaluation = (1u << 2),
-		Geometry = (1u << 3), Fragment = (1u << 4), Compute = (1u << 5),
-		Default = Vertex | Fragment,
-		AllGraphics = Vertex | TessellationControl | TessellationEvaluation | Geometry | Fragment,
-		All = Vertex | TessellationControl | TessellationEvaluation | Geometry | Fragment | Compute,
-	};
-	DEFINE_ENUM_FLAGS(BufferUsageStage)
-
-	enum class TextureAttachment
-	{
-		None = 0,
-		Color = (1u << 0), Depth = (1u << 1), Stencil = (1u << 2),
-		DepthReadOnly = (1u << 3), StencilReadOnly = (1u << 4),
-		//Generally used in post processing
-		ShaderReadOnly = (1u << 5),
-		//Used for images which are copied from
-		TransferSrc = (1u << 6),
-		//Used for images which are copied to
-		TransferDst = (1u << 7),
-		//Used for images which are presented to the screen
-		PresentSrc = (1u << 8),
-		Default = Color | Depth,
-		DepthStencil = Depth | Stencil,
-		DepthStencilReadOnly = DepthReadOnly | StencilReadOnly,
-	};
-	DEFINE_ENUM_FLAGS(TextureAttachment)
 
 	enum class UniformBufferType
 	{
@@ -291,7 +302,7 @@ namespace hf
 	struct UniformBufferBindingInfo
 	{
 		UniformBufferType type = UniformBufferType::UniformBuffer;
-		BufferUsageStage usageFlags = BufferUsageStage::Vertex | BufferUsageStage::Fragment;
+		ShaderUsageStage usageFlags = ShaderUsageStage::Vertex | ShaderUsageStage::Fragment;
 
 		//this variable describes this specific uniform buffers array size,
 		//example:
@@ -310,7 +321,7 @@ namespace hf
 		uint32_t bindingCount{};
 	};
 
-	enum class BindingType { Graphics = 0, Compute = 1, RayTracing = 1000165000, HuaweiSubpassShading = 1000369003 };
+	enum class RenderBindingType { Graphics = 0, Compute = 1, RayTracing = 1000165000, HuaweiSubpassShading = 1000369003 };
 
 	struct UniformBufferUpload
 	{
@@ -322,7 +333,7 @@ namespace hf
 
 	struct UniformBufferUploadInfo
 	{
-		BindingType bindingType = BindingType::Graphics;
+		RenderBindingType bindingType = RenderBindingType::Graphics;
 		uint32_t setBindingIndex = 0;
 		UniformBufferUpload* pUploads{};
 		uint32_t uploadCount{};
@@ -332,7 +343,7 @@ namespace hf
 	{
 		uint32_t bindingId{};
 		TextureLayoutType type = TextureLayoutType::CombinedImageSampler;
-		BufferUsageStage usageFlags = BufferUsageStage::Vertex | BufferUsageStage::Fragment;
+		ShaderUsageStage usageFlags = ShaderUsageStage::Vertex | ShaderUsageStage::Fragment;
 
 		//this variable describes this specific uniform buffers array size,
 		//example:
@@ -487,16 +498,118 @@ namespace hf
 
 	struct TexturePackCreationInfo
 	{
-		BindingType bindingType = BindingType::Graphics;
+		RenderBindingType bindingType = RenderBindingType::Graphics;
 		uint32_t setBindingIndex = 0;
 		TexturePackBindingInfo* pBindings{};
 		uint32_t bindingCount = 0;
 		TextureLayout layout = 0;
 	};
 
-	struct DrawPassDefinitionInfo
+	enum class RenderPassLayoutType
 	{
-		TextureAttachment attachmentFlags = TextureAttachment::Default;
+		Undefined = 0, General = 1,
+		Color = 2, DepthStencil = 3, DepthStencilReadOnly = 4,
+		//Generally used in post processing
+		ShaderReadOnly = 5,
+		//Used for images which are copied from
+		TransferSrc = 6,
+		//Used for images which are copied to
+		TransferDst = 7,
+		Preinitialized = 8,
+		DepthReadOnly_Stencil = 1000117000,
+		Depth_StencilReadOnly = 1000117001,
+		Depth = 1000241000,
+		DepthReadOnly = 1000241001,
+		Stencil = 1000241002,
+		StencilReadOnly = 1000241003,
+		ReadOnly = 1000314000,
+		Attachment = 1000314001,
+		RenderingLocalRead = 1000232000,
+
+		//used as a source for the swapchain
+		PresentSrc = 1000001002
+	};
+
+	enum class LoadStoreOperationType
+	{
+		LoadAndStore = 0, ClearAndStore = 1, DontCareAndStore = 2,
+		LoadAndDontCare = 3, ClearAndDontCare = 4, DontCareAndDontCare = 5,
+	};
+
+	enum class RenderPassAttachmentType
+	{
+		Input = 0, Color = 1,
+	};
+
+	struct RenderSubpassAttachmentInfo
+	{
+		RenderPassAttachmentType type = RenderPassAttachmentType::Color;
+		//type of attachment layout color, depth, stencil etc.
+		RenderPassLayoutType layout = RenderPassLayoutType::Color;
+		TextureFormat format = TextureFormat::B8G8R8A8_Srgb;
+		//meant as a multisampling counter, should be pot value, with 64 as maximum
+		uint32_t msaaCounter = 1;
+		LoadStoreOperationType lsOperation = LoadStoreOperationType::ClearAndStore;
+		LoadStoreOperationType lsStencilOperation = LoadStoreOperationType::DontCareAndDontCare;
+
+		//type of initial layout of the attachment
+		RenderPassLayoutType initialLayout = RenderPassLayoutType::Undefined;
+		RenderPassLayoutType finalLayout = RenderPassLayoutType::PresentSrc;
+		bool usesSharedMemory = false;
+	};
+
+	struct RenderSubpassInfo
+	{
+		RenderBindingType bindingType = RenderBindingType::Graphics;
+		RenderSubpassAttachmentInfo* pAttachments{};
+		uint32_t attachmentCount = 0;
+		RenderSubpassAttachmentInfo* depthAttachment{};
+	};
+
+	//meant to be used when you just want to previous rending to finish, until you start this one
+#define RENDER_PASS_DEPENDENCY_EXTERNAL (~0U)
+
+	enum class RenderPassDependencyType
+	{
+		None = 0,
+		ByRegion = (1 << 0),
+		ViewLocal = (1 << 1),
+		DeviceGroup = (1 << 2),
+	};
+
+	struct RenderPassDependencyTarget
+	{
+		uint32_t subpassIndex = 0;
+		RenderPassStage stageMask = RenderPassStage::None;
+		AccessType accessMask = AccessType::None;
+	};
+
+	struct RenderPassDependencyInfo
+	{
+		RenderPassDependencyTarget src
+		{
+			.subpassIndex = RENDER_PASS_DEPENDENCY_EXTERNAL,
+			.stageMask = RenderPassStage::ColorAttachmentOutput,
+			.accessMask = AccessType::None
+		};
+		RenderPassDependencyTarget dst
+		{
+			.subpassIndex = 0,
+			.stageMask = RenderPassStage::ColorAttachmentOutput,
+			.accessMask = AccessType::ColorAttachmentWrite
+		};
+		RenderPassDependencyType flags = RenderPassDependencyType::None;
+	};
+
+	struct RenderPassDefinitionInfo
+	{
+		RenderSubpassInfo* pSubpasses{};
+		uint32_t subpassCount = 0;
+		RenderPassDependencyInfo* pDependencies;
+		uint32_t dependencyCount = 0;
+		vec4 clearColor = vec4{ 0.0f, 0.0f, 0.0f, 1.0f };
+		float depth = 0.0f;
+		uint32_t stencil = 0;
 	};
 
 	enum class RenderingApiType { None, Vulkan, Direct3D };
@@ -554,7 +667,7 @@ namespace hf
 	{
 		//stage where you can create draw passes
 		//and should return the pass which is used for presentation
-		DrawPass (*onPassCreationCallback)();
+		RenderPass (*onPassCreationCallback)();
 		//Called after new renderer is loaded, this is where you should define uin32_t type rendering objects
 		//like: uniform buffer, buffer attribute and ect...
 		void (*onRendererLoad)(){};

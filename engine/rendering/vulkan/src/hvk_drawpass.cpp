@@ -7,44 +7,196 @@ namespace hf
     void CreateRenderPassColorAttachment(std::vector<VkAttachmentDescription>& attachments,
                                          std::vector<VkAttachmentReference>& attachmentRefs);
 
-    VkDrawPass::VkDrawPass(const DrawPassDefinitionInfo& info)
+    static void SetOperations(VkAttachmentLoadOp& loadOp, VkAttachmentStoreOp& storeOp, LoadStoreOperationType type);
+
+    VkDrawPass::VkDrawPass(const RenderPassDefinitionInfo& info)
     {
-        VkSubpassDependency dependency
-        {
-            .srcSubpass = VK_SUBPASS_EXTERNAL,
-            .dstSubpass = 0,
-            .srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
-            .dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
-            .srcAccessMask = 0,
-            .dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,
-        };
+        clearValue.depthStencil = { info.depth, info.stencil };
+        clearValue.color =
+            { info.clearColor.x, info.clearColor.y,
+              info.clearColor.z, info.clearColor.w };
 
-        std::vector<VkAttachmentDescription> attachments;
-        std::vector<VkAttachmentReference> attachmentRefs;
+        std::vector<VkSubpassDependency> dependencies(info.dependencyCount);
+        std::vector<VkSubpassDescription> subpasses(info.subpassCount);
 
-        attachmentCount = 0;
-        if ((uint32_t)(info.attachmentFlags & TextureAttachment::Color) > 0)
+        for (uint32_t i = 0; i < info.dependencyCount; i++)
         {
-            CreateRenderPassColorAttachment(attachments, attachmentRefs);
-            attachmentCount++;
+            auto& dependency = info.pDependencies[i];
+            dependencies[i] =
+            {
+                .srcSubpass = dependency.src.subpassIndex,
+                .dstSubpass = dependency.dst.subpassIndex,
+                .srcStageMask = (VkPipelineStageFlags)dependency.src.stageMask,
+                .dstStageMask = (VkPipelineStageFlags)dependency.dst.stageMask,
+                .srcAccessMask = (VkAccessFlags)dependency.src.accessMask,
+                .dstAccessMask = (VkAccessFlags)dependency.dst.accessMask,
+                .dependencyFlags = (VkDependencyFlags)dependency.flags
+            };
         }
 
-        VkSubpassDescription subpass
+        for (uint32_t i = 0; i < info.subpassCount; i++)
         {
-            .pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS,
-            .colorAttachmentCount = (uint32_t)attachmentRefs.size(),
-            .pColorAttachments = attachmentRefs.data()
-        };
+            auto& subpassInfo = info.pSubpasses[i];
+            attachmentCount += subpassInfo.attachmentCount;
+            for (uint32_t j = 0; j < subpassInfo.attachmentCount; j++)
+            {
+                auto& attachmentInfo = subpassInfo.pAttachments[j];
+                if (attachmentInfo.msaaCounter > 1)
+                {
+                    attachmentCount++;
+                    multisamplingAttachmentCount++;
+                }
+
+                switch (attachmentInfo.type)
+                {
+                case RenderPassAttachmentType::Input: inputAttachmentCount++; break;
+                case RenderPassAttachmentType::Color: colorAttachmentCount++; break;
+                }
+            }
+
+            if (subpassInfo.depthAttachment)
+            {
+                attachmentCount++;
+                depthAttachmentCount++;
+            }
+        }
+
+        std::vector<VkAttachmentDescription> attachments(attachmentCount);
+        std::vector<VkAttachmentReference> inputAttachmentRefs(inputAttachmentCount);
+        std::vector<VkAttachmentReference> colorAttachmentRefs(colorAttachmentCount);
+        std::vector<VkAttachmentReference> msaaAttachmentRefs(multisamplingAttachmentCount);
+        std::vector<VkAttachmentReference> depthAttachmentRefs(depthAttachmentCount);
+
+        {
+            uint32_t attachmentIndex = 0;
+            uint32_t inputIndex = 0;
+            uint32_t colorIndex = 0;
+            uint32_t multisampleIndex = 0;
+            uint32_t depthIndex = 0;
+            for (uint32_t i = 0; i < info.subpassCount; i++)
+            {
+                auto& subpassInfo = info.pSubpasses[i];
+                uint32_t inputStart = inputIndex;
+                uint32_t colorStart = colorIndex;
+                uint32_t multisampleStart = multisampleIndex;
+                for (uint32_t j = 0; j < subpassInfo.attachmentCount; j++)
+                {
+                    auto& attachmentInfo = subpassInfo.pAttachments[j];
+                    auto& attachment = attachments[attachmentIndex];
+                    attachment =
+                    {
+                        .flags = (VkAttachmentDescriptionFlags)attachmentInfo.usesSharedMemory,
+                        .format = (VkFormat)attachmentInfo.format,
+                        .samples = (VkSampleCountFlagBits)attachmentInfo.msaaCounter,
+                    };
+
+                    SetOperations(attachment.loadOp, attachment.storeOp, attachmentInfo.lsOperation);
+                    SetOperations(attachment.stencilLoadOp, attachment.stencilStoreOp, attachmentInfo.lsStencilOperation);
+
+                    VkAttachmentReference ref =
+                    {
+                        .attachment = attachmentIndex,
+                        .layout = (VkImageLayout)attachmentInfo.layout
+                    };
+
+                    switch (attachmentInfo.type)
+                    {
+                    case RenderPassAttachmentType::Input:
+                        inputAttachmentRefs[inputIndex] = ref;
+                        inputIndex++;
+                        break;
+                    case RenderPassAttachmentType::Color:
+                        colorAttachmentRefs[colorIndex] = ref;
+                        colorIndex++;
+                        break;
+                    }
+
+                    attachmentIndex++;
+
+                    if (attachmentInfo.msaaCounter > 1)
+                    {
+                        attachment.initialLayout = (VkImageLayout)attachmentInfo.initialLayout;
+                        attachment.finalLayout = (VkImageLayout)attachmentInfo.layout;
+
+                        auto& msaaAttachment = attachments[attachmentIndex];
+                        msaaAttachment = attachment;
+                        msaaAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
+                        msaaAttachment.finalLayout = (VkImageLayout)attachmentInfo.finalLayout;
+
+                        msaaAttachmentRefs[multisampleIndex] =
+                        {
+                            .attachment = attachmentIndex,
+                            .layout = (VkImageLayout)attachmentInfo.layout
+                        };
+
+                        multisampleIndex++;
+                        attachmentIndex++;
+                    }
+                    else
+                    {
+                        attachment.initialLayout = (VkImageLayout)attachmentInfo.initialLayout;
+                        attachment.finalLayout = (VkImageLayout)attachmentInfo.finalLayout;
+                    }
+                }
+
+                auto& subpass = subpasses[i];
+                subpass =
+                {
+                    .pipelineBindPoint = (VkPipelineBindPoint)subpassInfo.bindingType,
+                };
+
+                if ((inputIndex - inputStart) > 0)
+                {
+                    subpass.inputAttachmentCount = inputIndex - inputStart;
+                    subpass.pInputAttachments = &inputAttachmentRefs[inputStart];
+                }
+
+                if ((colorIndex - colorStart) > 0)
+                {
+                    subpass.colorAttachmentCount = colorIndex - colorStart;
+                    subpass.pColorAttachments = &colorAttachmentRefs[colorStart];
+                }
+
+                if ((multisampleIndex - multisampleStart) > 0)
+                {
+                    subpass.pResolveAttachments = &msaaAttachmentRefs[multisampleIndex];
+                }
+
+                if (subpassInfo.depthAttachment)
+                {
+                    auto& depthAttachment = attachments[attachmentIndex];
+                    depthAttachment =
+                    {
+                        .flags = (VkAttachmentDescriptionFlags)subpassInfo.depthAttachment->usesSharedMemory,
+                        .format = (VkFormat)subpassInfo.depthAttachment->format,
+                        .samples = VK_SAMPLE_COUNT_1_BIT,
+                    };
+
+                    SetOperations(depthAttachment.loadOp, depthAttachment.storeOp, subpassInfo.depthAttachment->lsOperation);
+                    SetOperations(depthAttachment.stencilLoadOp, depthAttachment.stencilStoreOp, subpassInfo.depthAttachment->lsStencilOperation);
+
+                    depthAttachmentRefs[depthIndex] =
+                    {
+                        .attachment = attachmentIndex,
+                        .layout = (VkImageLayout)subpassInfo.depthAttachment->layout
+                    };
+
+                    subpass.pDepthStencilAttachment = &depthAttachmentRefs[depthIndex];
+                    attachmentIndex++;
+                    depthIndex++;
+                }
+            }
+        }
 
         VkRenderPassCreateInfo renderPassInfo
         {
             .sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO,
             .attachmentCount = (uint32_t)attachments.size(),
             .pAttachments = attachments.data(),
-            .subpassCount = 1,
-            .pSubpasses = &subpass,
-            .dependencyCount = 1,
-            .pDependencies = &dependency,
+            .subpassCount = (uint32_t)subpasses.size(),
+            .pSubpasses = subpasses.data(),
+            .dependencyCount = (uint32_t)dependencies.size(),
+            .pDependencies = dependencies.data(),
         };
 
         VK_HANDLE_EXCEPT(vkCreateRenderPass(GRAPHICS_DATA.defaultDevice->logicalDevice.device,
@@ -56,26 +208,21 @@ namespace hf
         vkDestroyRenderPass(GRAPHICS_DATA.defaultDevice->logicalDevice.device, pass, nullptr);
     }
 
-    bool IsValidDrawPass(DrawPass pass)
+    bool IsValidDrawPass(RenderPass pass)
     {
-        return pass > 0 && pass <= GRAPHICS_DATA.drawPasses.size();
+        return pass > 0 && pass <= GRAPHICS_DATA.renderPasses.size();
     }
 
-    const VkDrawPass& GetDrawPass(DrawPass pass)
+    const VkDrawPass& GetDrawPass(RenderPass pass)
     {
         if (!IsValidDrawPass(pass)) throw GENERIC_EXCEPT("[Hyperflow]", "Invalid draw pass");
-        return GRAPHICS_DATA.drawPasses[pass - 1];
+        return GRAPHICS_DATA.renderPasses[pass - 1];
     }
 
-    void BeginPass(VkRenderer* rn, DrawPass pass)
+    void BeginPass(VkRenderer* rn, RenderPass pass)
     {
         if (rn->currentPass) throw GENERIC_EXCEPT("[Hyperflow]", "Begin render pass called twice without ending previous one");
         auto& drawPass = GetDrawPass(pass);
-        VkClearValue clearColor =
-        {
-            .color = { 0.0f, 0.0f, 0.0f, 1.0f },
-        };
-
         const auto frameBuffer = rn->swapchain.frameBuffers[rn->imageIndex];
         VkRenderPassBeginInfo renderPassInfo
         {
@@ -88,7 +235,7 @@ namespace hf
                 .extent = frameBuffer->extent,
             },
             .clearValueCount = 1,
-            .pClearValues = &clearColor
+            .pClearValues = &drawPass.clearValue
         };
 
         vkCmdBeginRenderPass(rn->currentCommand, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
@@ -131,5 +278,36 @@ namespace hf
 
         attachments.push_back(colorAttachment);
         attachmentRefs.push_back(colorAttachmentRef);
+    }
+
+    void SetOperations(VkAttachmentLoadOp& loadOp, VkAttachmentStoreOp& storeOp, LoadStoreOperationType type)
+    {
+        switch (type)
+        {
+        case LoadStoreOperationType::LoadAndStore:
+            loadOp = VK_ATTACHMENT_LOAD_OP_LOAD;
+            storeOp = VK_ATTACHMENT_STORE_OP_STORE;
+            break;
+        case LoadStoreOperationType::ClearAndStore:
+            loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
+            storeOp = VK_ATTACHMENT_STORE_OP_STORE;
+            break;
+        case LoadStoreOperationType::DontCareAndStore:
+            loadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+            storeOp = VK_ATTACHMENT_STORE_OP_STORE;
+            break;
+        case LoadStoreOperationType::LoadAndDontCare:
+            loadOp = VK_ATTACHMENT_LOAD_OP_LOAD;
+            storeOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+            break;
+        case LoadStoreOperationType::ClearAndDontCare:
+            loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
+            storeOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+            break;
+        case LoadStoreOperationType::DontCareAndDontCare:
+            loadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+            storeOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+            break;
+        }
     }
 }

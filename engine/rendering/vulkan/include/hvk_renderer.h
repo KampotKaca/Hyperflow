@@ -54,7 +54,7 @@ namespace hf
     void PresentSwapchain(VkRenderer* rn);
     bool AcquireNextImage(VkRenderer* rn);
 
-    void BeginPass(VkRenderer* rn, DrawPass pass);
+    void BeginPass(VkRenderer* rn, RenderPass pass);
     void EndPass(VkRenderer* rn);
 
     void BeginCommandBuffer(VkRenderer* rn, VkCommandBuffer buffer);
