@@ -6,6 +6,7 @@
 #include "hvk_texturepack.h"
 #include "hvk_vertbuffer.h"
 #include "hvk_texturepack.h"
+#include "hvk_drawpass.h"
 
 namespace hf::inter::rendering
 {
@@ -28,12 +29,28 @@ namespace hf::inter::rendering
 
     void* CreateInstance(const RendererInstanceCreationInfo& info)
     {
-        return new VKRenderer(info.handle, info.size);
+        return new VkRenderer(info.handle, info.size);
     }
 
     void DestroyInstance(void* rn)
     {
-        delete (VKRenderer*)rn;
+        delete (VkRenderer*)rn;
+    }
+
+    DrawPass DefineDrawPass(const DrawPassDefinitionInfo& info)
+    {
+        GRAPHICS_DATA.drawPasses.emplace_back(info);
+        return GRAPHICS_DATA.drawPasses.size();
+    }
+
+    void BeginDrawPass(void* rn, DrawPass pass)
+    {
+        BeginPass((VkRenderer*)rn, pass);
+    }
+
+    void EndDrawPass(void* rn)
+    {
+        EndPass((VkRenderer*)rn);
     }
 
     void* CreateShader(const ShaderCreationInfo& info)
@@ -48,7 +65,7 @@ namespace hf::inter::rendering
 
     void BindShader(const void* rn, const void* shader, BufferAttrib attrib)
     {
-        BindShader((VKRenderer*)rn, (VkShader*)shader, attrib);
+        BindShader((VkRenderer*)rn, (VkShader*)shader, attrib);
     }
 
     void* CreateTexture(const TextureCreationInfo& info)
@@ -89,7 +106,7 @@ namespace hf::inter::rendering
 
     void BindTexturePack(void* rn, void* texPack)
     {
-        hf::BindTexturePack((VKRenderer*)rn, (VkTexturePack*)texPack);
+        hf::BindTexturePack((VkRenderer*)rn, (VkTexturePack*)texPack);
     }
 
     void* CreateTexturePackAllocator(const TexturePackAllocatorCreationInfo& info)
@@ -102,19 +119,19 @@ namespace hf::inter::rendering
         delete (VkTexturePackAllocator*)texPackAllocator;
     }
 
-    uint32_t DefineTextureSampler(const TextureSamplerDefinitionInfo& info)
+    TextureSampler DefineTextureSampler(const TextureSamplerDefinitionInfo& info)
     {
         GRAPHICS_DATA.textureSamplers.emplace_back(info);
         return GRAPHICS_DATA.textureSamplers.size();
     }
 
-    uint32_t DefineTextureLayout(const TextureLayoutDefinitionInfo& info)
+    TextureLayout DefineTextureLayout(const TextureLayoutDefinitionInfo& info)
     {
         GRAPHICS_DATA.textureLayouts.emplace_back(info);
         return GRAPHICS_DATA.textureLayouts.size();
     }
 
-    uint32_t DefineVertBufferAttrib(const BufferAttribDefinitionInfo& info, uint32_t fullStride)
+    BufferAttrib DefineVertBufferAttrib(const BufferAttribDefinitionInfo& info, uint32_t fullStride)
     {
         GRAPHICS_DATA.bufferAttribs.emplace_back(info, fullStride);
         return GRAPHICS_DATA.bufferAttribs.size();
@@ -126,7 +143,7 @@ namespace hf::inter::rendering
         return attribute.vertexSize;
     }
 
-    uint32_t DefineUniformBuffer(const UniformBufferDefinitionInfo& info)
+    UniformBuffer DefineUniformBuffer(const UniformBufferDefinitionInfo& info)
     {
         GRAPHICS_DATA.uniformBuffers.emplace_back(info);
         return GRAPHICS_DATA.uniformBuffers.size();
@@ -134,10 +151,10 @@ namespace hf::inter::rendering
 
     void UploadUniformBuffer(const void* rn, const UniformBufferUploadInfo& info)
     {
-        UploadUniforms((VKRenderer*)rn, info);
+        UploadUniforms((VkRenderer*)rn, info);
     }
 
-    uint32_t DefineShaderSetup(const ShaderSetupDefinitionInfo& info)
+    ShaderSetup DefineShaderSetup(const ShaderSetupDefinitionInfo& info)
     {
         GRAPHICS_DATA.shaderSetups.emplace_back(info);
         return GRAPHICS_DATA.shaderSetups.size();
@@ -145,10 +162,10 @@ namespace hf::inter::rendering
 
     void BindShaderSetup(void* rn, ShaderSetup storage)
     {
-        hf::BindShaderSetup((VKRenderer*)rn, storage);
+        hf::BindShaderSetup((VkRenderer*)rn, storage);
     }
 
-    uint32_t DefineUniformAllocator(const UniformAllocatorDefinitionInfo& info)
+    UniformAllocator DefineUniformAllocator(const UniformAllocatorDefinitionInfo& info)
     {
         GRAPHICS_DATA.uniformAllocators.emplace_back(info);
         return GRAPHICS_DATA.uniformAllocators.size();
@@ -211,31 +228,31 @@ namespace hf::inter::rendering
 
     bool GetReadyForRendering(void* rn)
     {
-        auto renderer = (VKRenderer*)rn;
+        auto renderer = (VkRenderer*)rn;
         return GetReadyForRendering(renderer);
     }
 
     void StartFrame(void* rn)
     {
-        auto renderer = (VKRenderer*)rn;
+        auto renderer = (VkRenderer*)rn;
         StartFrame(renderer);
     }
 
     void EndFrame(void* rn)
     {
-        auto renderer = (VKRenderer*)rn;
+        auto renderer = (VkRenderer*)rn;
         EndFrame(renderer);
     }
 
     void RegisterFrameBufferChange(void* rn, uvec2 newSize)
     {
-        auto renderer = (VKRenderer*)rn;
+        auto renderer = (VkRenderer*)rn;
         RegisterFrameBufferChange(renderer, newSize);
     }
 
     void Draw(void* rn, const DrawCallInfo& info)
     {
-        auto* vrn = (VKRenderer*)rn;
+        auto* vrn = (VkRenderer*)rn;
 
         uint32_t offset = 0;
         uint32_t vertCount = 0;
@@ -283,6 +300,11 @@ namespace hf::inter::rendering
             .Unload                     = Unload,
             .CreateInstance             = CreateInstance,
             .DestroyInstance            = DestroyInstance,
+
+            //draw pass
+            .DefineDrawPass             = DefineDrawPass,
+            .BeginDrawPass              = BeginDrawPass,
+            .EndDrawPass                = EndDrawPass,
 
             //shader
             .CreateShader               = CreateShader,

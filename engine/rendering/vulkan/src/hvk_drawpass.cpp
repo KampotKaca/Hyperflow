@@ -1,3 +1,4 @@
+#include "hvk_drawpass.h"
 #include "hvk_graphics.h"
 #include "hvk_renderer.h"
 
@@ -6,7 +7,7 @@ namespace hf
     void CreateRenderPassColorAttachment(std::vector<VkAttachmentDescription>& attachments,
                                          std::vector<VkAttachmentReference>& attachmentRefs);
 
-    void CreateRenderPass(const VkRenderPassCreationInfo& info, VkRenderPass* renderPass)
+    VkDrawPass::VkDrawPass(const DrawPassDefinitionInfo& info)
     {
         VkSubpassDependency dependency
         {
@@ -21,13 +22,11 @@ namespace hf
         std::vector<VkAttachmentDescription> attachments;
         std::vector<VkAttachmentReference> attachmentRefs;
 
-        for (uint32_t i = 0; i < info.attachmentCount; i++)
+        attachmentCount = 0;
+        if ((uint32_t)(info.attachmentFlags & TextureAttachment::Color) > 0)
         {
-            switch (info.pAttachments[i])
-            {
-                case VkRenderPassAttachmentType::Color: CreateRenderPassColorAttachment(attachments, attachmentRefs); break;
-                default: throw GENERIC_EXCEPT("[Hyperflow]", "Unsupported type of render pass attachment.");
-            }
+            CreateRenderPassColorAttachment(attachments, attachmentRefs);
+            attachmentCount++;
         }
 
         VkSubpassDescription subpass
@@ -49,20 +48,29 @@ namespace hf
         };
 
         VK_HANDLE_EXCEPT(vkCreateRenderPass(GRAPHICS_DATA.defaultDevice->logicalDevice.device,
-            &renderPassInfo, nullptr, renderPass));
+            &renderPassInfo, nullptr, &pass));
     }
 
-    void DestroyRenderPass(VkRenderPass* renderPass)
+    VkDrawPass::~VkDrawPass()
     {
-        if (*renderPass != VK_NULL_HANDLE)
-        {
-            vkDestroyRenderPass(GRAPHICS_DATA.defaultDevice->logicalDevice.device, *renderPass, nullptr);
-            *renderPass = VK_NULL_HANDLE;
-        }
+        vkDestroyRenderPass(GRAPHICS_DATA.defaultDevice->logicalDevice.device, pass, nullptr);
     }
 
-    void BeginRenderPass(VKRenderer* rn, const VkRenderPass& renderPass)
+    bool IsValidDrawPass(DrawPass pass)
     {
+        return pass > 0 && pass <= GRAPHICS_DATA.drawPasses.size();
+    }
+
+    const VkDrawPass& GetDrawPass(DrawPass pass)
+    {
+        if (!IsValidDrawPass(pass)) throw GENERIC_EXCEPT("[Hyperflow]", "Invalid draw pass");
+        return GRAPHICS_DATA.drawPasses[pass - 1];
+    }
+
+    void BeginPass(VkRenderer* rn, DrawPass pass)
+    {
+        if (rn->currentPass) throw GENERIC_EXCEPT("[Hyperflow]", "Begin render pass called twice without ending previous one");
+        auto& drawPass = GetDrawPass(pass);
         VkClearValue clearColor =
         {
             .color = { 0.0f, 0.0f, 0.0f, 1.0f },
@@ -72,7 +80,7 @@ namespace hf
         VkRenderPassBeginInfo renderPassInfo
         {
             .sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO,
-            .renderPass = renderPass,
+            .renderPass = drawPass.pass,
             .framebuffer = frameBuffer->buffer,
             .renderArea =
             {
@@ -84,16 +92,18 @@ namespace hf
         };
 
         vkCmdBeginRenderPass(rn->currentCommand, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
-        rn->currentPass = renderPass;
+        rn->currentPass = drawPass.pass;
+        UploadViewportAndScissor(rn);
     }
 
-    void EndRenderPass(VKRenderer* rn)
+    void EndPass(VkRenderer* rn)
     {
         if (rn->currentPass != VK_NULL_HANDLE)
         {
             vkCmdEndRenderPass(rn->currentCommand);
             rn->currentPass = VK_NULL_HANDLE;
         }
+        else throw GENERIC_EXCEPT("[Hyperflow]", "End render pass called without begin render pass");
     }
 
     void CreateRenderPassColorAttachment(std::vector<VkAttachmentDescription>& attachments,
@@ -117,6 +127,7 @@ namespace hf
             .attachment = attachmentIndex,
             .layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL
         };
+
 
         attachments.push_back(colorAttachment);
         attachmentRefs.push_back(colorAttachmentRef);

@@ -11,7 +11,7 @@ namespace hf
 
     //------------------------------------------------------------------------------------
 
-    VKRenderer::VKRenderer(void* handle, uvec2 size) : windowHandle(handle), targetSize(size)
+    VkRenderer::VkRenderer(void* handle, uvec2 size) : windowHandle(handle), targetSize(size)
     {
         if (!GRAPHICS_DATA.devicesAreLoaded) LoadDevice(handle, &swapchain.surface);
         else GRAPHICS_DATA.platform.api->CreateSurface(GRAPHICS_DATA.platform.instance, windowHandle, GRAPHICS_DATA.instance, &swapchain.surface);
@@ -27,7 +27,7 @@ namespace hf
         for (uint32_t i = 0; i < FRAMES_IN_FLIGHT; ++i) CreateFrame(&frames[i]);
     }
 
-    VKRenderer::~VKRenderer()
+    VkRenderer::~VkRenderer()
     {
         for (auto& frame : frames) DestroyFrame(frame);
         frames.clear();
@@ -197,16 +197,8 @@ namespace hf
 
         VK_HANDLE_EXCEPT(vmaCreateAllocator(&allocatorInfo, &GRAPHICS_DATA.allocator));
 
-        VkRenderPassAttachmentType attachments[] =
-        {
-            VkRenderPassAttachmentType::Color,
-        };
-        VkRenderPassCreationInfo renderPassInfo
-        {
-            .pAttachments = attachments,
-            .attachmentCount = 1,
-        };
-        CreateRenderPass(renderPassInfo, &GRAPHICS_DATA.renderPass);
+        if (!GRAPHICS_DATA.onPassCreationCallback) throw GENERIC_EXCEPT("[Vulkan]", "No onPassCreationCallback provided");
+        GRAPHICS_DATA.presentationPass = GRAPHICS_DATA.onPassCreationCallback();
 
         CreateCommandPool(*GRAPHICS_DATA.defaultDevice, GRAPHICS_DATA.defaultDevice->familyIndices.transferFamily.value(), &GRAPHICS_DATA.transferPool);
         CreateCommandBuffers(*GRAPHICS_DATA.defaultDevice, &GRAPHICS_DATA.transferPool, 1);
@@ -229,7 +221,6 @@ namespace hf
         vmaDestroyAllocator(GRAPHICS_DATA.allocator);
         DestroyCommandPool(*GRAPHICS_DATA.defaultDevice, GRAPHICS_DATA.transferPool);
         DestroyCommandPool(*GRAPHICS_DATA.defaultDevice, GRAPHICS_DATA.graphicsPool);
-        DestroyRenderPass(&GRAPHICS_DATA.renderPass);
 
         for (auto& device : GRAPHICS_DATA.suitableDevices)
             DestroyLogicalDevice(device.logicalDevice);

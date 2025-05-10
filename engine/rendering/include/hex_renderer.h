@@ -8,6 +8,7 @@ namespace hf::inter::rendering
 {
     struct ShaderCreationInfo
     {
+        DrawPass drawPass;
         ShaderSetup shaderSetup{};
         void* texPack{};
         uint32_t supportedAttribCount{};
@@ -27,6 +28,7 @@ namespace hf::inter::rendering
         void* platformInstance;
         void* platformDll;
         void* (*getFuncFromDll)(void* dll, const char* funcName);
+        DrawPass (*onPassCreationCallback)();
     };
 
     struct VertBufferUploadInfo
@@ -116,13 +118,17 @@ namespace hf::inter::rendering
         void* (*CreateInstance)(const RendererInstanceCreationInfo& info);
         void (*DestroyInstance)(void* rn);
 
+        DrawPass (*DefineDrawPass)(const DrawPassDefinitionInfo& info);
+        void (*BeginDrawPass)(void* rn, DrawPass pass);
+        void (*EndDrawPass)(void* rn);
+
         //Shaders
         void* (*CreateShader)(const ShaderCreationInfo& info);
         void (*DestroyShader)(void* shader);
         void (*BindShader)(const void* rn, const void* shader, BufferAttrib attrib);
 
         //shader setup
-        uint32_t (*DefineShaderSetup)(const ShaderSetupDefinitionInfo& info);
+        ShaderSetup (*DefineShaderSetup)(const ShaderSetupDefinitionInfo& info);
         void (*BindShaderSetup)(void* rn, ShaderSetup);
 
         //texture
@@ -144,21 +150,21 @@ namespace hf::inter::rendering
         void (*DestroyTexturePackAllocator)(void* texPackAllocator);
 
         //texture sampler
-        uint32_t (*DefineTextureSampler)(const TextureSamplerDefinitionInfo& info);
+        TextureSampler (*DefineTextureSampler)(const TextureSamplerDefinitionInfo& info);
 
         //texture layout
-        uint32_t (*DefineTextureLayout)(const TextureLayoutDefinitionInfo& info);
+        TextureLayout (*DefineTextureLayout)(const TextureLayoutDefinitionInfo& info);
 
         //buffer attribute
-        uint32_t (*DefineVertBufferAttrib)(const BufferAttribDefinitionInfo& info, uint32_t fullStride);
+        BufferAttrib (*DefineVertBufferAttrib)(const BufferAttribDefinitionInfo& info, uint32_t fullStride);
         uint32_t (*GetVertBufferAttribSize)(BufferAttrib attrib);
 
         //uniform buffer
-        uint32_t (*DefineUniformBuffer)(const UniformBufferDefinitionInfo& info);
+        UniformBuffer (*DefineUniformBuffer)(const UniformBufferDefinitionInfo& info);
         void (*UploadUniformBuffer)(const void* rn, const UniformBufferUploadInfo& info);
 
         //uniform allocator
-        uint32_t (*DefineUniformAllocator)(const UniformAllocatorDefinitionInfo& info);
+        UniformAllocator (*DefineUniformAllocator)(const UniformAllocatorDefinitionInfo& info);
 
         //vertex buffer
         void* (*CreateVertBuffer)(const VertBufferCreationInfo& info);

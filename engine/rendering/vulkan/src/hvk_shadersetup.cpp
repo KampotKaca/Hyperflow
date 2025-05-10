@@ -58,7 +58,7 @@ namespace hf
         return GRAPHICS_DATA.shaderSetups[setup - 1];
     }
 
-    void BindShaderSetup(VKRenderer* rn, ShaderSetup setup)
+    void BindShaderSetup(VkRenderer* rn, ShaderSetup setup)
     {
         rn->currentLayout = GetShaderSetup(setup).layout;
     }

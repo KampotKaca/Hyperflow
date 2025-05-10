@@ -73,19 +73,18 @@ namespace hf
         return true;
     }
 
-    void CreateRendererFrameBuffers(VKRenderer* rn)
+    void CreateRendererFrameBuffers(VkRenderer* rn)
     {
         auto& imageViews = rn->swapchain.imageViews;
         rn->swapchain.frameBuffers = std::vector<VkFrameBuffer*>(imageViews.size());
         for (uint32_t i = 0; i < imageViews.size(); ++i)
         {
             rn->swapchain.frameBuffers[i] = new VkFrameBuffer(&rn->swapchain.imageViews[i],
-                1, GRAPHICS_DATA.renderPass,
-                rn->swapchain.details.extent);
+                GRAPHICS_DATA.presentationPass, rn->swapchain.details.extent);
         }
     }
 
-    void DestroyRendererFrameBuffers(VKRenderer* rn)
+    void DestroyRendererFrameBuffers(VkRenderer* rn)
     {
         for (auto& frameBuffer : rn->swapchain.frameBuffers) delete frameBuffer;
         rn->swapchain.frameBuffers.clear();
@@ -133,7 +132,7 @@ namespace hf
 
     bool QueueFamilyIndices::IsComplete() const { return graphicsFamily.has_value() && presentFamily.has_value() && transferFamily.has_value(); }
 
-    void SetupViewportAndScissor(VKRenderer* rn)
+    void SetupViewportAndScissor(VkRenderer* rn)
     {
         auto& extent = rn->swapchain.details.extent;
         rn->viewport =
@@ -153,7 +152,7 @@ namespace hf
         };
     }
 
-    void UploadViewportAndScissor(const VKRenderer* rn)
+    void UploadViewportAndScissor(const VkRenderer* rn)
     {
         vkCmdSetViewport(rn->currentCommand, 0, 1, &rn->viewport);
         vkCmdSetScissor(rn->currentCommand, 0, 1, &rn->scissor);

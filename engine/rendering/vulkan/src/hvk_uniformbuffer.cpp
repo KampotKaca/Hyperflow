@@ -84,6 +84,8 @@ namespace hf
         auto& uniform = GRAPHICS_DATA.uniformBuffers[buffer - 1];
         memcpy(uniform.descriptorSets, pDescriptors, sizeof(VkDescriptorSet) * FRAMES_IN_FLIGHT);
 
+        std::vector<VkWriteDescriptorSet> writes(FRAMES_IN_FLIGHT);
+
         for (uint32_t i = 0; i < FRAMES_IN_FLIGHT; i++)
         {
             VkDescriptorBufferInfo bufferInfo
@@ -93,7 +95,7 @@ namespace hf
                 .range = uniform.bufferSize,
             };
 
-            VkWriteDescriptorSet descriptorWrite
+            writes[i] =
             {
                 .sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
                 .dstSet = uniform.descriptorSets[i],
@@ -105,13 +107,14 @@ namespace hf
                 .pBufferInfo = &bufferInfo,
                 .pTexelBufferView = nullptr,
             };
-
-            vkUpdateDescriptorSets(GRAPHICS_DATA.defaultDevice->logicalDevice.device,
-                1, &descriptorWrite, 0, nullptr);
         }
+
+        vkUpdateDescriptorSets(GRAPHICS_DATA.defaultDevice->logicalDevice.device,
+                writes.size(), writes.data(),
+                0, nullptr);
     }
 
-    void UploadUniforms(const VKRenderer* rn, const UniformBufferUploadInfo& info)
+    void UploadUniforms(const VkRenderer* rn, const UniformBufferUploadInfo& info)
     {
         auto currentFrame = rn->currentFrame;
 

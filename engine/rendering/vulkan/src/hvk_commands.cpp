@@ -36,7 +36,7 @@ namespace hf
         for (uint32_t i = 0; i < count; i++) pool->buffers.push_back(commandBuffers[i]);
     }
 
-    void BeginCommandBuffer(VKRenderer* rn, VkCommandBuffer buffer)
+    void BeginCommandBuffer(VkRenderer* rn, VkCommandBuffer buffer)
     {
         auto& frame = rn->frames[rn->currentFrame];
         if (frame.usedCommandCount >= VULKAN_API_MAX_COMMANDS_PER_FRAME)
@@ -52,7 +52,7 @@ namespace hf
         rn->currentCommand = buffer;
     }
 
-    void EndCommandBuffer(VKRenderer* rn)
+    void EndCommandBuffer(VkRenderer* rn)
     {
         if (rn->currentCommand != VK_NULL_HANDLE)
         {
@@ -64,7 +64,7 @@ namespace hf
         }
     }
 
-    void SubmitCommands(VKRenderer* rn)
+    void SubmitCommands(VkRenderer* rn)
     {
         constexpr VkPipelineStageFlags waitStages[] = { VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT };
         auto& frame = rn->frames[rn->currentFrame];

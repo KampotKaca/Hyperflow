@@ -6,10 +6,10 @@
 
 namespace hf
 {
-    struct VKRenderer
+    struct VkRenderer
     {
-        VKRenderer(void* handle, uvec2 size);
-        ~VKRenderer();
+        VkRenderer(void* handle, uvec2 size);
+        ~VkRenderer();
 
         void* windowHandle = nullptr;
         GraphicsSwapChain swapchain{};
@@ -34,7 +34,7 @@ namespace hf
 
     struct VkDrawInfo
     {
-        VKRenderer* renderer{};
+        VkRenderer* renderer{};
         VkBuffer* pBuffers{};
         VkDeviceSize* pOffsets{};
 
@@ -47,33 +47,33 @@ namespace hf
         uint32_t instanceCount{};
     };
     
-    void DestroySurface(VKRenderer* rn);
+    void DestroySurface(VkRenderer* rn);
 
-    void SetupViewportAndScissor(VKRenderer* rn);
+    void SetupViewportAndScissor(VkRenderer* rn);
 
-    void PresentSwapchain(VKRenderer* rn);
-    bool AcquireNextImage(VKRenderer* rn);
+    void PresentSwapchain(VkRenderer* rn);
+    bool AcquireNextImage(VkRenderer* rn);
 
-    void BeginRenderPass(VKRenderer* rn, const VkRenderPass& renderPass);
-    void EndRenderPass(VKRenderer* rn);
+    void BeginPass(VkRenderer* rn, DrawPass pass);
+    void EndPass(VkRenderer* rn);
 
-    void BeginCommandBuffer(VKRenderer* rn, VkCommandBuffer buffer);
-    void EndCommandBuffer(VKRenderer* rn);
-    void SubmitCommands(VKRenderer* rn);
+    void BeginCommandBuffer(VkRenderer* rn, VkCommandBuffer buffer);
+    void EndCommandBuffer(VkRenderer* rn);
+    void SubmitCommands(VkRenderer* rn);
 
-    void CreateRendererFrameBuffers(VKRenderer* rn);
-    void DestroyRendererFrameBuffers(VKRenderer* rn);
-    void UploadViewportAndScissor(const VKRenderer* rn);
+    void CreateRendererFrameBuffers(VkRenderer* rn);
+    void DestroyRendererFrameBuffers(VkRenderer* rn);
+    void UploadViewportAndScissor(const VkRenderer* rn);
 
-    bool GetReadyForRendering(VKRenderer* rn);
-    void StartFrame(VKRenderer* rn);
-    void EndFrame(VKRenderer* rn);
-    void RegisterFrameBufferChange(VKRenderer* rn, uvec2 newSize);
+    bool GetReadyForRendering(VkRenderer* rn);
+    void StartFrame(VkRenderer* rn);
+    void EndFrame(VkRenderer* rn);
+    void RegisterFrameBufferChange(VkRenderer* rn, uvec2 newSize);
     void Draw(const VkDrawInfo& info);
 
-    void UploadUniforms(const VKRenderer* rn, const UniformBufferUploadInfo& info);
-    void BindTexturePack(VKRenderer* rn, VkTexturePack* pack);
-    void BindShaderSetup(VKRenderer* rn, ShaderSetup setup);
+    void UploadUniforms(const VkRenderer* rn, const UniformBufferUploadInfo& info);
+    void BindTexturePack(VkRenderer* rn, VkTexturePack* pack);
+    void BindShaderSetup(VkRenderer* rn, ShaderSetup setup);
 }
 
 #endif //HVK_RENDERER_H

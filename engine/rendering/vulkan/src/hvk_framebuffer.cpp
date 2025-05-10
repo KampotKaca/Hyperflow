@@ -3,15 +3,15 @@
 
 namespace hf
 {
-    VkFrameBuffer::VkFrameBuffer(VkImageView* pAttachments, uint32_t attachmentCount,
-        VkRenderPass rnPass, const VkExtent2D& extent)
+    VkFrameBuffer::VkFrameBuffer(VkImageView* pAttachments, DrawPass pass, const VkExtent2D& extent)
     {
+        auto& rnPass = GetDrawPass(pass);
         this->extent = extent;
         VkFramebufferCreateInfo frameBufferInfo
         {
             .sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO,
-            .renderPass = rnPass,
-            .attachmentCount = attachmentCount,
+            .renderPass = rnPass.pass,
+            .attachmentCount = rnPass.attachmentCount,
             .pAttachments = pAttachments,
             .width = extent.width,
             .height = extent.height,

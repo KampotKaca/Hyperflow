@@ -108,6 +108,13 @@ namespace hf
 		void UnloadAllResources(bool internalOnly = false);
 	}
 
+	namespace drawpass
+	{
+		DrawPass Define(const DrawPassDefinitionInfo& info);
+		void Begin(const Ref<Renderer>& rn, DrawPass pass);
+		void End(const Ref<Renderer>& rn);
+	}
+
 	namespace shader
 	{
 		Ref<Shader> Create(const ShaderCreationInfo& info);

@@ -76,6 +76,21 @@ namespace hf
 #elif PLATFORM_LINUX
 #define API extern "C" __attribute__((visibility("default")))
 #endif
+
+#define DEFINE_ENUM_FLAGS(Enum)\
+	inline Enum operator|(Enum a, Enum b) { return (Enum)((uint32_t)a | (uint32_t)b); }\
+	inline Enum operator&(Enum a, Enum b) { return (Enum)((uint32_t)a & (uint32_t)b); }\
+	inline Enum& operator|=(Enum& a, Enum b)\
+	{\
+		a = a | b;\
+		return a;\
+	}\
+	inline Enum& operator&=(Enum& a, Enum b)\
+	{\
+		a = a & b;\
+		return a;\
+	}\
+
 	//endregion
 
 	//region Definitions
@@ -162,6 +177,7 @@ namespace hf
 	typedef uint32_t TextureLayout;
 	typedef uint32_t TextureSampler;
 	typedef uint32_t ShaderSetup;
+	typedef uint32_t DrawPass;
 
 	enum class BufferDataType { U8, I8, U16, I16, U32, I32, U64, I64, F16, F32, F64, Count };
 	enum class BufferMemoryType { Static, WriteOnly, ReadWrite, Count };
@@ -219,6 +235,7 @@ namespace hf
 
 	struct ShaderCreationInfo
 	{
+		DrawPass drawPass{};
 		ShaderSetup setup{};
 		Ref<TexturePack> texturePack{};
 		uint32_t supportedAttribCount{};
@@ -236,28 +253,26 @@ namespace hf
 		AllGraphics = Vertex | TessellationControl | TessellationEvaluation | Geometry | Fragment,
 		All = Vertex | TessellationControl | TessellationEvaluation | Geometry | Fragment | Compute,
 	};
+	DEFINE_ENUM_FLAGS(BufferUsageStage)
 
-	inline BufferUsageStage operator|(BufferUsageStage a, BufferUsageStage b)
+	enum class TextureAttachment
 	{
-		return (BufferUsageStage)((uint32_t)a | (uint32_t)b);
-	}
-
-	inline BufferUsageStage operator&(BufferUsageStage a, BufferUsageStage b)
-	{
-		return (BufferUsageStage)((uint32_t)a & (uint32_t)b);
-	}
-
-	inline BufferUsageStage& operator|=(BufferUsageStage& a, BufferUsageStage b)
-	{
-		a = a | b;
-		return a;
-	}
-
-	inline BufferUsageStage& operator&=(BufferUsageStage& a, BufferUsageStage b)
-	{
-		a = a & b;
-		return a;
-	}
+		None = 0,
+		Color = (1u << 0), Depth = (1u << 1), Stencil = (1u << 2),
+		DepthReadOnly = (1u << 3), StencilReadOnly = (1u << 4),
+		//Generally used in post processing
+		ShaderReadOnly = (1u << 5),
+		//Used for images which are copied from
+		TransferSrc = (1u << 6),
+		//Used for images which are copied to
+		TransferDst = (1u << 7),
+		//Used for images which are presented to the screen
+		PresentSrc = (1u << 8),
+		Default = Color | Depth,
+		DepthStencil = Depth | Stencil,
+		DepthStencilReadOnly = DepthReadOnly | StencilReadOnly,
+	};
+	DEFINE_ENUM_FLAGS(TextureAttachment)
 
 	enum class UniformBufferType
 	{
@@ -315,7 +330,7 @@ namespace hf
 
 	struct TextureLayoutBindingInfo
 	{
-		uint32_t bindingId;
+		uint32_t bindingId{};
 		TextureLayoutType type = TextureLayoutType::CombinedImageSampler;
 		BufferUsageStage usageFlags = BufferUsageStage::Vertex | BufferUsageStage::Fragment;
 
@@ -479,6 +494,11 @@ namespace hf
 		TextureLayout layout = 0;
 	};
 
+	struct DrawPassDefinitionInfo
+	{
+		TextureAttachment attachmentFlags = TextureAttachment::Default;
+	};
+
 	enum class RenderingApiType { None, Vulkan, Direct3D };
 
 	struct DrawCallInfo
@@ -532,6 +552,9 @@ namespace hf
 
 	struct EngineLifecycleCallbacks
 	{
+		//stage where you can create draw passes
+		//and should return the pass which is used for presentation
+		DrawPass (*onPassCreationCallback)();
 		//Called after new renderer is loaded, this is where you should define uin32_t type rendering objects
 		//like: uniform buffer, buffer attribute and ect...
 		void (*onRendererLoad)(){};

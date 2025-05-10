@@ -171,6 +171,7 @@ namespace hf
 
 	static void Platform_HandleMotionNotify(XEvent& event, Window* window)
 	{
+    	if (!window) return;
     	MouseEvent_Moved(window->mouse, { event.xmotion.x, event.xmotion.y });
 	}
 

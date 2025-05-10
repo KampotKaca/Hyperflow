@@ -7,6 +7,7 @@
 #include "hvk_vertbuffer.h"
 #include "hvk_uniformbuffer.h"
 #include "hvk_shadersetup.h"
+#include "hvk_drawpass.h"
 #include "hvk_texturelayout.h"
 #include "hvk_texturepack.h"
 #include "hvk_texturepackallocator.h"
@@ -118,10 +119,10 @@ namespace hf
         std::set<std::string> availableExtensionNames{};
         std::vector<GraphicsDevice> suitableDevices{};
         GraphicsDevice* defaultDevice;
+        DrawPass presentationPass;
 
         bool devicesAreLoaded = false;
 
-        VkRenderPass renderPass{};
         CommandPool transferPool{};
         CommandPool graphicsPool{};
         VmaAllocator allocator;
@@ -132,9 +133,12 @@ namespace hf
         std::vector<VkTextureSampler> textureSamplers{};
         std::vector<VkTextureLayout> textureLayouts{};
         std::vector<VkShaderSetup> shaderSetups{};
+        std::vector<VkDrawPass> drawPasses{};
 
         std::vector<VkCopyBufferToBufferOperation> bufferToBufferCopyOperations{};
         std::vector<VkCopyBufferToImageOperation> bufferToImageCopyOperations{};
+
+        DrawPass (*onPassCreationCallback)();
 
 #if DEBUG
         VkDebugUtilsMessengerCreateInfoEXT debugCreateInfo
@@ -174,12 +178,9 @@ namespace hf
         uint32_t usedCommandCount = 0;
     };
 
-    enum class VkRenderPassAttachmentType { Color };
-
     struct VkRenderPassCreationInfo
     {
-        const VkRenderPassAttachmentType* pAttachments{};
-        uint32_t attachmentCount = 0;
+        TextureAttachment attachmentFlags = TextureAttachment::Default;
     };
 
     struct VkCreateBufferInfo
@@ -214,9 +215,6 @@ namespace hf
 
     void CreateFrame(VkFrame* result);
     void DestroyFrame(VkFrame& frame);
-
-    void CreateRenderPass(const VkRenderPassCreationInfo& info, VkRenderPass* renderPass);
-    void DestroyRenderPass(VkRenderPass* renderPass);
 
     void CreateCommandPool(const GraphicsDevice& device, uint32_t familyIndex, CommandPool* result);
     void DestroyCommandPool(const GraphicsDevice& device, CommandPool& pool);

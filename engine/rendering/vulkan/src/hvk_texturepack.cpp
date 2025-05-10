@@ -98,7 +98,7 @@ namespace hf
         else LOG_WARN("Unnecessary set binding call, noting changed");
     }
 
-    void BindTexturePack(VKRenderer* rn, VkTexturePack* pack)
+    void BindTexturePack(VkRenderer* rn, VkTexturePack* pack)
     {
         auto currentFrame = rn->currentFrame;
         auto& descriptors = pack->descriptorCache[currentFrame];

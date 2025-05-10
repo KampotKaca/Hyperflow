@@ -3,31 +3,28 @@
 
 namespace hf
 {
-    void DestroySurface(VKRenderer* rn)
+    void DestroySurface(VkRenderer* rn)
     {
         vkDestroySurfaceKHR(GRAPHICS_DATA.instance, rn->swapchain.surface, nullptr);
         rn->swapchain.surface = VK_NULL_HANDLE;
     }
 
-    bool GetReadyForRendering(VKRenderer* rn)
+    bool GetReadyForRendering(VkRenderer* rn)
     {
         SubmitAllOperations();
         if (rn->targetSize.x == 0 || rn->targetSize.y == 0) return false;
         return AcquireNextImage(rn);
     }
 
-    void StartFrame(VKRenderer* rn)
+    void StartFrame(VkRenderer* rn)
     {
         auto& frame = rn->frames[rn->currentFrame];
         frame.usedCommandCount = 0;
         BeginCommandBuffer(rn, rn->commandPool.buffers[rn->currentFrame]);
-        BeginRenderPass(rn, GRAPHICS_DATA.renderPass);
-        UploadViewportAndScissor(rn);
     }
 
-    void EndFrame(VKRenderer* rn)
+    void EndFrame(VkRenderer* rn)
     {
-        EndRenderPass(rn);
         EndCommandBuffer(rn);
         SubmitCommands(rn);
         PresentSwapchain(rn);
@@ -35,7 +32,7 @@ namespace hf
         rn->currentFrame = (rn->currentFrame + 1) % rn->frames.size();
     }
 
-    void RegisterFrameBufferChange(VKRenderer* rn, uvec2 newSize)
+    void RegisterFrameBufferChange(VkRenderer* rn, uvec2 newSize)
     {
         rn->targetSize = newSize;
         rn->frameBufferResized = true;

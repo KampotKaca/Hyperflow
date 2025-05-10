@@ -17,7 +17,7 @@ namespace hf
         std::unordered_map<BufferAttrib, VkPipeline> pipelines;
     };
 
-    void BindShader(VKRenderer* rn, VkShader* shader, BufferAttrib attrib);
+    void BindShader(VkRenderer* rn, VkShader* shader, BufferAttrib attrib);
 }
 
 #endif //HVKSHADER_H

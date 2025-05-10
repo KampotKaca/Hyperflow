@@ -181,6 +181,7 @@ namespace hf
                     .applicationTitle = HF.appTitle.c_str(),
                     .platformInstance = platform::GetPlatformInstance(),
                     .getFuncFromDll = platform::GetFuncPtr,
+                    .onPassCreationCallback = HF.lifecycleCallbacks.onPassCreationCallback
                 };
 
                 if (HF.renderingApi.type == RenderingApiType::Vulkan)
@@ -225,6 +226,24 @@ namespace hf
                     }
                 }
             }
+        }
+    }
+
+    namespace drawpass
+    {
+        DrawPass Define(const DrawPassDefinitionInfo& info)
+        {
+            return inter::HF.renderingApi.api.DefineDrawPass(info);
+        }
+
+        void Begin(const Ref<Renderer>& rn, DrawPass pass)
+        {
+            inter::HF.renderingApi.api.BeginDrawPass(rn->handle, pass);
+        }
+
+        void End(const Ref<Renderer>& rn)
+        {
+            inter::HF.renderingApi.api.EndDrawPass(rn->handle);
         }
     }
 }

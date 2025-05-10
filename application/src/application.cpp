@@ -6,22 +6,28 @@ namespace app
 {
 	struct Vertex
 	{
-		hf::vec2 pos{};
+		hf::vec3 pos{};
 		hf::vec3 color{};
 		hf::vec2 texCoord{};
 	};
 
 	constexpr Vertex vertices[]
 	{
-		{{-0.5f, -0.5f}, {1.0f, 0.0f, 0.0f}, {0.0f, 0.0f}},
-		{{0.5f, -0.5f}, {0.0f, 1.0f, 0.0f}, {1.0f, 0.0f}},
-		{{0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}, {1.0f, 1.0f}},
-		{{-0.5f, 0.5f}, {1.0f, 1.0f, 1.0f}, {0.0f, 1.0f}}
+		{{-0.5f, -0.5f, 0.0f}, {1.0f, 0.0f, 0.0f}, {0.0f, 0.0f}},
+		{{0.5f, -0.5f, 0.0f}, {0.0f, 1.0f, 0.0f}, {1.0f, 0.0f}},
+		{{0.5f, 0.5f, 0.0f}, {0.0f, 0.0f, 1.0f}, {1.0f, 1.0f}},
+		{{-0.5f, 0.5f, 0.0f}, {1.0f, 1.0f, 1.0f}, {0.0f, 1.0f}},
+
+		{{-0.5f, -0.5f, -0.5f}, {1.0f, 0.0f, 0.0f}, {0.0f, 0.0f}},
+		{{0.5f, -0.5f, -0.5f}, {0.0f, 1.0f, 0.0f}, {1.0f, 0.0f}},
+		{{0.5f, 0.5f, -0.5f}, {0.0f, 0.0f, 1.0f}, {1.0f, 1.0f}},
+		{{-0.5f, 0.5f, -0.5f}, {1.0f, 1.0f, 1.0f}, {0.0f, 1.0f}}
 	};
 
 	constexpr uint16_t indices[]
 	{
-		0, 1, 2, 2, 3, 0
+		0, 1, 2, 2, 3, 0,
+		4, 5, 6, 6, 7, 4
 	};
 
 	int count;
@@ -43,6 +49,7 @@ namespace app
 	hf::UniformAllocator uniformAllocator;
 	hf::TextureSampler sampler;
 	hf::TextureLayout layout;
+	hf::DrawPass presentPass;
 
 	struct Camera
 	{
@@ -54,11 +61,21 @@ namespace app
 
 	Camera camera;
 
+	hf::DrawPass Application::OnPassCreationCallback()
+	{
+		hf::DrawPassDefinitionInfo drawPassDefinitionInfo
+		{
+			.attachmentFlags = hf::TextureAttachment::Color
+		};
+		presentPass = hf::drawpass::Define(drawPassDefinitionInfo);
+		return presentPass;
+	}
+
 	void Application::OnRendererLoad()
 	{
 		hf::BufferAttribFormat formats[]
 		{
-			{ .type = hf::BufferDataType::F32, .size = 2, },
+			{ .type = hf::BufferDataType::F32, .size = 3, },
 			{ .type = hf::BufferDataType::F32, .size = 3, },
 			{ .type = hf::BufferDataType::F32, .size = 2, },
 		};
@@ -140,7 +157,7 @@ namespace app
 		{
 			.bufferAttrib = bufferAttrib,
 			.memoryType = hf::BufferMemoryType::Static,
-			.vertexCount = 4,
+			.vertexCount = 8,
 			.pVertices = (void*)vertices,
 		};
 
@@ -150,7 +167,7 @@ namespace app
 		{
 			.indexFormat = hf::BufferDataType::U16,
 			.memoryType = hf::BufferMemoryType::Static,
-			.indexCount = 6,
+			.indexCount = 12,
 			.pIndices = (void*)indices,
 		};
 
@@ -205,6 +222,7 @@ namespace app
 
 		hf::ShaderCreationInfo shaderInfo
 		{
+			.drawPass = presentPass,
 			.setup = shaderSetup,
 			.texturePack = texPack,
 			.supportedAttribCount = 1,
@@ -303,6 +321,8 @@ namespace app
 		camera.proj[1][1] *= -1;
 		camera.viewProj = camera.proj * camera.view;
 
+		hf::drawpass::Begin(rn, presentPass);
+
 		hf::shadersetup::Bind(rn, shaderSetup);
 
 		hf::UniformBufferUpload cameraUpload
@@ -335,5 +355,7 @@ namespace app
 		};
 
 		hf::renderer::Draw(rn, drawCallInfo);
+
+		hf::drawpass::End(rn);
 	}
 }

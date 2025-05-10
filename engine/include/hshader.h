@@ -11,6 +11,7 @@ namespace hf
         ~Shader();
 
         std::string vertLoc{}, fragLoc{};
+        DrawPass drawPass{};
         ShaderSetup shaderSetup{};
         Ref<TexturePack> texturePack{};
 

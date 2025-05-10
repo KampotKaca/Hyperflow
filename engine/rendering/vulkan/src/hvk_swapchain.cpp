@@ -125,7 +125,7 @@ namespace hf
         }
     }
 
-    void RecreateSwapchain(VKRenderer* rn)
+    void RecreateSwapchain(VkRenderer* rn)
     {
         rn->frameBufferResized = false;
         DelayThreadUntilRenderingFinish();
@@ -136,7 +136,7 @@ namespace hf
         CreateRendererFrameBuffers(rn);
     }
 
-    void PresentSwapchain(VKRenderer* rn)
+    void PresentSwapchain(VkRenderer* rn)
     {
         auto frame = rn->frames[rn->currentFrame];
         VkPresentInfoKHR presentInfo
@@ -156,7 +156,7 @@ namespace hf
         else if (result != VK_SUCCESS) throw GENERIC_EXCEPT("[Vulkan]", "Failed to present swapchain");
     }
 
-    bool AcquireNextImage(VKRenderer* rn)
+    bool AcquireNextImage(VkRenderer* rn)
     {
         auto& frame = rn->frames[rn->currentFrame];
         auto& device = GRAPHICS_DATA.defaultDevice->logicalDevice.device;
