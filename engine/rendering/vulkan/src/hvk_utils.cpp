@@ -4,8 +4,8 @@
 namespace hf
 {
     bool GetAvailableSurfaceDetails(const SwapChainSupportDetails& swapChainSupportDetails,
-    VkFormat targetFormat, VkPresentModeKHR targetPresentMode, uvec2 targetExtents,
-    GraphicsSwapchainDetails* result)
+    VkFormat targetFormat, VkPresentModeKHR targetPresentMode, VkPresentModeKHR defaultPresentMode,
+    uvec2 targetExtents, GraphicsSwapchainDetails* result)
     {
         int mask = 0;
         for (auto& format : swapChainSupportDetails.formats)
@@ -38,7 +38,7 @@ namespace hf
         if (!(mask & (1 << 0))) LOG_WARN("[Vulkan] %s", "Unable to choose target swapchain surface format");
         if (!(mask & (1 << 1)))
         {
-            result->presentMode = VK_PRESENT_MODE_FIFO_KHR;
+            result->presentMode = defaultPresentMode;
             mask |= 1 << 1;
             // LOG_WARN("[Vulkan] %s", "Unable to choose target swapchain present mode, defaulted to FIFO");
         }
@@ -73,21 +73,20 @@ namespace hf
         return true;
     }
 
-    void CreateRendererFrameBuffers(VkRenderer* rn)
+    void CreateSwapchainFrameBuffers(GraphicsSwapChain& swapchain)
     {
-        auto& imageViews = rn->swapchain.imageViews;
-        rn->swapchain.frameBuffers = std::vector<VkFrameBuffer*>(imageViews.size());
-        for (uint32_t i = 0; i < imageViews.size(); ++i)
+        swapchain.frameBuffers = std::vector<VkFrameBuffer*>(swapchain.imageViews.size());
+        for (uint32_t i = 0; i < swapchain.imageViews.size(); ++i)
         {
-            rn->swapchain.frameBuffers[i] = new VkFrameBuffer(&rn->swapchain.imageViews[i],
-                GRAPHICS_DATA.presentationPass, rn->swapchain.details.extent);
+            swapchain.frameBuffers[i] = new VkFrameBuffer(&swapchain.imageViews[i], 1,
+                GRAPHICS_DATA.presentationPass, swapchain.details.extent);
         }
     }
 
-    void DestroyRendererFrameBuffers(VkRenderer* rn)
+    void DestroySwapchainFrameBuffers(GraphicsSwapChain& swapchain)
     {
-        for (auto& frameBuffer : rn->swapchain.frameBuffers) delete frameBuffer;
-        rn->swapchain.frameBuffers.clear();
+        for (auto& frameBuffer : swapchain.frameBuffers) delete frameBuffer;
+        swapchain.frameBuffers.clear();
     }
 
     void QuerySwapChainSupport(const VkPhysicalDevice& device, const VkSurfaceKHR& surface, SwapChainSupportDetails* supportDetails)

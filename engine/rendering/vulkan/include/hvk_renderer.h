@@ -8,7 +8,7 @@ namespace hf
 {
     struct VkRenderer
     {
-        VkRenderer(void* handle, uvec2 size);
+        VkRenderer(const inter::rendering::RendererInstanceCreationInfo& info);
         ~VkRenderer();
 
         void* windowHandle = nullptr;
@@ -29,6 +29,7 @@ namespace hf
         std::vector<VkFrame> frames{};
         uint32_t currentFrame = 0;
         uint32_t imageIndex{};
+        bool vSyncOn = false;
         bool frameBufferResized = false;
     };
 
@@ -61,15 +62,17 @@ namespace hf
     void EndCommandBuffer(VkRenderer* rn);
     void SubmitCommands(VkRenderer* rn);
 
-    void CreateRendererFrameBuffers(VkRenderer* rn);
-    void DestroyRendererFrameBuffers(VkRenderer* rn);
+    void CreateSwapchainFrameBuffers(GraphicsSwapChain& swapchain);
+    void DestroySwapchainFrameBuffers(GraphicsSwapChain& swapchain);
     void UploadViewportAndScissor(const VkRenderer* rn);
 
     bool GetReadyForRendering(VkRenderer* rn);
     void StartFrame(VkRenderer* rn);
     void EndFrame(VkRenderer* rn);
-    void RegisterFrameBufferChange(VkRenderer* rn, uvec2 newSize);
     void Draw(const VkDrawInfo& info);
+
+    void RegisterFrameBufferChange(VkRenderer* rn, uvec2 newSize);
+    void SetVSync(VkRenderer* rn, bool isOn);
 
     void UploadUniforms(const VkRenderer* rn, const UniformBufferUploadInfo& info);
     void BindTexturePack(VkRenderer* rn, VkTexturePack* pack);

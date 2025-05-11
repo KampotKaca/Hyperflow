@@ -11,7 +11,6 @@ namespace hf
 
     bool GetReadyForRendering(VkRenderer* rn)
     {
-        SubmitAllOperations();
         if (rn->targetSize.x == 0 || rn->targetSize.y == 0) return false;
         return AcquireNextImage(rn);
     }
@@ -35,6 +34,12 @@ namespace hf
     void RegisterFrameBufferChange(VkRenderer* rn, uvec2 newSize)
     {
         rn->targetSize = newSize;
+        rn->frameBufferResized = true;
+    }
+
+    void SetVSync(VkRenderer* rn, bool isOn)
+    {
+        rn->vSyncOn = isOn;
         rn->frameBufferResized = true;
     }
 

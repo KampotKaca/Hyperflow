@@ -641,13 +641,14 @@ namespace hf
 		Default = Visible
 	};
 
-	struct WindowData
+	struct WindowCreationInfo
 	{
 		std::string title = "Untitled";
 		WindowFlags flags = WindowFlags::Default;
 		WindowStyle style = WindowStyle::Default;
 		ivec2 position = ivec2{ 300, 300 };
 		ivec2 size = ivec2{ 200, 200 };
+		bool vSyncOn = false;
 
 		void (*onPreRenderCallback)(const Ref<Renderer>&){};
 		void (*onRenderCallback)(const Ref<Renderer>&){};
@@ -687,7 +688,7 @@ namespace hf
 		RenderingApiType renderingApi = RenderingApiType::Vulkan; // type of initial api, can be changed later
 		EngineUpdateType updateType = EngineUpdateType::EventRaised; // type of application updates
 		EngineLifecycleCallbacks lifecycleCallbacks{}; //passed engine callbacks to interact with the engine
-		WindowData windowData{}; //properties of the initial window
+		WindowCreationInfo windowData{}; //properties of the initial window
 	};
 
 	struct Window;

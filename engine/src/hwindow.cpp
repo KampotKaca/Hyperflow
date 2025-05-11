@@ -6,10 +6,11 @@
 
 namespace hf
 {
-	Window::Window(const WindowData& data, const Ref<Window>& parent)
+	Window::Window(const WindowCreationInfo& data, const Ref<Window>& parent)
 	{
 		title = data.title;
 		style = data.style;
+		vSyncIsOn = data.vSyncOn;
 		this->parent = parent;
 		flags = (WindowFlags)0;
 		rect =
@@ -40,7 +41,7 @@ namespace hf
 
 	namespace window
 	{
-		Ref<Window> Open(const WindowData &data, const Ref<Window> &parent)
+		Ref<Window> Open(const WindowCreationInfo &data, const Ref<Window> &parent)
 		{
 			auto newWindow = MakeRef<Window>(data, parent);
 			if (inter::HF.renderingApi.type != RenderingApiType::None) newWindow->renderer = MakeRef<Renderer>(newWindow.get());
@@ -80,6 +81,14 @@ namespace hf
 
 		void SetFlags(const Ref<Window> &window, const WindowFlags flags) { if (!IsClosing(window)) inter::window::SetFlags(window.get(), flags); }
 		void Focus(const Ref<Window> &window) { if (!IsClosing(window)) inter::window::Focus(window.get()); }
+
+		void SetVSync(const Ref<Window> &window, bool isOn)
+		{
+			window->vSyncIsOn = isOn;
+			inter::HF.renderingApi.api.SetVSync(window->renderer->handle, isOn);
+		}
+
+		bool IsVSyncOn(const Ref<Window> &window) { return window->vSyncIsOn; }
 	}
 
 	void HandleKeyboardFocus(Keyboard& keyboard) noexcept;

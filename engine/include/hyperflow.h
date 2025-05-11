@@ -53,7 +53,7 @@ namespace hf
 
 	namespace window
 	{
-		Ref<Window> Open(const WindowData& data, const Ref<Window>& parent);
+		Ref<Window> Open(const WindowCreationInfo& data, const Ref<Window>& parent);
 		bool Close(const Ref<Window> &window);
 		void CloseAll();
 
@@ -73,6 +73,9 @@ namespace hf
 		bool IsClosing(const Ref<Window> &window);
 		void SetFlags(const Ref<Window> &window, WindowFlags flags);
 		void Focus(const Ref<Window> &window);
+
+		void SetVSync(const Ref<Window> &window, bool isOn);
+		bool IsVSyncOn(const Ref<Window> &window);
 	}
 
 	namespace time

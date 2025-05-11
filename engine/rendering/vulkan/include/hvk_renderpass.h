@@ -1,5 +1,5 @@
-#ifndef HVK_DRAWPASS_H
-#define HVK_DRAWPASS_H
+#ifndef HVK_RENDERPASS_H
+#define HVK_RENDERPASS_H
 
 #include "hvk_shared.h"
 
@@ -25,4 +25,4 @@ namespace hf
     const VkDrawPass& GetDrawPass(RenderPass pass);
 }
 
-#endif //HVK_DRAWPASS_H
+#endif //HVK_RENDERPASS_H

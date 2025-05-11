@@ -15,7 +15,7 @@ namespace hf
 
     Renderer::Renderer(const Window* window)
     {
-        windowHandle = inter::window::GetWindowHandle(window);
+        this->window = window;
         size = window->rect.size;
         inter::rendering::CreateRenderer_i(this);
     }
@@ -63,7 +63,7 @@ namespace hf
 
         void Resize(const Ref<Renderer>& rn, uvec2 size)
         {
-            if (rn->windowHandle != nullptr) throw GENERIC_EXCEPT("[Hyperflow]", "Cannot resize renderer connected to the window");
+            if (rn->window != nullptr) throw GENERIC_EXCEPT("[Hyperflow]", "Cannot resize renderer connected to the window");
             rn->size = size;
             inter::HF.renderingApi.api.RegisterFrameBufferChange(rn->handle, size);
         }
@@ -196,9 +196,15 @@ namespace hf
             HF.rendererCount++;
             RendererInstanceCreationInfo createInfo
             {
-                .handle = rn->windowHandle,
                 .size = rn->size,
             };
+
+            if (rn->window)
+            {
+                createInfo.vSyncOn = rn->window->vSyncIsOn;
+                createInfo.handle = window::GetWindowHandle(rn->window);
+            }
+
             rn->handle = HF.renderingApi.api.CreateInstance(createInfo);
         }
 

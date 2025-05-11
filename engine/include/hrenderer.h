@@ -13,7 +13,7 @@ namespace hf
 		~Renderer();
 
 		uvec2 size{};
-		void* windowHandle{};
+		const Window* window{};
 		void* handle{};
 		void* vertBufferCache[MAX_NUM_BUFFER_CACHE]{};
 	};

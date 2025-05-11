@@ -33,6 +33,7 @@ int main()
 			.style        		 = hf::WindowStyle::Default,
 			.position     		 = { 200, 200 },
 			.size         		 = { 920, 480 },
+			.vSyncOn			 = true,
 			.onPreRenderCallback = app::Application::OnPreRender,
 			.onRenderCallback    = app::Application::OnRender,
 		}

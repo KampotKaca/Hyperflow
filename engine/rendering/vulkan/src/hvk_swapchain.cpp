@@ -5,7 +5,7 @@ namespace hf
 {
     static void DestroyExistingViews(GraphicsSwapChain& swapchain);
 
-    void CreateSwapchain(VkSurfaceKHR surface, uvec2 targetSize, GraphicsSwapChain* result)
+    void CreateSwapchain(VkSurfaceKHR surface, uvec2 targetSize, bool vsyncOn, GraphicsSwapChain* result)
     {
         SwapChainSupportDetails scs{};
         QuerySwapChainSupport(GRAPHICS_DATA.defaultDevice->device, surface, &scs);
@@ -16,8 +16,21 @@ namespace hf
 
         auto oldSwapchain = result->swapchain;
         GraphicsSwapchainDetails details{};
-        if (GetAvailableSurfaceDetails(scs,
-            VULKAN_API_COLOR_FORMAT, VULKAN_API_PRESENT_MODE, targetSize, &details))
+        VkPresentModeKHR targetPresentMode{};
+        VkPresentModeKHR defaultPresentMode{};
+        if (vsyncOn)
+        {
+            targetPresentMode = VK_PRESENT_MODE_FIFO_KHR;
+            defaultPresentMode = VK_PRESENT_MODE_FIFO_KHR;
+        }
+        else
+        {
+            targetPresentMode = VK_PRESENT_MODE_MAILBOX_KHR;
+            defaultPresentMode = VK_PRESENT_MODE_IMMEDIATE_KHR;
+        }
+
+        if (GetAvailableSurfaceDetails(scs, VULKAN_API_COLOR_FORMAT,
+            targetPresentMode, defaultPresentMode, targetSize, &details))
         {
             uint32_t imageCount = scs.capabilities.minImageCount + 1;
             uint32_t maxImageCount = scs.capabilities.maxImageCount;
@@ -104,16 +117,6 @@ namespace hf
         result->imageViews = imageViews;
     }
 
-    void DestroyExistingViews(GraphicsSwapChain& swapchain)
-    {
-        auto& device = GRAPHICS_DATA.defaultDevice->logicalDevice.device;
-        for (auto& imageView : swapchain.imageViews)
-            vkDestroyImageView(device, imageView, nullptr);
-
-        swapchain.imageViews.clear();
-        swapchain.images.clear();
-    }
-
     void DestroySwapchain(GraphicsSwapChain& gc, VkSwapchainKHR* swapchain)
     {
         if (*swapchain != VK_NULL_HANDLE)
@@ -125,15 +128,25 @@ namespace hf
         }
     }
 
+    void DestroyExistingViews(GraphicsSwapChain& swapchain)
+    {
+        auto& device = GRAPHICS_DATA.defaultDevice->logicalDevice.device;
+        for (auto& imageView : swapchain.imageViews)
+            vkDestroyImageView(device, imageView, nullptr);
+
+        swapchain.imageViews.clear();
+        swapchain.images.clear();
+    }
+
     void RecreateSwapchain(VkRenderer* rn)
     {
         rn->frameBufferResized = false;
         DelayThreadUntilRenderingFinish();
 
-        DestroyRendererFrameBuffers(rn);
-        CreateSwapchain(rn->swapchain.surface, rn->targetSize, &rn->swapchain);
+        DestroySwapchainFrameBuffers(rn->swapchain);
+        CreateSwapchain(rn->swapchain.surface, rn->targetSize, rn->vSyncOn, &rn->swapchain);
         SetupViewportAndScissor(rn);
-        CreateRendererFrameBuffers(rn);
+        CreateSwapchainFrameBuffers(rn->swapchain);
     }
 
     void PresentSwapchain(VkRenderer* rn)
@@ -163,6 +176,7 @@ namespace hf
 
         tryAgain:
         vkWaitForFences(device, 1, &frame.isInFlight, true, VULKAN_API_MAX_TIMEOUT);
+        SubmitAllOperations();
 
         uint32_t tryCount = 0;
         auto result = vkAcquireNextImageKHR(device,

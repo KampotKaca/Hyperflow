@@ -11,15 +11,16 @@ namespace hf
 
     //------------------------------------------------------------------------------------
 
-    VkRenderer::VkRenderer(void* handle, uvec2 size) : windowHandle(handle), targetSize(size)
+    VkRenderer::VkRenderer(const inter::rendering::RendererInstanceCreationInfo& info)
+        : windowHandle(info.handle), targetSize(info.size), vSyncOn(info.vSyncOn)
     {
-        if (!GRAPHICS_DATA.devicesAreLoaded) LoadDevice(handle, &swapchain.surface);
+        if (!GRAPHICS_DATA.devicesAreLoaded) LoadDevice(windowHandle, &swapchain.surface);
         else GRAPHICS_DATA.platform.api->CreateSurface(GRAPHICS_DATA.platform.instance, windowHandle, GRAPHICS_DATA.instance, &swapchain.surface);
 
-        CreateSwapchain(swapchain.surface, targetSize, &swapchain);
+        CreateSwapchain(swapchain.surface, targetSize, vSyncOn,  &swapchain);
         SetupViewportAndScissor(this);
 
-        CreateRendererFrameBuffers(this);
+        CreateSwapchainFrameBuffers(swapchain);
         CreateCommandPool(*GRAPHICS_DATA.defaultDevice, GRAPHICS_DATA.defaultDevice->familyIndices.graphicsFamily.value(), &commandPool);
         CreateCommandBuffers(*GRAPHICS_DATA.defaultDevice, &commandPool, FRAMES_IN_FLIGHT);
 
@@ -32,7 +33,7 @@ namespace hf
         for (auto& frame : frames) DestroyFrame(frame);
         frames.clear();
 
-        DestroyRendererFrameBuffers(this);
+        DestroySwapchainFrameBuffers(swapchain);
         DestroySwapchain(swapchain, &swapchain.swapchain);
         DestroyCommandPool(*GRAPHICS_DATA.defaultDevice, commandPool);
         DestroySurface(this);

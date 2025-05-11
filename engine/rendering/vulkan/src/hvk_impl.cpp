@@ -6,7 +6,7 @@
 #include "hvk_texturepack.h"
 #include "hvk_vertbuffer.h"
 #include "hvk_texturepack.h"
-#include "hvk_drawpass.h"
+#include "hvk_renderpass.h"
 
 namespace hf::inter::rendering
 {
@@ -29,7 +29,7 @@ namespace hf::inter::rendering
 
     void* CreateInstance(const RendererInstanceCreationInfo& info)
     {
-        return new VkRenderer(info.handle, info.size);
+        return new VkRenderer(info);
     }
 
     void DestroyInstance(void* rn)
@@ -244,12 +244,6 @@ namespace hf::inter::rendering
         EndFrame(renderer);
     }
 
-    void RegisterFrameBufferChange(void* rn, uvec2 newSize)
-    {
-        auto renderer = (VkRenderer*)rn;
-        RegisterFrameBufferChange(renderer, newSize);
-    }
-
     void Draw(void* rn, const DrawCallInfo& info)
     {
         auto* vrn = (VkRenderer*)rn;
@@ -289,6 +283,17 @@ namespace hf::inter::rendering
     void WaitForRendering()
     {
         DelayThreadUntilRenderingFinish();
+    }
+
+    void RegisterFrameBufferChange(void* rn, uvec2 newSize)
+    {
+        auto renderer = (VkRenderer*)rn;
+        RegisterFrameBufferChange(renderer, newSize);
+    }
+
+    void SetVSync(void* rn, bool isOn)
+    {
+        SetVSync((VkRenderer*)rn, isOn);
     }
 
     API RendererAPI* GetAPI()
@@ -368,9 +373,11 @@ namespace hf::inter::rendering
             .GetReadyForRendering       = GetReadyForRendering,
             .StartFrame                 = StartFrame,
             .EndFrame                   = EndFrame,
-            .RegisterFrameBufferChange  = RegisterFrameBufferChange,
             .Draw                       = Draw,
-            .WaitForRendering           = WaitForRendering
+            .WaitForRendering           = WaitForRendering,
+
+            .RegisterFrameBufferChange  = RegisterFrameBufferChange,
+            .SetVSync  = SetVSync,
         };
         return &api;
     }

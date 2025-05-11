@@ -254,7 +254,9 @@ namespace app
 
 	void Application::Start()
 	{
+		hf::time::SetTargetFrameRate(-1);
 		count = 0;
+		wn = hf::GetMainWindow();
 	}
 
 	void Application::Update()
@@ -270,13 +272,14 @@ namespace app
 
 		if (hf::input::IsDown(hf::Key::A))
 		{
-			hf::WindowData data =
+			hf::WindowCreationInfo data =
 			{
 				.title = names[count % 5],
 				.flags = hf::WindowFlags::Default,
 				.style = hf::WindowStyle::Default,
 				.position = { 100, 100 },
 				.size = { 200, 200 },
+				.onPreRenderCallback = OnPreRender,
 				.onRenderCallback = OnRender
 			};
 			wn = hf::window::Open(data, nullptr);
@@ -285,6 +288,11 @@ namespace app
 		if (hf::input::IsDown(hf::Key::Space) && wn)
 		{
 			hf::window::Close(wn);
+		}
+
+		if (hf::input::IsDown(hf::Key::K))
+		{
+			hf::window::SetVSync(wn, !hf::window::IsVSyncOn(wn));
 		}
 
 		// auto delta = hf::input::GetScrollDelta();

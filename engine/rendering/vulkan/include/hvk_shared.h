@@ -3,7 +3,7 @@
 
 #include <vulkan/vulkan.h>
 #include <vk_mem_alloc.h>
-#include "hgraphicsexception.h"
+#include "hvk_exception.h"
 #include "../../include/hex_renderer.h"
 #include "../config.h"
 

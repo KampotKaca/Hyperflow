@@ -7,7 +7,7 @@
 #include "hvk_vertbuffer.h"
 #include "hvk_uniformbuffer.h"
 #include "hvk_shadersetup.h"
-#include "hvk_drawpass.h"
+#include "hvk_renderpass.h"
 #include "hvk_texturelayout.h"
 #include "hvk_texturepack.h"
 #include "hvk_texturepackallocator.h"
@@ -205,7 +205,7 @@ namespace hf
 
     void DelayThreadUntilRenderingFinish();
 
-    void CreateSwapchain(VkSurfaceKHR surface, uvec2 targetSize, GraphicsSwapChain* result);
+    void CreateSwapchain(VkSurfaceKHR surface, uvec2 targetSize, bool vsyncOn, GraphicsSwapChain* result);
     void DestroySwapchain(GraphicsSwapChain& gc, VkSwapchainKHR* swapchain);
 
     void CreateFrame(VkFrame* result);
@@ -217,8 +217,8 @@ namespace hf
     void CreateCommandBuffers(const GraphicsDevice& device, CommandPool* pool, uint32_t count);
 
     bool GetAvailableSurfaceDetails(const SwapChainSupportDetails& swapChainSupportDetails,
-                                    VkFormat targetFormat, VkPresentModeKHR targetPresentMode, uvec2 targetExtents,
-                                    GraphicsSwapchainDetails* result);
+                                    VkFormat targetFormat, VkPresentModeKHR targetPresentMode, VkPresentModeKHR defaultPresentMode,
+                                    uvec2 targetExtents, GraphicsSwapchainDetails* result);
 
     bool CheckDeviceExtensionSupport(const VkPhysicalDevice& device);
     void QuerySwapChainSupport(const VkPhysicalDevice& device, const VkSurfaceKHR& surface, SwapChainSupportDetails* supportDetails);

@@ -49,8 +49,9 @@ namespace hf::inter::rendering
 
     struct RendererInstanceCreationInfo
     {
-        void* handle;
-        uvec2 size;
+        void* handle{};
+        uvec2 size{};
+        bool vSyncOn = false;
     };
 
     struct TextureCreationInfo
@@ -92,7 +93,7 @@ namespace hf::inter::rendering
         void** pTextures{};
         uint32_t textureOffset = 0;
         uint32_t textureCount = 0;
-        TextureSampler sampler;
+        TextureSampler sampler{};
     };
 
     struct TexturePackAllocatorCreationInfo
@@ -184,9 +185,11 @@ namespace hf::inter::rendering
         bool (*GetReadyForRendering)(void* rn);
         void (*StartFrame)(void* rn);
         void (*EndFrame)(void* rn);
-        void (*RegisterFrameBufferChange)(void* rn, uvec2 newSize);
         void (*Draw)(void* rn, const DrawCallInfo& info);
         void (*WaitForRendering)();
+
+        void (*RegisterFrameBufferChange)(void* rn, uvec2 newSize);
+        void (*SetVSync)(void* rn, bool isOn);
     };
 }
 

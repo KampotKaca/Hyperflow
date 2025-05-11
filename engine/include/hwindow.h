@@ -10,7 +10,7 @@ namespace hf
 {
 	struct Window
 	{
-		Window(const WindowData& data, const Ref<Window>& parent);
+		Window(const WindowCreationInfo& data, const Ref<Window>& parent);
 		~Window();
 
 		struct EventData
@@ -28,6 +28,7 @@ namespace hf
 		void* handle{};
 		WindowStyle style{};
 		WindowFlags flags{};
+		bool vSyncIsOn = false;
 		Ref<Window> parent{};
 
 		Keyboard keyboard{};
