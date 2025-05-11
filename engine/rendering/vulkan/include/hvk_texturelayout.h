@@ -7,7 +7,7 @@ namespace hf
 {
     struct VkTextureLayout
     {
-        VkTextureLayout(const TextureLayoutDefinitionInfo& info);
+        explicit VkTextureLayout(const TextureLayoutDefinitionInfo& info);
         ~VkTextureLayout();
 
         VkDescriptorSetLayout layout{};

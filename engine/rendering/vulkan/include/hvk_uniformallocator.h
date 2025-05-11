@@ -7,7 +7,7 @@ namespace hf
 {
     struct VkUniformAllocator
     {
-        VkUniformAllocator(const UniformAllocatorDefinitionInfo& info);
+        explicit VkUniformAllocator(const UniformAllocatorDefinitionInfo& info);
         ~VkUniformAllocator();
 
         VkDescriptorPool pool{};

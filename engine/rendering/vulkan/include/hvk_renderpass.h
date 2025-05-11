@@ -23,7 +23,7 @@ namespace hf
 
     struct VkDrawPass
     {
-        VkDrawPass(const RenderPassDefinitionInfo& info);
+        explicit VkDrawPass(const RenderPassDefinitionInfo& info);
         ~VkDrawPass();
 
         VkRenderPass pass{};

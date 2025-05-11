@@ -17,7 +17,7 @@ namespace hf
 
     struct VkTexturePack
     {
-        VkTexturePack(const inter::rendering::TexturePackCreationInfo& info);
+        explicit VkTexturePack(const inter::rendering::TexturePackCreationInfo& info);
         ~VkTexturePack();
 
         RenderBindingType bindingType = RenderBindingType::Graphics;

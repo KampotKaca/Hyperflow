@@ -7,7 +7,7 @@ namespace hf
 {
     struct VkIndexBuffer
     {
-        VkIndexBuffer(const IndexBufferCreationInfo& info);
+        explicit VkIndexBuffer(const IndexBufferCreationInfo& info);
         ~VkIndexBuffer();
 
         VkBuffer buffer{};

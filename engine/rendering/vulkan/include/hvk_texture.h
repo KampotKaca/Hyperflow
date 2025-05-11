@@ -7,7 +7,7 @@ namespace hf
 {
     struct VkTexture
     {
-        VkTexture(const inter::rendering::TextureCreationInfo& info);
+        explicit VkTexture(const inter::rendering::TextureCreationInfo& info);
         ~VkTexture();
 
         VkImage image{};

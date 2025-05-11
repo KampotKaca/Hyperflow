@@ -7,7 +7,7 @@ namespace hf
 {
     struct VkShaderSetup
     {
-        VkShaderSetup(const ShaderSetupDefinitionInfo& info);
+        explicit VkShaderSetup(const ShaderSetupDefinitionInfo& info);
         ~VkShaderSetup();
 
         VkPipelineLayout layout{};

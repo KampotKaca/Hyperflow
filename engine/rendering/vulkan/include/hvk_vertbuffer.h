@@ -7,7 +7,7 @@ namespace hf
 {
     struct VkVertBuffer
     {
-        VkVertBuffer(const VertBufferCreationInfo& info);
+        explicit VkVertBuffer(const VertBufferCreationInfo& info);
         ~VkVertBuffer();
 
         VkBuffer buffer{};

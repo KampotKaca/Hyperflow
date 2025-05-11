@@ -8,7 +8,7 @@ namespace hf
 {
     struct VkRenderer
     {
-        VkRenderer(const inter::rendering::RendererInstanceCreationInfo& info);
+        explicit VkRenderer(const inter::rendering::RendererInstanceCreationInfo& info);
         ~VkRenderer();
 
         void* windowHandle = nullptr;

@@ -8,7 +8,7 @@ namespace hf
 {
     struct VkTextureAllocator
     {
-        VkTextureAllocator(const inter::rendering::TextureAllocatorCreationInfo& info);
+        explicit VkTextureAllocator(const inter::rendering::TextureAllocatorCreationInfo& info);
         ~VkTextureAllocator();
 
         std::vector<VkTexture*> textures{};

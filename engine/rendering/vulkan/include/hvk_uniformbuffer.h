@@ -7,7 +7,7 @@ namespace hf
 {
     struct VkUniformBuffer
     {
-        VkUniformBuffer(const UniformBufferDefinitionInfo& info);
+        explicit VkUniformBuffer(const UniformBufferDefinitionInfo& info);
         ~VkUniformBuffer();
 
         uint32_t bindingIndex{};

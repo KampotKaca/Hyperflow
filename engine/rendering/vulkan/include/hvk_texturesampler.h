@@ -7,7 +7,7 @@ namespace hf
 {
     struct VkTextureSampler
     {
-        VkTextureSampler(const TextureSamplerDefinitionInfo& info);
+        explicit VkTextureSampler(const TextureSamplerDefinitionInfo& info);
         ~VkTextureSampler();
 
         VkSampler sampler{};
