@@ -142,6 +142,9 @@ namespace hf
         deviceData->score = score;
 
         vkGetPhysicalDeviceMemoryProperties(deviceData->device, &deviceData->memProps);
+
+        for (uint32_t i = 0; i < (uint32_t)TextureFormat::Count; ++i)
+            vkGetPhysicalDeviceFormatProperties(deviceData->device, (VkFormat)i, &deviceData->formatProps[i]);
         return true;
     }
 

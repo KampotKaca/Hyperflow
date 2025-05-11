@@ -6,6 +6,33 @@
 
 namespace hf::inter::rendering
 {
+#define NUM_DEPTH_STENCIL_FORMATS 3
+    constexpr TextureFormat DEPTH_STENCIL_FORMATS[]
+    {
+        TextureFormat::D32_Sfloat_S8_Uint,
+        TextureFormat::D24_Unorm_S8_Uint,
+        TextureFormat::D16_Unorm_S8_Uint,
+    };
+
+#define NUM_DEPTH_FORMATS 5
+    constexpr TextureFormat DEPTH_FORMATS[]
+    {
+        TextureFormat::D32_Sfloat,
+        TextureFormat::D32_Sfloat_S8_Uint,
+        TextureFormat::D24_Unorm_S8_Uint,
+        TextureFormat::D16_Unorm_S8_Uint,
+        TextureFormat::D16_Unorm,
+    };
+
+#define NUM_STENCIL_FORMATS 4
+    constexpr TextureFormat STENCIL_FORMATS[]
+    {
+        TextureFormat::S8_Uint,
+        TextureFormat::D16_Unorm_S8_Uint,
+        TextureFormat::D24_Unorm_S8_Uint,
+        TextureFormat::D32_Sfloat_S8_Uint,
+    };
+
     struct ShaderCreationInfo
     {
         RenderPass drawPass;

@@ -5,6 +5,22 @@
 
 namespace hf
 {
+    struct VkRenderPassTexture
+    {
+        VkRenderPassTexture(uvec2 size, VkFormat format, VkImageTiling tiling,
+            VkImageUsageFlags imageUsageFlags);
+        ~VkRenderPassTexture();
+        VkImage image{};
+        VkImageView view{};
+        VmaAllocation memory{};
+    };
+
+    struct VkRendererPassInfo
+    {
+        std::vector<VkRenderPassTexture> colorTextures{};
+        std::vector<VkRenderPassTexture> depthTextures{};
+    };
+
     struct VkDrawPass
     {
         VkDrawPass(const RenderPassDefinitionInfo& info);

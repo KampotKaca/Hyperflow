@@ -75,8 +75,12 @@ namespace app
 			.depthAttachment = nullptr
 		};
 
+		hf::Ref<hf::Renderer> supportedRns[] = { hf::window::GetRenderer(hf::GetMainWindow()) };
+
 		hf::RenderPassDefinitionInfo drawPassDefinitionInfo
 		{
+			.pSupportedRenderers = supportedRns,
+			.supportedRendererCount = 1,
 			.pSubpasses = &subpassInfo,
 			.subpassCount = 1,
 			.pDependencies = &dependencyInfo,

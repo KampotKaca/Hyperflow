@@ -64,6 +64,7 @@ namespace hf
 		WindowFlags GetFlags(const Ref<Window> &window);
 		WindowStyle GetStyle(const Ref<Window> &window);
 		void* GetHandle(const Ref<Window> &window);
+		Ref<Renderer> GetRenderer(const Ref<Window> &window);
 
 		void SetTitle(const Ref<Window> &window, const std::string& title);
 		void SetSize(const Ref<Window> &window, ivec2 size);

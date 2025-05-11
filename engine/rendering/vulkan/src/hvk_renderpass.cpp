@@ -1,13 +1,56 @@
 #include "hvk_renderpass.h"
+
+#include "hrenderer.h"
 #include "hvk_graphics.h"
 #include "hvk_renderer.h"
 
 namespace hf
 {
-    void CreateRenderPassColorAttachment(std::vector<VkAttachmentDescription>& attachments,
-                                         std::vector<VkAttachmentReference>& attachmentRefs);
+    struct DepthStencilFormatInfo
+    {
+        VkFormat format{};
+        bool hasStencil{};
+        bool hasDepth{};
+    };
 
     static void SetOperations(VkAttachmentLoadOp& loadOp, VkAttachmentStoreOp& storeOp, LoadStoreOperationType type);
+    static DepthStencilFormatInfo ChooseDepthStencilFormat(LoadStoreOperationType op, LoadStoreOperationType stencilOp, VkImageTiling tiling, VkFormatFeatureFlags features);
+    inline bool CheckFormatSupport(VkFormat format, VkImageTiling tiling, VkFormatFeatureFlags features);
+    static void CreateImageViews(VkRenderPassTexture* pTextures, uint32_t count, VkFormat format, VkImageAspectFlags aspectFlags);
+
+    VkRenderPassTexture::VkRenderPassTexture(uvec2 size, VkFormat format,
+        VkImageTiling tiling, VkImageUsageFlags imageUsageFlags)
+    {
+        QueueFamilyIndices& familyIndices = GRAPHICS_DATA.defaultDevice->familyIndices;
+        uint32_t queus[2] = { familyIndices.transferFamily.value(), familyIndices.graphicsFamily.value() };
+        auto device = GRAPHICS_DATA.defaultDevice->logicalDevice.device;
+
+        VkImageCreateInfo imageInfo
+        {
+            .sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO,
+            .imageType = VK_IMAGE_TYPE_2D,
+            .format = format,
+            .extent = { size.x, size.y, 1 },
+            .mipLevels = 1,
+            .arrayLayers = 1,
+            .samples = VK_SAMPLE_COUNT_1_BIT,
+            .tiling = tiling,
+            .usage = imageUsageFlags,
+            .sharingMode = VK_SHARING_MODE_EXCLUSIVE,
+            .queueFamilyIndexCount = 2,
+            .pQueueFamilyIndices = queus,
+            .initialLayout = VK_IMAGE_LAYOUT_UNDEFINED,
+        };
+
+        VK_HANDLE_EXCEPT(vkCreateImage(device, &imageInfo, nullptr, &image));
+        AllocateImage(BufferMemoryType::Static, image, &memory);
+    }
+
+    VkRenderPassTexture::~VkRenderPassTexture()
+    {
+        vmaDestroyImage(GRAPHICS_DATA.allocator, image, memory);
+        if (view) vkDestroyImageView(GRAPHICS_DATA.defaultDevice->logicalDevice.device, view, nullptr);
+    }
 
     VkDrawPass::VkDrawPass(const RenderPassDefinitionInfo& info)
     {
@@ -67,6 +110,14 @@ namespace hf
         std::vector<VkAttachmentReference> msaaAttachmentRefs(multisamplingAttachmentCount);
         std::vector<VkAttachmentReference> depthAttachmentRefs(depthAttachmentCount);
 
+        // for (uint32_t i = 0; i < info.supportedRendererCount; i++)
+        // {
+        //     auto& rn = info.pSupportedRenderers[i];
+        //     VkRendererPassInfo passInfo = {};
+        //     passInfo.colorTextures.reserve(colorAttachmentCount);
+        //     passInfo.depthTextures.reserve(depthAttachmentCount);
+        // }
+
         {
             uint32_t attachmentIndex = 0;
             uint32_t inputIndex = 0;
@@ -86,9 +137,12 @@ namespace hf
                     attachment =
                     {
                         .flags = (VkAttachmentDescriptionFlags)attachmentInfo.usesSharedMemory,
-                        .format = (VkFormat)attachmentInfo.format,
                         .samples = (VkSampleCountFlagBits)attachmentInfo.msaaCounter,
                     };
+
+                    if (attachmentInfo.finalLayout == RenderPassLayoutType::PresentSrc)
+                        attachment.format = VULKAN_API_COLOR_FORMAT;
+                    else attachment.format = (VkFormat)attachmentInfo.format;
 
                     SetOperations(attachment.loadOp, attachment.storeOp, attachmentInfo.lsOperation);
                     SetOperations(attachment.stencilLoadOp, attachment.stencilStoreOp, attachmentInfo.lsStencilOperation);
@@ -172,6 +226,7 @@ namespace hf
                         .samples = VK_SAMPLE_COUNT_1_BIT,
                     };
 
+
                     SetOperations(depthAttachment.loadOp, depthAttachment.storeOp, subpassInfo.depthAttachment->lsOperation);
                     SetOperations(depthAttachment.stencilLoadOp, depthAttachment.stencilStoreOp, subpassInfo.depthAttachment->lsStencilOperation);
 
@@ -253,33 +308,6 @@ namespace hf
         else throw GENERIC_EXCEPT("[Hyperflow]", "End render pass called without begin render pass");
     }
 
-    void CreateRenderPassColorAttachment(std::vector<VkAttachmentDescription>& attachments,
-                                         std::vector<VkAttachmentReference>& attachmentRefs)
-    {
-        uint32_t attachmentIndex = attachments.size();
-        VkAttachmentDescription colorAttachment
-        {
-            .format = VULKAN_API_COLOR_FORMAT,
-            .samples = VK_SAMPLE_COUNT_1_BIT,
-            .loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR,
-            .storeOp = VK_ATTACHMENT_STORE_OP_STORE,
-            .stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE,
-            .stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE,
-            .initialLayout = VK_IMAGE_LAYOUT_UNDEFINED,
-            .finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR,
-        };
-
-        VkAttachmentReference colorAttachmentRef
-        {
-            .attachment = attachmentIndex,
-            .layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL
-        };
-
-
-        attachments.push_back(colorAttachment);
-        attachmentRefs.push_back(colorAttachmentRef);
-    }
-
     void SetOperations(VkAttachmentLoadOp& loadOp, VkAttachmentStoreOp& storeOp, LoadStoreOperationType type)
     {
         switch (type)
@@ -308,6 +336,107 @@ namespace hf
             loadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
             storeOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
             break;
+        }
+    }
+
+    DepthStencilFormatInfo ChooseDepthStencilFormat(LoadStoreOperationType op, LoadStoreOperationType stencilOp,
+        VkImageTiling tiling, VkFormatFeatureFlags features)
+    {
+        uint32_t stScore = (op != LoadStoreOperationType::DontCareAndDontCare) << 0;
+        stScore |= (stencilOp != LoadStoreOperationType::DontCareAndDontCare) << 1;
+
+        switch (stScore)
+        {
+        case 1:
+
+            for (uint32_t i = 0; i < NUM_DEPTH_FORMATS; i++)
+            {
+                auto format = (VkFormat)inter::rendering::DEPTH_FORMATS[i];
+                if (CheckFormatSupport(format, tiling, features)) return
+                {
+                    .format = format,
+                    .hasStencil = false,
+                    .hasDepth = true
+                };
+            }
+
+            throw GENERIC_EXCEPT("[Hyperflow]", "No suitable depth format found");
+            break;
+        case 2:
+
+            for (uint32_t i = 0; i < NUM_STENCIL_FORMATS; i++)
+            {
+                auto format = (VkFormat)inter::rendering::STENCIL_FORMATS[i];
+                if (CheckFormatSupport(format, tiling, features)) return
+                {
+                    .format = format,
+                    .hasStencil = true,
+                    .hasDepth = false
+                };
+            }
+
+            throw GENERIC_EXCEPT("[Hyperflow]", "No suitable stencil format found");
+            break;
+        case 3:
+
+            for (uint32_t i = 0; i < NUM_DEPTH_STENCIL_FORMATS; i++)
+            {
+                auto format = (VkFormat)inter::rendering::DEPTH_STENCIL_FORMATS[i];
+                if (CheckFormatSupport(format, tiling, features)) return
+                {
+                    .format = format,
+                    .hasStencil = true,
+                    .hasDepth = true
+                };
+            }
+
+            throw GENERIC_EXCEPT("[Hyperflow]", "No suitable depthStencil format found");
+            break;
+        default: throw GENERIC_EXCEPT("[Hyperflow]", "Unused renderPass depthStencil attachment!!!");
+        }
+    }
+
+    bool CheckFormatSupport(VkFormat format, VkImageTiling tiling, VkFormatFeatureFlags features)
+    {
+        auto& prop = GRAPHICS_DATA.defaultDevice->formatProps[(uint32_t)format];
+        switch (tiling)
+        {
+        case VK_IMAGE_TILING_LINEAR:
+            if ((prop.linearTilingFeatures & features) == features) return true;
+            break;
+        case VK_IMAGE_TILING_OPTIMAL:
+            if ((prop.optimalTilingFeatures & features) == features) return true;
+            break;
+        default: throw GENERIC_EXCEPT("[Hyperflow]", "Unused tiling type");
+        }
+        return false;
+    }
+
+    void CreateImageViews(VkRenderPassTexture* pTextures, uint32_t count,
+        VkFormat format, VkImageAspectFlags aspectFlags)
+    {
+        SubmitBufferToImageCopyOperations();
+        auto device = GRAPHICS_DATA.defaultDevice->logicalDevice.device;
+        for (uint32_t i = 0; i < count; i++)
+        {
+            auto& texture = pTextures[i];
+            VkImageViewCreateInfo viewInfo
+            {
+                .sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO,
+                .image = texture.image,
+                .viewType = VK_IMAGE_VIEW_TYPE_2D,
+                .format = format,
+                .subresourceRange =
+                {
+                    .aspectMask = aspectFlags,
+                    .baseMipLevel = 0,
+                    .levelCount = 1,
+                    .baseArrayLayer = 0,
+                    .layerCount = 1,
+                }
+            };
+
+            VK_HANDLE_EXCEPT(vkCreateImageView(device, &viewInfo, nullptr, &texture.view));
         }
     }
 }

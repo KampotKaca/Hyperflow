@@ -68,6 +68,7 @@ namespace hf
         QueueFamilyIndices familyIndices{};
         LogicalDevice logicalDevice{};
         VkPhysicalDeviceMemoryProperties memProps{};
+        VkFormatProperties formatProps[(uint32_t)TextureFormat::Count]{};
     };
 
     struct VkPlatform

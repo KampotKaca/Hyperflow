@@ -71,8 +71,11 @@ namespace hf
 		IRect GetRect(const Ref<Window> &window) { return window->rect; }
 		WindowFlags GetFlags(const Ref<Window> &window) { return window->flags; }
 		WindowStyle GetStyle(const Ref<Window> &window) { return window->style; }
-		void* GetHandle(const Ref<Window> &window) { return window->handle; }
+		void* GetHandle(const Ref<Window> &window) { return inter::window::GetWindowHandle(window.get()); }
+		Ref<Renderer> GetRenderer(const Ref<Window> &window) { return window->renderer; }
+
 		bool IsClosing(const Ref<Window> &window) { return window->handle == nullptr; }
+		Ref<Renderer> GetRenderer(const Ref<Window> &window);
 
 		void SetTitle(const Ref<Window> &window, const std::string& title) { if (!IsClosing(window)) inter::window::SetTitle(window.get(), title); }
 		void SetSize(const Ref<Window> &window, const ivec2 size) { if (!IsClosing(window)) inter::window::SetSize(window.get(), size); }
