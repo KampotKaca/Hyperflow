@@ -27,7 +27,8 @@ namespace hf
 
         std::vector<VkRendererPassTextureCollection> passTextureCollections{};
 
-        VkPipelineLayout currentLayout;
+        VkPipelineLayout currentLayout{};
+        RenderPass mainPass{};
 
         std::vector<VkFrame> frames{};
         uint32_t currentFrame = 0;
@@ -51,6 +52,8 @@ namespace hf
         uint32_t instanceCount{};
     };
 
+    void PostRendererLoad(VkRenderer* rn, RenderPass pass);
+
     void BindRenderPassToRenderer(VkRenderer* rn, RenderPass pass);
 
     void DestroySurface(VkRenderer* rn);
@@ -66,8 +69,8 @@ namespace hf
     void EndCommandBuffer(VkRenderer* rn);
     void SubmitCommands(VkRenderer* rn);
 
-    void CreateSwapchainFrameBuffers(GraphicsSwapChain& swapchain);
-    void DestroySwapchainFrameBuffers(GraphicsSwapChain& swapchain);
+    void CreateSwapchainFrameBuffers(VkRenderer* rn);
+    void DestroySwapchainFrameBuffers(VkRenderer* rn);
     void UploadViewportAndScissor(const VkRenderer* rn);
 
     bool GetReadyForRendering(VkRenderer* rn);

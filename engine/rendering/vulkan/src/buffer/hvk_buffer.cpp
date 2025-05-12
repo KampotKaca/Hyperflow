@@ -150,7 +150,7 @@ namespace hf
 
     inline void TransitionImageLayout(
         VkCommandBuffer command, VkImage image, VkFormat format,
-        VkImageLayout oldLayout, VkImageLayout newLayout)
+        VkImageLayout oldLayout, VkImageLayout newLayout, VkImageAspectFlags aspectFlags)
     {
         VkImageMemoryBarrier barrier
         {
@@ -162,7 +162,7 @@ namespace hf
             .image = image,
             .subresourceRange
             {
-                .aspectMask = VK_IMAGE_ASPECT_COLOR_BIT,
+                .aspectMask = aspectFlags,
                 .baseMipLevel = 0,
                 .levelCount = 1,
                 .baseArrayLayer = 0,
@@ -191,6 +191,13 @@ namespace hf
             sourceStage = VK_PIPELINE_STAGE_TRANSFER_BIT;
             destinationStage = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
         }
+        else if (oldLayout == VK_IMAGE_LAYOUT_UNDEFINED && newLayout == VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL) {
+            barrier.srcAccessMask = 0;
+            barrier.dstAccessMask = VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_READ_BIT | VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
+
+            sourceStage = VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT;
+            destinationStage = VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
+        }
         else throw GENERIC_EXCEPT("[Hyperflow]", "Unsupported layout transition!");
 
         vkCmdPipelineBarrier(command, sourceStage, destinationStage,
@@ -204,7 +211,7 @@ namespace hf
         for (auto& operation : GRAPHICS_DATA.bufferToImageCopyOperations)
         {
             TransitionImageLayout(command, operation.dstImage, operation.format,
-                operation.srcLayout, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
+                operation.srcLayout, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, operation.aspectFlags);
         }
     }
 
@@ -223,8 +230,35 @@ namespace hf
         for (auto& operation : GRAPHICS_DATA.bufferToImageCopyOperations)
         {
             TransitionImageLayout(command, operation.dstImage, operation.format,
-                VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, operation.dstLayout);
+                VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, operation.dstLayout, operation.aspectFlags);
         }
+    }
+
+    void TransitionEmptyImageLayout(VkImage image, VkFormat format, VkImageLayout srcLayout,
+        VkImageLayout dstLayout, VkImageAspectFlags aspectFlags)
+    {
+        auto command = GRAPHICS_DATA.transferPool.buffers[0];
+        VkCommandBufferBeginInfo beginInfo
+        {
+            .sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO,
+        };
+
+        VK_HANDLE_EXCEPT(vkResetCommandBuffer(command, 0));
+        VK_HANDLE_EXCEPT(vkBeginCommandBuffer(command, &beginInfo));
+
+        TransitionImageLayout(command, image, format, srcLayout, dstLayout, aspectFlags);
+
+        VK_HANDLE_EXCEPT(vkEndCommandBuffer(command));
+        VkSubmitInfo submitInfo
+        {
+            .sType = VK_STRUCTURE_TYPE_SUBMIT_INFO,
+            .commandBufferCount = 1,
+            .pCommandBuffers = &command
+        };
+
+        auto& queue = GRAPHICS_DATA.defaultDevice->logicalDevice.graphicsQueue;
+        vkQueueSubmit(queue, 1, &submitInfo, VK_NULL_HANDLE);
+        vkQueueWaitIdle(queue);
     }
 
     void SubmitAllOperations()

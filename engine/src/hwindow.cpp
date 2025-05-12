@@ -6,21 +6,18 @@
 
 namespace hf
 {
-	Window::Window(const WindowCreationInfo& data, const Ref<Window>& parent)
+	Window::Window(const WindowCreationInfo& info, const Ref<Window>& parent)
+		: title(info.title), style(info.style), vSyncIsOn(info.vSyncOn), parent(parent),
+		  onPassCreationCallback(info.onPassCreationCallback), onRenderCallback(info.onRenderCallback),
+		  onPreRenderCallback(info.onPreRenderCallback)
 	{
-		title = data.title;
-		style = data.style;
-		vSyncIsOn = data.vSyncOn;
-		this->parent = parent;
 		flags = (WindowFlags)0;
 		rect =
 		{
-			.position = data.position,
-			.size = data.size
+			.position = info.position,
+			.size = info.size
 		};
 		renderer = nullptr;
-		onRenderCallback = data.onRenderCallback;
-		onPreRenderCallback = data.onPreRenderCallback;
 
 		inter::window::Open(this);
 
@@ -29,7 +26,7 @@ namespace hf
 		mouse.isInClientRegion = pPos.x >= 0 && pPos.x < rect.size.x && pPos.y > 0 && pPos.y < rect.size.y;
 		eventData.pointerPosition = mouse.position;
 
-		inter::window::SetFlags(this, data.flags);
+		inter::window::SetFlags(this, info.flags);
 		inter::window::Focus(this);
 		inter::window::SetTitle(this, title);
 	}
@@ -44,8 +41,13 @@ namespace hf
 		Ref<Window> Open(const WindowCreationInfo &data, const Ref<Window> &parent)
 		{
 			auto newWindow = MakeRef<Window>(data, parent);
-			if (inter::HF.renderingApi.type != RenderingApiType::None) newWindow->renderer = MakeRef<Renderer>(newWindow.get());
 			inter::HF.windows.push_back(newWindow);
+
+			if (inter::HF.renderingApi.type != RenderingApiType::None)
+			{
+				newWindow->renderer = MakeRef<Renderer>(newWindow.get());
+				inter::HF.renderingApi.api.PostInstanceLoad(newWindow->renderer->handle, data.onPassCreationCallback());
+			}
 			return newWindow;
 		}
 

@@ -143,10 +143,10 @@ namespace hf
         rn->frameBufferResized = false;
         DelayThreadUntilRenderingFinish();
 
-        DestroySwapchainFrameBuffers(rn->swapchain);
+        DestroySwapchainFrameBuffers(rn);
         CreateSwapchain(rn->swapchain.surface, rn->targetSize, rn->vSyncOn, &rn->swapchain);
         SetupViewportAndScissor(rn);
-        CreateSwapchainFrameBuffers(rn->swapchain);
+        CreateSwapchainFrameBuffers(rn);
     }
 
     void PresentSwapchain(VkRenderer* rn)

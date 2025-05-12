@@ -73,20 +73,21 @@ namespace hf
         return true;
     }
 
-    void CreateSwapchainFrameBuffers(GraphicsSwapChain& swapchain)
+    void CreateSwapchainFrameBuffers(VkRenderer* rn)
     {
+        auto& swapchain = rn->swapchain;
         swapchain.frameBuffers = std::vector<VkFrameBuffer*>(swapchain.imageViews.size());
         for (uint32_t i = 0; i < swapchain.imageViews.size(); ++i)
         {
             swapchain.frameBuffers[i] = new VkFrameBuffer(&swapchain.imageViews[i], 1,
-                GRAPHICS_DATA.presentationPass, swapchain.details.extent);
+                rn->mainPass, swapchain.details.extent);
         }
     }
 
-    void DestroySwapchainFrameBuffers(GraphicsSwapChain& swapchain)
+    void DestroySwapchainFrameBuffers(VkRenderer* rn)
     {
-        for (auto& frameBuffer : swapchain.frameBuffers) delete frameBuffer;
-        swapchain.frameBuffers.clear();
+        for (auto& frameBuffer : rn->swapchain.frameBuffers) delete frameBuffer;
+        rn->swapchain.frameBuffers.clear();
     }
 
     void QuerySwapChainSupport(const VkPhysicalDevice& device, const VkSurfaceKHR& surface, SwapChainSupportDetails* supportDetails)

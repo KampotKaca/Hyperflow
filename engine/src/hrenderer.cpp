@@ -131,6 +131,7 @@ namespace hf
             {
                 if (win->renderer) CreateRenderer_i(win->renderer.get());
                 else win->renderer = MakeRef<Renderer>(win.get());
+                HF.renderingApi.api.PostInstanceLoad(win->renderer->handle, win->onPassCreationCallback());
             }
 
             if (HF.lifecycleCallbacks.onRendererLoad) HF.lifecycleCallbacks.onRendererLoad();
@@ -179,7 +180,6 @@ namespace hf
                     .applicationTitle = HF.appTitle.c_str(),
                     .platformInstance = platform::GetPlatformInstance(),
                     .getFuncFromDll = platform::GetFuncPtr,
-                    .onPassCreationCallback = HF.lifecycleCallbacks.onPassCreationCallback
                 };
 
                 if (HF.renderingApi.type == RenderingApiType::Vulkan)
@@ -233,11 +233,16 @@ namespace hf
         }
     }
 
-    namespace drawpass
+    namespace renderpass
     {
         RenderPass Define(const RenderPassDefinitionInfo& info)
         {
             return inter::HF.renderingApi.api.DefineRenderPass(info);
+        }
+
+        void Bind(const Ref<Renderer>& rn, RenderPass pass)
+        {
+            inter::HF.renderingApi.api.BindRenderPass(rn->handle, pass);
         }
 
         void Begin(const Ref<Renderer>& rn, RenderPass pass)

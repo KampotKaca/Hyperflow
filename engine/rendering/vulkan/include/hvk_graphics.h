@@ -104,6 +104,7 @@ namespace hf
         VkImageLayout dstLayout{};
 
         VkFormat format{};
+        VkImageAspectFlags aspectFlags{};
 
         VkBufferImageCopy pRegions[VULKAN_API_MAX_NUM_COPY_REGIONS]{};
         uint32_t regionCount = 0;
@@ -136,7 +137,6 @@ namespace hf
         std::set<std::string> availableExtensionNames{};
         std::vector<GraphicsDevice> suitableDevices{};
         GraphicsDevice* defaultDevice;
-        RenderPass presentationPass;
 
         bool devicesAreLoaded = false;
 
@@ -156,8 +156,6 @@ namespace hf
         std::vector<VkCopyBufferToImageOperation> bufferToImageCopyOperations{};
 
         PreAllocatedBuffers preAllocBuffers{};
-
-        RenderPass (*onPassCreationCallback)();
 
 #if DEBUG
         VkDebugUtilsMessengerCreateInfoEXT debugCreateInfo
@@ -259,6 +257,7 @@ namespace hf
     uint32_t GetMemoryType(uint32_t filter, VkMemoryPropertyFlags props);
     void StageCopyOperation(const VkCopyBufferToBufferOperation& operation);
     void StageCopyOperation(const VkCopyBufferToImageOperation& operation);
+    void TransitionEmptyImageLayout(VkImage image, VkFormat format, VkImageLayout srcLayout, VkImageLayout dstLayout, VkImageAspectFlags aspectFlags);
 
     void SubmitAllOperations();
     void SubmitBufferToBufferCopyOperations();

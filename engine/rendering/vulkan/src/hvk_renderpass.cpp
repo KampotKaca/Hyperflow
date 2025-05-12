@@ -103,7 +103,7 @@ namespace hf
                         .samples = (VkSampleCountFlagBits)attachmentInfo.msaaCounter,
                     };
 
-                    if (attachmentInfo.finalLayout == RenderPassLayoutType::PresentSrc)
+                    if (attachmentInfo.finalLayout == TextureResultLayoutType::PresentSrc)
                         attachment.format = VULKAN_API_COLOR_FORMAT;
                     else attachment.format = (VkFormat)attachmentInfo.format;
 
@@ -125,7 +125,7 @@ namespace hf
                     case RenderPassAttachmentType::Color:
                         colorAttachmentRefs[colorIndex] = ref;
                         colorIndex++;
-                        if (attachmentInfo.finalLayout != RenderPassLayoutType::PresentSrc)
+                        if (attachmentInfo.finalLayout != TextureResultLayoutType::PresentSrc)
                             colorAttachments[colorIndex] = attachmentInfo;
 
                         break;
@@ -327,7 +327,6 @@ namespace hf
             }
 
             throw GENERIC_EXCEPT("[Hyperflow]", "No suitable depth format found");
-            break;
         case 2:
 
             for (uint32_t i = 0; i < NUM_STENCIL_FORMATS; i++)
@@ -342,7 +341,6 @@ namespace hf
             }
 
             throw GENERIC_EXCEPT("[Hyperflow]", "No suitable stencil format found");
-            break;
         case 3:
 
             for (uint32_t i = 0; i < NUM_DEPTH_STENCIL_FORMATS; i++)
@@ -357,7 +355,6 @@ namespace hf
             }
 
             throw GENERIC_EXCEPT("[Hyperflow]", "No suitable depthStencil format found");
-            break;
         default: throw GENERIC_EXCEPT("[Hyperflow]", "Unused renderPass depthStencil attachment!!!");
         }
     }
@@ -410,15 +407,18 @@ namespace hf
                 {
                     .type = TextureType::Tex2D,
                     .format = (TextureFormat)supportedDepthFormat.format,
-                    .aspectFlags = TextureAspectFlags::Depth,
                     .tiling = TextureTiling::Optimal,
                     .usage = TextureUsageFlags::DepthStencil,
-                    .memoryType = BufferMemoryType::Static
+                    .memoryType = BufferMemoryType::Static,
+                    .finalLayout = TextureResultLayoutType::DepthStencil
                 }
             };
 
-            auto* texture = new VkTexture(textureInfo);
+            textureInfo.details.aspectFlags = TextureAspectFlags::None;
+            if (supportedDepthFormat.hasDepth) textureInfo.details.aspectFlags |= TextureAspectFlags::Depth;
+            if (supportedDepthFormat.hasStencil) textureInfo.details.aspectFlags |= TextureAspectFlags::Stencil;
 
+            auto* texture = new VkTexture(textureInfo);
             texCollection.depthTextures[i] = texture;
         }
 

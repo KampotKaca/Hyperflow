@@ -72,8 +72,9 @@ namespace hf
                 .srcLayout = VK_IMAGE_LAYOUT_UNDEFINED,
                 .dstImage = image,
                 .dstMemory = imageMemory,
-                .dstLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
+                .dstLayout = (VkImageLayout)info.details.finalLayout,
                 .format = (VkFormat)details.format,
+                .aspectFlags = (VkImageAspectFlags)info.details.aspectFlags,
                 .regionCount = 1,
                 .uData = this,
                 .taskCompletionCallback = TextureViewCallback,
@@ -85,6 +86,9 @@ namespace hf
         }
         else
         {
+            TransitionEmptyImageLayout(image, (VkFormat)details.format,
+                VK_IMAGE_LAYOUT_UNDEFINED, (VkImageLayout)info.details.finalLayout,
+                (VkImageAspectFlags)info.details.aspectFlags);
             TextureViewCallback(this);
         }
     }

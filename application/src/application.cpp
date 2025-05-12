@@ -62,19 +62,42 @@ namespace app
 
 	hf::RenderPass Application::OnPassCreationCallback()
 	{
-		hf::RenderPassDependencyInfo dependencyInfo{};
+		wn = hf::GetMainWindow();
 
+		hf::RenderPassDependencyInfo dependencyInfo
+		{
+			// .src =
+			// {
+			// 	.stageMask = hf::RenderPassStage::ColorAttachmentOutput |
+			// 				 hf::RenderPassStage::EarlyFragmentTest,
+			// },
+			// .dst =
+			// {
+			// 	.stageMask = hf::RenderPassStage::ColorAttachmentOutput |
+			// 				 hf::RenderPassStage::EarlyFragmentTest,
+			// 	.accessMask = hf::AccessType::ColorAttachmentWrite |
+			// 		          hf::AccessType::DepthStencilAttachmentWrite
+			// },
+		};
 		hf::RenderSubpassAttachmentInfo colorAttachment{};
+		hf::RenderSubpassAttachmentInfo depthAttachment
+		{
+			.layout = hf::TextureResultLayoutType::DepthStencil,
+			.msaaCounter = 1,
+			.lsOperation = hf::LoadStoreOperationType::ClearAndDontCare,
+			.lsStencilOperation = hf::LoadStoreOperationType::DontCareAndDontCare,
+			.initialLayout = hf::TextureResultLayoutType::Undefined,
+			.finalLayout = hf::TextureResultLayoutType::DepthStencil,
+			.usesSharedMemory = false
+		};
 
 		hf::RenderSubpassInfo subpassInfo
 		{
 			.bindingType = hf::RenderBindingType::Graphics,
 			.pAttachments = &colorAttachment,
 			.attachmentCount = 1,
-			.depthAttachment = nullptr
+			// .depthAttachment = &depthAttachment
 		};
-
-		hf::Ref<hf::Renderer> supportedRns[] = { hf::window::GetRenderer(hf::GetMainWindow()) };
 
 		hf::RenderPassDefinitionInfo drawPassDefinitionInfo
 		{
@@ -86,7 +109,8 @@ namespace app
 			.depth = 0.0f,
 			.stencil = 0
 		};
-		presentPass = hf::drawpass::Define(drawPassDefinitionInfo);
+		presentPass = hf::renderpass::Define(drawPassDefinitionInfo);
+		hf::renderpass::Bind(hf::window::GetRenderer(wn), presentPass);
 		return presentPass;
 	}
 
@@ -257,7 +281,6 @@ namespace app
 	{
 		hf::time::SetTargetFrameRate(-1);
 		count = 0;
-		wn = hf::GetMainWindow();
 	}
 
 	void Application::Update()
@@ -348,7 +371,7 @@ namespace app
 		camera.proj[1][1] *= -1;
 		camera.viewProj = camera.proj * camera.view;
 
-		hf::drawpass::Begin(rn, presentPass);
+		hf::renderpass::Begin(rn, presentPass);
 
 		hf::shadersetup::Bind(rn, shaderSetup);
 
@@ -383,6 +406,6 @@ namespace app
 
 		hf::renderer::Draw(rn, drawCallInfo);
 
-		hf::drawpass::End(rn);
+		hf::renderpass::End(rn);
 	}
 }

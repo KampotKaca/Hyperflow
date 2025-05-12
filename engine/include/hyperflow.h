@@ -112,9 +112,10 @@ namespace hf
 		void UnloadAllResources(bool internalOnly = false);
 	}
 
-	namespace drawpass
+	namespace renderpass
 	{
 		RenderPass Define(const RenderPassDefinitionInfo& info);
+		void Bind(const Ref<Renderer>& rn, RenderPass pass);
 		void Begin(const Ref<Renderer>& rn, RenderPass pass);
 		void End(const Ref<Renderer>& rn);
 	}

@@ -477,6 +477,31 @@ namespace hf
 	};
 	DEFINE_ENUM_FLAGS(TextureAspectFlags)
 
+	enum class TextureResultLayoutType
+	{
+		Undefined = 0, General = 1,
+		Color = 2, DepthStencil = 3, DepthStencilReadOnly = 4,
+		//Generally used in post processing
+		ShaderReadOnly = 5,
+		//Used for images which are copied from
+		TransferSrc = 6,
+		//Used for images which are copied to
+		TransferDst = 7,
+		Preinitialized = 8,
+		DepthReadOnly_Stencil = 1000117000,
+		Depth_StencilReadOnly = 1000117001,
+		Depth = 1000241000,
+		DepthReadOnly = 1000241001,
+		Stencil = 1000241002,
+		StencilReadOnly = 1000241003,
+		ReadOnly = 1000314000,
+		Attachment = 1000314001,
+		RenderingLocalRead = 1000232000,
+
+		//used as a source for the swapchain
+		PresentSrc = 1000001002
+	};
+
 	enum class TextureTiling
 	{
 		Optimal = 0, Linear = 1
@@ -496,6 +521,7 @@ namespace hf
 		TextureTiling tiling = TextureTiling::Optimal;
 		TextureUsageFlags usage = TextureUsageFlags::Sampled;
 		BufferMemoryType memoryType = BufferMemoryType::Static;
+		TextureResultLayoutType finalLayout = TextureResultLayoutType::ShaderReadOnly;
 	};
 
 	struct TextureCreationInfo
@@ -527,31 +553,6 @@ namespace hf
 		TextureLayout layout = 0;
 	};
 
-	enum class RenderPassLayoutType
-	{
-		Undefined = 0, General = 1,
-		Color = 2, DepthStencil = 3, DepthStencilReadOnly = 4,
-		//Generally used in post processing
-		ShaderReadOnly = 5,
-		//Used for images which are copied from
-		TransferSrc = 6,
-		//Used for images which are copied to
-		TransferDst = 7,
-		Preinitialized = 8,
-		DepthReadOnly_Stencil = 1000117000,
-		Depth_StencilReadOnly = 1000117001,
-		Depth = 1000241000,
-		DepthReadOnly = 1000241001,
-		Stencil = 1000241002,
-		StencilReadOnly = 1000241003,
-		ReadOnly = 1000314000,
-		Attachment = 1000314001,
-		RenderingLocalRead = 1000232000,
-
-		//used as a source for the swapchain
-		PresentSrc = 1000001002
-	};
-
 	enum class LoadStoreOperationType
 	{
 		LoadAndStore = 0, ClearAndStore = 1, DontCareAndStore = 2,
@@ -567,7 +568,7 @@ namespace hf
 	{
 		RenderPassAttachmentType type = RenderPassAttachmentType::Color;
 		//type of attachment layout color, depth, stencil etc.
-		RenderPassLayoutType layout = RenderPassLayoutType::Color;
+		TextureResultLayoutType layout = TextureResultLayoutType::Color;
 		TextureFormat format = TextureFormat::B8G8R8A8_Srgb;
 		//meant as a multisampling counter, should be pot value, with 64 as maximum
 		uint32_t msaaCounter = 1;
@@ -575,8 +576,8 @@ namespace hf
 		LoadStoreOperationType lsStencilOperation = LoadStoreOperationType::DontCareAndDontCare;
 
 		//type of initial layout of the attachment
-		RenderPassLayoutType initialLayout = RenderPassLayoutType::Undefined;
-		RenderPassLayoutType finalLayout = RenderPassLayoutType::PresentSrc;
+		TextureResultLayoutType initialLayout = TextureResultLayoutType::Undefined;
+		TextureResultLayoutType finalLayout = TextureResultLayoutType::PresentSrc;
 		bool usesSharedMemory = false;
 	};
 
@@ -672,6 +673,10 @@ namespace hf
 		ivec2 size = ivec2{ 200, 200 };
 		bool vSyncOn = false;
 
+		//stage where you can create draw passes
+		//and should return the pass which is used for presentation
+		RenderPass (*onPassCreationCallback)();
+
 		void (*onPreRenderCallback)(const Ref<Renderer>&){};
 		void (*onRenderCallback)(const Ref<Renderer>&){};
 	};
@@ -688,9 +693,6 @@ namespace hf
 
 	struct EngineLifecycleCallbacks
 	{
-		//stage where you can create draw passes
-		//and should return the pass which is used for presentation
-		RenderPass (*onPassCreationCallback)();
 		//Called after new renderer is loaded, this is where you should define uin32_t type rendering objects
 		//like: uniform buffer, buffer attribute and ect...
 		void (*onRendererLoad)(){};

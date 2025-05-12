@@ -10,7 +10,7 @@ namespace hf
 {
 	struct Window
 	{
-		Window(const WindowCreationInfo& data, const Ref<Window>& parent);
+		Window(const WindowCreationInfo& info, const Ref<Window>& parent);
 		~Window();
 
 		struct EventData
@@ -36,6 +36,7 @@ namespace hf
 		EventData eventData{};
 		Ref<Renderer> renderer{};
 
+		RenderPass (*onPassCreationCallback)();
 		void (*onRenderCallback)(const Ref<Renderer>&);
 		void (*onPreRenderCallback)(const Ref<Renderer>&);
 	};

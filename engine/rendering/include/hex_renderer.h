@@ -55,7 +55,6 @@ namespace hf::inter::rendering
         void* platformInstance;
         void* platformDll;
         void* (*getFuncFromDll)(void* dll, const char* funcName);
-        RenderPass (*onPassCreationCallback)();
     };
 
     struct VertBufferUploadInfo
@@ -76,6 +75,7 @@ namespace hf::inter::rendering
 
     struct RendererInstanceCreationInfo
     {
+        RenderPass mainPass{};
         void* handle{};
         uvec2 size{};
         bool vSyncOn = false;
@@ -136,9 +136,11 @@ namespace hf::inter::rendering
         void (*Load)(const RendererLoadInfo& info);
         void (*Unload)();
         void* (*CreateInstance)(const RendererInstanceCreationInfo& info);
+        void (*PostInstanceLoad)(void* rn, RenderPass pass);
         void (*DestroyInstance)(void* rn);
 
         RenderPass (*DefineRenderPass)(const RenderPassDefinitionInfo& info);
+        void (*BindRenderPass)(void* rn, RenderPass pass);
         void (*BeginRenderPass)(void* rn, RenderPass pass);
         void (*EndRenderPass)(void* rn);
 

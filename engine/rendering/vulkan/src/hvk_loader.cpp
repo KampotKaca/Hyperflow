@@ -59,7 +59,6 @@ namespace hf
 
     void LoadVulkan(const inter::rendering::RendererLoadInfo& info)
     {
-        GRAPHICS_DATA.onPassCreationCallback = info.onPassCreationCallback;
         VkApplicationInfo appInfo{};
         appInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
         appInfo.pApplicationName = info.applicationTitle;

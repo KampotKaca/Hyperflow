@@ -16,16 +16,6 @@ namespace hf
     {
         if (!GRAPHICS_DATA.devicesAreLoaded) LoadDevice(windowHandle, &swapchain.surface);
         else GRAPHICS_DATA.platform.api->CreateSurface(GRAPHICS_DATA.platform.instance, windowHandle, GRAPHICS_DATA.instance, &swapchain.surface);
-
-        CreateSwapchain(swapchain.surface, targetSize, vSyncOn,  &swapchain);
-        SetupViewportAndScissor(this);
-
-        CreateSwapchainFrameBuffers(swapchain);
-        CreateCommandPool(*GRAPHICS_DATA.defaultDevice, GRAPHICS_DATA.defaultDevice->familyIndices.graphicsFamily.value(), &commandPool);
-        CreateCommandBuffers(*GRAPHICS_DATA.defaultDevice, &commandPool, FRAMES_IN_FLIGHT);
-
-        frames = std::vector<VkFrame>(FRAMES_IN_FLIGHT);
-        for (uint32_t i = 0; i < FRAMES_IN_FLIGHT; ++i) CreateFrame(&frames[i]);
     }
 
     VkRenderer::~VkRenderer()
@@ -33,10 +23,31 @@ namespace hf
         for (auto& frame : frames) DestroyFrame(frame);
         frames.clear();
 
-        DestroySwapchainFrameBuffers(swapchain);
+        for (auto& texCollection : passTextureCollections)
+        {
+            for (auto& tex : texCollection.colorTextures) delete tex;
+            for (auto& tex : texCollection.depthTextures) delete tex;
+        }
+        passTextureCollections.clear();
+
+        DestroySwapchainFrameBuffers(this);
         DestroySwapchain(swapchain, &swapchain.swapchain);
         DestroyCommandPool(*GRAPHICS_DATA.defaultDevice, commandPool);
         DestroySurface(this);
+    }
+
+    void PostRendererLoad(VkRenderer* rn, RenderPass mainPass)
+    {
+        rn->mainPass = mainPass;
+        CreateSwapchain(rn->swapchain.surface, rn->targetSize, rn->vSyncOn,  &rn->swapchain);
+        SetupViewportAndScissor(rn);
+
+        CreateSwapchainFrameBuffers(rn);
+        CreateCommandPool(*GRAPHICS_DATA.defaultDevice, GRAPHICS_DATA.defaultDevice->familyIndices.graphicsFamily.value(), &rn->commandPool);
+        CreateCommandBuffers(*GRAPHICS_DATA.defaultDevice, &rn->commandPool, FRAMES_IN_FLIGHT);
+
+        rn->frames = std::vector<VkFrame>(FRAMES_IN_FLIGHT);
+        for (uint32_t i = 0; i < FRAMES_IN_FLIGHT; ++i) CreateFrame(&rn->frames[i]);
     }
 
     void CreateFrame(VkFrame* result)
@@ -200,9 +211,6 @@ namespace hf
         };
 
         VK_HANDLE_EXCEPT(vmaCreateAllocator(&allocatorInfo, &GRAPHICS_DATA.allocator));
-
-        if (!GRAPHICS_DATA.onPassCreationCallback) throw GENERIC_EXCEPT("[Vulkan]", "No onPassCreationCallback provided");
-        GRAPHICS_DATA.presentationPass = GRAPHICS_DATA.onPassCreationCallback();
 
         CreateCommandPool(*GRAPHICS_DATA.defaultDevice, GRAPHICS_DATA.defaultDevice->familyIndices.transferFamily.value(), &GRAPHICS_DATA.transferPool);
         CreateCommandBuffers(*GRAPHICS_DATA.defaultDevice, &GRAPHICS_DATA.transferPool, 1);

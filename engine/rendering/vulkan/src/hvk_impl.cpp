@@ -31,6 +31,11 @@ namespace hf::inter::rendering
         return new VkRenderer(info);
     }
 
+    void PostInstanceLoad(void* rn, RenderPass pass)
+    {
+        PostRendererLoad((VkRenderer*)rn, pass);
+    }
+
     void DestroyInstance(void* rn)
     {
         delete (VkRenderer*)rn;
@@ -40,6 +45,11 @@ namespace hf::inter::rendering
     {
         GRAPHICS_DATA.renderPasses.emplace_back(info);
         return GRAPHICS_DATA.renderPasses.size();
+    }
+
+    void BindRenderPass(void* rn, RenderPass pass)
+    {
+        BindRenderPassToRenderer((VkRenderer*)rn, pass);
     }
 
     void BeginRenderPass(void* rn, RenderPass pass)
@@ -293,10 +303,12 @@ namespace hf::inter::rendering
             .Load                       = Load,
             .Unload                     = Unload,
             .CreateInstance             = CreateInstance,
+            .PostInstanceLoad           = PostInstanceLoad,
             .DestroyInstance            = DestroyInstance,
 
             //draw pass
             .DefineRenderPass           = DefineRenderPass,
+            .BindRenderPass             = BindRenderPass,
             .BeginRenderPass            = BeginRenderPass,
             .EndRenderPass              = EndRenderPass,
 

@@ -19,7 +19,6 @@ int main()
 		.updateType = hf::EngineUpdateType::Continues,
 		.lifecycleCallbacks =
 		{
-			.onPassCreationCallback  = app::Application::OnPassCreationCallback,
 			.onRendererLoad     	 = app::Application::OnRendererLoad,
 			.onResourcesLoad     	 = app::Application::LoadResources,
 			.onStartCallback     	 = app::Application::Start,
@@ -34,6 +33,7 @@ int main()
 			.position     		 = { 200, 200 },
 			.size         		 = { 920, 480 },
 			.vSyncOn			 = true,
+			.onPassCreationCallback = app::Application::OnPassCreationCallback,
 			.onPreRenderCallback = app::Application::OnPreRender,
 			.onRenderCallback    = app::Application::OnRender,
 		}
