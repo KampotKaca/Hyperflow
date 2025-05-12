@@ -39,7 +39,6 @@ namespace app
 	hf::Ref<hf::IndexBuffer> indexBuffer;
 
 	hf::Ref<hf::Texture> texture;
-	hf::Ref<hf::TextureAllocator> textureAllocator;
 	hf::Ref<hf::TexturePack> texPack;
 	hf::Ref<hf::TexturePackAllocator> texPackAllocator;
 
@@ -192,6 +191,7 @@ namespace app
 		};
 
 		indexBuffer = hf::indexbuffer::Create(indexBufferInfo);
+		hf::buffer::SubmitAll();
 
 		hf::TextureCreationInfo texInfo
 		{
@@ -211,14 +211,6 @@ namespace app
 
 		texture = hf::texture::Create(texInfo);
 
-		hf::TextureAllocatorCreationInfo texAllocInfo
-		{
-			.pTextures = &texture,
-			.textureCount = 1
-		};
-
-		textureAllocator = hf::textureallocator::Create(texAllocInfo);
-
 		hf::TexturePackBindingInfo binding
 		{
 			.bindingId = 0,
@@ -237,6 +229,7 @@ namespace app
 		};
 
 		texPack = hf::texturepack::Create(texPackInfo);
+		hf::texture::SubmitAll();
 
 		hf::TexturePackAllocatorCreationInfo texPackAllocInfo
 		{

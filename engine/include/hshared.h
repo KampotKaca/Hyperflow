@@ -167,7 +167,6 @@ namespace hf
 	struct VertBuffer;
 	struct IndexBuffer;
 	struct Texture;
-	struct TextureAllocator;
 	struct TexturePack;
 	struct TexturePackAllocator;
 
@@ -503,12 +502,6 @@ namespace hf
 		TextureChannel desiredChannel = TextureChannel::RGBA;
 		uint32_t mipLevels = 1;
 		TextureDetails details{};
-	};
-
-	struct TextureAllocatorCreationInfo
-	{
-		const Ref<Texture>* pTextures{};
-		uint32_t textureCount{};
 	};
 
 	struct TexturePackBindingInfo

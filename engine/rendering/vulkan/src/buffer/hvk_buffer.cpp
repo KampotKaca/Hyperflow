@@ -244,7 +244,9 @@ namespace hf
             {
                 if (operation.deleteSrcAfterCopy)
                     vmaDestroyBuffer(GRAPHICS_DATA.allocator, operation.srcBuffer, operation.srcMemory);
+                if (operation.taskCompletionCallback) operation.taskCompletionCallback(operation.uData);
             }
+
             GRAPHICS_DATA.bufferToBufferCopyOperations.clear();
         }
     }
@@ -262,7 +264,9 @@ namespace hf
             {
                 if (operation.deleteSrcAfterCopy)
                     vmaDestroyBuffer(GRAPHICS_DATA.allocator, operation.srcBuffer, operation.srcMemory);
+                if (operation.taskCompletionCallback) operation.taskCompletionCallback(operation.uData);
             }
+
             GRAPHICS_DATA.bufferToImageCopyOperations.clear();
         }
     }

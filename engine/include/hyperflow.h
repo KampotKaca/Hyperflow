@@ -144,15 +144,8 @@ namespace hf
 		void Destroy(const Ref<Texture>* pTextures, uint32_t count);
 		void DestroyAll(bool internalOnly = false);
 		bool IsRunning(const Ref<Texture>& texture);
-	}
 
-	namespace textureallocator
-	{
-		Ref<TextureAllocator> Create(const TextureAllocatorCreationInfo& info);
-		void Destroy(const Ref<TextureAllocator>& texAllocator);
-		void Destroy(const Ref<TextureAllocator>* pTexAllocators, uint32_t count);
-		void DestroyAll(bool internalOnly = false);
-		bool IsRunning(const Ref<TextureAllocator>& texAllocator);
+		void SubmitAll();
 	}
 
 	namespace texturepack
@@ -202,6 +195,11 @@ namespace hf
 	namespace uniformallocator
 	{
 		UniformAllocator Define(const UniformAllocatorDefinitionInfo& info);
+	}
+
+	namespace buffer
+	{
+		void SubmitAll();
 	}
 
 	namespace vertbuffer

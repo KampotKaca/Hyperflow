@@ -2,7 +2,6 @@
 #include "hvk_indexbuffer.h"
 #include "hvk_renderer.h"
 #include "hvk_shader.h"
-#include "hvk_textureallocator.h"
 #include "hvk_texturepack.h"
 #include "hvk_vertbuffer.h"
 #include "hvk_texturepack.h"
@@ -76,16 +75,6 @@ namespace hf::inter::rendering
     void DestroyTexture(void* tex)
     {
         delete (VkTexture*)tex;
-    }
-
-    void* CreateTextureAllocator(const TextureAllocatorCreationInfo& info)
-    {
-        return new VkTextureAllocator(info);
-    }
-
-    void DestroyTextureAllocator(void* texAlloc)
-    {
-        delete (VkTextureAllocator*)texAlloc;
     }
 
     void* CreateTexturePack(const TexturePackCreationInfo& info)
@@ -323,10 +312,6 @@ namespace hf::inter::rendering
             //texture
             .CreateTexture              = CreateTexture,
             .DestroyTexture             = DestroyTexture,
-
-            //texture allocator
-            .CreateTextureAllocator     = CreateTextureAllocator,
-            .DestroyTextureAllocator    = DestroyTextureAllocator,
 
             //texture pack
             .CreateTexturePack          = CreateTexturePack,

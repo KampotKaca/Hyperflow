@@ -22,8 +22,6 @@ namespace hf
         uint64_t bufferSize{};
         uint32_t mipLevels{};
     };
-
-    void CreateTextureView(VkTexture* texture);
 }
 
 #endif //HVK_TEXTURE_H

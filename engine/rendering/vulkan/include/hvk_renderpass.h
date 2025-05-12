@@ -3,7 +3,6 @@
 
 #include "hvk_shared.h"
 #include "hvk_texture.h"
-#include "hvk_textureallocator.h"
 
 namespace hf
 {
@@ -12,7 +11,6 @@ namespace hf
         RenderPass pass;
         std::vector<VkTexture*> colorTextures{};
         std::vector<VkTexture*> depthTextures{};
-        VkTextureAllocator* allocator{};
     };
 
     struct VkDrawPass

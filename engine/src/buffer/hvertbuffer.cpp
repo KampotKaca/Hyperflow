@@ -89,4 +89,12 @@ namespace hf
             return false;
         }
     }
+
+    namespace buffer
+    {
+        void SubmitAll()
+        {
+			inter::HF.renderingApi.api.SubmitBufferCopyOperations();
+        }
+    }
 }

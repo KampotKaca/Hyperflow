@@ -90,12 +90,6 @@ namespace hf::inter::rendering
         TextureDetails details{};
     };
 
-    struct TextureAllocatorCreationInfo
-    {
-        void** pTextures{};
-        uint32_t textureCount = 0;
-    };
-
     struct TexturePackBinding
     {
         uint32_t bindingId = 0;
@@ -160,10 +154,6 @@ namespace hf::inter::rendering
         //texture
         void* (*CreateTexture)(const TextureCreationInfo& info);
         void (*DestroyTexture)(void* tex);
-
-        //texture allocator
-        void* (*CreateTextureAllocator)(const TextureAllocatorCreationInfo& info);
-        void (*DestroyTextureAllocator)(void* texAlloc);
 
         //texture pack
         void* (*CreateTexturePack)(const TexturePackCreationInfo& info);

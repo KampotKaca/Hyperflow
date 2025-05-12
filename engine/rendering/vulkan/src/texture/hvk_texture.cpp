@@ -3,6 +3,8 @@
 
 namespace hf
 {
+    static void TextureViewCallback(void* uData);
+
     VkTexture::VkTexture(const inter::rendering::TextureCreationInfo& info)
         : channel(info.channel), details(info.details), size(info.size), mipLevels(info.mipLevels)
     {
@@ -73,6 +75,8 @@ namespace hf
                 .dstLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
                 .format = (VkFormat)details.format,
                 .regionCount = 1,
+                .uData = this,
+                .taskCompletionCallback = TextureViewCallback,
                 .deleteSrcAfterCopy = true
             };
 
@@ -81,17 +85,19 @@ namespace hf
         }
         else
         {
-            CreateTextureView(this);
+            TextureViewCallback(this);
         }
     }
 
     VkTexture::~VkTexture()
     {
+        if (view) vkDestroyImageView(GRAPHICS_DATA.defaultDevice->logicalDevice.device, view, nullptr);
         vmaDestroyImage(GRAPHICS_DATA.allocator, image, imageMemory);
     }
 
-    void CreateTextureView(VkTexture* texture)
+    void TextureViewCallback(void* uData)
     {
+        auto* texture = (VkTexture*)uData;
         VkImageViewCreateInfo viewInfo
         {
             .sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO,

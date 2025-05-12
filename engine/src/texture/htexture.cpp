@@ -50,6 +50,7 @@ namespace hf
         }
 
         bool IsRunning(const Ref<Texture>& texture) { return texture->handle; }
+        void SubmitAll() { inter::HF.renderingApi.api.SubmitTextureCopyOperations(); }
     }
 
     namespace inter::rendering

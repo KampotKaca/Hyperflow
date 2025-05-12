@@ -87,6 +87,9 @@ namespace hf
 
         VkBufferCopy pRegions[VULKAN_API_MAX_NUM_COPY_REGIONS]{};
         uint32_t regionCount = 0;
+
+        void* uData{};
+        void (*taskCompletionCallback)(void* udata){};
         bool deleteSrcAfterCopy = false;
     };
 
@@ -104,6 +107,9 @@ namespace hf
 
         VkBufferImageCopy pRegions[VULKAN_API_MAX_NUM_COPY_REGIONS]{};
         uint32_t regionCount = 0;
+
+        void* uData{};
+        void (*taskCompletionCallback)(void* udata){};
         bool deleteSrcAfterCopy = false;
     };
 
