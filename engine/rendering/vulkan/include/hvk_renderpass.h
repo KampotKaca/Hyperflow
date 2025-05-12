@@ -19,12 +19,11 @@ namespace hf
         ~VkDrawPass();
 
         VkRenderPass pass{};
-        VkClearValue clearValue{};
 
-        std::vector<RenderSubpassAttachmentInfo> colorAttachments{};
-        std::vector<RenderSubpassAttachmentInfo> depthAttachments{};
+        std::vector<RenderSubpassColorAttachmentInfo> colorAttachments{};
+        std::vector<RenderSubpassDepthAttachmentInfo> depthAttachments{};
+        std::vector<VkClearValue> clearValues{};
         uint32_t attachmentCount = 0;
-        uint32_t inputAttachmentCount = 0;
         uint32_t multisamplingAttachmentCount = 0;
         bool hasDepthStencilAttachment = false;
     };

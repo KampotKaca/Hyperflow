@@ -77,9 +77,27 @@ namespace hf
     {
         auto& swapchain = rn->swapchain;
         swapchain.frameBuffers = std::vector<VkFrameBuffer*>(swapchain.imageViews.size());
+        uint32_t size = 0;
+        for (uint32_t i = 0; i < rn->passTextureCollections.size(); ++i)
+        {
+            size += rn->passTextureCollections[i].depthTextures.size();
+            // size += rn->passTextureCollections[i].colorTextures.size() * swapchain.imageViews.size();
+        }
+        std::vector<VkImageView> views(1 + size);
         for (uint32_t i = 0; i < swapchain.imageViews.size(); ++i)
         {
-            swapchain.frameBuffers[i] = new VkFrameBuffer(&swapchain.imageViews[i], 1,
+            views[0] = swapchain.imageViews[i];
+            uint32_t viewIndex = 1;
+            for (uint32_t j = 0; j < rn->passTextureCollections.size(); ++j)
+            {
+                auto& collection = rn->passTextureCollections[j];
+                for (uint32_t k = 0; k < collection.depthTextures.size(); ++k)
+                {
+                    views[viewIndex] = collection.depthTextures[k]->view;
+                    viewIndex++;
+                }
+            }
+            swapchain.frameBuffers[i] = new VkFrameBuffer(views.data(), views.size(),
                 rn->mainPass, swapchain.details.extent);
         }
     }

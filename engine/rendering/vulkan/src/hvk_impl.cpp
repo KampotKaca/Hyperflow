@@ -49,7 +49,8 @@ namespace hf::inter::rendering
 
     void BindRenderPass(void* rn, RenderPass pass)
     {
-        BindRenderPassToRenderer((VkRenderer*)rn, pass);
+        auto rend = (VkRenderer*)rn;
+        BindPassToRenderer(rend, pass, rend->targetSize);
     }
 
     void BeginRenderPass(void* rn, RenderPass pass)

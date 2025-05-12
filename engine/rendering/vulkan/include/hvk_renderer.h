@@ -54,7 +54,9 @@ namespace hf
 
     void PostRendererLoad(VkRenderer* rn, RenderPass pass);
 
-    void BindRenderPassToRenderer(VkRenderer* rn, RenderPass pass);
+    void BindPassToRenderer(VkRenderer* rn, RenderPass pass, uvec2 size);
+    void RebindRendererToAllPasses(VkRenderer* rn);
+    void ClearRendererPassData(VkRenderer* rn);
 
     void DestroySurface(VkRenderer* rn);
     void SetupViewportAndScissor(VkRenderer* rn);

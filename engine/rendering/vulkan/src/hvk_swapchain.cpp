@@ -146,6 +146,7 @@ namespace hf
         DestroySwapchainFrameBuffers(rn);
         CreateSwapchain(rn->swapchain.surface, rn->targetSize, rn->vSyncOn, &rn->swapchain);
         SetupViewportAndScissor(rn);
+        RebindRendererToAllPasses(rn);
         CreateSwapchainFrameBuffers(rn);
     }
 

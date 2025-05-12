@@ -19,11 +19,6 @@ namespace hf
 
     VkDrawPass::VkDrawPass(const RenderPassDefinitionInfo& info)
     {
-        clearValue.depthStencil = { info.depth, info.stencil };
-        clearValue.color =
-            { info.clearColor.x, info.clearColor.y,
-              info.clearColor.z, info.clearColor.w };
-
         std::vector<VkSubpassDependency> dependencies(info.dependencyCount);
         std::vector<VkSubpassDescription> subpasses(info.subpassCount);
 
@@ -51,18 +46,13 @@ namespace hf
             attachmentCount += subpassInfo.attachmentCount;
             for (uint32_t j = 0; j < subpassInfo.attachmentCount; j++)
             {
-                auto& attachmentInfo = subpassInfo.pAttachments[j];
+                auto& attachmentInfo = subpassInfo.pColorAttachments[j];
                 if (attachmentInfo.msaaCounter > 1)
                 {
                     attachmentCount++;
                     multisamplingAttachmentCount++;
                 }
-
-                switch (attachmentInfo.type)
-                {
-                case RenderPassAttachmentType::Input: inputAttachmentCount++; break;
-                case RenderPassAttachmentType::Color: colorAttachmentCount++; break;
-                }
+                colorAttachmentCount++;
             }
 
             if (subpassInfo.depthAttachment)
@@ -73,30 +63,39 @@ namespace hf
         }
 
         std::vector<VkAttachmentDescription> attachments(attachmentCount);
-        std::vector<VkAttachmentReference> inputAttachmentRefs(inputAttachmentCount);
         std::vector<VkAttachmentReference> colorAttachmentRefs(colorAttachmentCount);
         std::vector<VkAttachmentReference> msaaAttachmentRefs(multisamplingAttachmentCount);
         std::vector<VkAttachmentReference> depthAttachmentRefs(depthAttachmentCount);
 
-        colorAttachments = std::vector<RenderSubpassAttachmentInfo>(colorAttachmentCount);
-        depthAttachments = std::vector<RenderSubpassAttachmentInfo>(depthAttachmentCount);
+        clearValues = std::vector<VkClearValue>(attachmentCount);
+        colorAttachments = std::vector<RenderSubpassColorAttachmentInfo>(colorAttachmentCount);
+        depthAttachments = std::vector<RenderSubpassDepthAttachmentInfo>(depthAttachmentCount);
 
         {
             uint32_t attachmentIndex = 0;
-            uint32_t inputIndex = 0;
             uint32_t colorIndex = 0;
-            uint32_t multisampleIndex = 0;
             uint32_t depthIndex = 0;
+            uint32_t multisampleIndex = 0;
             for (uint32_t i = 0; i < info.subpassCount; i++)
             {
                 auto& subpassInfo = info.pSubpasses[i];
-                uint32_t inputStart = inputIndex;
                 uint32_t colorStart = colorIndex;
                 uint32_t multisampleStart = multisampleIndex;
                 for (uint32_t j = 0; j < subpassInfo.attachmentCount; j++)
                 {
-                    auto& attachmentInfo = subpassInfo.pAttachments[j];
+                    auto& attachmentInfo = subpassInfo.pColorAttachments[j];
                     auto& attachment = attachments[attachmentIndex];
+
+                    clearValues[attachmentIndex] =
+                    {
+                        .color =
+                        {
+                            attachmentInfo.clearColor.x,
+                            attachmentInfo.clearColor.y,
+                            attachmentInfo.clearColor.z,
+                            attachmentInfo.clearColor.w
+                        }
+                    };
                     attachment =
                     {
                         .flags = (VkAttachmentDescriptionFlags)attachmentInfo.usesSharedMemory,
@@ -116,20 +115,10 @@ namespace hf
                         .layout = (VkImageLayout)attachmentInfo.layout
                     };
 
-                    switch (attachmentInfo.type)
-                    {
-                    case RenderPassAttachmentType::Input:
-                        inputAttachmentRefs[inputIndex] = ref;
-                        inputIndex++;
-                        break;
-                    case RenderPassAttachmentType::Color:
-                        colorAttachmentRefs[colorIndex] = ref;
-                        colorIndex++;
-                        if (attachmentInfo.finalLayout != TextureResultLayoutType::PresentSrc)
-                            colorAttachments[colorIndex] = attachmentInfo;
-
-                        break;
-                    }
+                    colorAttachmentRefs[colorIndex] = ref;
+                    colorIndex++;
+                    if (attachmentInfo.finalLayout != TextureResultLayoutType::PresentSrc)
+                        colorAttachments[colorIndex] = attachmentInfo;
 
                     attachmentIndex++;
 
@@ -165,12 +154,6 @@ namespace hf
                     .pipelineBindPoint = (VkPipelineBindPoint)subpassInfo.bindingType,
                 };
 
-                if ((inputIndex - inputStart) > 0)
-                {
-                    subpass.inputAttachmentCount = inputIndex - inputStart;
-                    subpass.pInputAttachments = &inputAttachmentRefs[inputStart];
-                }
-
                 if ((colorIndex - colorStart) > 0)
                 {
                     subpass.colorAttachmentCount = colorIndex - colorStart;
@@ -185,17 +168,28 @@ namespace hf
                 if (subpassInfo.depthAttachment)
                 {
                     auto& depthAttachment = attachments[attachmentIndex];
-                    colorAttachments[depthIndex] = *subpassInfo.depthAttachment;
+                    depthAttachments[depthIndex] = *subpassInfo.depthAttachment;
+                    auto& da = *subpassInfo.depthAttachment;
+
+                    clearValues[attachmentIndex] =
+                    {
+                        .depthStencil = { da.clearDepth, da.clearStencil }
+                    };
+
                     depthAttachment =
                     {
-                        .flags = (VkAttachmentDescriptionFlags)subpassInfo.depthAttachment->usesSharedMemory,
-                        .format = (VkFormat)subpassInfo.depthAttachment->format,
+                        .flags = (VkAttachmentDescriptionFlags)da.usesSharedMemory,
                         .samples = VK_SAMPLE_COUNT_1_BIT,
+                        .initialLayout = (VkImageLayout)da.initialLayout,
+                        .finalLayout = (VkImageLayout)da.finalLayout
                     };
 
                     SetOperations(depthAttachment.loadOp, depthAttachment.storeOp, subpassInfo.depthAttachment->lsOperation);
                     SetOperations(depthAttachment.stencilLoadOp, depthAttachment.stencilStoreOp, subpassInfo.depthAttachment->lsStencilOperation);
 
+                    auto formatInfo = ChooseDepthStencilFormat(da.lsOperation, da.lsStencilOperation,
+                        VK_IMAGE_TILING_OPTIMAL, VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT);
+                    depthAttachment.format = formatInfo.format;
                     depthAttachmentRefs[depthIndex] =
                     {
                         .attachment = attachmentIndex,
@@ -255,8 +249,8 @@ namespace hf
                 .offset = {0, 0},
                 .extent = frameBuffer->extent,
             },
-            .clearValueCount = 1,
-            .pClearValues = &drawPass.clearValue
+            .clearValueCount = (uint32_t)drawPass.clearValues.size(),
+            .pClearValues = drawPass.clearValues.data()
         };
 
         vkCmdBeginRenderPass(rn->currentCommand, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
@@ -375,7 +369,7 @@ namespace hf
         return false;
     }
 
-    void BindRenderPassToRenderer(VkRenderer* rn, RenderPass pass)
+    void BindPassToRenderer(VkRenderer* rn, RenderPass pass, uvec2 size)
     {
         auto& renderPass = GetRenderPass(pass);
         VkRendererPassTextureCollection texCollection
@@ -399,7 +393,7 @@ namespace hf
 
             inter::rendering::TextureCreationInfo textureInfo
             {
-                .size = uvec3(rn->targetSize, 1),
+                .size = uvec3(size, 1),
                 .channel = TextureChannel::RGBA,
                 .mipLevels = 1,
                 .data = nullptr,
@@ -410,7 +404,7 @@ namespace hf
                     .tiling = TextureTiling::Optimal,
                     .usage = TextureUsageFlags::DepthStencil,
                     .memoryType = BufferMemoryType::Static,
-                    .finalLayout = TextureResultLayoutType::DepthStencil
+                    .finalLayout = attachment.finalLayout,
                 }
             };
 
@@ -423,5 +417,26 @@ namespace hf
         }
 
         rn->passTextureCollections.push_back(std::move(texCollection));
+    }
+
+    void RebindRendererToAllPasses(VkRenderer* rn)
+    {
+        std::vector<RenderPass> passes(rn->passTextureCollections.size());
+        for (uint32_t i = 0; i < rn->passTextureCollections.size(); i++)
+            passes[i] = rn->passTextureCollections[i].pass;
+
+        ClearRendererPassData(rn);
+        for (uint32_t i = 0; i < passes.size(); i++) BindPassToRenderer(rn, passes[i],
+            uvec2(rn->viewport.width, rn->viewport.height));
+    }
+
+    void ClearRendererPassData(VkRenderer* rn)
+    {
+        for (auto& texCollection : rn->passTextureCollections)
+        {
+            for (auto& tex : texCollection.colorTextures) delete tex;
+            for (auto& tex : texCollection.depthTextures) delete tex;
+        }
+        rn->passTextureCollections.clear();
     }
 }

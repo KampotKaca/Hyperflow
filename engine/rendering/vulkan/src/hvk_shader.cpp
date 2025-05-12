@@ -13,7 +13,7 @@ namespace hf
         VkLogicOp blendingOp = VK_LOGIC_OP_XOR; //Setting will be used only if you use Logical Blending
         BufferAttrib attrib{};
         VkPipelineLayout layout{};
-        VkRenderPass renderPass{};
+        RenderPass renderPass{};
     };
 
     static void CreateShaderModule(const char* code, uint32_t codeSize, VkShaderModule* result);
@@ -22,7 +22,6 @@ namespace hf
     VkShader::VkShader(const inter::rendering::ShaderCreationInfo& info)
     {
         shaderSetup = info.shaderSetup;
-        auto& drawPass = GetRenderPass(info.drawPass);
         texturePack = (VkTexturePack*)info.texPack;
         using namespace inter;
         VkShaderModule vertModule{}, fragModule{};
@@ -53,7 +52,7 @@ namespace hf
             .blendingMode = PipelineBlendType::None,
             .blendingOp = VK_LOGIC_OP_XOR,
             .layout = shaderSetup.layout,
-            .renderPass = drawPass.pass,
+            .renderPass = info.renderPass,
         };
 
         for (uint32_t i = 0; i < info.supportedAttribCount; i++)
@@ -196,6 +195,7 @@ namespace hf
             .blendConstants = { 0.0f, 0.0f, 0.0f, 0.0f },
         };
 
+        auto& pass = GetRenderPass(info.renderPass);
         VkGraphicsPipelineCreateInfo pipelineInfo
         {
             .sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO,
@@ -206,15 +206,33 @@ namespace hf
             .pViewportState = &viewportState,
             .pRasterizationState = &rasterizer,
             .pMultisampleState = &multisampling,
-            .pDepthStencilState = nullptr,
             .pColorBlendState = &colorBlending,
             .pDynamicState = &dynamicState,
             .layout = info.layout,
-            .renderPass = info.renderPass,
+            .renderPass = pass.pass,
             .subpass = 0,
             .basePipelineHandle = VK_NULL_HANDLE,
             .basePipelineIndex = -1,
         };
+
+        if (pass.depthAttachments.size() > 0)
+        {
+            VkPipelineDepthStencilStateCreateInfo depthStencilInfo
+            {
+                .sType = VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO,
+                .depthTestEnable = VK_TRUE,
+                .depthWriteEnable = VK_TRUE,
+                .depthCompareOp = VK_COMPARE_OP_LESS_OR_EQUAL,
+                .depthBoundsTestEnable = VK_FALSE,
+                .stencilTestEnable = VK_TRUE,
+                .front = {},
+                .back = {},
+                .minDepthBounds = 0,
+                .maxDepthBounds = 1
+            };
+            pipelineInfo.pDepthStencilState = &depthStencilInfo;
+        }
+        else pipelineInfo.pDepthStencilState = nullptr;
 
         VK_HANDLE_EXCEPT(vkCreateGraphicsPipelines(GRAPHICS_DATA.defaultDevice->logicalDevice.device,
             VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, pipeline));

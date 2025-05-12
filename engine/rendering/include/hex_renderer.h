@@ -35,7 +35,7 @@ namespace hf::inter::rendering
 
     struct ShaderCreationInfo
     {
-        RenderPass drawPass;
+        RenderPass renderPass;
         ShaderSetup shaderSetup{};
         void* texPack{};
         uint32_t supportedAttribCount{};

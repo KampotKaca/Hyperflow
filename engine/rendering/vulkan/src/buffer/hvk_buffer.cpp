@@ -237,7 +237,7 @@ namespace hf
     void TransitionEmptyImageLayout(VkImage image, VkFormat format, VkImageLayout srcLayout,
         VkImageLayout dstLayout, VkImageAspectFlags aspectFlags)
     {
-        auto command = GRAPHICS_DATA.transferPool.buffers[0];
+        auto command = GRAPHICS_DATA.graphicsPool.buffers[0];
         VkCommandBufferBeginInfo beginInfo
         {
             .sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO,

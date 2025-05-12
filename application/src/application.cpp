@@ -66,24 +66,24 @@ namespace app
 
 		hf::RenderPassDependencyInfo dependencyInfo
 		{
-			// .src =
-			// {
-			// 	.stageMask = hf::RenderPassStage::ColorAttachmentOutput |
-			// 				 hf::RenderPassStage::EarlyFragmentTest,
-			// },
-			// .dst =
-			// {
-			// 	.stageMask = hf::RenderPassStage::ColorAttachmentOutput |
-			// 				 hf::RenderPassStage::EarlyFragmentTest,
-			// 	.accessMask = hf::AccessType::ColorAttachmentWrite |
-			// 		          hf::AccessType::DepthStencilAttachmentWrite
-			// },
+			.src =
+			{
+				.stageMask = hf::RenderPassStage::ColorAttachmentOutput |
+							 hf::RenderPassStage::EarlyFragmentTest,
+			},
+			.dst =
+			{
+				.stageMask = hf::RenderPassStage::ColorAttachmentOutput |
+							 hf::RenderPassStage::EarlyFragmentTest,
+				.accessMask = hf::AccessType::ColorAttachmentWrite |
+					          hf::AccessType::DepthStencilAttachmentWrite
+			},
+			.flags = hf::RenderPassDependencyType::ByRegion
 		};
-		hf::RenderSubpassAttachmentInfo colorAttachment{};
-		hf::RenderSubpassAttachmentInfo depthAttachment
+		hf::RenderSubpassColorAttachmentInfo colorAttachment{};
+		hf::RenderSubpassDepthAttachmentInfo depthAttachment
 		{
 			.layout = hf::TextureResultLayoutType::DepthStencil,
-			.msaaCounter = 1,
 			.lsOperation = hf::LoadStoreOperationType::ClearAndDontCare,
 			.lsStencilOperation = hf::LoadStoreOperationType::DontCareAndDontCare,
 			.initialLayout = hf::TextureResultLayoutType::Undefined,
@@ -94,9 +94,9 @@ namespace app
 		hf::RenderSubpassInfo subpassInfo
 		{
 			.bindingType = hf::RenderBindingType::Graphics,
-			.pAttachments = &colorAttachment,
+			.pColorAttachments = &colorAttachment,
 			.attachmentCount = 1,
-			// .depthAttachment = &depthAttachment
+			.depthAttachment = &depthAttachment
 		};
 
 		hf::RenderPassDefinitionInfo drawPassDefinitionInfo
@@ -105,9 +105,6 @@ namespace app
 			.subpassCount = 1,
 			.pDependencies = &dependencyInfo,
 			.dependencyCount = 1,
-			.clearColor = { 0.0f, 0.0f, 0.0f, 1.0f },
-			.depth = 0.0f,
-			.stencil = 0
 		};
 		presentPass = hf::renderpass::Define(drawPassDefinitionInfo);
 		hf::renderpass::Bind(hf::window::GetRenderer(wn), presentPass);

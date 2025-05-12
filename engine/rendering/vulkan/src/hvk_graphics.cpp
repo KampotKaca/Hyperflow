@@ -23,12 +23,7 @@ namespace hf
         for (auto& frame : frames) DestroyFrame(frame);
         frames.clear();
 
-        for (auto& texCollection : passTextureCollections)
-        {
-            for (auto& tex : texCollection.colorTextures) delete tex;
-            for (auto& tex : texCollection.depthTextures) delete tex;
-        }
-        passTextureCollections.clear();
+        ClearRendererPassData(this);
 
         DestroySwapchainFrameBuffers(this);
         DestroySwapchain(swapchain, &swapchain.swapchain);

@@ -559,14 +559,8 @@ namespace hf
 		LoadAndDontCare = 3, ClearAndDontCare = 4, DontCareAndDontCare = 5,
 	};
 
-	enum class RenderPassAttachmentType
+	struct RenderSubpassColorAttachmentInfo
 	{
-		Input = 0, Color = 1,
-	};
-
-	struct RenderSubpassAttachmentInfo
-	{
-		RenderPassAttachmentType type = RenderPassAttachmentType::Color;
 		//type of attachment layout color, depth, stencil etc.
 		TextureResultLayoutType layout = TextureResultLayoutType::Color;
 		TextureFormat format = TextureFormat::B8G8R8A8_Srgb;
@@ -578,15 +572,34 @@ namespace hf
 		//type of initial layout of the attachment
 		TextureResultLayoutType initialLayout = TextureResultLayoutType::Undefined;
 		TextureResultLayoutType finalLayout = TextureResultLayoutType::PresentSrc;
+
+		vec4 clearColor = vec4(0.0f, 0.0f, 0.0f, 1.0f);
+
+		bool usesSharedMemory = false;
+	};
+
+	struct RenderSubpassDepthAttachmentInfo
+	{
+		//type of attachment layout color, depth, stencil etc.
+		TextureResultLayoutType layout = TextureResultLayoutType::DepthStencil;
+		LoadStoreOperationType lsOperation = LoadStoreOperationType::ClearAndStore;
+		LoadStoreOperationType lsStencilOperation = LoadStoreOperationType::DontCareAndDontCare;
+
+		//type of initial layout of the attachment
+		TextureResultLayoutType initialLayout = TextureResultLayoutType::Undefined;
+		TextureResultLayoutType finalLayout = TextureResultLayoutType::DepthStencil;
+
+		float clearDepth = 1.0f;
+		uint8_t clearStencil = 0;
 		bool usesSharedMemory = false;
 	};
 
 	struct RenderSubpassInfo
 	{
 		RenderBindingType bindingType = RenderBindingType::Graphics;
-		RenderSubpassAttachmentInfo* pAttachments{};
+		RenderSubpassColorAttachmentInfo* pColorAttachments{};
 		uint32_t attachmentCount = 0;
-		RenderSubpassAttachmentInfo* depthAttachment{};
+		RenderSubpassDepthAttachmentInfo* depthAttachment{};
 	};
 
 	//meant to be used when you just want to previous rending to finish, until you start this one
@@ -630,9 +643,6 @@ namespace hf
 		uint32_t subpassCount = 0;
 		RenderPassDependencyInfo* pDependencies;
 		uint32_t dependencyCount = 0;
-		vec4 clearColor = vec4{ 0.0f, 0.0f, 0.0f, 1.0f };
-		float depth = 0.0f;
-		uint32_t stencil = 0;
 	};
 
 	enum class RenderingApiType { None, Vulkan, Direct3D };

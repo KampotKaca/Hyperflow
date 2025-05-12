@@ -105,7 +105,7 @@ namespace hf
 
                     ShaderCreationInfo creationInfo
                     {
-                        .drawPass = shader->drawPass,
+                        .renderPass = shader->drawPass,
                         .shaderSetup = shader->shaderSetup,
                         .supportedAttribCount = shader->supportedAttribCount,
                         .pSupportedAttribs = shader->pSupportedAttribs,
