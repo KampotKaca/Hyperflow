@@ -289,6 +289,8 @@ namespace hf
 		UniformTexelBuffer = 4, StorageTexelBuffer = 5,
 		UniformBuffer = 6, StorageBuffer = 7,
 		UniformBufferDynamic = 8, StorageBufferDynamic = 9,
+		MaxEnum = 10,
+		MinEnum = 4
 	};
 
 	enum class TextureLayoutType

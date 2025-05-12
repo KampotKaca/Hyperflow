@@ -50,11 +50,9 @@ namespace hf
         auto& texLayout = GetTextureLayout(pack->layout);
         auto bindingType = (VkDescriptorType)texLayout.bindingInfos[bindingIndex].type;
 
-        std::vector<VkDescriptorImageInfo> imageInfos(size);
-
         for (size_t i = 0; i < size; i++)
         {
-            imageInfos[i] =
+            GRAPHICS_DATA.preAllocBuffers.descImageBindings[i] =
             {
                 .sampler = texSampler.sampler,
                 .imageView = binding.textures[offset + i]->view,
@@ -62,24 +60,22 @@ namespace hf
             };
         }
 
-        std::vector<VkWriteDescriptorSet> writes(FRAMES_IN_FLIGHT);
-
         for (size_t i = 0; i < FRAMES_IN_FLIGHT; i++)
         {
-            writes[i] =
+            GRAPHICS_DATA.preAllocBuffers.descWrites[i] =
             {
                 .sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
                 .dstSet = binding.descriptors[i],
                 .dstBinding = binding.bindingId,
                 .dstArrayElement = offset,
-                .descriptorCount = (uint32_t)imageInfos.size(),
+                .descriptorCount = size,
                 .descriptorType = bindingType,
-                .pImageInfo = imageInfos.data(),
+                .pImageInfo = GRAPHICS_DATA.preAllocBuffers.descImageBindings,
             };;
         }
 
         vkUpdateDescriptorSets(GRAPHICS_DATA.defaultDevice->logicalDevice.device,
-                writes.size(), writes.data(),
+                FRAMES_IN_FLIGHT, GRAPHICS_DATA.preAllocBuffers.descWrites,
                 0, nullptr);
     }
 

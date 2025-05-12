@@ -113,6 +113,16 @@ namespace hf
         bool deleteSrcAfterCopy = false;
     };
 
+    struct PreAllocatedBuffers
+    {
+        VkDescriptorSet descriptors[VK_MAX_UNIFORM_AND_TEXTURE_UPLOADS];
+        VkDescriptorSetLayoutBinding descLayoutBindings[VK_MAX_UNIFORM_AND_TEXTURE_BINDINGS];
+        VkDescriptorSetLayout descLayouts[VK_MAX_UNIFORM_AND_TEXTURE_BINDINGS * FRAMES_IN_FLIGHT];
+        VkWriteDescriptorSet descWrites[FRAMES_IN_FLIGHT];
+        VkDescriptorImageInfo descImageBindings[VK_MAX_IMAGE_BINDINGS];
+        VkDescriptorPoolSize descPoolSizes[(uint32_t)UniformBufferType::MaxEnum];
+    };
+
     struct GraphicsData
     {
         int32_t rendererCount = 0;
@@ -144,6 +154,8 @@ namespace hf
 
         std::vector<VkCopyBufferToBufferOperation> bufferToBufferCopyOperations{};
         std::vector<VkCopyBufferToImageOperation> bufferToImageCopyOperations{};
+
+        PreAllocatedBuffers preAllocBuffers{};
 
         RenderPass (*onPassCreationCallback)();
 

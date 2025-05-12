@@ -6,14 +6,13 @@ namespace hf
 {
     VkTextureLayout::VkTextureLayout(const TextureLayoutDefinitionInfo& info)
     {
-        std::vector<VkDescriptorSetLayoutBinding> bindings(info.bindingCount);
         bindingInfos = std::vector<TextureLayoutBindingInfo>(info.bindingCount);
         memcpy(bindingInfos.data(), info.pBindings, sizeof(TextureLayoutBindingInfo) * info.bindingCount);
 
         for (uint32_t i = 0; i < info.bindingCount; ++i)
         {
             auto& bindingInfo = info.pBindings[i];
-            bindings[i] =
+            GRAPHICS_DATA.preAllocBuffers.descLayoutBindings[i] =
             {
                 .binding = bindingInfo.bindingId,
                 .descriptorType = (VkDescriptorType)bindingInfo.type,
@@ -26,8 +25,8 @@ namespace hf
         VkDescriptorSetLayoutCreateInfo layoutInfo
         {
             .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO,
-            .bindingCount = (uint32_t)bindings.size(),
-            .pBindings = bindings.data()
+            .bindingCount = info.bindingCount,
+            .pBindings = GRAPHICS_DATA.preAllocBuffers.descLayoutBindings
         };
 
         VK_HANDLE_EXCEPT(vkCreateDescriptorSetLayout(GRAPHICS_DATA.defaultDevice->logicalDevice.device,

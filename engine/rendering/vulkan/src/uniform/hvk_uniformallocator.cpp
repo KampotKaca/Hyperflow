@@ -5,34 +5,29 @@ namespace hf
 {
     VkUniformAllocator::VkUniformAllocator(const UniformAllocatorDefinitionInfo& info)
     {
-        std::unordered_map<UniformBufferType, VkDescriptorPoolSize> poolSizes{};
+        for (uint32_t i = (uint32_t)UniformBufferType::MinEnum; i < (uint32_t)UniformBufferType::MaxEnum; i++)
+        {
+            GRAPHICS_DATA.preAllocBuffers.descPoolSizes[i] =
+            {
+                .type = (VkDescriptorType)i,
+                .descriptorCount = 0
+            };
+        }
 
         for (uint32_t i = 0; i < info.bufferCount; i++)
         {
             auto& buffer = GetUniform(info.pBuffers[i]);
-
             for (auto& binding : buffer.bindings)
-            {
-                if (poolSizes.contains(binding.type))
-                    poolSizes[binding.type].descriptorCount += FRAMES_IN_FLIGHT;
-                else
-                {
-                    poolSizes[binding.type] =
-                    {
-                        .type = (VkDescriptorType)binding.type,
-                        .descriptorCount = FRAMES_IN_FLIGHT,
-                    };
-                }
-            }
+                GRAPHICS_DATA.preAllocBuffers.descPoolSizes[(uint32_t)binding.type].descriptorCount += FRAMES_IN_FLIGHT;
         }
 
-        std::vector<VkDescriptorPoolSize> pools(poolSizes.size());
+        uint32_t poolSize = 0;
+        for (uint32_t i = (uint32_t)UniformBufferType::MinEnum; i < (uint32_t)UniformBufferType::MaxEnum; i++)
         {
-            uint32_t currentIndex = 0;
-            for (auto& size : poolSizes | std::views::values)
+            if (GRAPHICS_DATA.preAllocBuffers.descPoolSizes[i].descriptorCount > 0)
             {
-                pools[currentIndex] = size;
-                currentIndex++;
+                GRAPHICS_DATA.preAllocBuffers.descPoolSizes[poolSize] = GRAPHICS_DATA.preAllocBuffers.descPoolSizes[i];
+                poolSize++;
             }
         }
 
@@ -42,33 +37,31 @@ namespace hf
         {
             .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO,
             .maxSets = descriptorCount,
-            .poolSizeCount = (uint32_t)pools.size(),
-            .pPoolSizes = pools.data(),
+            .poolSizeCount = poolSize,
+            .pPoolSizes = GRAPHICS_DATA.preAllocBuffers.descPoolSizes,
         };
 
         auto& device = GRAPHICS_DATA.defaultDevice->logicalDevice.device;
         VK_HANDLE_EXCEPT(vkCreateDescriptorPool(device, &poolInfo, nullptr, &pool));
 
-        std::vector<VkDescriptorSetLayout> layouts(descriptorCount);
         for (uint32_t i = 0; i < info.bufferCount; i++)
         {
             auto& buffer = GetUniform(info.pBuffers[i]);
             for (uint32_t j = 0; j < FRAMES_IN_FLIGHT; j++)
-                layouts[i * FRAMES_IN_FLIGHT + j] = buffer.layout;
+                GRAPHICS_DATA.preAllocBuffers.descLayouts[i * FRAMES_IN_FLIGHT + j] = buffer.layout;
         }
 
         VkDescriptorSetAllocateInfo allocInfo
         {
             .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO,
             .descriptorPool = pool,
-            .descriptorSetCount = (uint32_t)layouts.size(),
-            .pSetLayouts = layouts.data(),
+            .descriptorSetCount = descriptorCount,
+            .pSetLayouts = GRAPHICS_DATA.preAllocBuffers.descLayouts,
         };
 
-        std::vector<VkDescriptorSet> descriptorSets(layouts.size());
-        VK_HANDLE_EXCEPT(vkAllocateDescriptorSets(device, &allocInfo, descriptorSets.data()));
+        VK_HANDLE_EXCEPT(vkAllocateDescriptorSets(device, &allocInfo, GRAPHICS_DATA.preAllocBuffers.descriptors));
         for (uint32_t i = 0; i < info.bufferCount; i++)
-            SetupUniform(info.pBuffers[i], &descriptorSets[i * FRAMES_IN_FLIGHT]);
+            SetupUniform(info.pBuffers[i], &GRAPHICS_DATA.preAllocBuffers.descriptors[i * FRAMES_IN_FLIGHT]);
     }
 
     VkUniformAllocator::~VkUniformAllocator()

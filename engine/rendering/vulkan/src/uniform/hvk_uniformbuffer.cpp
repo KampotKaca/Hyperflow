@@ -7,10 +7,7 @@ namespace hf
     VkUniformBuffer::VkUniformBuffer(const UniformBufferDefinitionInfo& info)
     {
         bindingIndex = info.bindingId;
-
-        std::vector<VkDescriptorSetLayoutBinding> lBindings(info.bindingCount);
         bindings = std::vector<UniformBufferBindingInfo>(info.bindingCount);
-
         bufferSize = 0;
 
         for (uint32_t i = 0; i < info.bindingCount; i++)
@@ -26,15 +23,15 @@ namespace hf
                 .stageFlags = (uint32_t)bindingInfo.usageFlags,
                 .pImmutableSamplers = nullptr,
             };
-            lBindings[i] = layout;
+            GRAPHICS_DATA.preAllocBuffers.descLayoutBindings[i] = layout;
             bufferSize += bindingInfo.elementSizeInBytes * bindingInfo.arraySize;
         }
 
         VkDescriptorSetLayoutCreateInfo uboLayoutInfo
         {
             .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO,
-            .bindingCount = (uint32_t)lBindings.size(),
-            .pBindings = lBindings.data(),
+            .bindingCount = info.bindingCount,
+            .pBindings = GRAPHICS_DATA.preAllocBuffers.descLayoutBindings,
         };
 
         VK_HANDLE_EXCEPT(vkCreateDescriptorSetLayout(GRAPHICS_DATA.defaultDevice->logicalDevice.device,
@@ -84,8 +81,6 @@ namespace hf
         auto& uniform = GRAPHICS_DATA.uniformBuffers[buffer - 1];
         memcpy(uniform.descriptorSets, pDescriptors, sizeof(VkDescriptorSet) * FRAMES_IN_FLIGHT);
 
-        std::vector<VkWriteDescriptorSet> writes(FRAMES_IN_FLIGHT);
-
         for (uint32_t i = 0; i < FRAMES_IN_FLIGHT; i++)
         {
             VkDescriptorBufferInfo bufferInfo
@@ -95,7 +90,7 @@ namespace hf
                 .range = uniform.bufferSize,
             };
 
-            writes[i] =
+            GRAPHICS_DATA.preAllocBuffers.descWrites[i] =
             {
                 .sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
                 .dstSet = uniform.descriptorSets[i],
@@ -110,7 +105,7 @@ namespace hf
         }
 
         vkUpdateDescriptorSets(GRAPHICS_DATA.defaultDevice->logicalDevice.device,
-                writes.size(), writes.data(),
+                FRAMES_IN_FLIGHT, GRAPHICS_DATA.preAllocBuffers.descWrites,
                 0, nullptr);
     }
 
@@ -118,7 +113,6 @@ namespace hf
     {
         auto currentFrame = rn->currentFrame;
 
-        std::vector<VkDescriptorSet> descriptorSets(info.uploadCount);
         for (uint32_t i = 0; i < info.uploadCount; i++)
         {
             auto& uploadInfo = info.pUploads[i];
@@ -126,11 +120,11 @@ namespace hf
             auto& uniform = GetUniform(uploadInfo.buffer);
             memcpy((uint8_t*)uniform.memoryMappings[currentFrame] + uploadInfo.offsetInBytes,
                 uploadInfo.data, uploadInfo.sizeInBytes);
-            descriptorSets[i] = uniform.descriptorSets[currentFrame];
+            GRAPHICS_DATA.preAllocBuffers.descriptors[i] = uniform.descriptorSets[currentFrame];
         }
 
         vkCmdBindDescriptorSets(rn->currentCommand, (VkPipelineBindPoint)info.bindingType, rn->currentLayout,
-        info.setBindingIndex, descriptorSets.size(), descriptorSets.data(),
+        info.setBindingIndex, info.uploadCount, GRAPHICS_DATA.preAllocBuffers.descriptors,
         0, nullptr);
     }
 }

@@ -24,24 +24,27 @@ namespace hf
                 entryCounts[(uint32_t)layout.bindingInfos[j].type] += FRAMES_IN_FLIGHT;
         }
 
-        std::vector<VkDescriptorPoolSize> poolSizes{};
+        uint32_t poolSize = 0;
         for (uint32_t i = 0; i < (uint32_t)TextureLayoutType::Count; i++)
         {
             if (entryCounts[i] > 0)
-                poolSizes.emplace_back((VkDescriptorType)i, entryCounts[i]);
+            {
+                GRAPHICS_DATA.preAllocBuffers.descPoolSizes[poolSize] =
+                    VkDescriptorPoolSize((VkDescriptorType)i, entryCounts[i]);
+                poolSize++;
+            }
         }
 
         VkDescriptorPoolCreateInfo poolInfo
         {
             .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO,
             .maxSets = descriptorCount,
-            .poolSizeCount = (uint32_t)poolSizes.size(),
-            .pPoolSizes = poolSizes.data()
+            .poolSizeCount = poolSize,
+            .pPoolSizes = GRAPHICS_DATA.preAllocBuffers.descPoolSizes
         };
 
         VK_HANDLE_EXCEPT(vkCreateDescriptorPool(device, &poolInfo, nullptr, &pool));
 
-        std::vector<VkDescriptorSetLayout> layouts(descriptorCount);
         {
             uint32_t currentIndex = 0;
             for (uint32_t i = 0; i < info.texturePackCount; i++)
@@ -53,7 +56,7 @@ namespace hf
                 {
                     for (uint32_t k = 0; k < FRAMES_IN_FLIGHT; k++)
                     {
-                        layouts[currentIndex] = layout.layout;
+                        GRAPHICS_DATA.preAllocBuffers.descLayouts[currentIndex] = layout.layout;
                         currentIndex++;
                     }
                 }
@@ -64,12 +67,11 @@ namespace hf
         {
             .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO,
             .descriptorPool = pool,
-            .descriptorSetCount = (uint32_t)layouts.size(),
-            .pSetLayouts = layouts.data(),
+            .descriptorSetCount = descriptorCount,
+            .pSetLayouts = GRAPHICS_DATA.preAllocBuffers.descLayouts,
         };
 
-        std::vector<VkDescriptorSet> descriptorSets(layouts.size());
-        VK_HANDLE_EXCEPT(vkAllocateDescriptorSets(device, &allocInfo, descriptorSets.data()));
+        VK_HANDLE_EXCEPT(vkAllocateDescriptorSets(device, &allocInfo, GRAPHICS_DATA.preAllocBuffers.descriptors));
 
         {
             uint32_t currentIndex = 0;
@@ -81,7 +83,7 @@ namespace hf
                     auto& binding = texPack->bindings[j];
                     for (uint32_t k = 0; k < FRAMES_IN_FLIGHT; k++)
                     {
-                        auto descriptorSet = descriptorSets[currentIndex];
+                        auto descriptorSet = GRAPHICS_DATA.preAllocBuffers.descriptors[currentIndex];
                         binding.descriptors[k] = descriptorSet;
                         texPack->descriptorCache[k][j] = descriptorSet;
                         currentIndex++;
