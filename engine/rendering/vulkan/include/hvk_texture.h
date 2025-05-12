@@ -14,16 +14,16 @@ namespace hf
         VkImageView view{};
         VmaAllocation imageMemory{};
 
-        TextureType type{};
         TextureChannel channel{};
-        TextureFormat format{};
-        BufferMemoryType memoryType{};
+        TextureDetails details{};
 
         uvec3 size{};
         uint64_t bufferOffset{};
         uint64_t bufferSize{};
         uint32_t mipLevels{};
     };
+
+    void CreateTextureView(VkTexture* texture);
 }
 
 #endif //HVK_TEXTURE_H

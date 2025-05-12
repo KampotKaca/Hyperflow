@@ -22,7 +22,7 @@ namespace hf
     VkShader::VkShader(const inter::rendering::ShaderCreationInfo& info)
     {
         shaderSetup = info.shaderSetup;
-        auto& drawPass = GetDrawPass(info.drawPass);
+        auto& drawPass = GetRenderPass(info.drawPass);
         texturePack = (VkTexturePack*)info.texPack;
         using namespace inter;
         VkShaderModule vertModule{}, fragModule{};

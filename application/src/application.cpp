@@ -79,8 +79,6 @@ namespace app
 
 		hf::RenderPassDefinitionInfo drawPassDefinitionInfo
 		{
-			.pSupportedRenderers = supportedRns,
-			.supportedRendererCount = 1,
 			.pSubpasses = &subpassInfo,
 			.subpassCount = 1,
 			.pDependencies = &dependencyInfo,
@@ -198,11 +196,17 @@ namespace app
 		hf::TextureCreationInfo texInfo
 		{
 			.filePath = "greek_head.jpg",
-			.type = hf::TextureType::Tex2D,
-			.format = hf::TextureFormat::B8G8R8A8_Srgb,
 			.desiredChannel = hf::TextureChannel::RGBA,
-			.memoryType = hf::BufferMemoryType::Static,
 			.mipLevels = 1,
+			.details
+			{
+				.type = hf::TextureType::Tex2D,
+				.format = hf::TextureFormat::B8G8R8A8_Srgb,
+				.aspectFlags = hf::TextureAspectFlags::Color,
+				.tiling = hf::TextureTiling::Optimal,
+				.usage = hf::TextureUsageFlags::Sampled,
+				.memoryType = hf::BufferMemoryType::Static
+			}
 		};
 
 		texture = hf::texture::Create(texInfo);

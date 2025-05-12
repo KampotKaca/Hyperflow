@@ -16,41 +16,6 @@ namespace hf
     static void SetOperations(VkAttachmentLoadOp& loadOp, VkAttachmentStoreOp& storeOp, LoadStoreOperationType type);
     static DepthStencilFormatInfo ChooseDepthStencilFormat(LoadStoreOperationType op, LoadStoreOperationType stencilOp, VkImageTiling tiling, VkFormatFeatureFlags features);
     inline bool CheckFormatSupport(VkFormat format, VkImageTiling tiling, VkFormatFeatureFlags features);
-    static void CreateImageViews(VkRenderPassTexture* pTextures, uint32_t count, VkFormat format, VkImageAspectFlags aspectFlags);
-
-    VkRenderPassTexture::VkRenderPassTexture(uvec2 size, VkFormat format,
-        VkImageTiling tiling, VkImageUsageFlags imageUsageFlags)
-    {
-        QueueFamilyIndices& familyIndices = GRAPHICS_DATA.defaultDevice->familyIndices;
-        uint32_t queus[2] = { familyIndices.transferFamily.value(), familyIndices.graphicsFamily.value() };
-        auto device = GRAPHICS_DATA.defaultDevice->logicalDevice.device;
-
-        VkImageCreateInfo imageInfo
-        {
-            .sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO,
-            .imageType = VK_IMAGE_TYPE_2D,
-            .format = format,
-            .extent = { size.x, size.y, 1 },
-            .mipLevels = 1,
-            .arrayLayers = 1,
-            .samples = VK_SAMPLE_COUNT_1_BIT,
-            .tiling = tiling,
-            .usage = imageUsageFlags,
-            .sharingMode = VK_SHARING_MODE_EXCLUSIVE,
-            .queueFamilyIndexCount = 2,
-            .pQueueFamilyIndices = queus,
-            .initialLayout = VK_IMAGE_LAYOUT_UNDEFINED,
-        };
-
-        VK_HANDLE_EXCEPT(vkCreateImage(device, &imageInfo, nullptr, &image));
-        AllocateImage(BufferMemoryType::Static, image, &memory);
-    }
-
-    VkRenderPassTexture::~VkRenderPassTexture()
-    {
-        vmaDestroyImage(GRAPHICS_DATA.allocator, image, memory);
-        if (view) vkDestroyImageView(GRAPHICS_DATA.defaultDevice->logicalDevice.device, view, nullptr);
-    }
 
     VkDrawPass::VkDrawPass(const RenderPassDefinitionInfo& info)
     {
@@ -76,6 +41,9 @@ namespace hf
                 .dependencyFlags = (VkDependencyFlags)dependency.flags
             };
         }
+
+        uint32_t colorAttachmentCount = 0;
+        uint32_t depthAttachmentCount = 0;
 
         for (uint32_t i = 0; i < info.subpassCount; i++)
         {
@@ -110,13 +78,8 @@ namespace hf
         std::vector<VkAttachmentReference> msaaAttachmentRefs(multisamplingAttachmentCount);
         std::vector<VkAttachmentReference> depthAttachmentRefs(depthAttachmentCount);
 
-        // for (uint32_t i = 0; i < info.supportedRendererCount; i++)
-        // {
-        //     auto& rn = info.pSupportedRenderers[i];
-        //     VkRendererPassInfo passInfo = {};
-        //     passInfo.colorTextures.reserve(colorAttachmentCount);
-        //     passInfo.depthTextures.reserve(depthAttachmentCount);
-        // }
+        colorAttachments = std::vector<RenderSubpassAttachmentInfo>(colorAttachmentCount);
+        depthAttachments = std::vector<RenderSubpassAttachmentInfo>(depthAttachmentCount);
 
         {
             uint32_t attachmentIndex = 0;
@@ -162,6 +125,9 @@ namespace hf
                     case RenderPassAttachmentType::Color:
                         colorAttachmentRefs[colorIndex] = ref;
                         colorIndex++;
+                        if (attachmentInfo.finalLayout != RenderPassLayoutType::PresentSrc)
+                            colorAttachments[colorIndex] = attachmentInfo;
+
                         break;
                     }
 
@@ -219,13 +185,13 @@ namespace hf
                 if (subpassInfo.depthAttachment)
                 {
                     auto& depthAttachment = attachments[attachmentIndex];
+                    colorAttachments[depthIndex] = *subpassInfo.depthAttachment;
                     depthAttachment =
                     {
                         .flags = (VkAttachmentDescriptionFlags)subpassInfo.depthAttachment->usesSharedMemory,
                         .format = (VkFormat)subpassInfo.depthAttachment->format,
                         .samples = VK_SAMPLE_COUNT_1_BIT,
                     };
-
 
                     SetOperations(depthAttachment.loadOp, depthAttachment.storeOp, subpassInfo.depthAttachment->lsOperation);
                     SetOperations(depthAttachment.stencilLoadOp, depthAttachment.stencilStoreOp, subpassInfo.depthAttachment->lsStencilOperation);
@@ -263,21 +229,21 @@ namespace hf
         vkDestroyRenderPass(GRAPHICS_DATA.defaultDevice->logicalDevice.device, pass, nullptr);
     }
 
-    bool IsValidDrawPass(RenderPass pass)
+    bool IsValidRenderPass(RenderPass pass)
     {
         return pass > 0 && pass <= GRAPHICS_DATA.renderPasses.size();
     }
 
-    const VkDrawPass& GetDrawPass(RenderPass pass)
+    const VkDrawPass& GetRenderPass(RenderPass pass)
     {
-        if (!IsValidDrawPass(pass)) throw GENERIC_EXCEPT("[Hyperflow]", "Invalid draw pass");
+        if (!IsValidRenderPass(pass)) throw GENERIC_EXCEPT("[Hyperflow]", "Invalid draw pass");
         return GRAPHICS_DATA.renderPasses[pass - 1];
     }
 
     void BeginPass(VkRenderer* rn, RenderPass pass)
     {
         if (rn->currentPass) throw GENERIC_EXCEPT("[Hyperflow]", "Begin render pass called twice without ending previous one");
-        auto& drawPass = GetDrawPass(pass);
+        auto& drawPass = GetRenderPass(pass);
         const auto frameBuffer = rn->swapchain.frameBuffers[rn->imageIndex];
         VkRenderPassBeginInfo renderPassInfo
         {
@@ -355,7 +321,7 @@ namespace hf
                 if (CheckFormatSupport(format, tiling, features)) return
                 {
                     .format = format,
-                    .hasStencil = false,
+                    .hasStencil = format != VK_FORMAT_D32_SFLOAT && format != VK_FORMAT_D16_UNORM,
                     .hasDepth = true
                 };
             }
@@ -371,7 +337,7 @@ namespace hf
                 {
                     .format = format,
                     .hasStencil = true,
-                    .hasDepth = false
+                    .hasDepth = format != VK_FORMAT_S8_UINT
                 };
             }
 
@@ -412,31 +378,50 @@ namespace hf
         return false;
     }
 
-    void CreateImageViews(VkRenderPassTexture* pTextures, uint32_t count,
-        VkFormat format, VkImageAspectFlags aspectFlags)
+    void BindRenderPassToRenderer(VkRenderer* rn, RenderPass pass)
     {
-        SubmitBufferToImageCopyOperations();
-        auto device = GRAPHICS_DATA.defaultDevice->logicalDevice.device;
-        for (uint32_t i = 0; i < count; i++)
+        auto& renderPass = GetRenderPass(pass);
+        VkRendererPassTextureCollection texCollection
         {
-            auto& texture = pTextures[i];
-            VkImageViewCreateInfo viewInfo
+            .pass = pass,
+        };
+        // texCollection.colorTextures.reserve(renderPass.colorAttachments.size());
+        texCollection.depthTextures = std::vector<VkTexture*>(renderPass.depthAttachments.size());
+
+        // for (uint32_t i = 0; i < renderPass.colorAttachments.size(); i++)
+        // {
+        //     auto tex = VkRenderPassTexture(rn->targetSize, );
+        //     texCollection.colorTextures.push_back(std::move(tex));
+        // }
+
+        for (uint32_t i = 0; i < renderPass.depthAttachments.size(); i++)
+        {
+            auto& attachment = renderPass.depthAttachments[i];
+            auto supportedDepthFormat = ChooseDepthStencilFormat(attachment.lsOperation, attachment.lsStencilOperation,
+                VK_IMAGE_TILING_OPTIMAL, VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT);
+
+            inter::rendering::TextureCreationInfo textureInfo
             {
-                .sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO,
-                .image = texture.image,
-                .viewType = VK_IMAGE_VIEW_TYPE_2D,
-                .format = format,
-                .subresourceRange =
+                .size = uvec3(rn->targetSize, 1),
+                .channel = TextureChannel::RGBA,
+                .mipLevels = 1,
+                .data = nullptr,
+                .details
                 {
-                    .aspectMask = aspectFlags,
-                    .baseMipLevel = 0,
-                    .levelCount = 1,
-                    .baseArrayLayer = 0,
-                    .layerCount = 1,
+                    .type = TextureType::Tex2D,
+                    .format = (TextureFormat)supportedDepthFormat.format,
+                    .aspectFlags = TextureAspectFlags::Depth,
+                    .tiling = TextureTiling::Optimal,
+                    .usage = TextureUsageFlags::DepthStencil,
+                    .memoryType = BufferMemoryType::Static
                 }
             };
 
-            VK_HANDLE_EXCEPT(vkCreateImageView(device, &viewInfo, nullptr, &texture.view));
+            auto* texture = new VkTexture(textureInfo);
+
+            texCollection.depthTextures[i] = texture;
         }
+
+        rn->passTextureCollections.push_back(std::move(texCollection));
     }
 }

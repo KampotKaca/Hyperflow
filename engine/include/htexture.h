@@ -11,10 +11,8 @@ namespace hf
         ~Texture();
 
         std::string filePath{};
-        TextureType type = TextureType::Tex2D;
-        BufferMemoryType memoryType = BufferMemoryType::Static;
-        TextureFormat format = TextureFormat::R8G8B8A8_Srgb;
         TextureChannel desiredChannel = TextureChannel::RGBA;
+        TextureDetails details{};
         uint32_t mipLevels{};
         void* pixelCache{};
 

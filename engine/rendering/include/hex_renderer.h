@@ -83,13 +83,11 @@ namespace hf::inter::rendering
 
     struct TextureCreationInfo
     {
-        uvec3 size;
-        TextureChannel channel;
+        uvec3 size = { 1, 1, 1 };
+        TextureChannel channel = TextureChannel::RGBA;
         uint32_t mipLevels = 1;
         void* data{};
-        TextureType type = TextureType::Tex2D;
-        TextureFormat format = TextureFormat::B8G8R8A8_Srgb;
-        BufferMemoryType memoryType = BufferMemoryType::Static;
+        TextureDetails details{};
     };
 
     struct TextureAllocatorCreationInfo

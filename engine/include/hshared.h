@@ -469,14 +469,40 @@ namespace hf
 		ComparisonOperation comparison = ComparisonOperation::None;
 	};
 
+	enum class TextureAspectFlags
+	{
+		None = 0, Color = 1 << 0, Depth = 1 << 1, Stencil = 1 << 2, MetaData = 1 << 3,
+		Plane0 = 1 << 4, Plane1 = 1 << 5, Plane2 = 1 << 6,
+	};
+	DEFINE_ENUM_FLAGS(TextureAspectFlags)
+
+	enum class TextureTiling
+	{
+		Optimal = 0, Linear = 1
+	};
+
+	enum class TextureUsageFlags
+	{
+		None = 0, TransferSrc = 1 << 0, TransferDst = 1 << 1, Sampled = 1 << 2, Storage = 1 << 3,
+		Color = 1 << 4, DepthStencil = 1 << 5, Transient = 1 << 6, Input = 1 << 7, Host = 1 << 22,
+	};
+
+	struct TextureDetails
+	{
+		TextureType type = TextureType::Tex2D;
+		TextureFormat format = TextureFormat::B8G8R8A8_Srgb;
+		TextureAspectFlags aspectFlags = TextureAspectFlags::Color;
+		TextureTiling tiling = TextureTiling::Optimal;
+		TextureUsageFlags usage = TextureUsageFlags::Sampled;
+		BufferMemoryType memoryType = BufferMemoryType::Static;
+	};
+
 	struct TextureCreationInfo
 	{
 		const char* filePath{};
-		TextureType type = TextureType::Tex2D;
-		TextureFormat format = TextureFormat::R8G8B8A8_Srgb;
 		TextureChannel desiredChannel = TextureChannel::RGBA;
-		BufferMemoryType memoryType = BufferMemoryType::Static;
 		uint32_t mipLevels = 1;
+		TextureDetails details{};
 	};
 
 	struct TextureAllocatorCreationInfo
@@ -604,8 +630,6 @@ namespace hf
 
 	struct RenderPassDefinitionInfo
 	{
-		Ref<Renderer>* pSupportedRenderers{};
-		uint32_t supportedRendererCount = 0;
 		RenderSubpassInfo* pSubpasses{};
 		uint32_t subpassCount = 0;
 		RenderPassDependencyInfo* pDependencies;

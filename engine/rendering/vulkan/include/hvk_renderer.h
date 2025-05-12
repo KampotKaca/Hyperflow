@@ -3,6 +3,7 @@
 
 #include "hvk_shared.h"
 #include "hvk_graphics.h"
+#include "hvk_renderpass.h"
 
 namespace hf
 {
@@ -23,6 +24,8 @@ namespace hf
 
         VkBuffer vertBufferCache[MAX_NUM_BUFFER_CACHE]{};
         VkDeviceSize drawOffsets[MAX_NUM_BUFFER_CACHE]{};
+
+        std::vector<VkRendererPassTextureCollection> passTextureCollections{};
 
         VkPipelineLayout currentLayout;
 
@@ -47,9 +50,10 @@ namespace hf
         uint32_t vertCount{};
         uint32_t instanceCount{};
     };
-    
-    void DestroySurface(VkRenderer* rn);
 
+    void BindRenderPassToRenderer(VkRenderer* rn, RenderPass pass);
+
+    void DestroySurface(VkRenderer* rn);
     void SetupViewportAndScissor(VkRenderer* rn);
 
     void PresentSwapchain(VkRenderer* rn);

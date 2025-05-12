@@ -5,15 +5,10 @@
 
 namespace hf
 {
-    Texture::Texture(const TextureCreationInfo& info)
+    Texture::Texture(const TextureCreationInfo& info) :
+        filePath(info.filePath), desiredChannel(info.desiredChannel), details(info.details),
+        mipLevels(info.mipLevels)
     {
-        filePath = info.filePath;
-        type = info.type;
-        memoryType = info.memoryType;
-        format = info.format;
-        desiredChannel = info.desiredChannel;
-        mipLevels = info.mipLevels;
-
         inter::rendering::CreateTexture_i(this);
     }
 
@@ -84,9 +79,7 @@ namespace hf
                     .channel = (TextureChannel)texChannels,
                     .mipLevels = tex->mipLevels,
                     .data = tex->pixelCache,
-                    .type = tex->type,
-                    .format = tex->format,
-                    .memoryType = tex->memoryType,
+                    .details = tex->details
                 };
 
                 tex->handle = HF.renderingApi.api.CreateTexture(creationInfo);

@@ -5,7 +5,7 @@ namespace hf
 {
     VkFrameBuffer::VkFrameBuffer(VkImageView* pAttachments, uint32_t attachmentCount, RenderPass pass, const VkExtent2D& extent)
     {
-        auto& rnPass = GetDrawPass(pass);
+        auto& rnPass = GetRenderPass(pass);
         this->extent = extent;
         VkFramebufferCreateInfo frameBufferInfo
         {
