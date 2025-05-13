@@ -83,7 +83,7 @@ namespace hf
 
         for (uint32_t i = 0; i < FRAMES_IN_FLIGHT; i++)
         {
-            VkDescriptorBufferInfo bufferInfo
+            GRAPHICS_DATA.preAllocBuffers.bufferInfos[i] =
             {
                 .buffer = uniform.buffers[i],
                 .offset = 0,
@@ -99,7 +99,7 @@ namespace hf
                 .descriptorCount = 1,
                 .descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
                 .pImageInfo = nullptr,
-                .pBufferInfo = &bufferInfo,
+                .pBufferInfo = &GRAPHICS_DATA.preAllocBuffers.bufferInfos[i],
                 .pTexelBufferView = nullptr,
             };
         }

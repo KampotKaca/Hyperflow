@@ -215,23 +215,22 @@ namespace hf
             .basePipelineIndex = -1,
         };
 
-        if (pass.depthAttachments.size() > 0)
+        VkPipelineDepthStencilStateCreateInfo depthStencilInfo
         {
-            VkPipelineDepthStencilStateCreateInfo depthStencilInfo
-            {
-                .sType = VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO,
-                .depthTestEnable = VK_TRUE,
-                .depthWriteEnable = VK_TRUE,
-                .depthCompareOp = VK_COMPARE_OP_LESS_OR_EQUAL,
-                .depthBoundsTestEnable = VK_FALSE,
-                .stencilTestEnable = VK_TRUE,
-                .front = {},
-                .back = {},
-                .minDepthBounds = 0,
-                .maxDepthBounds = 1
-            };
+            .sType = VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO,
+            .depthTestEnable = VK_TRUE,
+            .depthWriteEnable = VK_TRUE,
+            .depthCompareOp = VK_COMPARE_OP_LESS_OR_EQUAL,
+            .depthBoundsTestEnable = VK_FALSE,
+            .stencilTestEnable = VK_TRUE,
+            .front = {},
+            .back = {},
+            .minDepthBounds = 0,
+            .maxDepthBounds = 1
+        };
+
+        if (pass.depthAttachments.size() > 0)
             pipelineInfo.pDepthStencilState = &depthStencilInfo;
-        }
         else pipelineInfo.pDepthStencilState = nullptr;
 
         VK_HANDLE_EXCEPT(vkCreateGraphicsPipelines(GRAPHICS_DATA.defaultDevice->logicalDevice.device,

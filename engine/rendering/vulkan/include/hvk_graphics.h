@@ -119,6 +119,7 @@ namespace hf
         VkDescriptorSet descriptors[VK_MAX_UNIFORM_AND_TEXTURE_UPLOADS]{};
         VkDescriptorSetLayoutBinding descLayoutBindings[VK_MAX_UNIFORM_AND_TEXTURE_BINDINGS]{};
         VkDescriptorSetLayout descLayouts[VK_MAX_UNIFORM_AND_TEXTURE_BINDINGS * FRAMES_IN_FLIGHT]{};
+        VkDescriptorBufferInfo bufferInfos[FRAMES_IN_FLIGHT]{};
         VkWriteDescriptorSet descWrites[FRAMES_IN_FLIGHT]{};
         VkDescriptorImageInfo descImageBindings[VK_MAX_IMAGE_BINDINGS]{};
         VkDescriptorPoolSize descPoolSizes[(uint32_t)UniformBufferType::MaxEnum]{};

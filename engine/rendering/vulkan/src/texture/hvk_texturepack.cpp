@@ -71,7 +71,7 @@ namespace hf
                 .descriptorCount = size,
                 .descriptorType = bindingType,
                 .pImageInfo = GRAPHICS_DATA.preAllocBuffers.descImageBindings,
-            };;
+            };
         }
 
         vkUpdateDescriptorSets(GRAPHICS_DATA.defaultDevice->logicalDevice.device,
