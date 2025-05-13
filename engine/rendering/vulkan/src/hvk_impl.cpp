@@ -375,7 +375,7 @@ namespace hf::inter::rendering
             .WaitForRendering           = WaitForRendering,
 
             .RegisterFrameBufferChange  = RegisterFrameBufferChange,
-            .SetVSync  = SetVSync,
+            .SetVSync                   = SetVSync,
         };
         return &api;
     }

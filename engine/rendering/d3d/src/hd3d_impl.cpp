@@ -19,9 +19,34 @@ namespace hf::inter::rendering
         return hf::CreateRenderer((HWND)info.handle);
     }
 
+    void PostInstanceLoad(void* rn, RenderPass pass)
+    {
+
+    }
+
     void DestroyInstance(void* rnInstance)
     {
         hf::DestroyRenderer((D3DRenderer*)rnInstance);
+    }
+
+    RenderPass DefineRenderPass(const RenderPassDefinitionInfo& info)
+    {
+        return 1;
+    }
+
+    void BindRenderPass(void* rn, RenderPass pass)
+    {
+
+    }
+
+    void BeginRenderPass(void* rn, RenderPass pass)
+    {
+
+    }
+
+    void EndRenderPass(void* rn)
+    {
+
     }
 
     void* CreateShader(const ShaderCreationInfo& info)
@@ -44,16 +69,6 @@ namespace hf::inter::rendering
     }
 
     void DestroyTexture(void* tex)
-    {
-
-    }
-
-    void* CreateTextureAllocator(const TextureAllocatorCreationInfo& info)
-    {
-        return nullptr;
-    }
-
-    void DestroyTextureAllocator(void* texAlloc)
     {
 
     }
@@ -197,6 +212,11 @@ namespace hf::inter::rendering
         RegisterFrameBufferChange(renderer, newSize);
     }
 
+    void SetVSync(void* rn, bool isOn)
+    {
+
+    }
+
     void Draw(void* rn, const DrawCallInfo& info)
     {
         auto renderer = (D3DRenderer*)rn;
@@ -216,7 +236,14 @@ namespace hf::inter::rendering
             .Load                       = Load,
             .Unload                     = Unload,
             .CreateInstance             = CreateInstance,
+            .PostInstanceLoad           = PostInstanceLoad,
             .DestroyInstance            = DestroyInstance,
+
+            //draw pass
+            .DefineRenderPass           = DefineRenderPass,
+            .BindRenderPass             = BindRenderPass,
+            .BeginRenderPass            = BeginRenderPass,
+            .EndRenderPass              = EndRenderPass,
 
             //shader
             .CreateShader               = CreateShader,
@@ -230,10 +257,6 @@ namespace hf::inter::rendering
             //texture
             .CreateTexture              = CreateTexture,
             .DestroyTexture             = DestroyTexture,
-
-            //texture allocator
-            .CreateTextureAllocator     = CreateTextureAllocator,
-            .DestroyTextureAllocator    = DestroyTextureAllocator,
 
             //texture pack
             .CreateTexturePack          = CreateTexturePack,
@@ -280,9 +303,11 @@ namespace hf::inter::rendering
             .GetReadyForRendering       = GetReadyForRendering,
             .StartFrame                 = StartFrame,
             .EndFrame                   = EndFrame,
-            .RegisterFrameBufferChange  = RegisterFrameBufferChange,
             .Draw                       = Draw,
-            .WaitForRendering           = WaitForRendering
+            .WaitForRendering           = WaitForRendering,
+
+            .RegisterFrameBufferChange  = RegisterFrameBufferChange,
+            .SetVSync                   = SetVSync,
         };
         return &api;
     }
