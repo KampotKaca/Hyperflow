@@ -35,7 +35,7 @@ namespace hf::inter::rendering
 
     struct ShaderCreationInfo
     {
-        RenderPass renderPass;
+        RenderPass renderPass{};
         ShaderSetup shaderSetup{};
         void* texPack{};
         uint32_t supportedAttribCount{};
@@ -49,28 +49,28 @@ namespace hf::inter::rendering
 
     struct RendererLoadInfo
     {
-        uvec3 appVersion;
-        uvec3 engineVersion;
-        const char* applicationTitle;
-        void* platformInstance;
-        void* platformDll;
-        void* (*getFuncFromDll)(void* dll, const char* funcName);
+        uvec3 appVersion{};
+        uvec3 engineVersion{};
+        const char* applicationTitle{};
+        void* platformInstance{};
+        void* platformDll{};
+        void* (*getFuncFromDll)(void* dll, const char* funcName){};
     };
 
     struct VertBufferUploadInfo
     {
-        const void* buffer;
-        const void* data;
-        uint32_t offset;
-        uint32_t vertexCount;
+        const void* buffer{};
+        const void* data{};
+        uint32_t offset{};
+        uint32_t vertexCount{};
     };
 
     struct IndexBufferUploadInfo
     {
-        const void* buffer;
-        const void* data;
-        uint32_t offset;
-        uint32_t indexCount;
+        const void* buffer{};
+        const void* data{};
+        uint32_t offset{};
+        uint32_t indexCount{};
     };
 
     struct RendererInstanceCreationInfo
@@ -123,11 +123,11 @@ namespace hf::inter::rendering
 
     struct DrawCallInfo
     {
-        void** pVertBuffers;
-        uint32_t bufferCount;
+        void** pVertBuffers{};
+        uint32_t bufferCount{};
 
-        void* indexBuffer;
-        uint32_t instanceCount;
+        void* indexBuffer{};
+        uint32_t instanceCount{};
     };
 
     struct RendererAPI

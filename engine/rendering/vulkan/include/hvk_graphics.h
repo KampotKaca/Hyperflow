@@ -43,9 +43,9 @@ namespace hf
 
     struct QueueFamilyIndices
     {
-        std::optional<uint32_t> graphicsFamily;
-        std::optional<uint32_t> presentFamily;
-        std::optional<uint32_t> transferFamily;
+        std::optional<uint32_t> graphicsFamily{};
+        std::optional<uint32_t> presentFamily{};
+        std::optional<uint32_t> transferFamily{};
 
         [[nodiscard]] bool IsComplete() const;
     };
@@ -116,12 +116,12 @@ namespace hf
 
     struct PreAllocatedBuffers
     {
-        VkDescriptorSet descriptors[VK_MAX_UNIFORM_AND_TEXTURE_UPLOADS];
-        VkDescriptorSetLayoutBinding descLayoutBindings[VK_MAX_UNIFORM_AND_TEXTURE_BINDINGS];
-        VkDescriptorSetLayout descLayouts[VK_MAX_UNIFORM_AND_TEXTURE_BINDINGS * FRAMES_IN_FLIGHT];
-        VkWriteDescriptorSet descWrites[FRAMES_IN_FLIGHT];
-        VkDescriptorImageInfo descImageBindings[VK_MAX_IMAGE_BINDINGS];
-        VkDescriptorPoolSize descPoolSizes[(uint32_t)UniformBufferType::MaxEnum];
+        VkDescriptorSet descriptors[VK_MAX_UNIFORM_AND_TEXTURE_UPLOADS]{};
+        VkDescriptorSetLayoutBinding descLayoutBindings[VK_MAX_UNIFORM_AND_TEXTURE_BINDINGS]{};
+        VkDescriptorSetLayout descLayouts[VK_MAX_UNIFORM_AND_TEXTURE_BINDINGS * FRAMES_IN_FLIGHT]{};
+        VkWriteDescriptorSet descWrites[FRAMES_IN_FLIGHT]{};
+        VkDescriptorImageInfo descImageBindings[VK_MAX_IMAGE_BINDINGS]{};
+        VkDescriptorPoolSize descPoolSizes[(uint32_t)UniformBufferType::MaxEnum]{};
     };
 
     struct GraphicsData
@@ -133,16 +133,16 @@ namespace hf
         VkInstance instance{};
         VkPlatform platform{};
 
-        uint32_t supportedVersion;
+        uint32_t supportedVersion{};
         std::set<std::string> availableExtensionNames{};
         std::vector<GraphicsDevice> suitableDevices{};
-        GraphicsDevice* defaultDevice;
+        GraphicsDevice* defaultDevice{};
 
         bool devicesAreLoaded = false;
 
         CommandPool transferPool{};
         CommandPool graphicsPool{};
-        VmaAllocator allocator;
+        VmaAllocator allocator{};
 
         std::vector<VkBufferAttrib> bufferAttribs{};
         std::vector<VkUniformBuffer> uniformBuffers{};
@@ -171,9 +171,9 @@ namespace hf
 
     struct GraphicsSwapchainDetails
     {
-        VkSurfaceFormatKHR format;
-        VkPresentModeKHR presentMode;
-        VkExtent2D extent;
+        VkSurfaceFormatKHR format{};
+        VkPresentModeKHR presentMode{};
+        VkExtent2D extent{};
     };
 
     struct GraphicsSwapChain
@@ -207,9 +207,9 @@ namespace hf
 
     struct VkStaticBufferInfo
     {
-        uint64_t bufferSize;
-        const void* data;
-        VkBufferUsageFlags usage;
+        uint64_t bufferSize{};
+        const void* data{};
+        VkBufferUsageFlags usage{};
     };
 
     extern GraphicsData GRAPHICS_DATA;

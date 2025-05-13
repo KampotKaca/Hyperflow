@@ -34,6 +34,8 @@ namespace hf
     void PostRendererLoad(VkRenderer* rn, RenderPass mainPass)
     {
         rn->mainPass = mainPass;
+        auto& pass = GetRenderPass(mainPass);
+        if (!pass.hasPresentationAttachment) throw GENERIC_EXCEPT("[Vulkan]", "Main render pass must have presentation attachment");
         CreateSwapchain(rn->swapchain.surface, rn->targetSize, rn->vSyncOn,  &rn->swapchain);
         SetupViewportAndScissor(rn);
 

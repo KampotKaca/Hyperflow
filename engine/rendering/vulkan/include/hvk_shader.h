@@ -14,7 +14,7 @@ namespace hf
 
         ShaderSetup shaderSetup{};
         VkTexturePack* texturePack{};
-        std::unordered_map<BufferAttrib, VkPipeline> pipelines;
+        std::unordered_map<BufferAttrib, VkPipeline> pipelines{};
     };
 
     void BindShader(VkRenderer* rn, VkShader* shader, BufferAttrib attrib);

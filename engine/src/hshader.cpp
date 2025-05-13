@@ -12,7 +12,7 @@ namespace hf
         vertLoc = std::string(info.vertexShaderLoc);
         fragLoc = std::string(info.fragmentShaderLoc);
 
-        drawPass = info.drawPass;
+        drawPass = info.renderPass;
         shaderSetup = info.setup;
         supportedAttribCount = info.supportedAttribCount;
         texturePack = info.texturePack;

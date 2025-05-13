@@ -30,7 +30,7 @@ namespace hf
     struct VkTextureWriteOperation
     {
         std::vector<VkDescriptorImageInfo> imageInfos{};
-        VkWriteDescriptorSet writes[FRAMES_IN_FLIGHT];
+        VkWriteDescriptorSet writes[FRAMES_IN_FLIGHT]{};
     };
 
     void UpdateTextureBinding(const VkTexturePack* pack, uint32_t bindingIndex, uint32_t offset, uint32_t size);

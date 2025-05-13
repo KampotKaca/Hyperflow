@@ -55,6 +55,13 @@ namespace hf
                 colorAttachmentCount++;
             }
 
+            if (subpassInfo.presentationAttachment)
+            {
+                hasPresentationAttachment = true;
+                attachmentCount++;
+                colorAttachmentCount++;
+            }
+
             if (subpassInfo.depthAttachment)
             {
                 attachmentCount++;
@@ -67,9 +74,11 @@ namespace hf
         std::vector<VkAttachmentReference> msaaAttachmentRefs(multisamplingAttachmentCount);
         std::vector<VkAttachmentReference> depthAttachmentRefs(depthAttachmentCount);
 
+        uint32_t cCount = colorAttachmentCount;
+        if (hasPresentationAttachment) cCount--;
         clearValues = std::vector<VkClearValue>(attachmentCount);
-        colorAttachments = std::vector<RenderSubpassColorAttachmentInfo>(colorAttachmentCount);
-        depthAttachments = std::vector<RenderSubpassDepthAttachmentInfo>(depthAttachmentCount);
+        colorAttachments.reserve(cCount);
+        depthAttachments.reserve(depthAttachmentCount);
 
         {
             uint32_t attachmentIndex = 0;
@@ -99,12 +108,9 @@ namespace hf
                     attachment =
                     {
                         .flags = (VkAttachmentDescriptionFlags)attachmentInfo.usesSharedMemory,
+                        .format = (VkFormat)attachmentInfo.format,
                         .samples = (VkSampleCountFlagBits)attachmentInfo.msaaCounter,
                     };
-
-                    if (attachmentInfo.finalLayout == TextureResultLayoutType::PresentSrc)
-                        attachment.format = VULKAN_API_COLOR_FORMAT;
-                    else attachment.format = (VkFormat)attachmentInfo.format;
 
                     SetOperations(attachment.loadOp, attachment.storeOp, attachmentInfo.lsOperation);
                     SetOperations(attachment.stencilLoadOp, attachment.stencilStoreOp, attachmentInfo.lsStencilOperation);
@@ -117,9 +123,7 @@ namespace hf
 
                     colorAttachmentRefs[colorIndex] = ref;
                     colorIndex++;
-                    if (attachmentInfo.finalLayout != TextureResultLayoutType::PresentSrc)
-                        colorAttachments[colorIndex] = attachmentInfo;
-
+                    colorAttachments.push_back(attachmentInfo);
                     attachmentIndex++;
 
                     if (attachmentInfo.msaaCounter > 1)
@@ -154,21 +158,71 @@ namespace hf
                     .pipelineBindPoint = (VkPipelineBindPoint)subpassInfo.bindingType,
                 };
 
-                if ((colorIndex - colorStart) > 0)
+                if (subpassInfo.presentationAttachment)
                 {
-                    subpass.colorAttachmentCount = colorIndex - colorStart;
-                    subpass.pColorAttachments = &colorAttachmentRefs[colorStart];
-                }
+                    auto& attachmentInfo = *subpassInfo.presentationAttachment;
+                    auto& attachment = attachments[attachmentIndex];
 
-                if ((multisampleIndex - multisampleStart) > 0)
-                {
-                    subpass.pResolveAttachments = &msaaAttachmentRefs[multisampleIndex];
+                    clearValues[attachmentIndex] =
+                    {
+                        .color =
+                        {
+                            attachmentInfo.clearColor.x,
+                            attachmentInfo.clearColor.y,
+                            attachmentInfo.clearColor.z,
+                            attachmentInfo.clearColor.w
+                        }
+                    };
+                    attachment =
+                    {
+                        .flags = (VkAttachmentDescriptionFlags)attachmentInfo.usesSharedMemory,
+                        .format = VULKAN_API_COLOR_FORMAT,
+                        .samples = (VkSampleCountFlagBits)attachmentInfo.msaaCounter,
+                    };
+
+                    SetOperations(attachment.loadOp, attachment.storeOp, attachmentInfo.lsOperation);
+                    SetOperations(attachment.stencilLoadOp, attachment.stencilStoreOp, attachmentInfo.lsStencilOperation);
+
+                    VkAttachmentReference ref =
+                    {
+                        .attachment = attachmentIndex,
+                        .layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL
+                    };
+
+                    colorAttachmentRefs[colorIndex] = ref;
+                    colorIndex++;
+                    attachmentIndex++;
+
+                    if (attachmentInfo.msaaCounter > 1)
+                    {
+                        attachment.initialLayout = (VkImageLayout)attachmentInfo.initialLayout;
+                        attachment.finalLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+
+                        auto& msaaAttachment = attachments[attachmentIndex];
+                        msaaAttachment = attachment;
+                        msaaAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
+                        msaaAttachment.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
+
+                        msaaAttachmentRefs[multisampleIndex] =
+                        {
+                            .attachment = attachmentIndex,
+                            .layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL
+                        };
+
+                        multisampleIndex++;
+                        attachmentIndex++;
+                    }
+                    else
+                    {
+                        attachment.initialLayout = (VkImageLayout)attachmentInfo.initialLayout;
+                        attachment.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
+                    }
                 }
 
                 if (subpassInfo.depthAttachment)
                 {
                     auto& depthAttachment = attachments[attachmentIndex];
-                    depthAttachments[depthIndex] = *subpassInfo.depthAttachment;
+                    depthAttachments.push_back(*subpassInfo.depthAttachment);
                     auto& da = *subpassInfo.depthAttachment;
 
                     clearValues[attachmentIndex] =
@@ -199,6 +253,17 @@ namespace hf
                     subpass.pDepthStencilAttachment = &depthAttachmentRefs[depthIndex];
                     attachmentIndex++;
                     depthIndex++;
+                }
+
+                if ((colorIndex - colorStart) > 0)
+                {
+                    subpass.colorAttachmentCount = colorIndex - colorStart;
+                    subpass.pColorAttachments = &colorAttachmentRefs[colorStart];
+                }
+
+                if ((multisampleIndex - multisampleStart) > 0)
+                {
+                    subpass.pResolveAttachments = &msaaAttachmentRefs[multisampleIndex];
                 }
             }
         }

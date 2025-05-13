@@ -62,13 +62,6 @@ namespace hf
 		return std::make_unique<T>(std::forward<Args>(args)...);
 	}
 
-	template<typename T>
-	struct DllApi
-	{
-		void* handle;
-		T api;
-	};
-
 #define TO_RES_PATH(x) (std::string(RES_PATH) + (x))
 
 #if PLATFORM_WINDOWS
@@ -148,14 +141,14 @@ namespace hf
 
 	struct Rect
 	{
-		vec2 position;
-		vec2 size;
+		vec2 position{};
+		vec2 size{};
 	};
 
 	struct IRect
 	{
-		ivec2 position;
-		ivec2 size;
+		ivec2 position{};
+		ivec2 size{};
 	};
 
 	//endregion
@@ -257,25 +250,25 @@ namespace hf
 
 	struct VertBufferUploadInfo
 	{
-		const Ref<VertBuffer>& buffer;
-		const void* data;
+		const Ref<VertBuffer>& buffer{};
+		const void* data{};
 
 		//data alignment will be size of the vertex, so offset should be set as how many vertices should be skipped.
-		uint32_t offset;
-		uint32_t vertCount;
+		uint32_t offset{};
+		uint32_t vertCount{};
 	};
 
 	struct IndexBufferUploadInfo
 	{
-		const Ref<IndexBuffer>& buffer;
-		const void* data;
-		uint32_t offset;
-		uint32_t indexCount;
+		const Ref<IndexBuffer>& buffer{};
+		const void* data{};
+		uint32_t offset{};
+		uint32_t indexCount{};
 	};
 
 	struct ShaderCreationInfo
 	{
-		RenderPass drawPass{};
+		RenderPass renderPass{};
 		ShaderSetup setup{};
 		Ref<TexturePack> texturePack{};
 		uint32_t supportedAttribCount{};
@@ -326,10 +319,10 @@ namespace hf
 
 	struct UniformBufferUpload
 	{
-		UniformBuffer buffer;
-		uint32_t offsetInBytes;
-		uint32_t sizeInBytes;
-		const void* data;
+		UniformBuffer buffer{};
+		uint32_t offsetInBytes{};
+		uint32_t sizeInBytes{};
+		const void* data{};
 	};
 
 	struct UniformBufferUploadInfo
@@ -354,8 +347,8 @@ namespace hf
 
 	struct TextureLayoutDefinitionInfo
 	{
-		TextureLayoutBindingInfo* pBindings;
-		uint32_t bindingCount;
+		TextureLayoutBindingInfo* pBindings{};
+		uint32_t bindingCount{};
 	};
 
 	struct TexturePackAllocatorCreationInfo
@@ -366,17 +359,17 @@ namespace hf
 
 	struct ShaderSetupDefinitionInfo
 	{
-		UniformBuffer* pBuffers;
-		uint32_t bufferCount;
+		UniformBuffer* pBuffers{};
+		uint32_t bufferCount{};
 
-		TextureLayout* pTextureLayouts;
-		uint32_t textureLayoutCount;
+		TextureLayout* pTextureLayouts{};
+		uint32_t textureLayoutCount{};
 	};
 
 	struct UniformAllocatorDefinitionInfo
 	{
-		UniformBuffer* pBuffers;
-		uint32_t bufferCount;
+		UniformBuffer* pBuffers{};
+		uint32_t bufferCount{};
 	};
 
 	enum class TextureFormat
@@ -497,9 +490,6 @@ namespace hf
 		ReadOnly = 1000314000,
 		Attachment = 1000314001,
 		RenderingLocalRead = 1000232000,
-
-		//used as a source for the swapchain
-		PresentSrc = 1000001002
 	};
 
 	enum class TextureTiling
@@ -563,15 +553,15 @@ namespace hf
 	{
 		//type of attachment layout color, depth, stencil etc.
 		TextureResultLayoutType layout = TextureResultLayoutType::Color;
-		TextureFormat format = TextureFormat::B8G8R8A8_Srgb;
+		TextureFormat format = TextureFormat::R8G8B8A8_Snorm;
 		//meant as a multisampling counter, should be pot value, with 64 as maximum
 		uint32_t msaaCounter = 1;
 		LoadStoreOperationType lsOperation = LoadStoreOperationType::ClearAndStore;
 		LoadStoreOperationType lsStencilOperation = LoadStoreOperationType::DontCareAndDontCare;
 
-		//type of initial layout of the attachment
+		//initial layout type of the attachment
 		TextureResultLayoutType initialLayout = TextureResultLayoutType::Undefined;
-		TextureResultLayoutType finalLayout = TextureResultLayoutType::PresentSrc;
+		TextureResultLayoutType finalLayout = TextureResultLayoutType::Color;
 
 		vec4 clearColor = vec4(0.0f, 0.0f, 0.0f, 1.0f);
 
@@ -585,7 +575,7 @@ namespace hf
 		LoadStoreOperationType lsOperation = LoadStoreOperationType::ClearAndStore;
 		LoadStoreOperationType lsStencilOperation = LoadStoreOperationType::DontCareAndDontCare;
 
-		//type of initial layout of the attachment
+		//initial layout type of the attachment
 		TextureResultLayoutType initialLayout = TextureResultLayoutType::Undefined;
 		TextureResultLayoutType finalLayout = TextureResultLayoutType::DepthStencil;
 
@@ -594,11 +584,25 @@ namespace hf
 		bool usesSharedMemory = false;
 	};
 
+	struct RenderSubpassPresentationAttachmentInfo
+	{
+		//type of attachment layout color, depth, stencil etc.
+		uint32_t msaaCounter = 1;
+		LoadStoreOperationType lsOperation = LoadStoreOperationType::ClearAndStore;
+		LoadStoreOperationType lsStencilOperation = LoadStoreOperationType::DontCareAndDontCare;
+
+		//initial layout type of the attachment
+		TextureResultLayoutType initialLayout = TextureResultLayoutType::Undefined;
+		vec4 clearColor = vec4(0.0f, 0.0f, 0.0f, 1.0f);
+		bool usesSharedMemory = false;
+	};
+
 	struct RenderSubpassInfo
 	{
 		RenderBindingType bindingType = RenderBindingType::Graphics;
 		RenderSubpassColorAttachmentInfo* pColorAttachments{};
 		uint32_t attachmentCount = 0;
+		RenderSubpassPresentationAttachmentInfo* presentationAttachment{};
 		RenderSubpassDepthAttachmentInfo* depthAttachment{};
 	};
 
@@ -641,7 +645,7 @@ namespace hf
 	{
 		RenderSubpassInfo* pSubpasses{};
 		uint32_t subpassCount = 0;
-		RenderPassDependencyInfo* pDependencies;
+		RenderPassDependencyInfo* pDependencies{};
 		uint32_t dependencyCount = 0;
 	};
 
@@ -649,10 +653,10 @@ namespace hf
 
 	struct DrawCallInfo
 	{
-		Ref<VertBuffer>* pVertBuffers; //vertex buffers to render
+		Ref<VertBuffer>* pVertBuffers{}; //vertex buffers to render
 		uint32_t bufferCount = 0; //amount of buffers to render
 
-		Ref<IndexBuffer> indexBuffer; //is optional property, if nullptr engine will render vertex buffer in ordered manner.
+		Ref<IndexBuffer> indexBuffer{}; //is optional property, if nullptr engine will render vertex buffer in ordered manner.
 		uint32_t instanceCount = 0; //amount of instances to render
 	};
 
@@ -685,7 +689,7 @@ namespace hf
 
 		//stage where you can create draw passes
 		//and should return the pass which is used for presentation
-		RenderPass (*onPassCreationCallback)();
+		RenderPass (*onPassCreationCallback)(){};
 
 		void (*onPreRenderCallback)(const Ref<Renderer>&){};
 		void (*onRenderCallback)(const Ref<Renderer>&){};

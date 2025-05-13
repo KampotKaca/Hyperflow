@@ -266,7 +266,7 @@ namespace hf::inter::rendering
             .pOffsets = vrn->drawOffsets,
             .bufferCount = info.bufferCount,
             .vertCount = vertCount,
-            .instanceCount = info.instanceCount
+            .instanceCount = info.instanceCount,
         };
 
         if (info.indexBuffer)

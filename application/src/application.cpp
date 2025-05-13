@@ -30,25 +30,25 @@ namespace app
 		4, 5, 6, 6, 7, 4
 	};
 
-	int count;
-	hf::Ref<hf::Window> wn;
-	int reqCount = 0;
+	uint32_t count = 0;
+	uint32_t reqCount = 0;
+	hf::Ref<hf::Window> wn{};
 	int32_t lastReq = -1;
-	hf::Ref<hf::Shader> shader;
-	hf::Ref<hf::VertBuffer> vertBuffer;
-	hf::Ref<hf::IndexBuffer> indexBuffer;
+	hf::Ref<hf::Shader> shader{};
+	hf::Ref<hf::VertBuffer> vertBuffer{};
+	hf::Ref<hf::IndexBuffer> indexBuffer{};
 
-	hf::Ref<hf::Texture> texture;
-	hf::Ref<hf::TexturePack> texPack;
-	hf::Ref<hf::TexturePackAllocator> texPackAllocator;
+	hf::Ref<hf::Texture> texture{};
+	hf::Ref<hf::TexturePack> texPack{};
+	hf::Ref<hf::TexturePackAllocator> texPackAllocator{};
 
-	hf::BufferAttrib bufferAttrib;
-	hf::UniformBuffer cameraBuffer;
-	hf::ShaderSetup shaderSetup;
-	hf::UniformAllocator uniformAllocator;
-	hf::TextureSampler sampler;
-	hf::TextureLayout layout;
-	hf::RenderPass presentPass;
+	hf::BufferAttrib bufferAttrib{};
+	hf::UniformBuffer cameraBuffer{};
+	hf::ShaderSetup shaderSetup{};
+	hf::UniformAllocator uniformAllocator{};
+	hf::TextureSampler sampler{};
+	hf::TextureLayout layout{};
+	hf::RenderPass presentPass{};
 
 	struct Camera
 	{
@@ -58,7 +58,7 @@ namespace app
 		alignas(16) hf::mat4 viewProj{};
 	};
 
-	Camera camera;
+	Camera camera{};
 
 	hf::RenderPass Application::OnPassCreationCallback()
 	{
@@ -80,7 +80,7 @@ namespace app
 			},
 			.flags = hf::RenderPassDependencyType::ByRegion
 		};
-		hf::RenderSubpassColorAttachmentInfo colorAttachment{};
+		hf::RenderSubpassPresentationAttachmentInfo presentAttachment{};
 		hf::RenderSubpassDepthAttachmentInfo depthAttachment
 		{
 			.layout = hf::TextureResultLayoutType::DepthStencil,
@@ -94,8 +94,9 @@ namespace app
 		hf::RenderSubpassInfo subpassInfo
 		{
 			.bindingType = hf::RenderBindingType::Graphics,
-			.pColorAttachments = &colorAttachment,
-			.attachmentCount = 1,
+			.pColorAttachments = nullptr,
+			.attachmentCount = 0,
+			.presentationAttachment = &presentAttachment,
 			.depthAttachment = &depthAttachment
 		};
 
@@ -226,7 +227,8 @@ namespace app
 				.aspectFlags = hf::TextureAspectFlags::Color,
 				.tiling = hf::TextureTiling::Optimal,
 				.usage = hf::TextureUsageFlags::Sampled,
-				.memoryType = hf::BufferMemoryType::Static
+				.memoryType = hf::BufferMemoryType::Static,
+				.finalLayout = hf::TextureResultLayoutType::ShaderReadOnly
 			}
 		};
 
@@ -262,7 +264,7 @@ namespace app
 
 		hf::ShaderCreationInfo shaderInfo
 		{
-			.drawPass = presentPass,
+			.renderPass = presentPass,
 			.setup = shaderSetup,
 			.texturePack = texPack,
 			.supportedAttribCount = 1,

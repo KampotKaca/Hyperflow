@@ -8,7 +8,7 @@ namespace hf
 {
     struct VkRendererPassTextureCollection
     {
-        RenderPass pass;
+        RenderPass pass{};
         std::vector<VkTexture*> colorTextures{};
         std::vector<VkTexture*> depthTextures{};
     };
@@ -25,7 +25,7 @@ namespace hf
         std::vector<VkClearValue> clearValues{};
         uint32_t attachmentCount = 0;
         uint32_t multisamplingAttachmentCount = 0;
-        bool hasDepthStencilAttachment = false;
+        bool hasPresentationAttachment = false;
     };
 
     bool IsValidRenderPass(RenderPass pass);

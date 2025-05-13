@@ -106,7 +106,6 @@ namespace hf
         void LoadApi_i(RenderingApiType api)
         {
             if (HF.renderingApi.type != RenderingApiType::None) throw GENERIC_EXCEPT("[Hyperflow]", "Cannot load multiple rendering APIs, need unload current one first");
-
             RenderingApi newApi{};
             switch (api)
             {
