@@ -157,11 +157,13 @@ namespace hf
 
 	struct Renderer;
 	struct Shader;
-	struct VertBuffer;
-	struct IndexBuffer;
 	struct Texture;
 	struct TexturePack;
 	struct TexturePackAllocator;
+
+	struct VertBuffer;
+	struct IndexBuffer;
+	struct Mesh;
 
 	typedef uint32_t BufferAttrib;
 	typedef uint32_t UniformBuffer;
@@ -275,6 +277,13 @@ namespace hf
 		const BufferAttrib* pSupportedAttribs{};
 		const char* vertexShaderLoc{};
 		const char* fragmentShaderLoc{};
+	};
+
+	template<typename T>
+	struct OwnedData
+	{
+		Ref<T> ref{};
+		bool isOwned = false;
 	};
 
 	enum class UniformBufferType
@@ -647,6 +656,30 @@ namespace hf
 		uint32_t subpassCount = 0;
 		RenderPassDependencyInfo* pDependencies{};
 		uint32_t dependencyCount = 0;
+	};
+
+	enum class MeshDataType
+	{
+		None = 0,
+		Position = 1 << 0, Normal = 1 << 1, TexCoord = 1 << 2, Color = 1 << 3,
+		Default = Position | TexCoord,
+		All = Position | Normal | TexCoord | Color,
+	};
+	DEFINE_ENUM_FLAGS(MeshDataType)
+
+	enum class MeshIndexFormat { U8, U16, U32, };
+
+	struct MeshStats
+	{
+		MeshDataType typeFlags = MeshDataType::Default;
+		MeshIndexFormat indexFormat = MeshIndexFormat::U16;
+		BufferAttrib bufferAttrib{};
+	};
+
+	struct MeshCreationInfo
+	{
+		const char* filePath{};
+		MeshStats stats{};
 	};
 
 	enum class RenderingApiType { None, Vulkan, Direct3D };

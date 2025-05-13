@@ -5,13 +5,17 @@
 
 namespace hf
 {
-    IndexBuffer::IndexBuffer(const IndexBufferCreationInfo& info)
+    IndexBuffer::IndexBuffer(const IndexBufferCreationInfo& info, bool storeDataLocally)
+    : details(info), dataIsStoredLocally(storeDataLocally)
     {
         if (info.indexCount % 3 != 0) throw GENERIC_EXCEPT("[Hyperflow]", "index count must be a multiple of 3");
-        uint64_t bufferSize = info.indexCount * BUFFER_DATA_SIZE[(uint32_t)info.indexFormat];
-        details = info;
-        details.pIndices = utils::Allocate(bufferSize);
-        memcpy(details.pIndices, info.pIndices, bufferSize);
+
+        if (dataIsStoredLocally)
+        {
+            uint64_t bufferSize = info.indexCount * BUFFER_DATA_SIZE[(uint32_t)info.indexFormat];
+            details.pIndices = utils::Allocate(bufferSize);
+            memcpy(details.pIndices, info.pIndices, bufferSize);
+        }
 
         inter::rendering::CreateIndexBuffer_i(this);
     }
@@ -26,7 +30,7 @@ namespace hf
     {
         Ref<IndexBuffer> Create(const IndexBufferCreationInfo& info)
         {
-            Ref<IndexBuffer> buffer = MakeRef<IndexBuffer>(info);
+            Ref<IndexBuffer> buffer = MakeRef<IndexBuffer>(info, true);
             inter::HF.graphicsResources.indexBuffers[buffer.get()] = buffer;
             return buffer;
         }

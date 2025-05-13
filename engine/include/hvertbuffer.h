@@ -7,10 +7,11 @@ namespace hf
 {
     struct VertBuffer
     {
-        VertBuffer(const VertBufferCreationInfo& info);
+        VertBuffer(const VertBufferCreationInfo& info, bool storeDataLocally);
         ~VertBuffer();
 
-        VertBufferCreationInfo creationInfo{};
+        VertBufferCreationInfo details{};
+        bool dataIsStoredLocally = false;
         void* handle{};
     };
 }

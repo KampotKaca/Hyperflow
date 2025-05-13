@@ -45,7 +45,7 @@ endif()
 file(COPY ${CMAKE_SOURCE_DIR}/application/res DESTINATION ${CMAKE_BINARY_DIR})
 target_compile_definitions("${CMAKE_PROJECT_NAME}" PUBLIC RES_PATH="${CMAKE_BINARY_DIR}/res/")
 
-set(SHADER_SOURCE_DIR "${CMAKE_SOURCE_DIR}/application/shaders/vulkan")
+set(SHADER_SOURCE_DIR "${CMAKE_SOURCE_DIR}/application/assets/shaders/vulkan")
 set(SHADER_BINARY_DIR "${CMAKE_BINARY_DIR}/res/shaders/vulkan")
 
 # Find all shader source files
@@ -77,9 +77,43 @@ foreach(SHADER ${SHADER_SOURCES})
     list(APPEND COMPILED_SHADERS ${OUTPUT_FILE})
 endforeach()
 
+set(MESH_SOURCE_DIR "${CMAKE_SOURCE_DIR}/application/assets/meshes")
+set(MESH_BINARY_DIR "${CMAKE_BINARY_DIR}/res/meshes")
+
+file(MAKE_DIRECTORY ${MESH_BINARY_DIR})
+
+file(GLOB_RECURSE MESH_SOURCES
+        "${MESH_SOURCE_DIR}/*.obj"
+)
+
+set(CONVERTED_MESHES)
+
+foreach(MESH ${MESH_SOURCES})
+    # Get the filename without path
+    get_filename_component(FILE_NAME ${MESH} NAME)
+    # Output file path
+    set(OUTPUT_FILE "${MESH_BINARY_DIR}/${FILE_NAME}.mesh")
+
+    add_custom_command(
+            OUTPUT ${OUTPUT_FILE}
+            COMMAND meshconvertor
+            ARGS
+            "${MESH}"
+            "${OUTPUT_FILE}"
+            DEPENDS
+            meshconvertor
+            ${MESH}
+            COMMENT "Converting mesh: ${FILE_NAME}"
+            VERBATIM
+    )
+
+    list(APPEND CONVERTED_MESHES ${OUTPUT_FILE})
+endforeach()
+
 add_custom_target(Prebuild
-        ALL DEPENDS ${COMPILED_SHADERS}
+        ALL DEPENDS ${CONVERTED_MESHES} ${COMPILED_SHADERS}
         COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/application/res ${CMAKE_BINARY_DIR}/res
 )
+
 #endregion
 add_dependencies(${CMAKE_PROJECT_NAME} Prebuild)

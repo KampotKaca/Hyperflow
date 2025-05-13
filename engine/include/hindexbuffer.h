@@ -6,10 +6,11 @@ namespace hf
 {
     struct IndexBuffer
     {
-        IndexBuffer(const IndexBufferCreationInfo& info);
+        IndexBuffer(const IndexBufferCreationInfo& info, bool storeDataLocally);
         ~IndexBuffer();
 
         IndexBufferCreationInfo details{};
+        bool dataIsStoredLocally = false;
         void* handle{};
     };
 }

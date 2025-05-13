@@ -223,6 +223,16 @@ namespace hf
 		void Upload(const IndexBufferUploadInfo& info);
 	}
 
+	namespace mesh
+	{
+		Ref<Mesh> Create(const MeshCreationInfo& info);
+		void Destroy(const Ref<Mesh>& mesh);
+		void Destroy(const Ref<Mesh>* pMeshes, uint32_t count);
+		void DestroyAll(bool internalOnly = false);
+		bool IsRunning(const Ref<Mesh>& mesh);
+		MeshStats GetStats(const Ref<Mesh>& mesh);
+	}
+
 	namespace utils
 	{
 		ivec3 ConvertVersion(const char* version);

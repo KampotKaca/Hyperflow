@@ -5,20 +5,24 @@
 
 namespace hf
 {
-    VertBuffer::VertBuffer(const VertBufferCreationInfo& info)
+    VertBuffer::VertBuffer(const VertBufferCreationInfo& info, bool storeDataLocally)
+    : details(info), dataIsStoredLocally(storeDataLocally)
     {
         if (info.bufferAttrib == 0) throw GENERIC_EXCEPT("[Hyperflow]", "buffer attribute must be set");
-        uint64_t bufferSize = info.vertexCount * inter::HF.renderingApi.api.GetVertBufferAttribSize(info.bufferAttrib);
-        creationInfo = info;
-        creationInfo.pVertices = utils::Allocate(bufferSize);
-        memcpy(creationInfo.pVertices, info.pVertices, bufferSize);
+        
+        if (dataIsStoredLocally)
+        {
+            uint64_t bufferSize = info.vertexCount * inter::HF.renderingApi.api.GetVertBufferAttribSize(info.bufferAttrib);
+            details.pVertices = utils::Allocate(bufferSize);
+            memcpy(details.pVertices, info.pVertices, bufferSize);
+        }
 
         inter::rendering::CreateVertBuffer_i(this);
     }
 
     VertBuffer::~VertBuffer()
     {
-        utils::Deallocate(creationInfo.pVertices);
+        if (dataIsStoredLocally) utils::Deallocate(details.pVertices);
         inter::rendering::DestroyVertBuffer_i(this);
     }
 
@@ -26,7 +30,7 @@ namespace hf
     {
         Ref<VertBuffer> Create(const VertBufferCreationInfo& info)
         {
-            Ref<VertBuffer> buffer = MakeRef<VertBuffer>(info);
+            Ref<VertBuffer> buffer = MakeRef<VertBuffer>(info, true);
             inter::HF.graphicsResources.vertBuffers[buffer.get()] = buffer;
             return buffer;
         }
@@ -74,7 +78,7 @@ namespace hf
         bool CreateVertBuffer_i(VertBuffer* buffer)
         {
             if (buffer->handle) return false;
-            buffer->handle = HF.renderingApi.api.CreateVertBuffer(buffer->creationInfo);
+            buffer->handle = HF.renderingApi.api.CreateVertBuffer(buffer->details);
             return true;
         }
 
