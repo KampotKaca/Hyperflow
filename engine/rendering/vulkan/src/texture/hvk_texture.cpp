@@ -4,9 +4,10 @@
 namespace hf
 {
     static void TextureViewCallback(void* uData);
+    static void GenerateMimMaps(VkImage image, uvec2 texSize, uint32_t mipLevels);
 
     VkTexture::VkTexture(const inter::rendering::TextureCreationInfo& info)
-        : channel(info.channel), details(info.details), size(info.size), mipLevels(info.mipLevels)
+        : channel(info.channel), details(info.details), size(info.size)
     {
         bufferSize = size.x * size.y * size.z * 4;
         bufferOffset = 0;
@@ -21,7 +22,6 @@ namespace hf
             .imageType = (VkImageType)details.type,
             .format = (VkFormat)details.format,
             .extent = { size.x, size.y, size.z },
-            .mipLevels = mipLevels,
             .arrayLayers = 1,
             .samples = VK_SAMPLE_COUNT_1_BIT,
             .tiling = (VkImageTiling)details.tiling,
@@ -31,14 +31,21 @@ namespace hf
 
         if (info.data)
         {
+            // mipLevels = glm::min(info.mipLevels, (uint32_t)glm::floor(glm::log2(glm::max(size.x, size.y))) + 1);
+
             imageInfo.usage = VK_IMAGE_USAGE_TRANSFER_DST_BIT | (uint32_t)details.usage;
+            // if (mipLevels > 1) imageInfo.usage |= VK_IMAGE_USAGE_TRANSFER_SRC_BIT;
+
             imageInfo.queueFamilyIndexCount = 2;
             imageInfo.pQueueFamilyIndices = queus;
         }
         else
         {
             imageInfo.usage = (VkImageUsageFlags)details.usage;
+            mipLevels = 1;
         }
+
+        imageInfo.mipLevels = mipLevels;
 
         VK_HANDLE_EXCEPT(vkCreateImage(device, &imageInfo, nullptr, &image));
         AllocateImage(details.memoryType, image, &imageMemory);
@@ -120,5 +127,23 @@ namespace hf
 
         auto device = GRAPHICS_DATA.defaultDevice->logicalDevice.device;
         VK_HANDLE_EXCEPT(vkCreateImageView(device, &viewInfo, nullptr, &texture->view));
+    }
+
+    void GenerateMimMaps(VkImage image, uvec2 texSize, uint32_t mipLevels)
+    {
+        VkImageMemoryBarrier barrier
+        {
+            .sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER,
+            .image = image,
+            .srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
+            .dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
+            .subresourceRange =
+            {
+                .aspectMask = VK_IMAGE_ASPECT_COLOR_BIT,
+                .baseArrayLayer = 0,
+                .layerCount = 1,
+                .levelCount = 1,
+            }
+        };
     }
 }

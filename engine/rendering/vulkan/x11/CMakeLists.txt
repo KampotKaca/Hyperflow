@@ -1,3 +1,9 @@
+if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O0")
+elseif(CMAKE_BUILD_TYPE STREQUAL "Release")
+    set(CMAKE_CXX_FLAGS_RELEASE "-O3 -march=native -flto -funroll-loops")
+endif()
+
 file(GLOB_RECURSE VK_X11_SRC CONFIGURE_DEPENDS *.cpp)
 
 add_library(vkx11 SHARED ${VK_X11_SRC})

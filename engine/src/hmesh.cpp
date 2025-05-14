@@ -1,7 +1,4 @@
 #include "hmesh.h"
-
-#include <_bsd_types.h>
-
 #include "hyperflow.h"
 #include "hinternal.h"
 #include "hmeshconvertor.h"
@@ -93,7 +90,7 @@ namespace hf
                         offset += pncStep;
                     }
                 }
-
+                else offset += header.vertexCount * pncStep;
                 INTEGRITY_CHECK
             }
             if ((stats.typeFlags & MeshDataType::Position) != MeshDataType::None) strideOffset += pncStep;
@@ -108,7 +105,7 @@ namespace hf
                         offset += pncStep;
                     }
                 }
-
+                else offset += header.vertexCount * pncStep;
                 INTEGRITY_CHECK
             }
             if ((stats.typeFlags & MeshDataType::Normal) != MeshDataType::None) strideOffset += pncStep;
@@ -123,7 +120,7 @@ namespace hf
                         offset += pncStep;
                     }
                 }
-
+                else offset += header.vertexCount * pncStep;
                 INTEGRITY_CHECK
             }
             if ((stats.typeFlags & MeshDataType::Color) != MeshDataType::None) strideOffset += pncStep;
@@ -138,7 +135,7 @@ namespace hf
                         offset += tStep;
                     }
                 }
-
+                else offset += header.vertexCount * tStep;
                 INTEGRITY_CHECK
             }
 #undef INTEGRITY_CHECK

@@ -516,7 +516,7 @@ namespace hf
 	struct TextureDetails
 	{
 		TextureType type = TextureType::Tex2D;
-		TextureFormat format = TextureFormat::B8G8R8A8_Srgb;
+		TextureFormat format = TextureFormat::R8G8B8A8_Srgb;
 		TextureAspectFlags aspectFlags = TextureAspectFlags::Color;
 		TextureTiling tiling = TextureTiling::Optimal;
 		TextureUsageFlags usage = TextureUsageFlags::Sampled;

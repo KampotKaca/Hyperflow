@@ -1,3 +1,4 @@
+set(CMAKE_CXX_FLAGS_RELEASE "-O3 -march=native -flto -funroll-loops")
 project(meshconvertor)
 
 set(CMAKE_CXX_STANDARD 23)

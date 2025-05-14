@@ -7,6 +7,7 @@ namespace app
 	struct Vertex
 	{
 		hf::vec3 pos{};
+		hf::vec3 color{};
 		hf::vec2 texCoord{};
 	};
 
@@ -96,13 +97,14 @@ namespace app
 		hf::BufferAttribFormat formats[]
 		{
 			{ .type = hf::BufferDataType::F32, .size = 3, },
+			{ .type = hf::BufferDataType::F32, .size = 3, },
 			{ .type = hf::BufferDataType::F32, .size = 2, },
 		};
 
 		hf::BufferAttribDefinitionInfo bufferAttribDefinitionInfo
 		{
 			.bindingId = 0,
-			.formatCount = 2,
+			.formatCount = 3,
 			.pFormats = formats
 		};
 
@@ -177,7 +179,7 @@ namespace app
 			.filePath = "viking_room.obj",
 			.stats =
 			{
-				.typeFlags = hf::MeshDataType::Position | hf::MeshDataType::TexCoord,
+				.typeFlags = hf::MeshDataType::Position | hf::MeshDataType::Color | hf::MeshDataType::TexCoord,
 				.memoryType = hf::BufferMemoryType::Static,
 				.bufferAttrib = bufferAttrib
 			}
@@ -188,13 +190,13 @@ namespace app
 
 		hf::TextureCreationInfo texInfo
 		{
-			.filePath = "greek_head.jpg",
+			.filePath = "viking_room.png",
 			.desiredChannel = hf::TextureChannel::RGBA,
 			.mipLevels = 1,
 			.details
 			{
 				.type = hf::TextureType::Tex2D,
-				.format = hf::TextureFormat::B8G8R8A8_Srgb,
+				.format = hf::TextureFormat::R8G8B8A8_Srgb,
 				.aspectFlags = hf::TextureAspectFlags::Color,
 				.tiling = hf::TextureTiling::Optimal,
 				.usage = hf::TextureUsageFlags::Sampled,
@@ -335,7 +337,7 @@ namespace app
 	void Application::OnRender(const hf::Ref<hf::Renderer>& rn)
 	{
 		auto size = hf::renderer::GetSize(rn);
-		camera.model = glm::rotate(hf::mat4(1.0f), (float)hf::time::GetTimePassed() * glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+		camera.model = glm::rotate(hf::mat4(1.0f), (float)hf::time::GetTimePassed() * glm::radians(10.0f), glm::vec3(0.0f, 0.0f, 1.0f));
 		camera.view = glm::lookAt(hf::vec3(2.0f, 2.0f, 2.0f), hf::vec3(0.0f, 0.0f, 0.0f), hf::vec3(0.0f, 0.0f, 1.0f));
 		camera.proj = glm::perspective(glm::radians(45.0f), (float)size.x / (float)size.y, 0.1f, 10.0f);
 		camera.proj[1][1] *= -1;
