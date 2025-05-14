@@ -141,6 +141,7 @@ target_include_directories(${PROJECT_NAME}
         include/
         platforms/include
         rendering/include
+        ../meshconvertor/include
 )
 
 get_target_property(LIBS ${PROJECT_NAME} LINK_LIBRARIES)

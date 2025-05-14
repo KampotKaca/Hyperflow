@@ -134,6 +134,7 @@ namespace hf
 		Count
 	};
 
+	enum class DataTransferType { DoNotOwn, TransferOwnership, CopyData };
 	enum class Button : uint8_t { None, Left, Right, Wheel, Extra1, Extra2, Count };
 
 	enum class KeyState { None, Down, DownContinues, Up };
@@ -661,18 +662,23 @@ namespace hf
 	enum class MeshDataType
 	{
 		None = 0,
-		Position = 1 << 0, Normal = 1 << 1, TexCoord = 1 << 2, Color = 1 << 3,
+		Position = 1 << 0, Normal = 1 << 1, Color = 1 << 2, TexCoord = 1 << 3,
 		Default = Position | TexCoord,
 		All = Position | Normal | TexCoord | Color,
 	};
 	DEFINE_ENUM_FLAGS(MeshDataType)
 
-	enum class MeshIndexFormat { U8, U16, U32, };
+	enum class MeshIndexFormat
+	{
+		U8 = (uint32_t)BufferDataType::U8,
+		U16 = (uint32_t)BufferDataType::U16,
+		U32 = (uint32_t)BufferDataType::U32,
+	};
 
 	struct MeshStats
 	{
 		MeshDataType typeFlags = MeshDataType::Default;
-		MeshIndexFormat indexFormat = MeshIndexFormat::U16;
+		BufferMemoryType memoryType = BufferMemoryType::Static;
 		BufferAttrib bufferAttrib{};
 	};
 

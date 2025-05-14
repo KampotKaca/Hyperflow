@@ -7,11 +7,11 @@ namespace hf
 {
     struct VertBuffer
     {
-        VertBuffer(const VertBufferCreationInfo& info, bool storeDataLocally);
+        VertBuffer(const VertBufferCreationInfo& info, DataTransferType transferType);
         ~VertBuffer();
 
         VertBufferCreationInfo details{};
-        bool dataIsStoredLocally = false;
+        DataTransferType transferType = DataTransferType::DoNotOwn;
         void* handle{};
     };
 }

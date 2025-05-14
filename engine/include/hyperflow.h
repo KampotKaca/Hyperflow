@@ -106,6 +106,7 @@ namespace hf
 
 		void Resize(const Ref<Renderer>& rn, uvec2 size);
 		void Draw(const Ref<Renderer>& rn, const DrawCallInfo& info);
+		void Draw(const Ref<Renderer>& rn, const Ref<Mesh>& mesh);
 
 		//if true, will release internal resources, but will retain resource references
 		//it is made to be used for handling api changes.

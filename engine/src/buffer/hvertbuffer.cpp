@@ -5,12 +5,12 @@
 
 namespace hf
 {
-    VertBuffer::VertBuffer(const VertBufferCreationInfo& info, bool storeDataLocally)
-    : details(info), dataIsStoredLocally(storeDataLocally)
+    VertBuffer::VertBuffer(const VertBufferCreationInfo& info, DataTransferType transferType)
+    : details(info), transferType(transferType)
     {
         if (info.bufferAttrib == 0) throw GENERIC_EXCEPT("[Hyperflow]", "buffer attribute must be set");
-        
-        if (dataIsStoredLocally)
+
+        if (transferType == DataTransferType::CopyData)
         {
             uint64_t bufferSize = info.vertexCount * inter::HF.renderingApi.api.GetVertBufferAttribSize(info.bufferAttrib);
             details.pVertices = utils::Allocate(bufferSize);
@@ -22,7 +22,9 @@ namespace hf
 
     VertBuffer::~VertBuffer()
     {
-        if (dataIsStoredLocally) utils::Deallocate(details.pVertices);
+        if (transferType == DataTransferType::CopyData ||
+            transferType == DataTransferType::TransferOwnership)
+            utils::Deallocate(details.pVertices);
         inter::rendering::DestroyVertBuffer_i(this);
     }
 
@@ -30,7 +32,7 @@ namespace hf
     {
         Ref<VertBuffer> Create(const VertBufferCreationInfo& info)
         {
-            Ref<VertBuffer> buffer = MakeRef<VertBuffer>(info, true);
+            Ref<VertBuffer> buffer = MakeRef<VertBuffer>(info, DataTransferType::CopyData);
             inter::HF.graphicsResources.vertBuffers[buffer.get()] = buffer;
             return buffer;
         }

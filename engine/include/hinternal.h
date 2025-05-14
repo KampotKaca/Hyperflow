@@ -81,8 +81,8 @@ namespace hf::inter
         bool CreateIndexBuffer_i(IndexBuffer* buffer);
         bool DestroyIndexBuffer_i(IndexBuffer* buffer);
 
-        bool CreateMeshBuffer_i(Mesh* mesh);
-        bool DestroyMeshBuffer_i(Mesh* mesh);
+        bool CreateMesh_i(Mesh* mesh);
+        bool DestroyMesh_i(Mesh* mesh);
 
         bool CreateTexture_i(Texture* tex);
         bool DestroyTexture_i(Texture* tex);

@@ -6,11 +6,11 @@ namespace hf
 {
     struct IndexBuffer
     {
-        IndexBuffer(const IndexBufferCreationInfo& info, bool storeDataLocally);
+        IndexBuffer(const IndexBufferCreationInfo& info, DataTransferType transferType);
         ~IndexBuffer();
 
         IndexBufferCreationInfo details{};
-        bool dataIsStoredLocally = false;
+        DataTransferType transferType = DataTransferType::DoNotOwn;
         void* handle{};
     };
 }

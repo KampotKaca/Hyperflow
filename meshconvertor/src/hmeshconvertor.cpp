@@ -1,26 +1,7 @@
 #define GLM_ENABLE_EXPERIMENTAL
-#include <cstring>
-#include <filesystem>
-#include <iostream>
-#include <fstream>
-#include <vector>
 #include "tiny_obj_loader.h"
-#include "glm/glm.hpp"
 #include <glm/gtx/hash.hpp>
-
-#define DEFINE_ENUM_FLAGS(Enum)\
-inline Enum operator|(Enum a, Enum b) { return (Enum)((uint32_t)a | (uint32_t)b); }\
-inline Enum operator&(Enum a, Enum b) { return (Enum)((uint32_t)a & (uint32_t)b); }\
-inline Enum& operator|=(Enum& a, Enum b)\
-{\
-a = a | b;\
-return a;\
-}\
-inline Enum& operator&=(Enum& a, Enum b)\
-{\
-a = a & b;\
-return a;\
-}\
+#include "hmeshconvertor.h"
 
 struct Vertex
 {
@@ -50,40 +31,13 @@ namespace std
     };
 }
 
-enum class SubmeshDataType
-{
-    None = 0,
-    Position = 1 << 0, Normal = 1 << 1, Color = 1 << 2,
-    TexCoord = 1 << 3,
-};
-DEFINE_ENUM_FLAGS(SubmeshDataType)
-
-struct SubMeshHeader
-{
-    uint32_t vertexCount = 0;
-    uint32_t indexCount = 0;
-    uint32_t dataFlags = (uint32_t)SubmeshDataType::None;
-};
-
-struct SubMeshInfo
-{
-    std::vector<float> positions{};
-    std::vector<float> normals{};
-    std::vector<float> colors{};
-    std::vector<float> texCoords{};
-    std::vector<uint32_t> indices{};
-};
-
-struct MeshInfo
-{
-    std::vector<SubMeshHeader> headers{};
-    std::vector<SubMeshInfo> subMeshes{};
-};
-
 static void LoadModel(const char* path, MeshInfo* meshInfo);
+static bool WriteMesh(const MeshInfo& meshInfo, const std::string& outputFilePath);
 
 int main(int argc, char* argv[])
 {
+    std::ios_base::sync_with_stdio(true);
+
     if (argc != 3)
     {
         std::cout << "Usage: meshconv <input.obj> <output.mesh>" << std::endl;
@@ -93,27 +47,34 @@ int main(int argc, char* argv[])
     std::string inputPath = argv[1];
     std::string outputPath = argv[2];
 
-    tinyobj::attrib_t attrib;
-    std::vector<tinyobj::shape_t> shapes;
-    std::vector<tinyobj::material_t> materials;
-    std::string warn, err;
-
-    if (!tinyobj::LoadObj(&attrib, &shapes, &materials, &warn, &err, inputPath.c_str()))
+    try
     {
-        std::cerr << "Failed to load OBJ file: " << warn << err << std::endl;
+        MeshInfo meshInfo{};
+        LoadModel(inputPath.c_str(), &meshInfo);
+
+        if (WriteMesh(meshInfo, outputPath))
+        {
+            std::cout << "Successfully converted " << inputPath << " to " << outputPath << std::endl;
+            return 0;
+        }
+    }
+    catch (const std::exception& e)
+    {
+        std::cerr << "Error: " << e.what() << std::endl;
         return 1;
     }
 
-    // Open output file
-    std::ofstream outFile(outputPath, std::ios::binary);
+    return 0;
+}
+
+bool WriteMesh(const MeshInfo& meshInfo, const std::string& outputFilePath)
+{
+    std::ofstream outFile(outputFilePath, std::ios::binary);
     if (!outFile)
     {
         std::cerr << "Failed to open output file" << std::endl;
-        return 1;
+        return false;
     }
-
-    MeshInfo meshInfo{};
-    LoadModel(inputPath.c_str(), &meshInfo);
 
     uint32_t submeshCount = meshInfo.headers.size();
     uint32_t headerDataSize = meshInfo.headers.size() * sizeof(SubMeshHeader);
@@ -128,8 +89,10 @@ int main(int argc, char* argv[])
 
     outFile.write(headersData.data(), fullHeaderSize);
 
-    for (const auto& subMesh : meshInfo.subMeshes)
+    for (uint32_t i = 0; i < submeshCount; i++)
     {
+        auto& subMesh = meshInfo.subMeshes[i];
+        auto& header = meshInfo.headers[i];
         offset = 0;
 
         uint32_t submeshDataSize = 1;
@@ -137,7 +100,7 @@ int main(int argc, char* argv[])
         uint32_t normalSize = 0;
         uint32_t colorSize = 0;
         uint32_t texcoordSize = 0;
-        uint32_t indexSize = subMesh.indices.size() * sizeof(uint32_t);
+        uint32_t indexSize = subMesh.indices.size();
 
         if (!subMesh.positions.empty())
         {
@@ -203,9 +166,7 @@ int main(int argc, char* argv[])
     }
 
     outFile.close();
-    std::cout << "Successfully converted " << inputPath << " to " << outputPath << std::endl;
-
-    return 0;
+    return true;
 }
 
 void LoadModel(const char* path, MeshInfo* meshInfo)
@@ -247,9 +208,9 @@ void LoadModel(const char* path, MeshInfo* meshInfo)
             {
                 vertex.normal =
                 {
-                    attrib.vertices[3 * index.normal_index + 0],
-                    attrib.vertices[3 * index.normal_index + 1],
-                    attrib.vertices[3 * index.normal_index + 2]
+                    attrib.normals[3 * index.normal_index + 0],
+                    attrib.normals[3 * index.normal_index + 1],
+                    attrib.normals[3 * index.normal_index + 2]
                 };
             }
 
@@ -272,9 +233,9 @@ void LoadModel(const char* path, MeshInfo* meshInfo)
                 };
             }
 
-            if (uniqueVertices.count(vertex) == 0)
+            if (!uniqueVertices.contains(vertex))
             {
-                uniqueVertices[vertex] = static_cast<uint32_t>(vertices.size());
+                uniqueVertices[vertex] = (uint32_t)vertices.size();
                 vertices.push_back(vertex);
             }
 
@@ -283,64 +244,92 @@ void LoadModel(const char* path, MeshInfo* meshInfo)
 
         SubMeshInfo subMeshInfo
         {
-            .indices = std::move(indices)
         };
 
-        SubmeshDataType dataFlags = SubmeshDataType::None;
+        hf::MeshDataType dataFlags = hf::MeshDataType::None;
         if (!attrib.vertices.empty())
         {
             subMeshInfo.positions.resize(vertices.size() * 3);
-            dataFlags |= SubmeshDataType::Position;
+            dataFlags |= hf::MeshDataType::Position;
         }
         if (!attrib.normals.empty())
         {
             subMeshInfo.normals.resize(vertices.size() * 3);
-            dataFlags |= SubmeshDataType::Normal;
+            dataFlags |= hf::MeshDataType::Normal;
         }
         if (!attrib.colors.empty())
         {
             subMeshInfo.colors.resize(vertices.size() * 3);
-            dataFlags |= SubmeshDataType::Color;
+            dataFlags |= hf::MeshDataType::Color;
         }
         if (!attrib.texcoords.empty())
         {
             subMeshInfo.texCoords.resize(vertices.size() * 2);
-            dataFlags |= SubmeshDataType::TexCoord;
+            dataFlags |= hf::MeshDataType::TexCoord;
         }
 
         SubMeshHeader header
         {
             .vertexCount = (uint32_t)vertices.size(),
-            .indexCount = (uint32_t)subMeshInfo.indices.size(),
-            .dataFlags = (uint32_t)dataFlags
+            .indexCount = (uint32_t)indices.size(),
+            .dataFlags = (uint32_t)dataFlags,
         };
+
+        if (vertices.size() <= 255)
+        {
+            header.indexFormat = (uint32_t)hf::MeshIndexFormat::U8;
+            subMeshInfo.indices = std::vector<char>(indices.size());
+
+            for (uint32_t i = 0; i < indices.size(); ++i)
+            {
+                uint8_t result = (uint8_t)indices[i];
+                memcpy(&subMeshInfo.indices[i], &result, sizeof(uint8_t));
+            }
+        }
+        else if (vertices.size() <= 65535)
+        {
+            header.indexFormat = (uint32_t)hf::MeshIndexFormat::U16;
+            subMeshInfo.indices = std::vector<char>(indices.size() * 2);
+            for (uint32_t i = 0; i < indices.size(); ++i)
+            {
+                uint16_t result = (uint16_t)indices[i];
+                memcpy(&subMeshInfo.indices[i * 2], &result, sizeof(uint16_t));
+            }
+        }
+        else
+        {
+            header.indexFormat = (uint32_t)hf::MeshIndexFormat::U32;
+            subMeshInfo.indices = std::vector<char>(indices.size() * 4);
+            memcpy(subMeshInfo.indices.data(), indices.data(), sizeof(uint32_t) * indices.size());
+        }
+
         meshInfo->headers.push_back(header);
 
         for (uint32_t i = 0; i < vertices.size(); ++i)
         {
             const auto& vertex = vertices[i];
-            if (header.dataFlags & (uint32_t)SubmeshDataType::Position)
+            if (header.dataFlags & (uint32_t)hf::MeshDataType::Position)
             {
                 subMeshInfo.positions[i * 3 + 0] = vertex.pos.x;
                 subMeshInfo.positions[i * 3 + 1] = vertex.pos.y;
                 subMeshInfo.positions[i * 3 + 2] = vertex.pos.z;
             }
 
-            if (header.dataFlags & (uint32_t)SubmeshDataType::Normal)
+            if (header.dataFlags & (uint32_t)hf::MeshDataType::Normal)
             {
                 subMeshInfo.normals[i * 3 + 0] = vertex.normal.x;
                 subMeshInfo.normals[i * 3 + 1] = vertex.normal.y;
                 subMeshInfo.normals[i * 3 + 2] = vertex.normal.z;
             }
 
-            if (header.dataFlags & (uint32_t)SubmeshDataType::Color)
+            if (header.dataFlags & (uint32_t)hf::MeshDataType::Color)
             {
                 subMeshInfo.colors[i * 3 + 0] = vertex.color.x;
                 subMeshInfo.colors[i * 3 + 1] = vertex.color.y;
                 subMeshInfo.colors[i * 3 + 2] = vertex.color.z;
             }
 
-            if (header.dataFlags & (uint32_t)SubmeshDataType::TexCoord)
+            if (header.dataFlags & (uint32_t)hf::MeshDataType::TexCoord)
             {
                 subMeshInfo.texCoords[i * 2 + 0] = vertex.texCoord.x;
                 subMeshInfo.texCoords[i * 2 + 1] = vertex.texCoord.y;

@@ -7,27 +7,7 @@ namespace app
 	struct Vertex
 	{
 		hf::vec3 pos{};
-		hf::vec3 color{};
 		hf::vec2 texCoord{};
-	};
-
-	constexpr Vertex vertices[]
-	{
-		{{-0.5f, -0.5f, 0.0f}, {1.0f, 0.0f, 0.0f}, {0.0f, 0.0f}},
-		{{0.5f, -0.5f, 0.0f}, {0.0f, 1.0f, 0.0f}, {1.0f, 0.0f}},
-		{{0.5f, 0.5f, 0.0f}, {0.0f, 0.0f, 1.0f}, {1.0f, 1.0f}},
-		{{-0.5f, 0.5f, 0.0f}, {1.0f, 1.0f, 1.0f}, {0.0f, 1.0f}},
-
-		{{-0.5f, -0.5f, -0.5f}, {1.0f, 0.0f, 0.0f}, {0.0f, 0.0f}},
-		{{0.5f, -0.5f, -0.5f}, {0.0f, 1.0f, 0.0f}, {1.0f, 0.0f}},
-		{{0.5f, 0.5f, -0.5f}, {0.0f, 0.0f, 1.0f}, {1.0f, 1.0f}},
-		{{-0.5f, 0.5f, -0.5f}, {1.0f, 1.0f, 1.0f}, {0.0f, 1.0f}}
-	};
-
-	constexpr uint16_t indices[]
-	{
-		0, 1, 2, 2, 3, 0,
-		4, 5, 6, 6, 7, 4
 	};
 
 	uint32_t count = 0;
@@ -35,8 +15,7 @@ namespace app
 	hf::Ref<hf::Window> wn{};
 	int32_t lastReq = -1;
 	hf::Ref<hf::Shader> shader{};
-	hf::Ref<hf::VertBuffer> vertBuffer{};
-	hf::Ref<hf::IndexBuffer> indexBuffer{};
+	hf::Ref<hf::Mesh> mesh{};
 
 	hf::Ref<hf::Texture> texture{};
 	hf::Ref<hf::TexturePack> texPack{};
@@ -117,14 +96,13 @@ namespace app
 		hf::BufferAttribFormat formats[]
 		{
 			{ .type = hf::BufferDataType::F32, .size = 3, },
-			{ .type = hf::BufferDataType::F32, .size = 3, },
 			{ .type = hf::BufferDataType::F32, .size = 2, },
 		};
 
 		hf::BufferAttribDefinitionInfo bufferAttribDefinitionInfo
 		{
 			.bindingId = 0,
-			.formatCount = 3,
+			.formatCount = 2,
 			.pFormats = formats
 		};
 
@@ -194,25 +172,18 @@ namespace app
 
 	void Application::LoadResources()
 	{
-		hf::VertBufferCreationInfo vertBufferInfo
+		hf::MeshCreationInfo meshInfo
 		{
-			.bufferAttrib = bufferAttrib,
-			.memoryType = hf::BufferMemoryType::Static,
-			.vertexCount = 8,
-			.pVertices = (void*)vertices,
+			.filePath = "viking_room.obj",
+			.stats =
+			{
+				.typeFlags = hf::MeshDataType::Position | hf::MeshDataType::TexCoord,
+				.memoryType = hf::BufferMemoryType::Static,
+				.bufferAttrib = bufferAttrib
+			}
 		};
+		mesh = hf::mesh::Create(meshInfo);
 
-		vertBuffer = hf::vertbuffer::Create(vertBufferInfo);
-
-		hf::IndexBufferCreationInfo indexBufferInfo
-		{
-			.indexFormat = hf::BufferDataType::U16,
-			.memoryType = hf::BufferMemoryType::Static,
-			.indexCount = 12,
-			.pIndices = (void*)indices,
-		};
-
-		indexBuffer = hf::indexbuffer::Create(indexBufferInfo);
 		hf::buffer::SubmitAll();
 
 		hf::TextureCreationInfo texInfo
@@ -395,15 +366,7 @@ namespace app
 		hf::shader::Bind(rn, shader, bufferAttrib);
 		hf::texturepack::Bind(rn, texPack);
 
-		hf::DrawCallInfo drawCallInfo
-		{
-			.pVertBuffers = &vertBuffer,
-			.bufferCount = 1,
-			.indexBuffer = indexBuffer,
-			.instanceCount = 1
-		};
-
-		hf::renderer::Draw(rn, drawCallInfo);
+		hf::renderer::Draw(rn, mesh);
 
 		hf::renderpass::End(rn);
 	}

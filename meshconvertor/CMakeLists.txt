@@ -11,10 +11,13 @@ target_link_libraries(${PROJECT_NAME}
         PRIVATE
         tiny_obj
         glm
+        logc
+        ext
 )
 
 target_include_directories(${PROJECT_NAME}
         PRIVATE
+        include
         ${CMAKE_SOURCE_DIR}/engine/include
         ${CMAKE_SOURCE_DIR}/engine/external/glm
 )

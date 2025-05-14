@@ -92,6 +92,7 @@ namespace hf
             if (inter::HF.renderingApi.isLoaded) inter::HF.renderingApi.api.WaitForRendering();
             vertbuffer::DestroyAll(internalOnly);
             indexbuffer::DestroyAll(internalOnly);
+            mesh::DestroyAll(internalOnly);
             shader::DestroyAll(internalOnly);
 
             texture::DestroyAll(internalOnly);
@@ -136,8 +137,12 @@ namespace hf
             if (HF.lifecycleCallbacks.onRendererLoad) HF.lifecycleCallbacks.onRendererLoad();
 
             for (auto& shader : std::ranges::views::values(HF.graphicsResources.shaders)) CreateShader_i(shader.get());
+
             for (auto& vertBuffer : std::ranges::views::values(HF.graphicsResources.vertBuffers)) CreateVertBuffer_i(vertBuffer.get());
             for (auto& indexBuffer : std::ranges::views::values(HF.graphicsResources.indexBuffers)) CreateIndexBuffer_i(indexBuffer.get());
+            for (auto& mesh : std::ranges::views::values(HF.graphicsResources.meshes)) CreateMesh_i(mesh.get());
+            buffer::SubmitAll();
+
             for (auto& texture : std::ranges::views::values(HF.graphicsResources.textures)) CreateTexture_i(texture.get());
             for (auto& texPack : std::ranges::views::values(HF.graphicsResources.texturePacks)) CreateTexturePack_i(texPack.get());
             texture::SubmitAll();
