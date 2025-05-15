@@ -67,7 +67,7 @@ namespace hf
         {
             auto& header = headers[i];
             void* vertices = utils::Allocate(header.vertexCount * vertexStride);
-            auto* rf = (u_char*)vertices;
+            auto* rf = (unsigned char*)vertices;
             memset(vertices, 0, header.vertexCount * vertexStride);
 
 #define INTEGRITY_CHECK\

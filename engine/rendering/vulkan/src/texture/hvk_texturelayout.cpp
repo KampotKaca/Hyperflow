@@ -26,7 +26,7 @@ namespace hf
         {
             .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO,
             .bindingCount = info.bindingCount,
-            .pBindings = GRAPHICS_DATA.preAllocBuffers.descLayoutBindings
+            .pBindings = GRAPHICS_DATA.preAllocBuffers.descLayoutBindings,
         };
 
         VK_HANDLE_EXCEPT(vkCreateDescriptorSetLayout(GRAPHICS_DATA.defaultDevice->logicalDevice.device,

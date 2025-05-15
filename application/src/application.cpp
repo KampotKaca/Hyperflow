@@ -12,13 +12,14 @@ namespace app
 	};
 
 	uint32_t count = 0;
+	uint32_t currentTexture = 0;
 	uint32_t reqCount = 0;
 	hf::Ref<hf::Window> wn{};
 	int32_t lastReq = -1;
 	hf::Ref<hf::Shader> shader{};
 	hf::Ref<hf::Mesh> mesh{};
 
-	hf::Ref<hf::Texture> texture{};
+	hf::Ref<hf::Texture> textures[2]{};
 	hf::Ref<hf::TexturePack> texPack{};
 	hf::Ref<hf::TexturePackAllocator> texPackAllocator{};
 
@@ -205,13 +206,31 @@ namespace app
 			}
 		};
 
-		texture = hf::texture::Create(texInfo);
+		textures[0] = hf::texture::Create(texInfo);
+
+		hf::TextureCreationInfo secondTexInfo
+		{
+			.filePath = "greek_head.jpg",
+			.desiredChannel = hf::TextureChannel::RGBA,
+			.mipLevels = 1,
+			.details
+			{
+				.type = hf::TextureType::Tex2D,
+				.format = hf::TextureFormat::R8G8B8A8_Srgb,
+				.aspectFlags = hf::TextureAspectFlags::Color,
+				.tiling = hf::TextureTiling::Optimal,
+				.usage = hf::TextureUsageFlags::Sampled,
+				.memoryType = hf::BufferMemoryType::Static,
+				.finalLayout = hf::TextureResultLayoutType::ShaderReadOnly
+			}
+		};
+		textures[1] = hf::texture::Create(secondTexInfo);
 
 		hf::TexturePackBindingInfo binding
 		{
 			.bindingId = 0,
 			.sampler = sampler,
-			.pTextures = &texture,
+			.pTextures = &textures[currentTexture],
 			.textureCount = 1
 		};
 
@@ -331,7 +350,9 @@ namespace app
 
 	void Application::OnPreRender(const hf::Ref<hf::Renderer>& rn)
 	{
-
+		currentTexture++;
+		currentTexture %= 2;
+		hf::texturepack::SetBindingTextures(texPack, 0, &textures[currentTexture], 1, 0);
 	}
 
 	void Application::OnRender(const hf::Ref<hf::Renderer>& rn)

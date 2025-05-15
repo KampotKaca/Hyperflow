@@ -85,6 +85,7 @@ namespace hf
         void SetBindingTextures(const Ref<TexturePack>& pack, uint32_t bindingIndex,
             const Ref<Texture>* pTextures, uint32_t textureCount, uint32_t textureOffset)
         {
+            if (textureCount == 0) return;
             auto& binding = pack->bindings[bindingIndex];
             memcpy(&binding.textures[textureOffset], pTextures, textureCount * sizeof(Ref<Texture>));
 
@@ -96,14 +97,10 @@ namespace hf
                 .sampler = binding.sampler
             };
 
-            if (textureCount > 0)
-            {
-                std::vector<void*> texHandles(textureCount);
-                for (uint32_t i = 0; i < textureCount; i++)
-                    texHandles[i] = binding.textures[textureOffset + i]->handle;
-                uploadInfo.pTextures = texHandles.data();
-            }
-            else uploadInfo.pTextures = nullptr;
+            std::vector<void*> texHandles(textureCount);
+            for (uint32_t i = 0; i < textureCount; i++)
+                texHandles[i] = binding.textures[textureOffset + i]->handle;
+            uploadInfo.pTextures = texHandles.data();
             inter::HF.renderingApi.api.UploadTexturePack(pack->handle, uploadInfo);
         }
 

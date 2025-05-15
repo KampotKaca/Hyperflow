@@ -108,10 +108,25 @@ namespace hf
 
         VkBufferImageCopy pRegions[VULKAN_API_MAX_NUM_COPY_REGIONS]{};
         uint32_t regionCount = 0;
+        uint32_t mipLevels = 1;
 
         void* uData{};
         void (*taskCompletionCallback)(void* udata){};
         bool deleteSrcAfterCopy = false;
+    };
+
+    struct ImageTransitionInfo
+    {
+        VkImage image{};
+        VkFormat format{};
+        VkImageAspectFlags aspectFlags{};
+        uint32_t mipLevels = 1;
+    };
+
+    struct ImageTransitionArray
+    {
+        ImageTransitionInfo infos[VK_MAX_IMAGE_BARRIERS]{};
+        uint32_t count = 0;
     };
 
     struct PreAllocatedBuffers
@@ -123,6 +138,8 @@ namespace hf
         VkWriteDescriptorSet descWrites[FRAMES_IN_FLIGHT]{};
         VkDescriptorImageInfo descImageBindings[VK_MAX_IMAGE_BINDINGS]{};
         VkDescriptorPoolSize descPoolSizes[(uint32_t)UniformBufferType::MaxEnum]{};
+        VkImageMemoryBarrier imageBarriers[VK_MAX_IMAGE_BARRIERS]{};
+        ImageTransitionArray imageTransitions[9]{};
     };
 
     struct GraphicsData
@@ -258,7 +275,7 @@ namespace hf
     uint32_t GetMemoryType(uint32_t filter, VkMemoryPropertyFlags props);
     void StageCopyOperation(const VkCopyBufferToBufferOperation& operation);
     void StageCopyOperation(const VkCopyBufferToImageOperation& operation);
-    void TransitionEmptyImageLayout(VkImage image, VkFormat format, VkImageLayout srcLayout, VkImageLayout dstLayout, VkImageAspectFlags aspectFlags);
+    void BufferOperation(VkCommandBuffer command, VkQueue queue, void (*CopyCallback)(VkCommandBuffer command));
 
     void SubmitAllOperations();
     void SubmitBufferToBufferCopyOperations();

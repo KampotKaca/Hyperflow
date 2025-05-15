@@ -4,7 +4,6 @@
 namespace hf
 {
     static void SetMemoryTypeFlags(BufferMemoryType memoryType, VmaAllocationCreateInfo* result);
-    static void BufferOperation(VkCommandBuffer command, VkQueue queue, void (*CopyCallback)(VkCommandBuffer command));
 
     uint32_t GetMemoryType(uint32_t filter, VkMemoryPropertyFlags props)
     {
@@ -148,119 +147,6 @@ namespace hf
         }
     }
 
-    inline void TransitionImageLayout(
-        VkCommandBuffer command, VkImage image, VkFormat format,
-        VkImageLayout oldLayout, VkImageLayout newLayout, VkImageAspectFlags aspectFlags)
-    {
-        VkImageMemoryBarrier barrier
-        {
-            .sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER,
-            .oldLayout = oldLayout,
-            .newLayout = newLayout,
-            .srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
-            .dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
-            .image = image,
-            .subresourceRange
-            {
-                .aspectMask = aspectFlags,
-                .baseMipLevel = 0,
-                .levelCount = 1,
-                .baseArrayLayer = 0,
-                .layerCount = 1
-            },
-        };
-
-        VkPipelineStageFlags sourceStage;
-        VkPipelineStageFlags destinationStage;
-
-        if (oldLayout == VK_IMAGE_LAYOUT_UNDEFINED &&
-            newLayout == VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL)
-        {
-            barrier.srcAccessMask = 0;
-            barrier.dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
-
-            sourceStage = VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT;
-            destinationStage = VK_PIPELINE_STAGE_TRANSFER_BIT;
-        }
-        else if (oldLayout == VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL &&
-                 newLayout == VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL)
-        {
-            barrier.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
-            barrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
-
-            sourceStage = VK_PIPELINE_STAGE_TRANSFER_BIT;
-            destinationStage = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
-        }
-        else if (oldLayout == VK_IMAGE_LAYOUT_UNDEFINED && newLayout == VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL) {
-            barrier.srcAccessMask = 0;
-            barrier.dstAccessMask = VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_READ_BIT | VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
-
-            sourceStage = VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT;
-            destinationStage = VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
-        }
-        else throw GENERIC_EXCEPT("[Hyperflow]", "Unsupported layout transition!");
-
-        vkCmdPipelineBarrier(command, sourceStage, destinationStage,
-            0, 0, nullptr,
-            0, nullptr,
-            1, &barrier);
-    }
-
-    inline void TransitionBufferToImageStart(VkCommandBuffer command)
-    {
-        for (auto& operation : GRAPHICS_DATA.bufferToImageCopyOperations)
-        {
-            TransitionImageLayout(command, operation.dstImage, operation.format,
-                operation.srcLayout, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, operation.aspectFlags);
-        }
-    }
-
-    inline void CopyBufferToImage(VkCommandBuffer command)
-    {
-        for (auto& operation : GRAPHICS_DATA.bufferToImageCopyOperations)
-        {
-            vkCmdCopyBufferToImage(command, operation.srcBuffer, operation.dstImage,
-                VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
-                operation.regionCount, operation.pRegions);
-        }
-    }
-
-    inline void TransitionBufferToImageEnd(VkCommandBuffer command)
-    {
-        for (auto& operation : GRAPHICS_DATA.bufferToImageCopyOperations)
-        {
-            TransitionImageLayout(command, operation.dstImage, operation.format,
-                VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, operation.dstLayout, operation.aspectFlags);
-        }
-    }
-
-    void TransitionEmptyImageLayout(VkImage image, VkFormat format, VkImageLayout srcLayout,
-        VkImageLayout dstLayout, VkImageAspectFlags aspectFlags)
-    {
-        auto command = GRAPHICS_DATA.graphicsPool.buffers[0];
-        VkCommandBufferBeginInfo beginInfo
-        {
-            .sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO,
-        };
-
-        VK_HANDLE_EXCEPT(vkResetCommandBuffer(command, 0));
-        VK_HANDLE_EXCEPT(vkBeginCommandBuffer(command, &beginInfo));
-
-        TransitionImageLayout(command, image, format, srcLayout, dstLayout, aspectFlags);
-
-        VK_HANDLE_EXCEPT(vkEndCommandBuffer(command));
-        VkSubmitInfo submitInfo
-        {
-            .sType = VK_STRUCTURE_TYPE_SUBMIT_INFO,
-            .commandBufferCount = 1,
-            .pCommandBuffers = &command
-        };
-
-        auto& queue = GRAPHICS_DATA.defaultDevice->logicalDevice.graphicsQueue;
-        vkQueueSubmit(queue, 1, &submitInfo, VK_NULL_HANDLE);
-        vkQueueWaitIdle(queue);
-    }
-
     void SubmitAllOperations()
     {
         SubmitBufferToBufferCopyOperations();
@@ -282,26 +168,6 @@ namespace hf
             }
 
             GRAPHICS_DATA.bufferToBufferCopyOperations.clear();
-        }
-    }
-
-    void SubmitBufferToImageCopyOperations()
-    {
-        if (!GRAPHICS_DATA.bufferToImageCopyOperations.empty())
-        {
-            auto& device = GRAPHICS_DATA.defaultDevice->logicalDevice;
-            BufferOperation(GRAPHICS_DATA.transferPool.buffers[0], device.transferQueue, TransitionBufferToImageStart);
-            BufferOperation(GRAPHICS_DATA.transferPool.buffers[0], device.transferQueue, CopyBufferToImage);
-            BufferOperation(GRAPHICS_DATA.graphicsPool.buffers[0], device.graphicsQueue, TransitionBufferToImageEnd);
-
-            for (auto& operation : GRAPHICS_DATA.bufferToImageCopyOperations)
-            {
-                if (operation.deleteSrcAfterCopy)
-                    vmaDestroyBuffer(GRAPHICS_DATA.allocator, operation.srcBuffer, operation.srcMemory);
-                if (operation.taskCompletionCallback) operation.taskCompletionCallback(operation.uData);
-            }
-
-            GRAPHICS_DATA.bufferToImageCopyOperations.clear();
         }
     }
 

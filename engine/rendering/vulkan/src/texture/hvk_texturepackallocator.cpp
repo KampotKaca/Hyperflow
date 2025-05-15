@@ -38,6 +38,7 @@ namespace hf
         VkDescriptorPoolCreateInfo poolInfo
         {
             .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO,
+            .flags = VK_DESCRIPTOR_POOL_CREATE_UPDATE_AFTER_BIND_BIT,
             .maxSets = descriptorCount,
             .poolSizeCount = poolSize,
             .pPoolSizes = GRAPHICS_DATA.preAllocBuffers.descPoolSizes
