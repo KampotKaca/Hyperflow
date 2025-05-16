@@ -76,7 +76,6 @@ namespace hf
     void CreateSwapchainFrameBuffers(VkRenderer* rn)
     {
         auto& swapchain = rn->swapchain;
-        swapchain.frameBuffers = std::vector<VkFrameBuffer*>(swapchain.imageViews.size());
         uint32_t size = 0;
         for (uint32_t i = 0; i < rn->passTextureCollections.size(); ++i)
         {
@@ -84,9 +83,9 @@ namespace hf
             // size += rn->passTextureCollections[i].colorTextures.size() * swapchain.imageViews.size();
         }
         std::vector<VkImageView> views(1 + size);
-        for (uint32_t i = 0; i < swapchain.imageViews.size(); ++i)
+        for (uint32_t i = 0; i < swapchain.images.size(); ++i)
         {
-            views[0] = swapchain.imageViews[i];
+            views[0] = swapchain.images[i].view;
             uint32_t viewIndex = 1;
             for (uint32_t j = 0; j < rn->passTextureCollections.size(); ++j)
             {
@@ -97,15 +96,14 @@ namespace hf
                     viewIndex++;
                 }
             }
-            swapchain.frameBuffers[i] = new VkFrameBuffer(views.data(), views.size(),
+            swapchain.images[i].frameBuffer = new VkFrameBuffer(views.data(), views.size(),
                 rn->mainPass, swapchain.details.extent);
         }
     }
 
     void DestroySwapchainFrameBuffers(VkRenderer* rn)
     {
-        for (auto& frameBuffer : rn->swapchain.frameBuffers) delete frameBuffer;
-        rn->swapchain.frameBuffers.clear();
+        for (auto& image : rn->swapchain.images) delete image.frameBuffer;
     }
 
     void QuerySwapChainSupport(const VkPhysicalDevice& device, const VkSurfaceKHR& surface, SwapChainSupportDetails* supportDetails)

@@ -113,8 +113,13 @@ namespace hf
         }
 
         DestroySwapchain(*result, &oldSwapchain);
-        result->images = images;
-        result->imageViews = imageViews;
+        result->images = std::vector<SwapchainImage>(imageCount);
+        for (uint32_t i = 0; i < imageCount; i++)
+        {
+            auto& resImage = result->images[i];
+            resImage.image = images[i];
+            resImage.view = imageViews[i];
+        }
     }
 
     void DestroySwapchain(GraphicsSwapChain& gc, VkSwapchainKHR* swapchain)
@@ -131,11 +136,8 @@ namespace hf
     void DestroyExistingViews(GraphicsSwapChain& swapchain)
     {
         auto& device = GRAPHICS_DATA.defaultDevice->logicalDevice.device;
-        for (auto& imageView : swapchain.imageViews)
-            vkDestroyImageView(device, imageView, nullptr);
-
-        swapchain.imageViews.clear();
-        swapchain.images.clear();
+        for (auto& image : swapchain.images)
+            vkDestroyImageView(device, image.view, nullptr);
     }
 
     void RecreateSwapchain(VkRenderer* rn)

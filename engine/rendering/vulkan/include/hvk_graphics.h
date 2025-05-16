@@ -194,14 +194,19 @@ namespace hf
         VkExtent2D extent{};
     };
 
+    struct SwapchainImage
+    {
+        VkImage image{};
+        VkImageView view{};
+        VkFrameBuffer* frameBuffer{};
+    };
+
     struct GraphicsSwapChain
     {
         VkSurfaceKHR surface = VK_NULL_HANDLE;
         VkSwapchainKHR swapchain = VK_NULL_HANDLE;
-        std::vector<VkImage> images{};
-        std::vector<VkImageView> imageViews{};
         GraphicsSwapchainDetails details{};
-        std::vector<VkFrameBuffer*> frameBuffers{};
+        std::vector<SwapchainImage> images{};
     };
 
     struct VkFrame

@@ -303,7 +303,7 @@ namespace hf
     {
         if (rn->currentPass) throw GENERIC_EXCEPT("[Hyperflow]", "Begin render pass called twice without ending previous one");
         auto& drawPass = GetRenderPass(pass);
-        const auto frameBuffer = rn->swapchain.frameBuffers[rn->imageIndex];
+        const auto frameBuffer = rn->swapchain.images[rn->imageIndex].frameBuffer;
         VkRenderPassBeginInfo renderPassInfo
         {
             .sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO,

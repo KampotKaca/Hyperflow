@@ -350,9 +350,9 @@ namespace app
 
 	void Application::OnPreRender(const hf::Ref<hf::Renderer>& rn)
 	{
-		currentTexture++;
-		currentTexture %= 2;
-		hf::texturepack::SetBindingTextures(texPack, 0, &textures[currentTexture], 1, 0);
+		// currentTexture++;
+		// currentTexture %= 2;
+		// hf::texturepack::SetBindingTextures(texPack, 0, &textures[currentTexture], 1, 0);
 	}
 
 	void Application::OnRender(const hf::Ref<hf::Renderer>& rn)
