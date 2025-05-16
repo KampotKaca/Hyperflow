@@ -199,8 +199,8 @@ namespace hf
             .pCommandBuffers = &command
         };
 
-        vkQueueSubmit(queue, 1, &submitInfo, VK_NULL_HANDLE);
-        vkQueueWaitIdle(queue);
+        VK_HANDLE_EXCEPT(vkQueueSubmit(queue, 1, &submitInfo, VK_NULL_HANDLE));
+        VK_HANDLE_EXCEPT(vkQueueWaitIdle(queue));
     }
 
     static void SetMemoryTypeFlags(BufferMemoryType memoryType, VmaAllocationCreateInfo* result)

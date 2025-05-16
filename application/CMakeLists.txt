@@ -13,12 +13,6 @@ endif()
 
 set(CMAKE_CXX_STANDARD 23)
 
-if(CMAKE_BUILD_TYPE STREQUAL "Debug")
-    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O0")
-elseif(CMAKE_BUILD_TYPE STREQUAL "Release")
-    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O2")
-endif()
-
 file(GLOB_RECURSE PROJECT_SRC CONFIGURE_DEPENDS src/*.cpp)
 
 add_executable(${PROJECT_NAME} ${PROJECT_SRC})

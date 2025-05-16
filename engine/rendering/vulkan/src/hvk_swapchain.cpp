@@ -113,7 +113,7 @@ namespace hf
         }
 
         DestroySwapchain(*result, &oldSwapchain);
-        result->images = std::vector<SwapchainImage>(imageCount);
+        if (result->images.size() != imageCount) result->images = std::vector<SwapchainImage>(imageCount);
         for (uint32_t i = 0; i < imageCount; i++)
         {
             auto& resImage = result->images[i];
@@ -154,12 +154,12 @@ namespace hf
 
     void PresentSwapchain(VkRenderer* rn)
     {
-        auto frame = rn->frames[rn->currentFrame];
+        auto& image = rn->swapchain.images[rn->imageIndex];
         VkPresentInfoKHR presentInfo
         {
             .sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR,
             .waitSemaphoreCount = 1,
-            .pWaitSemaphores = &frame.isRenderingFinished,
+            .pWaitSemaphores = &image.isRenderingFinished,
             .swapchainCount = 1,
             .pSwapchains = &rn->swapchain.swapchain,
             .pImageIndices = &rn->imageIndex,
@@ -174,30 +174,37 @@ namespace hf
 
     bool AcquireNextImage(VkRenderer* rn)
     {
-        auto& frame = rn->frames[rn->currentFrame];
         auto& device = GRAPHICS_DATA.defaultDevice->logicalDevice.device;
 
         tryAgain:
-        vkWaitForFences(device, 1, &frame.isInFlight, true, VULKAN_API_MAX_TIMEOUT);
-        SubmitAllOperations();
-
-        uint32_t tryCount = 0;
-        auto result = vkAcquireNextImageKHR(device,
-                            rn->swapchain.swapchain, VULKAN_API_MAX_TIMEOUT,
-                            frame.isImageAvailable, VK_NULL_HANDLE, &rn->imageIndex);
-        if (result == VK_ERROR_OUT_OF_DATE_KHR)
         {
-            if (rn->targetSize.x == 0 || rn->targetSize.y == 0) return false;
-            RecreateSwapchain(rn);
-            tryCount++;
-            if (tryCount < 3) goto tryAgain;
-            LOG_WARN("Recreating swapchain failed 3 times");
+            if (rn->imageIndex != UINT32_MAX)
+            {
+                auto& previousImage = rn->swapchain.images[rn->imageIndex];
+                vkWaitForFences(device, 1, &previousImage.isInFlight, true, VULKAN_API_MAX_TIMEOUT);
+                vkResetFences(device, 1, &previousImage.isInFlight);
+            }
+            else rn->imageIndex = rn->swapchain.images.size() - 1;
+
+            SubmitAllOperations();
+
+            uint32_t tryCount = 0;
+            auto result = vkAcquireNextImageKHR(device,
+                                rn->swapchain.swapchain, VULKAN_API_MAX_TIMEOUT,
+                                rn->frames[rn->currentFrame].isImageAvailable, VK_NULL_HANDLE, &rn->imageIndex);
+            if (result == VK_ERROR_OUT_OF_DATE_KHR)
+            {
+                if (rn->targetSize.x == 0 || rn->targetSize.y == 0) return false;
+                RecreateSwapchain(rn);
+                tryCount++;
+                if (tryCount < 3) goto tryAgain;
+                LOG_WARN("Recreating swapchain failed 3 times");
+            }
+
+            if (result != VK_SUCCESS && result != VK_SUBOPTIMAL_KHR)
+                throw GENERIC_EXCEPT("[Vulkan]", "Unable to acquire image from swapchain!");
         }
 
-        if (result != VK_SUCCESS && result != VK_SUBOPTIMAL_KHR)
-            throw GENERIC_EXCEPT("[Vulkan]", "Unable to acquire image from swapchain!");
-
-        vkResetFences(device, 1, &frame.isInFlight);
         return true;
     }
 }

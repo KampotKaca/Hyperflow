@@ -15,12 +15,6 @@ endif()
 
 set(CMAKE_CXX_STANDARD 23)
 
-if(CMAKE_BUILD_TYPE STREQUAL "Debug")
-    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O0")
-elseif(CMAKE_BUILD_TYPE STREQUAL "Release")
-    set(CMAKE_CXX_FLAGS_RELEASE "-O3 -march=native -flto -funroll-loops")
-endif()
-
 #region Platforms
 
 if (CMAKE_SYSTEM_NAME STREQUAL "Windows")

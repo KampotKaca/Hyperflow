@@ -32,7 +32,7 @@ namespace hf
 
         std::vector<VkFrame> frames{};
         uint32_t currentFrame = 0;
-        uint32_t imageIndex{};
+        uint32_t imageIndex = UINT32_MAX;
         bool vSyncOn = false;
         bool frameBufferResized = false;
     };

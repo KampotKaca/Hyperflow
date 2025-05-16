@@ -199,6 +199,9 @@ namespace hf
         VkImage image{};
         VkImageView view{};
         VkFrameBuffer* frameBuffer{};
+
+        VkSemaphore isRenderingFinished{};
+        VkFence isInFlight{};
     };
 
     struct GraphicsSwapChain
@@ -212,8 +215,6 @@ namespace hf
     struct VkFrame
     {
         VkSemaphore isImageAvailable{};
-        VkSemaphore isRenderingFinished{};
-        VkFence isInFlight{};
         VkCommandBuffer usedCommands[VULKAN_API_MAX_COMMANDS_PER_FRAME]{};
         uint32_t usedCommandCount = 0;
     };
@@ -247,9 +248,6 @@ namespace hf
 
     void CreateSwapchain(VkSurfaceKHR surface, uvec2 targetSize, bool vsyncOn, GraphicsSwapChain* result);
     void DestroySwapchain(GraphicsSwapChain& gc, VkSwapchainKHR* swapchain);
-
-    void CreateFrame(VkFrame* result);
-    void DestroyFrame(VkFrame& frame);
 
     void CreateCommandPool(const GraphicsDevice& device, uint32_t familyIndex, CommandPool* result);
     void DestroyCommandPool(const GraphicsDevice& device, CommandPool& pool);

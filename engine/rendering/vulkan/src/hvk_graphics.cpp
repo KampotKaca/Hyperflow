@@ -20,7 +20,15 @@ namespace hf
 
     VkRenderer::~VkRenderer()
     {
-        for (auto& frame : frames) DestroyFrame(frame);
+        for (uint32_t i = 0; i < swapchain.images.size(); ++i)
+        {
+            auto& image = swapchain.images[i];
+            DestroySemaphore(*GRAPHICS_DATA.defaultDevice, image.isRenderingFinished);
+            DestroyFence(*GRAPHICS_DATA.defaultDevice, image.isInFlight);
+        }
+
+        for (uint32_t i = 0; i < FRAMES_IN_FLIGHT; ++i)
+            DestroySemaphore(*GRAPHICS_DATA.defaultDevice, frames[i].isImageAvailable);
         frames.clear();
 
         ClearRendererPassData(this);
@@ -44,21 +52,15 @@ namespace hf
         CreateCommandBuffers(*GRAPHICS_DATA.defaultDevice, &rn->commandPool, FRAMES_IN_FLIGHT);
 
         rn->frames = std::vector<VkFrame>(FRAMES_IN_FLIGHT);
-        for (uint32_t i = 0; i < FRAMES_IN_FLIGHT; ++i) CreateFrame(&rn->frames[i]);
-    }
+        for (uint32_t i = 0; i < FRAMES_IN_FLIGHT; ++i)
+            CreateSemaphore(*GRAPHICS_DATA.defaultDevice, &rn->frames[i].isImageAvailable);
 
-    void CreateFrame(VkFrame* result)
-    {
-        CreateSemaphore(*GRAPHICS_DATA.defaultDevice, &result->isImageAvailable);
-        CreateSemaphore(*GRAPHICS_DATA.defaultDevice, &result->isRenderingFinished);
-        CreateFence(*GRAPHICS_DATA.defaultDevice, &result->isInFlight, true);
-    }
-
-    void DestroyFrame(VkFrame& frame)
-    {
-        DestroySemaphore(*GRAPHICS_DATA.defaultDevice, frame.isImageAvailable);
-        DestroySemaphore(*GRAPHICS_DATA.defaultDevice, frame.isRenderingFinished);
-        DestroyFence(*GRAPHICS_DATA.defaultDevice, frame.isInFlight);
+        for (uint32_t i = 0; i < rn->swapchain.images.size(); ++i)
+        {
+            auto& image = rn->swapchain.images[i];
+            CreateSemaphore(*GRAPHICS_DATA.defaultDevice, &image.isRenderingFinished);
+            CreateFence(*GRAPHICS_DATA.defaultDevice, &image.isInFlight, true);
+        }
     }
 
     //------------------------------------------------------------------------------------

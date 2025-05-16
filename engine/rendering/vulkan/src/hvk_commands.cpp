@@ -68,6 +68,7 @@ namespace hf
     {
         constexpr VkPipelineStageFlags waitStages[] = { VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT };
         auto& frame = rn->frames[rn->currentFrame];
+        auto& image = rn->swapchain.images[rn->imageIndex];
 
         VkSubmitInfo submitInfo
         {
@@ -78,10 +79,12 @@ namespace hf
             .commandBufferCount = frame.usedCommandCount,
             .pCommandBuffers = frame.usedCommands,
             .signalSemaphoreCount = 1,
-            .pSignalSemaphores = &frame.isRenderingFinished,
+            .pSignalSemaphores = &image.isRenderingFinished,
         };
 
-        VK_HANDLE_EXCEPT(vkQueueSubmit(GRAPHICS_DATA.defaultDevice->logicalDevice.graphicsQueue,
-            1, &submitInfo, frame.isInFlight));
+        auto& device = GRAPHICS_DATA.defaultDevice->logicalDevice;
+        vkResetFences(device.device, 1, &image.isInFlight);
+        VK_HANDLE_EXCEPT(vkQueueSubmit(device.graphicsQueue,
+            1, &submitInfo, image.isInFlight));
     }
 }

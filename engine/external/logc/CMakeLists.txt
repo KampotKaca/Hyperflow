@@ -1,5 +1,3 @@
-set(CMAKE_CXX_FLAGS_RELEASE "-O3 -march=native -flto -funroll-loops")
-
 file(GLOB_RECURSE LOG_C_SRC CONFIGURE_DEPENDS src/*.c)
 
 add_definitions(-DLOG_USE_COLOR)

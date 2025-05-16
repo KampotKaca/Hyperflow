@@ -305,8 +305,8 @@ namespace hf
         };
 
         auto& queue = GRAPHICS_DATA.defaultDevice->logicalDevice.graphicsQueue;
-        vkQueueSubmit(queue, 1, &submitInfo, VK_NULL_HANDLE);
-        vkQueueWaitIdle(queue);
+        VK_HANDLE_EXCEPT(vkQueueSubmit(queue, 1, &submitInfo, VK_NULL_HANDLE));
+        VK_HANDLE_EXCEPT(vkQueueWaitIdle(queue));
     }
 
     void TextureViewCallback(void* uData)
