@@ -161,9 +161,13 @@ namespace hf
             .sharingMode = VK_SHARING_MODE_EXCLUSIVE
         };
 
+        auto& limits = deviceData->properties.limits;
+        VkSampleCountFlags maxMsaa = limits.framebufferColorSampleCounts & limits.framebufferDepthSampleCounts;
+
         int32_t score = 0;
         score += (deviceData->properties.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU) * 1000;
         score += (int32_t)deviceData->properties.limits.maxImageDimension2D;
+        score += (int32_t)maxMsaa;
         deviceData->score = score;
 
         vkGetPhysicalDeviceMemoryProperties(deviceData->device, &deviceData->memProps);

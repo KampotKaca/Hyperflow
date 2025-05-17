@@ -574,8 +574,6 @@ namespace hf
 		//type of attachment layout color, depth, stencil etc.
 		TextureResultLayoutType layout = TextureResultLayoutType::Color;
 		TextureFormat format = TextureFormat::R8G8B8A8_Snorm;
-		//meant as a multisampling counter, should be pot value, with 64 as maximum
-		uint32_t msaaCounter = 1;
 		LoadStoreOperationType lsOperation = LoadStoreOperationType::ClearAndStore;
 		LoadStoreOperationType lsStencilOperation = LoadStoreOperationType::DontCareAndDontCare;
 
@@ -606,8 +604,6 @@ namespace hf
 
 	struct RenderSubpassPresentationAttachmentInfo
 	{
-		//type of attachment layout color, depth, stencil etc.
-		uint32_t msaaCounter = 1;
 		LoadStoreOperationType lsOperation = LoadStoreOperationType::ClearAndStore;
 		LoadStoreOperationType lsStencilOperation = LoadStoreOperationType::DontCareAndDontCare;
 
@@ -622,6 +618,8 @@ namespace hf
 		RenderBindingType bindingType = RenderBindingType::Graphics;
 		RenderSubpassColorAttachmentInfo* pColorAttachments{};
 		uint32_t attachmentCount = 0;
+		//meant as a multisampling counter, max value 6
+		uint32_t msaaCounter = 0;
 		RenderSubpassPresentationAttachmentInfo* presentationAttachment{};
 		RenderSubpassDepthAttachmentInfo* depthAttachment{};
 	};

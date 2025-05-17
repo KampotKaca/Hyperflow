@@ -15,6 +15,8 @@ namespace hf
 
     static void SetOperations(VkAttachmentLoadOp& loadOp, VkAttachmentStoreOp& storeOp, LoadStoreOperationType type);
     static DepthStencilFormatInfo ChooseDepthStencilFormat(LoadStoreOperationType op, LoadStoreOperationType stencilOp, VkImageTiling tiling, VkFormatFeatureFlags features);
+    static void HandleMsaa(VkAttachmentDescription& desc, VkAttachmentDescription* attachments, VkAttachmentReference* refs,
+        uint32_t msaaCount, uint32_t& attachmentIndex, uint32_t& multisampleIndex);
     inline bool CheckFormatSupport(VkFormat format, VkImageTiling tiling, VkFormatFeatureFlags features);
 
     VkDrawPass::VkDrawPass(const RenderPassDefinitionInfo& info)
@@ -42,16 +44,12 @@ namespace hf
 
         for (uint32_t i = 0; i < info.subpassCount; i++)
         {
+            uint32_t countStart = attachmentCount;
             auto& subpassInfo = info.pSubpasses[i];
             attachmentCount += subpassInfo.attachmentCount;
             for (uint32_t j = 0; j < subpassInfo.attachmentCount; j++)
             {
                 auto& attachmentInfo = subpassInfo.pColorAttachments[j];
-                if (attachmentInfo.msaaCounter > 1)
-                {
-                    attachmentCount++;
-                    multisamplingAttachmentCount++;
-                }
                 colorAttachmentCount++;
             }
 
@@ -66,6 +64,13 @@ namespace hf
             {
                 attachmentCount++;
                 depthAttachmentCount++;
+            }
+
+            if (subpassInfo.msaaCounter > 0)
+            {
+                uint32_t msaaCount = attachmentCount - countStart;
+                attachmentCount += msaaCount;
+                multisamplingAttachmentCount += msaaCount;
             }
         }
 
@@ -105,11 +110,13 @@ namespace hf
                             attachmentInfo.clearColor.w
                         }
                     };
+
                     attachment =
                     {
                         .flags = (VkAttachmentDescriptionFlags)attachmentInfo.usesSharedMemory,
                         .format = (VkFormat)attachmentInfo.format,
-                        .samples = (VkSampleCountFlagBits)attachmentInfo.msaaCounter,
+                        .initialLayout = (VkImageLayout)attachmentInfo.initialLayout,
+                        .finalLayout = (VkImageLayout)attachmentInfo.finalLayout,
                     };
 
                     SetOperations(attachment.loadOp, attachment.storeOp, attachmentInfo.lsOperation);
@@ -126,30 +133,8 @@ namespace hf
                     colorAttachments.push_back(attachmentInfo);
                     attachmentIndex++;
 
-                    if (attachmentInfo.msaaCounter > 1)
-                    {
-                        attachment.initialLayout = (VkImageLayout)attachmentInfo.initialLayout;
-                        attachment.finalLayout = (VkImageLayout)attachmentInfo.layout;
-
-                        auto& msaaAttachment = attachments[attachmentIndex];
-                        msaaAttachment = attachment;
-                        msaaAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
-                        msaaAttachment.finalLayout = (VkImageLayout)attachmentInfo.finalLayout;
-
-                        msaaAttachmentRefs[multisampleIndex] =
-                        {
-                            .attachment = attachmentIndex,
-                            .layout = (VkImageLayout)attachmentInfo.layout
-                        };
-
-                        multisampleIndex++;
-                        attachmentIndex++;
-                    }
-                    else
-                    {
-                        attachment.initialLayout = (VkImageLayout)attachmentInfo.initialLayout;
-                        attachment.finalLayout = (VkImageLayout)attachmentInfo.finalLayout;
-                    }
+                    HandleMsaa(attachment, attachments.data(), msaaAttachmentRefs.data(),
+                        subpassInfo.msaaCounter, attachmentIndex, multisampleIndex);
                 }
 
                 auto& subpass = subpasses[i];
@@ -177,7 +162,8 @@ namespace hf
                     {
                         .flags = (VkAttachmentDescriptionFlags)attachmentInfo.usesSharedMemory,
                         .format = VULKAN_API_COLOR_FORMAT,
-                        .samples = (VkSampleCountFlagBits)attachmentInfo.msaaCounter,
+                        .initialLayout = (VkImageLayout)attachmentInfo.initialLayout,
+                        .finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR,
                     };
 
                     SetOperations(attachment.loadOp, attachment.storeOp, attachmentInfo.lsOperation);
@@ -192,31 +178,6 @@ namespace hf
                     colorAttachmentRefs[colorIndex] = ref;
                     colorIndex++;
                     attachmentIndex++;
-
-                    if (attachmentInfo.msaaCounter > 1)
-                    {
-                        attachment.initialLayout = (VkImageLayout)attachmentInfo.initialLayout;
-                        attachment.finalLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-
-                        auto& msaaAttachment = attachments[attachmentIndex];
-                        msaaAttachment = attachment;
-                        msaaAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
-                        msaaAttachment.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
-
-                        msaaAttachmentRefs[multisampleIndex] =
-                        {
-                            .attachment = attachmentIndex,
-                            .layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL
-                        };
-
-                        multisampleIndex++;
-                        attachmentIndex++;
-                    }
-                    else
-                    {
-                        attachment.initialLayout = (VkImageLayout)attachmentInfo.initialLayout;
-                        attachment.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
-                    }
                 }
 
                 if (subpassInfo.depthAttachment)
@@ -233,7 +194,6 @@ namespace hf
                     depthAttachment =
                     {
                         .flags = (VkAttachmentDescriptionFlags)da.usesSharedMemory,
-                        .samples = VK_SAMPLE_COUNT_1_BIT,
                         .initialLayout = (VkImageLayout)da.initialLayout,
                         .finalLayout = (VkImageLayout)da.finalLayout
                     };
@@ -255,6 +215,13 @@ namespace hf
                     depthIndex++;
                 }
 
+                uint32_t attCount = attachmentCount;
+                for (uint32_t j = 0; j < attCount; j++)
+                {
+                    HandleMsaa(attachments[j], attachments.data(), msaaAttachmentRefs.data(),
+                        subpassInfo.msaaCounter, attachmentIndex, multisampleIndex);
+                }
+
                 if ((colorIndex - colorStart) > 0)
                 {
                     subpass.colorAttachmentCount = colorIndex - colorStart;
@@ -263,7 +230,7 @@ namespace hf
 
                 if ((multisampleIndex - multisampleStart) > 0)
                 {
-                    subpass.pResolveAttachments = &msaaAttachmentRefs[multisampleIndex];
+                    subpass.pResolveAttachments = &msaaAttachmentRefs[multisampleStart];
                 }
             }
         }
@@ -434,6 +401,34 @@ namespace hf
         return false;
     }
 
+    void HandleMsaa(VkAttachmentDescription& desc, VkAttachmentDescription* attachments, VkAttachmentReference* refs,
+        uint32_t msaaCount, uint32_t& attachmentIndex, uint32_t& multisampleIndex)
+    {
+        if (msaaCount == 0)
+        {
+            desc.samples = VK_SAMPLE_COUNT_1_BIT;
+            return;
+        }
+        VkImageLayout initial = desc.initialLayout, final = desc.finalLayout;
+
+        desc.initialLayout = initial;
+        desc.finalLayout = VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL;
+        desc.samples = (VkSampleCountFlagBits)std::pow(2, msaaCount),
+
+        memcpy(&attachments[attachmentIndex], &desc, sizeof(VkAttachmentDescription));
+        attachments[attachmentIndex].samples = VK_SAMPLE_COUNT_1_BIT;
+        attachments[attachmentIndex].finalLayout = final;
+
+        refs[multisampleIndex] =
+        {
+            .attachment = attachmentIndex,
+            .layout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL
+        };
+
+        multisampleIndex++;
+        attachmentIndex++;
+    }
+
     void BindPassToRenderer(VkRenderer* rn, RenderPass pass, uvec2 size)
     {
         auto& renderPass = GetRenderPass(pass);
@@ -491,8 +486,8 @@ namespace hf
             passes[i] = rn->passTextureCollections[i].pass;
 
         ClearRendererPassData(rn);
-        for (uint32_t i = 0; i < passes.size(); i++) BindPassToRenderer(rn, passes[i],
-            uvec2(rn->viewport.width, rn->viewport.height));
+        uvec2 viewSize = uvec2(rn->viewport.width, rn->viewport.height);
+        for (unsigned int pass : passes) BindPassToRenderer(rn, pass, viewSize);
     }
 
     void ClearRendererPassData(VkRenderer* rn)
