@@ -164,7 +164,14 @@ namespace app
 			.anisotropicFilter = hf::TextureAnisotropicFilter::X16,
 			.repeatMode = hf::TextureRepeatMode::Repeat,
 			.useNormalizedCoordinates = true,
-			.comparison = hf::ComparisonOperation::None
+			.comparison = hf::ComparisonOperation::None,
+			.mipMaps =
+			{
+				.mode = hf::MipMapMode::Linear,
+				.minLod = 0.0f,
+				.maxLod = 8.0f,
+				.lodBias = 0.0f
+			}
 		};
 		sampler = hf::texturesampler::Define(samplerDefinitionInfo);
 
@@ -199,7 +206,7 @@ namespace app
 		{
 			.filePath = "viking_room.png",
 			.desiredChannel = hf::TextureChannel::RGBA,
-			.mipLevels = 1,
+			.mipLevels = 8,
 			.details
 			{
 				.type = hf::TextureType::Tex2D,
@@ -218,7 +225,7 @@ namespace app
 		{
 			.filePath = "greek_head.jpg",
 			.desiredChannel = hf::TextureChannel::RGBA,
-			.mipLevels = 1,
+			.mipLevels = 8,
 			.details
 			{
 				.type = hf::TextureType::Tex2D,

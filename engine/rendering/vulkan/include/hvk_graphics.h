@@ -116,6 +116,7 @@ namespace hf
         VkBufferImageCopy pRegions[VULKAN_API_MAX_NUM_COPY_REGIONS]{};
         uint32_t regionCount = 0;
         uint32_t mipLevels = 1;
+        uvec2 imageSize{};
 
         void* uData{};
         void (*taskCompletionCallback)(void* udata){};

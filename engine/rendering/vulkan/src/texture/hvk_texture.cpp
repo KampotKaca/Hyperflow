@@ -7,7 +7,7 @@ namespace hf
     void TransitionImageLayout(VkCommandBuffer command, const ImageTransitionInfo* pImageInfos, uint32_t imageInfoCount,
         VkImageLayout oldLayout, VkImageLayout newLayout);
     static void TextureViewCallback(void* uData);
-    static void GenerateMimMaps(VkImage image, uvec2 texSize, uint32_t mipLevels);
+    static void GenerateMimMaps(VkCommandBuffer command);
 
     VkTexture::VkTexture(const inter::rendering::TextureCreationInfo& info)
         : channel(info.channel), details(info.details), size(info.size)
@@ -27,7 +27,7 @@ namespace hf
             .arrayLayers = 1,
             .samples = VK_SAMPLE_COUNT_1_BIT,
             .tiling = (VkImageTiling)details.tiling,
-            .sharingMode = transferData.sharingMode,
+            .sharingMode = VK_SHARING_MODE_EXCLUSIVE,
             .queueFamilyIndexCount = (uint32_t)transferData.indices.size(),
             .pQueueFamilyIndices = transferData.indices.data(),
             .initialLayout = VK_IMAGE_LAYOUT_UNDEFINED,
@@ -37,17 +37,13 @@ namespace hf
         {
             mipLevels = std::min(info.mipLevels, (uint32_t)std::floor(std::log2(std::max(size.x, size.y))) + 1);
 
-            if (mipLevels > 1)
+            if (!(GRAPHICS_DATA.defaultDevice->formatProps[(uint32_t)details.format].optimalTilingFeatures & VK_FORMAT_FEATURE_SAMPLED_IMAGE_FILTER_LINEAR_BIT))
             {
-                if (!(GRAPHICS_DATA.defaultDevice->formatProps[(uint32_t)details.format].optimalTilingFeatures & VK_FORMAT_FEATURE_SAMPLED_IMAGE_FILTER_LINEAR_BIT))
-                {
-                    LOG_WARN("[Hyperflow]", "texture image format does not support linear blitting, disabling mimmaps!");
-                    mipLevels = 1;
-                }
+                LOG_WARN("[Hyperflow]", "texture image format does not support linear blitting, disabling mimmaps!");
+                return;
             }
 
-            imageInfo.usage = VK_IMAGE_USAGE_TRANSFER_DST_BIT | (uint32_t)details.usage;
-            if (mipLevels > 1) imageInfo.usage |= VK_IMAGE_USAGE_TRANSFER_SRC_BIT;
+            imageInfo.usage = VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | (uint32_t)details.usage;
         }
         else
         {
@@ -94,6 +90,7 @@ namespace hf
                 .aspectFlags = (VkImageAspectFlags)info.details.aspectFlags,
                 .regionCount = 1,
                 .mipLevels = mipLevels,
+                .imageSize = size,
                 .uData = this,
                 .taskCompletionCallback = TextureViewCallback,
                 .deleteSrcAfterCopy = true
@@ -175,8 +172,8 @@ namespace hf
                 .subresourceRange
                 {
                     .aspectMask = imageInfo.aspectFlags,
-                    .baseMipLevel = imageInfo.mipLevels - 1,
-                    .levelCount = 1,
+                    .baseMipLevel = 0,
+                    .levelCount = imageInfo.mipLevels,
                     .baseArrayLayer = 0,
                     .layerCount = 1
                 },
@@ -230,37 +227,6 @@ namespace hf
         }
     }
 
-    inline void TransitionBufferToImageEnd(VkCommandBuffer command)
-    {
-        for (auto &imageTransition : GRAPHICS_DATA.preAllocBuffers.imageTransitions) imageTransition.count = 0;
-
-        for (uint32_t i = 0; i < GRAPHICS_DATA.bufferToImageCopyOperations.size(); i++)
-        {
-            auto& operation = GRAPHICS_DATA.bufferToImageCopyOperations[i];
-            auto& imageTransitionArray = GRAPHICS_DATA.preAllocBuffers.imageTransitions[operation.dstLayout];
-            auto& imageTransition = imageTransitionArray.infos[imageTransitionArray.count];
-
-            imageTransition =
-            {
-                .image = operation.dstImage,
-                .format = operation.format,
-                .aspectFlags = operation.aspectFlags,
-                .mipLevels = operation.mipLevels
-            };
-            imageTransitionArray.count++;
-        }
-
-        for (uint32_t i = 0; i < 9; i++)
-        {
-            auto& imageTransitionArray = GRAPHICS_DATA.preAllocBuffers.imageTransitions[i];
-            if (imageTransitionArray.count > 0)
-            {
-                TransitionImageLayout(command, imageTransitionArray.infos, imageTransitionArray.count,
-                VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, (VkImageLayout)i);
-            }
-        }
-    }
-
     void SubmitBufferToImageCopyOperations()
     {
         if (!GRAPHICS_DATA.bufferToImageCopyOperations.empty())
@@ -268,7 +234,7 @@ namespace hf
             auto& device = GRAPHICS_DATA.defaultDevice->logicalDevice;
             BufferOperation(GRAPHICS_DATA.transferPool.buffers[0], device.transferQueue, TransitionBufferToImageStart);
             BufferOperation(GRAPHICS_DATA.transferPool.buffers[0], device.transferQueue, CopyBufferToImage);
-            BufferOperation(GRAPHICS_DATA.graphicsPool.buffers[0], device.graphicsQueue, TransitionBufferToImageEnd);
+            BufferOperation(GRAPHICS_DATA.graphicsPool.buffers[0], device.graphicsQueue, GenerateMimMaps);
 
             for (auto& operation : GRAPHICS_DATA.bufferToImageCopyOperations)
             {
@@ -330,50 +296,100 @@ namespace hf
         VK_HANDLE_EXCEPT(vkCreateImageView(device, &viewInfo, nullptr, &texture->view));
     }
 
-    void GenerateMimMaps(VkImage image, uvec2 texSize, uint32_t mipLevels)
+    void GenerateMimMaps(VkCommandBuffer command)
     {
-        auto command = GRAPHICS_DATA.graphicsPool.buffers[0];
-        VkCommandBufferBeginInfo beginInfo
+        for (uint32_t i = 0; i < GRAPHICS_DATA.bufferToImageCopyOperations.size(); i++)
         {
-            .sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO,
-        };
-
-        VK_HANDLE_EXCEPT(vkResetCommandBuffer(command, 0));
-        VK_HANDLE_EXCEPT(vkBeginCommandBuffer(command, &beginInfo));
-
-        VkImageMemoryBarrier barrier
-        {
-            .sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER,
-            .srcAccessMask = VK_QUEUE_FAMILY_IGNORED,
-            .dstAccessMask = VK_QUEUE_FAMILY_IGNORED,
-            // .oldLayout = ,
-            // .newLayout = ,
-            // .srcQueueFamilyIndex = ,
-            // .dstQueueFamilyIndex = ,
-            .image = image,
-            .subresourceRange =
+            auto& operation = GRAPHICS_DATA.bufferToImageCopyOperations[i];
+            VkImageMemoryBarrier barrier
             {
-                .aspectMask = VK_IMAGE_ASPECT_COLOR_BIT,
-                .levelCount = mipLevels,
-                .baseArrayLayer = 0,
-                .layerCount = 1
-            }
-        };
+                .sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER,
+                .srcAccessMask = VK_QUEUE_FAMILY_IGNORED,
+                .dstAccessMask = VK_QUEUE_FAMILY_IGNORED,
+                .image = operation.dstImage,
+                .subresourceRange =
+                {
+                    .aspectMask = VK_IMAGE_ASPECT_COLOR_BIT,
+                    .levelCount = 1,
+                    .baseArrayLayer = 0,
+                    .layerCount = 1
+                }
+            };
 
-        ivec2 tSize = texSize;
-        for (uint32_t i = 1; i < mipLevels; i++)
-        {
-            barrier.subresourceRange.baseMipLevel = i - 1;
+            ivec2 size = operation.imageSize;
+            for (uint32_t mip = 1; mip < operation.mipLevels; mip++)
+            {
+                barrier.subresourceRange.baseMipLevel = mip - 1;
+                barrier.oldLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
+                barrier.newLayout = VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL;
+                barrier.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+                barrier.dstAccessMask = VK_ACCESS_TRANSFER_READ_BIT;
+
+                vkCmdPipelineBarrier(command,
+                VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_TRANSFER_BIT, 0,
+                0, nullptr,
+                0, nullptr,
+                1, &barrier);
+
+                VkImageBlit blit
+                {
+                    .srcSubresource =
+                    {
+                        .aspectMask = VK_IMAGE_ASPECT_COLOR_BIT,
+                        .mipLevel = mip - 1,
+                        .baseArrayLayer = 0,
+                        .layerCount = 1
+                    },
+                    .srcOffsets =
+                    {
+                        { 0, 0, 0 },
+                        { size.x, size.y, 1 }
+                    },
+                    .dstSubresource =
+                    {
+                        .aspectMask = VK_IMAGE_ASPECT_COLOR_BIT,
+                        .mipLevel = mip,
+                        .baseArrayLayer = 0,
+                        .layerCount = 1
+                    },
+                    .dstOffsets =
+                    {
+                        { 0, 0, 0 },
+                        { size.x > 1 ? size.x / 2 : 1, size.y > 1 ? size.y / 2 : 1, 1 }
+                    }
+                };
+
+                vkCmdBlitImage(command,
+                operation.dstImage, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
+                operation.dstImage, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+                1, &blit, VK_FILTER_LINEAR);
+
+                barrier.oldLayout = VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL;
+                barrier.newLayout = operation.dstLayout;
+                barrier.srcAccessMask = VK_ACCESS_TRANSFER_READ_BIT;
+                barrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
+
+                vkCmdPipelineBarrier(command,
+                VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT, 0,
+                0, nullptr,
+                0, nullptr,
+                1, &barrier);
+
+                if (size.x > 1) size.x /= 2;
+                if (size.y > 1) size.y /= 2;
+            }
+
+            barrier.subresourceRange.baseMipLevel = operation.mipLevels - 1;
             barrier.oldLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
-            barrier.newLayout = VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL;
+            barrier.newLayout = operation.dstLayout;
             barrier.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
-            barrier.dstAccessMask = VK_ACCESS_TRANSFER_READ_BIT;
+            barrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
 
             vkCmdPipelineBarrier(command,
-                    VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_TRANSFER_BIT, 0,
-                    0, nullptr,
-                    0, nullptr,
-                    1, &barrier);
+                VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT, 0,
+                0, nullptr,
+                0, nullptr,
+                1, &barrier);
         }
     }
 }

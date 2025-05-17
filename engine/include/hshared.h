@@ -463,6 +463,15 @@ namespace hf
 	enum class TextureAnisotropicFilter	{ None, X2 = 2, X4 = 4, X8 = 8, X16 = 16, X32 = 32 };
 	enum class TextureRepeatMode		{ Repeat = 0, MirroredRepeat = 1, ClampToEdge = 2, ClampToBorder = 3, MirrorClampToEdge = 4 };
 	enum class ComparisonOperation		{ None = 0, Never = 1, Less = 2, Equal = 3, LessOrEqual = 4, Greater = 5, NotEqual = 6, GreaterOrEqual = 7, Always = 8 };
+	enum class MipMapMode				{ Nearest = 0, Linear = 1 };
+
+	struct TextureMipMapInfo
+	{
+		MipMapMode mode = MipMapMode::Linear;
+		float minLod = 0.0f;
+		float maxLod = 4.0f;
+		float lodBias = 0.0f;
+	};
 
 	struct TextureSamplerDefinitionInfo
 	{
@@ -471,6 +480,7 @@ namespace hf
 		TextureRepeatMode repeatMode = TextureRepeatMode::Repeat;
 		bool useNormalizedCoordinates = true;
 		ComparisonOperation comparison = ComparisonOperation::None;
+		TextureMipMapInfo mipMaps{};
 	};
 
 	enum class TextureAspectFlags
