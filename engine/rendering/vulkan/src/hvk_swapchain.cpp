@@ -164,7 +164,6 @@ namespace hf
     bool AcquireNextImage(VkRenderer* rn)
     {
         auto& device = GRAPHICS_DATA.defaultDevice->logicalDevice.device;
-        tryAgain:
         if (rn->imageIndex != UINT32_MAX)
         {
             auto& previousImage = rn->swapchain.images[rn->imageIndex];
@@ -176,6 +175,7 @@ namespace hf
         if (rn->frameBufferResized) RecreateSwapchain(rn);
 
         uint32_t tryCount = 0;
+        tryAgain:
         auto result = vkAcquireNextImageKHR(device,
                             rn->swapchain.swapchain, VULKAN_API_MAX_TIMEOUT,
                             rn->frames[rn->currentFrame].isImageAvailable, VK_NULL_HANDLE, &rn->imageIndex);
@@ -184,8 +184,9 @@ namespace hf
             if (rn->targetSize.x == 0 || rn->targetSize.y == 0) return false;
             RecreateSwapchain(rn);
             tryCount++;
-            if (tryCount < 3) goto tryAgain;
-            LOG_WARN("Recreating swapchain failed 3 times");
+            if (tryCount < 144) goto tryAgain;
+            LOG_WARN("Recreating swapchain failed 144 times");
+            return false;
         }
 
         if (result != VK_SUCCESS && result != VK_SUBOPTIMAL_KHR)
