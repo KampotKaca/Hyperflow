@@ -8,8 +8,7 @@ namespace hf
 {
 	Window::Window(const WindowCreationInfo& info, const Ref<Window>& parent)
 		: title(info.title), style(info.style), vSyncIsOn(info.vSyncOn), parent(parent),
-		  onPassCreationCallback(info.onPassCreationCallback), onRenderCallback(info.onRenderCallback),
-		  onPreRenderCallback(info.onPreRenderCallback)
+		  rnEventInfo(info.rnEventInfo)
 	{
 		flags = (WindowFlags)0;
 		rect =
@@ -45,8 +44,10 @@ namespace hf
 
 			if (inter::HF.renderingApi.type != RenderingApiType::None)
 			{
-				newWindow->renderer = MakeRef<Renderer>(newWindow.get());
-				inter::HF.renderingApi.api.PostInstanceLoad(newWindow->renderer->handle, data.onPassCreationCallback(newWindow->renderer));
+				newWindow->renderer = MakeRef<Renderer>(newWindow.get(), newWindow->rnEventInfo);
+				auto rn = newWindow->renderer;
+				inter::HF.renderingApi.api.PostInstanceLoad(newWindow->renderer->handle,
+					rn->eventInfo.onPassCreationCallback(rn));
 			}
 			return newWindow;
 		}
@@ -261,19 +262,4 @@ namespace hf
 		mouse.scrollDelta = { 0, 0 };
 	};
 	//endregion
-
-	namespace inter::window
-	{
-		void Update(const Window* win)
-		{
-			auto rn = win->renderer.get();
-			if(HF.renderingApi.api.GetReadyForRendering(rn->handle))
-			{
-				if (win->onPreRenderCallback) win->onPreRenderCallback(win->renderer);
-				HF.renderingApi.api.StartFrame(rn->handle);
-				if (win->onRenderCallback) win->onRenderCallback(win->renderer);
-				HF.renderingApi.api.EndFrame(rn->handle);
-			}
-		}
-	}
 }

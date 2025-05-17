@@ -7,13 +7,8 @@
 
 namespace hf
 {
-    Renderer::Renderer(uvec2 initialSize)
-    {
-        size = initialSize;
-        inter::rendering::CreateRenderer_i(this);
-    }
-
-    Renderer::Renderer(const Window* window)
+    Renderer::Renderer(const Window* window, const RendererEventInfo& eventInfo)
+        : eventInfo(eventInfo)
     {
         this->window = window;
         size = window->rect.size;
@@ -27,16 +22,6 @@ namespace hf
 
     namespace renderer
     {
-        Ref<Renderer> Create(uvec2 size)
-        {
-            return MakeRef<Renderer>(size);
-        }
-
-        void Destroy(const Ref<Renderer>& rn)
-        {
-            inter::rendering::DestroyRenderer_i(rn.get());
-        }
-
         bool IsRunning(const Ref<Renderer>& rn) { return rn->handle; }
 
         void ChangeApi(RenderingApiType targetApi)
@@ -130,8 +115,9 @@ namespace hf
             for (auto& win : HF.windows)
             {
                 if (win->renderer) CreateRenderer_i(win->renderer.get());
-                else win->renderer = MakeRef<Renderer>(win.get());
-                HF.renderingApi.api.PostInstanceLoad(win->renderer->handle, win->onPassCreationCallback(win->renderer));
+                else win->renderer = MakeRef<Renderer>(win.get(), win->rnEventInfo);
+                auto rn = win->renderer;
+                HF.renderingApi.api.PostInstanceLoad(rn->handle, rn->eventInfo.onPassCreationCallback(rn));
             }
 
             if (HF.lifecycleCallbacks.onRendererLoad) HF.lifecycleCallbacks.onRendererLoad();
@@ -235,6 +221,18 @@ namespace hf
                         HF.renderingApi.additionalDll = nullptr;
                     }
                 }
+            }
+        }
+
+        void UpdateRenderer_i(const Ref<Renderer>& rn)
+        {
+            if(HF.renderingApi.api.GetReadyForRendering(rn->handle))
+            {
+                auto& cInfo = rn->eventInfo;
+                if (cInfo.onPreRenderCallback) cInfo.onPreRenderCallback(rn);
+                HF.renderingApi.api.StartFrame(rn->handle);
+                if (cInfo.onRenderCallback) cInfo.onRenderCallback(rn);
+                HF.renderingApi.api.EndFrame(rn->handle);
             }
         }
     }

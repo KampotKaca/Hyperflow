@@ -717,6 +717,15 @@ namespace hf
 		Default = Visible
 	};
 
+	struct RendererEventInfo
+	{
+		//stage where you can create draw passes
+		//and should return the pass which is used for presentation
+		RenderPass (*onPassCreationCallback)(const Ref<Renderer>&){};
+		void (*onPreRenderCallback)(const Ref<Renderer>&){};
+		void (*onRenderCallback)(const Ref<Renderer>&){};
+	};
+
 	struct WindowCreationInfo
 	{
 		std::string title = "Untitled";
@@ -726,12 +735,7 @@ namespace hf
 		ivec2 size = ivec2{ 200, 200 };
 		bool vSyncOn = false;
 
-		//stage where you can create draw passes
-		//and should return the pass which is used for presentation
-		RenderPass (*onPassCreationCallback)(const Ref<Renderer>&){};
-
-		void (*onPreRenderCallback)(const Ref<Renderer>&){};
-		void (*onRenderCallback)(const Ref<Renderer>&){};
+		RendererEventInfo rnEventInfo{};
 	};
 
 	//endregion

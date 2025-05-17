@@ -55,7 +55,7 @@ namespace hf
 
 				for(auto& window : inter::HF.windows)
 				{
-					if (!window::IsClosing(window)) inter::window::Update(window.get());
+					if (!window::IsClosing(window)) inter::rendering::UpdateRenderer_i(window->renderer);
 				}
 			}
 			if (inter::HF.renderingApi.isLoaded) inter::HF.renderingApi.api.WaitForRendering();

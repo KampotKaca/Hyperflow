@@ -40,7 +40,6 @@ namespace hf::inter
 
         void SetFlags(Window* win, WindowFlags flags);
         void Focus(const Window* win);
-        void Update(const Window* win);
     }
 }
 

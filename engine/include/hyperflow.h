@@ -93,8 +93,6 @@ namespace hf
 
 	namespace renderer
 	{
-		Ref<Renderer> Create(uvec2 size);
-		void Destroy(const Ref<Renderer>& rn);
 		bool IsRunning(const Ref<Renderer>& rn);
 
 		//Destroy every renderer which is not connected to the window, before you try to change api

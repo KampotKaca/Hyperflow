@@ -301,9 +301,12 @@ namespace app
 				.position = { 100, 100 },
 				.size = { 200, 200 },
 				.vSyncOn = true,
-				.onPassCreationCallback = OnSubPassCreationCallback,
-				.onPreRenderCallback = OnPreRender,
-				.onRenderCallback = OnRender
+				.rnEventInfo =
+				{
+					.onPassCreationCallback = OnSubPassCreationCallback,
+					.onPreRenderCallback = OnPreRender,
+					.onRenderCallback = OnRender
+				},
 			};
 			wn = hf::window::Open(data, nullptr);
 			count++;

@@ -33,9 +33,12 @@ int main()
 			.position     		 = { 200, 200 },
 			.size         		 = { 920, 480 },
 			.vSyncOn			 = true,
-			.onPassCreationCallback = app::Application::OnPassCreationCallback,
-			.onPreRenderCallback = app::Application::OnPreRender,
-			.onRenderCallback    = app::Application::OnRender,
+			.rnEventInfo =
+			{
+				.onPassCreationCallback = app::Application::OnPassCreationCallback,
+				.onPreRenderCallback = app::Application::OnPreRender,
+				.onRenderCallback    = app::Application::OnRender,
+			},
 		}
 	};
 

@@ -36,9 +36,7 @@ namespace hf
 		EventData eventData{};
 		Ref<Renderer> renderer{};
 
-		RenderPass (*onPassCreationCallback)(const Ref<Renderer>&);
-		void (*onRenderCallback)(const Ref<Renderer>&);
-		void (*onPreRenderCallback)(const Ref<Renderer>&);
+		RendererEventInfo rnEventInfo{};
 	};
 
 	void WindowEvent_Title(Window* win, const char* newTitle) noexcept;
