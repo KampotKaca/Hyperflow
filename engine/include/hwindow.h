@@ -36,7 +36,7 @@ namespace hf
 		EventData eventData{};
 		Ref<Renderer> renderer{};
 
-		RenderPass (*onPassCreationCallback)();
+		RenderPass (*onPassCreationCallback)(const Ref<Renderer>&);
 		void (*onRenderCallback)(const Ref<Renderer>&);
 		void (*onPreRenderCallback)(const Ref<Renderer>&);
 	};

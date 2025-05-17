@@ -144,7 +144,22 @@ namespace hf
             if (deviceData->familyIndices.IsComplete()) break;
         }
 
-        if (!deviceData->familyIndices.IsComplete()) return false;
+        auto& indices = deviceData->familyIndices;
+        if (!indices.IsComplete()) return false;
+
+        if (indices.graphicsFamily != indices.presentFamily)
+        {
+            deviceData->transferData =
+            {
+                .indices = { indices.graphicsFamily.value(), indices.presentFamily.value() },
+                .sharingMode = VK_SHARING_MODE_CONCURRENT
+            };
+        }
+        else deviceData->transferData =
+        {
+            .indices = {},
+            .sharingMode = VK_SHARING_MODE_EXCLUSIVE
+        };
 
         int32_t score = 0;
         score += (deviceData->properties.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU) * 1000;

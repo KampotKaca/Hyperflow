@@ -131,7 +131,7 @@ namespace hf
             {
                 if (win->renderer) CreateRenderer_i(win->renderer.get());
                 else win->renderer = MakeRef<Renderer>(win.get());
-                HF.renderingApi.api.PostInstanceLoad(win->renderer->handle, win->onPassCreationCallback());
+                HF.renderingApi.api.PostInstanceLoad(win->renderer->handle, win->onPassCreationCallback(win->renderer));
             }
 
             if (HF.lifecycleCallbacks.onRendererLoad) HF.lifecycleCallbacks.onRendererLoad();

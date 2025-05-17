@@ -15,9 +15,8 @@ namespace hf
         bufferSize = size.x * size.y * size.z * 4;
         bufferOffset = 0;
 
-        QueueFamilyIndices& familyIndices = GRAPHICS_DATA.defaultDevice->familyIndices;
-        uint32_t queus[2] = { familyIndices.transferFamily.value(), familyIndices.graphicsFamily.value() };
         auto device = GRAPHICS_DATA.defaultDevice->logicalDevice.device;
+        auto& transferData = GRAPHICS_DATA.defaultDevice->transferData;
 
         VkImageCreateInfo imageInfo
         {
@@ -28,7 +27,9 @@ namespace hf
             .arrayLayers = 1,
             .samples = VK_SAMPLE_COUNT_1_BIT,
             .tiling = (VkImageTiling)details.tiling,
-            .sharingMode = VK_SHARING_MODE_EXCLUSIVE,
+            .sharingMode = transferData.sharingMode,
+            .queueFamilyIndexCount = (uint32_t)transferData.indices.size(),
+            .pQueueFamilyIndices = transferData.indices.data(),
             .initialLayout = VK_IMAGE_LAYOUT_UNDEFINED,
         };
 
@@ -47,9 +48,6 @@ namespace hf
 
             imageInfo.usage = VK_IMAGE_USAGE_TRANSFER_DST_BIT | (uint32_t)details.usage;
             if (mipLevels > 1) imageInfo.usage |= VK_IMAGE_USAGE_TRANSFER_SRC_BIT;
-
-            imageInfo.queueFamilyIndexCount = 2;
-            imageInfo.pQueueFamilyIndices = queus;
         }
         else
         {
@@ -193,7 +191,7 @@ namespace hf
 
     inline void TransitionBufferToImageStart(VkCommandBuffer command)
     {
-        for (uint32_t i = 0; i < 9; i++) GRAPHICS_DATA.preAllocBuffers.imageTransitions[i].count = 0;
+        for (auto& imageTransition : GRAPHICS_DATA.preAllocBuffers.imageTransitions) imageTransition.count = 0;
 
         for (uint32_t i = 0; i < GRAPHICS_DATA.bufferToImageCopyOperations.size(); i++)
         {
@@ -234,7 +232,7 @@ namespace hf
 
     inline void TransitionBufferToImageEnd(VkCommandBuffer command)
     {
-        for (uint32_t i = 0; i < 9; i++) GRAPHICS_DATA.preAllocBuffers.imageTransitions[i].count = 0;
+        for (auto &imageTransition : GRAPHICS_DATA.preAllocBuffers.imageTransitions) imageTransition.count = 0;
 
         for (uint32_t i = 0; i < GRAPHICS_DATA.bufferToImageCopyOperations.size(); i++)
         {

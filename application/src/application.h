@@ -10,7 +10,7 @@ namespace app
 	public:
 
 	private:
-		static hf::RenderPass OnPassCreationCallback();
+		static hf::RenderPass OnPassCreationCallback(const hf::Ref<hf::Renderer>& rn);
 		static void OnRendererLoad();
 		static void LoadResources();
 		static void Start();

@@ -58,6 +58,12 @@ namespace hf
         VkQueue transferQueue{};
     };
 
+    struct DeviceTransferData
+    {
+        std::vector<uint32_t> indices{};
+        VkSharingMode sharingMode{};
+    };
+
     struct GraphicsDevice
     {
         VkPhysicalDevice device{};
@@ -67,6 +73,7 @@ namespace hf
 
         QueueFamilyIndices familyIndices{};
         LogicalDevice logicalDevice{};
+        DeviceTransferData transferData{};
         VkPhysicalDeviceMemoryProperties memProps{};
         VkFormatProperties formatProps[(uint32_t)TextureFormat::Count]{};
     };

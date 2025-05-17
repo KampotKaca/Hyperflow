@@ -728,7 +728,7 @@ namespace hf
 
 		//stage where you can create draw passes
 		//and should return the pass which is used for presentation
-		RenderPass (*onPassCreationCallback)(){};
+		RenderPass (*onPassCreationCallback)(const Ref<Renderer>&){};
 
 		void (*onPreRenderCallback)(const Ref<Renderer>&){};
 		void (*onRenderCallback)(const Ref<Renderer>&){};

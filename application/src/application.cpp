@@ -41,7 +41,7 @@ namespace app
 
 	Camera camera{};
 
-	hf::RenderPass Application::OnPassCreationCallback()
+	hf::RenderPass Application::OnPassCreationCallback(const hf::Ref<hf::Renderer>& rn)
 	{
 		wn = hf::GetMainWindow();
 
@@ -89,7 +89,13 @@ namespace app
 			.dependencyCount = 1,
 		};
 		presentPass = hf::renderpass::Define(drawPassDefinitionInfo);
-		hf::renderpass::Bind(hf::window::GetRenderer(wn), presentPass);
+		hf::renderpass::Bind(rn, presentPass);
+		return presentPass;
+	}
+
+	hf::RenderPass OnSubPassCreationCallback(const hf::Ref<hf::Renderer>& rn)
+	{
+		hf::renderpass::Bind(rn, presentPass);
 		return presentPass;
 	}
 
@@ -294,6 +300,8 @@ namespace app
 				.style = hf::WindowStyle::Default,
 				.position = { 100, 100 },
 				.size = { 200, 200 },
+				.vSyncOn = true,
+				.onPassCreationCallback = OnSubPassCreationCallback,
 				.onPreRenderCallback = OnPreRender,
 				.onRenderCallback = OnRender
 			};

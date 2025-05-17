@@ -36,6 +36,7 @@ namespace hf
             uint32_t maxImageCount = scs.capabilities.maxImageCount;
             if (maxImageCount > 0 && imageCount > maxImageCount) imageCount = maxImageCount;
 
+            auto& transferData = GRAPHICS_DATA.defaultDevice->transferData;
             VkSwapchainCreateInfoKHR createInfo
             {
                 .sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR,
@@ -46,27 +47,15 @@ namespace hf
                 .imageExtent = details.extent,
                 .imageArrayLayers = 1,
                 .imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT,
+                .imageSharingMode = transferData.sharingMode,
+                .queueFamilyIndexCount = (uint32_t)transferData.indices.size(),
+                .pQueueFamilyIndices = transferData.indices.data(),
                 .preTransform = scs.capabilities.currentTransform,
                 .compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR,
                 .presentMode = details.presentMode,
                 .clipped = VK_TRUE,
                 .oldSwapchain = oldSwapchain
             };
-
-            auto& indices = GRAPHICS_DATA.defaultDevice->familyIndices;
-            if (indices.graphicsFamily != indices.presentFamily)
-            {
-                uint32_t familyIndices[] = { indices.graphicsFamily.value(), indices.presentFamily.value() };
-                createInfo.imageSharingMode = VK_SHARING_MODE_CONCURRENT;
-                createInfo.queueFamilyIndexCount = 2;
-                createInfo.pQueueFamilyIndices = familyIndices;
-            }
-            else
-            {
-                createInfo.imageSharingMode = VK_SHARING_MODE_EXCLUSIVE;
-                createInfo.queueFamilyIndexCount = 0;
-                createInfo.pQueueFamilyIndices = nullptr;
-            }
 
             VK_HANDLE_EXCEPT(vkCreateSwapchainKHR(GRAPHICS_DATA.defaultDevice->logicalDevice.device, &createInfo,
                 nullptr, &result->swapchain));
