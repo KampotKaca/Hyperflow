@@ -77,32 +77,57 @@ namespace hf
     {
         auto& swapchain = rn->swapchain;
         uint32_t size = 0;
+        uint32_t msaaCount = 0;
         for (uint32_t i = 0; i < rn->passTextureCollections.size(); ++i)
         {
             size += rn->passTextureCollections[i].depthTextures.size();
-            size += rn->passTextureCollections[i].msaaTextures.size();
-            // size += rn->passTextureCollections[i].colorTextures.size() * swapchain.imageViews.size();
+            msaaCount += rn->passTextureCollections[i].msaaTextures.size();
         }
+        size += msaaCount;
+
         std::vector<VkImageView> views(1 + size);
+
         for (uint32_t i = 0; i < swapchain.images.size(); ++i)
         {
-            views[0] = swapchain.images[i].view;
-            uint32_t viewIndex = 1;
-            for (uint32_t j = 0; j < rn->passTextureCollections.size(); ++j)
+            uint32_t viewIndex = 0;
+            if (msaaCount > 0)
             {
-                auto& collection = rn->passTextureCollections[j];
-                for (uint32_t k = 0; k < collection.depthTextures.size(); ++k)
+                for (uint32_t j = 0; j < rn->passTextureCollections.size(); ++j)
                 {
-                    views[viewIndex] = collection.depthTextures[k]->view;
-                    viewIndex++;
+                    auto& collection = rn->passTextureCollections[j];
+                    for (uint32_t k = 0; k < collection.msaaTextures.size(); ++k)
+                    {
+                        views[viewIndex] = collection.msaaTextures[k]->view;
+                        viewIndex++;
+                    }
                 }
 
-                for (uint32_t k = 0; k < collection.msaaTextures.size(); ++k)
+                for (uint32_t j = 0; j < rn->passTextureCollections.size(); ++j)
                 {
-                    views[viewIndex] = collection.msaaTextures[k]->view;
-                    viewIndex++;
+                    auto& collection = rn->passTextureCollections[j];
+                    for (uint32_t k = 0; k < collection.depthTextures.size(); ++k)
+                    {
+                        views[viewIndex] = collection.depthTextures[k]->view;
+                        viewIndex++;
+                    }
+                }
+                views[viewIndex] = swapchain.images[i].view;
+            }
+            else
+            {
+                views[viewIndex] = swapchain.images[i].view;
+                viewIndex++;
+                for (uint32_t j = 0; j < rn->passTextureCollections.size(); ++j)
+                {
+                    auto& collection = rn->passTextureCollections[j];
+                    for (uint32_t k = 0; k < collection.depthTextures.size(); ++k)
+                    {
+                        views[viewIndex] = collection.depthTextures[k]->view;
+                        viewIndex++;
+                    }
                 }
             }
+
             swapchain.images[i].frameBuffer = new VkFrameBuffer(views.data(), views.size(),
                 rn->mainPass, swapchain.details.extent);
         }

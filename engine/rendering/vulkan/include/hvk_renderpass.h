@@ -25,6 +25,7 @@ namespace hf
         std::vector<VkAttachmentReference> colorAttachmentRefs{};
         std::vector<VkAttachmentReference> depthAttachmentRefs{};
         std::vector<VkAttachmentReference> msaaAttachmentRefs{};
+        std::vector<uint32_t> msaaSamples{};
 
         std::vector<VkClearValue> clearValues{};
         bool hasPresentationAttachment = false;

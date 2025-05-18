@@ -77,7 +77,7 @@ namespace app
 			.bindingType = hf::RenderBindingType::Graphics,
 			.pColorAttachments = nullptr,
 			.attachmentCount = 0,
-			.msaaCounter = 0,
+			.msaaCounter = 3,
 			.presentationAttachment = &presentAttachment,
 			.depthAttachment = &depthAttachment
 		};

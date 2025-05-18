@@ -82,6 +82,7 @@ namespace hf
         colorAttachmentRefs = std::vector<VkAttachmentReference>(colorAttachmentCount);
         depthAttachmentRefs = std::vector<VkAttachmentReference>(depthAttachmentCount);
         msaaAttachmentRefs = std::vector<VkAttachmentReference>(msaaAttachmentCount);
+        msaaSamples = std::vector<uint32_t>(msaaAttachmentCount);
 
         clearValues = std::vector<VkClearValue>(attachmentCount);
         {
@@ -93,6 +94,7 @@ namespace hf
             {
                 auto& subpassInfo = info.pSubpasses[i];
                 uint32_t colorStart = colorIndex;
+                uint32_t attachmentStart = attachmentIndex;
                 auto msaaCount = (VkSampleCountFlagBits)std::pow(2, subpassInfo.msaaCounter);
                 for (uint32_t j = 0; j < subpassInfo.attachmentCount; j++)
                 {
@@ -212,30 +214,35 @@ namespace hf
                     depthIndex++;
                 }
 
-                uint32_t attCount = attachmentCount;
                 uint32_t msaaStart = multisampleIndex;
-                for (uint32_t j = 0; j < attCount; j++)
+                uint32_t msaaEnd = attachmentIndex;
+                for (uint32_t j = attachmentStart; j < msaaEnd; j++)
                 {
                     auto& attachment = attachments[j];
                     if (attachment.samples == 1 || attachment.finalLayout == VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL) continue;
-                    auto& attachmentRef = colorAttachmentRefs[j];
 
                     auto& msaaAttachment = attachments[attachmentIndex];
                     auto& msaaRef = msaaAttachmentRefs[multisampleIndex];
                     VkImageLayout initial = attachment.initialLayout, final = attachment.finalLayout;
 
                     attachment.initialLayout = initial;
-                    attachment.finalLayout = attachmentRef.layout;
+                    attachment.finalLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
 
                     msaaAttachment = attachment;
                     msaaAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
+                    msaaAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+                    msaaAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
+                    msaaAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+                    msaaAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
                     msaaAttachment.finalLayout = final;
 
                     msaaRef =
                     {
                         .attachment = attachmentIndex,
-                        .layout = attachmentRef.layout
+                        .layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL
                     };
+
+                    msaaSamples[multisampleIndex] = attachment.samples;
 
                     multisampleIndex++;
                     attachmentIndex++;
@@ -449,7 +456,8 @@ namespace hf
             {
                 .size = uvec3(size, 1),
                 .channel = TextureChannel::RGBA,
-                .mipLevels = (uint32_t)attachment.samples,
+                .mipLevels = 1,
+                .samples = (uint32_t)attachment.samples,
                 .data = nullptr,
                 .details
                 {
@@ -481,7 +489,7 @@ namespace hf
                 .size = uvec3(size, 1),
                 .channel = TextureChannel::RGBA,
                 .mipLevels = 1,
-                .samples = (uint32_t)attachment.samples,
+                .samples = (uint32_t)renderPass.msaaSamples[i],
                 .data = nullptr,
                 .details
                 {
@@ -489,7 +497,7 @@ namespace hf
                     .format = (TextureFormat)attachment.format,
                     .aspectFlags = TextureAspectFlags::Color,
                     .tiling = TextureTiling::Optimal,
-                    .usage = ((TextureUsageFlags)msaaRef.layout),
+                    .usage = (TextureUsageFlags::Color | TextureUsageFlags::Transient),
                     .memoryType = BufferMemoryType::Static,
                     .finalLayout = TextureResultLayoutType::Color,
                 }

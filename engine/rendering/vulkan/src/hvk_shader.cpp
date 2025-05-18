@@ -94,6 +94,7 @@ namespace hf
     void CreatePipeline(const VkPipelineInfo& info, VkPipeline* pipeline)
     {
         const auto& attribute = GetAttrib(info.attrib);
+        auto& pass = GetRenderPass(info.renderPass);
 
         VkPipelineVertexInputStateCreateInfo vertexInputInfo
         {
@@ -151,13 +152,21 @@ namespace hf
         VkPipelineMultisampleStateCreateInfo multisampling
         {
             .sType = VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO,
-            .rasterizationSamples = VK_SAMPLE_COUNT_1_BIT,
             .sampleShadingEnable = VK_FALSE,
             .minSampleShading = 1.0f,
             .pSampleMask = nullptr,
             .alphaToCoverageEnable = VK_FALSE,
             .alphaToOneEnable = VK_FALSE,
         };
+
+        if (pass.msaaSamples.size() > 0)
+        {
+            uint32_t maxSamples = pass.msaaSamples[0];
+            for (uint32_t i = 1; i < pass.msaaSamples.size(); i++)
+                if (maxSamples < pass.msaaSamples[i]) maxSamples = pass.msaaSamples[i];
+            multisampling.rasterizationSamples = (VkSampleCountFlagBits)maxSamples;
+        }
+        else multisampling.rasterizationSamples = VK_SAMPLE_COUNT_1_BIT;
 
         VkPipelineColorBlendAttachmentState colorBlendAttachment
         {
@@ -195,7 +204,6 @@ namespace hf
             .blendConstants = { 0.0f, 0.0f, 0.0f, 0.0f },
         };
 
-        auto& pass = GetRenderPass(info.renderPass);
         VkGraphicsPipelineCreateInfo pipelineInfo
         {
             .sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO,
