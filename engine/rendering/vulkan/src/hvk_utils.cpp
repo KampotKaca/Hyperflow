@@ -80,6 +80,7 @@ namespace hf
         for (uint32_t i = 0; i < rn->passTextureCollections.size(); ++i)
         {
             size += rn->passTextureCollections[i].depthTextures.size();
+            size += rn->passTextureCollections[i].msaaTextures.size();
             // size += rn->passTextureCollections[i].colorTextures.size() * swapchain.imageViews.size();
         }
         std::vector<VkImageView> views(1 + size);
@@ -93,6 +94,12 @@ namespace hf
                 for (uint32_t k = 0; k < collection.depthTextures.size(); ++k)
                 {
                     views[viewIndex] = collection.depthTextures[k]->view;
+                    viewIndex++;
+                }
+
+                for (uint32_t k = 0; k < collection.msaaTextures.size(); ++k)
+                {
+                    views[viewIndex] = collection.msaaTextures[k]->view;
                     viewIndex++;
                 }
             }

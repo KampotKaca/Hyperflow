@@ -218,13 +218,14 @@ namespace hf
                 {
                     auto& attachment = attachments[j];
                     if (attachment.samples == 1 || attachment.finalLayout == VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL) continue;
+                    auto& attachmentRef = colorAttachmentRefs[j];
 
                     auto& msaaAttachment = attachments[attachmentIndex];
                     auto& msaaRef = msaaAttachmentRefs[multisampleIndex];
                     VkImageLayout initial = attachment.initialLayout, final = attachment.finalLayout;
 
                     attachment.initialLayout = initial;
-                    attachment.finalLayout = VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL;
+                    attachment.finalLayout = attachmentRef.layout;
 
                     msaaAttachment = attachment;
                     msaaAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
@@ -233,7 +234,7 @@ namespace hf
                     msaaRef =
                     {
                         .attachment = attachmentIndex,
-                        .layout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL
+                        .layout = attachmentRef.layout
                     };
 
                     multisampleIndex++;
@@ -438,14 +439,6 @@ namespace hf
         {
             .pass = pass,
         };
-        // texCollection.colorTextures.reserve(renderPass.colorAttachments.size());
-        // texCollection.msaaTextures = std::vector<VkTexture*>(renderPass.multisamplingAttachmentCount);
-
-        // for (uint32_t i = 0; i < renderPass.colorAttachments.size(); i++)
-        // {
-        //     auto tex = VkRenderPassTexture(rn->targetSize, );
-        //     texCollection.colorTextures.push_back(std::move(tex));
-        // }
 
         texCollection.depthTextures = std::vector<VkTexture*>(renderPass.depthAttachmentRefs.size());
         for (uint32_t i = 0; i < renderPass.depthAttachmentRefs.size(); i++)
@@ -456,7 +449,7 @@ namespace hf
             {
                 .size = uvec3(size, 1),
                 .channel = TextureChannel::RGBA,
-                .mipLevels = 1,
+                .mipLevels = (uint32_t)attachment.samples,
                 .data = nullptr,
                 .details
                 {
@@ -477,6 +470,34 @@ namespace hf
             texCollection.depthTextures[i] = texture;
         }
 
+        texCollection.msaaTextures = std::vector<VkTexture*>(renderPass.msaaAttachmentRefs.size());
+        for (uint32_t i = 0; i < renderPass.msaaAttachmentRefs.size(); i++)
+        {
+            auto& msaaRef = renderPass.msaaAttachmentRefs[i];
+            auto& attachment = renderPass.attachments[msaaRef.attachment];
+
+            inter::rendering::TextureCreationInfo textureInfo
+            {
+                .size = uvec3(size, 1),
+                .channel = TextureChannel::RGBA,
+                .mipLevels = 1,
+                .samples = (uint32_t)attachment.samples,
+                .data = nullptr,
+                .details
+                {
+                    .type = TextureType::Tex2D,
+                    .format = (TextureFormat)attachment.format,
+                    .aspectFlags = TextureAspectFlags::Color,
+                    .tiling = TextureTiling::Optimal,
+                    .usage = ((TextureUsageFlags)msaaRef.layout),
+                    .memoryType = BufferMemoryType::Static,
+                    .finalLayout = TextureResultLayoutType::Color,
+                }
+            };
+
+            auto* texture = new VkTexture(textureInfo);
+            texCollection.msaaTextures[i] = texture;
+        }
         rn->passTextureCollections.push_back(std::move(texCollection));
     }
 
@@ -497,6 +518,7 @@ namespace hf
         {
             for (auto& tex : texCollection.colorTextures) delete tex;
             for (auto& tex : texCollection.depthTextures) delete tex;
+            for (auto& tex : texCollection.msaaTextures) delete tex;
         }
         rn->passTextureCollections.clear();
     }

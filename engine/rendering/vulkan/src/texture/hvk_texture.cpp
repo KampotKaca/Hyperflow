@@ -3,7 +3,6 @@
 
 namespace hf
 {
-    void TransitionEmptyImageLayout(const ImageTransitionInfo& transitionInfo, VkImageLayout srcLayout, VkImageLayout dstLayout);
     void TransitionImageLayout(VkCommandBuffer command, const ImageTransitionInfo* pImageInfos, uint32_t imageInfoCount,
         VkImageLayout oldLayout, VkImageLayout newLayout);
     static void TextureViewCallback(void* uData);
@@ -16,7 +15,6 @@ namespace hf
         bufferOffset = 0;
 
         auto device = GRAPHICS_DATA.defaultDevice->logicalDevice.device;
-        auto& transferData = GRAPHICS_DATA.defaultDevice->transferData;
 
         VkImageCreateInfo imageInfo
         {
@@ -28,8 +26,6 @@ namespace hf
             .samples = (VkSampleCountFlagBits)info.samples,
             .tiling = (VkImageTiling)details.tiling,
             .sharingMode = VK_SHARING_MODE_EXCLUSIVE,
-            .queueFamilyIndexCount = (uint32_t)transferData.indices.size(),
-            .pQueueFamilyIndices = transferData.indices.data(),
             .initialLayout = VK_IMAGE_LAYOUT_UNDEFINED,
         };
 
@@ -44,6 +40,10 @@ namespace hf
             }
 
             imageInfo.usage = VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | (uint32_t)details.usage;
+
+            auto& transferData = GRAPHICS_DATA.defaultDevice->transferData;
+            imageInfo.queueFamilyIndexCount = (uint32_t)transferData.indices.size();
+            imageInfo.pQueueFamilyIndices = transferData.indices.data();
         }
         else
         {
@@ -99,19 +99,7 @@ namespace hf
             copyOperation.pRegions[0] = copyRegion;
             StageCopyOperation(copyOperation);
         }
-        else
-        {
-            ImageTransitionInfo transitionInfo
-            {
-                .image = image,
-                .format = (VkFormat)details.format,
-                .aspectFlags = (VkImageAspectFlags)info.details.aspectFlags,
-                .mipLevels = mipLevels
-            };
-
-            TransitionEmptyImageLayout(transitionInfo, VK_IMAGE_LAYOUT_UNDEFINED, (VkImageLayout)info.details.finalLayout);
-            TextureViewCallback(this);
-        }
+        else TextureViewCallback(this);
     }
 
     VkTexture::~VkTexture()
@@ -245,32 +233,6 @@ namespace hf
 
             GRAPHICS_DATA.bufferToImageCopyOperations.clear();
         }
-    }
-
-    void TransitionEmptyImageLayout(const ImageTransitionInfo& transitionInfo, VkImageLayout srcLayout, VkImageLayout dstLayout)
-    {
-        auto command = GRAPHICS_DATA.graphicsPool.buffers[0];
-        VkCommandBufferBeginInfo beginInfo
-        {
-            .sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO,
-        };
-
-        VK_HANDLE_EXCEPT(vkResetCommandBuffer(command, 0));
-        VK_HANDLE_EXCEPT(vkBeginCommandBuffer(command, &beginInfo));
-
-        TransitionImageLayout(command, &transitionInfo, 1, srcLayout, dstLayout);
-
-        VK_HANDLE_EXCEPT(vkEndCommandBuffer(command));
-        VkSubmitInfo submitInfo
-        {
-            .sType = VK_STRUCTURE_TYPE_SUBMIT_INFO,
-            .commandBufferCount = 1,
-            .pCommandBuffers = &command
-        };
-
-        auto& queue = GRAPHICS_DATA.defaultDevice->logicalDevice.graphicsQueue;
-        VK_HANDLE_EXCEPT(vkQueueSubmit(queue, 1, &submitInfo, VK_NULL_HANDLE));
-        VK_HANDLE_EXCEPT(vkQueueWaitIdle(queue));
     }
 
     void TextureViewCallback(void* uData)

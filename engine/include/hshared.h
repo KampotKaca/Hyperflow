@@ -522,6 +522,7 @@ namespace hf
 		None = 0, TransferSrc = 1 << 0, TransferDst = 1 << 1, Sampled = 1 << 2, Storage = 1 << 3,
 		Color = 1 << 4, DepthStencil = 1 << 5, Transient = 1 << 6, Input = 1 << 7, Host = 1 << 22,
 	};
+	DEFINE_ENUM_FLAGS(TextureUsageFlags)
 
 	struct TextureDetails
 	{
