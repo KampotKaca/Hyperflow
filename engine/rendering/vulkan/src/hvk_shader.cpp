@@ -152,8 +152,6 @@ namespace hf
         VkPipelineMultisampleStateCreateInfo multisampling
         {
             .sType = VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO,
-            .sampleShadingEnable = VK_FALSE,
-            .minSampleShading = 1.0f,
             .pSampleMask = nullptr,
             .alphaToCoverageEnable = VK_FALSE,
             .alphaToOneEnable = VK_FALSE,
@@ -167,6 +165,17 @@ namespace hf
             multisampling.rasterizationSamples = (VkSampleCountFlagBits)maxSamples;
         }
         else multisampling.rasterizationSamples = VK_SAMPLE_COUNT_1_BIT;
+
+        if (pass.msaaSamples.size() > 0 && GRAPHICS_DATA.defaultDevice->features.sampleRateShading)
+        {
+            multisampling.sampleShadingEnable = VK_TRUE;
+            multisampling.minSampleShading = VK_MSAA_MIN_SAMPLE_SHADING;
+        }
+        else
+        {
+            multisampling.sampleShadingEnable = VK_FALSE;
+            multisampling.minSampleShading = 1.0f;
+        }
 
         VkPipelineColorBlendAttachmentState colorBlendAttachment
         {
