@@ -47,8 +47,6 @@ namespace hf
     {
         auto& binding = pack->bindings[bindingIndex];
         auto& texSampler = GetSampler(binding.sampler);
-        auto& texLayout = GetTextureLayout(pack->layout);
-        auto bindingType = (VkDescriptorType)texLayout.bindingInfos[bindingIndex].type;
 
         for (size_t i = 0; i < size; i++)
         {
@@ -69,7 +67,7 @@ namespace hf
                 .dstBinding = binding.bindingId,
                 .dstArrayElement = offset,
                 .descriptorCount = size,
-                .descriptorType = bindingType,
+                .descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
                 .pImageInfo = GRAPHICS_DATA.preAllocBuffers.descImageBindings,
             };
         }

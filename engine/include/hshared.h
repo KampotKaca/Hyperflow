@@ -287,25 +287,8 @@ namespace hf
 		bool isOwned = false;
 	};
 
-	enum class UniformBufferType
-	{
-		UniformTexelBuffer = 4, StorageTexelBuffer = 5,
-		UniformBuffer = 6, StorageBuffer = 7,
-		UniformBufferDynamic = 8, StorageBufferDynamic = 9,
-		MaxEnum = 10,
-		MinEnum = 4
-	};
-
-	enum class TextureLayoutType
-	{
-		Sampler = 0, CombinedImageSampler = 1,
-		SampledImage = 2, StorageImage = 3,
-		Count = 4
-	};
-
 	struct UniformBufferBindingInfo
 	{
-		UniformBufferType type = UniformBufferType::UniformBuffer;
 		ShaderUsageStage usageFlags = ShaderUsageStage::Vertex | ShaderUsageStage::Fragment;
 
 		//this variable describes this specific uniform buffers array size,
@@ -323,6 +306,11 @@ namespace hf
 		uint32_t bindingId{};
 		UniformBufferBindingInfo* pBindings{};
 		uint32_t bindingCount{};
+	};
+
+	struct StorageBufferCreationInfo
+	{
+		BufferMemoryType memoryType = BufferMemoryType::Static;
 	};
 
 	enum class RenderBindingType { Graphics = 0, Compute = 1, RayTracing = 1000165000, HuaweiSubpassShading = 1000369003 };
@@ -346,7 +334,6 @@ namespace hf
 	struct TextureLayoutBindingInfo
 	{
 		uint32_t bindingId{};
-		TextureLayoutType type = TextureLayoutType::CombinedImageSampler;
 		ShaderUsageStage usageFlags = ShaderUsageStage::Vertex | ShaderUsageStage::Fragment;
 
 		//this variable describes this specific uniform buffers array size,

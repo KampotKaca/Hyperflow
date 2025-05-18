@@ -120,7 +120,6 @@ namespace app
 
 		hf::UniformBufferBindingInfo bufferBindingInfo
 		{
-			.type = hf::UniformBufferType::UniformBuffer,
 			.usageFlags = hf::ShaderUsageStage::Default,
 			.arraySize = 1,
 			.elementSizeInBytes = sizeof(Camera)
@@ -146,7 +145,6 @@ namespace app
 		hf::TextureLayoutBindingInfo textureLayoutBindingInfo
 		{
 			.bindingId = 0,
-			.type = hf::TextureLayoutType::CombinedImageSampler,
 			.usageFlags = hf::ShaderUsageStage::Default,
 			.arraySize = 1,
 		};

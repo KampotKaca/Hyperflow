@@ -15,7 +15,7 @@ namespace hf
             GRAPHICS_DATA.preAllocBuffers.descLayoutBindings[i] =
             {
                 .binding = bindingInfo.bindingId,
-                .descriptorType = (VkDescriptorType)bindingInfo.type,
+                .descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
                 .descriptorCount = bindingInfo.arraySize,
                 .stageFlags = (VkShaderStageFlags)bindingInfo.usageFlags,
                 .pImmutableSamplers = nullptr

@@ -8,31 +8,22 @@ namespace hf
 {
     VkTexturePackAllocator::VkTexturePackAllocator(const inter::rendering::TexturePackAllocatorCreationInfo& info)
     {
+        VkDescriptorPoolSize poolSize =
+        {
+            .type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
+            .descriptorCount = 0
+        };
+
         auto& device = GRAPHICS_DATA.defaultDevice->logicalDevice.device;
         uint32_t textureBindingCount = 0;
         for (uint32_t i = 0; i < info.texturePackCount; i++)
             textureBindingCount += ((VkTexturePack*)info.pTexturePacks[i])->bindings.size();
 
-        uint32_t entryCounts[(uint32_t)TextureLayoutType::Count]{};
-
         uint32_t descriptorCount = textureBindingCount * FRAMES_IN_FLIGHT;
         for (uint32_t i = 0; i < info.texturePackCount; ++i)
         {
             auto* texPack = (VkTexturePack*)info.pTexturePacks[i];
-            auto& layout = GetTextureLayout(texPack->layout);
-            for (uint32_t j = 0; j < texPack->bindings.size(); ++j)
-                entryCounts[(uint32_t)layout.bindingInfos[j].type] += FRAMES_IN_FLIGHT;
-        }
-
-        uint32_t poolSize = 0;
-        for (uint32_t i = 0; i < (uint32_t)TextureLayoutType::Count; i++)
-        {
-            if (entryCounts[i] > 0)
-            {
-                GRAPHICS_DATA.preAllocBuffers.descPoolSizes[poolSize] =
-                    VkDescriptorPoolSize((VkDescriptorType)i, entryCounts[i]);
-                poolSize++;
-            }
+            poolSize.descriptorCount += texPack->bindings.size() * FRAMES_IN_FLIGHT;
         }
 
         VkDescriptorPoolCreateInfo poolInfo
@@ -40,8 +31,8 @@ namespace hf
             .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO,
             .flags = VK_DESCRIPTOR_POOL_CREATE_UPDATE_AFTER_BIND_BIT,
             .maxSets = descriptorCount,
-            .poolSizeCount = poolSize,
-            .pPoolSizes = GRAPHICS_DATA.preAllocBuffers.descPoolSizes
+            .poolSizeCount = 1,
+            .pPoolSizes = &poolSize
         };
 
         VK_HANDLE_EXCEPT(vkCreateDescriptorPool(device, &poolInfo, nullptr, &pool));
@@ -92,10 +83,10 @@ namespace hf
 
                     if (binding.sampler == 0) continue;
 
-                    bool isValid = binding.textures.size() > 0;
-                    for (uint32_t k = 0; k < binding.textures.size(); k++)
+                    bool isValid = !binding.textures.empty();
+                    for (auto& texture : binding.textures)
                     {
-                        if (!binding.textures[k])
+                        if (!texture)
                         {
                             isValid = false;
                             break;

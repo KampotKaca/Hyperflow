@@ -5,30 +5,16 @@ namespace hf
 {
     VkUniformAllocator::VkUniformAllocator(const UniformAllocatorDefinitionInfo& info)
     {
-        for (uint32_t i = (uint32_t)UniformBufferType::MinEnum; i < (uint32_t)UniformBufferType::MaxEnum; i++)
+        VkDescriptorPoolSize poolSize =
         {
-            GRAPHICS_DATA.preAllocBuffers.descPoolSizes[i] =
-            {
-                .type = (VkDescriptorType)i,
-                .descriptorCount = 0
-            };
-        }
+            .type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
+            .descriptorCount = 0
+        };
 
         for (uint32_t i = 0; i < info.bufferCount; i++)
         {
             auto& buffer = GetUniform(info.pBuffers[i]);
-            for (auto& binding : buffer.bindings)
-                GRAPHICS_DATA.preAllocBuffers.descPoolSizes[(uint32_t)binding.type].descriptorCount += FRAMES_IN_FLIGHT;
-        }
-
-        uint32_t poolSize = 0;
-        for (uint32_t i = (uint32_t)UniformBufferType::MinEnum; i < (uint32_t)UniformBufferType::MaxEnum; i++)
-        {
-            if (GRAPHICS_DATA.preAllocBuffers.descPoolSizes[i].descriptorCount > 0)
-            {
-                GRAPHICS_DATA.preAllocBuffers.descPoolSizes[poolSize] = GRAPHICS_DATA.preAllocBuffers.descPoolSizes[i];
-                poolSize++;
-            }
+            poolSize.descriptorCount += buffer.bindings.size() * FRAMES_IN_FLIGHT;
         }
 
         uint32_t descriptorCount = info.bufferCount * FRAMES_IN_FLIGHT;
@@ -37,8 +23,8 @@ namespace hf
         {
             .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO,
             .maxSets = descriptorCount,
-            .poolSizeCount = poolSize,
-            .pPoolSizes = GRAPHICS_DATA.preAllocBuffers.descPoolSizes,
+            .poolSizeCount = 1,
+            .pPoolSizes = &poolSize,
         };
 
         auto& device = GRAPHICS_DATA.defaultDevice->logicalDevice.device;

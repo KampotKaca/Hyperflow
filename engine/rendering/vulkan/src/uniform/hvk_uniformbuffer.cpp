@@ -18,7 +18,7 @@ namespace hf
             VkDescriptorSetLayoutBinding layout
             {
                 .binding = info.bindingId + i,
-                .descriptorType = (VkDescriptorType)bindingInfo.type,
+                .descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
                 .descriptorCount = bindingInfo.arraySize,
                 .stageFlags = (uint32_t)bindingInfo.usageFlags,
                 .pImmutableSamplers = nullptr,

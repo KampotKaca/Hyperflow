@@ -145,7 +145,6 @@ namespace hf
         VkDescriptorBufferInfo bufferInfos[FRAMES_IN_FLIGHT]{};
         VkWriteDescriptorSet descWrites[FRAMES_IN_FLIGHT]{};
         VkDescriptorImageInfo descImageBindings[VK_MAX_IMAGE_BINDINGS]{};
-        VkDescriptorPoolSize descPoolSizes[(uint32_t)UniformBufferType::MaxEnum]{};
         VkImageMemoryBarrier imageBarriers[VK_MAX_IMAGE_BARRIERS]{};
         ImageTransitionArray imageTransitions[9]{};
     };
