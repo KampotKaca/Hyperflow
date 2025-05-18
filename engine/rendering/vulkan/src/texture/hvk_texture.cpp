@@ -25,7 +25,7 @@ namespace hf
             .format = (VkFormat)details.format,
             .extent = { size.x, size.y, size.z },
             .arrayLayers = 1,
-            .samples = VK_SAMPLE_COUNT_1_BIT,
+            .samples = (VkSampleCountFlagBits)info.samples,
             .tiling = (VkImageTiling)details.tiling,
             .sharingMode = VK_SHARING_MODE_EXCLUSIVE,
             .queueFamilyIndexCount = (uint32_t)transferData.indices.size(),

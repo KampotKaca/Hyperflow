@@ -86,6 +86,7 @@ namespace hf::inter::rendering
         uvec3 size = { 1, 1, 1 };
         TextureChannel channel = TextureChannel::RGBA;
         uint32_t mipLevels = 1;
+        uint32_t samples = 1;
         void* data{};
         TextureDetails details{};
     };

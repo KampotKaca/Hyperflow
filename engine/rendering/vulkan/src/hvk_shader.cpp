@@ -229,7 +229,7 @@ namespace hf
             .maxDepthBounds = 1
         };
 
-        if (pass.depthAttachments.size() > 0)
+        if (pass.depthAttachmentRefs.size() > 0)
             pipelineInfo.pDepthStencilState = &depthStencilInfo;
         else pipelineInfo.pDepthStencilState = nullptr;
 

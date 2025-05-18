@@ -55,9 +55,8 @@ namespace hf
         for (uint32_t i = 0; i < FRAMES_IN_FLIGHT; ++i)
             CreateSemaphore(*GRAPHICS_DATA.defaultDevice, &rn->frames[i].isImageAvailable);
 
-        for (uint32_t i = 0; i < rn->swapchain.images.size(); ++i)
+        for (auto& image : rn->swapchain.images)
         {
-            auto& image = rn->swapchain.images[i];
             CreateSemaphore(*GRAPHICS_DATA.defaultDevice, &image.isRenderingFinished);
             CreateFence(*GRAPHICS_DATA.defaultDevice, &image.isInFlight, true);
         }
@@ -68,7 +67,7 @@ namespace hf
     void CreateLogicalDevice(GraphicsDevice& device)
     {
         std::vector<VkDeviceQueueCreateInfo> queueCreateInfos{};
-        std::set<uint32_t> uniqueQueueFamilies =
+        std::set uniqueQueueFamilies =
         {
             device.familyIndices.graphicsFamily.value(),
             device.familyIndices.presentFamily.value(),

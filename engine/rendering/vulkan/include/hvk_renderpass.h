@@ -11,6 +11,7 @@ namespace hf
         RenderPass pass{};
         std::vector<VkTexture*> colorTextures{};
         std::vector<VkTexture*> depthTextures{};
+        std::vector<VkTexture*> msaaTextures{};
     };
 
     struct VkDrawPass
@@ -20,11 +21,12 @@ namespace hf
 
         VkRenderPass pass{};
 
-        std::vector<RenderSubpassColorAttachmentInfo> colorAttachments{};
-        std::vector<RenderSubpassDepthAttachmentInfo> depthAttachments{};
+        std::vector<VkAttachmentDescription> attachments{};
+        std::vector<VkAttachmentReference> colorAttachmentRefs{};
+        std::vector<VkAttachmentReference> depthAttachmentRefs{};
+        std::vector<VkAttachmentReference> msaaAttachmentRefs{};
+
         std::vector<VkClearValue> clearValues{};
-        uint32_t attachmentCount = 0;
-        uint32_t multisamplingAttachmentCount = 0;
         bool hasPresentationAttachment = false;
     };
 

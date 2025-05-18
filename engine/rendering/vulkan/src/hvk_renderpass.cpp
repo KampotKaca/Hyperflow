@@ -15,8 +15,6 @@ namespace hf
 
     static void SetOperations(VkAttachmentLoadOp& loadOp, VkAttachmentStoreOp& storeOp, LoadStoreOperationType type);
     static DepthStencilFormatInfo ChooseDepthStencilFormat(LoadStoreOperationType op, LoadStoreOperationType stencilOp, VkImageTiling tiling, VkFormatFeatureFlags features);
-    static void HandleMsaa(VkAttachmentDescription& desc, VkAttachmentDescription* attachments, VkAttachmentReference* refs,
-        uint32_t msaaCount, uint32_t& attachmentIndex, uint32_t& multisampleIndex);
     inline bool CheckFormatSupport(VkFormat format, VkImageTiling tiling, VkFormatFeatureFlags features);
 
     VkDrawPass::VkDrawPass(const RenderPassDefinitionInfo& info)
@@ -39,18 +37,25 @@ namespace hf
             };
         }
 
+        uint32_t attachmentCount = 0;
         uint32_t colorAttachmentCount = 0;
         uint32_t depthAttachmentCount = 0;
+        uint32_t msaaAttachmentCount = 0;
 
         for (uint32_t i = 0; i < info.subpassCount; i++)
         {
-            uint32_t countStart = attachmentCount;
             auto& subpassInfo = info.pSubpasses[i];
             attachmentCount += subpassInfo.attachmentCount;
             for (uint32_t j = 0; j < subpassInfo.attachmentCount; j++)
             {
                 auto& attachmentInfo = subpassInfo.pColorAttachments[j];
                 colorAttachmentCount++;
+
+                if (subpassInfo.msaaCounter > 0)
+                {
+                    attachmentCount++;
+                    msaaAttachmentCount++;
+                }
             }
 
             if (subpassInfo.presentationAttachment)
@@ -58,6 +63,12 @@ namespace hf
                 hasPresentationAttachment = true;
                 attachmentCount++;
                 colorAttachmentCount++;
+
+                if (subpassInfo.msaaCounter > 0)
+                {
+                    attachmentCount++;
+                    msaaAttachmentCount++;
+                }
             }
 
             if (subpassInfo.depthAttachment)
@@ -65,26 +76,14 @@ namespace hf
                 attachmentCount++;
                 depthAttachmentCount++;
             }
-
-            if (subpassInfo.msaaCounter > 0)
-            {
-                uint32_t msaaCount = attachmentCount - countStart;
-                attachmentCount += msaaCount;
-                multisamplingAttachmentCount += msaaCount;
-            }
         }
 
-        std::vector<VkAttachmentDescription> attachments(attachmentCount);
-        std::vector<VkAttachmentReference> colorAttachmentRefs(colorAttachmentCount);
-        std::vector<VkAttachmentReference> msaaAttachmentRefs(multisamplingAttachmentCount);
-        std::vector<VkAttachmentReference> depthAttachmentRefs(depthAttachmentCount);
+        attachments = std::vector<VkAttachmentDescription>(attachmentCount);
+        colorAttachmentRefs = std::vector<VkAttachmentReference>(colorAttachmentCount);
+        depthAttachmentRefs = std::vector<VkAttachmentReference>(depthAttachmentCount);
+        msaaAttachmentRefs = std::vector<VkAttachmentReference>(msaaAttachmentCount);
 
-        uint32_t cCount = colorAttachmentCount;
-        if (hasPresentationAttachment) cCount--;
         clearValues = std::vector<VkClearValue>(attachmentCount);
-        colorAttachments.reserve(cCount);
-        depthAttachments.reserve(depthAttachmentCount);
-
         {
             uint32_t attachmentIndex = 0;
             uint32_t colorIndex = 0;
@@ -94,7 +93,7 @@ namespace hf
             {
                 auto& subpassInfo = info.pSubpasses[i];
                 uint32_t colorStart = colorIndex;
-                uint32_t multisampleStart = multisampleIndex;
+                auto msaaCount = (VkSampleCountFlagBits)std::pow(2, subpassInfo.msaaCounter);
                 for (uint32_t j = 0; j < subpassInfo.attachmentCount; j++)
                 {
                     auto& attachmentInfo = subpassInfo.pColorAttachments[j];
@@ -115,6 +114,7 @@ namespace hf
                     {
                         .flags = (VkAttachmentDescriptionFlags)attachmentInfo.usesSharedMemory,
                         .format = (VkFormat)attachmentInfo.format,
+                        .samples = msaaCount,
                         .initialLayout = (VkImageLayout)attachmentInfo.initialLayout,
                         .finalLayout = (VkImageLayout)attachmentInfo.finalLayout,
                     };
@@ -130,11 +130,7 @@ namespace hf
 
                     colorAttachmentRefs[colorIndex] = ref;
                     colorIndex++;
-                    colorAttachments.push_back(attachmentInfo);
                     attachmentIndex++;
-
-                    HandleMsaa(attachment, attachments.data(), msaaAttachmentRefs.data(),
-                        subpassInfo.msaaCounter, attachmentIndex, multisampleIndex);
                 }
 
                 auto& subpass = subpasses[i];
@@ -162,6 +158,7 @@ namespace hf
                     {
                         .flags = (VkAttachmentDescriptionFlags)attachmentInfo.usesSharedMemory,
                         .format = VULKAN_API_COLOR_FORMAT,
+                        .samples = msaaCount,
                         .initialLayout = (VkImageLayout)attachmentInfo.initialLayout,
                         .finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR,
                     };
@@ -183,7 +180,6 @@ namespace hf
                 if (subpassInfo.depthAttachment)
                 {
                     auto& depthAttachment = attachments[attachmentIndex];
-                    depthAttachments.push_back(*subpassInfo.depthAttachment);
                     auto& da = *subpassInfo.depthAttachment;
 
                     clearValues[attachmentIndex] =
@@ -194,6 +190,7 @@ namespace hf
                     depthAttachment =
                     {
                         .flags = (VkAttachmentDescriptionFlags)da.usesSharedMemory,
+                        .samples = msaaCount,
                         .initialLayout = (VkImageLayout)da.initialLayout,
                         .finalLayout = (VkImageLayout)da.finalLayout
                     };
@@ -216,10 +213,31 @@ namespace hf
                 }
 
                 uint32_t attCount = attachmentCount;
+                uint32_t msaaStart = multisampleIndex;
                 for (uint32_t j = 0; j < attCount; j++)
                 {
-                    HandleMsaa(attachments[j], attachments.data(), msaaAttachmentRefs.data(),
-                        subpassInfo.msaaCounter, attachmentIndex, multisampleIndex);
+                    auto& attachment = attachments[j];
+                    if (attachment.samples == 1 || attachment.finalLayout == VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL) continue;
+
+                    auto& msaaAttachment = attachments[attachmentIndex];
+                    auto& msaaRef = msaaAttachmentRefs[multisampleIndex];
+                    VkImageLayout initial = attachment.initialLayout, final = attachment.finalLayout;
+
+                    attachment.initialLayout = initial;
+                    attachment.finalLayout = VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL;
+
+                    msaaAttachment = attachment;
+                    msaaAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
+                    msaaAttachment.finalLayout = final;
+
+                    msaaRef =
+                    {
+                        .attachment = attachmentIndex,
+                        .layout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL
+                    };
+
+                    multisampleIndex++;
+                    attachmentIndex++;
                 }
 
                 if ((colorIndex - colorStart) > 0)
@@ -228,9 +246,9 @@ namespace hf
                     subpass.pColorAttachments = &colorAttachmentRefs[colorStart];
                 }
 
-                if ((multisampleIndex - multisampleStart) > 0)
+                if ((multisampleIndex - msaaStart) > 0)
                 {
-                    subpass.pResolveAttachments = &msaaAttachmentRefs[multisampleStart];
+                    subpass.pResolveAttachments = &msaaAttachmentRefs[msaaStart];
                 }
             }
         }
@@ -341,9 +359,9 @@ namespace hf
         {
         case 1:
 
-            for (uint32_t i = 0; i < NUM_DEPTH_FORMATS; i++)
+            for (auto i : inter::rendering::DEPTH_FORMATS)
             {
-                auto format = (VkFormat)inter::rendering::DEPTH_FORMATS[i];
+                auto format = (VkFormat)i;
                 if (CheckFormatSupport(format, tiling, features)) return
                 {
                     .format = format,
@@ -355,9 +373,9 @@ namespace hf
             throw GENERIC_EXCEPT("[Hyperflow]", "No suitable depth format found");
         case 2:
 
-            for (uint32_t i = 0; i < NUM_STENCIL_FORMATS; i++)
+            for (auto i : inter::rendering::STENCIL_FORMATS)
             {
-                auto format = (VkFormat)inter::rendering::STENCIL_FORMATS[i];
+                auto format = (VkFormat)i;
                 if (CheckFormatSupport(format, tiling, features)) return
                 {
                     .format = format,
@@ -369,9 +387,9 @@ namespace hf
             throw GENERIC_EXCEPT("[Hyperflow]", "No suitable stencil format found");
         case 3:
 
-            for (uint32_t i = 0; i < NUM_DEPTH_STENCIL_FORMATS; i++)
+            for (auto i : inter::rendering::DEPTH_STENCIL_FORMATS)
             {
-                auto format = (VkFormat)inter::rendering::DEPTH_STENCIL_FORMATS[i];
+                auto format = (VkFormat)i;
                 if (CheckFormatSupport(format, tiling, features)) return
                 {
                     .format = format,
@@ -401,32 +419,16 @@ namespace hf
         return false;
     }
 
-    void HandleMsaa(VkAttachmentDescription& desc, VkAttachmentDescription* attachments, VkAttachmentReference* refs,
-        uint32_t msaaCount, uint32_t& attachmentIndex, uint32_t& multisampleIndex)
+    bool IsDepthFormat(VkFormat format)
     {
-        if (msaaCount == 0)
-        {
-            desc.samples = VK_SAMPLE_COUNT_1_BIT;
-            return;
-        }
-        VkImageLayout initial = desc.initialLayout, final = desc.finalLayout;
+        return format == VK_FORMAT_D32_SFLOAT || format == VK_FORMAT_D32_SFLOAT_S8_UINT ||
+            format == VK_FORMAT_D24_UNORM_S8_UINT || format == VK_FORMAT_D16_UNORM_S8_UINT || format == VK_FORMAT_D16_UNORM;
+    }
 
-        desc.initialLayout = initial;
-        desc.finalLayout = VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL;
-        desc.samples = (VkSampleCountFlagBits)std::pow(2, msaaCount),
-
-        memcpy(&attachments[attachmentIndex], &desc, sizeof(VkAttachmentDescription));
-        attachments[attachmentIndex].samples = VK_SAMPLE_COUNT_1_BIT;
-        attachments[attachmentIndex].finalLayout = final;
-
-        refs[multisampleIndex] =
-        {
-            .attachment = attachmentIndex,
-            .layout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL
-        };
-
-        multisampleIndex++;
-        attachmentIndex++;
+    bool IsStencilFormat(VkFormat format)
+    {
+        return format == VK_FORMAT_S8_UINT || format == VK_FORMAT_D32_SFLOAT_S8_UINT ||
+            format == VK_FORMAT_D24_UNORM_S8_UINT || format == VK_FORMAT_D16_UNORM_S8_UINT;
     }
 
     void BindPassToRenderer(VkRenderer* rn, RenderPass pass, uvec2 size)
@@ -437,7 +439,7 @@ namespace hf
             .pass = pass,
         };
         // texCollection.colorTextures.reserve(renderPass.colorAttachments.size());
-        texCollection.depthTextures = std::vector<VkTexture*>(renderPass.depthAttachments.size());
+        // texCollection.msaaTextures = std::vector<VkTexture*>(renderPass.multisamplingAttachmentCount);
 
         // for (uint32_t i = 0; i < renderPass.colorAttachments.size(); i++)
         // {
@@ -445,11 +447,10 @@ namespace hf
         //     texCollection.colorTextures.push_back(std::move(tex));
         // }
 
-        for (uint32_t i = 0; i < renderPass.depthAttachments.size(); i++)
+        texCollection.depthTextures = std::vector<VkTexture*>(renderPass.depthAttachmentRefs.size());
+        for (uint32_t i = 0; i < renderPass.depthAttachmentRefs.size(); i++)
         {
-            auto& attachment = renderPass.depthAttachments[i];
-            auto supportedDepthFormat = ChooseDepthStencilFormat(attachment.lsOperation, attachment.lsStencilOperation,
-                VK_IMAGE_TILING_OPTIMAL, VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT);
+            auto& attachment = renderPass.attachments[renderPass.depthAttachmentRefs[i].attachment];
 
             inter::rendering::TextureCreationInfo textureInfo
             {
@@ -460,17 +461,17 @@ namespace hf
                 .details
                 {
                     .type = TextureType::Tex2D,
-                    .format = (TextureFormat)supportedDepthFormat.format,
+                    .format = (TextureFormat)attachment.format,
                     .tiling = TextureTiling::Optimal,
                     .usage = TextureUsageFlags::DepthStencil,
                     .memoryType = BufferMemoryType::Static,
-                    .finalLayout = attachment.finalLayout,
+                    .finalLayout = (TextureResultLayoutType)attachment.finalLayout,
                 }
             };
 
             textureInfo.details.aspectFlags = TextureAspectFlags::None;
-            if (supportedDepthFormat.hasDepth) textureInfo.details.aspectFlags |= TextureAspectFlags::Depth;
-            if (supportedDepthFormat.hasStencil) textureInfo.details.aspectFlags |= TextureAspectFlags::Stencil;
+            if (IsDepthFormat(attachment.format)) textureInfo.details.aspectFlags |= TextureAspectFlags::Depth;
+            if (IsStencilFormat(attachment.format)) textureInfo.details.aspectFlags |= TextureAspectFlags::Stencil;
 
             auto* texture = new VkTexture(textureInfo);
             texCollection.depthTextures[i] = texture;
