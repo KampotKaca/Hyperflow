@@ -1,5 +1,5 @@
-﻿#ifndef RENDEREREXPORT_H
-#define RENDEREREXPORT_H
+﻿#ifndef HEX_RENDERER_H
+#define HEX_RENDERER_H
 
 #include "hshared.h"
 #include "../../others/exception/include/hgenericexception.h"
@@ -73,7 +73,7 @@ namespace hf::inter::rendering
         uint32_t indexCount{};
     };
 
-    struct ShaderStorageUploadInfo
+    struct StorageBufferUploadInfo
     {
         const void* storage{};
         const void* data{};
@@ -204,9 +204,9 @@ namespace hf::inter::rendering
         void (*UploadIndexBuffer)(const IndexBufferUploadInfo& info);
 
         //shader storage
-        void* (*CreateShaderStorage)(const StorageBufferCreationInfo& info);
-        void (*DestroyShaderStorage)(void* handle);
-        void (*UploadShaderStorage)(const ShaderStorageUploadInfo& info);
+        void* (*CreateStorageBuffer)(const StorageBufferCreationInfo& info);
+        void (*DestroyStorageBuffer)(void* handle);
+        void (*UploadStorageBuffer)(const StorageBufferUploadInfo& info);
 
         //copy operations
         void (*SubmitBufferCopyOperations)();
@@ -224,4 +224,4 @@ namespace hf::inter::rendering
     };
 }
 
-#endif //RENDEREREXPORT_H
+#endif //HEX_RENDERER_H

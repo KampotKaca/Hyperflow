@@ -46,6 +46,7 @@ namespace hf
         std::optional<uint32_t> graphicsFamily{};
         std::optional<uint32_t> presentFamily{};
         std::optional<uint32_t> transferFamily{};
+        std::optional<uint32_t> computeFamily{};
 
         [[nodiscard]] bool IsComplete() const;
     };
@@ -56,6 +57,7 @@ namespace hf
         VkQueue graphicsQueue{};
         VkQueue presentQueue{};
         VkQueue transferQueue{};
+        VkQueue computeQueue{};
     };
 
     struct DeviceTransferData

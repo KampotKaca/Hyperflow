@@ -103,14 +103,23 @@ namespace hf
 
         VK_HANDLE_EXCEPT(vkCreateDevice(device.device, &createInfo, nullptr, &device.logicalDevice.device));
 
-        vkGetDeviceQueue(device.logicalDevice.device, device.familyIndices.graphicsFamily.value(),
+        auto& indices = device.familyIndices;
+        vkGetDeviceQueue(device.logicalDevice.device, indices.graphicsFamily.value(),
             0, &device.logicalDevice.graphicsQueue);
 
-        vkGetDeviceQueue(device.logicalDevice.device, device.familyIndices.presentFamily.value(),
+        vkGetDeviceQueue(device.logicalDevice.device, indices.presentFamily.value(),
             0, &device.logicalDevice.presentQueue);
 
-        vkGetDeviceQueue(device.logicalDevice.device, device.familyIndices.transferFamily.value(),
+        vkGetDeviceQueue(device.logicalDevice.device, indices.transferFamily.value(),
             0, &device.logicalDevice.transferQueue);
+
+        if (indices.graphicsFamily.value() == indices.computeFamily.value())
+            device.logicalDevice.computeQueue = device.logicalDevice.graphicsQueue;
+        else
+        {
+            vkGetDeviceQueue(device.logicalDevice.device, indices.computeFamily.value(),
+            0, &device.logicalDevice.computeQueue);
+        }
     }
 
     //------------------------------------------------------------------------------------
@@ -131,10 +140,13 @@ namespace hf
 
         for (uint32_t i = 0; i < queueFamilies.size(); i++)
         {
-            if (queueFamilies[i].queueFlags & VK_QUEUE_GRAPHICS_BIT)
+            auto& flags = queueFamilies[i].queueFlags;
+            if (flags & VK_QUEUE_GRAPHICS_BIT)
                 deviceData->familyIndices.graphicsFamily = i;
-            else if (queueFamilies[i].queueFlags & VK_QUEUE_TRANSFER_BIT)
+            else if (flags & VK_QUEUE_TRANSFER_BIT)
                 deviceData->familyIndices.transferFamily = i;
+            else if (flags & VK_QUEUE_COMPUTE_BIT)
+                deviceData->familyIndices.computeFamily = i;
 
             VkBool32 presentSupport = false;
             VK_HANDLE_EXCEPT(vkGetPhysicalDeviceSurfaceSupportKHR(device, i, surface, &presentSupport));
@@ -144,6 +156,14 @@ namespace hf
         }
 
         auto& indices = deviceData->familyIndices;
+        if (!indices.computeFamily.has_value() && indices.graphicsFamily.has_value())
+        {
+            auto& graphicsFlags = queueFamilies[indices.graphicsFamily.value()].queueFlags;
+            if (graphicsFlags & VK_QUEUE_COMPUTE_BIT)
+                deviceData->familyIndices.computeFamily = indices.graphicsFamily.value();
+            else return false;
+        }
+
         if (!indices.IsComplete()) return false;
 
         if (indices.graphicsFamily != indices.presentFamily)

@@ -178,17 +178,17 @@ namespace hf::inter::rendering
 
     }
 
-    void* CreateShaderStorage(const StorageBufferCreationInfo& info)
+    void* CreateStorageBuffer(const StorageBufferCreationInfo& info)
     {
         return nullptr;
     }
 
-    void DestroyShaderStorage(void* handle)
+    void DestroyStorageBuffer(void* handle)
     {
 
     }
 
-    void UploadShaderStorage(const ShaderStorageUploadInfo& info)
+    void UploadStorageBuffer(const StorageBufferUploadInfo& info)
     {
 
     }
@@ -311,9 +311,9 @@ namespace hf::inter::rendering
             .UploadIndexBuffer          = UploadIndexBuffer,
 
             //storage buffer
-            .CreateShaderStorage        = CreateShaderStorage,
-            .DestroyShaderStorage       = DestroyShaderStorage,
-            .UploadShaderStorage        = UploadShaderStorage,
+            .CreateStorageBuffer        = CreateStorageBuffer,
+            .DestroyStorageBuffer       = DestroyStorageBuffer,
+            .UploadStorageBuffer        = UploadStorageBuffer,
 
             //buffer operations
             .SubmitBufferCopyOperations   = SubmitBufferCopyOperations,

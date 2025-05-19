@@ -222,6 +222,16 @@ namespace hf
 		void Upload(const IndexBufferUploadInfo& info);
 	}
 
+	namespace storagebuffer
+	{
+		Ref<StorageBuffer> Create(const StorageBufferCreationInfo& info);
+		void Destroy(const Ref<StorageBuffer>& buffer);
+		void Destroy(const Ref<StorageBuffer>* pBuffers, uint32_t count);
+		void DestroyAll(bool internalOnly = false);
+		bool IsRunning(const Ref<StorageBuffer>& buffer);
+		void Upload(const StorageBufferUploadInfo& info);
+	}
+
 	namespace mesh
 	{
 		Ref<Mesh> Create(const MeshCreationInfo& info);

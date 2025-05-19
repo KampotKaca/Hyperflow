@@ -217,17 +217,17 @@ namespace hf::inter::rendering
         UploadBufferMemory(buffer->bufferMemory, info.data, fullOffset, fullSize);
     }
 
-    void* CreateShaderStorage(const StorageBufferCreationInfo& info)
+    void* CreateStorageBuffer(const StorageBufferCreationInfo& info)
     {
         return new VkStorageBuffer(info);
     }
 
-    void DestroyShaderStorage(void* handle)
+    void DestroyStorageBuffer(void* handle)
     {
         delete (VkStorageBuffer*)handle;
     }
 
-    void UploadShaderStorage(const ShaderStorageUploadInfo& info)
+    void UploadStorageBuffer(const StorageBufferUploadInfo& info)
     {
         auto buffer = (VkStorageBuffer*)info.storage;
         if (buffer->memoryType == BufferMemoryType::Static)
@@ -385,9 +385,9 @@ namespace hf::inter::rendering
             .UploadIndexBuffer          = UploadIndexBuffer,
 
             //storage buffer
-            .CreateShaderStorage        = CreateShaderStorage,
-            .DestroyShaderStorage       = DestroyShaderStorage,
-            .UploadShaderStorage        = UploadShaderStorage,
+            .CreateStorageBuffer        = CreateStorageBuffer,
+            .DestroyStorageBuffer       = DestroyStorageBuffer,
+            .UploadStorageBuffer        = UploadStorageBuffer,
 
             //buffer operations
             .SubmitBufferCopyOperations   = SubmitBufferCopyOperations,

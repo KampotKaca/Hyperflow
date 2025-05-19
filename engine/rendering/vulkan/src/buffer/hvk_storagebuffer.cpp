@@ -4,7 +4,7 @@
 namespace hf
 {
     VkStorageBuffer::VkStorageBuffer(const StorageBufferCreationInfo& info)
-        : bindingId(info.bindingId), bufferSize(info.sizeInBytes), memoryType(info.memoryType)
+        : bindingId(info.bindingId), bufferSize(info.elementCount * info.elementSizeInBytes), memoryType(info.memoryType)
     {
         switch (memoryType)
         {

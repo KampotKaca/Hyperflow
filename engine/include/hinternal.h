@@ -31,6 +31,7 @@ namespace hf::inter
         std::unordered_map<Shader*, Ref<Shader>> shaders{};
         std::unordered_map<VertBuffer*, Ref<VertBuffer>> vertBuffers{};
         std::unordered_map<IndexBuffer*, Ref<IndexBuffer>> indexBuffers{};
+        std::unordered_map<StorageBuffer*, Ref<StorageBuffer>> storageBuffers{};
         std::unordered_map<Mesh*, Ref<Mesh>> meshes{};
         std::unordered_map<Texture*, Ref<Texture>> textures{};
         std::unordered_map<TexturePack*, Ref<TexturePack>> texturePacks{};
@@ -82,6 +83,9 @@ namespace hf::inter
 
         bool CreateIndexBuffer_i(IndexBuffer* buffer);
         bool DestroyIndexBuffer_i(IndexBuffer* buffer);
+
+        bool CreateStorageBuffer_i(StorageBuffer* buffer);
+        bool DestroyStorageBuffer_i(StorageBuffer* buffer);
 
         bool CreateMesh_i(Mesh* mesh);
         bool DestroyMesh_i(Mesh* mesh);

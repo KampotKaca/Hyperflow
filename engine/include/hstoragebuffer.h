@@ -7,9 +7,11 @@ namespace hf
 {
     struct StorageBuffer
     {
-        StorageBuffer(const StorageBufferCreationInfo& info);
+        explicit StorageBuffer(const StorageBufferCreationInfo& info, DataTransferType transferType);
         ~StorageBuffer();
 
+        StorageBufferCreationInfo details{};
+        DataTransferType transferType = DataTransferType::DoNotOwn;
         void* handle{};
     };
 }

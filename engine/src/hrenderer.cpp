@@ -77,6 +77,7 @@ namespace hf
             if (inter::HF.renderingApi.isLoaded) inter::HF.renderingApi.api.WaitForRendering();
             vertbuffer::DestroyAll(internalOnly);
             indexbuffer::DestroyAll(internalOnly);
+            storagebuffer::DestroyAll(internalOnly);
             mesh::DestroyAll(internalOnly);
             shader::DestroyAll(internalOnly);
 
@@ -126,6 +127,7 @@ namespace hf
 
             for (auto& vertBuffer : std::ranges::views::values(HF.graphicsResources.vertBuffers)) CreateVertBuffer_i(vertBuffer.get());
             for (auto& indexBuffer : std::ranges::views::values(HF.graphicsResources.indexBuffers)) CreateIndexBuffer_i(indexBuffer.get());
+            for (auto& storageBuffer : std::ranges::views::values(HF.graphicsResources.storageBuffers)) CreateStorageBuffer_i(storageBuffer.get());
             for (auto& mesh : std::ranges::views::values(HF.graphicsResources.meshes)) CreateMesh_i(mesh.get());
             buffer::SubmitAll();
 

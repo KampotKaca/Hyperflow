@@ -178,7 +178,7 @@ namespace hf
         return false;
     }
 
-    bool QueueFamilyIndices::IsComplete() const { return graphicsFamily.has_value() && presentFamily.has_value() && transferFamily.has_value(); }
+    bool QueueFamilyIndices::IsComplete() const { return graphicsFamily.has_value() && presentFamily.has_value() && transferFamily.has_value() && computeFamily.has_value(); }
 
     void SetupViewportAndScissor(VkRenderer* rn)
     {

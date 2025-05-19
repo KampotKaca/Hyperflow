@@ -164,6 +164,7 @@ namespace hf
 
 	struct VertBuffer;
 	struct IndexBuffer;
+	struct StorageBuffer;
 	struct Mesh;
 
 	typedef uint32_t BufferAttrib;
@@ -225,6 +226,7 @@ namespace hf
 		TransferSrc = 1 << 0, TransferDst = 1 << 1, UniformTexel = 1 << 2, StorageTexel = 1 << 3,
 		Uniform = 1 << 4, Storage = 1 << 5, Index = 1 << 6, Vertex = 1 << 7, Indirect = 1 << 8
 	};
+	DEFINE_ENUM_FLAGS(BufferUsageType)
 
 	struct BufferAttribFormat
 	{
@@ -277,6 +279,14 @@ namespace hf
 		uint32_t indexCount{};
 	};
 
+	struct StorageBufferUploadInfo
+	{
+		const Ref<StorageBuffer>& buffer{};
+		const void* data{};
+		uint32_t offset{};
+		uint32_t size{};
+	};
+
 	struct ShaderCreationInfo
 	{
 		RenderPass renderPass{};
@@ -319,7 +329,8 @@ namespace hf
 	struct StorageBufferCreationInfo
 	{
 		uint32_t bindingId = 0;
-		uint64_t sizeInBytes = 0;
+		uint32_t elementSizeInBytes = 0;
+		uint32_t elementCount = 0;
 		BufferMemoryType memoryType = BufferMemoryType::Static;
 		BufferUsageType usageFlags = BufferUsageType::Storage;
 		void* data{};
