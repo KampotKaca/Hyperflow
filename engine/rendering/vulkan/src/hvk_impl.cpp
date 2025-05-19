@@ -4,7 +4,8 @@
 #include "hvk_shader.h"
 #include "hvk_texturepack.h"
 #include "hvk_vertbuffer.h"
-#include "hvk_texturepack.h"
+#include "hvk_storagebuffer.h"
+#include "hvk_renderpass.h"
 #include "hvk_renderpass.h"
 
 namespace hf::inter::rendering
@@ -216,6 +217,26 @@ namespace hf::inter::rendering
         UploadBufferMemory(buffer->bufferMemory, info.data, fullOffset, fullSize);
     }
 
+    void* CreateShaderStorage(const StorageBufferCreationInfo& info)
+    {
+        return new VkStorageBuffer(info);
+    }
+
+    void DestroyShaderStorage(void* handle)
+    {
+        delete (VkStorageBuffer*)handle;
+    }
+
+    void UploadShaderStorage(const ShaderStorageUploadInfo& info)
+    {
+        auto buffer = (VkStorageBuffer*)info.storage;
+        if (buffer->memoryType == BufferMemoryType::Static)
+            throw GENERIC_EXCEPT("[Hyperflow]", "Cannot modify static buffer");
+
+        if (buffer->mapping) UploadBufferMemory(info.data, buffer->mapping, info.offsetInBytes, info.sizeInBytes);
+        else UploadBufferMemory(buffer->bufferMemory, info.data, info.offsetInBytes, info.sizeInBytes);
+    }
+
     void SubmitBufferCopyOperations()
     {
         SubmitBufferToBufferCopyOperations();
@@ -362,6 +383,11 @@ namespace hf::inter::rendering
             .CreateIndexBuffer          = CreateIndexBuffer,
             .DestroyIndexBuffer         = DestroyIndexBuffer,
             .UploadIndexBuffer          = UploadIndexBuffer,
+
+            //storage buffer
+            .CreateShaderStorage        = CreateShaderStorage,
+            .DestroyShaderStorage       = DestroyShaderStorage,
+            .UploadShaderStorage        = UploadShaderStorage,
 
             //buffer operations
             .SubmitBufferCopyOperations   = SubmitBufferCopyOperations,

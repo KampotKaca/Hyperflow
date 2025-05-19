@@ -220,6 +220,12 @@ namespace hf
 
 	constexpr uint32_t BUFFER_DATA_SIZE[(uint32_t)BufferDataType::Count] = { 1, 1, 2, 2, 4, 4, 8, 8, 2, 4, 8 };
 
+	enum class BufferUsageType
+	{
+		TransferSrc = 1 << 0, TransferDst = 1 << 1, UniformTexel = 1 << 2, StorageTexel = 1 << 3,
+		Uniform = 1 << 4, Storage = 1 << 5, Index = 1 << 6, Vertex = 1 << 7, Indirect = 1 << 8
+	};
+
 	struct BufferAttribFormat
 	{
 		BufferDataType type = BufferDataType::F32;
@@ -239,6 +245,7 @@ namespace hf
 	{
 		BufferAttrib bufferAttrib = 0;
 		BufferMemoryType memoryType = BufferMemoryType::Static;
+		BufferUsageType usageFlags = BufferUsageType::Vertex;
 		uint32_t vertexCount = 0;
 		void* pVertices = nullptr;
 	};
@@ -247,6 +254,7 @@ namespace hf
 	{
 		BufferDataType indexFormat = BufferDataType::U16;
 		BufferMemoryType memoryType = BufferMemoryType::Static;
+		BufferUsageType usageFlags = BufferUsageType::Index;
 		uint32_t indexCount = 0;
 		void* pIndices = nullptr;
 	};
@@ -310,7 +318,11 @@ namespace hf
 
 	struct StorageBufferCreationInfo
 	{
+		uint32_t bindingId = 0;
+		uint64_t sizeInBytes = 0;
 		BufferMemoryType memoryType = BufferMemoryType::Static;
+		BufferUsageType usageFlags = BufferUsageType::Storage;
+		void* data{};
 	};
 
 	enum class RenderBindingType { Graphics = 0, Compute = 1, RayTracing = 1000165000, HuaweiSubpassShading = 1000369003 };

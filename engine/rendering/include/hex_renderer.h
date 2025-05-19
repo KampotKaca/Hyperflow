@@ -73,6 +73,14 @@ namespace hf::inter::rendering
         uint32_t indexCount{};
     };
 
+    struct ShaderStorageUploadInfo
+    {
+        const void* storage{};
+        const void* data{};
+        uint64_t offsetInBytes{};
+        uint64_t sizeInBytes{};
+    };
+
     struct RendererInstanceCreationInfo
     {
         RenderPass mainPass{};
@@ -194,6 +202,11 @@ namespace hf::inter::rendering
         void* (*CreateIndexBuffer)(const IndexBufferCreationInfo& info);
         void (*DestroyIndexBuffer)(void* handle);
         void (*UploadIndexBuffer)(const IndexBufferUploadInfo& info);
+
+        //shader storage
+        void* (*CreateShaderStorage)(const StorageBufferCreationInfo& info);
+        void (*DestroyShaderStorage)(void* handle);
+        void (*UploadShaderStorage)(const ShaderStorageUploadInfo& info);
 
         //copy operations
         void (*SubmitBufferCopyOperations)();

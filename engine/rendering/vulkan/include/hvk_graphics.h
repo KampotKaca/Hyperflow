@@ -292,6 +292,7 @@ namespace hf
     void SubmitBufferToImageCopyOperations();
 
     void UploadBufferMemory(VmaAllocation memory, const void* data, uint64_t fullOffset, uint64_t fullSize);
+    void UploadBufferMemory(const void* data, void* mapping, uint64_t fullOffset, uint64_t fullSize);
 }
 
 #endif //HVK_GRAPHICS_H

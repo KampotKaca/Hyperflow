@@ -179,6 +179,11 @@ namespace hf
         vmaUnmapMemory(GRAPHICS_DATA.allocator, memory);
     }
 
+    void UploadBufferMemory(const void* data, void* mapping, uint64_t fullOffset, uint64_t fullSize)
+    {
+        memcpy((uint8_t*)mapping + fullOffset, data, fullSize);
+    }
+
     void BufferOperation(VkCommandBuffer command, VkQueue queue, void (*CopyCallback)(VkCommandBuffer command))
     {
         VkCommandBufferBeginInfo beginInfo

@@ -10,11 +10,14 @@ namespace hf
         explicit VkVertBuffer(const VertBufferCreationInfo& info);
         ~VkVertBuffer();
 
+        uint32_t vertCount = 0;
+        BufferAttrib attrib{};
+        BufferMemoryType memoryType = BufferMemoryType::Static;
+
         VkBuffer buffer{};
         VmaAllocation bufferMemory{};
-        BufferAttrib attrib{};
-        uint32_t vertCount = 0;
-        BufferMemoryType memoryType = BufferMemoryType::Static;
+
+        void* mapping{};
     };
 }
 

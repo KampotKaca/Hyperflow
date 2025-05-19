@@ -10,12 +10,15 @@ namespace hf
         explicit VkIndexBuffer(const IndexBufferCreationInfo& info);
         ~VkIndexBuffer();
 
-        VkBuffer buffer{};
-        VmaAllocation bufferMemory{};
         uint32_t indexCount = 0;
         BufferMemoryType memoryType = BufferMemoryType::Static;
         BufferDataType indexFormat = BufferDataType::U16;
         VkIndexType indexType = VK_INDEX_TYPE_UINT16;
+
+        VkBuffer buffer{};
+        VmaAllocation bufferMemory{};
+
+        void* mapping{};
     };
 }
 
