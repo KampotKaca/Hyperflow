@@ -10,7 +10,6 @@ namespace hf
         bindings = std::vector<UniformBufferBindingInfo>(info.bindingCount);
         memcpy(bindings.data(), info.pBindings, sizeof(UniformBufferBindingInfo) * info.bindingCount);
         bufferSize = 0;
-        descriptorSets = std::vector<VkDescriptorSet>(FRAMES_IN_FLIGHT * info.bindingCount);
 
         for (uint32_t i = 0; i < info.bindingCount; i++)
         {
@@ -76,49 +75,48 @@ namespace hf
         return GRAPHICS_DATA.uniformBuffers[buffer - 1];
     }
 
-    uint32_t SetupUniform(UniformBuffer buffer, const VkDescriptorSet* pDescriptors)
+    void SetupUniform(UniformBuffer buffer, const VkDescriptorSet* pDescriptors)
     {
         if (!IsValidUniform(buffer)) throw GENERIC_EXCEPT("[Hyperflow]", "Invalid uniform buffer");
         auto& uniform = GRAPHICS_DATA.uniformBuffers[buffer - 1];
-        memcpy(uniform.descriptorSets.data(), pDescriptors, sizeof(VkDescriptorSet) * uniform.descriptorSets.size());
+        memcpy(uniform.descriptorSets, pDescriptors, sizeof(VkDescriptorSet) * FRAMES_IN_FLIGHT);
 
-        uint32_t index = 0;
+        uint32_t totalWrites = 0;
         uint32_t bufferOffset = 0;
+
         for (uint32_t i = 0; i < uniform.bindings.size(); i++)
         {
             auto& binding = uniform.bindings[i];
-            for (uint32_t j = 0; j < FRAMES_IN_FLIGHT; j++)
+            for (uint32_t frame = 0; frame < FRAMES_IN_FLIGHT; frame++)
             {
-                GRAPHICS_DATA.preAllocBuffers.bufferInfos[index] =
+                GRAPHICS_DATA.preAllocBuffers.bufferInfos[totalWrites] =
                 {
-                    .buffer = uniform.buffers[j],
+                    .buffer = uniform.buffers[frame],
                     .offset = bufferOffset,
-                    .range = binding.elementSizeInBytes,
+                    .range = binding.elementSizeInBytes * binding.arraySize,
                 };
 
-                GRAPHICS_DATA.preAllocBuffers.descWrites[index] =
+                GRAPHICS_DATA.preAllocBuffers.descWrites[totalWrites] =
                 {
                     .sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
-                    .dstSet = uniform.descriptorSets[index],
+                    .dstSet = uniform.descriptorSets[frame],
                     .dstBinding = uniform.bindingIndex + i,
                     .dstArrayElement = 0,
                     .descriptorCount = 1,
                     .descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
                     .pImageInfo = nullptr,
-                    .pBufferInfo = &GRAPHICS_DATA.preAllocBuffers.bufferInfos[j],
+                    .pBufferInfo = &GRAPHICS_DATA.preAllocBuffers.bufferInfos[totalWrites],
                     .pTexelBufferView = nullptr,
                 };
 
-                index++;
+                totalWrites++;
             }
             bufferOffset += binding.elementSizeInBytes * binding.arraySize;
         }
 
         vkUpdateDescriptorSets(GRAPHICS_DATA.defaultDevice->logicalDevice.device,
-                FRAMES_IN_FLIGHT, GRAPHICS_DATA.preAllocBuffers.descWrites,
+                totalWrites, GRAPHICS_DATA.preAllocBuffers.descWrites,
                 0, nullptr);
-
-        return uniform.descriptorSets.size();
     }
 
     void UploadUniforms(const VkRenderer* rn, const UniformBufferUploadInfo& info)

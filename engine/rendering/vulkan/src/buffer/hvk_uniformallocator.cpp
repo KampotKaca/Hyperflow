@@ -11,21 +11,23 @@ namespace hf
             .descriptorCount = 0
         };
 
-        uint32_t uniformBindingCount = 0;
+        uint32_t totalUniformBufferDescriptors = 0;
+        uint32_t totalDescriptorSets = 0;
 
         for (uint32_t i = 0; i < info.bufferCount; i++)
         {
             auto& buffer = GetUniform(info.pBuffers[i]);
-            uniformBindingCount += buffer.bindings.size();
+            uint32_t bCount = buffer.bindings.size();
+            totalUniformBufferDescriptors += bCount * FRAMES_IN_FLIGHT;
+            totalDescriptorSets += FRAMES_IN_FLIGHT;
         }
 
-        uint32_t descriptorCount = uniformBindingCount * FRAMES_IN_FLIGHT;
-        poolSize.descriptorCount = descriptorCount;
+        poolSize.descriptorCount = totalUniformBufferDescriptors;
 
         VkDescriptorPoolCreateInfo poolInfo
         {
             .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO,
-            .maxSets = descriptorCount,
+            .maxSets = totalDescriptorSets,
             .poolSizeCount = 1,
             .pPoolSizes = &poolSize,
         };
@@ -38,13 +40,10 @@ namespace hf
             for (uint32_t i = 0; i < info.bufferCount; i++)
             {
                 auto& buffer = GetUniform(info.pBuffers[i]);
-                for (uint32_t j = 0; j < buffer.bindings.size(); j++)
+                for (uint32_t k = 0; k < FRAMES_IN_FLIGHT; k++)
                 {
-                    for (uint32_t k = 0; k < FRAMES_IN_FLIGHT; k++)
-                    {
-                        GRAPHICS_DATA.preAllocBuffers.descLayouts[index] = buffer.layout;
-                        index++;
-                    }
+                    GRAPHICS_DATA.preAllocBuffers.descLayouts[index] = buffer.layout;
+                    index++;
                 }
             }
         }
@@ -53,16 +52,15 @@ namespace hf
         {
             .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO,
             .descriptorPool = pool,
-            .descriptorSetCount = descriptorCount,
+            .descriptorSetCount = totalDescriptorSets,
             .pSetLayouts = GRAPHICS_DATA.preAllocBuffers.descLayouts,
         };
 
         VK_HANDLE_EXCEPT(vkAllocateDescriptorSets(device, &allocInfo, GRAPHICS_DATA.preAllocBuffers.descriptors));
 
         {
-            uint32_t currentIndex = 0;
             for (uint32_t i = 0; i < info.bufferCount; i++)
-                currentIndex += SetupUniform(info.pBuffers[i], &GRAPHICS_DATA.preAllocBuffers.descriptors[currentIndex]);
+                SetupUniform(info.pBuffers[i], &GRAPHICS_DATA.preAllocBuffers.descriptors[i * FRAMES_IN_FLIGHT]);
         }
     }
 
