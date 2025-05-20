@@ -10,8 +10,8 @@ namespace hf
     {
         setBindingIndex = info.setBindingIndex;
         bindings = std::vector<VkTextureBinding>(info.bindingCount);
-        for (uint32_t i = 0; i < FRAMES_IN_FLIGHT; i++)
-            descriptorCache[i] = std::vector<VkDescriptorSet>(info.bindingCount);
+        for (auto &descriptors : descriptorCache)
+            descriptors = std::vector<VkDescriptorSet>(info.bindingCount);
 
         layout = info.layout;
         bindingType = info.bindingType;
@@ -33,7 +33,7 @@ namespace hf
 
     VkTexturePack::~VkTexturePack()
     {
-        for (uint32_t i = 0; i < FRAMES_IN_FLIGHT; i++) descriptorCache[i].clear();
+        for (auto & descriptors : descriptorCache) descriptors.clear();
 
         for (auto& binding : bindings)
        {

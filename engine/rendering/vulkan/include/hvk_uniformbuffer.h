@@ -17,12 +17,12 @@ namespace hf
         VkBuffer buffers[FRAMES_IN_FLIGHT]{};
         VmaAllocation memoryRegions[FRAMES_IN_FLIGHT]{};
         void* memoryMappings[FRAMES_IN_FLIGHT]{};
-        VkDescriptorSet descriptorSets[FRAMES_IN_FLIGHT]{};
+        std::vector<VkDescriptorSet> descriptorSets{};
     };
 
     bool IsValidUniform(UniformBuffer buffer);
     const VkUniformBuffer& GetUniform(UniformBuffer buffer);
-    void SetupUniform(UniformBuffer buffer, const VkDescriptorSet* pDescriptors);
+    uint32_t SetupUniform(UniformBuffer buffer, const VkDescriptorSet* pDescriptors);
 }
 
 #endif //HVK_UNIFORMBUFFER_H

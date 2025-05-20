@@ -39,7 +39,15 @@ namespace app
 		alignas(16) hf::mat4 viewProj{};
 	};
 
-	Camera camera{};
+	struct Time
+	{
+		alignas(8) double deltaTime;
+		alignas(8) double timeSinceStartup;
+	};
+
+	Camera* camera{};
+	Time* time{};
+	void* combinedBuffer{};
 
 	hf::RenderPass Application::OnPassCreationCallback(const hf::Ref<hf::Renderer>& rn)
 	{
@@ -118,18 +126,27 @@ namespace app
 
 		bufferAttrib = hf::bufferattrib::Define(bufferAttribDefinitionInfo);
 
-		hf::UniformBufferBindingInfo bufferBindingInfo
+		hf::UniformBufferBindingInfo cameraBindingInfo
 		{
 			.usageFlags = hf::ShaderUsageStage::Default,
 			.arraySize = 1,
 			.elementSizeInBytes = sizeof(Camera)
 		};
 
+		hf::UniformBufferBindingInfo timeBindingInfo
+		{
+			.usageFlags = hf::ShaderUsageStage::Default,
+			.arraySize = 1,
+			.elementSizeInBytes = sizeof(Time)
+		};
+
+		std::vector bindings = { cameraBindingInfo, timeBindingInfo };
+
 		hf::UniformBufferDefinitionInfo cameraBufferDefinitionInfo
 		{
 			.bindingId = 0,
-			.pBindings = &bufferBindingInfo,
-			.bindingCount = 1
+			.pBindings = bindings.data(),
+			.bindingCount = (uint32_t)bindings.size()
 		};
 
 		cameraBuffer = hf::uniformbuffer::Define(cameraBufferDefinitionInfo);
@@ -282,6 +299,9 @@ namespace app
 
 	void Application::Start()
 	{
+		combinedBuffer = hf::utils::Allocate(sizeof(Camera) + sizeof(Time));
+		camera = (Camera*)combinedBuffer;
+		time = (Time*)((uint8_t*)combinedBuffer + sizeof(Camera));
 		hf::time::SetTargetFrameRate(-1);
 		count = 0;
 	}
@@ -362,7 +382,7 @@ namespace app
 
 	void Application::Quit()
 	{
-
+		hf::utils::Deallocate(combinedBuffer);
 	}
 
 	void Application::OnPreRender(const hf::Ref<hf::Renderer>& rn)
@@ -375,11 +395,14 @@ namespace app
 	void Application::OnRender(const hf::Ref<hf::Renderer>& rn)
 	{
 		auto size = hf::renderer::GetSize(rn);
-		camera.model = glm::rotate(hf::mat4(1.0f), (float)hf::time::GetTimePassed() * glm::radians(10.0f), glm::vec3(0.0f, 0.0f, 1.0f));
-		camera.view = glm::lookAt(hf::vec3(2.0f, 2.0f, 2.0f), hf::vec3(0.0f, 0.0f, 0.0f), hf::vec3(0.0f, 0.0f, 1.0f));
-		camera.proj = glm::perspective(glm::radians(45.0f), (float)size.x / (float)size.y, 0.1f, 10.0f);
-		camera.proj[1][1] *= -1;
-		camera.viewProj = camera.proj * camera.view;
+		camera->model = glm::rotate(hf::mat4(1.0f), (float)hf::time::GetTimePassed() * glm::radians(10.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+		camera->view = glm::lookAt(hf::vec3(2.0f, 2.0f, 2.0f), hf::vec3(0.0f, 0.0f, 0.0f), hf::vec3(0.0f, 0.0f, 1.0f));
+		camera->proj = glm::perspective(glm::radians(45.0f), (float)size.x / (float)size.y, 0.1f, 10.0f);
+		camera->proj[1][1] *= -1;
+		camera->viewProj = camera->proj * camera->view;
+
+		time->deltaTime = hf::time::GetDeltaTime();
+		time->timeSinceStartup = hf::time::GetTimePassed();
 
 		hf::renderpass::Begin(rn, presentPass);
 
@@ -389,8 +412,8 @@ namespace app
 		{
 			.buffer = cameraBuffer,
 			.offsetInBytes = 0,
-			.sizeInBytes = sizeof(Camera),
-			.data = &camera
+			.sizeInBytes = sizeof(Camera) + sizeof(Time),
+			.data = combinedBuffer
 		};
 
 		hf::UniformBufferUploadInfo uniformBufferUploads

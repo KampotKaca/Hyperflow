@@ -3,7 +3,7 @@
 
 #define VERSION "0.0.0"
 #define HF_ENGINE_TITLE "Hyperflow"
-#define FRAMES_IN_FLIGHT 4
+#define FRAMES_IN_FLIGHT 2
 
 #if RENDERER_VULKAN
 #define VK_MSAA_MIN_SAMPLE_SHADING 0.2f

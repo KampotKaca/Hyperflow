@@ -11,13 +11,16 @@ namespace hf
             .descriptorCount = 0
         };
 
+        uint32_t uniformBindingCount = 0;
+
         for (uint32_t i = 0; i < info.bufferCount; i++)
         {
             auto& buffer = GetUniform(info.pBuffers[i]);
-            poolSize.descriptorCount += buffer.bindings.size() * FRAMES_IN_FLIGHT;
+            uniformBindingCount += buffer.bindings.size();
         }
 
-        uint32_t descriptorCount = info.bufferCount * FRAMES_IN_FLIGHT;
+        uint32_t descriptorCount = uniformBindingCount * FRAMES_IN_FLIGHT;
+        poolSize.descriptorCount = descriptorCount;
 
         VkDescriptorPoolCreateInfo poolInfo
         {
@@ -30,11 +33,20 @@ namespace hf
         auto& device = GRAPHICS_DATA.defaultDevice->logicalDevice.device;
         VK_HANDLE_EXCEPT(vkCreateDescriptorPool(device, &poolInfo, nullptr, &pool));
 
-        for (uint32_t i = 0; i < info.bufferCount; i++)
         {
-            auto& buffer = GetUniform(info.pBuffers[i]);
-            for (uint32_t j = 0; j < FRAMES_IN_FLIGHT; j++)
-                GRAPHICS_DATA.preAllocBuffers.descLayouts[i * FRAMES_IN_FLIGHT + j] = buffer.layout;
+            uint32_t index = 0;
+            for (uint32_t i = 0; i < info.bufferCount; i++)
+            {
+                auto& buffer = GetUniform(info.pBuffers[i]);
+                for (uint32_t j = 0; j < buffer.bindings.size(); j++)
+                {
+                    for (uint32_t k = 0; k < FRAMES_IN_FLIGHT; k++)
+                    {
+                        GRAPHICS_DATA.preAllocBuffers.descLayouts[index] = buffer.layout;
+                        index++;
+                    }
+                }
+            }
         }
 
         VkDescriptorSetAllocateInfo allocInfo
@@ -46,8 +58,12 @@ namespace hf
         };
 
         VK_HANDLE_EXCEPT(vkAllocateDescriptorSets(device, &allocInfo, GRAPHICS_DATA.preAllocBuffers.descriptors));
-        for (uint32_t i = 0; i < info.bufferCount; i++)
-            SetupUniform(info.pBuffers[i], &GRAPHICS_DATA.preAllocBuffers.descriptors[i * FRAMES_IN_FLIGHT]);
+
+        {
+            uint32_t currentIndex = 0;
+            for (uint32_t i = 0; i < info.bufferCount; i++)
+                currentIndex += SetupUniform(info.pBuffers[i], &GRAPHICS_DATA.preAllocBuffers.descriptors[currentIndex]);
+        }
     }
 
     VkUniformAllocator::~VkUniformAllocator()

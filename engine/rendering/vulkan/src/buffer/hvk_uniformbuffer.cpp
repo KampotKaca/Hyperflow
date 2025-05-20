@@ -8,12 +8,13 @@ namespace hf
     {
         bindingIndex = info.bindingId;
         bindings = std::vector<UniformBufferBindingInfo>(info.bindingCount);
+        memcpy(bindings.data(), info.pBindings, sizeof(UniformBufferBindingInfo) * info.bindingCount);
         bufferSize = 0;
+        descriptorSets = std::vector<VkDescriptorSet>(FRAMES_IN_FLIGHT * info.bindingCount);
 
         for (uint32_t i = 0; i < info.bindingCount; i++)
         {
             auto bindingInfo = info.pBindings[i];
-            bindings[i] = bindingInfo;
 
             VkDescriptorSetLayoutBinding layout
             {
@@ -49,7 +50,7 @@ namespace hf
                 .familyCount = 0,
             };
             CreateBuffer(bufferInfo, &buffers[i], &memoryRegions[i]);
-            vmaMapMemory(GRAPHICS_DATA.allocator, memoryRegions[i], &memoryMappings[i]);
+            VK_HANDLE_EXCEPT(vmaMapMemory(GRAPHICS_DATA.allocator, memoryRegions[i], &memoryMappings[i]));
         }
     }
 
@@ -75,38 +76,49 @@ namespace hf
         return GRAPHICS_DATA.uniformBuffers[buffer - 1];
     }
 
-    void SetupUniform(UniformBuffer buffer, const VkDescriptorSet* pDescriptors)
+    uint32_t SetupUniform(UniformBuffer buffer, const VkDescriptorSet* pDescriptors)
     {
         if (!IsValidUniform(buffer)) throw GENERIC_EXCEPT("[Hyperflow]", "Invalid uniform buffer");
         auto& uniform = GRAPHICS_DATA.uniformBuffers[buffer - 1];
-        memcpy(uniform.descriptorSets, pDescriptors, sizeof(VkDescriptorSet) * FRAMES_IN_FLIGHT);
+        memcpy(uniform.descriptorSets.data(), pDescriptors, sizeof(VkDescriptorSet) * uniform.descriptorSets.size());
 
-        for (uint32_t i = 0; i < FRAMES_IN_FLIGHT; i++)
+        uint32_t index = 0;
+        uint32_t bufferOffset = 0;
+        for (uint32_t i = 0; i < uniform.bindings.size(); i++)
         {
-            GRAPHICS_DATA.preAllocBuffers.bufferInfos[i] =
+            auto& binding = uniform.bindings[i];
+            for (uint32_t j = 0; j < FRAMES_IN_FLIGHT; j++)
             {
-                .buffer = uniform.buffers[i],
-                .offset = 0,
-                .range = uniform.bufferSize,
-            };
+                GRAPHICS_DATA.preAllocBuffers.bufferInfos[index] =
+                {
+                    .buffer = uniform.buffers[j],
+                    .offset = bufferOffset,
+                    .range = binding.elementSizeInBytes,
+                };
 
-            GRAPHICS_DATA.preAllocBuffers.descWrites[i] =
-            {
-                .sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
-                .dstSet = uniform.descriptorSets[i],
-                .dstBinding = uniform.bindingIndex,
-                .dstArrayElement = 0,
-                .descriptorCount = 1,
-                .descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
-                .pImageInfo = nullptr,
-                .pBufferInfo = &GRAPHICS_DATA.preAllocBuffers.bufferInfos[i],
-                .pTexelBufferView = nullptr,
-            };
+                GRAPHICS_DATA.preAllocBuffers.descWrites[index] =
+                {
+                    .sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
+                    .dstSet = uniform.descriptorSets[index],
+                    .dstBinding = uniform.bindingIndex + i,
+                    .dstArrayElement = 0,
+                    .descriptorCount = 1,
+                    .descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
+                    .pImageInfo = nullptr,
+                    .pBufferInfo = &GRAPHICS_DATA.preAllocBuffers.bufferInfos[j],
+                    .pTexelBufferView = nullptr,
+                };
+
+                index++;
+            }
+            bufferOffset += binding.elementSizeInBytes * binding.arraySize;
         }
 
         vkUpdateDescriptorSets(GRAPHICS_DATA.defaultDevice->logicalDevice.device,
                 FRAMES_IN_FLIGHT, GRAPHICS_DATA.preAllocBuffers.descWrites,
                 0, nullptr);
+
+        return uniform.descriptorSets.size();
     }
 
     void UploadUniforms(const VkRenderer* rn, const UniformBufferUploadInfo& info)
