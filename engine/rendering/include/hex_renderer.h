@@ -86,7 +86,7 @@ namespace hf::inter::rendering
         RenderPass mainPass{};
         void* handle{};
         uvec2 size{};
-        VsyncMode vSyncMode = VsyncMode::None;
+        VsyncMode vSyncMode = VsyncMode::NoSync;
     };
 
     struct TextureCreationInfo
@@ -101,7 +101,6 @@ namespace hf::inter::rendering
 
     struct TexturePackBinding
     {
-        uint32_t bindingId = 0;
         TextureSampler sampler{};
         std::vector<void*> textures{};
     };
@@ -109,6 +108,7 @@ namespace hf::inter::rendering
     struct TexturePackCreationInfo
     {
         RenderBindingType bindingType = RenderBindingType::Graphics;
+        uint32_t bindingId = 0;
         uint32_t setBindingIndex = 0;
         TexturePackBinding* pBindings{};
         uint32_t bindingCount = 0;

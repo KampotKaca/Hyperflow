@@ -17,7 +17,8 @@ namespace hf
         for (uint32_t i = 0; i < info.bufferCount; i++)
         {
             auto& buffer = GetUniform(info.pBuffers[i]);
-            totalBufferDescriptors += buffer.bindings.size() * FRAMES_IN_FLIGHT;
+            for (auto& binding : buffer.bindings)
+                totalBufferDescriptors += binding.arraySize * FRAMES_IN_FLIGHT;
         }
 
         poolSize.descriptorCount = totalBufferDescriptors;

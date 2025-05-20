@@ -9,7 +9,6 @@ namespace hf
     {
         TexturePackBinding() = default;
         ~TexturePackBinding() = default;
-        uint32_t bindingId = 0;
         TextureSampler sampler{};
         std::vector<Ref<Texture>> textures{};
     };
@@ -23,6 +22,7 @@ namespace hf
         std::vector<TexturePackBinding> bindings{};
         TextureLayout layout{};
         uint32_t setBindingIndex = 0;
+        uint32_t bindingId = 0;
         void* handle{};
     };
 }

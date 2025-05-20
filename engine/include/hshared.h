@@ -555,8 +555,6 @@ namespace hf
 
 	struct TexturePackBindingInfo
 	{
-		uint32_t bindingId = 0;
-
 		//optional but, must be set until you try to render anything
 		TextureSampler sampler{};
 		//optional but, must be set until you try to render anything
@@ -568,6 +566,7 @@ namespace hf
 	struct TexturePackCreationInfo
 	{
 		RenderBindingType bindingType = RenderBindingType::Graphics;
+		uint32_t bindingId = 0;
 		uint32_t setBindingIndex = 0;
 		TexturePackBindingInfo* pBindings{};
 		uint32_t bindingCount = 0;
@@ -736,7 +735,7 @@ namespace hf
 		Default = Visible
 	};
 
-	enum class VsyncMode { None, Relaxed, Full, Count };
+	enum class VsyncMode { NoSync, Relaxed, Full, Count };
 
 	struct RendererEventInfo
 	{

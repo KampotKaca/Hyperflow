@@ -7,6 +7,7 @@
 namespace hf
 {
     TexturePack::TexturePack(const TexturePackCreationInfo& info)
+        : bindingId(info.bindingId), layout(info.layout), bindingType(info.bindingType), setBindingIndex(info.setBindingIndex)
     {
         bindings = std::vector<TexturePackBinding>(info.bindingCount);
         for (uint32_t i = 0; i < info.bindingCount; i++)
@@ -14,15 +15,11 @@ namespace hf
             auto& bInfo = info.pBindings[i];
             auto& binding = bindings[i];
 
-            binding.bindingId = bInfo.bindingId;
             binding.sampler = bInfo.sampler;
             binding.textures = std::vector<Ref<Texture>>(bInfo.arraySize);
-            memcpy(binding.textures.data(), bInfo.pTextures, bInfo.arraySize * sizeof(Ref<Texture>));
+            for (uint32_t j = 0; j < bInfo.arraySize; j++) binding.textures[j] = bInfo.pTextures[j];
         }
 
-        layout = info.layout;
-        bindingType = info.bindingType;
-        setBindingIndex = info.setBindingIndex;
         inter::rendering::CreateTexturePack_i(this);
     }
 
@@ -108,7 +105,7 @@ namespace hf
             const Ref<Texture>* pTextures, uint32_t textureCount, uint32_t textureOffset)
         {
             auto& binding = pack->bindings[bindingIndex];
-            memcpy(&binding.textures[textureOffset], pTextures, textureCount * sizeof(Ref<Texture>));
+            for (uint32_t i = 0; i < textureCount; i++) binding.textures[textureOffset] = pTextures[i];
             binding.sampler = sampler;
 
             inter::rendering::TexturePackUploadInfo uploadInfo
@@ -150,7 +147,6 @@ namespace hf
                 auto& binding = bindings[i];
                 binding =
                 {
-                    .bindingId = bInfo.bindingId,
                     .sampler = bInfo.sampler,
                     .textures = std::vector<void*>(bInfo.textures.size())
                 };
@@ -162,6 +158,7 @@ namespace hf
             TexturePackCreationInfo creationInfo
             {
                 .bindingType = texPack->bindingType,
+                .bindingId = texPack->bindingId,
                 .setBindingIndex = texPack->setBindingIndex,
                 .pBindings = bindings.data(),
                 .bindingCount = (uint32_t)bindings.size(),

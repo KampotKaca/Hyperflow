@@ -135,7 +135,7 @@ namespace app
 		hf::UniformBufferBindingInfo timeBindingInfo
 		{
 			.usageFlags = hf::ShaderUsageStage::Default,
-			.arraySize = 1,
+			.arraySize = 2,
 			.elementSizeInBytes = sizeof(Time)
 		};
 
@@ -162,22 +162,22 @@ namespace app
 		{
 			.bindingId = 0,
 			.usageFlags = hf::ShaderUsageStage::Default,
-			.arraySize = 1,
+			.arraySize = 2,
 		};
 
-		hf::TextureLayoutBindingInfo greekBinding
-		{
-			.bindingId = 1,
-			.usageFlags = hf::ShaderUsageStage::Default,
-			.arraySize = 1,
-		};
+		// hf::TextureLayoutBindingInfo greekBinding
+		// {
+		// 	.bindingId = 1,
+		// 	.usageFlags = hf::ShaderUsageStage::Default,
+		// 	.arraySize = 1,
+		// };
 
-		std::vector layoutBindings = { mainTexBinding, greekBinding };
+		// std::vector layoutBindings = { mainTexBinding, greekBinding };
 
 		hf::TextureLayoutDefinitionInfo textureLayoutDefinitionInfo
 		{
-			.pBindings = layoutBindings.data(),
-			.bindingCount = (uint32_t)layoutBindings.size()
+			.pBindings = &mainTexBinding,
+			.bindingCount = 1
 		};
 
 		layout = hf::texturelayout::Define(textureLayoutDefinitionInfo);
@@ -265,28 +265,28 @@ namespace app
 
 		hf::TexturePackBindingInfo mainTexBinding
 		{
-			.bindingId = 0,
 			.sampler = sampler,
-			.pTextures = &textures[0],
-			.arraySize = 1
+			.pTextures = textures,
+			.arraySize = 2
 		};
 
-		hf::TexturePackBindingInfo greekBinding
-		{
-			.bindingId = 1,
-			.sampler = sampler,
-			.pTextures = &textures[1],
-			.arraySize = 1
-		};
+		// hf::TexturePackBindingInfo greekBinding
+		// {
+		// 	.bindingId = 1,
+		// 	.sampler = sampler,
+		// 	.pTextures = &textures[1],
+		// 	.arraySize = 1
+		// };
 
-		std::vector bindings = { mainTexBinding, greekBinding };
+		// std::vector bindings = { mainTexBinding, greekBinding };
 
 		hf::TexturePackCreationInfo texPackInfo
 		{
 			.bindingType = hf::RenderBindingType::Graphics,
+			.bindingId = 0,
 			.setBindingIndex = 1,
-			.pBindings = bindings.data(),
-			.bindingCount = (uint32_t)bindings.size(),
+			.pBindings = &mainTexBinding,
+			.bindingCount = 1,
 			.layout = layout,
 		};
 
@@ -317,9 +317,10 @@ namespace app
 
 	void Application::Start()
 	{
-		combinedBuffer = hf::utils::Allocate(sizeof(Camera) + sizeof(Time));
+		combinedBuffer = hf::utils::Allocate(sizeof(Camera) + sizeof(Time) * 2);
 		camera = (Camera*)combinedBuffer;
 		time = (Time*)((uint8_t*)combinedBuffer + sizeof(Camera));
+
 		hf::time::SetTargetFrameRate(-1);
 		count = 0;
 	}
@@ -419,8 +420,11 @@ namespace app
 		camera->proj[1][1] *= -1;
 		camera->viewProj = camera->proj * camera->view;
 
-		time->deltaTime = hf::time::GetDeltaTime();
-		time->timeSinceStartup = hf::time::GetTimePassed();
+		time[0].deltaTime = hf::time::GetDeltaTime();
+		time[0].timeSinceStartup = hf::time::GetTimePassed();
+
+		time[1].deltaTime = hf::time::GetDeltaTime() * .8f;
+		time[1].timeSinceStartup = hf::time::GetTimePassed() * .8f;
 
 		hf::renderpass::Begin(rn, presentPass);
 
@@ -430,7 +434,7 @@ namespace app
 		{
 			.buffer = cameraBuffer,
 			.offsetInBytes = 0,
-			.sizeInBytes = sizeof(Camera) + sizeof(Time),
+			.sizeInBytes = sizeof(Camera) + sizeof(Time) * 2,
 			.data = combinedBuffer
 		};
 

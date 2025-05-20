@@ -20,14 +20,11 @@ namespace hf
         for (uint32_t i = 0; i < info.texturePackCount; i++)
         {
             auto* texPack = (VkTexturePack*)info.pTexturePacks[i];
-            totalTextureDescriptors += texPack->bindings.size() * FRAMES_IN_FLIGHT;
+            for (auto& binding : texPack->bindings)
+                totalTextureDescriptors += binding.textures.size() * FRAMES_IN_FLIGHT;
         }
 
-        for (uint32_t i = 0; i < info.texturePackCount; ++i)
-        {
-            auto* texPack = (VkTexturePack*)info.pTexturePacks[i];
-            poolSize.descriptorCount += texPack->bindings.size() * FRAMES_IN_FLIGHT;
-        }
+        poolSize.descriptorCount = totalTextureDescriptors;
 
         VkDescriptorPoolCreateInfo poolInfo
         {

@@ -7,11 +7,9 @@
 namespace hf
 {
     VkTexturePack::VkTexturePack(const inter::rendering::TexturePackCreationInfo& info)
+        : bindingType(info.bindingType), layout(info.layout), setBindingIndex(info.setBindingIndex)
     {
-        setBindingIndex = info.setBindingIndex;
         bindings = std::vector<VkTextureBinding>(info.bindingCount);
-
-        layout = info.layout;
         bindingType = info.bindingType;
 
         for (uint32_t i = 0; i < info.bindingCount; i++)
@@ -20,7 +18,6 @@ namespace hf
             auto& binding = bindings[i];
             binding =
             {
-                .bindingId = bInfo.bindingId,
                 .sampler = bInfo.sampler,
             };
 
@@ -42,27 +39,30 @@ namespace hf
             auto& binding = pack->bindings[i];
             auto& texSampler = GetSampler(binding.sampler);
 
-            for (uint32_t frame = 0; frame < FRAMES_IN_FLIGHT; frame++)
+            for (uint32_t j = 0; j < binding.textures.size(); j++)
             {
-                GRAPHICS_DATA.preAllocBuffers.descImageBindings[writeCount] =
+                for (auto descriptor : pack->descriptors)
                 {
-                    .sampler = texSampler.sampler,
-                    .imageView = binding.textures[0]->view,
-                    .imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL
-                };
+                    GRAPHICS_DATA.preAllocBuffers.descImageBindings[writeCount] =
+                    {
+                        .sampler = texSampler.sampler,
+                        .imageView = binding.textures[j]->view,
+                        .imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL
+                    };
 
-                GRAPHICS_DATA.preAllocBuffers.descWrites[writeCount] =
-                {
-                    .sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
-                    .dstSet = pack->descriptors[frame],
-                    .dstBinding = binding.bindingId,
-                    .dstArrayElement = 0,
-                    .descriptorCount = 1,
-                    .descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
-                    .pImageInfo = &GRAPHICS_DATA.preAllocBuffers.descImageBindings[writeCount],
-                };
+                    GRAPHICS_DATA.preAllocBuffers.descWrites[writeCount] =
+                    {
+                        .sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
+                        .dstSet = descriptor,
+                        .dstBinding = pack->bindingId + i,
+                        .dstArrayElement = j,
+                        .descriptorCount = 1,
+                        .descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
+                        .pImageInfo = &GRAPHICS_DATA.preAllocBuffers.descImageBindings[writeCount],
+                    };
 
-                writeCount++;
+                    writeCount++;
+                }
             }
         }
 

@@ -8,9 +8,7 @@ namespace hf
 {
     struct VkTextureBinding
     {
-        uint32_t bindingId = 0;
         TextureSampler sampler{};
-
         std::vector<VkTexture*> textures{};
     };
 
@@ -23,6 +21,7 @@ namespace hf
         std::vector<VkTextureBinding> bindings{};
         VkDescriptorSet descriptors[FRAMES_IN_FLIGHT]{};
         TextureLayout layout = 0;
+        uint32_t bindingId = 0;
         uint32_t setBindingIndex = 0;
     };
 

@@ -87,30 +87,34 @@ namespace hf
         for (uint32_t i = 0; i < uniform.bindings.size(); i++)
         {
             auto& binding = uniform.bindings[i];
-            for (uint32_t frame = 0; frame < FRAMES_IN_FLIGHT; frame++)
+            for (uint32_t j = 0; j < binding.arraySize; j++)
             {
-                GRAPHICS_DATA.preAllocBuffers.bufferInfos[totalWrites] =
+                for (uint32_t frame = 0; frame < FRAMES_IN_FLIGHT; frame++)
                 {
-                    .buffer = uniform.buffers[frame],
-                    .offset = bufferOffset,
-                    .range = binding.elementSizeInBytes * binding.arraySize,
-                };
+                    GRAPHICS_DATA.preAllocBuffers.bufferInfos[totalWrites] =
+                    {
+                        .buffer = uniform.buffers[frame],
+                        .offset = bufferOffset,
+                        .range = binding.elementSizeInBytes * binding.arraySize,
+                    };
 
-                GRAPHICS_DATA.preAllocBuffers.descWrites[totalWrites] =
-                {
-                    .sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
-                    .dstSet = uniform.descriptorSets[frame],
-                    .dstBinding = uniform.bindingIndex + i,
-                    .dstArrayElement = 0,
-                    .descriptorCount = 1,
-                    .descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
-                    .pImageInfo = nullptr,
-                    .pBufferInfo = &GRAPHICS_DATA.preAllocBuffers.bufferInfos[totalWrites],
-                    .pTexelBufferView = nullptr,
-                };
+                    GRAPHICS_DATA.preAllocBuffers.descWrites[totalWrites] =
+                    {
+                        .sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
+                        .dstSet = uniform.descriptorSets[frame],
+                        .dstBinding = uniform.bindingIndex + i,
+                        .dstArrayElement = j,
+                        .descriptorCount = 1,
+                        .descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
+                        .pImageInfo = nullptr,
+                        .pBufferInfo = &GRAPHICS_DATA.preAllocBuffers.bufferInfos[totalWrites],
+                        .pTexelBufferView = nullptr,
+                    };
 
-                totalWrites++;
+                    totalWrites++;
+                }
             }
+
             bufferOffset += binding.elementSizeInBytes * binding.arraySize;
         }
 

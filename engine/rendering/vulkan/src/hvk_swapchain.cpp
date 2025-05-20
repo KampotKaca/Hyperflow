@@ -21,7 +21,7 @@ namespace hf
 
         switch (vsyncMode)
         {
-        case VsyncMode::None:
+        case VsyncMode::NoSync:
             {
                 targetPresentMode = VK_PRESENT_MODE_IMMEDIATE_KHR;
                 defaultPresentMode = VK_PRESENT_MODE_IMMEDIATE_KHR;
