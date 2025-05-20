@@ -5,7 +5,7 @@ namespace hf
 {
     static void DestroyExistingViews(GraphicsSwapChain& swapchain);
 
-    void CreateSwapchain(VkSurfaceKHR surface, uvec2 targetSize, bool vsyncOn, GraphicsSwapChain* result)
+    void CreateSwapchain(VkSurfaceKHR surface, uvec2 targetSize, VsyncMode vsyncMode, GraphicsSwapChain* result)
     {
         SwapChainSupportDetails scs{};
         QuerySwapChainSupport(GRAPHICS_DATA.defaultDevice->device, surface, &scs);
@@ -18,15 +18,28 @@ namespace hf
         GraphicsSwapchainDetails details{};
         VkPresentModeKHR targetPresentMode{};
         VkPresentModeKHR defaultPresentMode{};
-        if (vsyncOn)
+
+        switch (vsyncMode)
         {
-            targetPresentMode = VK_PRESENT_MODE_FIFO_KHR;
-            defaultPresentMode = VK_PRESENT_MODE_FIFO_KHR;
-        }
-        else
-        {
-            targetPresentMode = VK_PRESENT_MODE_MAILBOX_KHR;
-            defaultPresentMode = VK_PRESENT_MODE_IMMEDIATE_KHR;
+        case VsyncMode::None:
+            {
+                targetPresentMode = VK_PRESENT_MODE_IMMEDIATE_KHR;
+                defaultPresentMode = VK_PRESENT_MODE_IMMEDIATE_KHR;
+            }
+            break;
+        case VsyncMode::Relaxed:
+            {
+                targetPresentMode = VK_PRESENT_MODE_MAILBOX_KHR;
+                defaultPresentMode = VK_PRESENT_MODE_IMMEDIATE_KHR;
+            }
+            break;
+        case VsyncMode::Full:
+            {
+                targetPresentMode = VK_PRESENT_MODE_FIFO_KHR;
+                defaultPresentMode = VK_PRESENT_MODE_FIFO_KHR;
+            }
+            break;
+        default: throw GENERIC_EXCEPT("[Vulkan]", "Unsupported vsync mode!");
         }
 
         if (GetAvailableSurfaceDetails(scs, VULKAN_API_COLOR_FORMAT,
@@ -135,7 +148,7 @@ namespace hf
         DelayThreadUntilRenderingFinish();
 
         DestroySwapchainFrameBuffers(rn);
-        CreateSwapchain(rn->swapchain.surface, rn->targetSize, rn->vSyncOn, &rn->swapchain);
+        CreateSwapchain(rn->swapchain.surface, rn->targetSize, rn->vSyncMode, &rn->swapchain);
         SetupViewportAndScissor(rn);
         RebindRendererToAllPasses(rn);
         CreateSwapchainFrameBuffers(rn);

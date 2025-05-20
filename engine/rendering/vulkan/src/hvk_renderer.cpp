@@ -37,9 +37,9 @@ namespace hf
         rn->frameBufferResized = true;
     }
 
-    void SetVSync(VkRenderer* rn, bool isOn)
+    void SetVSync(VkRenderer* rn, VsyncMode mode)
     {
-        rn->vSyncOn = isOn;
+        rn->vSyncMode = mode;
         rn->frameBufferResized = true;
     }
 

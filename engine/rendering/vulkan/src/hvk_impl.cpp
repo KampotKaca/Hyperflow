@@ -312,9 +312,9 @@ namespace hf::inter::rendering
         RegisterFrameBufferChange(renderer, newSize);
     }
 
-    void SetVSync(void* rn, bool isOn)
+    void SetVSync(void* rn, VsyncMode mode)
     {
-        SetVSync((VkRenderer*)rn, isOn);
+        SetVSync((VkRenderer*)rn, mode);
     }
 
     API RendererAPI* GetAPI()

@@ -32,7 +32,7 @@ int main()
 			.style        		 = hf::WindowStyle::Default,
 			.position     		 = { 200, 200 },
 			.size         		 = { 920, 480 },
-			.vSyncOn			 = true,
+			.vsyncMode			 = hf::VsyncMode::Relaxed,
 			.rnEventInfo =
 			{
 				.onPassCreationCallback = app::Application::OnPassCreationCallback,

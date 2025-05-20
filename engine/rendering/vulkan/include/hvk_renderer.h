@@ -33,7 +33,7 @@ namespace hf
         std::vector<VkFrame> frames{};
         uint32_t currentFrame = 0;
         uint32_t imageIndex = UINT32_MAX;
-        bool vSyncOn = false;
+        VsyncMode vSyncMode = VsyncMode::Relaxed;
         bool frameBufferResized = false;
     };
 
@@ -81,7 +81,7 @@ namespace hf
     void Draw(const VkDrawInfo& info);
 
     void RegisterFrameBufferChange(VkRenderer* rn, uvec2 newSize);
-    void SetVSync(VkRenderer* rn, bool isOn);
+    void SetVSync(VkRenderer* rn, VsyncMode mode);
 
     void UploadUniforms(const VkRenderer* rn, const UniformBufferUploadInfo& info);
     void BindTexturePack(VkRenderer* rn, VkTexturePack* pack);

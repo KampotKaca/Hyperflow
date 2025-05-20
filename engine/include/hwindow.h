@@ -28,7 +28,7 @@ namespace hf
 		void* handle{};
 		WindowStyle style{};
 		WindowFlags flags{};
-		bool vSyncIsOn = false;
+		VsyncMode vSyncMode = VsyncMode::Relaxed;
 		Ref<Window> parent{};
 
 		Keyboard keyboard{};

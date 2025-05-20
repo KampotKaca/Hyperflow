@@ -344,7 +344,7 @@ namespace app
 				.style = hf::WindowStyle::Default,
 				.position = { 100, 100 },
 				.size = { 200, 200 },
-				.vSyncOn = true,
+				.vsyncMode = hf::VsyncMode::Relaxed,
 				.rnEventInfo =
 				{
 					.onPassCreationCallback = OnSubPassCreationCallback,
@@ -362,7 +362,7 @@ namespace app
 
 		if (hf::input::IsDown(hf::Key::K))
 		{
-			hf::window::SetVSync(wn, !hf::window::IsVSyncOn(wn));
+			hf::window::SetVSyncMode(wn, (hf::VsyncMode)(((uint32_t)hf::window::GetVSyncMode(wn) + 1) % (uint32_t)hf::VsyncMode::Count));
 		}
 
 		// auto delta = hf::input::GetScrollDelta();

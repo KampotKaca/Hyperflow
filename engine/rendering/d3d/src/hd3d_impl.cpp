@@ -227,7 +227,7 @@ namespace hf::inter::rendering
         RegisterFrameBufferChange(renderer, newSize);
     }
 
-    void SetVSync(void* rn, bool isOn)
+    void SetVSync(void* rn, VsyncMode mode)
     {
 
     }

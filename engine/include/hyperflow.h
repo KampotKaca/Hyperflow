@@ -75,8 +75,8 @@ namespace hf
 		void SetFlags(const Ref<Window> &window, WindowFlags flags);
 		void Focus(const Ref<Window> &window);
 
-		void SetVSync(const Ref<Window> &window, bool isOn);
-		bool IsVSyncOn(const Ref<Window> &window);
+		void SetVSyncMode(const Ref<Window> &window, VsyncMode mode);
+		VsyncMode GetVSyncMode(const Ref<Window> &window);
 	}
 
 	namespace time

@@ -193,7 +193,7 @@ namespace hf
 
             if (rn->window)
             {
-                createInfo.vSyncOn = rn->window->vSyncIsOn;
+                createInfo.vSyncMode = rn->window->vSyncMode;
                 createInfo.handle = window::GetWindowHandle(rn->window);
             }
 

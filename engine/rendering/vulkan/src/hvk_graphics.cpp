@@ -12,7 +12,7 @@ namespace hf
     //------------------------------------------------------------------------------------
 
     VkRenderer::VkRenderer(const inter::rendering::RendererInstanceCreationInfo& info)
-        : windowHandle(info.handle), targetSize(info.size), vSyncOn(info.vSyncOn)
+        : windowHandle(info.handle), targetSize(info.size), vSyncMode(info.vSyncMode)
     {
         if (!GRAPHICS_DATA.devicesAreLoaded) LoadDevice(windowHandle, &swapchain.surface);
         else GRAPHICS_DATA.platform.api->CreateSurface(GRAPHICS_DATA.platform.instance, windowHandle, GRAPHICS_DATA.instance, &swapchain.surface);
@@ -44,7 +44,7 @@ namespace hf
         rn->mainPass = mainPass;
         auto& pass = GetRenderPass(mainPass);
         if (!pass.hasPresentationAttachment) throw GENERIC_EXCEPT("[Vulkan]", "Main render pass must have presentation attachment");
-        CreateSwapchain(rn->swapchain.surface, rn->targetSize, rn->vSyncOn,  &rn->swapchain);
+        CreateSwapchain(rn->swapchain.surface, rn->targetSize, rn->vSyncMode,  &rn->swapchain);
         SetupViewportAndScissor(rn);
 
         CreateSwapchainFrameBuffers(rn);

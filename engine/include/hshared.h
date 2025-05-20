@@ -736,6 +736,8 @@ namespace hf
 		Default = Visible
 	};
 
+	enum class VsyncMode { None, Relaxed, Full, Count };
+
 	struct RendererEventInfo
 	{
 		//stage where you can create draw passes
@@ -752,7 +754,7 @@ namespace hf
 		WindowStyle style = WindowStyle::Default;
 		ivec2 position = ivec2{ 300, 300 };
 		ivec2 size = ivec2{ 200, 200 };
-		bool vSyncOn = false;
+		VsyncMode vsyncMode = VsyncMode::Relaxed;
 
 		RendererEventInfo rnEventInfo{};
 	};

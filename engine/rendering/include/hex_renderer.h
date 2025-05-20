@@ -86,7 +86,7 @@ namespace hf::inter::rendering
         RenderPass mainPass{};
         void* handle{};
         uvec2 size{};
-        bool vSyncOn = false;
+        VsyncMode vSyncMode = VsyncMode::None;
     };
 
     struct TextureCreationInfo
@@ -160,7 +160,7 @@ namespace hf::inter::rendering
 
         //shader setup
         ShaderSetup (*DefineShaderSetup)(const ShaderSetupDefinitionInfo& info);
-        void (*BindShaderSetup)(void* rn, ShaderSetup);
+        void (*BindShaderSetup)(void* rn, ShaderSetup setup);
 
         //texture
         void* (*CreateTexture)(const TextureCreationInfo& info);
@@ -220,7 +220,7 @@ namespace hf::inter::rendering
         void (*WaitForRendering)();
 
         void (*RegisterFrameBufferChange)(void* rn, uvec2 newSize);
-        void (*SetVSync)(void* rn, bool isOn);
+        void (*SetVSync)(void* rn, VsyncMode mode);
     };
 }
 
