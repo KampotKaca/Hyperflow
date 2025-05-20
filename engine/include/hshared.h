@@ -562,7 +562,7 @@ namespace hf
 		//optional but, must be set until you try to render anything
 		Ref<Texture>* pTextures{};
 		//optional but, must be set until you try to render anything
-		uint32_t textureCount = 0;
+		uint32_t arraySize = 0;
 	};
 
 	struct TexturePackCreationInfo

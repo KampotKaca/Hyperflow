@@ -12,7 +12,6 @@ namespace app
 	};
 
 	uint32_t count = 0;
-	uint32_t currentTexture = 0;
 	uint32_t reqCount = 0;
 	hf::Ref<hf::Window> wn{};
 	int32_t lastReq = -1;
@@ -159,17 +158,26 @@ namespace app
 
 		uniformAllocator = hf::uniformallocator::Define(uniformAllocatorDefinitionInfo);
 
-		hf::TextureLayoutBindingInfo textureLayoutBindingInfo
+		hf::TextureLayoutBindingInfo mainTexBinding
 		{
 			.bindingId = 0,
 			.usageFlags = hf::ShaderUsageStage::Default,
 			.arraySize = 1,
 		};
 
+		hf::TextureLayoutBindingInfo greekBinding
+		{
+			.bindingId = 1,
+			.usageFlags = hf::ShaderUsageStage::Default,
+			.arraySize = 1,
+		};
+
+		std::vector layoutBindings = { mainTexBinding, greekBinding };
+
 		hf::TextureLayoutDefinitionInfo textureLayoutDefinitionInfo
 		{
-			.pBindings = &textureLayoutBindingInfo,
-			.bindingCount = 1
+			.pBindings = layoutBindings.data(),
+			.bindingCount = (uint32_t)layoutBindings.size()
 		};
 
 		layout = hf::texturelayout::Define(textureLayoutDefinitionInfo);
@@ -255,20 +263,30 @@ namespace app
 		};
 		textures[1] = hf::texture::Create(secondTexInfo);
 
-		hf::TexturePackBindingInfo binding
+		hf::TexturePackBindingInfo mainTexBinding
 		{
 			.bindingId = 0,
 			.sampler = sampler,
-			.pTextures = &textures[currentTexture],
-			.textureCount = 1
+			.pTextures = &textures[0],
+			.arraySize = 1
 		};
+
+		hf::TexturePackBindingInfo greekBinding
+		{
+			.bindingId = 1,
+			.sampler = sampler,
+			.pTextures = &textures[1],
+			.arraySize = 1
+		};
+
+		std::vector bindings = { mainTexBinding, greekBinding };
 
 		hf::TexturePackCreationInfo texPackInfo
 		{
 			.bindingType = hf::RenderBindingType::Graphics,
 			.setBindingIndex = 1,
-			.pBindings = &binding,
-			.bindingCount = 1,
+			.pBindings = bindings.data(),
+			.bindingCount = (uint32_t)bindings.size(),
 			.layout = layout,
 		};
 

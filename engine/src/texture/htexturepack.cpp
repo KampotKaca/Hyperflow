@@ -16,8 +16,8 @@ namespace hf
 
             binding.bindingId = bInfo.bindingId;
             binding.sampler = bInfo.sampler;
-            binding.textures = std::vector<Ref<Texture>>(bInfo.textureCount);
-            memcpy(binding.textures.data(), bInfo.pTextures, bInfo.textureCount * sizeof(Ref<Texture>));
+            binding.textures = std::vector<Ref<Texture>>(bInfo.arraySize);
+            memcpy(binding.textures.data(), bInfo.pTextures, bInfo.arraySize * sizeof(Ref<Texture>));
         }
 
         layout = info.layout;

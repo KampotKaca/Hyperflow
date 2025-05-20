@@ -14,12 +14,15 @@ namespace hf
             .descriptorCount = 0
         };
 
-        auto& device = GRAPHICS_DATA.defaultDevice->logicalDevice.device;
-        uint32_t textureBindingCount = 0;
-        for (uint32_t i = 0; i < info.texturePackCount; i++)
-            textureBindingCount += ((VkTexturePack*)info.pTexturePacks[i])->bindings.size();
+        uint32_t totalTextureDescriptors = 0;
+        uint32_t totalDescriptorSets = info.texturePackCount * FRAMES_IN_FLIGHT;
 
-        uint32_t descriptorCount = textureBindingCount * FRAMES_IN_FLIGHT;
+        for (uint32_t i = 0; i < info.texturePackCount; i++)
+        {
+            auto* texPack = (VkTexturePack*)info.pTexturePacks[i];
+            totalTextureDescriptors += texPack->bindings.size() * FRAMES_IN_FLIGHT;
+        }
+
         for (uint32_t i = 0; i < info.texturePackCount; ++i)
         {
             auto* texPack = (VkTexturePack*)info.pTexturePacks[i];
@@ -30,11 +33,12 @@ namespace hf
         {
             .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO,
             .flags = VK_DESCRIPTOR_POOL_CREATE_UPDATE_AFTER_BIND_BIT,
-            .maxSets = descriptorCount,
+            .maxSets = totalDescriptorSets,
             .poolSizeCount = 1,
             .pPoolSizes = &poolSize
         };
 
+        auto& device = GRAPHICS_DATA.defaultDevice->logicalDevice.device;
         VK_HANDLE_EXCEPT(vkCreateDescriptorPool(device, &poolInfo, nullptr, &pool));
 
         {
@@ -44,13 +48,10 @@ namespace hf
                 auto* texPack = (VkTexturePack*)info.pTexturePacks[i];
                 auto& layout = GetTextureLayout(texPack->layout);
 
-                for (uint32_t j = 0; j < texPack->bindings.size(); j++)
+                for (uint32_t k = 0; k < FRAMES_IN_FLIGHT; k++)
                 {
-                    for (uint32_t k = 0; k < FRAMES_IN_FLIGHT; k++)
-                    {
-                        GRAPHICS_DATA.preAllocBuffers.descLayouts[currentIndex] = layout.layout;
-                        currentIndex++;
-                    }
+                    GRAPHICS_DATA.preAllocBuffers.descLayouts[currentIndex] = layout.layout;
+                    currentIndex++;
                 }
             }
         }
@@ -59,41 +60,18 @@ namespace hf
         {
             .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO,
             .descriptorPool = pool,
-            .descriptorSetCount = descriptorCount,
+            .descriptorSetCount = totalDescriptorSets,
             .pSetLayouts = GRAPHICS_DATA.preAllocBuffers.descLayouts,
         };
 
         VK_HANDLE_EXCEPT(vkAllocateDescriptorSets(device, &allocInfo, GRAPHICS_DATA.preAllocBuffers.descriptors));
 
         {
-            uint32_t currentIndex = 0;
             for (uint32_t i = 0; i < info.texturePackCount; i++)
             {
                 auto* texPack = (VkTexturePack*)info.pTexturePacks[i];
-                for (uint32_t j = 0; j < texPack->bindings.size(); j++)
-                {
-                    auto& binding = texPack->bindings[j];
-                    for (uint32_t k = 0; k < FRAMES_IN_FLIGHT; k++)
-                    {
-                        auto descriptorSet = GRAPHICS_DATA.preAllocBuffers.descriptors[currentIndex];
-                        binding.descriptors[k] = descriptorSet;
-                        texPack->descriptorCache[k][j] = descriptorSet;
-                        currentIndex++;
-                    }
-
-                    if (binding.sampler == 0) continue;
-
-                    bool isValid = !binding.textures.empty();
-                    for (auto& texture : binding.textures)
-                    {
-                        if (!texture)
-                        {
-                            isValid = false;
-                            break;
-                        }
-                    }
-                    if (isValid) UpdateTextureBinding(texPack, j, 0, binding.textures.size());
-                }
+                memcpy(texPack->descriptors, &GRAPHICS_DATA.preAllocBuffers.descriptors[i * FRAMES_IN_FLIGHT], sizeof(VkDescriptorSet) * FRAMES_IN_FLIGHT);
+                UpdateTexturePack(texPack, 0, texPack->bindings.size());
             }
         }
     }

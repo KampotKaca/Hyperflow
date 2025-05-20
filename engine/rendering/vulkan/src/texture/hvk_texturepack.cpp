@@ -10,8 +10,6 @@ namespace hf
     {
         setBindingIndex = info.setBindingIndex;
         bindings = std::vector<VkTextureBinding>(info.bindingCount);
-        for (auto &descriptors : descriptorCache)
-            descriptors = std::vector<VkDescriptorSet>(info.bindingCount);
 
         layout = info.layout;
         bindingType = info.bindingType;
@@ -33,47 +31,43 @@ namespace hf
 
     VkTexturePack::~VkTexturePack()
     {
-        for (auto & descriptors : descriptorCache) descriptors.clear();
-
-        for (auto& binding : bindings)
-       {
-            binding.textures.clear();
-            for (auto& desc : binding.descriptors) desc = VK_NULL_HANDLE;
-        }
+        bindings.clear();
     }
 
-    void UpdateTextureBinding(const VkTexturePack* pack, uint32_t bindingIndex,
-        uint32_t offset, uint32_t size)
+    void UpdateTexturePack(const VkTexturePack* pack, uint32_t bindingOffset, uint32_t bindingCount)
     {
-        auto& binding = pack->bindings[bindingIndex];
-        auto& texSampler = GetSampler(binding.sampler);
-
-        for (size_t i = 0; i < size; i++)
+        uint32_t writeCount = 0;
+        for (uint32_t i = bindingOffset; i < bindingCount; i++)
         {
-            GRAPHICS_DATA.preAllocBuffers.descImageBindings[i] =
-            {
-                .sampler = texSampler.sampler,
-                .imageView = binding.textures[offset + i]->view,
-                .imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL
-            };
-        }
+            auto& binding = pack->bindings[i];
+            auto& texSampler = GetSampler(binding.sampler);
 
-        for (size_t i = 0; i < FRAMES_IN_FLIGHT; i++)
-        {
-            GRAPHICS_DATA.preAllocBuffers.descWrites[i] =
+            for (uint32_t frame = 0; frame < FRAMES_IN_FLIGHT; frame++)
             {
-                .sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
-                .dstSet = binding.descriptors[i],
-                .dstBinding = binding.bindingId,
-                .dstArrayElement = offset,
-                .descriptorCount = size,
-                .descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
-                .pImageInfo = GRAPHICS_DATA.preAllocBuffers.descImageBindings,
-            };
+                GRAPHICS_DATA.preAllocBuffers.descImageBindings[writeCount] =
+                {
+                    .sampler = texSampler.sampler,
+                    .imageView = binding.textures[0]->view,
+                    .imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL
+                };
+
+                GRAPHICS_DATA.preAllocBuffers.descWrites[writeCount] =
+                {
+                    .sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
+                    .dstSet = pack->descriptors[frame],
+                    .dstBinding = binding.bindingId,
+                    .dstArrayElement = 0,
+                    .descriptorCount = 1,
+                    .descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
+                    .pImageInfo = &GRAPHICS_DATA.preAllocBuffers.descImageBindings[writeCount],
+                };
+
+                writeCount++;
+            }
         }
 
         vkUpdateDescriptorSets(GRAPHICS_DATA.defaultDevice->logicalDevice.device,
-                FRAMES_IN_FLIGHT, GRAPHICS_DATA.preAllocBuffers.descWrites,
+                writeCount, GRAPHICS_DATA.preAllocBuffers.descWrites,
                 0, nullptr);
     }
 
@@ -87,19 +81,18 @@ namespace hf
         if (binding.sampler != sampler)
         {
             binding.sampler = sampler;
-            UpdateTextureBinding(pack, bindingIndex, 0, binding.textures.size());
+            UpdateTexturePack(pack, bindingIndex, 1);
         }
-        else if (size > 0) UpdateTextureBinding(pack, bindingIndex, offset, size);
+        else if (size > 0) UpdateTexturePack(pack, bindingIndex, 1);
         else LOG_WARN("Unnecessary set binding call, noting changed");
     }
 
     void BindTexturePack(VkRenderer* rn, VkTexturePack* pack)
     {
         auto currentFrame = rn->currentFrame;
-        auto& descriptors = pack->descriptorCache[currentFrame];
 
         vkCmdBindDescriptorSets(rn->currentCommand, (VkPipelineBindPoint)pack->bindingType, rn->currentLayout,
-        pack->setBindingIndex, descriptors.size(), descriptors.data(),
+        pack->setBindingIndex, 1, &pack->descriptors[currentFrame],
         0, nullptr);
     }
 }

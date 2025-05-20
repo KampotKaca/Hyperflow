@@ -11,18 +11,16 @@ namespace hf
             .descriptorCount = 0
         };
 
-        uint32_t totalUniformBufferDescriptors = 0;
-        uint32_t totalDescriptorSets = 0;
+        uint32_t totalBufferDescriptors = 0;
+        uint32_t totalDescriptorSets = info.bufferCount * FRAMES_IN_FLIGHT;
 
         for (uint32_t i = 0; i < info.bufferCount; i++)
         {
             auto& buffer = GetUniform(info.pBuffers[i]);
-            uint32_t bCount = buffer.bindings.size();
-            totalUniformBufferDescriptors += bCount * FRAMES_IN_FLIGHT;
-            totalDescriptorSets += FRAMES_IN_FLIGHT;
+            totalBufferDescriptors += buffer.bindings.size() * FRAMES_IN_FLIGHT;
         }
 
-        poolSize.descriptorCount = totalUniformBufferDescriptors;
+        poolSize.descriptorCount = totalBufferDescriptors;
 
         VkDescriptorPoolCreateInfo poolInfo
         {
