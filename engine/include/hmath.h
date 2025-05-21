@@ -3,6 +3,7 @@
 
 #define GLM_FORCE_RADIANS
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE
+#define GLM_ENABLE_EXPERIMENTAL
 #include <cinttypes>
 #include "glm/vec2.hpp"
 #include "glm/vec3.hpp"
@@ -13,6 +14,8 @@
 #include "glm/fwd.hpp"
 #include "glm/ext/matrix_clip_space.hpp"
 #include "glm/ext/matrix_transform.hpp"
+#include "glm/detail/type_quat.hpp"
+#include "glm/gtc/quaternion.hpp"
 
 namespace hf
 {
@@ -28,7 +31,7 @@ namespace hf
     typedef glm::uvec3 uvec3;
     typedef glm::uvec4 uvec4;
 
-    typedef glm::quat quaternion;
+    typedef glm::quat quat;
 
     typedef glm::mat2   mat2;
     typedef glm::mat2x3 mat2x3;

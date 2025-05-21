@@ -1,4 +1,5 @@
 #include "application.h"
+#include "uniforms.h"
 #include <hyperflow.h>
 #include <sstream>
 
@@ -23,30 +24,11 @@ namespace app
 	hf::Ref<hf::TexturePackAllocator> texPackAllocator{};
 
 	hf::BufferAttrib bufferAttrib{};
-	hf::UniformBuffer cameraBuffer{};
 	hf::ShaderSetup shaderSetup{};
-	hf::UniformAllocator uniformAllocator{};
 	hf::TextureSampler sampler{};
 	hf::TextureLayout layout{};
 	hf::RenderPass presentPass{};
-
-	struct Camera
-	{
-		alignas(16) hf::mat4 model{};
-		alignas(16) hf::mat4 view{};
-		alignas(16) hf::mat4 proj{};
-		alignas(16) hf::mat4 viewProj{};
-	};
-
-	struct Time
-	{
-		alignas(8) double deltaTime;
-		alignas(8) double timeSinceStartup;
-	};
-
-	Camera* camera{};
-	Time* time{};
-	void* combinedBuffer{};
+	hf::Camera3D camera{};
 
 	hf::RenderPass Application::OnPassCreationCallback(const hf::Ref<hf::Renderer>& rn)
 	{
@@ -125,38 +107,7 @@ namespace app
 
 		bufferAttrib = hf::bufferattrib::Define(bufferAttribDefinitionInfo);
 
-		hf::UniformBufferBindingInfo cameraBindingInfo
-		{
-			.usageFlags = hf::ShaderUsageStage::Default,
-			.arraySize = 1,
-			.elementSizeInBytes = sizeof(Camera)
-		};
-
-		hf::UniformBufferBindingInfo timeBindingInfo
-		{
-			.usageFlags = hf::ShaderUsageStage::Default,
-			.arraySize = 2,
-			.elementSizeInBytes = sizeof(Time)
-		};
-
-		std::vector bindings = { cameraBindingInfo, timeBindingInfo };
-
-		hf::UniformBufferDefinitionInfo cameraBufferDefinitionInfo
-		{
-			.bindingId = 0,
-			.pBindings = bindings.data(),
-			.bindingCount = (uint32_t)bindings.size()
-		};
-
-		cameraBuffer = hf::uniformbuffer::Define(cameraBufferDefinitionInfo);
-
-		hf::UniformAllocatorDefinitionInfo uniformAllocatorDefinitionInfo
-		{
-			.pBuffers = &cameraBuffer,
-			.bufferCount = 1,
-		};
-
-		uniformAllocator = hf::uniformallocator::Define(uniformAllocatorDefinitionInfo);
+		UniformDefineAll();
 
 		hf::TextureLayoutBindingInfo mainTexBinding
 		{
@@ -201,7 +152,7 @@ namespace app
 
 		hf::ShaderSetupDefinitionInfo shaderSetupDefinitionInfo
 		{
-			.pBuffers = &cameraBuffer,
+			.pBuffers = &APP_UNIFORMS.cameraTimeBuffer,
 			.bufferCount = 1,
 			.pTextureLayouts = &layout,
 			.textureLayoutCount = 1
@@ -317,12 +268,10 @@ namespace app
 
 	void Application::Start()
 	{
-		combinedBuffer = hf::utils::Allocate(sizeof(Camera) + sizeof(Time) * 2);
-		camera = (Camera*)combinedBuffer;
-		time = (Time*)((uint8_t*)combinedBuffer + sizeof(Camera));
-
+		UniformStart();
 		hf::time::SetTargetFrameRate(-1);
 		count = 0;
+		camera.distance = 2;
 	}
 
 	void Application::Update()
@@ -401,7 +350,7 @@ namespace app
 
 	void Application::Quit()
 	{
-		hf::utils::Deallocate(combinedBuffer);
+
 	}
 
 	void Application::OnPreRender(const hf::Ref<hf::Renderer>& rn)
@@ -413,40 +362,11 @@ namespace app
 
 	void Application::OnRender(const hf::Ref<hf::Renderer>& rn)
 	{
-		auto size = hf::renderer::GetSize(rn);
-		camera->model = glm::rotate(hf::mat4(1.0f), (float)hf::time::GetTimePassed() * glm::radians(10.0f), glm::vec3(0.0f, 0.0f, 1.0f));
-		camera->view = glm::lookAt(hf::vec3(2.0f, 2.0f, 2.0f), hf::vec3(0.0f, 0.0f, 0.0f), hf::vec3(0.0f, 0.0f, 1.0f));
-		camera->proj = glm::perspective(glm::radians(45.0f), (float)size.x / (float)size.y, 0.1f, 10.0f);
-		camera->proj[1][1] *= -1;
-		camera->viewProj = camera->proj * camera->view;
-
-		time[0].deltaTime = hf::time::GetDeltaTime();
-		time[0].timeSinceStartup = hf::time::GetTimePassed();
-
-		time[1].deltaTime = hf::time::GetDeltaTime() * .8f;
-		time[1].timeSinceStartup = hf::time::GetTimePassed() * .8f;
-
 		hf::renderpass::Begin(rn, presentPass);
 
 		hf::shadersetup::Bind(rn, shaderSetup);
 
-		hf::UniformBufferUpload cameraUpload
-		{
-			.buffer = cameraBuffer,
-			.offsetInBytes = 0,
-			.sizeInBytes = sizeof(Camera) + sizeof(Time) * 2,
-			.data = combinedBuffer
-		};
-
-		hf::UniformBufferUploadInfo uniformBufferUploads
-		{
-			.bindingType = hf::RenderBindingType::Graphics,
-			.setBindingIndex = 0,
-			.pUploads = &cameraUpload,
-			.uploadCount = 1
-		};
-
-		hf::uniformbuffer::Upload(rn, uniformBufferUploads);
+		UniformUploadCameraTime(rn, camera);
 
 		hf::shader::Bind(rn, shader, bufferAttrib);
 		hf::texturepack::Bind(rn, texPack);

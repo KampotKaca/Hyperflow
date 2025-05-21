@@ -252,6 +252,9 @@ namespace hf
 		[[nodiscard]] void* AllocateAligned(std::size_t n, std::align_val_t align);
 		void Deallocate(void* p);
 		void DeallocateAligned(void* p, std::align_val_t align);
+
+		mat4 GetProjectionMat4(const Camera3D& camera);
+		mat4 GetViewMat4(const Camera3D& camera);
 	}
 }
 
