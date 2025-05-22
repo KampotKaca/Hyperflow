@@ -19,7 +19,7 @@ add_executable(${PROJECT_NAME} ${PROJECT_SRC})
 
 target_include_directories(${PROJECT_NAME}
         PUBLIC
-        src/
+        include/
         PRIVATE
 )
 

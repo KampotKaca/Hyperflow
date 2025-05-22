@@ -28,7 +28,7 @@ namespace app
     extern AppUniforms APP_UNIFORMS;
 
     void UniformDefineAll();
-    void UniformStart();
+    void UniformStartAll();
     void UniformUploadCameraTime(const hf::Ref<hf::Renderer>& rn, const hf::Camera3D& camera);
 }
 

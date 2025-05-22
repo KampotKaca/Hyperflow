@@ -1,8 +1,6 @@
 #include "hyperflow.h"
-
-#define private public
 #include "application.h"
-#undef private
+#include "renderpasses.h"
 
 static void __attribute__((constructor)) global_init()
 {
@@ -19,11 +17,11 @@ int main()
 		.updateType = hf::EngineUpdateType::Continues,
 		.lifecycleCallbacks =
 		{
-			.onRendererLoad     	 = app::Application::OnRendererLoad,
-			.onResourcesLoad     	 = app::Application::LoadResources,
-			.onStartCallback     	 = app::Application::Start,
-			.onUpdateCallback    	 = app::Application::Update,
-			.onQuitCallback      	 = app::Application::Quit,
+			.onRendererLoad     	 = app::AppRendererLoad,
+			.onResourcesLoad     	 = app::AppLoadResources,
+			.onStartCallback     	 = app::AppStart,
+			.onUpdateCallback    	 = app::AppUpdate,
+			.onQuitCallback      	 = app::AppQuit,
 		},
 		.windowData =
 		{
@@ -35,9 +33,9 @@ int main()
 			.vsyncMode			 = hf::VsyncMode::Relaxed,
 			.rnEventInfo =
 			{
-				.onPassCreationCallback = app::Application::OnPassCreationCallback,
-				.onPreRenderCallback = app::Application::OnPreRender,
-				.onRenderCallback    = app::Application::OnRender,
+				.onPassCreationCallback = app::DefineMainPresentationPass,
+				.onPreRenderCallback 	= app::AppPreRender,
+				.onRenderCallback    	= app::AppRender,
 			},
 		}
 	};

@@ -24,6 +24,7 @@ layout(location = 1) out vec3 o_Color;
 void main()
 {
     gl_Position = CAMERA.viewProj * CAMERA.model * vec4(inPosition, 1.0);
-    o_Color = inColor * sin(float(TIME.timeSinceStartup));
+    o_Color = inColor;
+    o_Color.r *= (sin(float(TIME.timeSinceStartup)) + 1) * 0.5f;
     o_TexCoord = inTexCoord;
 }

@@ -65,7 +65,7 @@ namespace app
         };
     }
 
-    void UniformStart()
+    void UniformStartAll()
     {
 
     }
