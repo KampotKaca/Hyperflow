@@ -13,9 +13,8 @@ namespace app
 
     struct CameraTimeUniformUpload_T
     {
-        char buffer[sizeof(CameraUniform) + sizeof(TimeUniform)]{};
-        CameraUniform* cameraU{};
-        TimeUniform* timeU{};
+        CameraUniform camera{};
+        TimeUniform time{};
     };
 
     static UniformStorage_T TEMP_ST{};
@@ -68,26 +67,25 @@ namespace app
 
     void UniformStart()
     {
-        TEMP_CAMERA_TIME_UPLOAD.cameraU = (CameraUniform*)&TEMP_CAMERA_TIME_UPLOAD.buffer[0];
-        TEMP_CAMERA_TIME_UPLOAD.timeU = (TimeUniform*)&TEMP_CAMERA_TIME_UPLOAD.buffer[sizeof(CameraUniform)];
+
     }
 
     void UniformUploadCameraTime(const hf::Ref<hf::Renderer>& rn, const hf::Camera3D& camera)
     {
-        TEMP_CAMERA_TIME_UPLOAD.timeU->deltaTime = hf::time::GetDeltaTime();
-        TEMP_CAMERA_TIME_UPLOAD.timeU->timeSinceStartup = hf::time::GetTimePassed();
+        TEMP_CAMERA_TIME_UPLOAD.time.deltaTime = hf::time::GetDeltaTime();
+        TEMP_CAMERA_TIME_UPLOAD.time.timeSinceStartup = hf::time::GetTimePassed();
 
-        TEMP_CAMERA_TIME_UPLOAD.cameraU->model = glm::rotate(hf::mat4(1.0f), (float)hf::time::GetTimePassed() * glm::radians(10.0f), glm::vec3(0.0f, 0.0f, 1.0f));
-        TEMP_CAMERA_TIME_UPLOAD.cameraU->view = camera.ToViewMat4();
-        TEMP_CAMERA_TIME_UPLOAD.cameraU->proj = camera.ToProjectionMat4(rn);
-        TEMP_CAMERA_TIME_UPLOAD.cameraU->viewProj = TEMP_CAMERA_TIME_UPLOAD.cameraU->proj * TEMP_CAMERA_TIME_UPLOAD.cameraU->view;
+        TEMP_CAMERA_TIME_UPLOAD.camera.model = glm::rotate(hf::mat4(1.0f), (float)hf::time::GetTimePassed() * glm::radians(10.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+        TEMP_CAMERA_TIME_UPLOAD.camera.view = camera.ToViewMat4();
+        TEMP_CAMERA_TIME_UPLOAD.camera.proj = camera.ToProjectionMat4(rn);
+        TEMP_CAMERA_TIME_UPLOAD.camera.viewProj = TEMP_CAMERA_TIME_UPLOAD.camera.proj * TEMP_CAMERA_TIME_UPLOAD.camera.view;
 
         hf::UniformBufferUpload cameraTimeUpload
         {
             .buffer = APP_UNIFORMS.cameraTimeBuffer,
             .offsetInBytes = 0,
-            .sizeInBytes = sizeof(TEMP_CAMERA_TIME_UPLOAD.buffer),
-            .data = TEMP_CAMERA_TIME_UPLOAD.buffer
+            .sizeInBytes = sizeof(CameraTimeUniformUpload_T),
+            .data = &TEMP_CAMERA_TIME_UPLOAD
         };
 
         TEMP_ST.uploads[0] = cameraTimeUpload;
