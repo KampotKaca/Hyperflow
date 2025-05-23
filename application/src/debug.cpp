@@ -1,6 +1,6 @@
 #include "debug.h"
 #include "application.h"
-#include "renderpasses.h"
+#include "../include/resources/renderpasses.h"
 
 namespace app
 {

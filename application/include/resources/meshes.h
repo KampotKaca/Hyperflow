@@ -7,14 +7,11 @@ namespace app
 {
     struct AppMeshes
     {
-        hf::BufferAttrib meshAttribute{};
-
         hf::Ref<hf::Mesh> viking_room{};
     };
 
     extern AppMeshes APP_MESHES;
 
-    void MeshDefineAll();
     void MeshLoadAll();
 }
 

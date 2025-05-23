@@ -1,4 +1,4 @@
-#include "uniforms.h"
+#include "resources/uniforms.h"
 
 namespace app
 {

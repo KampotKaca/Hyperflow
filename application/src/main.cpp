@@ -1,6 +1,6 @@
 #include "hyperflow.h"
 #include "application.h"
-#include "renderpasses.h"
+#include "../include/resources/renderpasses.h"
 
 static void __attribute__((constructor)) global_init()
 {
