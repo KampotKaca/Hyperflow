@@ -31,6 +31,7 @@ namespace app
 	{
 		TextureLoadAll();
 		MeshLoadAll();
+		TexturePackLoadAll();
 		ShaderLoadAll();
 		DebugLoad();
 	}
