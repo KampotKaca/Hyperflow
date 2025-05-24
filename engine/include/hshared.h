@@ -722,28 +722,54 @@ namespace hf
 
 	//region Objects
 
-	struct Camera3D
+	struct Camera3DCore
 	{
-		vec3 lookTarget{};
-		vec3 up = { 0, 1, 0 };
-		float yaw = 0.0f;
-		float pitch = 0.0f;
-		float distance = 10.0f;
 		float fov = 60.0f;
 		float nearPlane = 0.1f;
 		float farPlane = 1000.0f;
 
-		[[nodiscard]] inline mat4 ToViewMat4() const
+		[[nodiscard]] mat4 ToProjectionMat4(const Ref<Renderer>& rn) const;
+	};
+
+	struct Camera3DAnchored
+	{
+		vec3 anchor{};
+		vec3 up = { 0, 1, 0 };
+		float yaw = 0.0f;
+		float pitch = 0.0f;
+		float distance = 10.0f;
+		Camera3DCore core{};
+
+		[[nodiscard]] inline vec3 GetDirection() const
 		{
 			float yawRad = glm::radians(yaw);
 			float pitchRad = glm::radians(fmodf(pitch - 90, 180));
 			float cpr = cosf(pitchRad);
-			vec3 direction{ cpr * sinf(yawRad), sinf(pitchRad), cpr * cosf(yawRad) };
-			vec3 position{ lookTarget - direction * distance };
+			return { cpr * sinf(yawRad), sinf(pitchRad), cpr * cosf(yawRad) };
+		}
+
+		[[nodiscard]] inline mat4 ToViewMat4() const
+		{
+			vec3 direction = GetDirection();
+			vec3 position{ anchor - direction * distance };
 			return glm::lookAt(position, direction, up);
 		}
 
-		[[nodiscard]] mat4 ToProjectionMat4(const Ref<Renderer>& rn) const;
+		[[nodiscard]] mat4 ToViewProjectionMat4(const Ref<Renderer>& rn) const;
+	};
+
+	struct Camera3DFreeLook
+	{
+		vec3 position{};
+		vec3 direction{};
+		vec3 up = { 0, 1, 0 };
+		Camera3DCore core{};
+
+		[[nodiscard]] inline mat4 ToViewMat4() const
+		{
+			return glm::lookAt(position, direction, up);
+		}
+
 		[[nodiscard]] mat4 ToViewProjectionMat4(const Ref<Renderer>& rn) const;
 	};
 

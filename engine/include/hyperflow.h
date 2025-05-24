@@ -4,6 +4,7 @@
 #include "hshared.h"
 #include "hexception.h"
 #include "hgenericexception.h"
+#include "components/hfreemovecamera3d.h"
 
 namespace hf
 {
@@ -256,8 +257,8 @@ namespace hf
 		void Deallocate(void* p);
 		void DeallocateAligned(void* p, std::align_val_t align);
 
-		mat4 GetProjectionMat4(const Camera3D& camera);
-		mat4 GetViewMat4(const Camera3D& camera);
+		mat4 GetProjectionMat4(const Camera3DAnchored& camera);
+		mat4 GetViewMat4(const Camera3DAnchored& camera);
 	}
 }
 

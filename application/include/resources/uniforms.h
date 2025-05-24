@@ -29,7 +29,7 @@ namespace app
 
     void UniformDefineAll();
     void UniformStartAll();
-    void UniformUploadCameraTime(const hf::Ref<hf::Renderer>& rn, const hf::Camera3D& camera);
+    void UniformUploadCameraTime(const hf::Ref<hf::Renderer>& rn, const hf::Camera3DCore& cameraCore, const hf::mat4& view);
 }
 
 #endif //UNIFORMS_H

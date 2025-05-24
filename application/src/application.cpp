@@ -4,7 +4,8 @@
 
 namespace app
 {
-	hf::Camera3D camera{};
+	hf::FreeMoveCamera3D freeMoveCamera{};
+	hf::Camera3DAnchored anchoredCamera{};
 
 	void AppRendererLoad()
 	{
@@ -27,14 +28,15 @@ namespace app
 
 	void AppStart()
 	{
+		anchoredCamera.distance = 2;
+		freeMoveCamera.camera3D.distance = 2;
 		UniformStartAll();
 		DebugStart();
-
-        camera.distance = 2;
 	}
 
 	void AppUpdate()
 	{
+		freeMoveCamera.Update(hf::GetMainWindow(), (float)hf::time::GetDeltaTime());
 		DebugUpdate();
 	}
 
@@ -55,7 +57,8 @@ namespace app
 		hf::renderpass::Begin(rn, APP_RENDER_PASSES.mainPresentPass);
 		hf::shadersetup::Bind(rn, APP_SHADER_SETUPS.viking_room_setup);
 
-		UniformUploadCameraTime(rn, camera);
+		UniformUploadCameraTime(rn, freeMoveCamera.camera3D.core, freeMoveCamera.camera3D.ToViewMat4());
+		// UniformUploadCameraTime(rn, anchoredCamera.core, anchoredCamera.ToViewMat4());
 
 		hf::shader::Bind(rn, APP_SHADERS.viking_room_shader, APP_BUFFER_ATTRIBUTES.pctAttribute);
 		hf::texturepack::Bind(rn, APP_TEXTURE_PACKS.viking_room_pack);
