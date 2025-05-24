@@ -1,17 +1,6 @@
 #include "application.h"
-#include <hyperflow.h>
-
-#include "resources/renderpasses.h"
-#include "resources/uniforms.h"
-#include "resources/textures.h"
-#include "resources/meshes.h"
-#include "resources/shaders.h"
-#include "resources/bufferattributes.h"
-#include "resources/texturesamplers.h"
-#include "resources/texturelayouts.h"
-#include "resources/texturepacks.h"
-#include "resources/shadersetups.h"
 #include "debug.h"
+#include "resources.h"
 
 namespace app
 {
@@ -56,12 +45,12 @@ namespace app
 
 	void AppPreRender(const hf::Ref<hf::Renderer>& rn)
 	{
-		DebugPreRender();
+		DebugPreRender(rn);
 	}
 
 	void AppRender(const hf::Ref<hf::Renderer>& rn)
 	{
-		DebugRender();
+		DebugRender(rn);
 
 		hf::renderpass::Begin(rn, APP_RENDER_PASSES.mainPresentPass);
 		hf::shadersetup::Bind(rn, APP_SHADER_SETUPS.viking_room_setup);

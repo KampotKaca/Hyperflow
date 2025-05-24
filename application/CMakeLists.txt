@@ -25,6 +25,7 @@ target_include_directories(${PROJECT_NAME}
 
 target_link_libraries(${PROJECT_NAME}
         PUBLIC
+        ryml
         PRIVATE
         Hyperflow_Engine
 )

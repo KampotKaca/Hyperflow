@@ -1,4 +1,3 @@
-#include <stb_image.h>
 #include "htexturepack.h"
 #include "hinternal.h"
 #include "hyperflow.h"
@@ -84,7 +83,8 @@ namespace hf
         {
             if (textureCount == 0) return;
             auto& binding = pack->bindings[bindingIndex];
-            memcpy(&binding.textures[textureOffset], pTextures, textureCount * sizeof(Ref<Texture>));
+            uint32_t end = textureOffset + textureCount;
+            for (uint32_t i = textureOffset; i < end; i++) binding.textures[i] = pTextures[i];
 
             inter::rendering::TexturePackUploadInfo uploadInfo
             {

@@ -10,8 +10,8 @@ namespace app
     void DebugStart();
     void DebugUpdate();
     void DebugQuit();
-    void DebugPreRender();
-    void DebugRender();
+    void DebugPreRender(const hf::Ref<hf::Renderer>& rn);
+    void DebugRender(const hf::Ref<hf::Renderer>& rn);
 }
 
 #endif //DEBUG_H

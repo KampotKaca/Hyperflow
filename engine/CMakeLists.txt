@@ -75,6 +75,7 @@ add_subdirectory(external/glm)
 add_subdirectory(external/stb)
 add_subdirectory(external/logc)
 add_subdirectory(external/rpmalloc)
+add_subdirectory(external/rapidyaml)
 add_subdirectory(others/exception)
 
 add_library(${PROJECT_NAME} ${ENGINE_SRC})
@@ -85,8 +86,10 @@ target_link_libraries(${PROJECT_NAME}
         glm
         stb
         logc
-        rpmalloc
+        ryml
         ext
+        PRIVATE
+        rpmalloc
 )
 
 if(D3D)
@@ -127,6 +130,7 @@ target_include_directories(${PROJECT_NAME}
         external/glm
         external/logc/include
         external/rpmalloc
+        external/rapidyaml/src
         PRIVATE
 )
 

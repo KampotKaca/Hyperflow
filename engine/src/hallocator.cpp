@@ -8,11 +8,11 @@ namespace hf
 {
     namespace utils
     {
-        static std::once_flag allocatorInitFlag;
+        static std::once_flag ALLOCATOR_INIT_FLAG;
 
         static void EnsureAllocatorInit()
         {
-            std::call_once(allocatorInitFlag, []
+            std::call_once(ALLOCATOR_INIT_FLAG, []
             {
                 rpmalloc_initialize();
                 rpmalloc_thread_initialize();
@@ -196,6 +196,16 @@ void operator delete(void* ptr, std::align_val_t align, const std::nothrow_t&) n
 }
 
 void operator delete[](void* ptr, std::align_val_t align, const std::nothrow_t&) noexcept
+{
+    hf::utils::DeallocateAligned(ptr, align);
+}
+
+void operator delete(void* ptr, std::align_val_t align, std::size_t size) noexcept
+{
+    hf::utils::DeallocateAligned(ptr, align);
+}
+
+void operator delete[](void* ptr, std::align_val_t align, std::size_t size) noexcept
 {
     hf::utils::DeallocateAligned(ptr, align);
 }
