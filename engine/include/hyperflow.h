@@ -184,6 +184,7 @@ namespace hf
 	namespace bufferattrib
 	{
 		BufferAttrib Define(const BufferAttribDefinitionInfo& info);
+		BufferAttrib Define(const char* assetPath);
 	}
 
 	namespace uniformbuffer
@@ -235,6 +236,7 @@ namespace hf
 	namespace mesh
 	{
 		Ref<Mesh> Create(const MeshCreationInfo& info);
+		Ref<Mesh> Create(const char* assetPath);
 		void Destroy(const Ref<Mesh>& mesh);
 		void Destroy(const Ref<Mesh>* pMeshes, uint32_t count);
 		void DestroyAll(bool internalOnly = false);
@@ -245,7 +247,7 @@ namespace hf
 	namespace utils
 	{
 		ivec3 ConvertVersion(const char* version);
-		bool ReadFile(const std::string& filename, std::vector<char>& result);
+		bool ReadFile(const std::string& filename, bool addNullTerminator, std::vector<char>& result);
 		bool FileExists(const char* path);
 
 		[[nodiscard]] void* Allocate(std::size_t n);

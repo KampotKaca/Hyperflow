@@ -166,7 +166,7 @@ namespace hf
         }
         else multisampling.rasterizationSamples = VK_SAMPLE_COUNT_1_BIT;
 
-        if (pass.msaaSamples.size() > 0 && GRAPHICS_DATA.defaultDevice->features.sampleRateShading)
+        if (!pass.msaaSamples.empty() && GRAPHICS_DATA.defaultDevice->features.sampleRateShading)
         {
             multisampling.sampleShadingEnable = VK_TRUE;
             multisampling.minSampleShading = VK_MSAA_MIN_SAMPLE_SHADING;

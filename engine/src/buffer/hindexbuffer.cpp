@@ -33,14 +33,14 @@ namespace hf
         Ref<IndexBuffer> Create(const IndexBufferCreationInfo& info)
         {
             Ref<IndexBuffer> buffer = MakeRef<IndexBuffer>(info, DataTransferType::CopyData);
-            inter::HF.graphicsResources.indexBuffers[buffer.get()] = buffer;
+            inter::HF.graphicsResources.indexBuffers[(uint64_t)buffer.get()] = buffer;
             return buffer;
         }
 
         void Destroy(const Ref<IndexBuffer>& buffer)
         {
             if (inter::rendering::DestroyIndexBuffer_i(buffer.get()))
-                inter::HF.graphicsResources.indexBuffers.erase(buffer.get());
+                inter::HF.graphicsResources.indexBuffers.erase((uint64_t)buffer.get());
         }
 
         void Destroy(const Ref<IndexBuffer>* pBuffers, uint32_t count)
@@ -49,7 +49,7 @@ namespace hf
             {
                 auto buffer = pBuffers[i];
                 if (inter::rendering::DestroyIndexBuffer_i(buffer.get()))
-                    inter::HF.graphicsResources.indexBuffers.erase(buffer.get());
+                    inter::HF.graphicsResources.indexBuffers.erase((uint64_t)buffer.get());
             }
         }
 

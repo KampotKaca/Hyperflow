@@ -33,14 +33,14 @@ namespace hf
         Ref<TexturePack> Create(const TexturePackCreationInfo& info)
         {
             Ref<TexturePack> texPack = MakeRef<TexturePack>(info);
-            inter::HF.graphicsResources.texturePacks[texPack.get()] = texPack;
+            inter::HF.graphicsResources.texturePacks[(uint64_t)texPack.get()] = texPack;
             return texPack;
         }
 
         void Destroy(const Ref<TexturePack>& pack)
         {
             if (inter::rendering::DestroyTexturePack_i(pack.get()))
-                inter::HF.graphicsResources.texturePacks.erase(pack.get());
+                inter::HF.graphicsResources.texturePacks.erase((uint64_t)pack.get());
         }
 
         void Destroy(const Ref<TexturePack>* pPacks, uint32_t count)
@@ -49,7 +49,7 @@ namespace hf
             {
                 auto pack = pPacks[i];
                 if (inter::rendering::DestroyTexturePack_i(pack.get()))
-                    inter::HF.graphicsResources.texturePacks.erase(pack.get());
+                    inter::HF.graphicsResources.texturePacks.erase((uint64_t)pack.get());
             }
         }
 

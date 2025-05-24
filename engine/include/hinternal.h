@@ -28,14 +28,16 @@ namespace hf::inter
 
     struct GraphicsResources
     {
-        std::unordered_map<Shader*, Ref<Shader>> shaders{};
-        std::unordered_map<VertBuffer*, Ref<VertBuffer>> vertBuffers{};
-        std::unordered_map<IndexBuffer*, Ref<IndexBuffer>> indexBuffers{};
-        std::unordered_map<StorageBuffer*, Ref<StorageBuffer>> storageBuffers{};
-        std::unordered_map<Mesh*, Ref<Mesh>> meshes{};
-        std::unordered_map<Texture*, Ref<Texture>> textures{};
-        std::unordered_map<TexturePack*, Ref<TexturePack>> texturePacks{};
-        std::unordered_map<TexturePackAllocator*, Ref<TexturePackAllocator>> texturePackAllocators{};
+        phmap::flat_hash_map<uint64_t, Ref<Shader>> shaders{};
+        phmap::flat_hash_map<uint64_t, Ref<VertBuffer>> vertBuffers{};
+        phmap::flat_hash_map<uint64_t, Ref<IndexBuffer>> indexBuffers{};
+        phmap::flat_hash_map<uint64_t, Ref<StorageBuffer>> storageBuffers{};
+        phmap::flat_hash_map<uint64_t, Ref<Texture>> textures{};
+        phmap::flat_hash_map<uint64_t, Ref<TexturePack>> texturePacks{};
+        phmap::flat_hash_map<uint64_t, Ref<TexturePackAllocator>> texturePackAllocators{};
+
+        phmap::flat_hash_map<std::string, BufferAttrib> bufferAttribs{};
+        phmap::flat_hash_map<std::string, Ref<Mesh>> meshes{};
     };
 
     struct Hyperflow

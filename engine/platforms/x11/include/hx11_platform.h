@@ -23,7 +23,7 @@ namespace hf
 	};
 
 	extern X11Platform PLATFORM_DATA;
-	extern std::unordered_map<::Window, Window*> WIN_REGISTRY;
+	extern phmap::flat_hash_map<::Window, Window*> WIN_REGISTRY;
 
 	void X11_Load();
 	void X11_Unload();

@@ -30,14 +30,14 @@ namespace hf
         Ref<StorageBuffer> Create(const StorageBufferCreationInfo& info)
         {
             Ref<StorageBuffer> buffer = MakeRef<StorageBuffer>(info, DataTransferType::CopyData);
-            inter::HF.graphicsResources.storageBuffers[buffer.get()] = buffer;
+            inter::HF.graphicsResources.storageBuffers[(uint64_t)buffer.get()] = buffer;
             return buffer;
         }
 
         void Destroy(const Ref<StorageBuffer>& buffer)
         {
             if (inter::rendering::CreateStorageBuffer_i(buffer.get()))
-                inter::HF.graphicsResources.storageBuffers.erase(buffer.get());
+                inter::HF.graphicsResources.storageBuffers.erase((uint64_t)buffer.get());
         }
 
         void Destroy(const Ref<StorageBuffer>* pBuffers, uint32_t count)
@@ -46,7 +46,7 @@ namespace hf
             {
                 auto buffer = pBuffers[i];
                 if (inter::rendering::DestroyStorageBuffer_i(buffer.get()))
-                    inter::HF.graphicsResources.storageBuffers.erase(buffer.get());
+                    inter::HF.graphicsResources.storageBuffers.erase((uint64_t)buffer.get());
             }
         }
 

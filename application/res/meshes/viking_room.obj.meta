@@ -1,0 +1,8 @@
+typeFlags:
+  - Position
+#  - Normal
+  - Color
+  - TexCoord
+
+memoryType: Static
+bufferAttrib: pos_col_tex

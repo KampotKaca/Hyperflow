@@ -158,6 +158,8 @@ namespace hf
                 .type = RenderingApiType::None,
                 .handle = nullptr,
             };
+
+            HF.graphicsResources.bufferAttribs.clear();
         }
 
         void CreateRenderer_i(Renderer* rn)

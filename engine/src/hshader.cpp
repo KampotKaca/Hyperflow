@@ -34,14 +34,14 @@ namespace hf
         Ref<Shader> Create(const ShaderCreationInfo& info)
         {
             Ref<Shader> shader = MakeRef<Shader>(info);
-            inter::HF.graphicsResources.shaders[shader.get()] = shader;
+            inter::HF.graphicsResources.shaders[(uint64_t)shader.get()] = shader;
             return shader;
         }
 
         void Destroy(const Ref<Shader>& shader)
         {
             if (inter::rendering::DestroyShader_i(shader.get()))
-                inter::HF.graphicsResources.shaders.erase(shader.get());
+                inter::HF.graphicsResources.shaders.erase((uint64_t)shader.get());
         }
 
         void Destroy(const Ref<Shader>* pShaders, uint32_t count)
@@ -50,7 +50,7 @@ namespace hf
             {
                 auto shader = pShaders[i];
                 if (inter::rendering::DestroyShader_i(shader.get()))
-                    inter::HF.graphicsResources.shaders.erase(shader.get());
+                    inter::HF.graphicsResources.shaders.erase((uint64_t)shader.get());
             }
         }
 
@@ -100,8 +100,8 @@ namespace hf
                         return false;
                     }
 
-                    utils::ReadFile(vLoc, vertexCode);
-                    utils::ReadFile(fLoc, fragmentCode);
+                    utils::ReadFile(vLoc, false, vertexCode);
+                    utils::ReadFile(fLoc, false, fragmentCode);
 
                     ShaderCreationInfo creationInfo
                     {

@@ -186,7 +186,7 @@ void LoadModel(const char* path, MeshInfo* meshInfo)
 
     for (const auto& shape : shapes)
     {
-        std::unordered_map<Vertex, uint32_t> uniqueVertices{};
+        phmap::flat_hash_map<Vertex, uint32_t> uniqueVertices{};
         std::vector<Vertex> vertices{};
         std::vector<uint32_t> indices{};
 

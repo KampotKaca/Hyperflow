@@ -8,7 +8,7 @@
 namespace hf
 {
 	X11Platform PLATFORM_DATA{};
-	std::unordered_map<::Window, Window*> WIN_REGISTRY{};
+	phmap::flat_hash_map<::Window, Window*> WIN_REGISTRY{};
 
 	int32_t XErrorHandler(Display *display, XErrorEvent *error)
 	{

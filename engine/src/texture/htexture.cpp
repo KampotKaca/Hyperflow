@@ -22,14 +22,14 @@ namespace hf
         Ref<Texture> Create(const TextureCreationInfo& info)
         {
             Ref<Texture> texture = MakeRef<Texture>(info);
-            inter::HF.graphicsResources.textures[texture.get()] = texture;
+            inter::HF.graphicsResources.textures[(uint64_t)texture.get()] = texture;
             return texture;
         }
 
         void Destroy(const Ref<Texture>& texture)
         {
             if (inter::rendering::DestroyTexture_i(texture.get()))
-                inter::HF.graphicsResources.textures.erase(texture.get());
+                inter::HF.graphicsResources.textures.erase((uint64_t)texture.get());
         }
 
         void Destroy(const Ref<Texture>* pTextures, uint32_t count)
@@ -38,7 +38,7 @@ namespace hf
             {
                 auto tex = pTextures[i];
                 if (inter::rendering::DestroyTexture_i(tex.get()))
-                    inter::HF.graphicsResources.textures.erase(tex.get());
+                    inter::HF.graphicsResources.textures.erase((uint64_t)tex.get());
             }
         }
 

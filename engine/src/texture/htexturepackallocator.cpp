@@ -21,14 +21,14 @@ namespace hf
         Ref<TexturePackAllocator> Create(const TexturePackAllocatorCreationInfo& info)
         {
             Ref<TexturePackAllocator> texPackAllocator = MakeRef<TexturePackAllocator>(info);
-            inter::HF.graphicsResources.texturePackAllocators[texPackAllocator.get()] = texPackAllocator;
+            inter::HF.graphicsResources.texturePackAllocators[(uint64_t)texPackAllocator.get()] = texPackAllocator;
             return texPackAllocator;
         }
 
         void Destroy(const Ref<TexturePackAllocator>& texPackAllocator)
         {
             if (inter::rendering::DestroyTexturePackAllocator_i(texPackAllocator.get()))
-                inter::HF.graphicsResources.texturePackAllocators.erase(texPackAllocator.get());
+                inter::HF.graphicsResources.texturePackAllocators.erase((uint64_t)texPackAllocator.get());
         }
 
         void Destroy(const Ref<TexturePackAllocator>* pTexPackAllocators, uint32_t count)
@@ -37,7 +37,7 @@ namespace hf
             {
                 auto packAllocator = pTexPackAllocators[i];
                 if (inter::rendering::DestroyTexturePackAllocator_i(packAllocator.get()))
-                    inter::HF.graphicsResources.texturePackAllocators.erase(packAllocator.get());
+                    inter::HF.graphicsResources.texturePackAllocators.erase((uint64_t)packAllocator.get());
             }
         }
 

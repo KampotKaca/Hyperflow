@@ -33,14 +33,14 @@ namespace hf
         Ref<VertBuffer> Create(const VertBufferCreationInfo& info)
         {
             Ref<VertBuffer> buffer = MakeRef<VertBuffer>(info, DataTransferType::CopyData);
-            inter::HF.graphicsResources.vertBuffers[buffer.get()] = buffer;
+            inter::HF.graphicsResources.vertBuffers[(uint64_t)buffer.get()] = buffer;
             return buffer;
         }
 
         void Destroy(const Ref<VertBuffer>& buffer)
         {
             if (inter::rendering::DestroyVertBuffer_i(buffer.get()))
-                inter::HF.graphicsResources.vertBuffers.erase(buffer.get());
+                inter::HF.graphicsResources.vertBuffers.erase((uint64_t)buffer.get());
         }
 
         void Destroy(const Ref<VertBuffer>* pBuffers, uint32_t count)
@@ -49,7 +49,7 @@ namespace hf
             {
                 auto buffer = pBuffers[i];
                 if (inter::rendering::DestroyVertBuffer_i(buffer.get()))
-                    inter::HF.graphicsResources.vertBuffers.erase(buffer.get());
+                    inter::HF.graphicsResources.vertBuffers.erase((uint64_t)buffer.get());
             }
         }
 

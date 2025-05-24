@@ -20,7 +20,7 @@ namespace hf::utils
         return v;
     }
 
-    bool ReadFile(const std::string& filename, std::vector<char>& result)
+    bool ReadFile(const std::string& filename, bool addNullTerminator, std::vector<char>& result)
     {
         std::ifstream file(filename, std::ios::ate | std::ios::binary);
         if (!file.is_open())
@@ -29,10 +29,13 @@ namespace hf::utils
             return false;
         }
         size_t fileSize = file.tellg();
-        result = std::vector<char>(fileSize);
+        uint64_t bufferSize = fileSize + addNullTerminator;
+        result = std::vector<char>(bufferSize);
         file.seekg(0);
         file.read(result.data(), (int64_t)fileSize);
         file.close();
+
+        if (addNullTerminator) result[bufferSize - 1] = '\0';
 
         return true;
     }
