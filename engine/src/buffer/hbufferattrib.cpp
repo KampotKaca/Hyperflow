@@ -1,6 +1,7 @@
 #include "hyperflow.h"
 #include "hinternal.h"
 #include "hyaml.h"
+#include "hstrconversion.h"
 
 namespace hf::bufferattrib
 {

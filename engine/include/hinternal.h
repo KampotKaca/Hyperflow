@@ -32,12 +32,12 @@ namespace hf::inter
         phmap::flat_hash_map<uint64_t, Ref<VertBuffer>> vertBuffers{};
         phmap::flat_hash_map<uint64_t, Ref<IndexBuffer>> indexBuffers{};
         phmap::flat_hash_map<uint64_t, Ref<StorageBuffer>> storageBuffers{};
-        phmap::flat_hash_map<uint64_t, Ref<Texture>> textures{};
         phmap::flat_hash_map<uint64_t, Ref<TexturePack>> texturePacks{};
         phmap::flat_hash_map<uint64_t, Ref<TexturePackAllocator>> texturePackAllocators{};
 
         phmap::flat_hash_map<std::string, BufferAttrib> bufferAttribs{};
         phmap::flat_hash_map<std::string, Ref<Mesh>> meshes{};
+        phmap::flat_hash_map<std::string, Ref<Texture>> textures{};
     };
 
     struct Hyperflow

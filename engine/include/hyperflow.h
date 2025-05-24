@@ -140,6 +140,7 @@ namespace hf
 	namespace texture
 	{
 		Ref<Texture> Create(const TextureCreationInfo& info);
+		Ref<Texture> Create(const char* assetPath);
 		void Destroy(const Ref<Texture>& texture);
 		void Destroy(const Ref<Texture>* pTextures, uint32_t count);
 		void DestroyAll(bool internalOnly = false);

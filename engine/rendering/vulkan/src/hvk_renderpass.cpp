@@ -464,7 +464,7 @@ namespace hf
                     .type = TextureType::Tex2D,
                     .format = (TextureFormat)attachment.format,
                     .tiling = TextureTiling::Optimal,
-                    .usage = TextureUsageFlags::DepthStencil,
+                    .usageFlags = TextureUsageFlags::DepthStencil,
                     .memoryType = BufferMemoryType::Static,
                     .finalLayout = (TextureResultLayoutType)attachment.finalLayout,
                 }
@@ -497,7 +497,7 @@ namespace hf
                     .format = (TextureFormat)attachment.format,
                     .aspectFlags = TextureAspectFlags::Color,
                     .tiling = TextureTiling::Optimal,
-                    .usage = (TextureUsageFlags::Color | TextureUsageFlags::Transient),
+                    .usageFlags = (TextureUsageFlags::Color | TextureUsageFlags::Transient),
                     .memoryType = BufferMemoryType::Static,
                     .finalLayout = TextureResultLayoutType::Color,
                 }

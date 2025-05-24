@@ -39,7 +39,7 @@ namespace hf
                 return;
             }
 
-            imageInfo.usage = VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | (uint32_t)details.usage;
+            imageInfo.usage = VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | (uint32_t)details.usageFlags;
 
             auto& transferData = GRAPHICS_DATA.defaultDevice->transferData;
             imageInfo.queueFamilyIndexCount = (uint32_t)transferData.indices.size();
@@ -47,7 +47,7 @@ namespace hf
         }
         else
         {
-            imageInfo.usage = (VkImageUsageFlags)details.usage;
+            imageInfo.usage = (VkImageUsageFlags)details.usageFlags;
             mipLevels = 1;
         }
 

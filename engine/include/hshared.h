@@ -180,49 +180,6 @@ namespace hf
 	enum class BufferDataType { U8, I8, U16, I16, U32, I32, U64, I64, F16, F32, F64, Count };
 	enum class BufferMemoryType { Static, WriteOnly, ReadWrite, Count };
 
-	constexpr uint32_t fnv1a(std::string_view str)
-	{
-		uint32_t hash = 2166136261u;
-		for (const char c : str)
-		{
-			hash ^= static_cast<uint8_t>(c);
-			hash *= 16777619u;
-		}
-		return hash;
-	}
-
-	constexpr BufferDataType STRING_TO_BUFFER_DATA_TYPE(std::string_view str)
-	{
-		switch (fnv1a(str))
-		{
-			case fnv1a("U8"):  return BufferDataType::U8;
-			case fnv1a("I8"):  return BufferDataType::I8;
-			case fnv1a("U16"): return BufferDataType::U16;
-			case fnv1a("I16"): return BufferDataType::I16;
-			case fnv1a("U32"): return BufferDataType::U32;
-			case fnv1a("I32"): return BufferDataType::I32;
-			case fnv1a("U64"): return BufferDataType::U64;
-			case fnv1a("I64"): return BufferDataType::I64;
-			case fnv1a("F16"): return BufferDataType::F16;
-			case fnv1a("F32"): return BufferDataType::F32;
-			case fnv1a("F64"): return BufferDataType::F64;
-			default:
-				throw std::invalid_argument("Unknown BufferDataType string");
-		}
-	}
-
-	constexpr BufferMemoryType STRING_TO_BUFFER_MEMORY_TYPE(std::string_view str)
-	{
-		switch (fnv1a(str))
-		{
-			case fnv1a("Static"):  return BufferMemoryType::Static;
-			case fnv1a("WriteOnly"):  return BufferMemoryType::WriteOnly;
-			case fnv1a("ReadWrite"): return BufferMemoryType::ReadWrite;
-			default:
-				throw std::invalid_argument("Unknown BufferMemoryType string");
-		}
-	}
-
 	enum class AccessType
 	{
 		None = 0,
@@ -513,7 +470,6 @@ namespace hf
 
 	enum class TextureType   	{ Tex1D = 0, Tex2D = 1, Tex3D = 2 };
 	enum class TextureChannel   { Default = 0, Gray = 1, GrayAlpha = 2, RGB = 3, RGBA = 4 };
-
 	enum class TextureFilter			{ Point = 0, Bilinear = 1 };
 	enum class TextureAnisotropicFilter	{ None, X2 = 2, X4 = 4, X8 = 8, X16 = 16, X32 = 32 };
 	enum class TextureRepeatMode		{ Repeat = 0, MirroredRepeat = 1, ClampToEdge = 2, ClampToBorder = 3, MirrorClampToEdge = 4 };
@@ -585,7 +541,7 @@ namespace hf
 		TextureFormat format = TextureFormat::R8G8B8A8_Srgb;
 		TextureAspectFlags aspectFlags = TextureAspectFlags::Color;
 		TextureTiling tiling = TextureTiling::Optimal;
-		TextureUsageFlags usage = TextureUsageFlags::Sampled;
+		TextureUsageFlags usageFlags = TextureUsageFlags::Sampled;
 		BufferMemoryType memoryType = BufferMemoryType::Static;
 		TextureResultLayoutType finalLayout = TextureResultLayoutType::ShaderReadOnly;
 	};
@@ -730,19 +686,6 @@ namespace hf
 		All = Position | Normal | TexCoord | Color,
 	};
 	DEFINE_ENUM_FLAGS(MeshDataType)
-
-	constexpr MeshDataType STRING_TO_MESH_DATA_TYPE(std::string_view str)
-	{
-		switch (fnv1a(str))
-		{
-			case fnv1a("Position"):  return MeshDataType::Position;
-			case fnv1a("Normal"):  return MeshDataType::Normal;
-			case fnv1a("Color"): return MeshDataType::Color;
-			case fnv1a("TexCoord"): return MeshDataType::TexCoord;
-			default:
-				throw std::invalid_argument("Unknown MeshDataType string");
-		}
-	}
 
 	enum class MeshIndexFormat
 	{

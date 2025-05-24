@@ -3,6 +3,7 @@
 #include "hmeshconvertor.h"
 #include "hmesh.h"
 #include "hyaml.h"
+#include "hstrconversion.h"
 
 namespace hf
 {
@@ -42,8 +43,6 @@ namespace hf
             LOG_ERROR("[Hyperflow] Unable to read mesh: %s", filePath.c_str());
             return;
         }
-        meshData.push_back('\0');
-
         uint32_t offset = 0;
 
         uint32_t submeshCount = 0;
@@ -200,15 +199,15 @@ namespace hf
             std::string assetLoc = TO_RES_PATH(std::string("meshes/") + assetPath) + ".meta";
             if (!utils::FileExists(assetLoc.c_str()))
             {
-                LOG_ERROR("[Hyperflow] Unable to find buffer attrib meta file: %s", assetPath);
-                return 0;
+                LOG_ERROR("[Hyperflow] Unable to find mesh meta file: %s", assetPath);
+                return nullptr;
             }
 
             std::vector<char> metadata{};
             if (!utils::ReadFile(assetLoc, true, metadata))
             {
-                LOG_ERROR("[Hyperflow] Unable to read buffer attribute meta: %s", assetPath);
-                return 0;
+                LOG_ERROR("[Hyperflow] Unable to read mesh meta: %s", assetPath);
+                return nullptr;
             }
 
             try
