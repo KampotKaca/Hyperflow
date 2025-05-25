@@ -7,17 +7,7 @@ target_link_libraries(lnxx11
         stb
         logc
         rpmalloc
-        glfw
         ext
-)
-
-target_link_libraries(lnxx11
-        PRIVATE
-        X11
-        Xxf86vm
-        Xrandr
-        Xi
-        dl
 )
 
 target_include_directories(lnxx11 PUBLIC include)

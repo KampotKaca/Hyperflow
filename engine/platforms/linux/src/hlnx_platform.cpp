@@ -4,7 +4,7 @@
 #include <bits/dlfcn.h>
 #include <ctime>
 
-namespace hf::inter::platform
+namespace hf::platform
 {
     void* LoadDll(const char* dllName)
     {

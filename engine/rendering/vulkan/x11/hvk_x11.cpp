@@ -13,7 +13,7 @@ namespace hf
     {
         VK_KHR_SURFACE_EXTENSION_NAME,
         VK_KHR_GET_PHYSICAL_DEVICE_PROPERTIES_2_EXTENSION_NAME,
-        "VK_KHR_xlib_surface",
+        "VK_KHR_xcb_surface",
 #if DEBUG
         "VK_EXT_debug_utils"
 #endif

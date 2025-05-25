@@ -38,22 +38,41 @@ elseif (CMAKE_SYSTEM_NAME STREQUAL "Linux")
     option(VULKAN "vulkan" ON)
     add_definitions(-DRENDERER_VULKAN)
 
-    find_package(PkgConfig)
-    pkg_check_modules(WAYLAND wayland-client)
+    execute_process(
+            COMMAND sh -c "echo $XDG_SESSION_TYPE"
+            OUTPUT_VARIABLE DISPLAY_SERVER_TYPE
+            OUTPUT_STRIP_TRAILING_WHITESPACE
+    )
 
-    if(WAYLAND_FOUND)
-        add_definitions(-DWAYLAND)
-        add_subdirectory(platforms/wayland)
-    else()
-        find_package(X11 REQUIRED)
-        if(X11_FOUND)
-            add_definitions(-DX11)
-            add_subdirectory(platforms/x11)
+    if(NOT DISPLAY_SERVER_TYPE)
+        if(DEFINED ENV{DISPLAY})
+            set(DISPLAY_SERVER_TYPE "x11")
         else()
-            message(FATAL_ERROR "Unsupported display server detected")
+            message(FATAL_ERROR "Could not detect display server type")
         endif()
     endif()
 
+    if(DISPLAY_SERVER_TYPE STREQUAL "wayland")
+        find_package(PkgConfig)
+        pkg_check_modules(WAYLAND wayland-client)
+
+        if(WAYLAND_FOUND)
+            message(STATUS "Using Wayland display server")
+            add_definitions(-DWAYLAND)
+            add_subdirectory(platforms/wayland)
+        else()
+            message(FATAL_ERROR "Wayland session detected but wayland-client not found")
+        endif()
+    else()
+        find_package(X11 REQUIRED)
+        if(X11_FOUND)
+            message(STATUS "Using X11 display server")
+            add_definitions(-DX11)
+            add_subdirectory(platforms/x11)
+        else()
+            message(FATAL_ERROR "X11 libraries not found")
+        endif()
+    endif()
 
 else()
     message(FATAL_ERROR "Unsupported platform: ${CMAKE_SYSTEM_NAME}")
@@ -80,6 +99,7 @@ add_subdirectory(external/logc)
 add_subdirectory(external/rpmalloc)
 add_subdirectory(external/rapidyaml)
 add_subdirectory(external/glfw)
+add_subdirectory(platforms/platform)
 
 add_subdirectory(others/exception)
 
@@ -96,6 +116,7 @@ target_link_libraries(${PROJECT_NAME}
         PRIVATE
         rpmalloc
         glfw
+        platform
 )
 
 if(D3D)

@@ -3,13 +3,31 @@ add_subdirectory(windows)
 message(STATUS "Windows")
 elseif (CMAKE_SYSTEM_NAME STREQUAL "Linux")
 
-    find_package(PkgConfig)
-    pkg_check_modules(WAYLAND wayland-client)
+    execute_process(
+            COMMAND sh -c "echo $XDG_SESSION_TYPE"
+            OUTPUT_VARIABLE DISPLAY_SERVER_TYPE
+            OUTPUT_STRIP_TRAILING_WHITESPACE
+    )
 
-    if(WAYLAND_FOUND)
-        add_definitions(-DWAYLAND)
-        add_subdirectory(wayland)
-        message(STATUS "WAYLAND")
+    if(NOT DISPLAY_SERVER_TYPE)
+        if(DEFINED ENV{DISPLAY})
+            set(DISPLAY_SERVER_TYPE "x11")
+        else()
+            message(FATAL_ERROR "Could not detect display server type")
+        endif()
+    endif()
+
+    if(DISPLAY_SERVER_TYPE STREQUAL "wayland")
+        find_package(PkgConfig)
+        pkg_check_modules(WAYLAND wayland-client)
+
+        if(WAYLAND_FOUND)
+            add_definitions(-DWAYLAND)
+            add_subdirectory(wayland)
+            message(STATUS "WAYLAND")
+        else()
+            message(FATAL_ERROR "Wayland session detected but wayland-client not found")
+        endif()
     else()
         find_package(X11 REQUIRED)
         if(X11_FOUND)
@@ -17,9 +35,8 @@ elseif (CMAKE_SYSTEM_NAME STREQUAL "Linux")
             add_subdirectory(x11)
             message(STATUS "X11")
         else()
-            message(FATAL_ERROR "No linux display manager found")
-        endif ()
-
+            message(FATAL_ERROR "X11 libraries not found")
+        endif()
     endif()
 endif ()
 

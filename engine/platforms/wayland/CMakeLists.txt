@@ -7,7 +7,6 @@ target_link_libraries(lnxwayland
         stb
         logc
         rpmalloc
-        glfw
         ext
 )
 

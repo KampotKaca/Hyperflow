@@ -1,90 +1,26 @@
-#define GLFW_EXPOSE_NATIVE_X11
-#define GLFW_INCLUDE_VULKAN
-#include <GLFW/glfw3.h>
-#include <GLFW/glfw3native.h>
-
-#include "hex_platform.h"
-#include "hx11_platform.h"
+#include "hplatform.h"
 #include "hinternal.h"
 
-namespace hf::inter
+namespace hf::platform
 {
-    namespace platform
-    {
-        void Load()
-        {
-            X11_Load();
-        }
+    void Load(){}
+    void Unload(){}
 
-        void Unload()
-        {
-            X11_Unload();
-        }
-
-        ivec2 GetPointerPosition(const Window* window)
-        {
-            return X11_GetPointerPosition(window);
-        }
-
-        void HandleEvents(EngineUpdateType updateType)
-        {
-            X11_HandleEvents(updateType);
-        }
-
-        uint32_t CreateVulkanSurface(void* windowHandle, void* instance, void* surfaceResult)
-        {
-            auto* winHandle = (GLFWwindow*)windowHandle;
-            return glfwCreateWindowSurface((VkInstance)instance, winHandle, nullptr, (VkSurfaceKHR*)surfaceResult);
-        }
-    }
+    ivec2 GetPointerPosition(const Window* window){ return {}; }
+    void HandleEvents(EngineUpdateType updateType){}
+    uint32_t CreateVulkanSurface(void* windowHandle, void* instance, void* surfaceResult){ return 0; }
 
     namespace window
     {
-        void Open(Window* win)
-        {
-            X11_WindowOpen(win);
-        }
+        void Open(Window* win){}
+        bool Close(Window* win){ return true; }
 
-        bool Close(Window* win)
-        {
-            if (win->handle)
-            {
-                rendering::DestroyRenderer_i(win->renderer.get());
-                win->renderer = nullptr;
-                X11_WindowClose(win);
-                return true;
-            }
-            return false;
-        }
+        void SetTitle(const Window* win, const std::string& title){}
+        void SetSize(const Window* win, ivec2 size){}
+        void SetPosition(const Window* win, ivec2 position){}
+        void SetRect(const Window* win, IRect rect){}
 
-        void SetTitle(const Window* win, const std::string& title)
-        {
-            X11_WindowSetTitle(win, title.c_str());
-        }
-
-        void SetSize(const Window* win, ivec2 size)
-        {
-            X11_WindowSetSize(win, size);
-        }
-
-        void SetPosition(const Window* win, ivec2 position)
-        {
-            X11_WindowSetPosition(win, position);
-        }
-
-        void SetRect(const Window* win, IRect rect)
-        {
-            X11_WindowSetRect(win, rect);
-        }
-
-        void SetFlags(Window* win, WindowFlags flags)
-        {
-            X11_WindowSetFlags(win, flags);
-        }
-
-        void Focus(const Window* win)
-        {
-            X11_WindowFocus(win);
-        }
+        void SetFlags(Window* win, WindowFlags flags){}
+        void Focus(const Window* win){}
     }
 }
