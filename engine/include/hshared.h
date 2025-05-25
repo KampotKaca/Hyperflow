@@ -40,6 +40,11 @@ extern "C"
 #ifdef None
 #undef None
 #endif
+
+#ifdef Always
+#undef Always
+#endif
+
 #endif
 
 namespace hf

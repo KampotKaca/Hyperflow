@@ -33,26 +33,26 @@ namespace hf
         XEvent event;
         XNextEvent(PLATFORM_DATA.display, &event);
 
-    	auto it = WIN_REGISTRY.find(event.xclient.window);
-		Window* window = nullptr;
-    	if (it != WIN_REGISTRY.end()) window = it->second;
-    	switch (event.type)
-        {
-            case GenericEvent:   	Platform_HandleGenericEvent(event);		        return;
-            case DestroyNotify:   	Platform_HandleDestroyNotify(event, window);		return;
-            case ClientMessage:   	Platform_HandleClientMessage(event, window);		return;
-
-            case ConfigureNotify:   Platform_HandleConfigureNotify(event, window);	return;
-            case FocusIn:			Platform_HandleFocusIn(event, window);			return;
-            case FocusOut:			Platform_HandleFocusOut(event, window);			return;
-            case Expose:			Platform_HandleExpose(event, window);			return;
-
-        	case KeyPress:   		Platform_HandleKeyPress(event, window);			return;
-        	case ButtonPress:   	Platform_HandleButtonPress(event, window);		return;
-            case KeyRelease: 		Platform_HandleKeyRelease(event, window);		return;
-            case ButtonRelease: 	Platform_HandleButtonRelease(event, window);		return;
-            case MotionNotify:	 	Platform_HandleMotionNotify(event, window);		return;
-        }
+  //   	auto it = WIN_REGISTRY.find(event.xclient.window);
+		// Window* window = nullptr;
+  //   	if (it != WIN_REGISTRY.end()) window = it->second;
+    	// switch (event.type)
+     //    {
+     //        case GenericEvent:   	Platform_HandleGenericEvent(event);		        return;
+     //        case DestroyNotify:   	Platform_HandleDestroyNotify(event, window);		return;
+     //        case ClientMessage:   	Platform_HandleClientMessage(event, window);		return;
+     //
+     //        case ConfigureNotify:   Platform_HandleConfigureNotify(event, window);	return;
+     //        case FocusIn:			Platform_HandleFocusIn(event, window);			return;
+     //        case FocusOut:			Platform_HandleFocusOut(event, window);			return;
+     //        case Expose:			Platform_HandleExpose(event, window);			return;
+     //
+     //    	case KeyPress:   		Platform_HandleKeyPress(event, window);			return;
+     //    	case ButtonPress:   	Platform_HandleButtonPress(event, window);		return;
+     //        case KeyRelease: 		Platform_HandleKeyRelease(event, window);		return;
+     //        case ButtonRelease: 	Platform_HandleButtonRelease(event, window);		return;
+     //        case MotionNotify:	 	Platform_HandleMotionNotify(event, window);		return;
+     //    }
     }
 
 	static void Platform_HandleGenericEvent(XEvent& event)

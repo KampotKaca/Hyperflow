@@ -9,17 +9,17 @@ namespace hf
 #endif
 #define NUM_DEVICE_EXTENSIONS 3
 
-    const char* REQUIRED_EXTENSIONS[NUM_REQUIRED_EXTENSIONS] =
+    const char* REQUIRED_EXTENSIONS[]
     {
         VK_KHR_SURFACE_EXTENSION_NAME,
+        "VK_KHR_wayland_surface",
         VK_KHR_GET_PHYSICAL_DEVICE_PROPERTIES_2_EXTENSION_NAME,
-        "VK_KHR_xlib_surface",
 #if DEBUG
         "VK_EXT_debug_utils"
 #endif
     };
 
-    const char* DEVICE_EXTENSIONS[NUM_DEVICE_EXTENSIONS] =
+    const char* DEVICE_EXTENSIONS[]
     {
         VK_KHR_SWAPCHAIN_EXTENSION_NAME,
         VK_EXT_DESCRIPTOR_INDEXING_EXTENSION_NAME,

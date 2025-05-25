@@ -15,7 +15,7 @@ namespace hf
         : windowHandle(info.handle), targetSize(info.size), vSyncMode(info.vSyncMode)
     {
         if (!GRAPHICS_DATA.devicesAreLoaded) LoadDevice(windowHandle, &swapchain.surface);
-        else GRAPHICS_DATA.platform.api->CreateSurface(GRAPHICS_DATA.platform.instance, windowHandle, GRAPHICS_DATA.instance, &swapchain.surface);
+        else VK_HANDLE_EXCEPT((VkResult)GRAPHICS_DATA.platform.createVulkanSurfaceFunc(windowHandle, GRAPHICS_DATA.instance, &swapchain.surface));
     }
 
     VkRenderer::~VkRenderer()
@@ -208,8 +208,7 @@ namespace hf
         VK_HANDLE_EXCEPT(vkEnumeratePhysicalDevices(GRAPHICS_DATA.instance,
                 &deviceCount, availableDevices.data()));
 
-        GRAPHICS_DATA.platform.api->CreateSurface(GRAPHICS_DATA.platform.instance,
-            windowHandle, GRAPHICS_DATA.instance, resultSurface);
+        VK_HANDLE_EXCEPT((VkResult)GRAPHICS_DATA.platform.createVulkanSurfaceFunc(windowHandle, GRAPHICS_DATA.instance, resultSurface));
 
         for (const auto& device : availableDevices)
         {

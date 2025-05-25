@@ -94,9 +94,4 @@ namespace hf
         SetFocus((HWND)win->handle);
         SetForegroundWindow((HWND)win->handle);
     }
-
-    void* Win_GetWindowHandle(const Window* win)
-    {
-        return win->handle;
-    }
 }

@@ -6,11 +6,6 @@
 
 namespace hf
 {
-	struct X11Window
-	{
-		::Window window;
-	};
-
 	struct X11Platform
 	{
 		Display* display;
@@ -23,7 +18,6 @@ namespace hf
 	};
 
 	extern X11Platform PLATFORM_DATA;
-	extern phmap::flat_hash_map<::Window, Window*> WIN_REGISTRY;
 
 	void X11_Load();
 	void X11_Unload();
@@ -39,7 +33,6 @@ namespace hf
 	void X11_WindowFocus(const Window* win);
 	void X11_WindowOpen(Window* win);
 	void X11_WindowClose(Window* win);
-	void* X11_WindowGetHandle(const Window* win);
 }
 
 #endif //HLNX_EVENTHANDLING_H

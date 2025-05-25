@@ -174,7 +174,6 @@ namespace hf
                     .appVersion = appV,
                     .engineVersion = engineV,
                     .applicationTitle = HF.appTitle.c_str(),
-                    .platformInstance = platform::GetPlatformInstance(),
                     .getFuncFromDll = platform::GetFuncPtr,
                 };
 
@@ -182,6 +181,7 @@ namespace hf
                 {
                     HF.renderingApi.additionalDll = platform::LoadDll(VK_DLL);
                     loadInfo.platformDll = HF.renderingApi.additionalDll;
+                    loadInfo.createVulkanSurfaceFunc = platform::CreateVulkanSurface;
                 }
 
                 HF.renderingApi.api.Load(loadInfo);
@@ -196,7 +196,7 @@ namespace hf
             if (rn->window)
             {
                 createInfo.vSyncMode = rn->window->vSyncMode;
-                createInfo.handle = window::GetWindowHandle(rn->window);
+                createInfo.handle = rn->window->handle;
             }
 
             rn->handle = HF.renderingApi.api.CreateInstance(createInfo);

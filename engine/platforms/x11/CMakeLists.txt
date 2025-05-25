@@ -7,6 +7,7 @@ target_link_libraries(lnxx11
         stb
         logc
         rpmalloc
+        glfw
         ext
 )
 

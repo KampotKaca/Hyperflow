@@ -52,7 +52,7 @@ namespace hf::inter::rendering
         uvec3 appVersion{};
         uvec3 engineVersion{};
         const char* applicationTitle{};
-        void* platformInstance{};
+        uint32_t (*createVulkanSurfaceFunc)(void* windowHandle, void* instance, void* surfaceResult);
         void* platformDll{};
         void* (*getFuncFromDll)(void* dll, const char* funcName){};
     };

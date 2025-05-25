@@ -38,20 +38,23 @@ elseif (CMAKE_SYSTEM_NAME STREQUAL "Linux")
     option(VULKAN "vulkan" ON)
     add_definitions(-DRENDERER_VULKAN)
 
-    find_package(X11)
-    if(X11_FOUND)
-        add_definitions(-DX11)
-        add_subdirectory(platforms/x11)
-    else()
-        find_package(PkgConfig REQUIRED)
-        pkg_check_modules(WAYLAND wayland-client)
+    find_package(PkgConfig)
+    pkg_check_modules(WAYLAND wayland-client)
 
-        if(WAYLAND_FOUND)
-            add_definitions(-DWAYLAND)
+    if(WAYLAND_FOUND)
+        add_definitions(-DWAYLAND)
+        add_subdirectory(platforms/wayland)
+    else()
+        find_package(X11 REQUIRED)
+        if(X11_FOUND)
+            add_definitions(-DX11)
+            add_subdirectory(platforms/x11)
         else()
             message(FATAL_ERROR "Unsupported display server detected")
         endif()
     endif()
+
+
 else()
     message(FATAL_ERROR "Unsupported platform: ${CMAKE_SYSTEM_NAME}")
 endif()
@@ -76,6 +79,8 @@ add_subdirectory(external/stb)
 add_subdirectory(external/logc)
 add_subdirectory(external/rpmalloc)
 add_subdirectory(external/rapidyaml)
+add_subdirectory(external/glfw)
+
 add_subdirectory(others/exception)
 
 add_library(${PROJECT_NAME} ${ENGINE_SRC})
@@ -90,6 +95,7 @@ target_link_libraries(${PROJECT_NAME}
         ext
         PRIVATE
         rpmalloc
+        glfw
 )
 
 if(D3D)
@@ -114,7 +120,8 @@ elseif (LINUX)
     if(X11_FOUND)
         target_link_libraries(${PROJECT_NAME} PRIVATE lnxx11)
         target_compile_definitions("${PROJECT_NAME}" PUBLIC VK_DLL="vkx11")
-    elseif (WAYLAND)
+    elseif (WAYLAND_FOUND)
+        target_link_libraries(${PROJECT_NAME} PRIVATE lnxwayland)
         target_compile_definitions("${PROJECT_NAME}" PUBLIC VK_DLL="vkwayland")
     else ()
         message(FATAL_ERROR "Unsupported display server detected")
@@ -131,6 +138,7 @@ target_include_directories(${PROJECT_NAME}
         external/logc/include
         external/rpmalloc
         external/rapidyaml/src
+        external/glfw/include
         PRIVATE
 )
 

@@ -57,11 +57,6 @@ namespace hf::inter
             return (void*)Win_GetFuncPtr(dll, funcName);
         }
 
-        void* GetPlatformInstance()
-        {
-            return PLATFORM_DATA.instance;
-        }
-
         RenderingApiType GetBestRenderingApi()
         {
             return RenderingApiType::Direct3D;
@@ -115,11 +110,6 @@ namespace hf::inter
         void SetRect(const Window* win, IRect rect)
         {
             Win_WindowSetRect(win, rect);
-        }
-
-        void* GetWindowHandle(const Window* win)
-        {
-            return win->handle;
         }
 
         void SetFlags(Window* win, WindowFlags flags)

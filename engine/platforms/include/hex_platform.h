@@ -20,10 +20,10 @@ namespace hf::inter
         void* LoadDll(const char* dllName);
         void UnloadDll(void* dll);
         void* GetFuncPtr(void* dll, const char* funcName);
-        void* GetPlatformInstance();
 
         RenderingApiType GetBestRenderingApi();
         bool IsValidRenderingApi(RenderingApiType api);
+        uint32_t CreateVulkanSurface(void* windowHandle, void* instance, void* surfaceResult);
     }
 
     namespace window
@@ -35,8 +35,6 @@ namespace hf::inter
         void SetSize(const Window* win, ivec2 size);
         void SetPosition(const Window* win, ivec2 position);
         void SetRect(const Window* win, IRect rect);
-
-        void* GetWindowHandle(const Window* win);
 
         void SetFlags(Window* win, WindowFlags flags);
         void Focus(const Window* win);
