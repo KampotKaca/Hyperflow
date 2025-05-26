@@ -113,7 +113,7 @@ namespace hf
             newApi.type = api;
             HF.renderingApi = newApi;
 
-            for (auto& win : HF.windows)
+            for (auto& win : HF.windows | std::views::values)
             {
                 if (win->renderer) CreateRenderer_i(win->renderer.get());
                 else win->renderer = MakeRef<Renderer>(win.get(), win->rnEventInfo);
@@ -142,7 +142,7 @@ namespace hf
         {
             if (HF.renderingApi.type == RenderingApiType::None) return;
 
-            for (auto& window : HF.windows)
+            for (auto& window : HF.windows | std::views::values)
             {
                 if (window->renderer)
                 {

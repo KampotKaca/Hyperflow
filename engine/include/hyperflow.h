@@ -55,14 +55,16 @@ namespace hf
 	namespace window
 	{
 		Ref<Window> Open(const WindowCreationInfo& data, const Ref<Window>& parent);
-		bool Close(const Ref<Window> &window);
+		void Close(const Ref<Window> &window);
 		void CloseAll();
 
 		const std::string& GetTitle(const Ref<Window> &window);
 		ivec2 GetSize(const Ref<Window> &window);
 		ivec2 GetPosition(const Ref<Window> &window);
 		IRect GetRect(const Ref<Window> &window);
-		WindowFlags GetFlags(const Ref<Window> &window);
+		IRect GetFrameRect(const Ref<Window> &window);
+
+		WindowState GetState(const Ref<Window> &window);
 		WindowStyle GetStyle(const Ref<Window> &window);
 		void* GetHandle(const Ref<Window> &window);
 		Ref<Renderer> GetRenderer(const Ref<Window> &window);
@@ -72,8 +74,8 @@ namespace hf
 		void SetPosition(const Ref<Window> &window, ivec2 position);
 		void SetRect(const Ref<Window> &window, IRect rect);
 
-		bool IsClosing(const Ref<Window> &window);
-		void SetFlags(const Ref<Window> &window, WindowFlags flags);
+		bool IsClosed(const Ref<Window> &window);
+		void SetState(const Ref<Window> &window, WindowState state);
 		void Focus(const Ref<Window> &window);
 
 		void SetVSyncMode(const Ref<Window> &window, VsyncMode mode);
@@ -251,14 +253,12 @@ namespace hf
 		ivec3 ConvertVersion(const char* version);
 		bool ReadFile(const std::string& filename, bool addNullTerminator, std::vector<char>& result);
 		bool FileExists(const char* path);
+		uint32_t TrailingZeros64(uint64_t n);
 
 		[[nodiscard]] void* Allocate(std::size_t n);
 		[[nodiscard]] void* AllocateAligned(std::size_t n, std::align_val_t align);
 		void Deallocate(void* p);
 		void DeallocateAligned(void* p, std::align_val_t align);
-
-		mat4 GetProjectionMat4(const Camera3DAnchored& camera);
-		mat4 GetViewMat4(const Camera3DAnchored& camera);
 	}
 }
 

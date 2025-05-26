@@ -48,7 +48,7 @@ namespace hf::inter
         std::string appTitle{};
         Time time{};
         Ref<Window> mainWindow{};
-        std::vector<Ref<Window>> windows{};
+        phmap::flat_hash_map<uint64_t, Ref<Window>> windows{};
         uint32_t rendererCount{};
         RenderingApi renderingApi{};
 

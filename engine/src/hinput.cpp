@@ -25,15 +25,13 @@ namespace hf::input
 	KeyState GetState(const Ref<Window> &window, Key key)
 	{
 		if(!window) throw NULL_REF_EXCEPTION(Window, window);
-		if(key == Key::None) LOG_WARN("Redundant Key State Request!");
-		return (KeyState)window->eventData.keyStates[(uint8_t)key];
+		return window->eventData.keyStates[(uint16_t)key];
 	}
 
 	ButtonState GetState(const Ref<Window> &window, Button button)
 	{
 		if(!window) throw NULL_REF_EXCEPTION(Window, window);
-		if(button == Button::None) LOG_WARN("Redundant Button State Request!");
-		return (KeyState)window->eventData.buttonStates[(uint8_t)button];
+		return window->eventData.buttonStates[(uint8_t)button];
 	}
 
 	const std::string& GetWrite(const Ref<Window> &window)

@@ -44,7 +44,6 @@ namespace hf
 			{
 				inter::HF.time.StartFrame();
 				inter::platform::HandleEvents(inter::HF.updateType);
-				Window_HandleInput(inter::HF.windows);
 				if(inter::HF.lifecycleCallbacks.onUpdateCallback) inter::HF.lifecycleCallbacks.onUpdateCallback();
 
 				if(input::IsDown(Key::Escape))
@@ -53,9 +52,9 @@ namespace hf
 					Terminate();
 				}
 
-				for(auto& window : inter::HF.windows)
+				for(auto& window : inter::HF.windows | std::views::values)
 				{
-					if (!window::IsClosing(window)) inter::rendering::UpdateRenderer_i(window->renderer);
+					if (!window::IsClosed(window)) inter::rendering::UpdateRenderer_i(window->renderer);
 				}
 			}
 			if (inter::HF.renderingApi.isLoaded) inter::HF.renderingApi.api.WaitForRendering();
@@ -78,7 +77,7 @@ namespace hf
 		}
 	}
 
-	bool IsRunning() { return inter::HF.isRunning && !window::IsClosing(inter::HF.mainWindow); }
+	bool IsRunning() { return inter::HF.isRunning && !window::IsClosed(inter::HF.mainWindow); }
 
 	Ref<Window> GetMainWindow() { return inter::HF.mainWindow; }
 	const std::string& GetApplicationTitle() { return inter::HF.appTitle; }

@@ -42,11 +42,6 @@ namespace hf::platform
         nanosleep(&ts, nullptr);
     }
 
-    void SetWindowFlag(WindowFlags* flags, WindowFlags target, uint32_t value)
-    {
-        *flags = (WindowFlags)(((int32_t)*flags & ~(int32_t)target) | (-value & (int32_t)target));
-    }
-
     RenderingApiType GetBestRenderingApi()
     {
         return RenderingApiType::Vulkan;

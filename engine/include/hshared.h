@@ -35,6 +35,7 @@ extern "C"
 #include "phmap/phmap.h"
 
 #include "hmath.h"
+#include "hinput.h"
 
 #if PLATFORM_LINUX
 #ifdef None
@@ -80,6 +81,7 @@ namespace hf
 #define DEFINE_ENUM_FLAGS(Enum)\
 	inline Enum operator|(Enum a, Enum b) { return (Enum)((uint32_t)a | (uint32_t)b); }\
 	inline Enum operator&(Enum a, Enum b) { return (Enum)((uint32_t)a & (uint32_t)b); }\
+	inline Enum operator^(Enum a, Enum b) { return (Enum)((uint32_t)a ^ (uint32_t)b); }\
 	inline Enum& operator|=(Enum& a, Enum b)\
 	{\
 		a = a | b;\
@@ -95,69 +97,7 @@ namespace hf
 
 	//region Definitions
 
-	enum class Key : uint8_t
-	{
-		None,
-		Backspace,
-		Tab,
-		Enter,
-		Pause,
-		CapsLock,
-		Escape,
-		Space,
-		PageUp, PageDown,
-		End, Home,
-		Left, Up, Right, Down,
-		PrintScreen,
-		Insert,
-		Delete,
-		Zero, One, Two, Three, Four, Five, Six, Seven, Eight, Nine,
-		LeftSuper, RightSuper,
-		Pad0, Pad1, Pad2, Pad3, Pad4, Pad5, Pad6, Pad7, Pad8, Pad9,
-		PadMultiply,
-		PadAdd,
-		PadEqual,
-		PadSubtract,
-		PadDecimal,
-		PadDivide,
-		F1, F2, F3, F4, F5, F6, F7, F8, F9, F10, F11, F12,
-		LeftBracket,
-		Backslash,
-		RightBracket,
-		Apostrophe,
-		NumLock,
-		ScrollLock,
-		A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, W, X, Y, Z,
-		LeftShift, RightShift,
-		LeftControl, RightControl,
-		LeftAlt, RightAlt,
-		Semicolon,
-		Equal,
-		Comma,
-		Minus,
-		Period,
-		Slash,
-		Grave,
-		Count
-	};
-
 	enum class DataTransferType { DoNotOwn, TransferOwnership, CopyData };
-	enum class Button : uint8_t { None, Left, Right, Wheel, Extra1, Extra2, Count };
-
-	enum class KeyState { None, Down, DownContinues, Up };
-	typedef KeyState ButtonState;
-
-	struct Rect
-	{
-		vec2 position{};
-		vec2 size{};
-	};
-
-	struct IRect
-	{
-		ivec2 position{};
-		ivec2 size{};
-	};
 
 	//endregion
 
@@ -805,21 +745,22 @@ namespace hf
 		Default
 	};
 
-	enum class WindowFlags
+	enum class WindowState
 	{
-		Visible   = 1 << 0,
-		Minimized = 1 << 1,
-		Maximized = 1 << 2,
-
-		Default = Visible
+		None = 0, Restored = 1, Minimized = 2, Maximized = 3,
+		Hidden = 4, Fullscreen = 5, FullscreenBorderless = 6,
 	};
-	DEFINE_ENUM_FLAGS(WindowFlags)
 
 	enum class WindowEventFlags
 	{
 		Key = 1 << 0, Char = 1 << 1, PointerMove = 1 << 2, PointerState = 1 << 3,
-		Button = 1 << 4, Scroll = 1 << 5, DragAndDrop = 1 << 6,
-		All = Key | Char | PointerMove | PointerState | Button | Scroll | DragAndDrop,
+		Button = 1 << 4, Scroll = 1 << 5, DragAndDrop = 1 << 6, Close = 1 << 7,
+		Focus = 1 << 8, Minimize = 1 << 9, Maximize = 1 << 10,
+		Move = 1 << 11, Resize = 1 << 12, Refresh = 1 << 13,
+		Default = Key | Char | PointerMove | PointerState | Button | Scroll | DragAndDrop |
+				  Close | Focus | Minimize | Maximize | Move | Resize,
+		All = Default | Refresh,
+
 	};
 	DEFINE_ENUM_FLAGS(WindowEventFlags)
 
@@ -837,8 +778,8 @@ namespace hf
 	struct WindowCreationInfo
 	{
 		std::string title = "Untitled";
-		WindowFlags flags = WindowFlags::Default;
-		WindowEventFlags eventFlags = WindowEventFlags::All;;
+		WindowState state = WindowState::Restored;
+		WindowEventFlags eventFlags = WindowEventFlags::All;
 		WindowStyle style = WindowStyle::Default;
 		ivec2 position = ivec2{ 300, 300 };
 		ivec2 size = ivec2{ 200, 200 };
@@ -880,12 +821,6 @@ namespace hf
 		EngineLifecycleCallbacks lifecycleCallbacks{}; //passed engine callbacks to interact with the engine
 		WindowCreationInfo windowData{}; //properties of the initial window
 	};
-
-	//endregion
-
-	//region Helpers
-
-	uint32_t TrailingZeros64(uint64_t n);
 
 	//endregion
 }

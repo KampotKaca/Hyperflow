@@ -42,6 +42,18 @@ namespace hf
     typedef glm::mat4x2 mat4x2;
     typedef glm::mat4x3 mat4x3;
     typedef glm::mat4   mat4;
+
+    struct Rect
+    {
+        vec2 position{};
+        vec2 size{};
+    };
+
+    struct IRect
+    {
+        ivec2 position{};
+        ivec2 size{};
+    };
 }
 
 #endif //HMATH_H

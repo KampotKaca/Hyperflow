@@ -2,8 +2,6 @@
 #define HEX_PLATFORM_H
 
 #include "hshared.h"
-#include "hkeyboard.h"
-#include "hmouse.h"
 
 namespace hf::inter
 {
@@ -14,7 +12,6 @@ namespace hf::inter
         void Sleep(double seconds);
 
         ivec2 GetPointerPosition(const Window* window);
-        void SetWindowFlag(WindowFlags* flags, WindowFlags target, uint32_t value);
         void HandleEvents(EngineUpdateType updateType);
 
         void* LoadDll(const char* dllName);
@@ -28,17 +25,23 @@ namespace hf::inter
 
     namespace window
     {
-        void Open(Window* win);
+        void Open(Window* win, const WindowCreationInfo& info);
         bool Close(Window* win);
 
-        void SetTitle(const Window* win, const std::string& title);
+        void SetTitle(Window* win, const std::string& title);
         void SetSize(const Window* win, ivec2 size);
         void SetPosition(const Window* win, ivec2 position);
         void SetRect(const Window* win, IRect rect);
 
-        void SetFlags(Window* win, WindowFlags flags);
+        void SetState(Window* win, WindowState state);
         void SetEventFlags(Window* win, WindowEventFlags eventFlags);
         void Focus(const Window* win);
+
+        bool IsFocused(const Window* win);
+
+        IRect GetFrameRect(const Window* win);
+        ivec2 GetSize(const Window* win);
+        ivec2 GetPosition(const Window* win);
     }
 }
 
