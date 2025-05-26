@@ -28,6 +28,7 @@ namespace hf
 		void* handle{};
 		WindowStyle style{};
 		WindowFlags flags{};
+		WindowEventFlags eventFlags{};
 		VsyncMode vSyncMode = VsyncMode::Relaxed;
 		Ref<Window> parent{};
 

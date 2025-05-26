@@ -25,6 +25,7 @@ namespace hf
 		mouse.isInClientRegion = pPos.x >= 0 && pPos.x < rect.size.x && pPos.y > 0 && pPos.y < rect.size.y;
 		eventData.pointerPosition = mouse.position;
 
+		inter::window::SetEventFlags(this, info.eventFlags);
 		inter::window::SetFlags(this, info.flags);
 		inter::window::Focus(this);
 		inter::window::SetTitle(this, title);

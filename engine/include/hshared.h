@@ -798,6 +798,8 @@ namespace hf
 
 	//region Window
 
+	struct Window;
+
 	enum class WindowStyle
 	{
 		Default
@@ -811,6 +813,15 @@ namespace hf
 
 		Default = Visible
 	};
+	DEFINE_ENUM_FLAGS(WindowFlags)
+
+	enum class WindowEventFlags
+	{
+		Key = 1 << 0, Char = 1 << 1, PointerMove = 1 << 2, PointerState = 1 << 3,
+		Button = 1 << 4, Scroll = 1 << 5, DragAndDrop = 1 << 6,
+		All = Key | Char | PointerMove | PointerState | Button | Scroll | DragAndDrop,
+	};
+	DEFINE_ENUM_FLAGS(WindowEventFlags)
 
 	enum class VsyncMode { NoSync, Relaxed, Full, Count };
 
@@ -827,6 +838,7 @@ namespace hf
 	{
 		std::string title = "Untitled";
 		WindowFlags flags = WindowFlags::Default;
+		WindowEventFlags eventFlags = WindowEventFlags::All;;
 		WindowStyle style = WindowStyle::Default;
 		ivec2 position = ivec2{ 300, 300 };
 		ivec2 size = ivec2{ 200, 200 };
@@ -868,8 +880,6 @@ namespace hf
 		EngineLifecycleCallbacks lifecycleCallbacks{}; //passed engine callbacks to interact with the engine
 		WindowCreationInfo windowData{}; //properties of the initial window
 	};
-
-	struct Window;
 
 	//endregion
 

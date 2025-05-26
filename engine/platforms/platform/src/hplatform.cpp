@@ -4,6 +4,7 @@
 #include <GLFW/glfw3native.h>
 
 #include "hplatform.h"
+#include "hinputcallbacks.h"
 #include "hinternal.h"
 
 namespace hf::inter
@@ -39,7 +40,12 @@ namespace hf::inter
 
         void HandleEvents(EngineUpdateType updateType)
         {
-            glfwPollEvents();
+            switch (updateType)
+            {
+                case EngineUpdateType::Continues: glfwPollEvents(); break;
+                case EngineUpdateType::EventRaised: glfwWaitEvents(); break;
+            }
+
             hf::platform::HandleEvents(updateType);
         }
 
@@ -133,6 +139,32 @@ namespace hf::inter
         void SetFlags(Window* win, WindowFlags flags)
         {
             hf::platform::window::SetFlags(win, flags);
+        }
+
+        void SetEventFlags(Window* win, WindowEventFlags eventFlags)
+        {
+            if ((bool)(eventFlags & WindowEventFlags::Key)) glfwSetKeyCallback((GLFWwindow*)win->handle, hf::platform::KeyCallback);
+            else glfwSetKeyCallback((GLFWwindow*)win->handle, nullptr);
+
+            if ((bool)(eventFlags & WindowEventFlags::Char)) glfwSetCharCallback((GLFWwindow*)win->handle, hf::platform::CharCallback);
+            else glfwSetCharCallback((GLFWwindow*)win->handle, nullptr);
+
+            if ((bool)(eventFlags & WindowEventFlags::PointerMove)) glfwSetCursorPosCallback((GLFWwindow*)win->handle, hf::platform::PointerMoveCallback);
+            else glfwSetCursorPosCallback((GLFWwindow*)win->handle, nullptr);
+
+            if ((bool)(eventFlags & WindowEventFlags::PointerState)) glfwSetCursorEnterCallback((GLFWwindow*)win->handle, hf::platform::PointerStateCallback);
+            else glfwSetCursorEnterCallback((GLFWwindow*)win->handle, nullptr);
+
+            if ((bool)(eventFlags & WindowEventFlags::Button)) glfwSetMouseButtonCallback((GLFWwindow*)win->handle, hf::platform::ButtonCallback);
+            else glfwSetMouseButtonCallback((GLFWwindow*)win->handle, nullptr);
+
+            if ((bool)(eventFlags & WindowEventFlags::Scroll)) glfwSetScrollCallback((GLFWwindow*)win->handle, hf::platform::ScrollCallback);
+            else glfwSetScrollCallback((GLFWwindow*)win->handle, nullptr);
+
+            if ((bool)(eventFlags & WindowEventFlags::DragAndDrop)) glfwSetDropCallback((GLFWwindow*)win->handle, hf::platform::DragAndDropCallback);
+            else glfwSetDropCallback((GLFWwindow*)win->handle, nullptr);
+
+            win->eventFlags = eventFlags;
         }
 
         void Focus(const Window* win)

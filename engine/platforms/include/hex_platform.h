@@ -37,6 +37,7 @@ namespace hf::inter
         void SetRect(const Window* win, IRect rect);
 
         void SetFlags(Window* win, WindowFlags flags);
+        void SetEventFlags(Window* win, WindowEventFlags eventFlags);
         void Focus(const Window* win);
     }
 }
