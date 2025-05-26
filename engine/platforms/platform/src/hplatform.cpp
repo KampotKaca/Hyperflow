@@ -4,6 +4,7 @@
 #include "hplatform.h"
 #include "hinputcallbacks.h"
 #include "hinternal.h"
+#include "hyperflow.h"
 
 namespace hf::inter
 {
@@ -182,6 +183,12 @@ namespace hf::inter
                     GLFWmonitor* monitor = glfwGetWindowMonitor(window);
                     if (!monitor) monitor = glfwGetPrimaryMonitor();
 
+                    if (win->state != WindowState::FullscreenBorderless)
+                    {
+                        win->rect.position = GetPosition(win);
+                        win->rect.size = GetSize(win);
+                    }
+
                     const GLFWvidmode* mode = glfwGetVideoMode(monitor);
                     glfwSetWindowMonitor(window, monitor, 0, 0, mode->width, mode->height, mode->refreshRate);
                     break;
@@ -190,8 +197,14 @@ namespace hf::inter
                 {
                     GLFWmonitor* monitor = glfwGetWindowMonitor(window);
                     if (!monitor) monitor = glfwGetPrimaryMonitor();
-
                     const GLFWvidmode* mode = glfwGetVideoMode(monitor);
+
+                    if (win->state != WindowState::Fullscreen)
+                    {
+                        win->rect.position = GetPosition(win);
+                        win->rect.size = GetSize(win);
+                    }
+
                     glfwSetWindowAttrib(window, GLFW_DECORATED, GLFW_FALSE);
                     glfwSetWindowMonitor(window, nullptr, 0, 0, mode->width, mode->height, 0);
                     break;

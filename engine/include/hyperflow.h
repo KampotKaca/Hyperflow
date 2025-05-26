@@ -63,23 +63,20 @@ namespace hf
 		ivec2 GetPosition(const Ref<Window> &window);
 		IRect GetRect(const Ref<Window> &window);
 		IRect GetFrameRect(const Ref<Window> &window);
-
 		WindowState GetState(const Ref<Window> &window);
 		WindowStyle GetStyle(const Ref<Window> &window);
 		void* GetHandle(const Ref<Window> &window);
 		Ref<Renderer> GetRenderer(const Ref<Window> &window);
+		bool IsClosed(const Ref<Window> &window);
+		VsyncMode GetVSyncMode(const Ref<Window> &window);
 
 		void SetTitle(const Ref<Window> &window, const std::string& title);
 		void SetSize(const Ref<Window> &window, ivec2 size);
 		void SetPosition(const Ref<Window> &window, ivec2 position);
 		void SetRect(const Ref<Window> &window, IRect rect);
-
-		bool IsClosed(const Ref<Window> &window);
 		void SetState(const Ref<Window> &window, WindowState state);
 		void Focus(const Ref<Window> &window);
-
 		void SetVSyncMode(const Ref<Window> &window, VsyncMode mode);
-		VsyncMode GetVSyncMode(const Ref<Window> &window);
 	}
 
 	namespace time

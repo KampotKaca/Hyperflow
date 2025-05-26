@@ -63,6 +63,8 @@ namespace hf::callbacks
         auto window = inter::HF.windows[(uint64_t)win];
         if (minimized) window->state = WindowState::Minimized;
         else window->state = WindowState::Restored;
+
+        ForceUpdateFrameBuffer(window.get());
     }
 
     void WindowMaximizedCallback(GLFWwindow* win, int maximized)
@@ -70,6 +72,8 @@ namespace hf::callbacks
         auto window = inter::HF.windows[(uint64_t)win];
         if (maximized) window->state = WindowState::Maximized;
         else window->state = WindowState::Restored;
+
+        ForceUpdateFrameBuffer(window.get());
     }
 
     void WindowMoveCallback(GLFWwindow* win, int xpos, int ypos)
@@ -80,13 +84,7 @@ namespace hf::callbacks
     void WindowSizeCallback(GLFWwindow* win, int width, int height)
     {
         auto window = inter::HF.windows[(uint64_t)win];
-        auto rn = window->renderer;
-        if (rn)
-        {
-            auto size = inter::window::GetFrameRect(window.get()).size;
-            rn->size = size;
-            inter::HF.renderingApi.api.RegisterFrameBufferChange(rn->handle, size);
-        }
+        ForceUpdateFrameBuffer(window.get());
     }
 
     void WindowRefreshCallback(GLFWwindow* win)
@@ -102,5 +100,16 @@ namespace hf::callbacks
     void JoystickEventCallback(int32_t jid, int32_t event)
     {
 
+    }
+
+    void ForceUpdateFrameBuffer(Window* win)
+    {
+        auto rn = win->renderer;
+        if (rn)
+        {
+            auto size = inter::window::GetSize(win);
+            rn->size = size;
+            inter::HF.renderingApi.api.RegisterFrameBufferChange(rn->handle, size);
+        }
     }
 }

@@ -11,7 +11,7 @@ namespace hf
         : eventInfo(eventInfo)
     {
         this->window = window;
-        size = window->rect.size;
+        size = inter::window::GetSize(window);
         inter::rendering::CreateRenderer_i(this);
     }
 

@@ -25,6 +25,8 @@ namespace hf::callbacks
     void WindowCloseCallback(GLFWwindow* win);
 
     void JoystickEventCallback(int32_t jid, int32_t event);
+
+    void ForceUpdateFrameBuffer(Window* win);
 }
 
 #endif //HINPUTCALLBACKS_H

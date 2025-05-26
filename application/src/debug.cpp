@@ -48,6 +48,13 @@ namespace app
 
     void DebugUpdate()
     {
+        if (hf::input::IsDown(hf::Key::Space))
+        {
+            auto state = (hf::WindowState)std::max(1, ((int32_t)hf::window::GetState(DEBUG_INFO.wn) + 1) % (int32_t)hf::WindowState::FullscreenBorderless);
+            if (state == hf::WindowState::Hidden) state = hf::WindowState::Fullscreen;
+            hf::window::SetState(DEBUG_INFO.wn, state);
+        }
+
         // if (hf::input::IsDown(hf::Key::A))
         // {
         // 	hf::WindowCreationInfo data =
