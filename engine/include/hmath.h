@@ -3,6 +3,7 @@
 
 #define GLM_FORCE_RADIANS
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE
+#define GLM_FORCE_RIGHT_HANDED
 #define GLM_ENABLE_EXPERIMENTAL
 #include <cinttypes>
 #include "glm/vec2.hpp"
@@ -16,6 +17,7 @@
 #include "glm/ext/matrix_transform.hpp"
 #include "glm/detail/type_quat.hpp"
 #include "glm/gtc/quaternion.hpp"
+#include "glm/gtx/quaternion.hpp"
 
 namespace hf
 {

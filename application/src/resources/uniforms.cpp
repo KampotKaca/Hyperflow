@@ -70,12 +70,12 @@ namespace app
 
     }
 
-    void UniformUploadCameraTime(const hf::Ref<hf::Renderer>& rn, const hf::Camera3DCore& cameraCore, const hf::mat4& view)
+    void UniformUploadCameraTime(const hf::Ref<hf::Renderer>& rn, const hf::Camera3DCore& cameraCore, const hf::mat4& view, const hf::mat4& model)
     {
         TEMP_CAMERA_TIME_UPLOAD.time.deltaTime = hf::time::GetDeltaTime();
         TEMP_CAMERA_TIME_UPLOAD.time.timeSinceStartup = hf::time::GetTimePassed();
 
-        TEMP_CAMERA_TIME_UPLOAD.camera.model = glm::rotate(hf::mat4(1.0f), (float)hf::time::GetTimePassed() * glm::radians(10.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+        TEMP_CAMERA_TIME_UPLOAD.camera.model = model;
         TEMP_CAMERA_TIME_UPLOAD.camera.view = view;
         TEMP_CAMERA_TIME_UPLOAD.camera.proj = cameraCore.ToProjectionMat4(rn);
         TEMP_CAMERA_TIME_UPLOAD.camera.viewProj = TEMP_CAMERA_TIME_UPLOAD.camera.proj * TEMP_CAMERA_TIME_UPLOAD.camera.view;

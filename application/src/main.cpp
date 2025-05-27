@@ -26,7 +26,9 @@ int main()
 		.windowData =
 		{
 			.title        		 = "Hyperflow",
+			.state				 = hf::WindowState::Restored,
 			.eventFlags			 = hf::WindowEventFlags::Default,
+			.pointerState		 = hf::WindowPointerState::Disabled,
 			.style        		 = hf::WindowStyle::Default,
 			.position     		 = { 200, 200 },
 			.size         		 = { 920, 480 },

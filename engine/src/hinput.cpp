@@ -25,13 +25,13 @@ namespace hf::input
 	KeyState GetState(const Ref<Window> &window, Key key)
 	{
 		if(!window) throw NULL_REF_EXCEPTION(Window, window);
-		return window->eventData.keyStates[(uint16_t)key];
+		return window->eventData.keyStates[(uint32_t)key];
 	}
 
 	ButtonState GetState(const Ref<Window> &window, Button button)
 	{
 		if(!window) throw NULL_REF_EXCEPTION(Window, window);
-		return window->eventData.buttonStates[(uint8_t)button];
+		return window->eventData.buttonStates[(uint32_t)button];
 	}
 
 	const std::string& GetWrite(const Ref<Window> &window)

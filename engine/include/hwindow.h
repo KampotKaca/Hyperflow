@@ -13,8 +13,8 @@ namespace hf
 
 		struct EventData
 		{
-			KeyState keyStates[(uint8_t)Key::MAX]{};
-			ButtonState buttonStates[(uint8_t)Button::MAX]{};
+			KeyState keyStates[(uint32_t)Key::MAX]{};
+			ButtonState buttonStates[(uint32_t)Button::MAX]{};
 			std::string charData{};
 			vec2 pointerPosition{};
 			vec2 pointerDelta{};

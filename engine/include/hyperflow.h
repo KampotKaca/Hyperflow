@@ -4,7 +4,7 @@
 #include "hshared.h"
 #include "hexception.h"
 #include "hgenericexception.h"
-#include "components/hfreemovecamera3d.h"
+#include "hobjects.h"
 
 namespace hf
 {
