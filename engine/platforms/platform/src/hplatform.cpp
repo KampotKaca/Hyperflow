@@ -1,8 +1,8 @@
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
+#include "hinputcallbacks.h"
 
 #include "hplatform.h"
-#include "hinputcallbacks.h"
 #include "hinternal.h"
 #include "hyperflow.h"
 
@@ -98,8 +98,12 @@ namespace hf::inter
 
         uint32_t CreateVulkanSurface(void* windowHandle, void* instance, void* surfaceResult)
         {
+#if defined(VULKAN)
             auto* winHandle = (GLFWwindow*)windowHandle;
             return glfwCreateWindowSurface((VkInstance)instance, winHandle, nullptr, (VkSurfaceKHR*)surfaceResult);
+#else
+            return -1;
+#endif
         }
     }
 

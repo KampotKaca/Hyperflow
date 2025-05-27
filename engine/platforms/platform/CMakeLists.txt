@@ -12,6 +12,13 @@ target_link_libraries(platform
         glfw
 )
 
+find_package(Vulkan)
+if(VULKAN_FOUND)
+    message(STATUS "VULKAN PLATFORM ADDED")
+    add_definitions(-DVULKAN)
+    target_link_libraries(platform PRIVATE Vulkan::Vulkan)
+endif ()
+
 target_include_directories(platform PUBLIC include)
 target_include_directories(platform PUBLIC ../include)
 target_include_directories(platform PUBLIC ../../include)
