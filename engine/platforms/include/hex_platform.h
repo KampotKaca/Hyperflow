@@ -32,6 +32,7 @@ namespace hf::inter
         void SetSize(const Window* win, ivec2 size);
         void SetPosition(const Window* win, ivec2 position);
         void SetRect(const Window* win, IRect rect);
+        void SetPointerState(Window* win, WindowPointerState state);
 
         void SetState(Window* win, WindowState state);
         void SetEventFlags(Window* win, WindowEventFlags eventFlags);

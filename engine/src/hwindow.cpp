@@ -7,7 +7,7 @@
 namespace hf
 {
 	Window::Window(const WindowCreationInfo& info, const Ref<Window>& parent)
-		: title(info.title), style(info.style), vSyncMode(info.vsyncMode), parent(parent),
+		: title(info.title), style(info.style), pointerState(info.pointerState), vSyncMode(info.vsyncMode), parent(parent),
 		  rnEventInfo(info.rnEventInfo)
 	{
 		rect =
@@ -24,6 +24,8 @@ namespace hf
 		inter::window::SetState(this, info.state);
 		inter::window::Focus(this);
 		inter::window::SetTitle(this, info.title);
+		inter::window::SetTitle(this, info.title);
+		inter::window::SetPointerState(this, info.pointerState);
 	}
 
 	Window::~Window()
@@ -74,6 +76,7 @@ namespace hf
 		IRect GetFrameRect(const Ref<Window> &window) { return inter::window::GetFrameRect(window.get()); }
 		WindowState GetState(const Ref<Window> &window) { return window->state; }
 		WindowStyle GetStyle(const Ref<Window> &window) { return window->style; }
+		WindowPointerState GetPointerState(const Ref<Window> &window) { return window->pointerState; }
 		void* GetHandle(const Ref<Window> &window) { return window->handle; }
 		Ref<Renderer> GetRenderer(const Ref<Window> &window) { return window->renderer; }
 
@@ -85,6 +88,7 @@ namespace hf
 		void SetRect(const Ref<Window> &window, const IRect rect) { if (!IsClosed(window)) inter::window::SetRect(window.get(), rect); }
 
 		void SetState(const Ref<Window> &window, WindowState state) { if (!IsClosed(window)) inter::window::SetState(window.get(), state); }
+		void SetPointerState(const Ref<Window> &window, WindowPointerState state) { if (!IsClosed(window)) inter::window::SetPointerState(window.get(), state); }
 		void Focus(const Ref<Window> &window) { if (!IsClosed(window)) inter::window::Focus(window.get()); }
 
 		void SetVSyncMode(const Ref<Window> &window, VsyncMode mode)

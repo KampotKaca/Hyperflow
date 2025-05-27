@@ -55,6 +55,12 @@ namespace app
             hf::window::SetState(DEBUG_INFO.wn, state);
         }
 
+        if (hf::input::IsDown(hf::Key::B))
+        {
+            auto state = (hf::WindowPointerState)(((uint32_t)hf::window::GetPointerState(DEBUG_INFO.wn) + 1) % 4);
+            hf::window::SetPointerState(DEBUG_INFO.wn, state);
+        }
+
         // if (hf::input::IsDown(hf::Key::A))
         // {
         // 	hf::WindowCreationInfo data =

@@ -60,6 +60,9 @@ namespace hf::inter
                     case KeyState::DownContinues: break;
                     }
                 }
+
+                eventData.pointerDelta = {};
+                eventData.scrollDelta = {};
             }
 
             switch (updateType)
@@ -160,6 +163,27 @@ namespace hf::inter
         {
             glfwSetWindowSize((GLFWwindow*)win->handle, rect.size.x, rect.size.y);
             glfwSetWindowPos((GLFWwindow*)win->handle, rect.position.x, rect.position.y);
+        }
+
+        void SetPointerState(Window* win, WindowPointerState state)
+        {
+            switch (state)
+            {
+            case WindowPointerState::Normal:
+                glfwSetInputMode((GLFWwindow*)win->handle, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+                break;
+            case WindowPointerState::Hidden:
+                glfwSetInputMode((GLFWwindow*)win->handle, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
+                break;
+            case WindowPointerState::Disabled:
+                glfwSetInputMode((GLFWwindow*)win->handle, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+                break;
+            case WindowPointerState::Captured:
+                glfwSetInputMode((GLFWwindow*)win->handle, GLFW_CURSOR, GLFW_CURSOR_CAPTURED);
+                break;
+            }
+
+            win->pointerState = state;
         }
 
         void SetState(Window* win, WindowState state)

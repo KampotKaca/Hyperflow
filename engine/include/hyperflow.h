@@ -65,6 +65,7 @@ namespace hf
 		IRect GetFrameRect(const Ref<Window> &window);
 		WindowState GetState(const Ref<Window> &window);
 		WindowStyle GetStyle(const Ref<Window> &window);
+		WindowPointerState GetPointerState(const Ref<Window> &window);
 		void* GetHandle(const Ref<Window> &window);
 		Ref<Renderer> GetRenderer(const Ref<Window> &window);
 		bool IsClosed(const Ref<Window> &window);
@@ -75,6 +76,8 @@ namespace hf
 		void SetPosition(const Ref<Window> &window, ivec2 position);
 		void SetRect(const Ref<Window> &window, IRect rect);
 		void SetState(const Ref<Window> &window, WindowState state);
+		void SetPointerState(const Ref<Window> &window, WindowPointerState state);
+
 		void Focus(const Ref<Window> &window);
 		void SetVSyncMode(const Ref<Window> &window, VsyncMode mode);
 	}

@@ -775,11 +775,14 @@ namespace hf
 		void (*onRenderCallback)(const Ref<Renderer>&){};
 	};
 
+	enum class WindowPointerState { Normal, Hidden, Disabled, Captured };
+
 	struct WindowCreationInfo
 	{
 		std::string title = "Untitled";
 		WindowState state = WindowState::Restored;
 		WindowEventFlags eventFlags = WindowEventFlags::All;
+		WindowPointerState pointerState = WindowPointerState::Normal;
 		WindowStyle style = WindowStyle::Default;
 		ivec2 position = ivec2{ 300, 300 };
 		ivec2 size = ivec2{ 200, 200 };

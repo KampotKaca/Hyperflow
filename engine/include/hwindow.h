@@ -26,6 +26,7 @@ namespace hf
 		IRect rect{};
 		WindowStyle style{};
 		WindowState state{};
+		WindowPointerState pointerState = WindowPointerState::Normal;
 		WindowEventFlags eventFlags{};
 		VsyncMode vSyncMode = VsyncMode::Relaxed;
 		Ref<Window> parent{};
