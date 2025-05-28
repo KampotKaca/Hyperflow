@@ -50,13 +50,6 @@ namespace hf
             }
         }
 
-        void DestroyAll(bool internalOnly)
-        {
-            for (const auto& buffer : std::ranges::views::values(inter::HF.graphicsResources.storageBuffers))
-                inter::rendering::DestroyStorageBuffer_i(buffer.get());
-            if (!internalOnly) inter::HF.graphicsResources.storageBuffers.clear();
-        }
-
         bool IsRunning(const Ref<StorageBuffer>& buffer) { return buffer->handle; }
 
         void Upload(const StorageBufferUploadInfo& info)
@@ -90,6 +83,13 @@ namespace hf
                 return true;
             }
             return false;
+        }
+
+        void DestroyAllStorageBuffers_i(bool internalOnly)
+        {
+            for (const auto& buffer : std::ranges::views::values(HF.graphicsResources.storageBuffers))
+                DestroyStorageBuffer_i(buffer.get());
+            if (!internalOnly) HF.graphicsResources.storageBuffers.clear();
         }
     }
 }

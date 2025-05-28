@@ -171,7 +171,9 @@ namespace hf
 	enum class BufferUsageType
 	{
 		TransferSrc = 1 << 0, TransferDst = 1 << 1, UniformTexel = 1 << 2, StorageTexel = 1 << 3,
-		Uniform = 1 << 4, Storage = 1 << 5, Index = 1 << 6, Vertex = 1 << 7, Indirect = 1 << 8
+		Uniform = 1 << 4, Storage = 1 << 5, Index = 1 << 6, Vertex = 1 << 7, Indirect = 1 << 8,
+		Default = TransferSrc | TransferDst | Vertex | Index | Storage,
+		All = TransferSrc | TransferDst | UniformTexel | StorageTexel | Uniform | Storage | Index | Vertex | Indirect,
 	};
 	DEFINE_ENUM_FLAGS(BufferUsageType)
 
@@ -662,6 +664,23 @@ namespace hf
 		Ref<IndexBuffer> indexBuffer{}; //is optional property, if nullptr engine will render vertex buffer in ordered manner.
 		uint32_t instanceCount = 0; //amount of instances to render
 	};
+
+	//endregion
+
+	//region Additionals
+
+	enum class Axis { X = 1 << 0, Y = 1 << 1, Z = 1 << 2, All = X | Y | Z };
+	DEFINE_ENUM_FLAGS(Axis)
+
+	struct AxisLinesCreationInfo
+	{
+		Axis axis = Axis::All;
+		vec3 lineThickness = { 0.1f, 0.1f, 0.1f };
+		vec3 offset = {};
+		vec4 color = vec4(1.0f, 1.0f, 1.0f, 1.0f);
+	};
+
+	struct AxisLines;
 
 	//endregion
 

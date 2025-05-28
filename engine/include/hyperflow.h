@@ -108,10 +108,6 @@ namespace hf
 		void Resize(const Ref<Renderer>& rn, uvec2 size);
 		void Draw(const Ref<Renderer>& rn, const DrawCallInfo& info);
 		void Draw(const Ref<Renderer>& rn, const Ref<Mesh>& mesh);
-
-		//if true, will release internal resources, but will retain resource references
-		//it is made to be used for handling api changes.
-		void UnloadAllResources(bool internalOnly = false);
 	}
 
 	namespace renderpass
@@ -127,7 +123,6 @@ namespace hf
 		Ref<Shader> Create(const ShaderCreationInfo& info);
 		void Destroy(const Ref<Shader>& shader);
 		void Destroy(const Ref<Shader>* pShaders, uint32_t count);
-		void DestroyAll(bool internalOnly = false);
 		bool IsRunning(const Ref<Shader>& shader);
 
 		void Bind(const Ref<Shader>& shader, BufferAttrib attrib);
@@ -146,7 +141,6 @@ namespace hf
 		Ref<Texture> Create(const char* assetPath);
 		void Destroy(const Ref<Texture>& texture);
 		void Destroy(const Ref<Texture>* pTextures, uint32_t count);
-		void DestroyAll(bool internalOnly = false);
 		bool IsRunning(const Ref<Texture>& texture);
 
 		void SubmitAll();
@@ -157,7 +151,6 @@ namespace hf
 		Ref<TexturePack> Create(const TexturePackCreationInfo& info);
 		void Destroy(const Ref<TexturePack>& pack);
 		void Destroy(const Ref<TexturePack>* pPacks, uint32_t count);
-		void DestroyAll(bool internalOnly = false);
 		bool IsRunning(const Ref<TexturePack>& pack);
 
 		void SetBindingSampler(const Ref<TexturePack>& pack, uint32_t bindingIndex, TextureSampler sampler);
@@ -171,7 +164,6 @@ namespace hf
 		Ref<TexturePackAllocator> Create(const TexturePackAllocatorCreationInfo& info);
 		void Destroy(const Ref<TexturePackAllocator>& texPackAllocator);
 		void Destroy(const Ref<TexturePackAllocator>* pTexPackAllocators, uint32_t count);
-		void DestroyAll(bool internalOnly = false);
 		bool IsRunning(const Ref<TexturePackAllocator>& texPackAllocator);
 	}
 
@@ -212,7 +204,6 @@ namespace hf
 		Ref<VertBuffer> Create(const VertBufferCreationInfo& info);
 		void Destroy(const Ref<VertBuffer>& buffer);
 		void Destroy(const Ref<VertBuffer>* pBuffers, uint32_t count);
-		void DestroyAll(bool internalOnly = false);
 		bool IsRunning(const Ref<VertBuffer>& buffer);
 		void Upload(const VertBufferUploadInfo& info);
 	}
@@ -222,7 +213,6 @@ namespace hf
 		Ref<IndexBuffer> Create(const IndexBufferCreationInfo& info);
 		void Destroy(const Ref<IndexBuffer>& buffer);
 		void Destroy(const Ref<IndexBuffer>* pBuffers, uint32_t count);
-		void DestroyAll(bool internalOnly = false);
 		bool IsRunning(const Ref<IndexBuffer>& buffer);
 		void Upload(const IndexBufferUploadInfo& info);
 	}
@@ -232,7 +222,6 @@ namespace hf
 		Ref<StorageBuffer> Create(const StorageBufferCreationInfo& info);
 		void Destroy(const Ref<StorageBuffer>& buffer);
 		void Destroy(const Ref<StorageBuffer>* pBuffers, uint32_t count);
-		void DestroyAll(bool internalOnly = false);
 		bool IsRunning(const Ref<StorageBuffer>& buffer);
 		void Upload(const StorageBufferUploadInfo& info);
 	}
@@ -243,7 +232,6 @@ namespace hf
 		Ref<Mesh> Create(const char* assetPath);
 		void Destroy(const Ref<Mesh>& mesh);
 		void Destroy(const Ref<Mesh>* pMeshes, uint32_t count);
-		void DestroyAll(bool internalOnly = false);
 		bool IsRunning(const Ref<Mesh>& mesh);
 		MeshStats GetStats(const Ref<Mesh>& mesh);
 	}

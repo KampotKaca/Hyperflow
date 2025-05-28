@@ -40,6 +40,15 @@ namespace hf::inter
         phmap::flat_hash_map<std::string, Ref<Texture>> textures{};
     };
 
+    struct StaticResources
+    {
+        BufferAttrib quadAttrib{};
+        UniformBuffer axisLineUniform{};
+        Ref<VertBuffer> quadBuffer{};
+
+        UniformAllocator staticUniformAllocator{};
+    };
+
     struct Hyperflow
     {
         EngineLifecycleCallbacks lifecycleCallbacks{};
@@ -53,9 +62,18 @@ namespace hf::inter
         RenderingApi renderingApi{};
 
         GraphicsResources graphicsResources{};
+        StaticResources staticResources{};
     };
 
     extern Hyperflow HF;
+
+    struct AxisLineUniform
+    {
+        alignas(16) uint32_t axis;
+        alignas(16) vec3 lineThickness;
+        alignas(16) vec3 offset;
+        alignas(16) vec4 color;
+    };
 
     namespace alloc
     {
@@ -71,6 +89,8 @@ namespace hf::inter
     {
         void LoadApi_i(RenderingApiType api);
         void UnloadCurrentApi_i(bool retainReferences);
+        void DefineStaticResources_i();
+        void LoadStaticResources_i();
 
         void CreateRenderer_i(Renderer* rn);
         void DestroyRenderer_i(Renderer* rn);
@@ -100,6 +120,19 @@ namespace hf::inter
 
         bool CreateTexturePackAllocator_i(TexturePackAllocator* packAllocator);
         bool DestroyTexturePackAllocator_i(TexturePackAllocator* packAllocator);
+
+        void DestroyAllVertBuffers_i(bool internalOnly = false);
+        void DestroyAllIndexBuffers_i(bool internalOnly = false);
+        void DestroyAllStorageBuffers_i(bool internalOnly = false);
+        void DestroyAllMeshes_i(bool internalOnly = false);
+        void DestroyAllTextures_i(bool internalOnly = false);
+        void DestroyAllTexturePacks_i(bool internalOnly = false);
+        void DestroyAllTexturePackAllocators_i(bool internalOnly = false);
+        void DestroyAllShaders_i(bool internalOnly = false);
+
+        //if true, will release internal resources, but will retain resource references
+        //it is made to be used for handling api changes.
+        void UnloadAllResources_i(bool internalOnly = false);
     }
 }
 

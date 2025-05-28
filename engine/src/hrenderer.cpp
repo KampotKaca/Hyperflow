@@ -71,21 +71,6 @@ namespace hf
 
             inter::HF.renderingApi.api.Draw(rn->handle, drawInfo);
         }
-
-        void UnloadAllResources(bool internalOnly)
-        {
-            if (inter::HF.renderingApi.isLoaded) inter::HF.renderingApi.api.WaitForRendering();
-            vertbuffer::DestroyAll(internalOnly);
-            indexbuffer::DestroyAll(internalOnly);
-            storagebuffer::DestroyAll(internalOnly);
-            mesh::DestroyAll(internalOnly);
-            shader::DestroyAll(internalOnly);
-
-            texture::DestroyAll(internalOnly);
-
-            texturepackallocator::DestroyAll(internalOnly);
-            texturepack::DestroyAll(internalOnly);
-        }
     }
 
     namespace inter::rendering
@@ -121,6 +106,7 @@ namespace hf
                 HF.renderingApi.api.PostInstanceLoad(rn->handle, rn->eventInfo.onPassCreationCallback(rn));
             }
 
+            DefineStaticResources_i();
             if (HF.lifecycleCallbacks.onRendererLoad) HF.lifecycleCallbacks.onRendererLoad();
 
             for (auto& shader : std::ranges::views::values(HF.graphicsResources.shaders)) CreateShader_i(shader.get());
@@ -160,6 +146,70 @@ namespace hf
             };
 
             HF.graphicsResources.bufferAttribs.clear();
+        }
+
+        void DefineStaticResources_i()
+        {
+            BufferAttribFormat quadFormats[]
+            {
+                { .type = BufferDataType::I16, .size = 2, }
+            };
+
+            BufferAttribDefinitionInfo quadAttribInfo
+            {
+                .bindingId = 0,
+                .formatCount = 1,
+                .pFormats = quadFormats
+            };
+
+            HF.staticResources.quadAttrib = bufferattrib::Define(quadAttribInfo);
+
+            UniformBufferBindingInfo quadBindings[]
+            {
+                { .usageFlags = ShaderUsageStage::All, .arraySize = 1, .elementSizeInBytes = sizeof(AxisLineUniform) }
+            };
+
+            UniformBufferDefinitionInfo axisLineUniformInfo
+            {
+                .bindingId = 0,
+                .pBindings = quadBindings,
+                .bindingCount = 1
+            };
+
+            HF.staticResources.axisLineUniform = uniformbuffer::Define(axisLineUniformInfo);
+
+            UniformAllocatorDefinitionInfo staticUniformAllocatorInfo
+            {
+                .pBuffers = &HF.staticResources.axisLineUniform,
+                .bufferCount = 1
+            };
+
+            HF.staticResources.staticUniformAllocator = uniformallocator::Define(staticUniformAllocatorInfo);
+        }
+
+        void LoadStaticResources_i()
+        {
+            struct QuadVertex
+            {
+                alignas(2) int16_t x, y;
+            };
+
+            QuadVertex quadVertices[6]
+            {
+                { -1, -1 }, { -1, 1 }, { 1, 1 },
+                { -1, -1 }, { 1, 1 }, { 1, -1 },
+            };
+
+            VertBufferCreationInfo quadBufferInfo
+            {
+                .bufferAttrib = HF.staticResources.quadAttrib,
+                .memoryType = BufferMemoryType::Static,
+                .usageFlags = BufferUsageType::All,
+                .vertexCount = 6,
+                .pVertices = quadVertices
+            };
+
+            HF.staticResources.quadBuffer = vertbuffer::Create(quadBufferInfo);
         }
 
         void CreateRenderer_i(Renderer* rn)
@@ -208,7 +258,7 @@ namespace hf
             {
                 if (HF.rendererCount == 1)
                 {
-                    renderer::UnloadAllResources(IsRunning());
+                    UnloadAllResources_i(IsRunning());
                 }
 
                 HF.renderingApi.api.WaitForRendering();
@@ -238,6 +288,21 @@ namespace hf
                 if (cInfo.onRenderCallback) cInfo.onRenderCallback(rn);
                 HF.renderingApi.api.EndFrame(rn->handle);
             }
+        }
+
+        void UnloadAllResources_i(bool internalOnly)
+        {
+            if (HF.renderingApi.isLoaded) HF.renderingApi.api.WaitForRendering();
+            DestroyAllVertBuffers_i(internalOnly);
+            DestroyAllIndexBuffers_i(internalOnly);
+            DestroyAllStorageBuffers_i(internalOnly);
+            DestroyAllMeshes_i(internalOnly);
+            DestroyAllShaders_i(internalOnly);
+
+            DestroyAllTextures_i(internalOnly);
+
+            DestroyAllTexturePackAllocators_i(internalOnly);
+            DestroyAllTexturePacks_i(internalOnly);
         }
     }
 

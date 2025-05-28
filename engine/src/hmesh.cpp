@@ -268,13 +268,6 @@ namespace hf
             }
         }
 
-        void DestroyAll(bool internalOnly)
-        {
-            for (const auto& mesh : std::ranges::views::values(inter::HF.graphicsResources.meshes))
-                inter::rendering::DestroyMesh_i(mesh.get());
-            if (!internalOnly) inter::HF.graphicsResources.meshes.clear();
-        }
-
         bool IsRunning(const Ref<Mesh>& mesh) { return mesh->isLoaded; }
         MeshStats GetStats(const Ref<Mesh>& mesh) { return mesh->stats; }
     }
@@ -308,6 +301,13 @@ namespace hf
                 return true;
             }
             return false;
+        }
+
+        void DestroyAllMeshes_i(bool internalOnly)
+        {
+            for (const auto& mesh : std::ranges::views::values(HF.graphicsResources.meshes))
+                DestroyMesh_i(mesh.get());
+            if (!internalOnly) HF.graphicsResources.meshes.clear();
         }
     }
 

@@ -6,5 +6,6 @@
 #include "components/hcamera3danchored.h"
 #include "components/hfreemovecamera3d.h"
 #include "components/htransform.h"
+#include "components/haxislines.h"
 
 #endif //HOBJECTS_H

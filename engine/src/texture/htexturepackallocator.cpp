@@ -41,13 +41,6 @@ namespace hf
             }
         }
 
-        void DestroyAll(bool internalOnly = false)
-        {
-            for (const auto& packAllocator : std::ranges::views::values(inter::HF.graphicsResources.texturePackAllocators))
-                inter::rendering::DestroyTexturePackAllocator_i(packAllocator.get());
-            if (!internalOnly) inter::HF.graphicsResources.texturePackAllocators.clear();
-        }
-
         bool IsRunning(const Ref<TexturePackAllocator>& texPackAllocator) { return texPackAllocator->handle; }
     }
 
@@ -81,6 +74,13 @@ namespace hf
                 return true;
             }
             return false;
+        }
+
+        void DestroyAllTexturePackAllocators_i(bool internalOnly)
+        {
+            for (const auto& packAllocator : std::ranges::views::values(HF.graphicsResources.texturePackAllocators))
+                DestroyTexturePackAllocator_i(packAllocator.get());
+            if (!internalOnly) HF.graphicsResources.texturePackAllocators.clear();
         }
     }
 }

@@ -54,13 +54,6 @@ namespace hf
             }
         }
 
-        void DestroyAll(bool internalOnly)
-        {
-            for (const auto& shader : std::ranges::views::values(inter::HF.graphicsResources.shaders))
-                inter::rendering::DestroyShader_i(shader.get());
-            if (!internalOnly) inter::HF.graphicsResources.shaders.clear();
-        }
-
         bool IsRunning(const Ref<Shader>& shader) { return shader->handle; }
 
         void Bind(const Ref<Shader>& shader, BufferAttrib attrib)
@@ -138,6 +131,13 @@ namespace hf
                 return true;
             }
             return false;
+        }
+
+        void DestroyAllShaders_i(bool internalOnly)
+        {
+            for (const auto& shader : std::ranges::views::values(HF.graphicsResources.shaders))
+                DestroyShader_i(shader.get());
+            if (!internalOnly) HF.graphicsResources.shaders.clear();
         }
     }
 

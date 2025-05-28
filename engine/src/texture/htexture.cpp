@@ -138,13 +138,6 @@ namespace hf
             }
         }
 
-        void DestroyAll(bool internalOnly)
-        {
-            for (const auto& tex : std::ranges::views::values(inter::HF.graphicsResources.textures))
-                inter::rendering::DestroyTexture_i(tex.get());
-            if (!internalOnly) inter::HF.graphicsResources.textures.clear();
-        }
-
         bool IsRunning(const Ref<Texture>& texture) { return texture->handle; }
         void SubmitAll() { inter::HF.renderingApi.api.SubmitTextureCopyOperations(); }
     }
@@ -199,6 +192,13 @@ namespace hf
                 return true;
             }
             return false;
+        }
+
+        void DestroyAllTextures_i(bool internalOnly)
+        {
+            for (const auto& tex : std::ranges::views::values(HF.graphicsResources.textures))
+                DestroyTexture_i(tex.get());
+            if (!internalOnly) HF.graphicsResources.textures.clear();
         }
     }
 
