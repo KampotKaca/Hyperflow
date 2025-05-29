@@ -8,11 +8,11 @@ namespace hf
     {
         uint32_t stageCount = 0;
         VkPipelineShaderStageCreateInfo* pStages = nullptr;
-        ShaderBlendMode blendingMode = ShaderBlendMode::None;
-        VkLogicOp blendingOp = VK_LOGIC_OP_XOR;
         BufferAttrib attrib{};
         VkPipelineLayout layout{};
         RenderPass renderPass{};
+        ShaderBlendingOptions blendingOptions{};
+        ShaderDepthStencilOptions depthStencilOptions{};
     };
 
     static void CreateShaderModule(const char* code, uint32_t codeSize, VkShaderModule* result);
@@ -46,10 +46,10 @@ namespace hf
         {
             .stageCount = 2,
             .pStages = shaderStages,
-            .blendingMode = info.blendMode,
-            .blendingOp = (VkLogicOp)info.blendOp,
             .layout = shaderSetup.layout,
             .renderPass = info.renderPass,
+            .blendingOptions = info.blendingOptions,
+            .depthStencilOptions = info.depthStencilOptions,
         };
 
         for (uint32_t i = 0; i < info.supportedAttribCount; i++)
@@ -109,7 +109,7 @@ namespace hf
             .primitiveRestartEnable = VK_FALSE
         };
 
-        std::vector<VkDynamicState> dynamicStates =
+        std::vector dynamicStates =
         {
             VK_DYNAMIC_STATE_VIEWPORT,
             VK_DYNAMIC_STATE_SCISSOR
@@ -179,7 +179,7 @@ namespace hf
             .colorWriteMask = VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT,
         };
 
-        if (info.blendingMode == ShaderBlendMode::Alpha)
+        if (info.blendingOptions.blendMode == ShaderBlendMode::Alpha)
         {
             colorBlendAttachment.blendEnable = VK_TRUE;
             colorBlendAttachment.srcColorBlendFactor = VK_BLEND_FACTOR_SRC_ALPHA;
@@ -189,7 +189,7 @@ namespace hf
             colorBlendAttachment.dstAlphaBlendFactor = VK_BLEND_FACTOR_ZERO;
             colorBlendAttachment.alphaBlendOp = VK_BLEND_OP_ADD;
         }
-        else if (info.blendingMode == ShaderBlendMode::None)
+        else if (info.blendingOptions.blendMode == ShaderBlendMode::None)
         {
             colorBlendAttachment.blendEnable = VK_FALSE;
             colorBlendAttachment.srcColorBlendFactor = VK_BLEND_FACTOR_ONE;
@@ -203,8 +203,8 @@ namespace hf
         VkPipelineColorBlendStateCreateInfo colorBlending
         {
             .sType = VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO,
-            .logicOpEnable = info.blendingMode == ShaderBlendMode::Logical,
-            .logicOp = (VkLogicOp)info.blendingOp,
+            .logicOpEnable = info.blendingOptions.blendMode == ShaderBlendMode::Logical,
+            .logicOp = (VkLogicOp)info.blendingOptions.blendOp,
             .attachmentCount = 1,
             .pAttachments = &colorBlendAttachment,
             .blendConstants = { 0.0f, 0.0f, 0.0f, 0.0f },
@@ -229,18 +229,19 @@ namespace hf
             .basePipelineIndex = -1,
         };
 
+        auto& dsOptions = info.depthStencilOptions;
         VkPipelineDepthStencilStateCreateInfo depthStencilInfo
         {
             .sType = VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO,
-            .depthTestEnable = VK_TRUE,
-            .depthWriteEnable = VK_TRUE,
-            .depthCompareOp = VK_COMPARE_OP_LESS_OR_EQUAL,
-            .depthBoundsTestEnable = VK_FALSE,
-            .stencilTestEnable = VK_TRUE,
-            .front = {},
-            .back = {},
-            .minDepthBounds = 0,
-            .maxDepthBounds = 1
+            .depthTestEnable = dsOptions.enableDepth,
+            .depthWriteEnable = dsOptions.writeDepth,
+            .depthCompareOp = (VkCompareOp)dsOptions.comparisonFunc,
+            .depthBoundsTestEnable = dsOptions.enableDepthBounds,
+            .stencilTestEnable = dsOptions.enableStencil,
+            .front = (VkStencilOpState)(VkStencilOp)dsOptions.frontStencil,
+            .back = (VkStencilOpState)(VkStencilOp)dsOptions.backStencil,
+            .minDepthBounds = dsOptions.depthBounds.x,
+            .maxDepthBounds = dsOptions.depthBounds.y
         };
 
         if (pass.depthAttachmentRefs.size() > 0)

@@ -34,6 +34,19 @@ namespace app
             .pSupportedAttribs = &quadAttrib,
             .vertexShaderLoc = "axislines",
             .fragmentShaderLoc = "axislines",
+            .alphaTestOptions =
+            {
+                .blendMode = hf::ShaderBlendMode::Alpha,
+                .blendOp = hf::ShaderBlendOp::XOr
+            },
+            .depthStencilOptions =
+            {
+                .enableDepth = false,
+                .writeDepth = false,
+                .comparisonFunc = hf::DepthComparisonFunction::Always,
+                .enableDepthBounds = false,
+                .enableStencil = false,
+            }
         };
         APP_SHADERS.axis_lines = hf::shader::Create(axisLinesShaderInfo);
     }

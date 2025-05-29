@@ -7,7 +7,7 @@ namespace hf
 {
     struct Shader
     {
-        Shader(const ShaderCreationInfo& info);
+        explicit Shader(const ShaderCreationInfo& info);
         ~Shader();
 
         std::string vertLoc{}, fragLoc{};
@@ -17,6 +17,9 @@ namespace hf
 
         BufferAttrib* pSupportedAttribs{};
         uint32_t supportedAttribCount{};
+
+        ShaderDepthStencilOptions depthStencilOptions{};
+        ShaderBlendingOptions blendingOptions{};
         void* handle{};
     };
 }

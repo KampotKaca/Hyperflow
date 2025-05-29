@@ -41,13 +41,13 @@ namespace hf::inter::rendering
         uint32_t supportedAttribCount{};
         const BufferAttrib* pSupportedAttribs{};
 
-        ShaderBlendMode blendMode{};
-        ShaderBlendOp blendOp{}; //Setting will be used only if you use Logical Blending
-
         const char* vCode{};
         uint32_t vCodeSize = 0;
         const char* fCode{};
         uint32_t fCodeSize = 0;
+
+        ShaderDepthStencilOptions depthStencilOptions{};
+        ShaderBlendingOptions blendingOptions{};
     };
 
     struct ShaderBindingInfo

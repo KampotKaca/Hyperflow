@@ -185,6 +185,18 @@ namespace hf
 		Equivalent, Invert, OrReverse, CopyInverted, OrInverted, Nand, Set
 	};
 
+	enum class DepthComparisonFunction
+	{
+		Never, Less, Equal, LessOrEqual, Greater,
+		NotEqual, GreaterOrEqual, Always
+	};
+
+	enum class StencilOperation
+	{
+		Keep, Zero, Replace, IncrementAndClamp, DecrementAndClamp,
+		Invert, IncrementAndWrap, DecrementAndWrap,
+	};
+
 	struct BufferAttribFormat
 	{
 		BufferDataType type = BufferDataType::F32;
@@ -244,6 +256,26 @@ namespace hf
 		uint32_t size{};
 	};
 
+	struct ShaderBlendingOptions
+	{
+		ShaderBlendMode blendMode = ShaderBlendMode::Alpha;
+		ShaderBlendOp blendOp = ShaderBlendOp::XOr; //Setting will be used only if you use Logical Blending
+	};
+
+	struct ShaderDepthStencilOptions
+	{
+		bool enableDepth = true;
+		bool writeDepth = true;
+		DepthComparisonFunction comparisonFunc = DepthComparisonFunction::LessOrEqual;
+		bool enableDepthBounds = false;
+		bool enableStencil = true;
+
+		StencilOperation frontStencil = StencilOperation::Keep;
+		StencilOperation backStencil = StencilOperation::Zero;
+
+		vec2 depthBounds = { 0, 1 };
+	};
+
 	struct ShaderCreationInfo
 	{
 		RenderPass renderPass{};
@@ -254,8 +286,8 @@ namespace hf
 		const char* vertexShaderLoc{};
 		const char* fragmentShaderLoc{};
 
-		ShaderBlendMode blendMode = ShaderBlendMode::Alpha;
-		ShaderBlendOp blendOp = ShaderBlendOp::XOr; //Setting will be used only if you use Logical Blending
+		ShaderBlendingOptions alphaTestOptions{};
+		ShaderDepthStencilOptions depthStencilOptions{};
 	};
 
 	template<typename T>

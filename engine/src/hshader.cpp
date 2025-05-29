@@ -10,7 +10,8 @@ namespace hf
     Shader::Shader(const ShaderCreationInfo& info)
         : vertLoc(info.vertexShaderLoc), fragLoc(info.fragmentShaderLoc),
           renderPass(info.renderPass), shaderSetup(info.setup),
-          texturePack(info.texturePack), supportedAttribCount(info.supportedAttribCount)
+          texturePack(info.texturePack), supportedAttribCount(info.supportedAttribCount),
+          depthStencilOptions(info.depthStencilOptions), blendingOptions(info.alphaTestOptions)
     {
         uint32_t bufferSize = sizeof(BufferAttrib) * info.supportedAttribCount;
         pSupportedAttribs = (BufferAttrib*)utils::Allocate(bufferSize);
@@ -139,6 +140,8 @@ namespace hf
                         .vCodeSize = (uint32_t)vertexCode.size(),
                         .fCode = fragmentCode.data(),
                         .fCodeSize = (uint32_t)fragmentCode.size(),
+                        .depthStencilOptions = shader->depthStencilOptions,
+                        .blendingOptions = shader->blendingOptions
                     };
 
                     if (shader->texturePack) creationInfo.texPack = shader->texturePack->handle;
