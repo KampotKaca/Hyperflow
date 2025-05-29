@@ -44,7 +44,13 @@ namespace hf
 
     VkShaderSetup::~VkShaderSetup()
     {
-        vkDestroyPipelineLayout(GRAPHICS_DATA.defaultDevice->logicalDevice.device, layout, nullptr);
+        if (layout) vkDestroyPipelineLayout(GRAPHICS_DATA.defaultDevice->logicalDevice.device, layout, nullptr);
+    }
+
+    VkShaderSetup::VkShaderSetup(VkShaderSetup&& other) noexcept
+    {
+        layout = other.layout;
+        other.layout = {};
     }
 
     bool IsValidShaderSetup(ShaderSetup setup)

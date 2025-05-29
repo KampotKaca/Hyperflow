@@ -3,6 +3,12 @@
 
 namespace hf
 {
+    VkUniformAllocator::VkUniformAllocator(VkUniformAllocator&& other) noexcept
+    {
+        pool = other.pool;
+        other.pool = VK_NULL_HANDLE;
+    }
+
     VkUniformAllocator::VkUniformAllocator(const UniformAllocatorDefinitionInfo& info)
     {
         VkDescriptorPoolSize poolSize =
@@ -57,15 +63,23 @@ namespace hf
 
         VK_HANDLE_EXCEPT(vkAllocateDescriptorSets(device, &allocInfo, GRAPHICS_DATA.preAllocBuffers.descriptors));
 
+        uint32_t setIndex = 0;
+        for (uint32_t i = 0; i < info.bufferCount; i++)
         {
-            for (uint32_t i = 0; i < info.bufferCount; i++)
-                SetupUniform(info.pBuffers[i], &GRAPHICS_DATA.preAllocBuffers.descriptors[i * FRAMES_IN_FLIGHT]);
+            auto& uniform = GetUniform(info.pBuffers[i]);
+            for (auto& descriptorSet : uniform.descriptorSets)
+            {
+                descriptorSet = GRAPHICS_DATA.preAllocBuffers.descriptors[setIndex];
+                setIndex++;
+            }
+            SetupUniform(uniform);
         }
     }
 
     VkUniformAllocator::~VkUniformAllocator()
     {
-        vkDestroyDescriptorPool(GRAPHICS_DATA.defaultDevice->logicalDevice.device, pool, nullptr);
+        if (pool != VK_NULL_HANDLE)
+            vkDestroyDescriptorPool(GRAPHICS_DATA.defaultDevice->logicalDevice.device, pool, nullptr);
     }
 
     bool IsValidAllocator(UniformAllocator allocator)

@@ -9,6 +9,7 @@ namespace hf
     {
         explicit VkShaderSetup(const ShaderSetupDefinitionInfo& info);
         ~VkShaderSetup();
+        VkShaderSetup(VkShaderSetup&& other) noexcept;
 
         VkPipelineLayout layout{};
     };

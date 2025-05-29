@@ -23,7 +23,7 @@ namespace app
             .setBindingIndex = 1,
             .pBindings = &viking_room_binding,
             .bindingCount = 1,
-            .layout = APP_TEXTURE_LAYOUTS.viking_room_layout,
+            .layout = APP_TEXTURE_LAYOUTS.viking_room,
         };
 
         APP_TEXTURE_PACKS.viking_room_pack = hf::texturepack::Create(texPackInfo);

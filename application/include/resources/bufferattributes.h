@@ -8,7 +8,7 @@ namespace app
     struct AppBufferAttributes
     {
         //Position | Color | TextureCoord
-        hf::BufferAttrib pctAttribute{};
+        hf::BufferAttrib pos_col_tex{};
     };
 
     extern AppBufferAttributes APP_BUFFER_ATTRIBUTES;

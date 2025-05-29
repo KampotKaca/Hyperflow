@@ -7,7 +7,7 @@ namespace app
 {
     struct AppTextureLayouts
     {
-        hf::TextureLayout viking_room_layout{};
+        hf::TextureLayout viking_room{};
     };
 
     extern AppTextureLayouts APP_TEXTURE_LAYOUTS;

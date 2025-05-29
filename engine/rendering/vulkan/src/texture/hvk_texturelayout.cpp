@@ -35,7 +35,13 @@ namespace hf
 
     VkTextureLayout::~VkTextureLayout()
     {
-        vkDestroyDescriptorSetLayout(GRAPHICS_DATA.defaultDevice->logicalDevice.device, layout, nullptr);
+        if (layout) vkDestroyDescriptorSetLayout(GRAPHICS_DATA.defaultDevice->logicalDevice.device, layout, nullptr);
+    }
+
+    VkTextureLayout::VkTextureLayout(VkTextureLayout&& other) noexcept
+    {
+        memcpy(this, &other, sizeof(*this));
+        other.layout = VK_NULL_HANDLE;
     }
 
     bool IsValidLayout(TextureLayout layout)

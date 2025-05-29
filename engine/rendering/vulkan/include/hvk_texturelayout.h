@@ -9,6 +9,7 @@ namespace hf
     {
         explicit VkTextureLayout(const TextureLayoutDefinitionInfo& info);
         ~VkTextureLayout();
+        VkTextureLayout(VkTextureLayout&& other) noexcept;
 
         VkDescriptorSetLayout layout{};
         std::vector<TextureLayoutBindingInfo> bindingInfos{};

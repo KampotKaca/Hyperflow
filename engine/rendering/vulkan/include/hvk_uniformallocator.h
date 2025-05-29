@@ -9,6 +9,7 @@ namespace hf
     {
         explicit VkUniformAllocator(const UniformAllocatorDefinitionInfo& info);
         ~VkUniformAllocator();
+        VkUniformAllocator(VkUniformAllocator&& other) noexcept;
 
         VkDescriptorPool pool{};
     };

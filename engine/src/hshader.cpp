@@ -8,15 +8,10 @@
 namespace hf
 {
     Shader::Shader(const ShaderCreationInfo& info)
+        : vertLoc(info.vertexShaderLoc), fragLoc(info.fragmentShaderLoc),
+          renderPass(info.renderPass), shaderSetup(info.setup),
+          texturePack(info.texturePack), supportedAttribCount(info.supportedAttribCount)
     {
-        vertLoc = std::string(info.vertexShaderLoc);
-        fragLoc = std::string(info.fragmentShaderLoc);
-
-        drawPass = info.renderPass;
-        shaderSetup = info.setup;
-        supportedAttribCount = info.supportedAttribCount;
-        texturePack = info.texturePack;
-
         uint32_t bufferSize = sizeof(BufferAttrib) * info.supportedAttribCount;
         pSupportedAttribs = (BufferAttrib*)utils::Allocate(bufferSize);
         memcpy(pSupportedAttribs, info.pSupportedAttribs, bufferSize);
@@ -58,12 +53,50 @@ namespace hf
 
         void Bind(const Ref<Shader>& shader, BufferAttrib attrib)
         {
-            inter::HF.renderingApi.api.BindShader(inter::HF.mainWindow->renderer.get(), shader.get(), attrib);
+            inter::rendering::ShaderBindingInfo bindingInfo
+            {
+                .shader = shader->handle,
+                .attrib = attrib,
+                .bindingPoint = RenderBindingType::Graphics
+            };
+
+            inter::HF.renderingApi.api.BindShader(inter::HF.mainWindow->renderer->handle, bindingInfo);
+        }
+
+        void Bind(const Ref<Shader>& shader, BufferAttrib attrib, RenderBindingType bindingPoint)
+        {
+            inter::rendering::ShaderBindingInfo bindingInfo
+            {
+                .shader = shader->handle,
+                .attrib = attrib,
+                .bindingPoint = bindingPoint
+            };
+
+            inter::HF.renderingApi.api.BindShader(inter::HF.mainWindow->renderer->handle, bindingInfo);
         }
 
         void Bind(const Ref<Renderer>& renderer, const Ref<Shader>& shader, BufferAttrib attrib)
         {
-            inter::HF.renderingApi.api.BindShader(renderer->handle, shader->handle, attrib);
+            inter::rendering::ShaderBindingInfo bindingInfo
+            {
+                .shader = shader->handle,
+                .attrib = attrib,
+                .bindingPoint = RenderBindingType::Graphics
+            };
+
+            inter::HF.renderingApi.api.BindShader(renderer->handle, bindingInfo);
+        }
+
+        void Bind(const Ref<Renderer>& renderer, const Ref<Shader>& shader, BufferAttrib attrib, RenderBindingType bindingPoint)
+        {
+            inter::rendering::ShaderBindingInfo bindingInfo
+           {
+               .shader = shader->handle,
+               .attrib = attrib,
+               .bindingPoint = bindingPoint
+           };
+
+            inter::HF.renderingApi.api.BindShader(renderer->handle, bindingInfo);
         }
     }
 
@@ -98,7 +131,7 @@ namespace hf
 
                     ShaderCreationInfo creationInfo
                     {
-                        .renderPass = shader->drawPass,
+                        .renderPass = shader->renderPass,
                         .shaderSetup = shader->shaderSetup,
                         .supportedAttribCount = shader->supportedAttribCount,
                         .pSupportedAttribs = shader->pSupportedAttribs,

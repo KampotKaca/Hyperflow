@@ -51,17 +51,29 @@ namespace hf
             CreateBuffer(bufferInfo, &buffers[i], &memoryRegions[i]);
             VK_HANDLE_EXCEPT(vmaMapMemory(GRAPHICS_DATA.allocator, memoryRegions[i], &memoryMappings[i]));
         }
+
+        isLoaded = true;
     }
 
     VkUniformBuffer::~VkUniformBuffer()
     {
-        for (uint32_t i = 0; i < FRAMES_IN_FLIGHT; i++)
+        if (isLoaded)
         {
-            vmaUnmapMemory(GRAPHICS_DATA.allocator, memoryRegions[i]);
-            vmaDestroyBuffer(GRAPHICS_DATA.allocator, buffers[i], memoryRegions[i]);
-        }
+            for (uint32_t i = 0; i < FRAMES_IN_FLIGHT; i++)
+            {
+                vmaUnmapMemory(GRAPHICS_DATA.allocator, memoryRegions[i]);
+                vmaDestroyBuffer(GRAPHICS_DATA.allocator, buffers[i], memoryRegions[i]);
+            }
 
-        vkDestroyDescriptorSetLayout(GRAPHICS_DATA.defaultDevice->logicalDevice.device, layout, nullptr);
+            vkDestroyDescriptorSetLayout(GRAPHICS_DATA.defaultDevice->logicalDevice.device, layout, nullptr);
+            isLoaded = false;
+        }
+    }
+
+    VkUniformBuffer::VkUniformBuffer(VkUniformBuffer&& other) noexcept
+    {
+        memcpy(this, &other, sizeof(VkUniformBuffer));
+        other.isLoaded = false;
     }
 
     bool IsValidUniform(UniformBuffer buffer)
@@ -69,18 +81,14 @@ namespace hf
         return buffer > 0 && buffer <= GRAPHICS_DATA.uniformBuffers.size();
     }
 
-    const VkUniformBuffer& GetUniform(UniformBuffer buffer)
+    VkUniformBuffer& GetUniform(UniformBuffer buffer)
     {
         if (!IsValidUniform(buffer)) throw GENERIC_EXCEPT("[Hyperflow]", "Invalid uniform buffer");
         return GRAPHICS_DATA.uniformBuffers[buffer - 1];
     }
 
-    void SetupUniform(UniformBuffer buffer, const VkDescriptorSet* pDescriptors)
+    void SetupUniform(VkUniformBuffer& uniform)
     {
-        if (!IsValidUniform(buffer)) throw GENERIC_EXCEPT("[Hyperflow]", "Invalid uniform buffer");
-        auto& uniform = GRAPHICS_DATA.uniformBuffers[buffer - 1];
-        memcpy(uniform.descriptorSets, pDescriptors, sizeof(VkDescriptorSet) * FRAMES_IN_FLIGHT);
-
         uint32_t totalWrites = 0;
         uint32_t bufferOffset = 0;
 

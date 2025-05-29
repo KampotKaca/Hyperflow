@@ -42,6 +42,7 @@ namespace hf::inter
 
     struct StaticResources
     {
+        TextureLayout emptyLayout{};
         BufferAttrib quadAttrib{};
         UniformBuffer axisLineUniform{};
         Ref<VertBuffer> quadBuffer{};

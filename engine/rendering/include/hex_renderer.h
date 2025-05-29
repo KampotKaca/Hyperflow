@@ -41,10 +41,20 @@ namespace hf::inter::rendering
         uint32_t supportedAttribCount{};
         const BufferAttrib* pSupportedAttribs{};
 
+        ShaderBlendMode blendMode{};
+        ShaderBlendOp blendOp{}; //Setting will be used only if you use Logical Blending
+
         const char* vCode{};
         uint32_t vCodeSize = 0;
         const char* fCode{};
         uint32_t fCodeSize = 0;
+    };
+
+    struct ShaderBindingInfo
+    {
+        void* shader{};
+        BufferAttrib attrib{};
+        RenderBindingType bindingPoint{};
     };
 
     struct RendererLoadInfo
@@ -156,7 +166,7 @@ namespace hf::inter::rendering
         //Shaders
         void* (*CreateShader)(const ShaderCreationInfo& info);
         void (*DestroyShader)(void* shader);
-        void (*BindShader)(const void* rn, const void* shader, BufferAttrib attrib);
+        void (*BindShader)(const void* rn, const ShaderBindingInfo& info);
 
         //shader setup
         ShaderSetup (*DefineShaderSetup)(const ShaderSetupDefinitionInfo& info);

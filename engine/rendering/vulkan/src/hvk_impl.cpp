@@ -74,9 +74,9 @@ namespace hf::inter::rendering
         delete (VkShader*)shader;
     }
 
-    void BindShader(const void* rn, const void* shader, BufferAttrib attrib)
+    void BindShader(const void* rn, const ShaderBindingInfo& info)
     {
-        BindShader((VkRenderer*)rn, (VkShader*)shader, attrib);
+        BindShader((VkRenderer*)rn, (VkShader*)info.shader, info.attrib, info.bindingPoint);
     }
 
     void* CreateTexture(const TextureCreationInfo& info)
@@ -161,9 +161,9 @@ namespace hf::inter::rendering
         return GRAPHICS_DATA.shaderSetups.size();
     }
 
-    void BindShaderSetup(void* rn, ShaderSetup storage)
+    void BindShaderSetup(void* rn, ShaderSetup setup)
     {
-        hf::BindShaderSetup((VkRenderer*)rn, storage);
+        hf::BindShaderSetup((VkRenderer*)rn, setup);
     }
 
     UniformAllocator DefineUniformAllocator(const UniformAllocatorDefinitionInfo& info)

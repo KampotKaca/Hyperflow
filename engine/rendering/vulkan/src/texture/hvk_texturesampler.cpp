@@ -52,7 +52,13 @@ namespace hf
 
     VkTextureSampler::~VkTextureSampler()
     {
-        vkDestroySampler(GRAPHICS_DATA.defaultDevice->logicalDevice.device, sampler, nullptr);
+        if (sampler) vkDestroySampler(GRAPHICS_DATA.defaultDevice->logicalDevice.device, sampler, nullptr);
+    }
+
+    VkTextureSampler::VkTextureSampler(VkTextureSampler&& other) noexcept
+    {
+        sampler = other.sampler;
+        other.sampler = nullptr;
     }
 
     bool IsValidSampler(TextureSampler sampler)

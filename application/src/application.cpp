@@ -60,17 +60,25 @@ namespace app
 		DebugRender(rn);
 
 		hf::renderpass::Begin(rn, APP_RENDER_PASSES.mainPresentPass);
-		hf::shadersetup::Bind(rn, APP_SHADER_SETUPS.viking_room_setup);
+		hf::shadersetup::Bind(rn, APP_SHADER_SETUPS.viking_room);
 
 		UniformUploadCameraTime(rn, freeMoveCamera.camera3D.core,
 			freeMoveCamera.camera3D.direction, freeMoveCamera.camera3D.position,
 			freeMoveCamera.camera3D.ToViewMat4(), vikingRoomTransform.ToMat4());
 		// UniformUploadCameraTime(rn, anchoredCamera.core, anchoredCamera.ToViewMat4());
 
-		hf::shader::Bind(rn, APP_SHADERS.viking_room_shader, APP_BUFFER_ATTRIBUTES.pctAttribute);
+		hf::shader::Bind(rn, APP_SHADERS.viking_room, APP_BUFFER_ATTRIBUTES.pos_col_tex);
 		hf::texturepack::Bind(rn, APP_TEXTURE_PACKS.viking_room_pack);
 
 		hf::renderer::Draw(rn, APP_MESHES.viking_room);
+
+		hf::shadersetup::Bind(rn, APP_SHADER_SETUPS.axis_lines);
+		UniformUploadCameraTime(rn, freeMoveCamera.camera3D.core,
+					freeMoveCamera.camera3D.direction, freeMoveCamera.camera3D.position,
+					freeMoveCamera.camera3D.ToViewMat4(), vikingRoomTransform.ToMat4());
+
+		hf::shader::Bind(rn, APP_SHADERS.axis_lines, hf::bufferattrib::GetQuad());
+		axisLines.Draw(rn);
 
 		hf::renderpass::End(rn);
 	}

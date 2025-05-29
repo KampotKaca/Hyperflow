@@ -177,6 +177,14 @@ namespace hf
 	};
 	DEFINE_ENUM_FLAGS(BufferUsageType)
 
+	enum class ShaderBlendMode { None, Alpha, Logical };
+
+	enum class ShaderBlendOp
+	{
+		Clear, And, AndReverse, Copy, AndInverted, NoOp, XOr, Or, Nor,
+		Equivalent, Invert, OrReverse, CopyInverted, OrInverted, Nand, Set
+	};
+
 	struct BufferAttribFormat
 	{
 		BufferDataType type = BufferDataType::F32;
@@ -245,6 +253,9 @@ namespace hf
 		const BufferAttrib* pSupportedAttribs{};
 		const char* vertexShaderLoc{};
 		const char* fragmentShaderLoc{};
+
+		ShaderBlendMode blendMode = ShaderBlendMode::Alpha;
+		ShaderBlendOp blendOp = ShaderBlendOp::XOr; //Setting will be used only if you use Logical Blending
 	};
 
 	template<typename T>

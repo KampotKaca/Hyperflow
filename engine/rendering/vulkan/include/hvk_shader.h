@@ -17,7 +17,7 @@ namespace hf
         phmap::flat_hash_map<BufferAttrib, VkPipeline> pipelines{};
     };
 
-    void BindShader(VkRenderer* rn, VkShader* shader, BufferAttrib attrib);
+    void BindShader(VkRenderer* rn, VkShader* shader, BufferAttrib attrib, RenderBindingType bindingType);
 }
 
 #endif //HVKSHADER_H

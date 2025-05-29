@@ -11,17 +11,30 @@ namespace app
 
     void ShaderLoadAll()
     {
-        hf::ShaderCreationInfo shaderInfo
+        hf::ShaderCreationInfo vikingShaderInfo
         {
             .renderPass = APP_RENDER_PASSES.mainPresentPass,
-            .setup = APP_SHADER_SETUPS.viking_room_setup,
+            .setup = APP_SHADER_SETUPS.viking_room,
             .texturePack = APP_TEXTURE_PACKS.viking_room_pack,
             .supportedAttribCount = 1,
-            .pSupportedAttribs = &APP_BUFFER_ATTRIBUTES.pctAttribute,
+            .pSupportedAttribs = &APP_BUFFER_ATTRIBUTES.pos_col_tex,
             .vertexShaderLoc = "default",
             .fragmentShaderLoc = "default",
         };
 
-        APP_SHADERS.viking_room_shader = hf::shader::Create(shaderInfo);
+        APP_SHADERS.viking_room = hf::shader::Create(vikingShaderInfo);
+
+        auto quadAttrib = hf::bufferattrib::GetQuad();
+        hf::ShaderCreationInfo axisLinesShaderInfo
+        {
+            .renderPass = APP_RENDER_PASSES.mainPresentPass,
+            .setup = APP_SHADER_SETUPS.axis_lines,
+            .texturePack = nullptr,
+            .supportedAttribCount = 1,
+            .pSupportedAttribs = &quadAttrib,
+            .vertexShaderLoc = "axislines",
+            .fragmentShaderLoc = "axislines",
+        };
+        APP_SHADERS.axis_lines = hf::shader::Create(axisLinesShaderInfo);
     }
 }

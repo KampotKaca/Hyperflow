@@ -6,6 +6,6 @@ namespace app
 
     void BufferAttributeDefineAll()
     {
-        APP_BUFFER_ATTRIBUTES.pctAttribute = hf::bufferattrib::Define("pos_col_tex");
+        APP_BUFFER_ATTRIBUTES.pos_col_tex = hf::bufferattrib::Define("pos_col_tex");
     }
 }

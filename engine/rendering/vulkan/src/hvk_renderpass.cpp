@@ -278,7 +278,13 @@ namespace hf
 
     VkDrawPass::~VkDrawPass()
     {
-        vkDestroyRenderPass(GRAPHICS_DATA.defaultDevice->logicalDevice.device, pass, nullptr);
+        if (pass) vkDestroyRenderPass(GRAPHICS_DATA.defaultDevice->logicalDevice.device, pass, nullptr);
+    }
+
+    VkDrawPass::VkDrawPass(VkDrawPass&& other) noexcept
+    {
+        memcpy(this, &other, sizeof(VkDrawPass));
+        other.pass = VK_NULL_HANDLE;
     }
 
     bool IsValidRenderPass(RenderPass pass)

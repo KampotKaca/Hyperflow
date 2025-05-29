@@ -58,7 +58,7 @@ namespace hf::inter::rendering
     {
     }
 
-    void BindShader(const void* renderer, const void* shader, BufferAttrib attrib)
+    void BindShader(const void* renderer, const ShaderBindingInfo& info)
     {
 
     }

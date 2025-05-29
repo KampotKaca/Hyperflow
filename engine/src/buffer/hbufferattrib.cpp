@@ -68,4 +68,6 @@ namespace hf::bufferattrib
             return 0;
         }
     }
+
+    BufferAttrib GetQuad() { return inter::HF.staticResources.quadAttrib; }
 }

@@ -18,6 +18,7 @@ namespace hf
     {
         explicit VkDrawPass(const RenderPassDefinitionInfo& info);
         ~VkDrawPass();
+        VkDrawPass(VkDrawPass&& other) noexcept;
 
         VkRenderPass pass{};
 

@@ -4,6 +4,11 @@
 
 namespace hf
 {
+    void AxisLines::GetNecessaryUniforms(UniformBuffer* location)
+    {
+        location[0] = inter::HF.staticResources.axisLineUniform;
+    }
+
     void AxisLines::Draw(const Ref<Renderer>& rn)
     {
         static inter::AxisLineUniform uploadUniform{};

@@ -126,7 +126,9 @@ namespace hf
 		bool IsRunning(const Ref<Shader>& shader);
 
 		void Bind(const Ref<Shader>& shader, BufferAttrib attrib);
+		void Bind(const Ref<Shader>& shader, BufferAttrib attrib, RenderBindingType bindingPoint);
 		void Bind(const Ref<Renderer>& renderer, const Ref<Shader>& shader, BufferAttrib attrib);
+		void Bind(const Ref<Renderer>& renderer, const Ref<Shader>& shader, BufferAttrib attrib, RenderBindingType bindingPoint);
 	}
 
 	namespace shadersetup
@@ -175,12 +177,14 @@ namespace hf
 	namespace texturelayout
 	{
 		TextureLayout Define(const TextureLayoutDefinitionInfo& info);
+		TextureLayout GetEmpty();
 	}
 
 	namespace bufferattrib
 	{
 		BufferAttrib Define(const BufferAttribDefinitionInfo& info);
 		BufferAttrib Define(const char* assetPath);
+		BufferAttrib GetQuad();
 	}
 
 	namespace uniformbuffer

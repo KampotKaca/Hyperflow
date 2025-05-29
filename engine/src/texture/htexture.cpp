@@ -216,5 +216,7 @@ namespace hf
         {
             return inter::HF.renderingApi.api.DefineTextureLayout(info);
         }
+
+        TextureLayout GetEmpty() { return inter::HF.staticResources.emptyLayout; }
     }
 }

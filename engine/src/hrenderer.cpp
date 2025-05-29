@@ -152,7 +152,7 @@ namespace hf
         {
             BufferAttribFormat quadFormats[]
             {
-                { .type = BufferDataType::I16, .size = 2, }
+                { .type = BufferDataType::F32, .size = 2, }
             };
 
             BufferAttribDefinitionInfo quadAttribInfo
@@ -185,19 +185,22 @@ namespace hf
             };
 
             HF.staticResources.staticUniformAllocator = uniformallocator::Define(staticUniformAllocatorInfo);
+
+            TextureLayoutDefinitionInfo emptyLayoutInfo
+            {
+                .pBindings = nullptr,
+                .bindingCount = 0
+            };
+
+            HF.staticResources.emptyLayout = texturelayout::Define(emptyLayoutInfo);
         }
 
         void LoadStaticResources_i()
         {
-            struct QuadVertex
+            vec2 quadVertices[6]
             {
-                alignas(2) int16_t x, y;
-            };
-
-            QuadVertex quadVertices[6]
-            {
-                { -1, -1 }, { -1, 1 }, { 1, 1 },
-                { -1, -1 }, { 1, 1 }, { 1, -1 },
+                { 0, 0 }, { 0, 1 }, { 1, 1 },
+                { 0, 0 }, { 1, 1 }, { 1, 0 },
             };
 
             VertBufferCreationInfo quadBufferInfo

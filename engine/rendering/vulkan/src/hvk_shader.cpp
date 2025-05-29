@@ -4,13 +4,12 @@
 
 namespace hf
 {
-    enum class PipelineBlendType { None, Alpha, Logical };
     struct VkPipelineInfo
     {
         uint32_t stageCount = 0;
         VkPipelineShaderStageCreateInfo* pStages = nullptr;
-        PipelineBlendType blendingMode = PipelineBlendType::None;
-        VkLogicOp blendingOp = VK_LOGIC_OP_XOR; //Setting will be used only if you use Logical Blending
+        ShaderBlendMode blendingMode = ShaderBlendMode::None;
+        VkLogicOp blendingOp = VK_LOGIC_OP_XOR;
         BufferAttrib attrib{};
         VkPipelineLayout layout{};
         RenderPass renderPass{};
@@ -20,10 +19,8 @@ namespace hf
     static void CreatePipeline(const VkPipelineInfo& info, VkPipeline* pipeline);
 
     VkShader::VkShader(const inter::rendering::ShaderCreationInfo& info)
+        : shaderSetup(info.shaderSetup), texturePack((VkTexturePack*)info.texPack)
     {
-        shaderSetup = info.shaderSetup;
-        texturePack = (VkTexturePack*)info.texPack;
-        using namespace inter;
         VkShaderModule vertModule{}, fragModule{};
         CreateShaderModule(info.vCode, info.vCodeSize, &vertModule);
         CreateShaderModule(info.fCode, info.fCodeSize, &fragModule);
@@ -49,8 +46,8 @@ namespace hf
         {
             .stageCount = 2,
             .pStages = shaderStages,
-            .blendingMode = PipelineBlendType::None,
-            .blendingOp = VK_LOGIC_OP_XOR,
+            .blendingMode = info.blendMode,
+            .blendingOp = (VkLogicOp)info.blendOp,
             .layout = shaderSetup.layout,
             .renderPass = info.renderPass,
         };
@@ -182,7 +179,7 @@ namespace hf
             .colorWriteMask = VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT,
         };
 
-        if (info.blendingMode == PipelineBlendType::Alpha)
+        if (info.blendingMode == ShaderBlendMode::Alpha)
         {
             colorBlendAttachment.blendEnable = VK_TRUE;
             colorBlendAttachment.srcColorBlendFactor = VK_BLEND_FACTOR_SRC_ALPHA;
@@ -192,7 +189,7 @@ namespace hf
             colorBlendAttachment.dstAlphaBlendFactor = VK_BLEND_FACTOR_ZERO;
             colorBlendAttachment.alphaBlendOp = VK_BLEND_OP_ADD;
         }
-        else if (info.blendingMode == PipelineBlendType::None)
+        else if (info.blendingMode == ShaderBlendMode::None)
         {
             colorBlendAttachment.blendEnable = VK_FALSE;
             colorBlendAttachment.srcColorBlendFactor = VK_BLEND_FACTOR_ONE;
@@ -206,8 +203,8 @@ namespace hf
         VkPipelineColorBlendStateCreateInfo colorBlending
         {
             .sType = VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO,
-            .logicOpEnable = info.blendingMode == PipelineBlendType::Logical,
-            .logicOp = VK_LOGIC_OP_XOR,
+            .logicOpEnable = info.blendingMode == ShaderBlendMode::Logical,
+            .logicOp = (VkLogicOp)info.blendingOp,
             .attachmentCount = 1,
             .pAttachments = &colorBlendAttachment,
             .blendConstants = { 0.0f, 0.0f, 0.0f, 0.0f },
@@ -254,9 +251,13 @@ namespace hf
             VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, pipeline));
     }
 
-    void BindShader(VkRenderer* rn, VkShader* shader, BufferAttrib attrib)
+    void BindShader(VkRenderer* rn, VkShader* shader, BufferAttrib attrib, RenderBindingType bindingType)
     {
-        if (rn->currentLayout != GetShaderSetup(shader->shaderSetup).layout) throw GENERIC_EXCEPT("[Hyperflow]", "Bind correct uniform storage first");
-        vkCmdBindPipeline(rn->currentCommand, VK_PIPELINE_BIND_POINT_GRAPHICS, shader->pipelines[attrib]);
+#if DEBUG
+        if (rn->currentLayout != GetShaderSetup(shader->shaderSetup).layout)
+            throw GENERIC_EXCEPT("[Hyperflow]", "Bind correct shader setup first");
+#endif
+
+        vkCmdBindPipeline(rn->currentCommand, (VkPipelineBindPoint)bindingType, shader->pipelines[attrib]);
     }
 }

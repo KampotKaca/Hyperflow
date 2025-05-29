@@ -10,6 +10,8 @@ namespace hf
         AxisLines() = default;
         ~AxisLines() = default;
 
+        static void GetNecessaryUniforms(UniformBuffer* location);
+
         void Draw(const Ref<Renderer>& rn);
 
         Axis axis = Axis::X | Axis::Z;
