@@ -25,7 +25,7 @@ layout(set = 1, binding = 0) uniform AxisLineUniform
     vec4 color;
 } AXIS_LINES;
 
-layout(location = 0) in vec2 o_NDCCoord;
+layout(location = 0) in vec3 o_RayWorld;
 layout(location = 0) out vec4 outColor;
 
 const vec3 CENTER = vec3(0, 0, 0);
@@ -43,15 +43,8 @@ bool RayIntersectsPlane(vec3 rayOrigin, vec3 rayDir, vec3 planeNormal, vec3 plan
 
 void main()
 {
-    vec4 clipPos = vec4(o_NDCCoord, -1.0, 1.0);
-    vec4 viewPos = CAMERA.invProj * clipPos;
-    viewPos /= viewPos.w;
-    vec3 rayDirView = normalize(viewPos.xyz);
-
-    vec3 rayDirWorld = normalize(mat3(CAMERA.invView) * rayDirView);
-
     vec3 intersection;
-    if(RayIntersectsPlane(CAMERA.position, rayDirWorld, vec3(AXIS_LINES.planeNormal), CENTER, intersection))
+    if(RayIntersectsPlane(CAMERA.position, o_RayWorld, vec3(AXIS_LINES.planeNormal), CENTER, intersection))
     {
         vec3 delta = intersection - CAMERA.position;
         float dist = delta.x * delta.x + delta.y * delta.y + delta.z * delta.z;
@@ -62,8 +55,7 @@ void main()
         if(fraction.x < thickness || fraction.x > (1.0 - thickness) ||
            fraction.y < thickness || fraction.y > (1.0 - thickness))
         {
-//            outColor = AXIS_LINES.color * exp(-dist * 0.05);
-            outColor = AXIS_LINES.color * 1 / (1 + dist * 0.005);
+            outColor = AXIS_LINES.color / (1 + dist * 0.005);
             return;
         }
     }
