@@ -2,5 +2,6 @@
 #define APPCONFIG_H
 
 #define APP_VERSION "0.0.0"
+#define VOXEL_TERRAIN_MAX_DEPTH 8
 
 #endif //APPCONFIG_H

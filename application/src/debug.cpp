@@ -61,31 +61,25 @@ namespace app
             hf::window::SetPointerState(DEBUG_INFO.wn, state);
         }
 
-        // if (hf::input::IsDown(hf::Key::A))
-        // {
-        // 	hf::WindowCreationInfo data =
-        // 	{
-        // 		.title = DEBUG_WINDOW_NAMES[DEBUG_INFO.count % 5],
-        // 		.flags = hf::WindowFlags::Default,
-        // 		.style = hf::WindowStyle::Default,
-        // 		.position = { 100, 100 },
-        // 		.size = { 200, 200 },
-        // 		.vsyncMode = hf::VsyncMode::Relaxed,
-        // 		.rnEventInfo =
-        // 		{
-        // 			.onPassCreationCallback = CreateSubWindowRenderPass,
-        // 			.onPreRenderCallback = AppPreRender,
-        // 			.onRenderCallback = AppRender
-        // 		},
-        // 	};
-        // 	DEBUG_INFO.wn = hf::window::Open(data, nullptr);
-        // 	DEBUG_INFO.count++;
-        // }
-        //
-        // if (hf::input::IsDown(hf::Key::Space) && DEBUG_INFO.wn)
-        // {
-        //     hf::window::Close(DEBUG_INFO.wn);
-        // }
+        if (hf::input::IsDown(hf::Key::V))
+        {
+        	hf::WindowCreationInfo data =
+        	{
+        		.title = DEBUG_WINDOW_NAMES[DEBUG_INFO.count % 5],
+        		.style = hf::WindowStyle::Default,
+        		.position = { 100, 100 },
+        		.size = { 200, 200 },
+        		.vsyncMode = hf::VsyncMode::Relaxed,
+        		.rnEventInfo =
+        		{
+        			.onPassCreationCallback = CreateSubWindowRenderPass,
+        			.onPreRenderCallback = AppPreRender,
+        			.onRenderCallback = AppRender
+        		},
+        	};
+        	DEBUG_INFO.wn = hf::window::Open(data, nullptr);
+        	DEBUG_INFO.count++;
+        }
 
         if (hf::input::IsDown(hf::Key::K))
         {
