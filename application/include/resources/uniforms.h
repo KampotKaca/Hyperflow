@@ -17,7 +17,9 @@ namespace app
         alignas(16) hf::vec3 lookDirection;
         alignas(16) hf::vec3 position;
         alignas(16) hf::mat4 view{};
+        alignas(16) hf::mat4 invView{};
         alignas(16) hf::mat4 proj{};
+        alignas(16) hf::mat4 invProj{};
         alignas(16) hf::mat4 viewProj{};
     };
 

@@ -14,10 +14,9 @@ namespace hf
 
         void Draw(const Ref<Renderer>& rn);
 
-        Axis axis = Axis::X | Axis::Z;
-        vec3 lineThickness = { 0.1f, 0.1f, 0.1f };
-        vec3 offset{};
-        vec4 color{ 1.0f, 1.0f, 1.0f, 1.0f };
+        vec3 planeNormal = { 0.0, 1.0, 0.0 };
+        float lineThickness = 0.02f;
+        vec4 color{ 1.0f, 1.0f, 1.0f, 0.2f };
     };
 }
 

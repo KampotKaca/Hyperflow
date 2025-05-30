@@ -41,9 +41,9 @@ namespace app
             },
             .depthStencilOptions =
             {
-                .enableDepth = false,
+                .enableDepth = true,
                 .writeDepth = false,
-                .comparisonFunc = hf::DepthComparisonFunction::Always,
+                .comparisonFunc = hf::DepthComparisonFunction::LessOrEqual,
                 .enableDepthBounds = false,
                 .enableStencil = false,
             }

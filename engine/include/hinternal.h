@@ -70,9 +70,7 @@ namespace hf::inter
 
     struct AxisLineUniform
     {
-        alignas(16) uint32_t axis;
-        alignas(16) vec3 lineThickness;
-        alignas(16) vec3 offset;
+        alignas(16) vec4 planeNormal; // w is thickness
         alignas(16) vec4 color;
     };
 

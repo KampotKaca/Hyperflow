@@ -74,15 +74,19 @@ namespace app
         hf::vec3 lookDirection, hf::vec3 position,
         const hf::mat4& view, const hf::mat4& model)
     {
-        TEMP_CAMERA_TIME_UPLOAD.time.deltaTime = hf::time::GetDeltaTime();
-        TEMP_CAMERA_TIME_UPLOAD.time.timeSinceStartup = hf::time::GetTimePassed();
+        auto& utime = TEMP_CAMERA_TIME_UPLOAD.time;
+        utime.deltaTime = hf::time::GetDeltaTime();
+        utime.timeSinceStartup = hf::time::GetTimePassed();
 
-        TEMP_CAMERA_TIME_UPLOAD.camera.model = model;
-        TEMP_CAMERA_TIME_UPLOAD.camera.position = position;
-        TEMP_CAMERA_TIME_UPLOAD.camera.lookDirection = lookDirection;
-        TEMP_CAMERA_TIME_UPLOAD.camera.view = view;
-        TEMP_CAMERA_TIME_UPLOAD.camera.proj = cameraCore.ToProjectionMat4(rn);
-        TEMP_CAMERA_TIME_UPLOAD.camera.viewProj = TEMP_CAMERA_TIME_UPLOAD.camera.proj * TEMP_CAMERA_TIME_UPLOAD.camera.view;
+        auto& uCam = TEMP_CAMERA_TIME_UPLOAD.camera;
+        uCam.model = model;
+        uCam.position = position;
+        uCam.lookDirection = lookDirection;
+        uCam.view = view;
+        uCam.invView = glm::inverse(view);
+        uCam.proj = cameraCore.ToProjectionMat4(rn);
+        uCam.invProj = glm::inverse(uCam.proj);
+        uCam.viewProj = uCam.proj * uCam.view;
 
         hf::UniformBufferUpload cameraTimeUpload
         {

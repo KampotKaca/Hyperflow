@@ -710,23 +710,6 @@ namespace hf
 
 	//endregion
 
-	//region Additionals
-
-	enum class Axis { X = 1 << 0, Y = 1 << 1, Z = 1 << 2, All = X | Y | Z };
-	DEFINE_ENUM_FLAGS(Axis)
-
-	struct AxisLinesCreationInfo
-	{
-		Axis axis = Axis::All;
-		vec3 lineThickness = { 0.1f, 0.1f, 0.1f };
-		vec3 offset = {};
-		vec4 color = vec4(1.0f, 1.0f, 1.0f, 1.0f);
-	};
-
-	struct AxisLines;
-
-	//endregion
-
 	//region Window
 
 	struct Window;

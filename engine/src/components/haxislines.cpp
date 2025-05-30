@@ -12,9 +12,7 @@ namespace hf
     void AxisLines::Draw(const Ref<Renderer>& rn)
     {
         static inter::AxisLineUniform uploadUniform{};
-        uploadUniform.axis = (uint32_t)axis;
-        uploadUniform.lineThickness = lineThickness;
-        uploadUniform.offset = offset;
+        uploadUniform.planeNormal = vec4(planeNormal, lineThickness);
         uploadUniform.color = color;
 
         UniformBufferUpload upload
