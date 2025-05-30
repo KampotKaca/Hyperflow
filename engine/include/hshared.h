@@ -346,6 +346,14 @@ namespace hf
 		uint32_t uploadCount{};
 	};
 
+	struct UniformBufferBindInfo
+	{
+		RenderBindingType bindingType = RenderBindingType::Graphics;
+		uint32_t setBindingIndex = 0;
+		UniformBuffer* pUniforms{};
+		uint32_t uniformCount = 0;
+	};
+
 	struct TextureLayoutBindingInfo
 	{
 		uint32_t bindingId{};

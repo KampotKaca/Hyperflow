@@ -12,7 +12,7 @@ namespace hf
 
         static void GetNecessaryUniforms(UniformBuffer* location);
 
-        void Draw(const Ref<Renderer>& rn);
+        void Draw(const Ref<Renderer>& rn) const;
 
         vec3 planeNormal = { 0.0, 1.0, 0.0 };
         float lineThickness = 0.02f;

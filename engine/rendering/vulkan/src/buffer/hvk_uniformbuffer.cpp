@@ -149,4 +149,19 @@ namespace hf
         info.setBindingIndex, info.uploadCount, GRAPHICS_DATA.preAllocBuffers.descriptors,
         0, nullptr);
     }
+
+    void BindUniforms(const VkRenderer* rn, const UniformBufferBindInfo& info)
+    {
+        auto currentFrame = rn->currentFrame;
+
+        for (uint32_t i = 0; i < info.uniformCount; i++)
+        {
+            const auto& uniform = GetUniform(info.pUniforms[i]);
+            GRAPHICS_DATA.preAllocBuffers.descriptors[i] = uniform.descriptorSets[currentFrame];
+        }
+
+        vkCmdBindDescriptorSets(rn->currentCommand, (VkPipelineBindPoint)info.bindingType, rn->currentLayout,
+        info.setBindingIndex, info.uniformCount, GRAPHICS_DATA.preAllocBuffers.descriptors,
+        0, nullptr);
+    }
 }

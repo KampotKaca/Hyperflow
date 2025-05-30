@@ -84,6 +84,7 @@ namespace hf
     void SetVSync(VkRenderer* rn, VsyncMode mode);
 
     void UploadUniforms(const VkRenderer* rn, const UniformBufferUploadInfo& info);
+    void BindUniforms(const VkRenderer* rn, const UniformBufferBindInfo& info);
     void BindTexturePack(VkRenderer* rn, VkTexturePack* pack);
     void BindShaderSetup(VkRenderer* rn, ShaderSetup setup);
 }

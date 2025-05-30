@@ -1,8 +1,8 @@
 #include "hshared.h"
 #include "hrenderer.h"
-#include "components/hcamera3dcore.h"
-#include "components/hcamera3danchored.h"
-#include "components/hcamera3dfreelook.h"
+#include "hcamera3dcore.h"
+#include "hcamera3danchored.h"
+#include "hcamera3dfreelook.h"
 
 namespace hf
 {

@@ -4,7 +4,7 @@
 #include "hshared.h"
 #include "hexception.h"
 #include "hgenericexception.h"
-#include "hobjects.h"
+#include "../components/include/hcomponents.h"
 
 namespace hf
 {
@@ -191,6 +191,7 @@ namespace hf
 	{
 		UniformBuffer Define(const UniformBufferDefinitionInfo& info);
 		void Upload(const Ref<Renderer>& rn, const UniformBufferUploadInfo& info);
+		void Bind(const Ref<Renderer>& rn, const UniformBufferBindInfo& info);
 	}
 
 	namespace uniformallocator

@@ -34,7 +34,6 @@ namespace app
 		anchoredCamera.distance = 2;
 		freeMoveCamera.camera3D.position = {0, 0.5, -2};
 		freeMoveCamera.camera3D.direction = {0, 0, 1};
-		freeMoveCamera.lookSpeed = 10;
 		// freeMoveCamera.camera3D.distance = 2;
 		UniformStartAll();
 		DebugStart();
@@ -79,12 +78,14 @@ namespace app
 		if (drawAxisLines)
 		{
 			hf::shadersetup::Bind(rn, APP_SHADER_SETUPS.axis_lines);
-			UniformUploadCameraTime(rn, freeMoveCamera.camera3D.core,
-						freeMoveCamera.camera3D.direction, freeMoveCamera.camera3D.position,
-						freeMoveCamera.camera3D.ToViewMat4(), vikingRoomTransform.ToMat4());
+			UniformBindCameraTime(rn);
 
 			hf::shader::Bind(rn, APP_SHADERS.axis_lines, hf::bufferattrib::GetQuad());
-			axisLines.Draw(rn);
+
+			for (uint32_t i = 0; i < 100; i++)
+			{
+				axisLines.Draw(rn);
+			}
 		}
 
 		hf::renderpass::End(rn);

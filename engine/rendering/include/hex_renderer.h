@@ -199,6 +199,7 @@ namespace hf::inter::rendering
         //uniform buffer
         UniformBuffer (*DefineUniformBuffer)(const UniformBufferDefinitionInfo& info);
         void (*UploadUniformBuffer)(const void* rn, const UniformBufferUploadInfo& info);
+        void (*BindUniformBuffer)(const void* rn, const UniformBufferBindInfo& info);
 
         //uniform allocator
         UniformAllocator (*DefineUniformAllocator)(const UniformAllocatorDefinitionInfo& info);

@@ -1,4 +1,4 @@
-#include "components/haxislines.h"
+#include "haxislines.h"
 #include "hyperflow.h"
 #include "hinternal.h"
 
@@ -9,7 +9,7 @@ namespace hf
         location[0] = inter::HF.staticResources.axisLineUniform;
     }
 
-    void AxisLines::Draw(const Ref<Renderer>& rn)
+    void AxisLines::Draw(const Ref<Renderer>& rn) const
     {
         static inter::AxisLineUniform uploadUniform{};
         uploadUniform.planeNormal = vec4(planeNormal, lineThickness);

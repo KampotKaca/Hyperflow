@@ -36,6 +36,7 @@ namespace app
     void UniformUploadCameraTime(const hf::Ref<hf::Renderer>& rn, const hf::Camera3DCore& cameraCore,
         hf::vec3 lookDirection, hf::vec3 position,
         const hf::mat4& view, const hf::mat4& model);
+    void UniformBindCameraTime(const hf::Ref<hf::Renderer>& rn);
 }
 
 #endif //UNIFORMS_H

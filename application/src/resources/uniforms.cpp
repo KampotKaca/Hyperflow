@@ -108,4 +108,17 @@ namespace app
 
         hf::uniformbuffer::Upload(rn, uniformBufferUploads);
     }
+
+    void UniformBindCameraTime(const hf::Ref<hf::Renderer>& rn)
+    {
+        hf::UniformBufferBindInfo info
+        {
+            .bindingType = hf::RenderBindingType::Graphics,
+            .setBindingIndex = 0,
+            .pUniforms = TEMP_ST.uniformBuffers,
+            .uniformCount = 1
+        };
+
+        hf::uniformbuffer::Bind(rn, info);
+    }
 }

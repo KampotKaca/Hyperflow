@@ -155,6 +155,11 @@ namespace hf::inter::rendering
         UploadUniforms((VkRenderer*)rn, info);
     }
 
+    void BindUniformBuffer(const void* rn, const UniformBufferBindInfo& info)
+    {
+        BindUniforms((VkRenderer*)rn, info);
+    }
+
     ShaderSetup DefineShaderSetup(const ShaderSetupDefinitionInfo& info)
     {
         GRAPHICS_DATA.shaderSetups.emplace_back(info);
@@ -370,6 +375,7 @@ namespace hf::inter::rendering
             //uniform buffer
             .DefineUniformBuffer        = DefineUniformBuffer,
             .UploadUniformBuffer        = UploadUniformBuffer,
+            .BindUniformBuffer          = BindUniformBuffer,
 
             //uniform allocator
             .DefineUniformAllocator     = DefineUniformAllocator,

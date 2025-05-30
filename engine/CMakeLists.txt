@@ -100,6 +100,7 @@ add_subdirectory(external/rpmalloc)
 add_subdirectory(external/rapidyaml)
 add_subdirectory(external/glfw)
 add_subdirectory(platforms/platform)
+add_subdirectory(components)
 
 add_subdirectory(others/exception)
 
@@ -113,6 +114,7 @@ target_link_libraries(${PROJECT_NAME}
         logc
         ryml
         ext
+        components
         PRIVATE
         rpmalloc
         glfw
@@ -168,6 +170,7 @@ target_include_directories(${PROJECT_NAME}
         include/
         platforms/include
         rendering/include
+        components/include
         ../meshconvertor/include
 )
 

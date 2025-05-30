@@ -14,6 +14,11 @@ namespace hf
         {
             inter::HF.renderingApi.api.UploadUniformBuffer(rn->handle, info);
         }
+
+        void Bind(const Ref<Renderer>& rn, const UniformBufferBindInfo& info)
+        {
+            inter::HF.renderingApi.api.BindUniformBuffer(rn->handle, info);
+        }
     }
 
     namespace uniformallocator

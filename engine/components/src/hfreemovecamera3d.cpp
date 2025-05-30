@@ -1,6 +1,6 @@
-#include "components/hfreemovecamera3d.h"
+#include "hfreemovecamera3d.h"
 #include "hyperflow.h"
-#include "glm/gtx/rotate_vector.hpp"
+#include "hwindow.h"
 
 namespace hf
 {
@@ -16,8 +16,9 @@ namespace hf
 
         vec2 lookAmount = vec2((bool)(lookFlags & FreeMoveCameraLookAxis::Horizontal), (bool)(lookFlags & FreeMoveCameraLookAxis::Vertical));
         auto delta = input::GetPointerDelta(window);
-        lookAmount.x *= (float)delta.x;
-        lookAmount.y *= (float)delta.y;
+        auto windowSize = window::GetSize(window);
+        lookAmount.x *= (float)delta.x / (float)windowSize.x;
+        lookAmount.y *= (float)delta.y / (float)windowSize.y;
 
         motion *= moveSpeed * deltaTime;
         lookAmount *= lookSpeed * deltaTime;
