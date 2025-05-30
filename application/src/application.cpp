@@ -81,11 +81,7 @@ namespace app
 			UniformBindCameraTime(rn);
 
 			hf::shader::Bind(rn, APP_SHADERS.axis_lines, hf::bufferattrib::GetQuad());
-
-			for (uint32_t i = 0; i < 100; i++)
-			{
-				axisLines.Draw(rn);
-			}
+			axisLines.Draw(rn);
 		}
 
 		hf::renderpass::End(rn);

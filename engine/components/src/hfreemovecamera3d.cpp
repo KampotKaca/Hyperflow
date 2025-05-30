@@ -21,7 +21,7 @@ namespace hf
         lookAmount.y *= (float)delta.y / (float)windowSize.y;
 
         motion *= moveSpeed * deltaTime;
-        lookAmount *= lookSpeed * deltaTime;
+        lookAmount *= lookSpeed;
 
         float pitch = glm::asin(camera3D.direction.y) - lookAmount.y;
         float yaw = glm::atan(camera3D.direction.x, camera3D.direction.z) + lookAmount.x;

@@ -1,7 +1,7 @@
 #ifndef FREEMOVECAMERA3D_H
 #define FREEMOVECAMERA3D_H
 
-#include "../../components/include/hcamera3dfreelook.h"
+#include "hcamera3dfreelook.h"
 
 namespace hf
 {
@@ -34,7 +34,7 @@ namespace hf
         Camera3DFreeLook camera3D{};
         FreeMoveCameraDirection moveFlags = FreeMoveCameraDirection::All;
         FreeMoveCameraLookAxis lookFlags = FreeMoveCameraLookAxis::All;
-        float lookSpeed = 1200.0f;
+        float lookSpeed = 12.0f;
         float moveSpeed = 20.0f;
 
         vec2 zoomLimits = { 2, 1000 };
