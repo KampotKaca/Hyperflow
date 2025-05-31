@@ -6,11 +6,25 @@
 
 namespace app
 {
+    enum VoxelType : uint16_t
+    {
+        VOXEL_NONE = 0, VOXEL_GRASS = 1, VOXEL_DIRT = 2, VOXEL_STONE = 3,
+    };
+
+    enum VoxelFlags : uint16_t
+    {
+        VOXEL_FLAG_NONE = 0, VOXEL_FLAG_IS_LEAF = 1 << 0, VOXEL_FLAG_IS_ROOT = 1 << 1
+    };
+
+    //12 bit chunk location 6x3 bit path to the octave
+    typedef uint32_t OctavePath;
+
     struct VoxelOctave
     {
-        uint32_t firstChildLocation{};
-        uint32_t parentLocation{};
-        uint16_t type{}; //lower 12 bits are type, higher 4 bits are flags
+        OctavePath firstChildLocation{};
+        OctavePath parentLocation{};
+        VoxelType type{};
+        VoxelFlags flags{};
     };
 
     template<typename T>
@@ -26,7 +40,9 @@ namespace app
 
     struct VoxelTerrain
     {
+        VoxelOctave* octreeRoot{};
         std::vector<Chunk_L2> octreeChunks{};
+        uint32_t terrainAxisSize{};
     };
 
     extern VoxelTerrain VOXEL_TERRAIN;
@@ -34,6 +50,16 @@ namespace app
     void VoxelTerrainGenerate();
     void VoxelTerrainUpdate();
     void VoxelTerrainDraw(const hf::Ref<hf::Renderer>& rn);
+
+    //returns the octave at a certain location
+    hf::uvec4 GetIndexPath(OctavePath path);
+    OctavePath ToPath(hf::uvec4 index);
+    VoxelType GetVoxel(hf::uvec3 position);
+    VoxelOctave* GetOctave(OctavePath path);
+    VoxelOctave* SetVoxel(hf::uvec3 position, VoxelType type);
+    VoxelOctave* PruneBranch(VoxelOctave* octave);
+
+    OctavePath ReserveOctaves(OctavePath parentPath);
 }
 
 #endif //VOXELTERRAIN_H

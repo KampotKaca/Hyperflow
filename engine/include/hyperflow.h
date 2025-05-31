@@ -246,7 +246,8 @@ namespace hf
 		ivec3 ConvertVersion(const char* version);
 		bool ReadFile(const std::string& filename, bool addNullTerminator, std::vector<char>& result);
 		bool FileExists(const char* path);
-		uint32_t TrailingZeros64(uint64_t n);
+		inline uint32_t GetFirstBitOne64(uint64_t n) { return n ? __builtin_ctzll(n) : 64u; }
+		inline uint32_t GetFirstBitZero64(uint64_t n) { return ~n ? __builtin_ctzll(~n) : 64u; }
 
 		[[nodiscard]] void* Allocate(std::size_t n);
 		[[nodiscard]] void* AllocateAligned(std::size_t n, std::align_val_t align);

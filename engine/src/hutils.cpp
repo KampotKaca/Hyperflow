@@ -45,9 +45,4 @@ namespace hf::utils
         struct stat buffer{};
         return stat(path, &buffer) == 0;
     }
-
-    uint32_t TrailingZeros64(uint64_t n)
-    {
-        return n ? __builtin_ctzll(n) : 64u;
-    }
 }

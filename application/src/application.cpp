@@ -1,6 +1,7 @@
 #include "application.h"
 #include "debug.h"
 #include "resources.h"
+#include "voxelterrain.h"
 
 namespace app
 {
@@ -37,6 +38,8 @@ namespace app
 		// freeMoveCamera.camera3D.distance = 2;
 		UniformStartAll();
 		DebugStart();
+
+		VoxelTerrainGenerate();
 	}
 
 	void AppUpdate()
@@ -46,6 +49,7 @@ namespace app
 		DebugUpdate();
 
 		if (hf::input::IsDown(hf::Key::N)) drawAxisLines = !drawAxisLines;
+		VoxelTerrainUpdate();
 	}
 
 	void AppQuit()
@@ -83,6 +87,8 @@ namespace app
 			hf::shader::Bind(rn, APP_SHADERS.axis_lines, hf::bufferattrib::GetQuad());
 			axisLines.Draw(rn);
 		}
+
+		VoxelTerrainDraw(rn);
 
 		hf::renderpass::End(rn);
 	}
