@@ -19,6 +19,17 @@ namespace app
             .flags = (VoxelFlags)(VOXEL_FLAG_IS_ROOT | VOXEL_FLAG_IS_LEAF),
         };
         VOXEL_TERRAIN.octreeRoot = &chunk.cells[1];
+
+        for (uint32_t x = 0; x < 255; x++)
+        {
+            for (uint32_t z = 0; z < 255; z++)
+            {
+                for (uint32_t y = 0; y < 255; y++)
+                {
+                    SetVoxel(hf::uvec3(x, y, z), VOXEL_GRASS);
+                }
+            }
+        }
     }
 
     void VoxelTerrainUpdate()
@@ -93,11 +104,20 @@ namespace app
 
     VoxelOctave* PruneBranch(VoxelOctave* octave)
     {
+        if (octave->parentLocation)
+        {
+            auto parent = GetOctave(octave->parentLocation);
+            auto children = GetOctave(parent->firstChildLocation);
+            auto type = children[0].type;
+            for (uint32_t i = 1; i < 8; i++) if (type != children[i].type) return octave;
+
+            //Free the memory
+            FreeOctaves(parent->firstChildLocation, 8);
+            parent->firstChildLocation = 0;
+            parent->flags = (VoxelFlags)(parent->flags | VOXEL_FLAG_IS_LEAF);
+            return PruneBranch(parent);
+        }
         return octave;
-        // if (octave->parentLocation)
-        // {
-        //
-        // }
     }
 
     VoxelType GetVoxel(hf::uvec3 position)
@@ -161,5 +181,19 @@ namespace app
         location.z = 0;
         MarkOctaves(chunk, 0, parentPath);
         return ToPath(location);
+    }
+
+    void FreeOctaves(OctavePath path, uint32_t count)
+    {
+        hf::uvec4 location = GetIndexPath(path);
+        auto& chunkL2 = VOXEL_TERRAIN.octreeChunks[location.w];
+        auto& chunkL1 = chunkL2.cells[location.x];
+        auto& chunkL0 = chunkL1.cells[location.y];
+        auto* octave = &chunkL0.cells[location.z];
+
+        memset(octave, 0, sizeof(VoxelOctave) * count);
+        chunkL0.occupancyMask &= ~(((1llu << count) - 1llu) << location.z);
+        if (chunkL0.occupancyMask == 0) chunkL1.occupancyMask &= ~(1llu << location.y);
+        if (chunkL1.occupancyMask == 0) chunkL2.occupancyMask &= ~(1llu << location.x);
     }
 }

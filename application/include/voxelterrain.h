@@ -60,6 +60,7 @@ namespace app
     VoxelOctave* PruneBranch(VoxelOctave* octave);
 
     OctavePath ReserveOctaves(OctavePath parentPath);
+    void FreeOctaves(OctavePath path, uint32_t count);
 }
 
 #endif //VOXELTERRAIN_H
