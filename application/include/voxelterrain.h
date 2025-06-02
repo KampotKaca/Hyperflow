@@ -52,15 +52,36 @@ namespace app
     void VoxelTerrainDraw(const hf::Ref<hf::Renderer>& rn);
 
     //returns the octave at a certain location
-    hf::uvec4 GetIndexPath(OctavePath path);
-    OctavePath ToPath(hf::uvec4 index);
     VoxelType GetVoxel(hf::uvec3 position);
-    VoxelOctave* GetOctave(OctavePath path);
     VoxelOctave* SetVoxel(hf::uvec3 position, VoxelType type);
     VoxelOctave* PruneBranch(VoxelOctave* octave);
 
+    OctavePath ReserveOctaves(hf::uvec4 path);
     OctavePath ReserveOctaves(OctavePath parentPath);
     void FreeOctaves(OctavePath path, uint32_t count);
+
+    inline OctavePath ToPath(const hf::uvec4 index) { return index.w << 18u | index.x << 12u | index.y << 6u | index.z; }
+
+    inline hf::uvec4 GetIndexPath(OctavePath path)
+    {
+        hf::uvec4 location{};
+        location.z = path & ((1u << 6) - 1u);
+        path >>= 6;
+        location.y = path & ((1u << 6) - 1u);
+        path >>= 6;
+        location.x = path & ((1u << 6) - 1u);
+        path >>= 6;
+        location.w = path & ((1u << 12) - 1u);
+
+        return location;
+    }
+
+    inline VoxelOctave* GetOctave(const hf::uvec4 location)
+    {
+        return &VOXEL_TERRAIN.octreeChunks[location.w].cells[location.x].cells[location.y].cells[location.z];
+    }
+
+    inline VoxelOctave* GetOctave(OctavePath path) { return GetOctave(GetIndexPath(path)); }
 }
 
 #endif //VOXELTERRAIN_H

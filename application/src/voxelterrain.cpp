@@ -20,16 +20,26 @@ namespace app
         };
         VOXEL_TERRAIN.octreeRoot = &chunk.cells[1];
 
-        for (uint32_t x = 0; x < 255; x++)
+        for (uint32_t x = 0; x < 32; x++)
         {
-            for (uint32_t z = 0; z < 255; z++)
+            for (uint32_t z = 0; z < 32; z++)
             {
-                for (uint32_t y = 0; y < 255; y++)
+                for (uint32_t y = 0; y < 32; y++)
+                {
+                    SetVoxel(hf::uvec3(x, y, z), VOXEL_GRASS);
+                }
+            }
+
+            for (uint32_t z = 128; z < 128 + 32; z++)
+            {
+                for (uint32_t y = 0; y < 32; y++)
                 {
                     SetVoxel(hf::uvec3(x, y, z), VOXEL_GRASS);
                 }
             }
         }
+
+        LOG_WARN("%s", "Finish");
     }
 
     void VoxelTerrainUpdate()
@@ -42,78 +52,58 @@ namespace app
 
     }
 
-    hf::uvec4 GetIndexPath(OctavePath path)
-    {
-        hf::uvec4 location{};
-        location.z = path & ((1u << 6) - 1u);
-        path >>= 6;
-        location.y = path & ((1u << 6) - 1u);
-        path >>= 6;
-        location.x = path & ((1u << 6) - 1u);
-        path >>= 6;
-        location.w = path & ((1u << 12) - 1u);
-
-        return location;
-    }
-
-    VoxelOctave* GetOctave(OctavePath path)
-    {
-        hf::uvec4 location = GetIndexPath(path);
-        return &VOXEL_TERRAIN.octreeChunks[location.w].cells[location.x].cells[location.y].cells[location.z];
-    }
-
     VoxelOctave* SetVoxel(hf::uvec3 position, VoxelType type)
     {
-        auto currentOctave = VOXEL_TERRAIN.octreeRoot;
-        hf::uvec4 currentOctavePath = hf::uvec4(0, 0, 1, 0);
+        auto* currentOctave = VOXEL_TERRAIN.octreeRoot;
         auto currentAxisSize = VOXEL_TERRAIN.terrainAxisSize;
-        hf::uvec3 pos = position;
+        hf::uvec4 pathIndex = hf::uvec4(0, 0, 1, 0);
+        uint32_t loopIndex = 0;
 
         while (currentAxisSize > 1)
         {
-            const auto step = currentAxisSize / 2;
-            uint32_t index = ((pos.x >= step) << 2) | ((pos.y >= step) << 1) || (pos.z >= step);
-            pos += hf::uvec3(index & 1, index & 2, index & 4) * step;
+            const auto step = currentAxisSize / 2u;
+            hf::uvec3 posOffset = hf::uvec3((uint32_t)(position.x >= step), (uint32_t)(position.y >= step), (uint32_t)(position.z >= step));
+            uint32_t index = (posOffset.x << 2u) | (posOffset.y << 1u) | posOffset.z;
+            position -= posOffset * step;
 
             auto& flags = currentOctave->flags;
             if (flags & VOXEL_FLAG_IS_LEAF)
             {
                 flags = (VoxelFlags)(flags & ~VOXEL_FLAG_IS_LEAF);
-                currentOctave->firstChildLocation = ReserveOctaves(ToPath(currentOctavePath));
+                currentOctave->firstChildLocation = ReserveOctaves(pathIndex);
             }
 
-            currentOctave = &GetOctave(currentOctave->firstChildLocation)[index];
+            pathIndex = GetIndexPath(currentOctave->firstChildLocation);
+            pathIndex.z += index;
+            currentOctave = GetOctave(pathIndex);
             currentAxisSize = step;
+            loopIndex++;
         }
 
         currentOctave->type = type;
         return PruneBranch(currentOctave);
     }
 
-    OctavePath ToPath(hf::uvec4 index)
-    {
-        OctavePath path = index.w;
-        path <<= 6;
-        path |= index.x;
-        path <<= 6;
-        path |= index.y;
-        path <<= 6;
-        path |= index.z;
-        return path;
-    }
-
     VoxelOctave* PruneBranch(VoxelOctave* octave)
     {
         if (octave->parentLocation)
         {
-            auto parent = GetOctave(octave->parentLocation);
-            auto children = GetOctave(parent->firstChildLocation);
-            auto type = children[0].type;
-            for (uint32_t i = 1; i < 8; i++) if (type != children[i].type) return octave;
+            const auto parent = GetOctave(octave->parentLocation);
+            const auto children = GetOctave(parent->firstChildLocation);
+
+            auto initialType = children[0].type;
+            if(initialType != children[1].type ||
+               initialType != children[2].type ||
+               initialType != children[3].type ||
+               initialType != children[4].type ||
+               initialType != children[5].type ||
+               initialType != children[6].type ||
+               initialType != children[7].type) return octave;
 
             //Free the memory
             FreeOctaves(parent->firstChildLocation, 8);
             parent->firstChildLocation = 0;
+            parent->type = initialType;
             parent->flags = (VoxelFlags)(parent->flags | VOXEL_FLAG_IS_LEAF);
             return PruneBranch(parent);
         }
@@ -124,15 +114,15 @@ namespace app
     {
         auto currentOctave = VOXEL_TERRAIN.octreeRoot;
         auto currentAxisSize = VOXEL_TERRAIN.terrainAxisSize;
-        hf::uvec3 pos = position;
 
         while (currentAxisSize > 1)
         {
             if (currentOctave->flags & VOXEL_FLAG_IS_LEAF) return currentOctave->type;
 
-            const auto step = currentAxisSize / 2;
-            uint32_t index = ((pos.x >= step) << 2) | ((pos.y >= step) << 1) || (pos.z >= step);
-            pos += hf::uvec3(index & 1, index & 2, index & 4) * step;
+            const auto step = currentAxisSize / 2u;
+            hf::uvec3 posOffset = hf::uvec3((uint32_t)(position.x >= step), (uint32_t)(position.y >= step), (uint32_t)(position.z >= step));
+            uint32_t index = (posOffset.x << 2u) | (posOffset.y << 1u) | posOffset.z;
+            position -= posOffset * step;
 
             currentOctave = &GetOctave(currentOctave->firstChildLocation)[index];
             currentAxisSize = step;
@@ -150,6 +140,8 @@ namespace app
             octave.parentLocation = parentPath;
         }
     }
+
+    OctavePath ReserveOctaves(hf::uvec4 path) { return ReserveOctaves(ToPath(path)); }
 
     OctavePath ReserveOctaves(OctavePath parentPath)
     {
@@ -193,7 +185,7 @@ namespace app
 
         memset(octave, 0, sizeof(VoxelOctave) * count);
         chunkL0.occupancyMask &= ~(((1llu << count) - 1llu) << location.z);
-        if (chunkL0.occupancyMask == 0) chunkL1.occupancyMask &= ~(1llu << location.y);
-        if (chunkL1.occupancyMask == 0) chunkL2.occupancyMask &= ~(1llu << location.x);
+        if (chunkL0.occupancyMask != ~0llu) chunkL1.occupancyMask &= ~(1llu << location.y);
+        if (chunkL1.occupancyMask != ~0llu) chunkL2.occupancyMask &= ~(1llu << location.x);
     }
 }
