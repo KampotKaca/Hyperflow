@@ -40,9 +40,14 @@ namespace app
 
     struct VoxelTerrain
     {
+        Chunk_L2 cl;
         VoxelOctave* octreeRoot{};
+        hf::uvec4 octreeRootIndex{};
         std::vector<Chunk_L2> octreeChunks{};
         uint32_t terrainAxisSize{};
+        uint32_t usedOctaves{};
+
+        BS::thread_pool<>* jobPool{};
     };
 
     extern VoxelTerrain VOXEL_TERRAIN;
@@ -50,14 +55,17 @@ namespace app
     void VoxelTerrainGenerate();
     void VoxelTerrainUpdate();
     void VoxelTerrainDraw(const hf::Ref<hf::Renderer>& rn);
+    void VoxelTerrainDispose();
 
     //returns the octave at a certain location
     VoxelType GetVoxel(hf::uvec3 position);
     VoxelOctave* SetVoxel(hf::uvec3 position, VoxelType type);
-    VoxelOctave* PruneBranch(VoxelOctave* octave);
+    VoxelOctave* PruneBranch(VoxelOctave* octave, uint32_t octaveDepth);
 
-    OctavePath ReserveOctaves(hf::uvec4 path);
-    OctavePath ReserveOctaves(OctavePath parentPath);
+    void TrySetChildren(VoxelOctave* octave, hf::uvec4 octaveIndex);
+    void TrySetChildren(VoxelOctave* octave, OctavePath octavePath);
+    OctavePath CreateChildren(hf::uvec4 parentIndex);
+    OctavePath CreateChildren(OctavePath parentPath);
     void FreeOctaves(OctavePath path, uint32_t count);
 
     inline OctavePath ToPath(const hf::uvec4 index) { return index.w << 18u | index.x << 12u | index.y << 6u | index.z; }

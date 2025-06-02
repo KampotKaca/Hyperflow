@@ -7,5 +7,6 @@
 #include "hfreemovecamera3d.h"
 #include "htransform.h"
 #include "haxislines.h"
+#include "BS_thread_pool.hpp"
 
 #endif //HCOMPONENTS_H

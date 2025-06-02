@@ -54,6 +54,7 @@ namespace app
 
 	void AppQuit()
 	{
+		VoxelTerrainDispose();
 		DebugQuit();
 	}
 

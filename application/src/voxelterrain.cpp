@@ -1,24 +1,23 @@
 #include "voxelterrain.h"
+#include "FastNoiseLite.h"
 
 namespace app
 {
     VoxelTerrain VOXEL_TERRAIN;
+    static void CreateVoxelOctreeRoot();
+    static void CreateUnPrunableBranches();
+
+    static void GenerateOctaveMap2D_Thread(VoxelOctave* octave, hf::uvec3 position, hf::uvec3 size)
+    {
+
+    }
 
     void VoxelTerrainGenerate()
     {
-        VOXEL_TERRAIN.octreeChunks = std::vector<Chunk_L2>(1);
-        VOXEL_TERRAIN.terrainAxisSize = (uint32_t)std::pow(2, VOXEL_TERRAIN_MAX_DEPTH);
+        VOXEL_TERRAIN.jobPool = new BS::thread_pool<>();
 
-        auto& chunk = VOXEL_TERRAIN.octreeChunks[0].cells[0].cells[0];
-        chunk.occupancyMask |= (1llu << 8llu) - 1llu;
-        chunk.cells[1] = VoxelOctave
-        {
-            .firstChildLocation = 0,
-            .parentLocation = 0,
-            .type = VOXEL_NONE,
-            .flags = (VoxelFlags)(VOXEL_FLAG_IS_ROOT | VOXEL_FLAG_IS_LEAF),
-        };
-        VOXEL_TERRAIN.octreeRoot = &chunk.cells[1];
+        CreateVoxelOctreeRoot();
+        CreateUnPrunableBranches();
 
         for (uint32_t x = 0; x < 32; x++)
         {
@@ -52,12 +51,18 @@ namespace app
 
     }
 
+    void VoxelTerrainDispose()
+    {
+        delete VOXEL_TERRAIN.jobPool;
+        VOXEL_TERRAIN.jobPool = nullptr;
+    }
+
     VoxelOctave* SetVoxel(hf::uvec3 position, VoxelType type)
     {
         auto* currentOctave = VOXEL_TERRAIN.octreeRoot;
         auto currentAxisSize = VOXEL_TERRAIN.terrainAxisSize;
-        hf::uvec4 pathIndex = hf::uvec4(0, 0, 1, 0);
-        uint32_t loopIndex = 0;
+        hf::uvec4 pathIndex = VOXEL_TERRAIN.octreeRootIndex;
+        uint32_t depth = VOXEL_TERRAIN_MAX_DEPTH;
 
         while (currentAxisSize > 1)
         {
@@ -66,27 +71,22 @@ namespace app
             uint32_t index = (posOffset.x << 2u) | (posOffset.y << 1u) | posOffset.z;
             position -= posOffset * step;
 
-            auto& flags = currentOctave->flags;
-            if (flags & VOXEL_FLAG_IS_LEAF)
-            {
-                flags = (VoxelFlags)(flags & ~VOXEL_FLAG_IS_LEAF);
-                currentOctave->firstChildLocation = ReserveOctaves(pathIndex);
-            }
+            TrySetChildren(currentOctave, pathIndex);
 
             pathIndex = GetIndexPath(currentOctave->firstChildLocation);
             pathIndex.z += index;
             currentOctave = GetOctave(pathIndex);
             currentAxisSize = step;
-            loopIndex++;
+            depth--;
         }
 
         currentOctave->type = type;
-        return PruneBranch(currentOctave);
+        return PruneBranch(currentOctave, depth);
     }
 
-    VoxelOctave* PruneBranch(VoxelOctave* octave)
+    VoxelOctave* PruneBranch(VoxelOctave* octave, uint32_t octaveDepth)
     {
-        if (octave->parentLocation)
+        if (octave->parentLocation && octaveDepth <= VOXEL_TERRAIN_MAX_CLEAR_DEPTH)
         {
             const auto parent = GetOctave(octave->parentLocation);
             const auto children = GetOctave(parent->firstChildLocation);
@@ -105,7 +105,7 @@ namespace app
             parent->firstChildLocation = 0;
             parent->type = initialType;
             parent->flags = (VoxelFlags)(parent->flags | VOXEL_FLAG_IS_LEAF);
-            return PruneBranch(parent);
+            return PruneBranch(parent, octaveDepth + 1);
         }
         return octave;
     }
@@ -141,10 +141,31 @@ namespace app
         }
     }
 
-    OctavePath ReserveOctaves(hf::uvec4 path) { return ReserveOctaves(ToPath(path)); }
-
-    OctavePath ReserveOctaves(OctavePath parentPath)
+    void TrySetChildren(VoxelOctave* octave, hf::uvec4 octaveIndex)
     {
+        auto& flags = octave->flags;
+        if (flags & VOXEL_FLAG_IS_LEAF)
+        {
+            flags = (VoxelFlags)(flags & ~VOXEL_FLAG_IS_LEAF);
+            octave->firstChildLocation = CreateChildren(octaveIndex);
+        }
+    }
+
+    void TrySetChildren(VoxelOctave* octave, OctavePath octavePath)
+    {
+        auto& flags = octave->flags;
+        if (flags & VOXEL_FLAG_IS_LEAF)
+        {
+            flags = (VoxelFlags)(flags & ~VOXEL_FLAG_IS_LEAF);
+            octave->firstChildLocation = CreateChildren(octavePath);
+        }
+    }
+
+    OctavePath CreateChildren(hf::uvec4 parentIndex) { return CreateChildren(ToPath(parentIndex)); }
+
+    OctavePath CreateChildren(OctavePath parentPath)
+    {
+        VOXEL_TERRAIN.usedOctaves += 8;
         hf::uvec4 location{};
         for (location.w = 0; location.w < VOXEL_TERRAIN.octreeChunks.size(); location.w++)
         {
@@ -187,5 +208,42 @@ namespace app
         chunkL0.occupancyMask &= ~(((1llu << count) - 1llu) << location.z);
         if (chunkL0.occupancyMask != ~0llu) chunkL1.occupancyMask &= ~(1llu << location.y);
         if (chunkL1.occupancyMask != ~0llu) chunkL2.occupancyMask &= ~(1llu << location.x);
+        VOXEL_TERRAIN.usedOctaves -= 8;
+    }
+
+    void CreateVoxelOctreeRoot()
+    {
+        VOXEL_TERRAIN.octreeChunks = std::vector<Chunk_L2>(1);
+        VOXEL_TERRAIN.terrainAxisSize = (uint32_t)std::pow(2, VOXEL_TERRAIN_MAX_DEPTH);
+        VOXEL_TERRAIN.octreeRootIndex = hf::uvec4(0, 0, 1, 0);
+
+        auto& chunk = VOXEL_TERRAIN.octreeChunks[VOXEL_TERRAIN.octreeRootIndex.w]
+                                          .cells[VOXEL_TERRAIN.octreeRootIndex.x]
+                                          .cells[VOXEL_TERRAIN.octreeRootIndex.y];
+        chunk.occupancyMask |= (1llu << 8llu) - 1llu;
+        chunk.cells[VOXEL_TERRAIN.octreeRootIndex.z] = VoxelOctave
+        {
+            .firstChildLocation = 0,
+            .parentLocation = 0,
+            .type = VOXEL_NONE,
+            .flags = (VoxelFlags)(VOXEL_FLAG_IS_ROOT | VOXEL_FLAG_IS_LEAF),
+        };
+        VOXEL_TERRAIN.octreeRoot = &chunk.cells[VOXEL_TERRAIN.octreeRootIndex.z];
+        VOXEL_TERRAIN.usedOctaves = 8;
+    }
+
+    static void CreateChildrenLoop(VoxelOctave* octave, hf::uvec4 index, uint32_t depth)
+    {
+        if (depth == 0) return;
+        TrySetChildren(octave, index);
+        depth--;
+        index = GetIndexPath(octave->firstChildLocation);
+        auto* children = GetOctave(index);
+        for (uint32_t i = 0; i < 8; i++) CreateChildrenLoop(&children[i], index, depth);
+    }
+
+    void CreateUnPrunableBranches()
+    {
+        CreateChildrenLoop(VOXEL_TERRAIN.octreeRoot, VOXEL_TERRAIN.octreeRootIndex, VOXEL_TERRAIN_MAX_DEPTH - VOXEL_TERRAIN_MAX_CLEAR_DEPTH);
     }
 }
