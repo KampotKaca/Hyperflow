@@ -52,12 +52,16 @@ void main()
     {
         vec3 delta = intersection - CAMERA.position;
         float dist = delta.x * delta.x + delta.y * delta.y + delta.z * delta.z;
-        float thickness = clamp(abs(CAMERA.position.y), 3.0, 10.0) * 0.1 * AXIS_LINES.planeNormal.w;
         vec2 absIntersection = abs(intersection.xz);
+
         vec2 fraction = absIntersection - floor(absIntersection);
 
-        if(fraction.x < thickness || fraction.x > (1.0 - thickness) ||
-           fraction.y < thickness || fraction.y > (1.0 - thickness))
+        vec2 smoothWidth = AXIS_LINES.planeNormal.w * fwidth(fraction);
+
+        vec2 lines = smoothstep(vec2(0.0), smoothWidth, fraction) *
+        smoothstep(vec2(0.0), smoothWidth, vec2(1.0) - fraction);
+
+        if(min(lines.x, lines.y) < 0.5)
         {
             outColor = AXIS_LINES.color / (1 + dist * 0.005);
             return;

@@ -15,8 +15,8 @@ namespace hf
         void Draw(const Ref<Renderer>& rn) const;
 
         vec3 planeNormal = { 0.0, 1.0, 0.0 };
-        float lineThickness = 0.02f;
-        vec4 color{ 1.0f, 1.0f, 1.0f, 0.2f };
+        float lineThickness = 1.5f;
+        vec4 color{ 1.0f, 1.0f, 1.0f, 0.1f };
     };
 }
 

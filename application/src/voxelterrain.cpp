@@ -7,10 +7,7 @@ namespace app
     static void CreateVoxelOctreeRoot();
     static void CreateUnPrunableBranches();
 
-    static void GenerateOctaveMap2D_Thread(VoxelOctave* octave, hf::uvec3 position, hf::uvec3 size)
-    {
-
-    }
+    static void GenerateOctaveMap2D_Thread(VoxelOctave* octave, hf::uvec3 position, hf::uvec3 size);
 
     void VoxelTerrainGenerate()
     {
