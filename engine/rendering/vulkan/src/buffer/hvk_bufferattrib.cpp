@@ -67,7 +67,7 @@ namespace hf
         return attrib > 0 && attrib <= GRAPHICS_DATA.bufferAttribs.size();
     }
 
-    const VkBufferAttrib& GetAttrib(BufferAttrib attrib)
+    URef<VkBufferAttrib>& GetAttrib(BufferAttrib attrib)
     {
         if (!IsValidAttrib(attrib)) throw GENERIC_EXCEPT("[Hyperflow]", "Invalid buffer attribute");
         return GRAPHICS_DATA.bufferAttribs[attrib - 1];

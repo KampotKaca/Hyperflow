@@ -9,14 +9,13 @@ namespace hf
     {
         explicit VkTextureLayout(const TextureLayoutDefinitionInfo& info);
         ~VkTextureLayout();
-        VkTextureLayout(VkTextureLayout&& other) noexcept;
 
         VkDescriptorSetLayout layout{};
         std::vector<TextureLayoutBindingInfo> bindingInfos{};
     };
 
     bool IsValidLayout(TextureLayout layout);
-    const VkTextureLayout& GetTextureLayout(TextureLayout layout);
+    URef<VkTextureLayout>& GetTextureLayout(TextureLayout layout);
 }
 
 #endif //HVK_TEXTURELAYOUT_H

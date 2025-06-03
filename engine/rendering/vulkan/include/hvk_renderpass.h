@@ -18,7 +18,6 @@ namespace hf
     {
         explicit VkDrawPass(const RenderPassDefinitionInfo& info);
         ~VkDrawPass();
-        VkDrawPass(VkDrawPass&& other) noexcept;
 
         VkRenderPass pass{};
 
@@ -33,7 +32,7 @@ namespace hf
     };
 
     bool IsValidRenderPass(RenderPass pass);
-    const VkDrawPass& GetRenderPass(RenderPass pass);
+    URef<VkDrawPass>& GetRenderPass(RenderPass pass);
 }
 
 #endif //HVK_RENDERPASS_H

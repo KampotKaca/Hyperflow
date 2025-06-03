@@ -21,6 +21,10 @@ namespace app
         alignas(16) hf::mat4 proj{};
         alignas(16) hf::mat4 invProj{};
         alignas(16) hf::mat4 viewProj{};
+
+        alignas(16) hf::mat4 padding0{};
+        alignas(16) hf::vec4 padding1{};
+        alignas(16) hf::vec4 padding2{};
     };
 
     struct TimeUniform
@@ -34,8 +38,7 @@ namespace app
     void UniformDefineAll();
     void UniformStartAll();
     void UniformUploadCameraTime(const hf::Ref<hf::Renderer>& rn, const hf::Camera3DCore& cameraCore,
-        hf::vec3 lookDirection, hf::vec3 position,
-        const hf::mat4& view, const hf::mat4& model);
+        hf::vec3 lookDirection, hf::vec3 position, const hf::mat4& view, const hf::mat4& model);
     void UniformBindCameraTime(const hf::Ref<hf::Renderer>& rn);
 }
 

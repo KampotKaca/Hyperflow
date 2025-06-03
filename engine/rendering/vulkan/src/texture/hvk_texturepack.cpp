@@ -45,7 +45,7 @@ namespace hf
                 {
                     GRAPHICS_DATA.preAllocBuffers.descImageBindings[writeCount] =
                     {
-                        .sampler = texSampler.sampler,
+                        .sampler = texSampler->sampler,
                         .imageView = binding.textures[j]->view,
                         .imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL
                     };

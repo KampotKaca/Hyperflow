@@ -20,13 +20,13 @@ namespace hf
             for (uint32_t i = 0; i < info.bufferCount; i++)
             {
                 auto& buffer = GetUniform(info.pBuffers[i]);
-                layouts[i] = buffer.layout;
+                layouts[i] = buffer->layout;
             }
 
             for (uint32_t i = 0; i < info.textureLayoutCount; i++)
             {
                 auto& layout = GetTextureLayout(info.pTextureLayouts[i]);
-                layouts[info.bufferCount + i] = layout.layout;
+                layouts[info.bufferCount + i] = layout->layout;
             }
 
             pipelineLayoutInfo.pSetLayouts = layouts.data();
@@ -47,18 +47,12 @@ namespace hf
         if (layout) vkDestroyPipelineLayout(GRAPHICS_DATA.defaultDevice->logicalDevice.device, layout, nullptr);
     }
 
-    VkShaderSetup::VkShaderSetup(VkShaderSetup&& other) noexcept
-    {
-        layout = other.layout;
-        other.layout = {};
-    }
-
     bool IsValidShaderSetup(ShaderSetup setup)
     {
         return setup > 0 && setup <= GRAPHICS_DATA.shaderSetups.size();
     }
 
-    const VkShaderSetup& GetShaderSetup(ShaderSetup setup)
+    URef<VkShaderSetup>& GetShaderSetup(ShaderSetup setup)
     {
         if (!IsValidShaderSetup(setup)) throw GENERIC_EXCEPT("[Hyperflow]", "Invalid shader setup");
         return GRAPHICS_DATA.shaderSetups[setup - 1];
@@ -66,6 +60,6 @@ namespace hf
 
     void BindShaderSetup(VkRenderer* rn, ShaderSetup setup)
     {
-        rn->currentLayout = GetShaderSetup(setup).layout;
+        rn->currentLayout = GetShaderSetup(setup)->layout;
     }
 }

@@ -18,7 +18,7 @@ namespace hf
     };
 
     bool IsValidAttrib(BufferAttrib attrib);
-    const VkBufferAttrib& GetAttrib(BufferAttrib attrib);
+    URef<VkBufferAttrib>& GetAttrib(BufferAttrib attrib);
 }
 
 #endif //HVK_BUFFERATTRIB_H

@@ -8,7 +8,7 @@ namespace hf
         : vertCount(info.vertexCount), attrib(info.bufferAttrib), memoryType(info.memoryType)
     {
         const auto& bufferAttrib = GetAttrib(attrib);
-        uint64_t bufferSize = (uint64_t)bufferAttrib.vertexSize * info.vertexCount;
+        uint64_t bufferSize = (uint64_t)bufferAttrib->vertexSize * info.vertexCount;
 
         switch (memoryType)
         {

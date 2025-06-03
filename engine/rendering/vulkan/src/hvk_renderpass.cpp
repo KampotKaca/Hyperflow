@@ -281,18 +281,12 @@ namespace hf
         if (pass) vkDestroyRenderPass(GRAPHICS_DATA.defaultDevice->logicalDevice.device, pass, nullptr);
     }
 
-    VkDrawPass::VkDrawPass(VkDrawPass&& other) noexcept
-    {
-        memcpy(this, &other, sizeof(VkDrawPass));
-        other.pass = VK_NULL_HANDLE;
-    }
-
     bool IsValidRenderPass(RenderPass pass)
     {
         return pass > 0 && pass <= GRAPHICS_DATA.renderPasses.size();
     }
 
-    const VkDrawPass& GetRenderPass(RenderPass pass)
+    URef<VkDrawPass>& GetRenderPass(RenderPass pass)
     {
         if (!IsValidRenderPass(pass)) throw GENERIC_EXCEPT("[Hyperflow]", "Invalid draw pass");
         return GRAPHICS_DATA.renderPasses[pass - 1];
@@ -306,19 +300,19 @@ namespace hf
         VkRenderPassBeginInfo renderPassInfo
         {
             .sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO,
-            .renderPass = drawPass.pass,
+            .renderPass = drawPass->pass,
             .framebuffer = frameBuffer->buffer,
             .renderArea =
             {
                 .offset = {0, 0},
                 .extent = frameBuffer->extent,
             },
-            .clearValueCount = (uint32_t)drawPass.clearValues.size(),
-            .pClearValues = drawPass.clearValues.data()
+            .clearValueCount = (uint32_t)drawPass->clearValues.size(),
+            .pClearValues = drawPass->clearValues.data()
         };
 
         vkCmdBeginRenderPass(rn->currentCommand, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
-        rn->currentPass = drawPass.pass;
+        rn->currentPass = drawPass->pass;
         UploadViewportAndScissor(rn);
     }
 
@@ -453,10 +447,10 @@ namespace hf
             .pass = pass,
         };
 
-        texCollection.depthTextures = std::vector<VkTexture*>(renderPass.depthAttachmentRefs.size());
-        for (uint32_t i = 0; i < renderPass.depthAttachmentRefs.size(); i++)
+        texCollection.depthTextures = std::vector<VkTexture*>(renderPass->depthAttachmentRefs.size());
+        for (uint32_t i = 0; i < renderPass->depthAttachmentRefs.size(); i++)
         {
-            auto& attachment = renderPass.attachments[renderPass.depthAttachmentRefs[i].attachment];
+            auto& attachment = renderPass->attachments[renderPass->depthAttachmentRefs[i].attachment];
 
             inter::rendering::TextureCreationInfo textureInfo
             {
@@ -484,18 +478,18 @@ namespace hf
             texCollection.depthTextures[i] = texture;
         }
 
-        texCollection.msaaTextures = std::vector<VkTexture*>(renderPass.msaaAttachmentRefs.size());
-        for (uint32_t i = 0; i < renderPass.msaaAttachmentRefs.size(); i++)
+        texCollection.msaaTextures = std::vector<VkTexture*>(renderPass->msaaAttachmentRefs.size());
+        for (uint32_t i = 0; i < renderPass->msaaAttachmentRefs.size(); i++)
         {
-            auto& msaaRef = renderPass.msaaAttachmentRefs[i];
-            auto& attachment = renderPass.attachments[msaaRef.attachment];
+            auto& msaaRef = renderPass->msaaAttachmentRefs[i];
+            auto& attachment = renderPass->attachments[msaaRef.attachment];
 
             inter::rendering::TextureCreationInfo textureInfo
             {
                 .size = uvec3(size, 1),
                 .channel = TextureChannel::RGBA,
                 .mipLevels = 1,
-                .samples = (uint32_t)renderPass.msaaSamples[i],
+                .samples = (uint32_t)renderPass->msaaSamples[i],
                 .data = nullptr,
                 .details
                 {

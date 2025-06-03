@@ -24,7 +24,13 @@ namespace hf
                 .pImmutableSamplers = nullptr,
             };
             GRAPHICS_DATA.preAllocBuffers.descLayoutBindings[i] = layout;
-            bufferSize += bindingInfo.elementSizeInBytes * bindingInfo.arraySize;
+
+            const auto offset = bindingInfo.elementSizeInBytes * bindingInfo.arraySize;
+            if (i != info.bindingCount - 1 && offset % 256 != 0)
+                LOG_ERROR("Invalid uniform alignment!!! "
+                          "Some devices only support alignment 256, this is not recommended. "
+                          "Alignment is only necessary when uniform has more than one binding");
+            bufferSize += offset;
         }
 
         VkDescriptorSetLayoutCreateInfo uboLayoutInfo
@@ -70,38 +76,32 @@ namespace hf
         }
     }
 
-    VkUniformBuffer::VkUniformBuffer(VkUniformBuffer&& other) noexcept
-    {
-        memcpy(this, &other, sizeof(VkUniformBuffer));
-        other.isLoaded = false;
-    }
-
     bool IsValidUniform(UniformBuffer buffer)
     {
         return buffer > 0 && buffer <= GRAPHICS_DATA.uniformBuffers.size();
     }
 
-    VkUniformBuffer& GetUniform(UniformBuffer buffer)
+    URef<VkUniformBuffer>& GetUniform(UniformBuffer buffer)
     {
         if (!IsValidUniform(buffer)) throw GENERIC_EXCEPT("[Hyperflow]", "Invalid uniform buffer");
         return GRAPHICS_DATA.uniformBuffers[buffer - 1];
     }
 
-    void SetupUniform(VkUniformBuffer& uniform)
+    void SetupUniform(const URef<VkUniformBuffer>& uniform)
     {
         uint32_t totalWrites = 0;
         uint32_t bufferOffset = 0;
 
-        for (uint32_t i = 0; i < uniform.bindings.size(); i++)
+        for (uint32_t i = 0; i < uniform->bindings.size(); i++)
         {
-            auto& binding = uniform.bindings[i];
+            auto& binding = uniform->bindings[i];
             for (uint32_t j = 0; j < binding.arraySize; j++)
             {
                 for (uint32_t frame = 0; frame < FRAMES_IN_FLIGHT; frame++)
                 {
                     GRAPHICS_DATA.preAllocBuffers.bufferInfos[totalWrites] =
                     {
-                        .buffer = uniform.buffers[frame],
+                        .buffer = uniform->buffers[frame],
                         .offset = bufferOffset,
                         .range = binding.elementSizeInBytes * binding.arraySize,
                     };
@@ -109,8 +109,8 @@ namespace hf
                     GRAPHICS_DATA.preAllocBuffers.descWrites[totalWrites] =
                     {
                         .sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
-                        .dstSet = uniform.descriptorSets[frame],
-                        .dstBinding = uniform.bindingIndex + i,
+                        .dstSet = uniform->descriptorSets[frame],
+                        .dstBinding = uniform->bindingIndex + i,
                         .dstArrayElement = j,
                         .descriptorCount = 1,
                         .descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
@@ -140,9 +140,9 @@ namespace hf
             auto& uploadInfo = info.pUploads[i];
             if (!uploadInfo.data) continue;
             auto& uniform = GetUniform(uploadInfo.buffer);
-            memcpy((uint8_t*)uniform.memoryMappings[currentFrame] + uploadInfo.offsetInBytes,
+            memcpy((uint8_t*)uniform->memoryMappings[currentFrame] + uploadInfo.offsetInBytes,
                 uploadInfo.data, uploadInfo.sizeInBytes);
-            GRAPHICS_DATA.preAllocBuffers.descriptors[i] = uniform.descriptorSets[currentFrame];
+            GRAPHICS_DATA.preAllocBuffers.descriptors[i] = uniform->descriptorSets[currentFrame];
         }
 
         vkCmdBindDescriptorSets(rn->currentCommand, (VkPipelineBindPoint)info.bindingType, rn->currentLayout,
@@ -157,7 +157,7 @@ namespace hf
         for (uint32_t i = 0; i < info.uniformCount; i++)
         {
             const auto& uniform = GetUniform(info.pUniforms[i]);
-            GRAPHICS_DATA.preAllocBuffers.descriptors[i] = uniform.descriptorSets[currentFrame];
+            GRAPHICS_DATA.preAllocBuffers.descriptors[i] = uniform->descriptorSets[currentFrame];
         }
 
         vkCmdBindDescriptorSets(rn->currentCommand, (VkPipelineBindPoint)info.bindingType, rn->currentLayout,

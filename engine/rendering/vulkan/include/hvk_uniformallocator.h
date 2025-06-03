@@ -9,13 +9,12 @@ namespace hf
     {
         explicit VkUniformAllocator(const UniformAllocatorDefinitionInfo& info);
         ~VkUniformAllocator();
-        VkUniformAllocator(VkUniformAllocator&& other) noexcept;
 
         VkDescriptorPool pool{};
     };
 
     bool IsValidAllocator(UniformAllocator allocator);
-    const VkUniformAllocator& GetAllocator(UniformAllocator allocator);
+    URef<VkUniformAllocator>& GetAllocator(UniformAllocator allocator);
 }
 
 #endif //HVK_UNIFORMALLOCATOR_H

@@ -11,6 +11,10 @@ layout(set = 0, binding = 0) uniform Camera
     mat4 proj;
     mat4 invProj;
     mat4 viewProj;
+
+    mat4 padding0;
+    vec4 padding1;
+    vec4 padding2;
 } CAMERA;
 
 layout (set = 0, binding = 1) uniform Time

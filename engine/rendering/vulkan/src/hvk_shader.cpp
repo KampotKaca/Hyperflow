@@ -46,7 +46,7 @@ namespace hf
         {
             .stageCount = 2,
             .pStages = shaderStages,
-            .layout = shaderSetup.layout,
+            .layout = shaderSetup->layout,
             .renderPass = info.renderPass,
             .blendingOptions = info.blendingOptions,
             .depthStencilOptions = info.depthStencilOptions,
@@ -97,9 +97,9 @@ namespace hf
         {
             .sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO,
             .vertexBindingDescriptionCount = 1,
-            .pVertexBindingDescriptions = &attribute.bindingDescription,
-            .vertexAttributeDescriptionCount = (uint32_t)attribute.attribDescriptions.size(),
-            .pVertexAttributeDescriptions = attribute.attribDescriptions.data(),
+            .pVertexBindingDescriptions = &attribute->bindingDescription,
+            .vertexAttributeDescriptionCount = (uint32_t)attribute->attribDescriptions.size(),
+            .pVertexAttributeDescriptions = attribute->attribDescriptions.data(),
         };
 
         VkPipelineInputAssemblyStateCreateInfo inputAssembly
@@ -154,16 +154,16 @@ namespace hf
             .alphaToOneEnable = VK_FALSE,
         };
 
-        if (pass.msaaSamples.size() > 0)
+        if (pass->msaaSamples.size() > 0)
         {
-            uint32_t maxSamples = pass.msaaSamples[0];
-            for (uint32_t i = 1; i < pass.msaaSamples.size(); i++)
-                if (maxSamples < pass.msaaSamples[i]) maxSamples = pass.msaaSamples[i];
+            uint32_t maxSamples = pass->msaaSamples[0];
+            for (uint32_t i = 1; i < pass->msaaSamples.size(); i++)
+                if (maxSamples < pass->msaaSamples[i]) maxSamples = pass->msaaSamples[i];
             multisampling.rasterizationSamples = (VkSampleCountFlagBits)maxSamples;
         }
         else multisampling.rasterizationSamples = VK_SAMPLE_COUNT_1_BIT;
 
-        if (!pass.msaaSamples.empty() && GRAPHICS_DATA.defaultDevice->features.sampleRateShading)
+        if (!pass->msaaSamples.empty() && GRAPHICS_DATA.defaultDevice->features.sampleRateShading)
         {
             multisampling.sampleShadingEnable = VK_TRUE;
             multisampling.minSampleShading = VK_MSAA_MIN_SAMPLE_SHADING;
@@ -223,7 +223,7 @@ namespace hf
             .pColorBlendState = &colorBlending,
             .pDynamicState = &dynamicState,
             .layout = info.layout,
-            .renderPass = pass.pass,
+            .renderPass = pass->pass,
             .subpass = 0,
             .basePipelineHandle = VK_NULL_HANDLE,
             .basePipelineIndex = -1,
@@ -244,7 +244,7 @@ namespace hf
             .maxDepthBounds = dsOptions.depthBounds.y
         };
 
-        if (pass.depthAttachmentRefs.size() > 0)
+        if (pass->depthAttachmentRefs.size() > 0)
             pipelineInfo.pDepthStencilState = &depthStencilInfo;
         else pipelineInfo.pDepthStencilState = nullptr;
 
@@ -255,7 +255,7 @@ namespace hf
     void BindShader(VkRenderer* rn, VkShader* shader, BufferAttrib attrib, RenderBindingType bindingType)
     {
 #if DEBUG
-        if (rn->currentLayout != GetShaderSetup(shader->shaderSetup).layout)
+        if (rn->currentLayout != GetShaderSetup(shader->shaderSetup)->layout)
             throw GENERIC_EXCEPT("[Hyperflow]", "Bind correct shader setup first");
 #endif
 

@@ -3,12 +3,6 @@
 
 namespace hf
 {
-    VkUniformAllocator::VkUniformAllocator(VkUniformAllocator&& other) noexcept
-    {
-        pool = other.pool;
-        other.pool = VK_NULL_HANDLE;
-    }
-
     VkUniformAllocator::VkUniformAllocator(const UniformAllocatorDefinitionInfo& info)
     {
         VkDescriptorPoolSize poolSize =
@@ -23,7 +17,7 @@ namespace hf
         for (uint32_t i = 0; i < info.bufferCount; i++)
         {
             auto& buffer = GetUniform(info.pBuffers[i]);
-            for (auto& binding : buffer.bindings)
+            for (auto& binding : buffer->bindings)
                 totalBufferDescriptors += binding.arraySize * FRAMES_IN_FLIGHT;
         }
 
@@ -47,7 +41,7 @@ namespace hf
                 auto& buffer = GetUniform(info.pBuffers[i]);
                 for (uint32_t k = 0; k < FRAMES_IN_FLIGHT; k++)
                 {
-                    GRAPHICS_DATA.preAllocBuffers.descLayouts[index] = buffer.layout;
+                    GRAPHICS_DATA.preAllocBuffers.descLayouts[index] = buffer->layout;
                     index++;
                 }
             }
@@ -67,7 +61,7 @@ namespace hf
         for (uint32_t i = 0; i < info.bufferCount; i++)
         {
             auto& uniform = GetUniform(info.pBuffers[i]);
-            for (auto& descriptorSet : uniform.descriptorSets)
+            for (auto& descriptorSet : uniform->descriptorSets)
             {
                 descriptorSet = GRAPHICS_DATA.preAllocBuffers.descriptors[setIndex];
                 setIndex++;
@@ -87,7 +81,7 @@ namespace hf
         return allocator > 0 && allocator <= GRAPHICS_DATA.uniformAllocators.size();
     }
 
-    const VkUniformAllocator& GetAllocator(UniformAllocator allocator)
+    URef<VkUniformAllocator>& GetAllocator(UniformAllocator allocator)
     {
         if (!IsValidAllocator(allocator)) throw GENERIC_EXCEPT("[Hyperflow]", "Invalid uniform allocator");
         return GRAPHICS_DATA.uniformAllocators[allocator - 1];

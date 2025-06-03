@@ -9,13 +9,12 @@ namespace hf
     {
         explicit VkShaderSetup(const ShaderSetupDefinitionInfo& info);
         ~VkShaderSetup();
-        VkShaderSetup(VkShaderSetup&& other) noexcept;
 
         VkPipelineLayout layout{};
     };
 
     bool IsValidShaderSetup(ShaderSetup setup);
-    const VkShaderSetup& GetShaderSetup(ShaderSetup setup);
+    URef<VkShaderSetup>& GetShaderSetup(ShaderSetup setup);
 }
 
 #endif //HVK_SHADERSETUP_H

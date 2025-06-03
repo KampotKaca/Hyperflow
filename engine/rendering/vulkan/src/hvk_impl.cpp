@@ -44,7 +44,7 @@ namespace hf::inter::rendering
 
     RenderPass DefineRenderPass(const RenderPassDefinitionInfo& info)
     {
-        GRAPHICS_DATA.renderPasses.emplace_back(info);
+        GRAPHICS_DATA.renderPasses.emplace_back(MakeURef<VkDrawPass>(info));
         return GRAPHICS_DATA.renderPasses.size();
     }
 
@@ -122,31 +122,31 @@ namespace hf::inter::rendering
 
     TextureSampler DefineTextureSampler(const TextureSamplerDefinitionInfo& info)
     {
-        GRAPHICS_DATA.textureSamplers.emplace_back(info);
+        GRAPHICS_DATA.textureSamplers.emplace_back(MakeURef<VkTextureSampler>(info));
         return GRAPHICS_DATA.textureSamplers.size();
     }
 
     TextureLayout DefineTextureLayout(const TextureLayoutDefinitionInfo& info)
     {
-        GRAPHICS_DATA.textureLayouts.emplace_back(info);
+        GRAPHICS_DATA.textureLayouts.emplace_back(MakeURef<VkTextureLayout>(info));
         return GRAPHICS_DATA.textureLayouts.size();
     }
 
     BufferAttrib DefineVertBufferAttrib(const BufferAttribDefinitionInfo& info, uint32_t fullStride)
     {
-        GRAPHICS_DATA.bufferAttribs.emplace_back(info, fullStride);
+        GRAPHICS_DATA.bufferAttribs.emplace_back(MakeURef<VkBufferAttrib>(info, fullStride));
         return GRAPHICS_DATA.bufferAttribs.size();
     }
 
     uint32_t GetVertBufferAttribSize(BufferAttrib attrib)
     {
         auto& attribute = GetAttrib(attrib);
-        return attribute.vertexSize;
+        return attribute->vertexSize;
     }
 
     UniformBuffer DefineUniformBuffer(const UniformBufferDefinitionInfo& info)
     {
-        GRAPHICS_DATA.uniformBuffers.emplace_back(info);
+        GRAPHICS_DATA.uniformBuffers.emplace_back(MakeURef<VkUniformBuffer>(info));
         return GRAPHICS_DATA.uniformBuffers.size();
     }
 
@@ -162,7 +162,7 @@ namespace hf::inter::rendering
 
     ShaderSetup DefineShaderSetup(const ShaderSetupDefinitionInfo& info)
     {
-        GRAPHICS_DATA.shaderSetups.emplace_back(info);
+        GRAPHICS_DATA.shaderSetups.emplace_back(MakeURef<VkShaderSetup>(info));
         return GRAPHICS_DATA.shaderSetups.size();
     }
 
@@ -173,7 +173,7 @@ namespace hf::inter::rendering
 
     UniformAllocator DefineUniformAllocator(const UniformAllocatorDefinitionInfo& info)
     {
-        GRAPHICS_DATA.uniformAllocators.emplace_back(info);
+        GRAPHICS_DATA.uniformAllocators.emplace_back(MakeURef<VkUniformAllocator>(info));
         return GRAPHICS_DATA.uniformAllocators.size();
     }
 
@@ -194,7 +194,7 @@ namespace hf::inter::rendering
             throw GENERIC_EXCEPT("[Hyperflow]", "Cannot modify static buffer");
 
         auto& attribute = GetAttrib(buffer->attrib);
-        auto fullSize = (uint64_t)attribute.vertexSize * info.vertexCount;
+        auto fullSize = (uint64_t)attribute->vertexSize * info.vertexCount;
         auto fullOffset = (uint64_t)info.offset * info.vertexCount;
 
         UploadBufferMemory(buffer->bufferMemory, info.data, fullOffset, fullSize);
@@ -281,7 +281,7 @@ namespace hf::inter::rendering
             auto vertBuffer = (VkVertBuffer*)info.pVertBuffers[i];
             vrn->vertBufferCache[i] = vertBuffer->buffer;
             vrn->drawOffsets[i] = offset;
-            offset += GetAttrib(vertBuffer->attrib).vertexSize;
+            offset += GetAttrib(vertBuffer->attrib)->vertexSize;
             vertCount = vertBuffer->vertCount;
         }
 

@@ -38,18 +38,12 @@ namespace hf
         if (layout) vkDestroyDescriptorSetLayout(GRAPHICS_DATA.defaultDevice->logicalDevice.device, layout, nullptr);
     }
 
-    VkTextureLayout::VkTextureLayout(VkTextureLayout&& other) noexcept
-    {
-        memcpy(this, &other, sizeof(*this));
-        other.layout = VK_NULL_HANDLE;
-    }
-
     bool IsValidLayout(TextureLayout layout)
     {
         return layout > 0 && layout <= GRAPHICS_DATA.textureLayouts.size();
     }
 
-    const VkTextureLayout& GetTextureLayout(TextureLayout layout)
+    URef<VkTextureLayout>& GetTextureLayout(TextureLayout layout)
     {
         if (!IsValidLayout(layout)) throw GENERIC_EXCEPT("[Hyperflow]", "Invalid texture layout");
         return GRAPHICS_DATA.textureLayouts[layout - 1];

@@ -10,7 +10,7 @@ namespace hf
         VkFramebufferCreateInfo frameBufferInfo
         {
             .sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO,
-            .renderPass = rnPass.pass,
+            .renderPass = rnPass->pass,
             .attachmentCount = attachmentCount,
             .pAttachments = pAttachments,
             .width = extent.width,

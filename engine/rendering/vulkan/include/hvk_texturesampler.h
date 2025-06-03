@@ -9,13 +9,12 @@ namespace hf
     {
         explicit VkTextureSampler(const TextureSamplerDefinitionInfo& info);
         ~VkTextureSampler();
-        VkTextureSampler(VkTextureSampler&& other) noexcept;
 
         VkSampler sampler{};
     };
 
     bool IsValidSampler(TextureSampler sampler);
-    const VkTextureSampler& GetSampler(TextureSampler sampler);
+    URef<VkTextureSampler>& GetSampler(TextureSampler sampler);
 }
 
 #endif //HVK_TEXTURESAMPLER_H

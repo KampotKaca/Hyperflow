@@ -171,13 +171,13 @@ namespace hf
         CommandPool graphicsPool{};
         VmaAllocator allocator{};
 
-        std::vector<VkBufferAttrib> bufferAttribs{};
-        std::vector<VkUniformBuffer> uniformBuffers{};
-        std::vector<VkUniformAllocator> uniformAllocators{};
-        std::vector<VkTextureSampler> textureSamplers{};
-        std::vector<VkTextureLayout> textureLayouts{};
-        std::vector<VkShaderSetup> shaderSetups{};
-        std::vector<VkDrawPass> renderPasses{};
+        std::vector<URef<VkBufferAttrib>> bufferAttribs{};
+        std::vector<URef<VkUniformBuffer>> uniformBuffers{};
+        std::vector<URef<VkUniformAllocator>> uniformAllocators{};
+        std::vector<URef<VkTextureSampler>> textureSamplers{};
+        std::vector<URef<VkTextureLayout>> textureLayouts{};
+        std::vector<URef<VkShaderSetup>> shaderSetups{};
+        std::vector<URef<VkDrawPass>> renderPasses{};
 
         std::vector<VkCopyBufferToBufferOperation> bufferToBufferCopyOperations{};
         std::vector<VkCopyBufferToImageOperation> bufferToImageCopyOperations{};

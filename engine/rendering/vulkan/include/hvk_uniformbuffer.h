@@ -9,7 +9,6 @@ namespace hf
     {
         explicit VkUniformBuffer(const UniformBufferDefinitionInfo& info);
         ~VkUniformBuffer();
-        VkUniformBuffer(VkUniformBuffer&& other) noexcept;
 
         bool isLoaded = false;
         uint32_t bindingIndex{};
@@ -23,8 +22,8 @@ namespace hf
     };
 
     bool IsValidUniform(UniformBuffer buffer);
-    VkUniformBuffer& GetUniform(UniformBuffer buffer);
-    void SetupUniform(VkUniformBuffer& uniform);
+    URef<VkUniformBuffer>& GetUniform(UniformBuffer buffer);
+    void SetupUniform(const URef<VkUniformBuffer>& uniform);
 }
 
 #endif //HVK_UNIFORMBUFFER_H

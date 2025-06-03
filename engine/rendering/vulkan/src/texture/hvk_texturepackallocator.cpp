@@ -47,7 +47,7 @@ namespace hf
 
                 for (uint32_t k = 0; k < FRAMES_IN_FLIGHT; k++)
                 {
-                    GRAPHICS_DATA.preAllocBuffers.descLayouts[currentIndex] = layout.layout;
+                    GRAPHICS_DATA.preAllocBuffers.descLayouts[currentIndex] = layout->layout;
                     currentIndex++;
                 }
             }

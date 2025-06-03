@@ -43,7 +43,7 @@ namespace hf
     {
         rn->mainPass = mainPass;
         auto& pass = GetRenderPass(mainPass);
-        if (!pass.hasPresentationAttachment) throw GENERIC_EXCEPT("[Vulkan]", "Main render pass must have presentation attachment");
+        if (!pass->hasPresentationAttachment) throw GENERIC_EXCEPT("[Vulkan]", "Main render pass must have presentation attachment");
         CreateSwapchain(rn->swapchain.surface, rn->targetSize, rn->vSyncMode,  &rn->swapchain);
         SetupViewportAndScissor(rn);
 

@@ -55,18 +55,12 @@ namespace hf
         if (sampler) vkDestroySampler(GRAPHICS_DATA.defaultDevice->logicalDevice.device, sampler, nullptr);
     }
 
-    VkTextureSampler::VkTextureSampler(VkTextureSampler&& other) noexcept
-    {
-        sampler = other.sampler;
-        other.sampler = nullptr;
-    }
-
     bool IsValidSampler(TextureSampler sampler)
     {
         return sampler > 0 && sampler <= GRAPHICS_DATA.textureSamplers.size();
     }
 
-    const VkTextureSampler& GetSampler(TextureSampler sampler)
+    URef<VkTextureSampler>& GetSampler(TextureSampler sampler)
     {
         if (!IsValidSampler(sampler)) throw GENERIC_EXCEPT("[Hyperflow]", "Invalid sampler");
         return GRAPHICS_DATA.textureSamplers[sampler - 1];
