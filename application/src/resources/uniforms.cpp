@@ -22,47 +22,49 @@ namespace app
 
     void UniformDefineAll()
     {
-        hf::UniformBufferBindingInfo cameraBindingInfo
+        //cameraTimeUniform
         {
-            .usageFlags = hf::ShaderUsageStage::Default,
-            .arraySize = 1,
-            .elementSizeInBytes = sizeof(CameraUniform)
-        };
+            hf::UniformBufferBindingInfo cameraBindingInfo
+            {
+                .usageFlags = hf::ShaderUsageStage::Default,
+                .arraySize = 1,
+                .elementSizeInBytes = sizeof(CameraUniform)
+            };
 
-        hf::UniformBufferBindingInfo timeBindingInfo
+            hf::UniformBufferBindingInfo timeBindingInfo
+            {
+                .usageFlags = hf::ShaderUsageStage::Default,
+                .arraySize = 1,
+                .elementSizeInBytes = sizeof(TimeUniform)
+            };
+
+            TEMP_ST.uniformBindingInfos[0] = cameraBindingInfo;
+            TEMP_ST.uniformBindingInfos[1] = timeBindingInfo;
+
+            hf::UniformBufferDefinitionInfo cameraBufferDefinitionInfo
+            {
+                .bindingId = 0,
+                .pBindings = TEMP_ST.uniformBindingInfos,
+                .bindingCount = 2
+            };
+
+            auto cameraTimeUniform = hf::uniformbuffer::Define(cameraBufferDefinitionInfo);
+
+            TEMP_ST.uniformBuffers[0] = cameraTimeUniform;
+            APP_UNIFORMS.cameraTimeBuffer = cameraTimeUniform;
+        }
+
+        //allocator
         {
-            .usageFlags = hf::ShaderUsageStage::Default,
-            .arraySize = 1,
-            .elementSizeInBytes = sizeof(TimeUniform)
-        };
+            hf::UniformAllocatorDefinitionInfo uniformAllocatorDefinitionInfo
+            {
+                .pBuffers = TEMP_ST.uniformBuffers,
+                .bufferCount = 1,
+            };
 
-        TEMP_ST.uniformBindingInfos[0] = cameraBindingInfo;
-        TEMP_ST.uniformBindingInfos[1] = timeBindingInfo;
-
-        hf::UniformBufferDefinitionInfo cameraBufferDefinitionInfo
-        {
-            .bindingId = 0,
-            .pBindings = TEMP_ST.uniformBindingInfos,
-            .bindingCount = 2
-        };
-
-        auto cameraTimeUniform = hf::uniformbuffer::Define(cameraBufferDefinitionInfo);
-
-        TEMP_ST.uniformBuffers[0] = cameraTimeUniform;
-
-        hf::UniformAllocatorDefinitionInfo uniformAllocatorDefinitionInfo
-        {
-            .pBuffers = TEMP_ST.uniformBuffers,
-            .bufferCount = 1,
-        };
-
-        auto allocator = hf::uniformallocator::Define(uniformAllocatorDefinitionInfo);
-
-        APP_UNIFORMS =
-        {
-            .allocator = allocator,
-            .cameraTimeBuffer = cameraTimeUniform
-        };
+            auto allocator = hf::uniformallocator::Define(uniformAllocatorDefinitionInfo);
+            APP_UNIFORMS.allocator = allocator;
+        }
     }
 
     void UniformStartAll()

@@ -118,6 +118,7 @@ namespace hf
             buffer::SubmitAll();
 
             for (auto& texture : std::ranges::views::values(HF.graphicsResources.textures)) CreateTexture_i(texture.get());
+            for (auto& cubemap : std::ranges::views::values(HF.graphicsResources.cubemaps)) CreateCubemap_i(cubemap.get());
             for (auto& texPack : std::ranges::views::values(HF.graphicsResources.texturePacks)) CreateTexturePack_i(texPack.get());
             texture::SubmitAll();
 
@@ -150,69 +151,159 @@ namespace hf
 
         void DefineStaticResources_i()
         {
-            BufferAttribFormat quadFormats[]
+            //Quat Attribute
             {
-                { .type = BufferDataType::F32, .size = 2, }
-            };
+                BufferAttribFormat formats[]
+                {
+                    { .type = BufferDataType::I32, .size = 2, }
+                };
 
-            BufferAttribDefinitionInfo quadAttribInfo
+                BufferAttribDefinitionInfo attribInfo
+                {
+                    .bindingId = 0,
+                    .formatCount = 1,
+                    .pFormats = formats
+                };
+
+                HF.staticResources.quadAttrib = bufferattrib::Define(attribInfo);
+            }
+
+            //Axis Line Uniform
             {
-                .bindingId = 0,
-                .formatCount = 1,
-                .pFormats = quadFormats
-            };
+                UniformBufferBindingInfo bindings[]
+                {
+                    { .usageFlags = ShaderUsageStage::All, .arraySize = 1, .elementSizeInBytes = sizeof(AxisLineUniform) }
+                };
 
-            HF.staticResources.quadAttrib = bufferattrib::Define(quadAttribInfo);
+                UniformBufferDefinitionInfo uniformInfo
+                {
+                    .bindingId = 0,
+                    .pBindings = bindings,
+                    .bindingCount = 1
+                };
 
-            UniformBufferBindingInfo quadBindings[]
+                HF.staticResources.axisLineUniform = uniformbuffer::Define(uniformInfo);
+            }
+
+            //Uniform Allocator Info
             {
-                { .usageFlags = ShaderUsageStage::All, .arraySize = 1, .elementSizeInBytes = sizeof(AxisLineUniform) }
-            };
+                UniformAllocatorDefinitionInfo uniformAllocatorInfo
+                {
+                    .pBuffers = &HF.staticResources.axisLineUniform,
+                    .bufferCount = 1
+                };
 
-            UniformBufferDefinitionInfo axisLineUniformInfo
+                HF.staticResources.staticUniformAllocator = uniformallocator::Define(uniformAllocatorInfo);
+            }
+
+            //Empty Texture Layout
             {
-                .bindingId = 0,
-                .pBindings = quadBindings,
-                .bindingCount = 1
-            };
+                TextureLayoutDefinitionInfo layoutInfo
+                {
+                    .pBindings = nullptr,
+                    .bindingCount = 0
+                };
 
-            HF.staticResources.axisLineUniform = uniformbuffer::Define(axisLineUniformInfo);
+                HF.staticResources.emptyLayout = texturelayout::Define(layoutInfo);
+            }
 
-            UniformAllocatorDefinitionInfo staticUniformAllocatorInfo
+            //Cubemap Sampler
             {
-                .pBuffers = &HF.staticResources.axisLineUniform,
-                .bufferCount = 1
-            };
+                TextureSamplerDefinitionInfo samplerInfo
+                {
+                    .filter = TextureFilter::Bilinear,
+                    .anisotropicFilter = TextureAnisotropicFilter::X16,
+                    .repeatMode = TextureRepeatMode::ClampToEdge,
+                    .useNormalizedCoordinates = true,
+                    .comparison = ComparisonOperation::Never,
+                };
 
-            HF.staticResources.staticUniformAllocator = uniformallocator::Define(staticUniformAllocatorInfo);
+                HF.staticResources.cubemapSampler = hf::texturesampler::Define(samplerInfo);
+            }
 
-            TextureLayoutDefinitionInfo emptyLayoutInfo
+            //Cubemap Attrib
             {
-                .pBindings = nullptr,
-                .bindingCount = 0
-            };
+                BufferAttribFormat formats[]
+                {
+                    { .type = BufferDataType::I32, .size = 3, }
+                };
 
-            HF.staticResources.emptyLayout = texturelayout::Define(emptyLayoutInfo);
+                BufferAttribDefinitionInfo attribInfo
+                {
+                    .bindingId = 0,
+                    .formatCount = 1,
+                    .pFormats = formats
+                };
+
+                HF.staticResources.cubeAttrib = bufferattrib::Define(attribInfo);
+            }
         }
 
         void LoadStaticResources_i()
         {
-            vec2 quadVertices[6]
+            //Quad Vertices
             {
-                { -1, -1 }, { 1, 1 }, { -1, 1 },
-                { -1, -1 }, { 1, -1 }, { 1, 1 },
-            };
+                ivec2 vertices[6]
+                {
+                    { -1, -1 }, { 1, 1 }, { -1, 1 },
+                    { -1, -1 }, { 1, -1 }, { 1, 1 },
+                };
 
-            VertBufferCreationInfo quadBufferInfo
+                VertBufferCreationInfo bufferInfo
+                {
+                    .bufferAttrib = HF.staticResources.quadAttrib,
+                    .memoryType = BufferMemoryType::Static,
+                    .usageFlags = BufferUsageType::All,
+                    .vertexCount = 6,
+                    .pVertices = vertices
+                };
+
+                HF.staticResources.quadBuffer = vertbuffer::Create(bufferInfo);
+            }
+
+            //Cube Vertices
             {
-                .bufferAttrib = HF.staticResources.quadAttrib,
-                .memoryType = BufferMemoryType::Static,
-                .usageFlags = BufferUsageType::All,
-                .vertexCount = 6,
-                .pVertices = quadVertices
-            };
+                ivec3 vertices[8]
+                {
+                    { -1, -1, -1 }, { -1, -1, 1 }, { 1, -1, 1 }, { 1, -1, -1 },
+                    { -1, 1, -1 }, { -1, 1, 1 }, { 1, 1, 1 }, { 1, 1, -1 },
+                };
 
-            HF.staticResources.quadBuffer = vertbuffer::Create(quadBufferInfo);
+                VertBufferCreationInfo bufferInfo
+                {
+                    .bufferAttrib = HF.staticResources.cubeAttrib,
+                    .memoryType = BufferMemoryType::Static,
+                    .usageFlags = BufferUsageType::All,
+                    .vertexCount = 8,
+                    .pVertices = vertices
+                };
+
+                HF.staticResources.cubeVertices = vertbuffer::Create(bufferInfo);
+            }
+
+            //Cube Indices
+            {
+                uint8_t indices[36]
+                {
+                    0, 1, 2,   2, 3, 0,  //Bottom
+                    4, 6, 5,   4, 7, 6,  //Top
+                    1, 5, 6,   6, 2, 1,  //Front
+                    0, 7, 3,   0, 4, 7,  //Back
+                    0, 5, 1,   0, 4, 5,  //Left
+                    3, 6, 2,   3, 7, 6   //Right
+                };
+
+                IndexBufferCreationInfo bufferInfo
+                {
+                    .indexFormat = BufferDataType::U8,
+                    .memoryType = BufferMemoryType::Static,
+                    .usageFlags = BufferUsageType::All,
+                    .indexCount = 36,
+                    .pIndices = indices
+                };
+
+                HF.staticResources.cubeIndices = indexbuffer::Create(bufferInfo);
+            }
         }
 
         void CreateRenderer_i(Renderer* rn)
@@ -303,6 +394,7 @@ namespace hf
             DestroyAllShaders_i(internalOnly);
 
             DestroyAllTextures_i(internalOnly);
+            DestroyAllCubemaps_i(internalOnly);
 
             DestroyAllTexturePackAllocators_i(internalOnly);
             DestroyAllTexturePacks_i(internalOnly);

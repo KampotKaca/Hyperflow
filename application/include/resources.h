@@ -11,5 +11,6 @@
 #include "resources/texturelayouts.h"
 #include "resources/texturepacks.h"
 #include "resources/shadersetups.h"
+#include "resources/cubemaps.h"
 
 #endif //RESOURCES_H

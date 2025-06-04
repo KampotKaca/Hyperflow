@@ -8,28 +8,34 @@ namespace app
 
     void ShaderSetupDefineAll()
     {
-        hf::ShaderSetupDefinitionInfo vikingRoomDefinitionInfo
+        //viking_room
         {
-            .pBuffers = &APP_UNIFORMS.cameraTimeBuffer,
-            .bufferCount = 1,
-            .pTextureLayouts = &APP_TEXTURE_LAYOUTS.viking_room,
-            .textureLayoutCount = 1
-        };
+            hf::ShaderSetupDefinitionInfo shaderSetupDefinitionInfo
+            {
+                .pBuffers = &APP_UNIFORMS.cameraTimeBuffer,
+                .bufferCount = 1,
+                .pTextureLayouts = &APP_TEXTURE_LAYOUTS.viking_room,
+                .textureLayoutCount = 1
+            };
 
-        APP_SHADER_SETUPS.viking_room = hf::shadersetup::Define(vikingRoomDefinitionInfo);
+            APP_SHADER_SETUPS.viking_room = hf::shadersetup::Define(shaderSetupDefinitionInfo);
+        }
 
-        std::array<hf::UniformBuffer, 2> axisLinesUniforms = { APP_UNIFORMS.cameraTimeBuffer };
-        hf::AxisLines::GetNecessaryUniforms(&axisLinesUniforms[1]);
-
-        auto emptyLayout = hf::texturelayout::GetEmpty();
-        hf::ShaderSetupDefinitionInfo axisLinesDefinitionInfo
+        //axis_lines
         {
-            .pBuffers = axisLinesUniforms.data(),
-            .bufferCount = axisLinesUniforms.size(),
-            .pTextureLayouts = &emptyLayout,
-            .textureLayoutCount = 1
-        };
+            std::array<hf::UniformBuffer, 2> axisLinesUniforms = { APP_UNIFORMS.cameraTimeBuffer };
+            hf::AxisLines::GetNecessaryUniforms(&axisLinesUniforms[1]);
 
-        APP_SHADER_SETUPS.axis_lines = hf::shadersetup::Define(axisLinesDefinitionInfo);
+            auto emptyLayout = hf::resources::GetEmptyTextureLayout();
+            hf::ShaderSetupDefinitionInfo shaderSetupDefinitionInfo
+            {
+                .pBuffers = axisLinesUniforms.data(),
+                .bufferCount = axisLinesUniforms.size(),
+                .pTextureLayouts = &emptyLayout,
+                .textureLayoutCount = 1
+            };
+
+            APP_SHADER_SETUPS.axis_lines = hf::shadersetup::Define(shaderSetupDefinitionInfo);
+        }
     }
 }

@@ -1,19 +1,44 @@
 #include "hyaml.h"
 #include "hcubemap.h"
+#include "htexture.h"
 #include "hinternal.h"
 #include "hstrconversion.h"
 #include "hyperflow.h"
 
 namespace hf
 {
-    Cubemap::Cubemap(const CubemapCreationInfo& info)
+    Cubemap::Cubemap(const CubemapCreationInfo& info) :
+        folderPath(info.folderPath), desiredChannel(info.desiredChannel), details(info.details),
+        mipLevels(info.mipLevels)
     {
+        texturePaths[0] = info.texturePaths.left;
+        texturePaths[1] = info.texturePaths.right;
+        texturePaths[2] = info.texturePaths.down;
+        texturePaths[3] = info.texturePaths.up;
+        texturePaths[4] = info.texturePaths.back;
+        texturePaths[5] = info.texturePaths.front;
 
+        TextureCreationInfo texInfo
+        {
+            .useAbsolutePath = true,
+            .desiredChannel = desiredChannel,
+            .mipLevels = mipLevels,
+            .details = details
+        };
+
+        std::string fullCubemapFolderPath = TO_RES_PATH(std::string("cubemaps/") + folderPath + "/");
+        for (uint32_t i = 0; i < 6; i++)
+        {
+            std::string path = fullCubemapFolderPath + texturePaths[i];
+            texInfo.filePath = path.c_str();
+
+            textures[i] = MakeRef<Texture>(texInfo);
+        }
     }
 
     Cubemap::~Cubemap()
     {
-
+        inter::rendering::DestroyCubemap_i(this);
     }
 
     namespace cubemap
@@ -58,6 +83,53 @@ namespace hf
                 }
 
                 info.mipLevels = std::stoi(root["mipLevels"].val().str);
+                std::string left, right, down, up, back, front;
+
+                {
+                    const auto v = root["left"].val();
+                    std::string_view vView{v.str, v.len};
+                    left = vView;
+                }
+
+                {
+                    const auto v = root["right"].val();
+                    std::string_view vView{v.str, v.len};
+                    right = vView;
+                }
+
+                {
+                    const auto v = root["down"].val();
+                    std::string_view vView{v.str, v.len};
+                    down = vView;
+                }
+
+                {
+                    const auto v = root["up"].val();
+                    std::string_view vView{v.str, v.len};
+                    up = vView;
+                }
+
+                {
+                    const auto v = root["back"].val();
+                    std::string_view vView{v.str, v.len};
+                    back = vView;
+                }
+
+                {
+                    const auto v = root["front"].val();
+                    std::string_view vView{v.str, v.len};
+                    front = vView;
+                }
+
+                info.texturePaths =
+                {
+                    .left = left.c_str(),
+                    .right = right.c_str(),
+                    .down = down.c_str(),
+                    .up = up.c_str(),
+                    .back = back.c_str(),
+                    .front = front.c_str()
+                };
 
                 utils::ReadTextureDetails(&tree, &root, info.details);
 
@@ -92,13 +164,23 @@ namespace hf
     {
         bool CreateCubemap_i(Cubemap* cubemap)
         {
-
+            bool state = false;
+            for (auto& texture : cubemap->textures)
+            {
+                const auto result = CreateTexture_i(texture.get());
+                state = state || result;
+            }
+            return state;
         }
 
         bool DestroyCubemap_i(Cubemap* cubemap)
         {
             bool state = false;
-            for (auto& texture : cubemap->textures) state = state || DestroyTexture_i(texture.get());
+            for (auto& texture : cubemap->textures)
+            {
+                const auto result = DestroyTexture_i(texture.get());
+                state = state || result;
+            }
             return state;
         }
 

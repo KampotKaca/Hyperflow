@@ -1,6 +1,13 @@
 desiredChannel: RGBA
 mipLevels: 1,
 
+left: left.png
+right: right.png
+down: down.png
+up: up.png
+back: back.png
+front: front.png
+
 type: Tex2D
 format: R8G8B8A8_Srgb
 aspectFlags:

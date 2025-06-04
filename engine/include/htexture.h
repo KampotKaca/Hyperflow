@@ -11,6 +11,7 @@ namespace hf
         ~Texture();
 
         std::string filePath{};
+        bool useAbsolutePath{};
         TextureChannel desiredChannel = TextureChannel::RGBA;
         TextureDetails details{};
         uint32_t mipLevels{};

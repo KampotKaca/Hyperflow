@@ -8,7 +8,7 @@
 namespace hf
 {
     Texture::Texture(const TextureCreationInfo& info) :
-        filePath(info.filePath), desiredChannel(info.desiredChannel), details(info.details),
+        filePath(info.filePath), useAbsolutePath(info.useAbsolutePath), desiredChannel(info.desiredChannel), details(info.details),
         mipLevels(info.mipLevels)
     {
         inter::rendering::CreateTexture_i(this);
@@ -100,7 +100,10 @@ namespace hf
         {
             if (tex->handle) return false;
 
-            std::string texLoc = TO_RES_PATH(std::string("textures/") + tex->filePath);
+            std::string texLoc{};
+
+            if (tex->useAbsolutePath) texLoc = tex->filePath;
+            else texLoc = TO_RES_PATH(std::string("textures/") + tex->filePath);
 
             if (!utils::FileExists(texLoc.c_str()))
             {
@@ -168,7 +171,5 @@ namespace hf
         {
             return inter::HF.renderingApi.api.DefineTextureLayout(info);
         }
-
-        TextureLayout GetEmpty() { return inter::HF.staticResources.emptyLayout; }
     }
 }

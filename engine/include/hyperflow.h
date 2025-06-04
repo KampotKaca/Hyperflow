@@ -185,14 +185,12 @@ namespace hf
 	namespace texturelayout
 	{
 		TextureLayout Define(const TextureLayoutDefinitionInfo& info);
-		TextureLayout GetEmpty();
 	}
 
 	namespace bufferattrib
 	{
 		BufferAttrib Define(const BufferAttribDefinitionInfo& info);
 		BufferAttrib Define(const char* assetPath);
-		BufferAttrib GetQuad();
 	}
 
 	namespace uniformbuffer
@@ -263,6 +261,17 @@ namespace hf
 		void DeallocateAligned(void* p, std::align_val_t align);
 
 		void ReadTextureDetails(void* yamlTree, void* yamlRoot, TextureDetails& result);
+	}
+
+	namespace resources
+	{
+		BufferAttrib GetQuadBufferAttrib();
+		TextureLayout GetEmptyTextureLayout();
+
+		BufferAttrib GetCubeBufferAttrib();
+		TextureSampler GetCubemapSampler();
+		Ref<VertBuffer> GetCubeVertices();
+		Ref<IndexBuffer> GetCubeIndices();
 	}
 }
 

@@ -50,6 +50,12 @@ namespace hf::inter
         Ref<VertBuffer> quadBuffer{};
 
         UniformAllocator staticUniformAllocator{};
+
+        TextureSampler cubemapSampler{};
+        BufferAttrib cubeAttrib{};
+
+        Ref<VertBuffer> cubeVertices{};
+        Ref<IndexBuffer> cubeIndices{};
     };
 
     struct Hyperflow

@@ -11,43 +11,49 @@ namespace app
 
     void ShaderLoadAll()
     {
-        hf::ShaderCreationInfo vikingShaderInfo
+        //Default Shader
         {
-            .renderPass = APP_RENDER_PASSES.mainPresentPass,
-            .setup = APP_SHADER_SETUPS.viking_room,
-            .texturePack = APP_TEXTURE_PACKS.viking_room_pack,
-            .supportedAttribCount = 1,
-            .pSupportedAttribs = &APP_BUFFER_ATTRIBUTES.pos_col_tex,
-            .vertexShaderLoc = "default",
-            .fragmentShaderLoc = "default",
-        };
+            hf::ShaderCreationInfo shaderInfo
+            {
+                .renderPass = APP_RENDER_PASSES.mainPresentPass,
+                .setup = APP_SHADER_SETUPS.viking_room,
+                .texturePack = APP_TEXTURE_PACKS.viking_room_pack,
+                .supportedAttribCount = 1,
+                .pSupportedAttribs = &APP_BUFFER_ATTRIBUTES.pos_col_tex,
+                .vertexShaderLoc = "default",
+                .fragmentShaderLoc = "default",
+            };
 
-        APP_SHADERS.viking_room = hf::shader::Create(vikingShaderInfo);
+            APP_SHADERS.viking_room = hf::shader::Create(shaderInfo);
+        }
 
-        auto quadAttrib = hf::bufferattrib::GetQuad();
-        hf::ShaderCreationInfo axisLinesShaderInfo
+        //Axis Lines Shader
         {
-            .renderPass = APP_RENDER_PASSES.mainPresentPass,
-            .setup = APP_SHADER_SETUPS.axis_lines,
-            .texturePack = nullptr,
-            .supportedAttribCount = 1,
-            .pSupportedAttribs = &quadAttrib,
-            .vertexShaderLoc = "axislines",
-            .fragmentShaderLoc = "axislines",
-            .alphaTestOptions =
+            auto quadAttrib = hf::resources::GetQuadBufferAttrib();
+            hf::ShaderCreationInfo shaderInfo
             {
-                .blendMode = hf::ShaderBlendMode::Alpha,
-                .blendOp = hf::ShaderBlendOp::XOr
-            },
-            .depthStencilOptions =
-            {
-                .enableDepth = true,
-                .writeDepth = false,
-                .comparisonFunc = hf::DepthComparisonFunction::LessOrEqual,
-                .enableDepthBounds = false,
-                .enableStencil = false,
-            }
-        };
-        APP_SHADERS.axis_lines = hf::shader::Create(axisLinesShaderInfo);
+                .renderPass = APP_RENDER_PASSES.mainPresentPass,
+                .setup = APP_SHADER_SETUPS.axis_lines,
+                .texturePack = nullptr,
+                .supportedAttribCount = 1,
+                .pSupportedAttribs = &quadAttrib,
+                .vertexShaderLoc = "axislines",
+                .fragmentShaderLoc = "axislines",
+                .alphaTestOptions =
+                {
+                    .blendMode = hf::ShaderBlendMode::Alpha,
+                    .blendOp = hf::ShaderBlendOp::XOr
+                },
+                .depthStencilOptions =
+                {
+                    .enableDepth = true,
+                    .writeDepth = false,
+                    .comparisonFunc = hf::DepthComparisonFunction::LessOrEqual,
+                    .enableDepthBounds = false,
+                    .enableStencil = false,
+                }
+            };
+            APP_SHADERS.axis_lines = hf::shader::Create(shaderInfo);
+        }
     }
 }

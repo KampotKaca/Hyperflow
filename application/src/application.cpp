@@ -24,6 +24,7 @@ namespace app
 	void AppLoadResources()
 	{
 		TextureLoadAll();
+		CubemapLoadAll();
 		MeshLoadAll();
 		TexturePackLoadAll();
 		ShaderLoadAll();
@@ -85,7 +86,7 @@ namespace app
 			hf::shadersetup::Bind(rn, APP_SHADER_SETUPS.axis_lines);
 			UniformBindCameraTime(rn);
 
-			hf::shader::Bind(rn, APP_SHADERS.axis_lines, hf::bufferattrib::GetQuad());
+			hf::shader::Bind(rn, APP_SHADERS.axis_lines, hf::resources::GetQuadBufferAttrib());
 			axisLines.Draw(rn);
 		}
 

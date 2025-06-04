@@ -11,7 +11,12 @@ namespace hf
         ~Cubemap();
 
         std::string folderPath{};
-        Ref<Texture> textures[6];
+        std::string texturePaths[6]{};
+        TextureChannel desiredChannel = TextureChannel::RGBA;
+        uint32_t mipLevels = 1;
+        TextureDetails details{};
+
+        Ref<Texture> textures[6]{};
     };
 }
 
