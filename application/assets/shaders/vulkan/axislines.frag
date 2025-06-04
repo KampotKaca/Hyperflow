@@ -45,27 +45,33 @@ bool RayIntersectsPlane(vec3 rayOrigin, vec3 rayDir, vec3 planeNormal, vec3 plan
     return true;
 }
 
+bool GetGridColor(float dist, vec2 absIntersection, float scale, float opacity, out vec4 o_Color)
+{
+    vec2 fraction = (absIntersection - ivec2(absIntersection * scale) / scale) * scale;
+    vec2 smoothWidth = AXIS_LINES.planeNormal.w * fwidth(fraction);
+
+    vec2 lines = smoothstep(vec2(0.0), smoothWidth, fraction) *
+    smoothstep(vec2(0.0), smoothWidth, vec2(1.0) - fraction);
+
+    if(min(lines.x, lines.y) < 0.5)
+    {
+        o_Color = AXIS_LINES.color / (1 + dist * opacity);
+        return true;
+    }
+    return false;
+}
+
 void main()
 {
     vec3 intersection;
     if(RayIntersectsPlane(CAMERA.position, o_RayWorld, vec3(AXIS_LINES.planeNormal), CENTER, intersection))
     {
-        vec3 delta = intersection - CAMERA.position;
-        float dist = delta.x * delta.x + delta.y * delta.y + delta.z * delta.z;
+        float dist = length(intersection - CAMERA.position);
         vec2 absIntersection = abs(intersection.xz);
 
-        vec2 fraction = absIntersection - floor(absIntersection);
-
-        vec2 smoothWidth = AXIS_LINES.planeNormal.w * fwidth(fraction);
-
-        vec2 lines = smoothstep(vec2(0.0), smoothWidth, fraction) *
-        smoothstep(vec2(0.0), smoothWidth, vec2(1.0) - fraction);
-
-        if(min(lines.x, lines.y) < 0.5)
-        {
-            outColor = AXIS_LINES.color / (1 + dist * 0.005);
-            return;
-        }
+        if(GetGridColor(dist, absIntersection, 0.01, 0.01, outColor)) return;
+        if(GetGridColor(dist, absIntersection, 0.1, 0.075, outColor)) return;
+        if(GetGridColor(dist, absIntersection, 1, 0.25, outColor)) return;
     }
 
     discard;
