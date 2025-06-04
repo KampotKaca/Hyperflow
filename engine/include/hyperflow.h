@@ -148,6 +148,14 @@ namespace hf
 		void SubmitAll();
 	}
 
+	namespace cubemap
+	{
+		Ref<Cubemap> Create(const CubemapCreationInfo& info);
+		Ref<Cubemap> Create(const char* assetPath);
+		void Destroy(const Ref<Cubemap>& cubemap);
+		void Destroy(const Ref<Cubemap>* pCubemaps, uint32_t count);
+	}
+
 	namespace texturepack
 	{
 		Ref<TexturePack> Create(const TexturePackCreationInfo& info);
@@ -253,6 +261,8 @@ namespace hf
 		[[nodiscard]] void* AllocateAligned(std::size_t n, std::align_val_t align);
 		void Deallocate(void* p);
 		void DeallocateAligned(void* p, std::align_val_t align);
+
+		void ReadTextureDetails(void* yamlTree, void* yamlRoot, TextureDetails& result);
 	}
 }
 

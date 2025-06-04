@@ -7,7 +7,7 @@ namespace hf
 {
     struct Texture
     {
-        Texture(const TextureCreationInfo& info);
+        explicit Texture(const TextureCreationInfo& info);
         ~Texture();
 
         std::string filePath{};

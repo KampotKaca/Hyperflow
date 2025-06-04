@@ -5,6 +5,7 @@
 #include "hshared.h"
 #include "hvertbuffer.h"
 #include "hindexbuffer.h"
+#include "hcubemap.h"
 #include "htime.h"
 #include "../rendering/include/hex_renderer.h"
 #include "../platforms/include/hex_platform.h"
@@ -38,6 +39,7 @@ namespace hf::inter
         phmap::flat_hash_map<std::string, BufferAttrib> bufferAttribs{};
         phmap::flat_hash_map<std::string, Ref<Mesh>> meshes{};
         phmap::flat_hash_map<std::string, Ref<Texture>> textures{};
+        phmap::flat_hash_map<std::string, Ref<Cubemap>> cubemaps{};
     };
 
     struct StaticResources
@@ -114,6 +116,9 @@ namespace hf::inter
         bool CreateTexture_i(Texture* tex);
         bool DestroyTexture_i(Texture* tex);
 
+        bool CreateCubemap_i(Cubemap* cubemap);
+        bool DestroyCubemap_i(Cubemap* cubemap);
+
         bool CreateTexturePack_i(TexturePack* texPack);
         bool DestroyTexturePack_i(TexturePack* texPack);
 
@@ -125,6 +130,7 @@ namespace hf::inter
         void DestroyAllStorageBuffers_i(bool internalOnly = false);
         void DestroyAllMeshes_i(bool internalOnly = false);
         void DestroyAllTextures_i(bool internalOnly = false);
+        void DestroyAllCubemaps_i(bool internalOnly = false);
         void DestroyAllTexturePacks_i(bool internalOnly = false);
         void DestroyAllTexturePackAllocators_i(bool internalOnly = false);
         void DestroyAllShaders_i(bool internalOnly = false);

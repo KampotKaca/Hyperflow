@@ -62,55 +62,7 @@ namespace hf
 
                 info.mipLevels = std::stoi(root["mipLevels"].val().str);
 
-                {
-                    const auto v = root["type"].val();
-                    std::string_view vView{v.str, v.len};
-                    info.details.type = STRING_TO_TEXTURE_TYPE(vView);
-                }
-
-                {
-                    const auto v = root["format"].val();
-                    std::string_view vView{v.str, v.len};
-                    info.details.format = STRING_TO_TEXTURE_FORMAT(vView);
-                }
-
-                {
-                    auto aspectFlags = root["aspectFlags"];
-                    for (ryml::NodeRef fmt : aspectFlags.children())
-                    {
-                        auto v = fmt.val();
-                        std::string_view vView{v.str, v.len};
-                        info.details.aspectFlags |= STRING_TO_TEXTURE_ASPECT_FLAGS(vView);
-                    }
-                }
-
-                {
-                    const auto v = root["tiling"].val();
-                    std::string_view vView{v.str, v.len};
-                    info.details.tiling = STRING_TO_TEXTURE_TILING(vView);
-                }
-
-                {
-                    auto usageFlags = root["usageFlags"];
-                    for (ryml::NodeRef fmt : usageFlags.children())
-                    {
-                        auto v = fmt.val();
-                        std::string_view vView{v.str, v.len};
-                        info.details.usageFlags |= STRING_TO_TEXTURE_USAGE_FLAGS(vView);
-                    }
-                }
-
-                {
-                    const auto v = root["memoryType"].val();
-                    std::string_view vView{v.str, v.len};
-                    info.details.memoryType = STRING_TO_BUFFER_MEMORY_TYPE(vView);
-                }
-
-                {
-                    const auto v = root["finalLayout"].val();
-                    std::string_view vView{v.str, v.len};
-                    info.details.finalLayout = STRING_TO_TEXTURE_RESULT_LAYOUT_TYPE(vView);
-                }
+                utils::ReadTextureDetails(&tree, &root, info.details);
 
                 auto texture = Create(info);
                 inter::HF.graphicsResources.textures[texture->filePath] = texture;

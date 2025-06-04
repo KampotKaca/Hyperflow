@@ -106,6 +106,7 @@ namespace hf
 	struct Renderer;
 	struct Shader;
 	struct Texture;
+	struct Cubemap;
 	struct TexturePack;
 	struct TexturePackAllocator;
 
@@ -121,6 +122,10 @@ namespace hf
 	typedef uint32_t TextureSampler;
 	typedef uint32_t ShaderSetup;
 	typedef uint32_t RenderPass;
+
+	enum class CubemapTextureType { Left, Right, Down, Up, Back, Front };
+
+	constexpr std::string GET_CUBEMAP_TEXTURE_TYPE_NAME[] = { "left", "right", "down", "up", "back", "front" };
 
 	enum class BufferDataType { U8, I8, U16, I16, U32, I32, U64, I64, F16, F32, F64, Count };
 	enum class BufferMemoryType { Static, WriteOnly, ReadWrite, Count };
@@ -547,6 +552,14 @@ namespace hf
 	struct TextureCreationInfo
 	{
 		const char* filePath{};
+		TextureChannel desiredChannel = TextureChannel::RGBA;
+		uint32_t mipLevels = 1;
+		TextureDetails details{};
+	};
+
+	struct CubemapCreationInfo
+	{
+		const char* folderPath{};
 		TextureChannel desiredChannel = TextureChannel::RGBA;
 		uint32_t mipLevels = 1;
 		TextureDetails details{};
