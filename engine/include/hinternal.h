@@ -94,6 +94,9 @@ namespace hf::inter
 
     namespace rendering
     {
+        void StartRenderPacket_i(const Ref<Renderer>& rn);
+        void EndRenderPacket_i(const Ref<Renderer>& rn);
+
         void LoadApi_i(RenderingApiType api);
         void UnloadCurrentApi_i(bool retainReferences);
         void DefineStaticResources_i();

@@ -62,6 +62,9 @@ namespace app
 	void AppPreRender(const hf::Ref<hf::Renderer>& rn)
 	{
 		DebugPreRender(rn);
+		UniformUploadCameraTime(rn, freeMoveCamera.camera3D.core,
+			freeMoveCamera.camera3D.direction, freeMoveCamera.camera3D.position,
+			freeMoveCamera.camera3D.ToViewMat4(), vikingRoomTransform.ToMat4());
 	}
 
 	void AppRender(const hf::Ref<hf::Renderer>& rn)
@@ -71,9 +74,7 @@ namespace app
 		hf::renderpass::Begin(rn, APP_RENDER_PASSES.mainPresentPass);
 		hf::shadersetup::Bind(rn, APP_SHADER_SETUPS.viking_room);
 
-		UniformUploadCameraTime(rn, freeMoveCamera.camera3D.core,
-			freeMoveCamera.camera3D.direction, freeMoveCamera.camera3D.position,
-			freeMoveCamera.camera3D.ToViewMat4(), vikingRoomTransform.ToMat4());
+		UniformBindCameraTime(rn);
 		// UniformUploadCameraTime(rn, anchoredCamera.core, anchoredCamera.ToViewMat4());
 
 		hf::shader::Bind(rn, APP_SHADERS.viking_room, APP_BUFFER_ATTRIBUTES.pos_col_tex);

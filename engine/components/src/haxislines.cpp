@@ -25,13 +25,21 @@ namespace hf
 
         UniformBufferUploadInfo uploadInfo
         {
-            .bindingType = RenderBindingType::Graphics,
-            .setBindingIndex = 1,
             .pUploads = &upload,
             .uploadCount = 1
         };
 
         uniformbuffer::Upload(rn, uploadInfo);
+
+        UniformBufferBindInfo bindInfo
+        {
+            .bindingType = RenderBindingType::Graphics,
+            .setBindingIndex = 1,
+            .pUniforms = &inter::HF.staticResources.axisLineUniform,
+            .uniformCount = 1
+        };
+
+        uniformbuffer::Bind(rn, bindInfo);
 
         DrawCallInfo info
         {

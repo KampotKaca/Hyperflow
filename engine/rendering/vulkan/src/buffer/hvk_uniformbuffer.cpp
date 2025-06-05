@@ -142,12 +142,7 @@ namespace hf
             auto& uniform = GetUniform(uploadInfo.buffer);
             memcpy((uint8_t*)uniform->memoryMappings[currentFrame] + uploadInfo.offsetInBytes,
                 uploadInfo.data, uploadInfo.sizeInBytes);
-            GRAPHICS_DATA.preAllocBuffers.descriptors[i] = uniform->descriptorSets[currentFrame];
         }
-
-        vkCmdBindDescriptorSets(rn->currentCommand, (VkPipelineBindPoint)info.bindingType, rn->currentLayout,
-        info.setBindingIndex, info.uploadCount, GRAPHICS_DATA.preAllocBuffers.descriptors,
-        0, nullptr);
     }
 
     void BindUniforms(const VkRenderer* rn, const UniformBufferBindInfo& info)

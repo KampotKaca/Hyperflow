@@ -102,8 +102,6 @@ namespace app
 
         hf::UniformBufferUploadInfo uniformBufferUploads
         {
-            .bindingType = hf::RenderBindingType::Graphics,
-            .setBindingIndex = 0,
             .pUploads = TEMP_ST.uploads,
             .uploadCount = 1
         };

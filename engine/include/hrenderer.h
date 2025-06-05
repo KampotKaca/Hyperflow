@@ -3,6 +3,7 @@
 
 #include "hshared.h"
 #include "../config.h"
+#include "hdrawprocess.h"
 
 namespace hf
 {
@@ -24,6 +25,12 @@ namespace hf
 		void* handle{};
 		void* vertBufferCache[MAX_NUM_BUFFER_CACHE]{};
 		RendererEventInfo eventInfo{};
+
+		RenderPacketInfo packetQueue[4];
+		uint8_t packetCount{};
+
+		RenderPacketDrawProcess currentDraw{};
+		bool isDrawing = false;
 	};
 }
 

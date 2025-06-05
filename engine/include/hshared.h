@@ -343,8 +343,6 @@ namespace hf
 
 	struct UniformBufferUploadInfo
 	{
-		RenderBindingType bindingType = RenderBindingType::Graphics;
-		uint32_t setBindingIndex = 0;
 		UniformBufferUpload* pUploads{};
 		uint32_t uploadCount{};
 	};
