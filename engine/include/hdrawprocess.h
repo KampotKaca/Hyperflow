@@ -11,16 +11,16 @@ namespace hf
         uint32_t texpackStart{};
         uint32_t texpackCount{};
 
-        uint32_t uniformStart{};
-        uint32_t uniformCount{};
-
         uint32_t drawCallStart{};
         uint32_t drawCallCount{};
+
+        uint32_t uniformStart{};
+        uint32_t uniformCount{};
     };
 
     struct ShaderPacketInfo
     {
-        Ref<Shader> shader{};
+        ShaderBindingInfo bindingInfo{};
         uint16_t drawPacketStart{};
         uint16_t drawPacketCount{};
     };
@@ -30,6 +30,12 @@ namespace hf
         ShaderSetup shaderSetup{};
         uint16_t shaderStart{};
         uint16_t shaderCount{};
+
+        uint32_t uniformStart{};
+        uint32_t uniformCount{};
+
+        uint32_t texpackStart{};
+        uint32_t texpackCount{};
     };
 
     struct RenderPassPacketInfo
@@ -39,7 +45,7 @@ namespace hf
         uint16_t shaderSetupCount{};
     };
 
-    struct RenderPacketInfo
+    struct RenderPacket
     {
         RenderPassPacketInfo passes[RENDERING_MAX_NUM_RENDER_PASSES];
         uint8_t passCount{};
@@ -70,7 +76,7 @@ namespace hf
         ShaderPacketInfo* currentShader{};
         DrawPacketInfo* currentDraw{};
 
-        RenderPacketInfo packet{};
+        RenderPacket packet{};
     };
 
     void StartRenderPassPacket(const Ref<Renderer>& rn, RenderPass pass);
@@ -79,12 +85,16 @@ namespace hf
     void StartShaderSetupPacket(const Ref<Renderer>& rn, ShaderSetup shaderSetup);
     void EndShaderSetupPacket(const Ref<Renderer>& rn);
 
-    void StartShaderPacket(const Ref<Renderer>& rn, const Ref<Shader>& shader);
+    void StartShaderPacket(const Ref<Renderer>& rn, const ShaderBindingInfo& shaderBindingInfo);
     void EndShaderPacket(const Ref<Renderer>& rn);
 
     void StartDrawPacket(const Ref<Renderer>& rn);
     void EndDrawPacket(const Ref<Renderer>& rn);
 
+    void ShaderSetupAdd_UniformBinding(const Ref<Renderer>& rn, const UniformBufferBindInfo& uniformBinding);
+    void ShaderSetupAdd_TexturePackBinding(const Ref<Renderer>& rn, const Ref<TexturePack>& texPack);
+
+    void PacketAdd_DrawCall(const Ref<Renderer>& rn, const Ref<Mesh>& mesh);
     void PacketAdd_DrawCall(const Ref<Renderer>& rn, const DrawCallInfo& drawCall);
     void PacketAdd_UniformBinding(const Ref<Renderer>& rn, const UniformBufferBindInfo& uniformBinding);
     void PacketAdd_TexturePackBinding(const Ref<Renderer>& rn, const Ref<TexturePack>& texPack);

@@ -119,6 +119,6 @@ namespace app
             .uniformCount = 1
         };
 
-        hf::uniformbuffer::Bind(rn, info);
+        hf::ShaderSetupAdd_UniformBinding(rn, info);
     }
 }

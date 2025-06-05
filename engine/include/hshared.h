@@ -127,6 +127,7 @@ namespace hf
 
 	enum class BufferDataType { U8, I8, U16, I16, U32, I32, U64, I64, F16, F32, F64, Count };
 	enum class BufferMemoryType { Static, WriteOnly, ReadWrite, Count };
+	enum class RenderBindingType { Graphics = 0, Compute = 1, RayTracing = 1000165000, HuaweiSubpassShading = 1000369003 };
 
 	enum class AccessType
 	{
@@ -293,6 +294,13 @@ namespace hf
 		ShaderDepthStencilOptions depthStencilOptions{};
 	};
 
+	struct ShaderBindingInfo
+	{
+		Ref<Shader> shader{};
+		BufferAttrib attrib{};
+		RenderBindingType bindingPoint = RenderBindingType::Graphics;
+	};
+
 	template<typename T>
 	struct OwnedData
 	{
@@ -330,8 +338,6 @@ namespace hf
 		BufferUsageType usageFlags = BufferUsageType::Storage;
 		void* data{};
 	};
-
-	enum class RenderBindingType { Graphics = 0, Compute = 1, RayTracing = 1000165000, HuaweiSubpassShading = 1000369003 };
 
 	struct UniformBufferUpload
 	{

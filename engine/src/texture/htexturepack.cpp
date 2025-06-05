@@ -119,11 +119,6 @@ namespace hf
             else uploadInfo.pTextures = nullptr;
             inter::HF.renderingApi.api.UploadTexturePack(pack->handle, uploadInfo);
         }
-
-        void Bind(const Ref<Renderer>& rn, const Ref<TexturePack>& pack)
-        {
-            inter::HF.renderingApi.api.BindTexturePack(rn->handle, pack->handle);
-        }
     }
 
     namespace inter::rendering

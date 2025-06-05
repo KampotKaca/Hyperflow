@@ -51,54 +51,6 @@ namespace hf
         }
 
         bool IsRunning(const Ref<Shader>& shader) { return shader->handle; }
-
-        void Bind(const Ref<Shader>& shader, BufferAttrib attrib)
-        {
-            inter::rendering::ShaderBindingInfo bindingInfo
-            {
-                .shader = shader->handle,
-                .attrib = attrib,
-                .bindingPoint = RenderBindingType::Graphics
-            };
-
-            inter::HF.renderingApi.api.BindShader(inter::HF.mainWindow->renderer->handle, bindingInfo);
-        }
-
-        void Bind(const Ref<Shader>& shader, BufferAttrib attrib, RenderBindingType bindingPoint)
-        {
-            inter::rendering::ShaderBindingInfo bindingInfo
-            {
-                .shader = shader->handle,
-                .attrib = attrib,
-                .bindingPoint = bindingPoint
-            };
-
-            inter::HF.renderingApi.api.BindShader(inter::HF.mainWindow->renderer->handle, bindingInfo);
-        }
-
-        void Bind(const Ref<Renderer>& renderer, const Ref<Shader>& shader, BufferAttrib attrib)
-        {
-            inter::rendering::ShaderBindingInfo bindingInfo
-            {
-                .shader = shader->handle,
-                .attrib = attrib,
-                .bindingPoint = RenderBindingType::Graphics
-            };
-
-            inter::HF.renderingApi.api.BindShader(renderer->handle, bindingInfo);
-        }
-
-        void Bind(const Ref<Renderer>& renderer, const Ref<Shader>& shader, BufferAttrib attrib, RenderBindingType bindingPoint)
-        {
-            inter::rendering::ShaderBindingInfo bindingInfo
-           {
-               .shader = shader->handle,
-               .attrib = attrib,
-               .bindingPoint = bindingPoint
-           };
-
-            inter::HF.renderingApi.api.BindShader(renderer->handle, bindingInfo);
-        }
     }
 
     namespace inter::rendering
@@ -182,11 +134,6 @@ namespace hf
         ShaderSetup Define(const ShaderSetupDefinitionInfo& info)
         {
             return (ShaderSetup)inter::HF.renderingApi.api.DefineShaderSetup(info);
-        }
-
-        void Bind(const Ref<Renderer>& rn, ShaderSetup setup)
-        {
-            inter::HF.renderingApi.api.BindShaderSetup(rn->handle, setup);
         }
     }
 }

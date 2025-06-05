@@ -23,10 +23,9 @@ namespace hf
 		uvec2 size{};
 		const Window* window{};
 		void* handle{};
-		void* vertBufferCache[MAX_NUM_BUFFER_CACHE]{};
 		RendererEventInfo eventInfo{};
 
-		RenderPacketInfo packetQueue[4];
+		RenderPacket packetQueue[RENDERING_MAX_PACKET_QUEUE_SIZE];
 		uint8_t packetCount{};
 
 		RenderPacketDrawProcess currentDraw{};

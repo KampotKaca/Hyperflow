@@ -71,28 +71,57 @@ namespace app
 	{
 		DebugRender(rn);
 
-		hf::renderpass::Begin(rn, APP_RENDER_PASSES.mainPresentPass);
-		hf::shadersetup::Bind(rn, APP_SHADER_SETUPS.viking_room);
-
-		UniformBindCameraTime(rn);
-		// UniformUploadCameraTime(rn, anchoredCamera.core, anchoredCamera.ToViewMat4());
-
-		hf::shader::Bind(rn, APP_SHADERS.viking_room, APP_BUFFER_ATTRIBUTES.pos_col_tex);
-		hf::texturepack::Bind(rn, APP_TEXTURE_PACKS.viking_room_pack);
-
-		hf::renderer::Draw(rn, APP_MESHES.viking_room);
-
-		if (drawAxisLines)
+		hf::StartRenderPassPacket(rn, APP_RENDER_PASSES.mainPresentPass);
 		{
-			hf::shadersetup::Bind(rn, APP_SHADER_SETUPS.axis_lines);
+			hf::StartShaderSetupPacket(rn, APP_SHADER_SETUPS.viking_room); //Viking room setup
 			UniformBindCameraTime(rn);
+			{
+				hf::ShaderBindingInfo vikingRoomShaderInfo
+				{
+					.shader = APP_SHADERS.viking_room,
+					.attrib = APP_BUFFER_ATTRIBUTES.pos_col_tex,
+					.bindingPoint = hf::RenderBindingType::Graphics
+				};
+				hf::StartShaderPacket(rn, vikingRoomShaderInfo);
 
-			hf::shader::Bind(rn, APP_SHADERS.axis_lines, hf::resources::GetQuadBufferAttrib());
-			axisLines.Draw(rn);
+				{
+					hf::StartDrawPacket(rn);
+					{
+						hf::PacketAdd_TexturePackBinding(rn, APP_TEXTURE_PACKS.viking_room_pack);
+						hf::PacketAdd_DrawCall(rn, APP_MESHES.viking_room);
+					}
+					hf::EndDrawPacket(rn);
+				}
+
+				hf::EndShaderPacket(rn);
+			}
+			hf::EndShaderSetupPacket(rn);
+
+			if (drawAxisLines)
+			{
+				hf::StartShaderSetupPacket(rn, APP_SHADER_SETUPS.axis_lines); //Axis lines setup
+				UniformBindCameraTime(rn);
+				{
+					hf::ShaderBindingInfo vikingRoomShaderInfo
+					{
+						.shader = APP_SHADERS.axis_lines,
+						.attrib = hf::resources::GetQuadBufferAttrib(),
+						.bindingPoint = hf::RenderBindingType::Graphics
+					};
+					hf::StartShaderPacket(rn, vikingRoomShaderInfo);
+
+					{
+						axisLines.Draw(rn);
+					}
+
+					hf::EndShaderPacket(rn);
+				}
+				hf::EndShaderSetupPacket(rn);
+			}
 		}
 
 		VoxelTerrainDraw(rn);
 
-		hf::renderpass::End(rn);
+		hf::EndRenderPassPacket(rn);
 	}
 }

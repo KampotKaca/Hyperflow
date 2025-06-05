@@ -52,25 +52,6 @@ namespace hf
             rn->size = size;
             inter::HF.renderingApi.api.RegisterFrameBufferChange(rn->handle, size);
         }
-
-        void Draw(const Ref<Renderer>& rn, const DrawCallInfo& info)
-        {
-            if (info.bufferCount > MAX_NUM_BUFFER_CACHE)
-                throw GENERIC_EXCEPT("[Hyperflow]", "Trying to draw too many buffers at once, max is %i", MAX_NUM_BUFFER_CACHE);
-
-            for (uint32_t i = 0; i < info.bufferCount; i++)
-                rn->vertBufferCache[i] = info.pVertBuffers[i]->handle;
-
-            inter::rendering::DrawCallInfo drawInfo
-            {
-                .pVertBuffers = rn->vertBufferCache,
-                .bufferCount = info.bufferCount,
-                .indexBuffer = info.indexBuffer ? info.indexBuffer->handle : nullptr,
-                .instanceCount = info.instanceCount
-            };
-
-            inter::HF.renderingApi.api.Draw(rn->handle, drawInfo);
-        }
     }
 
     namespace inter::rendering
@@ -372,18 +353,6 @@ namespace hf
             }
         }
 
-        void UpdateRenderer_i(const Ref<Renderer>& rn)
-        {
-            if(HF.renderingApi.api.GetReadyForRendering(rn->handle))
-            {
-                auto& cInfo = rn->eventInfo;
-                if (cInfo.onPreRenderCallback) cInfo.onPreRenderCallback(rn);
-                HF.renderingApi.api.StartFrame(rn->handle);
-                if (cInfo.onRenderCallback) cInfo.onRenderCallback(rn);
-                HF.renderingApi.api.EndFrame(rn->handle);
-            }
-        }
-
         void UnloadAllResources_i(bool internalOnly)
         {
             if (HF.renderingApi.isLoaded) HF.renderingApi.api.WaitForRendering();
@@ -411,16 +380,6 @@ namespace hf
         void Bind(const Ref<Renderer>& rn, RenderPass pass)
         {
             inter::HF.renderingApi.api.BindRenderPass(rn->handle, pass);
-        }
-
-        void Begin(const Ref<Renderer>& rn, RenderPass pass)
-        {
-            inter::HF.renderingApi.api.BeginRenderPass(rn->handle, pass);
-        }
-
-        void End(const Ref<Renderer>& rn)
-        {
-            inter::HF.renderingApi.api.EndRenderPass(rn->handle);
         }
     }
 }

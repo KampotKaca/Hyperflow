@@ -105,7 +105,8 @@ namespace hf::inter
         void CreateRenderer_i(Renderer* rn);
         void DestroyRenderer_i(Renderer* rn);
 
-        void UpdateRenderer_i(const Ref<Renderer>& rn);
+        void RendererUpdate_i(const Ref<Renderer>& rn);
+        void RendererDraw_i(const Ref<Renderer>& rn, const RenderPacket& packet);
 
         bool CreateShader_i(Shader* shader);
         bool DestroyShader_i(Shader* shader);

@@ -55,7 +55,16 @@ namespace hf
 
 				for(auto& window : inter::HF.windows | std::views::values)
 				{
-					if (!window::IsClosed(window)) inter::rendering::UpdateRenderer_i(window->renderer);
+					if (!window::IsClosed(window))
+					{
+						auto rn = window->renderer;
+						auto& cInfo = rn->eventInfo;
+						inter::rendering::StartRenderPacket_i(rn);
+						if (cInfo.onRenderCallback) cInfo.onRenderCallback(rn);
+						inter::rendering::EndRenderPacket_i(rn);
+						
+						inter::rendering::RendererUpdate_i(rn);
+					}
 				}
 			}
 			if (inter::HF.renderingApi.isLoaded) inter::HF.renderingApi.api.WaitForRendering();

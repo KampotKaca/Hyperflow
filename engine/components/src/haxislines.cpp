@@ -30,24 +30,28 @@ namespace hf
 
         uniformbuffer::Upload(rn, uploadInfo);
 
-        UniformBufferBindInfo bindInfo
+        StartDrawPacket(rn);
         {
-            .bindingType = RenderBindingType::Graphics,
-            .setBindingIndex = 1,
-            .pUniforms = &inter::HF.staticResources.axisLineUniform,
-            .uniformCount = 1
-        };
+            UniformBufferBindInfo bindInfo
+            {
+                .bindingType = RenderBindingType::Graphics,
+                .setBindingIndex = 1,
+                .pUniforms = &inter::HF.staticResources.axisLineUniform,
+                .uniformCount = 1
+            };
 
-        uniformbuffer::Bind(rn, bindInfo);
+            PacketAdd_UniformBinding(rn, bindInfo);
 
-        DrawCallInfo info
-        {
-            .pVertBuffers = &inter::HF.staticResources.quadBuffer,
-            .bufferCount = 1,
-            .indexBuffer = nullptr,
-            .instanceCount = 1
-        };
+            DrawCallInfo info
+            {
+                .pVertBuffers = &inter::HF.staticResources.quadBuffer,
+                .bufferCount = 1,
+                .indexBuffer = nullptr,
+                .instanceCount = 1
+            };
 
-        renderer::Draw(rn, info);
+            PacketAdd_DrawCall(rn, info);
+        }
+        EndDrawPacket(rn);
     }
 }

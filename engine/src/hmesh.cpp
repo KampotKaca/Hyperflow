@@ -1,3 +1,4 @@
+#include "hdrawprocess.h"
 #include "hyperflow.h"
 #include "hinternal.h"
 #include "hmeshconvertor.h"
@@ -311,21 +312,18 @@ namespace hf
         }
     }
 
-    namespace renderer
+    void PacketAdd_DrawCall(const Ref<Renderer>& rn, const Ref<Mesh>& mesh)
     {
-        void Draw(const Ref<Renderer>& rn, const Ref<Mesh>& mesh)
+        for (auto& submesh : mesh->subMeshes)
         {
-            for (auto& submesh : mesh->subMeshes)
+            DrawCallInfo drawInfo
             {
-                DrawCallInfo drawInfo
-                {
-                    .pVertBuffers = &submesh.vertBuffer,
-                    .bufferCount = 1,
-                    .indexBuffer = submesh.indexBuffer,
-                    .instanceCount = 1
-                };
-                Draw(rn, drawInfo);
-            }
+                .pVertBuffers = &submesh.vertBuffer,
+                .bufferCount = 1,
+                .indexBuffer = submesh.indexBuffer,
+                .instanceCount = 1
+            };
+            PacketAdd_DrawCall(rn, drawInfo);
         }
     }
 }

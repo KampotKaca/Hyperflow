@@ -4,6 +4,7 @@
 #include "hshared.h"
 #include "hexception.h"
 #include "hgenericexception.h"
+#include "hdrawprocess.h"
 #include "../components/include/hcomponents.h"
 
 namespace hf
@@ -106,16 +107,12 @@ namespace hf
 		uvec2 GetSize(const Ref<Renderer>& rn);
 
 		void Resize(const Ref<Renderer>& rn, uvec2 size);
-		void Draw(const Ref<Renderer>& rn, const DrawCallInfo& info);
-		void Draw(const Ref<Renderer>& rn, const Ref<Mesh>& mesh);
 	}
 
 	namespace renderpass
 	{
 		RenderPass Define(const RenderPassDefinitionInfo& info);
 		void Bind(const Ref<Renderer>& rn, RenderPass pass);
-		void Begin(const Ref<Renderer>& rn, RenderPass pass);
-		void End(const Ref<Renderer>& rn);
 	}
 
 	namespace shader
@@ -124,17 +121,11 @@ namespace hf
 		void Destroy(const Ref<Shader>& shader);
 		void Destroy(const Ref<Shader>* pShaders, uint32_t count);
 		bool IsRunning(const Ref<Shader>& shader);
-
-		void Bind(const Ref<Shader>& shader, BufferAttrib attrib);
-		void Bind(const Ref<Shader>& shader, BufferAttrib attrib, RenderBindingType bindingPoint);
-		void Bind(const Ref<Renderer>& renderer, const Ref<Shader>& shader, BufferAttrib attrib);
-		void Bind(const Ref<Renderer>& renderer, const Ref<Shader>& shader, BufferAttrib attrib, RenderBindingType bindingPoint);
 	}
 
 	namespace shadersetup
 	{
 		ShaderSetup Define(const ShaderSetupDefinitionInfo& info);
-		void Bind(const Ref<Renderer>& rn, ShaderSetup setup);
 	}
 
 	namespace texture
@@ -166,7 +157,6 @@ namespace hf
 		void SetBindingSampler(const Ref<TexturePack>& pack, uint32_t bindingIndex, TextureSampler sampler);
 		void SetBindingTextures(const Ref<TexturePack>& pack, uint32_t bindingIndex, const Ref<Texture>* pTextures, uint32_t textureCount, uint32_t textureOffset);
 		void SetBinding(const Ref<TexturePack>& pack, uint32_t bindingIndex, TextureSampler sampler, const Ref<Texture>* pTextures, uint32_t textureCount, uint32_t textureOffset);
-		void Bind(const Ref<Renderer>& rn, const Ref<TexturePack>& pack);
 	}
 
 	namespace texturepackallocator
@@ -197,7 +187,6 @@ namespace hf
 	{
 		UniformBuffer Define(const UniformBufferDefinitionInfo& info);
 		void Upload(const Ref<Renderer>& rn, const UniformBufferUploadInfo& info);
-		void Bind(const Ref<Renderer>& rn, const UniformBufferBindInfo& info);
 	}
 
 	namespace uniformallocator
