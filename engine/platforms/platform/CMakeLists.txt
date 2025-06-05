@@ -1,5 +1,6 @@
 file(GLOB_RECURSE PLATFORM_SRC CONFIGURE_DEPENDS src/*.cpp)
 add_library(platform ${PLATFORM_SRC})
+target_precompile_headers(platform PRIVATE "../include/hex_platform.h")
 
 target_link_libraries(platform
         PUBLIC

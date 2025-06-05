@@ -105,6 +105,7 @@ add_subdirectory(components)
 add_subdirectory(others/exception)
 
 add_library(${PROJECT_NAME} ${ENGINE_SRC})
+target_precompile_headers(${PROJECT_NAME} PRIVATE "include/hshared.h")
 
 # Using keyword-based signature consistently
 target_link_libraries(${PROJECT_NAME}

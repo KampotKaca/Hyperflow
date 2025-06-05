@@ -1,6 +1,5 @@
 #include "haxislines.h"
-#include "hyperflow.h"
-#include "hinternal.h"
+#include "hexternal.h"
 
 namespace hf
 {

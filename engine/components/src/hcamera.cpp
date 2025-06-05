@@ -1,5 +1,4 @@
-#include "hshared.h"
-#include "hrenderer.h"
+#include "hexternal.h"
 #include "hcamera3dcore.h"
 #include "hcamera3danchored.h"
 #include "hcamera3dfreelook.h"

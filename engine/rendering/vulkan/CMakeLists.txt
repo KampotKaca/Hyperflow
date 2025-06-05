@@ -45,6 +45,7 @@ file(GLOB_RECURSE VULKAN_SRC CONFIGURE_DEPENDS src/*.cpp)
 add_subdirectory(external/vma)
 
 add_library(vk SHARED ${VULKAN_SRC})
+target_precompile_headers(vk PRIVATE "include/hvk_shared.h")
 
 if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
     add_dependencies(vk vkwin)
