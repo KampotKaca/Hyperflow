@@ -17,6 +17,7 @@ file(GLOB_RECURSE PROJECT_SRC CONFIGURE_DEPENDS src/*.cpp)
 
 add_executable(${PROJECT_NAME} ${PROJECT_SRC})
 target_precompile_headers(${PROJECT_NAME} PRIVATE "../engine/include/hyperflow.h")
+set_target_properties(${PROJECT_NAME} PROPERTIES UNITY_BUILD ON)
 
 target_include_directories(${PROJECT_NAME}
         PUBLIC

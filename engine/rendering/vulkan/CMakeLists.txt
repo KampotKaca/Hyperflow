@@ -46,6 +46,7 @@ add_subdirectory(external/vma)
 
 add_library(vk SHARED ${VULKAN_SRC})
 target_precompile_headers(vk PRIVATE "include/hvk_shared.h")
+set_target_properties(vk PROPERTIES UNITY_BUILD ON)
 
 if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
     add_dependencies(vk vkwin)

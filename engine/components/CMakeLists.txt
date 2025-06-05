@@ -1,6 +1,7 @@
 file(GLOB_RECURSE COMPONENTS_SRC CONFIGURE_DEPENDS src/*.cpp)
 add_library(components ${COMPONENTS_SRC})
-target_precompile_headers(platform PRIVATE "include/hexternal.h")
+target_precompile_headers(components PRIVATE "include/hexternal.h")
+set_target_properties(components PROPERTIES UNITY_BUILD ON)
 
 target_link_libraries(components
         PUBLIC

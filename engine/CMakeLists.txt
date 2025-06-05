@@ -106,6 +106,7 @@ add_subdirectory(others/exception)
 
 add_library(${PROJECT_NAME} ${ENGINE_SRC})
 target_precompile_headers(${PROJECT_NAME} PRIVATE "include/hshared.h")
+set_target_properties(${PROJECT_NAME} PROPERTIES UNITY_BUILD ON)
 
 # Using keyword-based signature consistently
 target_link_libraries(${PROJECT_NAME}
