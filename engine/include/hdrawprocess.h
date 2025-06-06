@@ -11,18 +11,18 @@ namespace hf
         uint32_t texpackStart{};
         uint32_t texpackCount{};
 
-        uint32_t drawCallStart{};
-        uint32_t drawCallCount{};
-
         uint32_t uniformStart{};
         uint32_t uniformCount{};
+
+        uint32_t drawCallStart{};
+        uint32_t drawCallCount{};
     };
 
     struct ShaderPacketInfo
     {
         ShaderBindingInfo bindingInfo{};
-        uint16_t drawPacketStart{};
-        uint16_t drawPacketCount{};
+        uint32_t drawPacketStart{};
+        uint32_t drawPacketCount{};
     };
 
     struct ShaderSetupPacketInfo
@@ -57,7 +57,7 @@ namespace hf
         uint16_t shaderCount{};
 
         DrawPacketInfo drawPackets[RENDERING_MAX_NUM_DRAWPACKETS];
-        uint16_t drawPacketCount{};
+        uint32_t drawPacketCount{};
 
         Ref<TexturePack> texpacks[RENDERING_MAX_NUM_TEXPACKS];
         uint32_t texpackCount{};
