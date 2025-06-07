@@ -27,16 +27,9 @@ namespace app
         VoxelFlags flags{};
     };
 
-    template<typename T>
-    struct Chunk
-    {
-        T cells[64]{};
-        uint64_t occupancyMask = 0;
-    };
-
-    typedef Chunk<VoxelOctave> Chunk_L0;
-    typedef Chunk<Chunk_L0> Chunk_L1;
-    typedef Chunk<Chunk_L1> Chunk_L2;
+    typedef hf::OctreeChunk<VoxelOctave> Chunk_L0;
+    typedef hf::OctreeChunk<Chunk_L0> Chunk_L1;
+    typedef hf::OctreeChunk<Chunk_L1> Chunk_L2;
 
     struct VoxelTerrain
     {

@@ -6,6 +6,7 @@
 #include "resources/textures.h"
 #include "resources/meshes.h"
 #include "resources/shaders.h"
+#include "resources/materials.h"
 #include "resources/bufferattributes.h"
 #include "resources/texturesamplers.h"
 #include "resources/texturelayouts.h"

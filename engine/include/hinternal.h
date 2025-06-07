@@ -40,16 +40,15 @@ namespace hf::inter
         phmap::flat_hash_map<std::string, Ref<Mesh>> meshes{};
         phmap::flat_hash_map<std::string, Ref<Texture>> textures{};
         phmap::flat_hash_map<std::string, Ref<Cubemap>> cubemaps{};
+
+        Ref<StorageBuffer> materialDataStorage{};
     };
 
     struct StaticResources
     {
         TextureLayout emptyLayout{};
         BufferAttrib quadAttrib{};
-        UniformBuffer axisLineUniform{};
         Ref<VertBuffer> quadBuffer{};
-
-        UniformAllocator staticUniformAllocator{};
 
         TextureSampler cubemapSampler{};
         BufferAttrib cubeAttrib{};
@@ -76,10 +75,10 @@ namespace hf::inter
 
     extern Hyperflow HF;
 
-    struct AxisLineUniform
+    struct AxisLinePushConstant
     {
-        alignas(16) vec4 planeNormal; // w is thickness
-        alignas(16) vec4 color;
+        vec4 planeNormal; // w is thickness
+        vec4 color;
     };
 
     namespace alloc
@@ -148,6 +147,8 @@ namespace hf::inter
         //if true, will release internal resources, but will retain resource references
         //it is made to be used for handling api changes.
         void UnloadAllResources_i(bool internalOnly = false);
+
+        void SendMaterialPushConstants_i(Material* material);
     }
 }
 

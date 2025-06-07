@@ -2,8 +2,6 @@
 
 layout(set = 0, binding = 0) uniform Camera
 {
-    mat4 model;
-
     vec3 lookDirection;
     vec3 position;
     mat4 view;
@@ -13,8 +11,9 @@ layout(set = 0, binding = 0) uniform Camera
     mat4 viewProj;
 
     mat4 padding0;
-    vec4 padding1;
+    mat4 padding1;
     vec4 padding2;
+    vec4 padding3;
 } CAMERA;
 
 layout (set = 0, binding = 1) uniform Time

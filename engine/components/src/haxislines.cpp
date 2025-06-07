@@ -3,44 +3,17 @@
 
 namespace hf
 {
-    void AxisLines::GetNecessaryUniforms(UniformBuffer* location)
-    {
-        location[0] = inter::HF.staticResources.axisLineUniform;
-    }
-
     void AxisLines::Draw(const Ref<Renderer>& rn) const
     {
-        static inter::AxisLineUniform uploadUniform{};
-        uploadUniform.planeNormal = vec4(planeNormal, lineThickness);
-        uploadUniform.color = color;
-
-        UniformBufferUpload upload
+        draw::StartDrawPacket(rn);
         {
-            .buffer = inter::HF.staticResources.axisLineUniform,
-            .offsetInBytes = 0,
-            .sizeInBytes = sizeof(inter::AxisLineUniform),
-            .data = &uploadUniform
-        };
-
-        UniformBufferUploadInfo uploadInfo
-        {
-            .pUploads = &upload,
-            .uploadCount = 1
-        };
-
-        uniformbuffer::Upload(rn, uploadInfo);
-
-        StartDrawPacket(rn);
-        {
-            UniformBufferBindInfo bindInfo
+            UploadInfo uploadInfo
             {
-                .bindingType = RenderBindingType::Graphics,
-                .setBindingIndex = 1,
-                .pUniforms = &inter::HF.staticResources.axisLineUniform,
-                .uniformCount = 1
+                .planeNormal = vec4(planeNormal, lineThickness),
+                .color = color
             };
 
-            PacketAdd_UniformBinding(rn, bindInfo);
+            draw::PacketSet_PushConstant(rn, &uploadInfo, sizeof(UploadInfo));
 
             DrawCallInfo info
             {
@@ -50,8 +23,8 @@ namespace hf
                 .instanceCount = 1
             };
 
-            PacketAdd_DrawCall(rn, info);
+            draw::PacketAdd_DrawCall(rn, info);
         }
-        EndDrawPacket(rn);
+        draw::EndDrawPacket(rn);
     }
 }

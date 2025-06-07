@@ -64,16 +64,16 @@ namespace app
 		DebugPreRender(rn);
 		UniformUploadCameraTime(rn, freeMoveCamera.camera3D.core,
 			freeMoveCamera.camera3D.direction, freeMoveCamera.camera3D.position,
-			freeMoveCamera.camera3D.ToViewMat4(), vikingRoomTransform.ToMat4());
+			freeMoveCamera.camera3D.ToViewMat4());
 	}
 
 	void AppRender(const hf::Ref<hf::Renderer>& rn)
 	{
 		DebugRender(rn);
 
-		hf::StartRenderPassPacket(rn, APP_RENDER_PASSES.mainPresentPass);
+		hf::draw::StartRenderPassPacket(rn, APP_RENDER_PASSES.mainPresentPass);
 		{
-			hf::StartShaderSetupPacket(rn, APP_SHADER_SETUPS.viking_room); //Viking room setup
+			hf::draw::StartShaderSetupPacket(rn, APP_SHADER_SETUPS.viking_room); //Viking room setup
 			UniformBindCameraTime(rn);
 			{
 				hf::ShaderBindingInfo vikingRoomShaderInfo
@@ -82,24 +82,28 @@ namespace app
 					.attrib = APP_BUFFER_ATTRIBUTES.pos_col_tex,
 					.bindingPoint = hf::RenderBindingType::Graphics
 				};
-				hf::StartShaderPacket(rn, vikingRoomShaderInfo);
-
+				hf::draw::StartShaderPacket(rn, vikingRoomShaderInfo);
 				{
-					hf::StartDrawPacket(rn);
+					hf::draw::StartMaterialPacket(rn, APP_MATERIALS.viking_room);
 					{
-						hf::PacketAdd_TexturePackBinding(rn, APP_TEXTURE_PACKS.viking_room_pack);
-						hf::PacketAdd_DrawCall(rn, APP_MESHES.viking_room);
+						hf::draw::StartDrawPacket(rn);
+						{
+							auto trs = vikingRoomTransform.ToMat4();
+							hf::draw::PacketAdd_TexturePackBinding(rn, APP_TEXTURE_PACKS.viking_room_pack);
+							hf::draw::PacketSet_PushConstant(rn, &trs, sizeof(trs));
+							hf::draw::PacketAdd_DrawCall(rn, APP_MESHES.viking_room);
+						}
+						hf::draw::EndDrawPacket(rn);
 					}
-					hf::EndDrawPacket(rn);
+					hf::draw::EndMaterialPacket(rn);
 				}
-
-				hf::EndShaderPacket(rn);
+				hf::draw::EndShaderPacket(rn);
 			}
-			hf::EndShaderSetupPacket(rn);
+			hf::draw::EndShaderSetupPacket(rn);
 
 			if (drawAxisLines)
 			{
-				hf::StartShaderSetupPacket(rn, APP_SHADER_SETUPS.axis_lines); //Axis lines setup
+				hf::draw::StartShaderSetupPacket(rn, APP_SHADER_SETUPS.axis_lines); //Axis lines setup
 				UniformBindCameraTime(rn);
 				{
 					hf::ShaderBindingInfo vikingRoomShaderInfo
@@ -108,20 +112,22 @@ namespace app
 						.attrib = hf::resources::GetQuadBufferAttrib(),
 						.bindingPoint = hf::RenderBindingType::Graphics
 					};
-					hf::StartShaderPacket(rn, vikingRoomShaderInfo);
-
+					hf::draw::StartShaderPacket(rn, vikingRoomShaderInfo);
 					{
-						axisLines.Draw(rn);
+						hf::draw::StartMaterialPacket(rn, APP_MATERIALS.viking_room);
+						{
+							axisLines.Draw(rn);
+						}
+						hf::draw::EndMaterialPacket(rn);
 					}
-
-					hf::EndShaderPacket(rn);
+					hf::draw::EndShaderPacket(rn);
 				}
-				hf::EndShaderSetupPacket(rn);
+				hf::draw::EndShaderSetupPacket(rn);
 			}
 		}
 
 		VoxelTerrainDraw(rn);
 
-		hf::EndRenderPassPacket(rn);
+		hf::draw::EndRenderPassPacket(rn);
 	}
 }

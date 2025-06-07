@@ -114,6 +114,7 @@ namespace hf
 	struct IndexBuffer;
 	struct StorageBuffer;
 	struct Mesh;
+	struct Material;
 
 	typedef uint32_t BufferAttrib;
 	typedef uint32_t UniformBuffer;
@@ -122,7 +123,6 @@ namespace hf
 	typedef uint32_t TextureSampler;
 	typedef uint32_t ShaderSetup;
 	typedef uint32_t RenderPass;
-	typedef uint32_t PushConstant;
 
 	enum class CubemapTextureType { Left, Right, Down, Up, Back, Front };
 
@@ -378,11 +378,14 @@ namespace hf
 		uint32_t texturePackCount = 0;
 	};
 
+	//quick access and upload buffer.
+	//at minimum it's size should be 4 bytes.
+	//remember first 2 bytes are always occupied by material index, so you can use other 126 bytes freely
+	//on vulkan it directly translates to push constant, but on other pipelines ...
 	struct PushConstantInfo
 	{
-		ShaderUsageStage usageFlags = ShaderUsageStage::Vertex | ShaderUsageStage::Fragment;
+		ShaderUsageStage usageFlags = ShaderUsageStage::None;
 		uint32_t sizeInBytes{};
-		uint32_t offsetInBytes{};
 	};
 
 	struct PushConstantUploadInfo
@@ -393,11 +396,7 @@ namespace hf
 
 	struct ShaderSetupDefinitionInfo
 	{
-		//quick access and upload buffer.
-		//sum of the size of all of them should be max 128 bytes.
-		//on vulkan it directly translates to push constant, but on other pipelines ...
-		PushConstantInfo* pPushConstants{};
-		uint32_t pushConstantCount{};
+		PushConstantInfo pushConstant{};
 
 		UniformBuffer* pBuffers{};
 		uint32_t bufferCount{};
@@ -716,6 +715,12 @@ namespace hf
 		uint32_t dependencyCount = 0;
 	};
 
+	struct MaterialCreationInfo
+	{
+		Ref<Shader> shader{};
+		uint32_t sizeInBytes{};
+	};
+
 	enum class MeshDataType
 	{
 		None = 0,
@@ -848,6 +853,12 @@ namespace hf
 	};
 
 	//endregion
+
+	namespace utils
+	{
+		inline uint32_t GetFirstBitOne64(uint64_t n) { return n ? __builtin_ctzll(n) : 64u; }
+		inline uint32_t GetFirstBitZero64(uint64_t n) { return ~n ? __builtin_ctzll(~n) : 64u; }
+	}
 }
 
 #endif //HSHARED_H

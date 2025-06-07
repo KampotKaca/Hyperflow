@@ -2,8 +2,6 @@
 
 layout(set = 0, binding = 0) uniform Camera
 {
-    mat4 model;
-
     vec3 lookDirection;
     vec3 position;
     mat4 view;
@@ -13,8 +11,9 @@ layout(set = 0, binding = 0) uniform Camera
     mat4 viewProj;
 
     mat4 padding0;
-    vec4 padding1;
+    mat4 padding1;
     vec4 padding2;
+    vec4 padding3;
 } CAMERA;
 
 layout (set = 0, binding = 1) uniform Time
@@ -23,11 +22,11 @@ layout (set = 0, binding = 1) uniform Time
     double timeSinceStartup;
 } TIME;
 
-layout(set = 1, binding = 0) uniform AxisLineUniform
+layout(push_constant) uniform PushConstants
 {
-    vec4 planeNormal; //w component is thickness
+    vec4 planeNormal;
     vec4 color;
-} AXIS_LINES;
+} PUSH_CONSTANT;
 
 layout(location = 0) in vec3 o_RayWorld;
 layout(location = 0) out vec4 outColor;
@@ -48,14 +47,14 @@ bool RayIntersectsPlane(vec3 rayOrigin, vec3 rayDir, vec3 planeNormal, vec3 plan
 bool GetGridColor(float dist, vec2 absIntersection, float scale, float opacity, out vec4 o_Color)
 {
     vec2 fraction = (absIntersection - ivec2(absIntersection * scale) / scale) * scale;
-    vec2 smoothWidth = AXIS_LINES.planeNormal.w * fwidth(fraction);
+    vec2 smoothWidth = PUSH_CONSTANT.planeNormal.w * fwidth(fraction);
 
     vec2 lines = smoothstep(vec2(0.0), smoothWidth, fraction) *
     smoothstep(vec2(0.0), smoothWidth, vec2(1.0) - fraction);
 
     if(min(lines.x, lines.y) < 0.5)
     {
-        o_Color = AXIS_LINES.color / (1 + dist * opacity);
+        o_Color = PUSH_CONSTANT.color / (1 + dist * opacity);
         return true;
     }
     return false;
@@ -64,7 +63,7 @@ bool GetGridColor(float dist, vec2 absIntersection, float scale, float opacity, 
 void main()
 {
     vec3 intersection;
-    if(RayIntersectsPlane(CAMERA.position, o_RayWorld, vec3(AXIS_LINES.planeNormal), CENTER, intersection))
+    if(RayIntersectsPlane(CAMERA.position, o_RayWorld, vec3(PUSH_CONSTANT.planeNormal), CENTER, intersection))
     {
         float dist = length(intersection - CAMERA.position);
         vec2 absIntersection = abs(intersection.xz);

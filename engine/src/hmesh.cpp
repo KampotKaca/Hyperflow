@@ -312,18 +312,21 @@ namespace hf
         }
     }
 
-    void PacketAdd_DrawCall(const Ref<Renderer>& rn, const Ref<Mesh>& mesh)
+    namespace draw
     {
-        for (auto& submesh : mesh->subMeshes)
+        void PacketAdd_DrawCall(const Ref<Renderer>& rn, const Ref<Mesh>& mesh)
         {
-            DrawCallInfo drawInfo
+            for (auto& submesh : mesh->subMeshes)
             {
-                .pVertBuffers = &submesh.vertBuffer,
-                .bufferCount = 1,
-                .indexBuffer = submesh.indexBuffer,
-                .instanceCount = 1
-            };
-            PacketAdd_DrawCall(rn, drawInfo);
+                DrawCallInfo drawInfo
+                {
+                    .pVertBuffers = &submesh.vertBuffer,
+                    .bufferCount = 1,
+                    .indexBuffer = submesh.indexBuffer,
+                    .instanceCount = 1
+                };
+                PacketAdd_DrawCall(rn, drawInfo);
+            }
         }
     }
 }

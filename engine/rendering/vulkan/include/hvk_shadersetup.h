@@ -11,8 +11,7 @@ namespace hf
         ~VkShaderSetup();
 
         VkPipelineLayout layout{};
-        VkShaderStageFlags stageFlags{};
-        uint32_t pushConstantSize{};
+        PushConstantInfo pushConstantInfo{};
     };
 
     bool IsValidShaderSetup(ShaderSetup setup);

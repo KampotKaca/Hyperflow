@@ -236,13 +236,48 @@ namespace hf
 		MeshStats GetStats(const Ref<Mesh>& mesh);
 	}
 
+	namespace material
+	{
+		//No need to destroy the material, if it goes out of scope it is automatically freed!
+		Ref<Material> Create(const MaterialCreationInfo& info);
+		void Upload(const Ref<Material>& material, const void* data);
+		uint16_t GetBufferIndex(const Ref<Material>& material);
+	}
+
+	namespace draw
+	{
+		void StartRenderPassPacket(const Ref<Renderer>& rn, RenderPass pass);
+		void EndRenderPassPacket(const Ref<Renderer>& rn);
+
+		void StartShaderSetupPacket(const Ref<Renderer>& rn, ShaderSetup shaderSetup);
+		void EndShaderSetupPacket(const Ref<Renderer>& rn);
+
+		void StartShaderPacket(const Ref<Renderer>& rn, const ShaderBindingInfo& shaderBindingInfo);
+		void EndShaderPacket(const Ref<Renderer>& rn);
+
+		void StartShaderPacket(const Ref<Renderer>& rn, const ShaderBindingInfo& shaderBindingInfo);
+		void EndShaderPacket(const Ref<Renderer>& rn);
+
+		void StartMaterialPacket(const Ref<Renderer>& rn, const Ref<Material>& material);
+		void EndMaterialPacket(const Ref<Renderer>& rn);
+
+		void StartDrawPacket(const Ref<Renderer>& rn);
+		void EndDrawPacket(const Ref<Renderer>& rn);
+
+		void ShaderSetupAdd_UniformBinding(const Ref<Renderer>& rn, const UniformBufferBindInfo& uniformBinding);
+		void ShaderSetupAdd_TexturePackBinding(const Ref<Renderer>& rn, const Ref<TexturePack>& texPack);
+
+		void PacketAdd_DrawCall(const Ref<Renderer>& rn, const Ref<Mesh>& mesh);
+		void PacketAdd_DrawCall(const Ref<Renderer>& rn, const DrawCallInfo& drawCall);
+		void PacketAdd_TexturePackBinding(const Ref<Renderer>& rn, const Ref<TexturePack>& texPack);
+		void PacketSet_PushConstant(const Ref<Renderer>& rn, const void* data, uint32_t dataSize);
+	}
+
 	namespace utils
 	{
 		ivec3 ConvertVersion(const char* version);
 		bool ReadFile(const std::string& filename, bool addNullTerminator, std::vector<char>& result);
 		bool FileExists(const char* path);
-		inline uint32_t GetFirstBitOne64(uint64_t n) { return n ? __builtin_ctzll(n) : 64u; }
-		inline uint32_t GetFirstBitZero64(uint64_t n) { return ~n ? __builtin_ctzll(~n) : 64u; }
 
 		[[nodiscard]] void* Allocate(std::size_t n);
 		[[nodiscard]] void* AllocateAligned(std::size_t n, std::align_val_t align);

@@ -90,6 +90,18 @@ namespace hf
             DefineStaticResources_i();
             if (HF.lifecycleCallbacks.onRendererLoad) HF.lifecycleCallbacks.onRendererLoad();
 
+            StorageBufferCreationInfo materialStorageInfo
+            {
+                .bindingId = 0,
+                .elementSizeInBytes = RENDERING_MAX_MATERIAL_MEMORY_BADGET,
+                .elementCount = 64 * 64 * RENDERING_MAX_MATERIAL_OCTREE_COUNT,
+                .memoryType = BufferMemoryType::WriteOnly,
+                .usageFlags = BufferUsageType::All,
+                .data = nullptr
+            };
+
+            // HF.graphicsResources.materialDataStorage = storagebuffer::Create(materialStorageInfo);
+
             for (auto& shader : std::ranges::views::values(HF.graphicsResources.shaders)) CreateShader_i(shader.get());
 
             for (auto& vertBuffer : std::ranges::views::values(HF.graphicsResources.vertBuffers)) CreateVertBuffer_i(vertBuffer.get());
@@ -147,34 +159,6 @@ namespace hf
                 };
 
                 HF.staticResources.quadAttrib = bufferattrib::Define(attribInfo);
-            }
-
-            //Axis Line Uniform
-            {
-                UniformBufferBindingInfo bindings[]
-                {
-                    { .usageFlags = ShaderUsageStage::All, .arraySize = 1, .elementSizeInBytes = sizeof(AxisLineUniform) }
-                };
-
-                UniformBufferDefinitionInfo uniformInfo
-                {
-                    .bindingId = 0,
-                    .pBindings = bindings,
-                    .bindingCount = 1
-                };
-
-                HF.staticResources.axisLineUniform = uniformbuffer::Define(uniformInfo);
-            }
-
-            //Uniform Allocator Info
-            {
-                UniformAllocatorDefinitionInfo uniformAllocatorInfo
-                {
-                    .pBuffers = &HF.staticResources.axisLineUniform,
-                    .bufferCount = 1
-                };
-
-                HF.staticResources.staticUniformAllocator = uniformallocator::Define(uniformAllocatorInfo);
             }
 
             //Empty Texture Layout

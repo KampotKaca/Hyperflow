@@ -74,14 +74,13 @@ namespace app
 
     void UniformUploadCameraTime(const hf::Ref<hf::Renderer>& rn, const hf::Camera3DCore& cameraCore,
         hf::vec3 lookDirection, hf::vec3 position,
-        const hf::mat4& view, const hf::mat4& model)
+        const hf::mat4& view)
     {
         auto& utime = TEMP_CAMERA_TIME_UPLOAD.time;
         utime.deltaTime = hf::time::GetDeltaTime();
         utime.timeSinceStartup = hf::time::GetTimePassed();
 
         auto& uCam = TEMP_CAMERA_TIME_UPLOAD.camera;
-        uCam.model = model;
         uCam.position = position;
         uCam.lookDirection = lookDirection;
         uCam.view = view;
@@ -119,6 +118,6 @@ namespace app
             .uniformCount = 1
         };
 
-        hf::ShaderSetupAdd_UniformBinding(rn, info);
+        hf::draw::ShaderSetupAdd_UniformBinding(rn, info);
     }
 }

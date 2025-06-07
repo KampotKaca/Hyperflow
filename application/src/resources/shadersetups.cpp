@@ -12,6 +12,11 @@ namespace app
         {
             hf::ShaderSetupDefinitionInfo shaderSetupDefinitionInfo
             {
+                .pushConstant =
+                {
+                    .usageFlags = hf::ShaderUsageStage::Vertex | hf::ShaderUsageStage::Fragment,
+                    .sizeInBytes = sizeof(hf::mat4)
+                },
                 .pBuffers = &APP_UNIFORMS.cameraTimeBuffer,
                 .bufferCount = 1,
                 .pTextureLayouts = &APP_TEXTURE_LAYOUTS.viking_room,
@@ -23,14 +28,16 @@ namespace app
 
         //axis_lines
         {
-            std::array<hf::UniformBuffer, 2> axisLinesUniforms = { APP_UNIFORMS.cameraTimeBuffer };
-            hf::AxisLines::GetNecessaryUniforms(&axisLinesUniforms[1]);
-
             auto emptyLayout = hf::resources::GetEmptyTextureLayout();
             hf::ShaderSetupDefinitionInfo shaderSetupDefinitionInfo
             {
-                .pBuffers = axisLinesUniforms.data(),
-                .bufferCount = axisLinesUniforms.size(),
+                .pushConstant =
+                {
+                    .usageFlags = hf::ShaderUsageStage::Vertex | hf::ShaderUsageStage::Fragment,
+                    .sizeInBytes = sizeof(hf::AxisLines::UploadInfo),
+                },
+                .pBuffers = &APP_UNIFORMS.cameraTimeBuffer,
+                .bufferCount = 1,
                 .pTextureLayouts = &emptyLayout,
                 .textureLayoutCount = 1
             };
