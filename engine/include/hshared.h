@@ -122,6 +122,7 @@ namespace hf
 	typedef uint32_t TextureSampler;
 	typedef uint32_t ShaderSetup;
 	typedef uint32_t RenderPass;
+	typedef uint32_t PushConstant;
 
 	enum class CubemapTextureType { Left, Right, Down, Up, Back, Front };
 
@@ -301,13 +302,6 @@ namespace hf
 		RenderBindingType bindingPoint = RenderBindingType::Graphics;
 	};
 
-	template<typename T>
-	struct OwnedData
-	{
-		Ref<T> ref{};
-		bool isOwned = false;
-	};
-
 	struct UniformBufferBindingInfo
 	{
 		ShaderUsageStage usageFlags = ShaderUsageStage::Vertex | ShaderUsageStage::Fragment;
@@ -384,8 +378,27 @@ namespace hf
 		uint32_t texturePackCount = 0;
 	};
 
+	struct PushConstantInfo
+	{
+		ShaderUsageStage usageFlags = ShaderUsageStage::Vertex | ShaderUsageStage::Fragment;
+		uint32_t sizeInBytes{};
+		uint32_t offsetInBytes{};
+	};
+
+	struct PushConstantUploadInfo
+	{
+		ShaderSetup shaderSetup{};
+		const void* data{};
+	};
+
 	struct ShaderSetupDefinitionInfo
 	{
+		//quick access and upload buffer.
+		//sum of the size of all of them should be max 128 bytes.
+		//on vulkan it directly translates to push constant, but on other pipelines ...
+		PushConstantInfo* pPushConstants{};
+		uint32_t pushConstantCount{};
+
 		UniformBuffer* pBuffers{};
 		uint32_t bufferCount{};
 

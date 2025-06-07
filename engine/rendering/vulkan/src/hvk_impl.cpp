@@ -171,6 +171,11 @@ namespace hf::inter::rendering
         hf::BindShaderSetup((VkRenderer*)rn, setup);
     }
 
+    void UploadPushConstants(void* rn, const PushConstantUploadInfo& info)
+    {
+        hf::UploadPushConstants((VkRenderer*)rn, info);
+    }
+
     UniformAllocator DefineUniformAllocator(const UniformAllocatorDefinitionInfo& info)
     {
         GRAPHICS_DATA.uniformAllocators.emplace_back(MakeURef<VkUniformAllocator>(info));
@@ -347,6 +352,7 @@ namespace hf::inter::rendering
             //uniform storage
             .DefineShaderSetup          = DefineShaderSetup,
             .BindShaderSetup            = BindShaderSetup,
+            .UploadPushConstants        = UploadPushConstants,
 
             //texture
             .CreateTexture              = CreateTexture,

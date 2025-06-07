@@ -148,6 +148,7 @@ namespace hf
         VkWriteDescriptorSet descWrites[VK_MAX_UNIFORM_AND_TEXTURE_BINDINGS * FRAMES_IN_FLIGHT]{};
         VkDescriptorImageInfo descImageBindings[VK_MAX_IMAGE_BINDINGS]{};
         VkImageMemoryBarrier imageBarriers[VK_MAX_IMAGE_BARRIERS]{};
+        VkPushConstantRange pushConstantRanges[VK_MAX_PUSH_CONSTANT_RANGES]{};
         ImageTransitionArray imageTransitions[9]{};
     };
 

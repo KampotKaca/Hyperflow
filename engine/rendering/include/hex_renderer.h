@@ -171,7 +171,7 @@ namespace hf::inter::rendering
         //shader setup
         ShaderSetup (*DefineShaderSetup)(const ShaderSetupDefinitionInfo& info);
         void (*BindShaderSetup)(void* rn, ShaderSetup setup);
-
+        void (*UploadPushConstants)(void* rn, const PushConstantUploadInfo& info);
         //texture
         void* (*CreateTexture)(const TextureCreationInfo& info);
         void (*DestroyTexture)(void* tex);

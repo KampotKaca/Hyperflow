@@ -87,6 +87,7 @@ namespace hf
     void BindUniforms(const VkRenderer* rn, const UniformBufferBindInfo& info);
     void BindTexturePack(VkRenderer* rn, VkTexturePack* pack);
     void BindShaderSetup(VkRenderer* rn, ShaderSetup setup);
+    void UploadPushConstants(const VkRenderer* rn, const PushConstantUploadInfo& info);
 }
 
 #endif //HVK_RENDERER_H
