@@ -100,7 +100,7 @@ namespace hf
                 .data = nullptr
             };
 
-            // HF.graphicsResources.materialDataStorage = storagebuffer::Create(materialStorageInfo);
+            HF.graphicsResources.materialDataStorage = storagebuffer::Create(materialStorageInfo);
 
             for (auto& shader : std::ranges::views::values(HF.graphicsResources.shaders)) CreateShader_i(shader.get());
 

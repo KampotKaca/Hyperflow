@@ -11,7 +11,7 @@ namespace hf
         {
             uint64_t bufferSize = info.elementCount * info.elementSizeInBytes;
             details.data = utils::Allocate(bufferSize);
-            memcpy(details.data, info.data, bufferSize);
+            if (info.data) memcpy(details.data, info.data, bufferSize);
         }
 
         inter::rendering::CreateStorageBuffer_i(this);

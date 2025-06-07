@@ -114,7 +114,7 @@ namespace app
 					};
 					hf::draw::StartShaderPacket(rn, vikingRoomShaderInfo);
 					{
-						hf::draw::StartMaterialPacket(rn, APP_MATERIALS.viking_room);
+						hf::draw::StartMaterialPacket(rn, APP_MATERIALS.axis_lines);
 						{
 							axisLines.Draw(rn);
 						}
