@@ -13,7 +13,7 @@ namespace hf
     {
         void StartRenderPassPacket(const Ref<Renderer>& rn, RenderPass pass)
         {
-            auto& currentDraw = rn->currentDraw;
+            auto& currentDraw = rn->threadInfo.currentDraw;
 #if DEBUG
             if (currentDraw.currentPass)
                 throw GENERIC_EXCEPT("[Hyperflow]", "Cannot start RenderPass, without ending the previous one!");
@@ -33,7 +33,7 @@ namespace hf
 
         void EndRenderPassPacket(const Ref<Renderer>& rn)
         {
-            auto& currentDraw = rn->currentDraw;
+            auto& currentDraw = rn->threadInfo.currentDraw;
 #if DEBUG
             if (!currentDraw.currentPass)
                 throw GENERIC_EXCEPT("[Hyperflow]", "Cannot end RenderPass, without starting it!");
@@ -44,7 +44,7 @@ namespace hf
 
         void StartShaderSetupPacket(const Ref<Renderer>& rn, ShaderSetup shaderSetup)
         {
-            auto& currentDraw = rn->currentDraw;
+            auto& currentDraw = rn->threadInfo.currentDraw;
 #if DEBUG
             if (!currentDraw.currentPass)
                 throw GENERIC_EXCEPT("[Hyperflow]", "RenderPass must be set!");
@@ -68,7 +68,7 @@ namespace hf
 
         void EndShaderSetupPacket(const Ref<Renderer>& rn)
         {
-            auto& currentDraw = rn->currentDraw;
+            auto& currentDraw = rn->threadInfo.currentDraw;
 #if DEBUG
             if (!currentDraw.currentPass)
                 throw GENERIC_EXCEPT("[Hyperflow]", "RenderPass must be set!");
@@ -82,7 +82,7 @@ namespace hf
 
         void StartShaderPacket(const Ref<Renderer>& rn, const ShaderBindingInfo& shaderBindingInfo)
         {
-            auto& currentDraw = rn->currentDraw;
+            auto& currentDraw = rn->threadInfo.currentDraw;
 #if DEBUG
             if (!currentDraw.currentShaderSetup)
                 throw GENERIC_EXCEPT("[Hyperflow]", "ShaderSetup must be set!");
@@ -106,7 +106,7 @@ namespace hf
 
         void EndShaderPacket(const Ref<Renderer>& rn)
         {
-            auto& currentDraw = rn->currentDraw;
+            auto& currentDraw = rn->threadInfo.currentDraw;
 #if DEBUG
             if (!currentDraw.currentShaderSetup)
                 throw GENERIC_EXCEPT("[Hyperflow]", "ShaderSetup must be set!");
@@ -120,7 +120,7 @@ namespace hf
 
         void StartMaterialPacket(const Ref<Renderer>& rn, const Ref<Material>& material)
         {
-            auto& currentDraw = rn->currentDraw;
+            auto& currentDraw = rn->threadInfo.currentDraw;
 #if DEBUG
             if (!currentDraw.currentShader)
                 throw GENERIC_EXCEPT("[Hyperflow]", "Shader must be set!");
@@ -144,7 +144,7 @@ namespace hf
 
         void EndMaterialPacket(const Ref<Renderer>& rn)
         {
-            auto& currentDraw = rn->currentDraw;
+            auto& currentDraw = rn->threadInfo.currentDraw;
 #if DEBUG
             if (!currentDraw.currentShader)
                 throw GENERIC_EXCEPT("[Hyperflow]", "Shader must be set!");
@@ -157,7 +157,7 @@ namespace hf
 
         void StartDrawPacket(const Ref<Renderer>& rn)
         {
-            auto& currentDraw = rn->currentDraw;
+            auto& currentDraw = rn->threadInfo.currentDraw;
 #if DEBUG
             if (!currentDraw.currentMaterial)
                 throw GENERIC_EXCEPT("[Hyperflow]", "Material must be set!");
@@ -182,7 +182,7 @@ namespace hf
 
         void EndDrawPacket(const Ref<Renderer>& rn)
         {
-            auto& currentDraw = rn->currentDraw;
+            auto& currentDraw = rn->threadInfo.currentDraw;
 #if DEBUG
             if (!currentDraw.currentShader)
                 throw GENERIC_EXCEPT("[Hyperflow]", "Shader must be set!");
@@ -196,7 +196,7 @@ namespace hf
 
         void ShaderSetupAdd_UniformBinding(const Ref<Renderer>& rn, const UniformBufferBindInfo& uniformBinding)
         {
-            auto& currentDraw = rn->currentDraw;
+            auto& currentDraw = rn->threadInfo.currentDraw;
 #if DEBUG
             if (!currentDraw.currentShaderSetup)
                 throw GENERIC_EXCEPT("[Hyperflow]", "Shader Setup must be set!");
@@ -210,7 +210,7 @@ namespace hf
 
         void ShaderSetupAdd_TexturePackBinding(const Ref<Renderer>& rn, const Ref<TexturePack>& texPack)
         {
-            auto& currentDraw = rn->currentDraw;
+            auto& currentDraw = rn->threadInfo.currentDraw;
 #if DEBUG
             if (!currentDraw.currentShaderSetup)
                 throw GENERIC_EXCEPT("[Hyperflow]", "Shader Setup must be set!");
@@ -224,7 +224,7 @@ namespace hf
 
         void PacketAdd_DrawCall(const Ref<Renderer>& rn, const DrawCallInfo& drawCall)
         {
-            auto& currentDraw = rn->currentDraw;
+            auto& currentDraw = rn->threadInfo.currentDraw;
 #if DEBUG
             if (!currentDraw.currentDraw)
                 throw GENERIC_EXCEPT("[Hyperflow]", "DrawPacket must be set!");
@@ -238,7 +238,7 @@ namespace hf
 
         void PacketAdd_TexturePackBinding(const Ref<Renderer>& rn, const Ref<TexturePack>& texPack)
         {
-            auto& currentDraw = rn->currentDraw;
+            auto& currentDraw = rn->threadInfo.currentDraw;
 #if DEBUG
             if (!currentDraw.currentDraw)
                 throw GENERIC_EXCEPT("[Hyperflow]", "DrawPacket must be set!");
@@ -252,7 +252,7 @@ namespace hf
 
         void PacketSet_PushConstant(const Ref<Renderer>& rn, const void* data, uint32_t dataSize)
         {
-            auto& currentDraw = rn->currentDraw;
+            auto& currentDraw = rn->threadInfo.currentDraw;
 #if DEBUG
             if (!currentDraw.currentDraw)
                 throw GENERIC_EXCEPT("[Hyperflow]", "DrawPacket must be set!");
@@ -268,43 +268,47 @@ namespace hf
     {
         void StartRenderPacket_i(const Ref<Renderer>& rn)
         {
-            rn->isDrawing = true;
+            rn->threadInfo.isDrawing = true;
         }
 
         void EndRenderPacket_i(const Ref<Renderer>& rn)
         {
+            auto& tInfo = rn->threadInfo;
 #if DEBUG
-            if (!rn->isDrawing) throw GENERIC_EXCEPT("[Hyperflow]", "Cannot end RenderPacket, without starting it!");
+            if (!tInfo.isDrawing) throw GENERIC_EXCEPT("[Hyperflow]", "Cannot end RenderPacket, without starting it!");
 #endif
 
-            if (rn->packetCount >= RENDERING_MAX_PACKET_QUEUE_SIZE)
+            if (tInfo.packetCount >= RENDERING_MAX_PACKET_QUEUE_SIZE)
             {
-                rn->packetQueue[RENDERING_MAX_PACKET_QUEUE_SIZE - 1] = rn->currentDraw.packet;
-                rn->packetCount = RENDERING_MAX_PACKET_QUEUE_SIZE;
+                tInfo.packetQueue[RENDERING_MAX_PACKET_QUEUE_SIZE - 1] = tInfo.currentDraw.packet;
+                tInfo.packetCount = RENDERING_MAX_PACKET_QUEUE_SIZE;
             }
             else
             {
-                rn->packetQueue[rn->packetCount] = rn->currentDraw.packet;
-                rn->packetCount++;
+                tInfo.packetQueue[rn->threadInfo.packetCount] = tInfo.currentDraw.packet;
+                tInfo.packetCount++;
             }
 
-            rn->currentDraw = {};
-            rn->isDrawing = false;
+            tInfo.currentDraw = {};
+            tInfo.isDrawing = false;
         }
 
         void RendererUpdate_i(const Ref<Renderer>& rn)
         {
+            auto& tInfo = rn->threadInfo;
             volatile bool packetIsReady = false;
-
             RenderPacket packet;
-            if (rn->packetCount > 0)
             {
-                packet = rn->packetQueue[rn->packetCount - 1];
-                rn->packetCount = 0;
-                packetIsReady = true;
+                std::lock_guard lock(tInfo.threadlock);
+                if (tInfo.packetCount > 0)
+                {
+                    packet = tInfo.packetQueue[tInfo.packetCount - 1];
+                    tInfo.packetCount = 0;
+                    packetIsReady = HF.renderingApi.api.GetReadyForRendering(rn->handle);
+                }
             }
 
-            if(packetIsReady && HF.renderingApi.api.GetReadyForRendering(rn->handle))
+            if(packetIsReady)
             {
                 auto& cInfo = rn->eventInfo;
                 if (cInfo.onPreRenderCallback) cInfo.onPreRenderCallback(rn);

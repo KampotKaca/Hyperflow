@@ -107,8 +107,9 @@ namespace hf::callbacks
         auto rn = win->renderer;
         if (rn)
         {
+            std::lock_guard lock(rn->threadInfo.threadlock);
             auto size = inter::window::GetSize(win);
-            rn->size = size;
+            rn->threadInfo.size = size;
             inter::HF.renderingApi.api.RegisterFrameBufferChange(rn->handle, size);
         }
     }

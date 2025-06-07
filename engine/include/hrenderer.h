@@ -16,20 +16,18 @@ namespace hf
 		{
 			std::jthread thread;
 			std::mutex threadlock{};
-			bool wasModified = false;
 			uvec2 size{};
+
+			RenderPacket packetQueue[RENDERING_MAX_PACKET_QUEUE_SIZE];
+			uint8_t packetCount{};
+			RenderPacketDrawProcess currentDraw{};
+			std::atomic_bool isDrawing = false;
 		};
 
-		uvec2 size{};
+		ThreadInfo threadInfo{};
 		const Window* window{};
 		void* handle{};
 		RendererEventInfo eventInfo{};
-
-		RenderPacket packetQueue[RENDERING_MAX_PACKET_QUEUE_SIZE];
-		uint8_t packetCount{};
-
-		RenderPacketDrawProcess currentDraw{};
-		bool isDrawing = false;
 	};
 }
 
