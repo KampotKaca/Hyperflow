@@ -7,8 +7,11 @@ namespace app
 {
     struct AppUniforms
     {
+        hf::UniformBuffer cameraUniform = 0;
+        hf::UniformBuffer timeUniform = 0;
+
+        std::array<hf::UniformBuffer, 2> uniforms{};
         hf::UniformAllocator allocator = 0;
-        hf::UniformBuffer cameraTimeBuffer = 0;
     };
 
     struct CameraUniform
@@ -20,11 +23,6 @@ namespace app
         alignas(16) hf::mat4 proj{};
         alignas(16) hf::mat4 invProj{};
         alignas(16) hf::mat4 viewProj{};
-
-        alignas(16) hf::mat4 padding0{};
-        alignas(16) hf::mat4 padding1{};
-        alignas(16) hf::vec4 padding2{};
-        alignas(16) hf::vec4 padding3{};
     };
 
     struct TimeUniform
@@ -37,9 +35,12 @@ namespace app
 
     void UniformDefineAll();
     void UniformStartAll();
-    void UniformUploadCameraTime(const hf::Ref<hf::Renderer>& rn, const hf::Camera3DCore& cameraCore,
+    void UniformUploadCamera(const hf::Ref<hf::Renderer>& rn, const hf::Camera3DCore& cameraCore,
         hf::vec3 lookDirection, hf::vec3 position, const hf::mat4& view);
-    void UniformBindCameraTime(const hf::Ref<hf::Renderer>& rn);
+    void UniformUploadTime(const hf::Ref<hf::Renderer>& rn);
+
+    void UniformBindCamera(const hf::Ref<hf::Renderer>& rn);
+    void UniformBindTime(const hf::Ref<hf::Renderer>& rn);
 }
 
 #endif //UNIFORMS_H

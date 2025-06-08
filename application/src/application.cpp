@@ -68,15 +68,18 @@ namespace app
 	{
 		DebugRender(rn);
 
-		UniformUploadCameraTime(rn, freeMoveCamera.camera3D.core,
+		UniformUploadCamera(rn, freeMoveCamera.camera3D.core,
 			freeMoveCamera.camera3D.direction, freeMoveCamera.camera3D.position,
 			freeMoveCamera.camera3D.ToViewMat4());
+		UniformUploadTime(rn);
+
 		hf::draw::StartRenderPassPacket(rn, APP_RENDER_PASSES.mainPresentPass);
 		{
 			hf::draw::StartShaderSetupPacket(rn, APP_SHADER_SETUPS.viking_room); //Viking room setup
-			UniformBindCameraTime(rn);
+			UniformBindCamera(rn);
+			UniformBindTime(rn);
 			{
-				hf::ShaderBindingInfo vikingRoomShaderInfo
+				const hf::ShaderBindingInfo vikingRoomShaderInfo
 				{
 					.shader = APP_SHADERS.viking_room,
 					.attrib = APP_BUFFER_ATTRIBUTES.pos_col_tex,
@@ -88,7 +91,7 @@ namespace app
 					{
 						hf::draw::StartDrawPacket(rn);
 						{
-							auto trs = vikingRoomTransform.ToMat4();
+							const auto trs = vikingRoomTransform.ToMat4();
 							hf::draw::PacketAdd_TexturePackBinding(rn, APP_TEXTURE_PACKS.viking_room_pack);
 							hf::draw::PacketSet_PushConstant(rn, &trs, sizeof(trs));
 							hf::draw::PacketAdd_DrawCall(rn, APP_MESHES.viking_room);
@@ -104,9 +107,9 @@ namespace app
 			if (drawAxisLines)
 			{
 				hf::draw::StartShaderSetupPacket(rn, APP_SHADER_SETUPS.axis_lines); //Axis lines setup
-				UniformBindCameraTime(rn);
+				UniformBindCamera(rn);
 				{
-					hf::ShaderBindingInfo vikingRoomShaderInfo
+					const hf::ShaderBindingInfo vikingRoomShaderInfo
 					{
 						.shader = APP_SHADERS.axis_lines,
 						.attrib = hf::resources::GetQuadBufferAttrib(),

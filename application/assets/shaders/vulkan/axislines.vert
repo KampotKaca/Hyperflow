@@ -9,18 +9,7 @@ layout(set = 0, binding = 0) uniform Camera
     mat4 proj;
     mat4 invProj;
     mat4 viewProj;
-
-    mat4 padding0;
-    mat4 padding1;
-    vec4 padding2;
-    vec4 padding3;
 } CAMERA;
-
-layout (set = 0, binding = 1) uniform Time
-{
-    double deltaTime;
-    double timeSinceStartup;
-} TIME;
 
 layout(location = 0) in ivec2 inPosition;
 layout(location = 0) out vec3 o_RayWorld;

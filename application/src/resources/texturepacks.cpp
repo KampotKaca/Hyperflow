@@ -22,7 +22,7 @@ namespace app
             {
                 .bindingType = hf::RenderBindingType::Graphics,
                 .bindingId = 0,
-                .setBindingIndex = 1,
+                .setBindingIndex = 2,
                 .pBindings = &viking_room_binding,
                 .bindingCount = 1,
                 .layout = APP_TEXTURE_LAYOUTS.viking_room,

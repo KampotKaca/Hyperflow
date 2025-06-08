@@ -1,68 +1,62 @@
 #include "resources/uniforms.h"
+#include "../appconfig.h"
 
 namespace app
 {
     AppUniforms APP_UNIFORMS{};
 
-    struct UniformStorage_T
-    {
-        hf::UniformBufferBindingInfo uniformBindingInfos[8]{};
-        hf::UniformBuffer uniformBuffers[8]{};
-    };
-
-    struct CameraTimeUniformUpload_T
-    {
-        CameraUniform camera{};
-        TimeUniform time{};
-    };
-
-    static UniformStorage_T TEMP_ST{};
-    static CameraTimeUniformUpload_T TEMP_CAMERA_TIME_UPLOAD{};
-
     void UniformDefineAll()
     {
-        //cameraTimeUniform
+        //Camera uniform
         {
-            hf::UniformBufferBindingInfo cameraBindingInfo
+            hf::UniformBufferBindingInfo bindingInfo
             {
                 .usageFlags = hf::ShaderUsageStage::Default,
                 .arraySize = 1,
                 .elementSizeInBytes = sizeof(CameraUniform)
             };
 
-            hf::UniformBufferBindingInfo timeBindingInfo
+            const hf::UniformBufferDefinitionInfo uniform
+            {
+                .bindingId = 0,
+                .pBindings = &bindingInfo,
+                .bindingCount = 1
+            };
+
+            APP_UNIFORMS.cameraUniform = hf::uniformbuffer::Define(uniform);
+        }
+
+        //Time uniform
+        {
+            hf::UniformBufferBindingInfo bindingInfo
             {
                 .usageFlags = hf::ShaderUsageStage::Default,
                 .arraySize = 1,
                 .elementSizeInBytes = sizeof(TimeUniform)
             };
 
-            TEMP_ST.uniformBindingInfos[0] = cameraBindingInfo;
-            TEMP_ST.uniformBindingInfos[1] = timeBindingInfo;
-
-            hf::UniformBufferDefinitionInfo cameraBufferDefinitionInfo
+            hf::UniformBufferDefinitionInfo uniform
             {
                 .bindingId = 0,
-                .pBindings = TEMP_ST.uniformBindingInfos,
-                .bindingCount = 2
+                .pBindings = &bindingInfo,
+                .bindingCount = 1
             };
 
-            auto cameraTimeUniform = hf::uniformbuffer::Define(cameraBufferDefinitionInfo);
-
-            TEMP_ST.uniformBuffers[0] = cameraTimeUniform;
-            APP_UNIFORMS.cameraTimeBuffer = cameraTimeUniform;
+            APP_UNIFORMS.timeUniform = hf::uniformbuffer::Define(uniform);
         }
 
         //allocator
         {
-            hf::UniformAllocatorDefinitionInfo uniformAllocatorDefinitionInfo
+            APP_UNIFORMS.uniforms[0] = APP_UNIFORMS.cameraUniform;
+            APP_UNIFORMS.uniforms[1] = APP_UNIFORMS.timeUniform;
+
+            const hf::UniformAllocatorDefinitionInfo info
             {
-                .pBuffers = TEMP_ST.uniformBuffers,
-                .bufferCount = 1,
+                .pBuffers = APP_UNIFORMS.uniforms.data(),
+                .bufferCount = APP_UNIFORMS.uniforms.size(),
             };
 
-            auto allocator = hf::uniformallocator::Define(uniformAllocatorDefinitionInfo);
-            APP_UNIFORMS.allocator = allocator;
+            APP_UNIFORMS.allocator = hf::uniformallocator::Define(info);
         }
     }
 
@@ -71,41 +65,67 @@ namespace app
 
     }
 
-    void UniformUploadCameraTime(const hf::Ref<hf::Renderer>& rn, const hf::Camera3DCore& cameraCore,
+    void UniformUploadCamera(const hf::Ref<hf::Renderer>& rn, const hf::Camera3DCore& cameraCore,
         hf::vec3 lookDirection, hf::vec3 position, const hf::mat4& view)
     {
-        auto& utime = TEMP_CAMERA_TIME_UPLOAD.time;
-        utime.deltaTime = hf::time::GetDeltaTime();
-        utime.timeSinceStartup = hf::time::GetTimePassed();
+        static CameraUniform UNIFORM{};
+        UNIFORM.position = position;
+        UNIFORM.lookDirection = lookDirection;
+        UNIFORM.view = view;
+        UNIFORM.invView = glm::inverse(view);
+        UNIFORM.proj = cameraCore.ToProjectionMat4(rn);
+        UNIFORM.invProj = glm::inverse(UNIFORM.proj);
+        UNIFORM.viewProj = UNIFORM.proj * UNIFORM.view;
 
-        auto& uCam = TEMP_CAMERA_TIME_UPLOAD.camera;
-        uCam.position = position;
-        uCam.lookDirection = lookDirection;
-        uCam.view = view;
-        uCam.invView = glm::inverse(view);
-        uCam.proj = cameraCore.ToProjectionMat4(rn);
-        uCam.invProj = glm::inverse(uCam.proj);
-        uCam.viewProj = uCam.proj * uCam.view;
-
-        hf::UniformBufferUpload cameraTimeUpload
+        const hf::UniformBufferUpload uniformUpload
         {
-            .buffer = APP_UNIFORMS.cameraTimeBuffer,
+            .buffer = APP_UNIFORMS.cameraUniform,
             .offsetInBytes = 0,
-            .sizeInBytes = sizeof(CameraTimeUniformUpload_T),
-            .data = &TEMP_CAMERA_TIME_UPLOAD
+            .sizeInBytes = sizeof(CameraUniform),
+            .data = &UNIFORM
         };
 
-        hf::draw::UploadUniformPacket(rn, cameraTimeUpload);
+        hf::draw::UploadUniformPacket(rn, uniformUpload);
     }
 
-    void UniformBindCameraTime(const hf::Ref<hf::Renderer>& rn)
+    void UniformUploadTime(const hf::Ref<hf::Renderer>& rn)
     {
-        hf::UniformBufferBindInfo info
+        static TimeUniform UNIFORM{};
+        UNIFORM.deltaTime = hf::time::GetDeltaTime();
+        UNIFORM.timeSinceStartup = hf::time::GetTimePassed();
+
+        const hf::UniformBufferUpload uniformUpload
+        {
+            .buffer = APP_UNIFORMS.cameraUniform,
+            .offsetInBytes = 0,
+            .sizeInBytes = sizeof(TimeUniform),
+            .data = &UNIFORM
+        };
+
+        hf::draw::UploadUniformPacket(rn, uniformUpload);
+    }
+
+    void UniformBindCamera(const hf::Ref<hf::Renderer>& rn)
+    {
+        const hf::UniformBufferBindInfo info
         {
             .bindingType = hf::RenderBindingType::Graphics,
-            .setBindingIndex = 0,
-            .pUniforms = TEMP_ST.uniformBuffers,
-            .uniformCount = 1
+            .setBindingIndex = UNIFORM_CAMERA_SET_INDEX,
+            .pUniforms = &APP_UNIFORMS.cameraUniform,
+            .uniformCount = 1,
+        };
+
+        hf::draw::ShaderSetupAdd_UniformBinding(rn, info);
+    }
+
+    void UniformBindTime(const hf::Ref<hf::Renderer>& rn)
+    {
+        const hf::UniformBufferBindInfo info
+        {
+            .bindingType = hf::RenderBindingType::Graphics,
+            .setBindingIndex = UNIFORM_TIME_SET_INDEX,
+            .pUniforms = &APP_UNIFORMS.timeUniform,
+            .uniformCount = 1,
         };
 
         hf::draw::ShaderSetupAdd_UniformBinding(rn, info);

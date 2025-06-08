@@ -9,14 +9,9 @@ layout(set = 0, binding = 0) uniform Camera
     mat4 proj;
     mat4 invProj;
     mat4 viewProj;
-
-    mat4 padding0;
-    mat4 padding1;
-    vec4 padding2;
-    vec4 padding3;
 } CAMERA;
 
-layout (set = 0, binding = 1) uniform Time
+layout (set = 1, binding = 0) uniform Time
 {
     double deltaTime;
     double timeSinceStartup;
