@@ -131,17 +131,16 @@ namespace hf
                 0, nullptr);
     }
 
-    void UploadUniforms(const VkRenderer* rn, const UniformBufferUploadInfo& info)
+    void UploadUniforms(const VkRenderer* rn, const inter::rendering::UniformBufferUploadInfo& info)
     {
         auto currentFrame = rn->currentFrame;
 
-        for (uint32_t i = 0; i < info.uploadCount; i++)
+        for (uint32_t i = 0; i < info.uploadPacketCount; i++)
         {
-            auto& uploadInfo = info.pUploads[i];
-            if (!uploadInfo.data) continue;
-            auto& uniform = GetUniform(uploadInfo.buffer);
-            memcpy((uint8_t*)uniform->memoryMappings[currentFrame] + uploadInfo.offsetInBytes,
-                uploadInfo.data, uploadInfo.sizeInBytes);
+            auto& packet = info.pUploadPackets[i];
+            auto& uniform = GetUniform(packet.buffer);
+            memcpy((uint8_t*)uniform->memoryMappings[currentFrame] + packet.offsetInBytes,
+                &info.pUniformDataBuffer[packet.uniformStart], packet.uniformSize);
         }
     }
 

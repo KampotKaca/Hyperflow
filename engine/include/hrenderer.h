@@ -4,6 +4,7 @@
 #include "hshared.h"
 #include "../config.h"
 #include "hdrawprocess.h"
+#include "htime.h"
 
 namespace hf
 {

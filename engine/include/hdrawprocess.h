@@ -51,6 +51,15 @@ namespace hf
         uint16_t shaderSetupCount{};
     };
 
+    struct UniformUploadPacketInfo
+    {
+        UniformBuffer buffer{};
+        uint32_t offsetInBytes{};
+
+        uint32_t uniformStart{};
+        uint32_t uniformSize{};
+    };
+
     struct RenderPacket
     {
         RenderPassPacketInfo passes[RENDERING_MAX_NUM_RENDER_PASSES];
@@ -76,6 +85,12 @@ namespace hf
 
         DrawCallInfo drawCalls[RENDERING_MAX_NUM_DRAW_CALLS]{};
         uint32_t drawCallCount{};
+
+        uint8_t uniformUploads[RENDERING_MAX_UNIFORM_UPLOAD_BUFFER_SIZE]{};
+        uint32_t uniformUploadSize{};
+
+        UniformUploadPacketInfo uniformUploadPackets[RENDERING_MAX_UNIFORM_UPLOAD_COUNT];
+        uint32_t uniformUploadPacketCount{};
     };
 
     struct RenderPacketDrawProcess

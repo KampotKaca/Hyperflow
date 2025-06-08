@@ -7,6 +7,15 @@
 
 namespace hf
 {
+    static void ThreadDraw(Ref<Renderer> rn)
+    {
+        auto& threadInfo = rn->threadInfo;
+        while (renderer::IsRunning(rn))
+        {
+            
+        }
+    }
+
     Renderer::Renderer(const Window* window, const RendererEventInfo& eventInfo)
         : eventInfo(eventInfo)
     {

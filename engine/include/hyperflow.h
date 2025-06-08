@@ -186,7 +186,6 @@ namespace hf
 	namespace uniformbuffer
 	{
 		UniformBuffer Define(const UniformBufferDefinitionInfo& info);
-		void Upload(const Ref<Renderer>& rn, const UniformBufferUploadInfo& info);
 	}
 
 	namespace uniformallocator
@@ -246,6 +245,8 @@ namespace hf
 
 	namespace draw
 	{
+		void UploadUniformPacket(const Ref<Renderer>& rn, const UniformBufferUpload& info);
+
 		void StartRenderPassPacket(const Ref<Renderer>& rn, RenderPass pass);
 		void EndRenderPassPacket(const Ref<Renderer>& rn);
 

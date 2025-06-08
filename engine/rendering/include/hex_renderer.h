@@ -2,6 +2,7 @@
 #define HEX_RENDERER_H
 
 #include "hshared.h"
+#include "hdrawprocess.h"
 #include "../../others/exception/include/hgenericexception.h"
 
 namespace hf::inter::rendering
@@ -31,6 +32,13 @@ namespace hf::inter::rendering
         TextureFormat::D16_Unorm_S8_Uint,
         TextureFormat::D24_Unorm_S8_Uint,
         TextureFormat::D32_Sfloat_S8_Uint,
+    };
+
+    struct UniformBufferUploadInfo
+    {
+        const UniformUploadPacketInfo* pUploadPackets{};
+        uint32_t uploadPacketCount{};
+        const uint8_t* pUniformDataBuffer{};
     };
 
     struct ShaderCreationInfo

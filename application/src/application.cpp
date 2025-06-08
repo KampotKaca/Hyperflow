@@ -62,15 +62,15 @@ namespace app
 	void AppPreRender(const hf::Ref<hf::Renderer>& rn)
 	{
 		DebugPreRender(rn);
-		UniformUploadCameraTime(rn, freeMoveCamera.camera3D.core,
-			freeMoveCamera.camera3D.direction, freeMoveCamera.camera3D.position,
-			freeMoveCamera.camera3D.ToViewMat4());
 	}
 
 	void AppRender(const hf::Ref<hf::Renderer>& rn)
 	{
 		DebugRender(rn);
 
+		UniformUploadCameraTime(rn, freeMoveCamera.camera3D.core,
+			freeMoveCamera.camera3D.direction, freeMoveCamera.camera3D.position,
+			freeMoveCamera.camera3D.ToViewMat4());
 		hf::draw::StartRenderPassPacket(rn, APP_RENDER_PASSES.mainPresentPass);
 		{
 			hf::draw::StartShaderSetupPacket(rn, APP_SHADER_SETUPS.viking_room); //Viking room setup

@@ -8,7 +8,6 @@ namespace app
     {
         hf::UniformBufferBindingInfo uniformBindingInfos[8]{};
         hf::UniformBuffer uniformBuffers[8]{};
-        hf::UniformBufferUpload uploads[8]{};
     };
 
     struct CameraTimeUniformUpload_T
@@ -73,8 +72,7 @@ namespace app
     }
 
     void UniformUploadCameraTime(const hf::Ref<hf::Renderer>& rn, const hf::Camera3DCore& cameraCore,
-        hf::vec3 lookDirection, hf::vec3 position,
-        const hf::mat4& view)
+        hf::vec3 lookDirection, hf::vec3 position, const hf::mat4& view)
     {
         auto& utime = TEMP_CAMERA_TIME_UPLOAD.time;
         utime.deltaTime = hf::time::GetDeltaTime();
@@ -97,15 +95,7 @@ namespace app
             .data = &TEMP_CAMERA_TIME_UPLOAD
         };
 
-        TEMP_ST.uploads[0] = cameraTimeUpload;
-
-        hf::UniformBufferUploadInfo uniformBufferUploads
-        {
-            .pUploads = TEMP_ST.uploads,
-            .uploadCount = 1
-        };
-
-        hf::uniformbuffer::Upload(rn, uniformBufferUploads);
+        hf::draw::UploadUniformPacket(rn, cameraTimeUpload);
     }
 
     void UniformBindCameraTime(const hf::Ref<hf::Renderer>& rn)

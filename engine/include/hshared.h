@@ -340,13 +340,7 @@ namespace hf
 		uint32_t sizeInBytes{};
 		const void* data{};
 	};
-
-	struct UniformBufferUploadInfo
-	{
-		UniformBufferUpload* pUploads{};
-		uint32_t uploadCount{};
-	};
-
+	
 	struct UniformBufferBindInfo
 	{
 		RenderBindingType bindingType = RenderBindingType::Graphics;

@@ -42,6 +42,27 @@ namespace hf
             currentDraw.currentPass = nullptr;
         }
 
+        void UploadUniformPacket(const Ref<Renderer>& rn, const UniformBufferUpload& info)
+        {
+#if DEBUG
+            if (!rn->threadInfo.isDrawing)
+                throw GENERIC_EXCEPT("[Hyperflow]", "Cannot upload uniform util drawing process starts");
+#endif
+
+            auto& packet = rn->threadInfo.currentDraw.packet;
+            memcpy(&packet.uniformUploads[packet.uniformUploadSize], info.data, info.sizeInBytes);
+            packet.uniformUploadPackets[packet.uniformUploadPacketCount] =
+            {
+                .buffer = info.buffer,
+                .offsetInBytes = info.offsetInBytes,
+                .uniformStart = packet.uniformUploadSize,
+                .uniformSize = info.sizeInBytes
+            };
+
+            packet.uniformUploadSize += info.sizeInBytes;
+            packet.uniformUploadPacketCount++;
+        }
+
         void StartShaderSetupPacket(const Ref<Renderer>& rn, ShaderSetup shaderSetup)
         {
             auto& currentDraw = rn->threadInfo.currentDraw;
@@ -321,8 +342,18 @@ namespace hf
         void RendererDraw_i(const Ref<Renderer>& rn, const RenderPacket& packet)
         {
             void* vBufferCache[MAX_NUM_BUFFER_CACHE];
-
             auto handle = rn->handle;
+
+            {
+                const UniformBufferUploadInfo uploadInfo
+                {
+                    .pUploadPackets = packet.uniformUploadPackets,
+                    .uploadPacketCount = packet.uniformUploadPacketCount,
+                    .pUniformDataBuffer = packet.uniformUploads
+                };
+                HF.renderingApi.api.UploadUniformBuffer(handle, uploadInfo);
+            }
+
             for (uint8_t passIndex = 0; passIndex < packet.passCount; passIndex++)
             {
                 const auto& pass = packet.passes[passIndex];
