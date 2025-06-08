@@ -15,12 +15,13 @@ namespace hf
 
 		struct ThreadInfo
 		{
-			std::jthread thread;
+			std::thread thread;
 			std::mutex threadLock{};
 			std::condition_variable renderCondition;
 			uvec2 size{};
 
 			bool packetIsReady{};
+			bool isRunning{};
 			RenderPacket drawPacket{};
 		};
 

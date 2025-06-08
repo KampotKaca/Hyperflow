@@ -28,6 +28,7 @@ namespace app
 		MeshLoadAll();
 		TexturePackLoadAll();
 		ShaderLoadAll();
+		MaterialLoadAll();
 		DebugLoad();
 	}
 
@@ -40,7 +41,7 @@ namespace app
 		UniformStartAll();
 		DebugStart();
 
-		VoxelTerrainGenerate();
+		// VoxelTerrainGenerate();
 		hf::time::SetTargetFrameRate(-1);
 	}
 
@@ -51,12 +52,12 @@ namespace app
 		DebugUpdate();
 
 		if (hf::input::IsDown(hf::Key::N)) drawAxisLines = !drawAxisLines;
-		VoxelTerrainUpdate();
+		// VoxelTerrainUpdate();
 	}
 
 	void AppQuit()
 	{
-		VoxelTerrainDispose();
+		// VoxelTerrainDispose();
 		DebugQuit();
 	}
 

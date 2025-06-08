@@ -9,13 +9,13 @@ namespace hf
 {
     static void ThreadDraw(const Ref<Renderer>& rn)
     {
-        do
+        rn->threadInfo.isRunning = true;
+        while (rn->threadInfo.isRunning)
         {
-            if (renderer::IsRunning(rn))
-            {
-                inter::rendering::RendererUpdate_i(rn);
-            }
-        }while (inter::HF.isRunning);
+            inter::rendering::RendererUpdate_i(rn);
+            if (!inter::HF.isRunning) break;
+        }
+        rn->threadInfo.isRunning = false;
     }
 
     Renderer::Renderer(const Window* window, const RendererEventInfo& eventInfo)
@@ -96,7 +96,7 @@ namespace hf
                 if (win->renderer) CreateRenderer_i(win->renderer.get());
                 else win->renderer = MakeRef<Renderer>(win.get(), win->rnEventInfo);
                 auto rn = win->renderer;
-                HF.renderingApi.api.PostInstanceLoad(rn->handle, rn->eventInfo.onPassCreationCallback(rn));
+                RunRenderThread_i(win->renderer);
             }
 
             DefineStaticResources_i();
@@ -128,9 +128,6 @@ namespace hf
             texture::SubmitAll();
 
             for (auto& texPackAllocator : std::ranges::views::values(HF.graphicsResources.texturePackAllocators)) CreateTexturePackAllocator_i(texPackAllocator.get());
-
-            for (auto& win : HF.windows | std::views::values)
-                RunRenderThread_i(win->renderer);
         }
 
         void UnloadCurrentApi_i(bool retainReferences)
@@ -330,14 +327,18 @@ namespace hf
         {
             if (rn->handle)
             {
+                auto handle = rn->handle;
+                rn->handle = nullptr;
+                rn->threadInfo.isRunning = false;
+                if (rn->threadInfo.thread.joinable()) rn->threadInfo.thread.join();
+
+                HF.renderingApi.api.WaitForPreviousFrame(handle);
                 if (HF.rendererCount == 1)
                 {
                     UnloadAllResources_i(IsRunning());
                 }
 
-                HF.renderingApi.api.WaitForRendering();
-                HF.renderingApi.api.DestroyInstance(rn->handle);
-                rn->handle = nullptr;
+                HF.renderingApi.api.DestroyInstance(handle);
                 HF.rendererCount--;
                 if (HF.rendererCount == 0)
                 {
@@ -354,7 +355,6 @@ namespace hf
 
         void UnloadAllResources_i(const bool internalOnly)
         {
-            if (HF.renderingApi.isLoaded) HF.renderingApi.api.WaitForRendering();
             DestroyAllVertBuffers_i(internalOnly);
             DestroyAllIndexBuffers_i(internalOnly);
             DestroyAllStorageBuffers_i(internalOnly);
@@ -370,7 +370,8 @@ namespace hf
 
         void RunRenderThread_i(const Ref<Renderer>& rn)
         {
-            rn->threadInfo.thread = std::jthread(ThreadDraw, rn);
+            HF.renderingApi.api.PostInstanceLoad(rn->handle, rn->eventInfo.onPassCreationCallback(rn));
+            rn->threadInfo.thread = std::thread(ThreadDraw, rn);
             rn->threadInfo.thread.detach();
         }
     }

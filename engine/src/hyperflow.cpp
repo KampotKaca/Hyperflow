@@ -65,7 +65,6 @@ namespace hf
 					}
 				}
 			}
-			if (inter::HF.renderingApi.isLoaded) inter::HF.renderingApi.api.WaitForRendering();
 			if (inter::HF.lifecycleCallbacks.onQuitCallback) inter::HF.lifecycleCallbacks.onQuitCallback();
 
 			window::CloseAll();

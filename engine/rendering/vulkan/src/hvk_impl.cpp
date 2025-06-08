@@ -315,11 +315,6 @@ namespace hf::inter::rendering
         Draw(drawInfo);
     }
 
-    void WaitForRendering()
-    {
-        DelayThreadUntilRenderingFinish();
-    }
-
     void RegisterFrameBufferChange(void* rn, uvec2 newSize)
     {
         auto renderer = (VkRenderer*)rn;
@@ -415,7 +410,6 @@ namespace hf::inter::rendering
             .StartFrame                 = StartFrame,
             .EndFrame                   = EndFrame,
             .Draw                       = Draw,
-            .WaitForRendering           = WaitForRendering,
 
             .RegisterFrameBufferChange  = RegisterFrameBufferChange,
             .SetVSync                   = SetVSync,

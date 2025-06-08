@@ -237,7 +237,6 @@ namespace hf::inter::rendering
         void (*StartFrame)(void* rn);
         void (*EndFrame)(void* rn);
         void (*Draw)(void* rn, const DrawCallInfo& info);
-        void (*WaitForRendering)();
 
         void (*RegisterFrameBufferChange)(void* rn, uvec2 newSize);
         void (*SetVSync)(void* rn, VsyncMode mode);

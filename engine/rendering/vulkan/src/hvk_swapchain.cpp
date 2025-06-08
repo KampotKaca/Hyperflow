@@ -172,6 +172,7 @@ namespace hf
         if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR)
             RecreateSwapchain(rn);
         else if (result != VK_SUCCESS) throw GENERIC_EXCEPT("[Vulkan]", "Failed to present swapchain");
+        vkQueueWaitIdle(GRAPHICS_DATA.defaultDevice->logicalDevice.presentQueue);
     }
 
     bool AcquireNextImage(VkRenderer* rn)

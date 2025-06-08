@@ -10,7 +10,7 @@ namespace hf
         uint32_t hash = 2166136261u;
         for (const char c : str)
         {
-            hash ^= static_cast<uint8_t>(c);
+            hash ^= (uint8_t)c;
             hash *= 16777619u;
         }
         return hash;

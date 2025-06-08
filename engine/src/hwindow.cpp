@@ -43,10 +43,7 @@ namespace hf
 			if (inter::HF.renderingApi.type != RenderingApiType::None)
 			{
 				newWindow->renderer = MakeRef<Renderer>(newWindow.get(), newWindow->rnEventInfo);
-				auto rn = newWindow->renderer;
-				inter::HF.renderingApi.api.PostInstanceLoad(newWindow->renderer->handle,
-					rn->eventInfo.onPassCreationCallback(rn));
-				inter::rendering::RunRenderThread_i(rn);
+				inter::rendering::RunRenderThread_i(newWindow->renderer);
 			}
 			return newWindow;
 		}
