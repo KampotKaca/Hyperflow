@@ -7,13 +7,21 @@
 
 namespace hf
 {
-    static void ThreadDraw(Ref<Renderer> rn)
+    static void ThreadDraw(const Ref<Renderer>& rn)
     {
         auto& threadInfo = rn->threadInfo;
-        while (renderer::IsRunning(rn))
+        do
         {
-            
-        }
+            {
+                std::unique_lock lock(threadInfo.threadLock);
+                threadInfo.renderCondition.wait(lock, [&]{ return threadInfo.packetIsReady; });
+            }
+
+            if (renderer::IsRunning(rn))
+            {
+                inter::rendering::RendererUpdate_i(rn);
+            }
+        }while (inter::HF.isRunning);
     }
 
     Renderer::Renderer(const Window* window, const RendererEventInfo& eventInfo)
@@ -57,7 +65,7 @@ namespace hf
 
         void Resize(const Ref<Renderer>& rn, uvec2 size)
         {
-            std::lock_guard lock(rn->threadInfo.threadlock);
+            std::lock_guard lock(rn->threadInfo.threadLock);
             if (rn->window != nullptr) throw GENERIC_EXCEPT("[Hyperflow]", "Cannot resize renderer connected to the window");
             rn->threadInfo.size = size;
             inter::HF.renderingApi.api.RegisterFrameBufferChange(rn->handle, size);
@@ -126,13 +134,16 @@ namespace hf
             texture::SubmitAll();
 
             for (auto& texPackAllocator : std::ranges::views::values(HF.graphicsResources.texturePackAllocators)) CreateTexturePackAllocator_i(texPackAllocator.get());
+
+            for (auto& win : HF.windows | std::views::values)
+                RunRenderThread_i(win->renderer);
         }
 
         void UnloadCurrentApi_i(bool retainReferences)
         {
             if (HF.renderingApi.type == RenderingApiType::None) return;
 
-            for (auto& window : HF.windows | std::views::values)
+            for (const auto& window : HF.windows | std::views::values)
             {
                 if (window->renderer)
                 {
@@ -161,7 +172,7 @@ namespace hf
                     { .type = BufferDataType::I32, .size = 2, }
                 };
 
-                BufferAttribDefinitionInfo attribInfo
+                const BufferAttribDefinitionInfo attribInfo
                 {
                     .bindingId = 0,
                     .formatCount = 1,
@@ -173,7 +184,7 @@ namespace hf
 
             //Empty Texture Layout
             {
-                TextureLayoutDefinitionInfo layoutInfo
+                constexpr TextureLayoutDefinitionInfo layoutInfo
                 {
                     .pBindings = nullptr,
                     .bindingCount = 0
@@ -184,7 +195,7 @@ namespace hf
 
             //Cubemap Sampler
             {
-                TextureSamplerDefinitionInfo samplerInfo
+                constexpr TextureSamplerDefinitionInfo samplerInfo
                 {
                     .filter = TextureFilter::Bilinear,
                     .anisotropicFilter = TextureAnisotropicFilter::X16,
@@ -193,7 +204,7 @@ namespace hf
                     .comparison = ComparisonOperation::Never,
                 };
 
-                HF.staticResources.cubemapSampler = hf::texturesampler::Define(samplerInfo);
+                HF.staticResources.cubemapSampler = texturesampler::Define(samplerInfo);
             }
 
             //Cubemap Attrib
@@ -224,7 +235,7 @@ namespace hf
                     { -1, -1 }, { 1, -1 }, { 1, 1 },
                 };
 
-                VertBufferCreationInfo bufferInfo
+                const VertBufferCreationInfo bufferInfo
                 {
                     .bufferAttrib = HF.staticResources.quadAttrib,
                     .memoryType = BufferMemoryType::Static,
@@ -244,7 +255,7 @@ namespace hf
                     { -1, 1, -1 }, { -1, 1, 1 }, { 1, 1, 1 }, { 1, 1, -1 },
                 };
 
-                VertBufferCreationInfo bufferInfo
+                const VertBufferCreationInfo bufferInfo
                 {
                     .bufferAttrib = HF.staticResources.cubeAttrib,
                     .memoryType = BufferMemoryType::Static,
@@ -285,8 +296,8 @@ namespace hf
         {
             if (HF.rendererCount == 0)
             {
-                auto engineV = utils::ConvertVersion(VERSION);
-                auto appV = utils::ConvertVersion(APP_VERSION);
+                const auto engineV = utils::ConvertVersion(VERSION);
+                const auto appV = utils::ConvertVersion(APP_VERSION);
 
                 RendererLoadInfo loadInfo
                 {
@@ -347,7 +358,7 @@ namespace hf
             }
         }
 
-        void UnloadAllResources_i(bool internalOnly)
+        void UnloadAllResources_i(const bool internalOnly)
         {
             if (HF.renderingApi.isLoaded) HF.renderingApi.api.WaitForRendering();
             DestroyAllVertBuffers_i(internalOnly);
@@ -361,6 +372,12 @@ namespace hf
 
             DestroyAllTexturePackAllocators_i(internalOnly);
             DestroyAllTexturePacks_i(internalOnly);
+        }
+
+        void RunRenderThread_i(const Ref<Renderer>& rn)
+        {
+            rn->threadInfo.thread = std::jthread(ThreadDraw, rn);
+            rn->threadInfo.thread.detach();
         }
     }
 

@@ -107,7 +107,7 @@ namespace app
 
     void UniformBindCamera(const hf::Ref<hf::Renderer>& rn)
     {
-        const hf::UniformBufferBindInfo info
+        constexpr hf::UniformBufferBindInfo info
         {
             .bindingType = hf::RenderBindingType::Graphics,
             .setBindingIndex = UNIFORM_CAMERA_SET_INDEX,
@@ -120,7 +120,7 @@ namespace app
 
     void UniformBindTime(const hf::Ref<hf::Renderer>& rn)
     {
-        const hf::UniformBufferBindInfo info
+        constexpr hf::UniformBufferBindInfo info
         {
             .bindingType = hf::RenderBindingType::Graphics,
             .setBindingIndex = UNIFORM_TIME_SET_INDEX,

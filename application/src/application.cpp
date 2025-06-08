@@ -41,6 +41,7 @@ namespace app
 		DebugStart();
 
 		VoxelTerrainGenerate();
+		hf::time::SetTargetFrameRate(-1);
 	}
 
 	void AppUpdate()

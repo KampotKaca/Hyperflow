@@ -62,8 +62,6 @@ namespace hf
 						inter::rendering::StartRenderPacket_i(rn);
 						if (cInfo.onRenderCallback) cInfo.onRenderCallback(rn);
 						inter::rendering::EndRenderPacket_i(rn);
-						
-						inter::rendering::RendererUpdate_i(rn);
 					}
 				}
 			}

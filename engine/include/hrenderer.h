@@ -16,15 +16,16 @@ namespace hf
 		struct ThreadInfo
 		{
 			std::jthread thread;
-			std::mutex threadlock{};
+			std::mutex threadLock{};
+			std::condition_variable renderCondition;
 			uvec2 size{};
 
-			RenderPacket packetQueue[RENDERING_MAX_PACKET_QUEUE_SIZE];
-			uint8_t packetCount{};
-			RenderPacketDrawProcess currentDraw{};
-			std::atomic_bool isDrawing = false;
+			bool packetIsReady{};
+			RenderPacket drawPacket{};
 		};
 
+		RenderPacketDrawProcess currentDraw{};
+		bool isDrawing = false;
 		ThreadInfo threadInfo{};
 		const Window* window{};
 		void* handle{};

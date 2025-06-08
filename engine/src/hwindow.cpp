@@ -46,6 +46,7 @@ namespace hf
 				auto rn = newWindow->renderer;
 				inter::HF.renderingApi.api.PostInstanceLoad(newWindow->renderer->handle,
 					rn->eventInfo.onPassCreationCallback(rn));
+				inter::rendering::RunRenderThread_i(rn);
 			}
 			return newWindow;
 		}

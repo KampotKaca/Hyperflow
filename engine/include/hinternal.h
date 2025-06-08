@@ -61,7 +61,7 @@ namespace hf::inter
     {
         EngineLifecycleCallbacks lifecycleCallbacks{};
         EngineUpdateType updateType = EngineUpdateType::Continues;
-        bool isRunning{};
+        std::atomic_bool isRunning{};
         std::string appTitle{};
         Time time{};
         Ref<Window> mainWindow{};
@@ -103,6 +103,7 @@ namespace hf::inter
 
         void CreateRenderer_i(Renderer* rn);
         void DestroyRenderer_i(Renderer* rn);
+        void RunRenderThread_i(const Ref<Renderer>& rn);
 
         void RendererUpdate_i(const Ref<Renderer>& rn);
         void RendererDraw_i(const Ref<Renderer>& rn, const RenderPacket& packet);
