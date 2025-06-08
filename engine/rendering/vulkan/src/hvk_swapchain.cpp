@@ -177,13 +177,6 @@ namespace hf
     bool AcquireNextImage(VkRenderer* rn)
     {
         auto& device = GRAPHICS_DATA.defaultDevice->logicalDevice.device;
-        if (rn->imageIndex != UINT32_MAX)
-        {
-            auto& previousImage = rn->swapchain.images[rn->imageIndex];
-            vkWaitForFences(device, 1, &previousImage.isInFlight, true, VULKAN_API_MAX_TIMEOUT);
-            vkResetFences(device, 1, &previousImage.isInFlight);
-        }
-        else rn->imageIndex = rn->swapchain.images.size() - 1;
         SubmitAllOperations();
         if (rn->frameBufferResized) RecreateSwapchain(rn);
 
@@ -206,5 +199,17 @@ namespace hf
             throw GENERIC_EXCEPT("[Vulkan]", "Unable to acquire image from swapchain!");
 
         return true;
+    }
+
+    void DelayUntilPreviousFrameFinish(VkRenderer* rn)
+    {
+        if (rn->imageIndex != UINT32_MAX)
+        {
+            auto& device = GRAPHICS_DATA.defaultDevice->logicalDevice.device;
+            auto& previousImage = rn->swapchain.images[rn->imageIndex];
+            vkWaitForFences(device, 1, &previousImage.isInFlight, true, VULKAN_API_MAX_TIMEOUT);
+            vkResetFences(device, 1, &previousImage.isInFlight);
+        }
+        else rn->imageIndex = rn->swapchain.images.size() - 1;
     }
 }

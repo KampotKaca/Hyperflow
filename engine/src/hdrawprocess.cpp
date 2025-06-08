@@ -310,20 +310,18 @@ namespace hf
 
         void RendererUpdate_i(const Ref<Renderer>& rn)
         {
+            HF.renderingApi.api.WaitForPreviousFrame(rn->handle);
             auto& tInfo = rn->threadInfo;
-            volatile bool packetIsReady = false;
+
             RenderPacket packet;
             {
-                std::lock_guard lock(tInfo.threadLock);
-                if (tInfo.packetIsReady)
-                {
-                    packet = tInfo.drawPacket;
-                    tInfo.packetIsReady = false;
-                    packetIsReady = HF.renderingApi.api.GetReadyForRendering(rn->handle);
-                }
+                std::unique_lock lock(tInfo.threadLock);
+                tInfo.renderCondition.wait(lock, [&]{ return tInfo.packetIsReady; });
+                packet = tInfo.drawPacket;
+                tInfo.packetIsReady = false;
             }
 
-            if(packetIsReady)
+            if(HF.renderingApi.api.GetReadyForRendering(rn->handle))
             {
                 auto& cInfo = rn->eventInfo;
                 if (cInfo.onPreRenderCallback) cInfo.onPreRenderCallback(rn);

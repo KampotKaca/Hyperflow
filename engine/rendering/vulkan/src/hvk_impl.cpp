@@ -6,7 +6,6 @@
 #include "hvk_vertbuffer.h"
 #include "hvk_storagebuffer.h"
 #include "hvk_renderpass.h"
-#include "hvk_renderpass.h"
 
 namespace hf::inter::rendering
 {
@@ -263,6 +262,11 @@ namespace hf::inter::rendering
         return GetReadyForRendering(renderer);
     }
 
+    void WaitForPreviousFrame(void* rn)
+    {
+        DelayUntilPreviousFrameFinish((VkRenderer*)rn);
+    }
+
     void StartFrame(void* rn)
     {
         auto renderer = (VkRenderer*)rn;
@@ -406,6 +410,7 @@ namespace hf::inter::rendering
             .SubmitTextureCopyOperations  = SubmitTextureCopyOperations,
 
             //rendering
+            .WaitForPreviousFrame       = WaitForPreviousFrame,
             .GetReadyForRendering       = GetReadyForRendering,
             .StartFrame                 = StartFrame,
             .EndFrame                   = EndFrame,

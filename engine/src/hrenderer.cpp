@@ -9,14 +9,8 @@ namespace hf
 {
     static void ThreadDraw(const Ref<Renderer>& rn)
     {
-        auto& threadInfo = rn->threadInfo;
         do
         {
-            {
-                std::unique_lock lock(threadInfo.threadLock);
-                threadInfo.renderCondition.wait(lock, [&]{ return threadInfo.packetIsReady; });
-            }
-
             if (renderer::IsRunning(rn))
             {
                 inter::rendering::RendererUpdate_i(rn);

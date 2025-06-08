@@ -55,6 +55,11 @@ namespace app
             hf::window::SetState(DEBUG_INFO.wn, state);
         }
 
+        if (hf::input::IsDown(hf::Key::M))
+        {
+            hf::window::SetState(DEBUG_INFO.wn, hf::WindowState::FullscreenBorderless);
+        }
+
         if (hf::input::IsDown(hf::Key::B))
         {
             auto state = (hf::WindowPointerState)(((uint32_t)hf::window::GetPointerState(DEBUG_INFO.wn) + 1) % 4);

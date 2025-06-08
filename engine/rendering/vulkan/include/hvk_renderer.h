@@ -63,6 +63,7 @@ namespace hf
 
     void PresentSwapchain(VkRenderer* rn);
     bool AcquireNextImage(VkRenderer* rn);
+    void DelayUntilPreviousFrameFinish(VkRenderer* rn);
 
     void BeginPass(VkRenderer* rn, RenderPass pass);
     void EndPass(VkRenderer* rn);

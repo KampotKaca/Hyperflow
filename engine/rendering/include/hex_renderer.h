@@ -232,6 +232,7 @@ namespace hf::inter::rendering
         void (*SubmitTextureCopyOperations)();
 
         //RenderingOperations
+        void (*WaitForPreviousFrame)(void* rn);
         bool (*GetReadyForRendering)(void* rn);
         void (*StartFrame)(void* rn);
         void (*EndFrame)(void* rn);
