@@ -142,7 +142,8 @@ namespace hf
         {
             if (tex->handle)
             {
-                HF.renderingApi.api.DestroyTexture(tex->handle);
+                std::lock_guard lock(HF.deletedResources.syncLock);
+                HF.deletedResources.textures.push_back(tex->handle);
                 tex->handle = nullptr;
                 return true;
             }

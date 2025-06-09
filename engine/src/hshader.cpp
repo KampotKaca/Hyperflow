@@ -114,7 +114,8 @@ namespace hf
         {
             if (shader->handle)
             {
-                HF.renderingApi.api.DestroyShader(shader->handle);
+                std::lock_guard lock(HF.deletedResources.syncLock);
+                HF.deletedResources.shaders.push_back(shader->handle);
                 shader->handle = nullptr;
                 return true;
             }

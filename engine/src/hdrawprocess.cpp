@@ -311,8 +311,9 @@ namespace hf
         void RendererUpdate_i(const Ref<Renderer>& rn)
         {
             HF.renderingApi.api.WaitForPreviousFrame(rn->handle);
-            auto& tInfo = rn->threadInfo;
+            CleanMarkedResources_i();
 
+            auto& tInfo = rn->threadInfo;
             RenderPacket packet;
             {
                 std::unique_lock lock(tInfo.threadLock);

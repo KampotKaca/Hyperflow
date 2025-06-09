@@ -74,7 +74,6 @@ namespace hf
     void SetTextureBinding(VkTexturePack* pack, uint32_t bindingIndex, TextureSampler sampler,
         VkTexture** pTextures, uint32_t offset, uint32_t size)
     {
-        WaitForDevice();
         auto& binding = pack->bindings[bindingIndex];
         if (size > 0) memcpy(&binding.textures[offset], pTextures, size * sizeof(VkTexture*));
 

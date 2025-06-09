@@ -9,6 +9,7 @@ namespace hf
 {
     static void ThreadDraw(const Ref<Renderer>& rn)
     {
+        // auto handle = rn->handle;
         rn->threadInfo.isRunning = true;
         while (rn->threadInfo.isRunning)
         {
@@ -16,8 +17,22 @@ namespace hf
             if (!inter::HF.isRunning) break;
         }
         rn->threadInfo.isRunning = false;
-        if (rn->handle) inter::HF.renderingApi.api.WaitForPreviousFrame(rn->handle);
+        // if (handle) inter::HF.renderingApi.api.WaitForPreviousFrame(handle);
         inter::HF.renderingApi.api.WaitForDevice();
+        inter::CleanMarkedResources_i();
+
+        inter::HF.renderingApi.api.DestroyInstance(rn->handle);
+
+        if (inter::HF.rendererCount == 0)
+        {
+            inter::HF.renderingApi.isLoaded = false;
+            inter::HF.renderingApi.api.Unload();
+            if (inter::HF.renderingApi.additionalDll)
+            {
+                inter::platform::UnloadDll(inter::HF.renderingApi.additionalDll);
+                inter::HF.renderingApi.additionalDll = nullptr;
+            }
+        }
     }
 
     Renderer::Renderer(const Window* window, const RendererEventInfo& eventInfo)
@@ -329,50 +344,22 @@ namespace hf
         {
             if (rn->handle)
             {
-                rn->threadInfo.isRunning = false;
-                if (rn->threadInfo.thread.joinable()) rn->threadInfo.thread.join();
-
-                if (HF.rendererCount == 1)
                 {
-                    UnloadAllResources_i(IsRunning());
-                }
+                    if (HF.rendererCount == 1) UnloadAllResources_i(IsRunning());
 
-                HF.renderingApi.api.DestroyInstance(rn->handle);
+                    std::lock_guard lock(HF.deletedResources.syncLock);
+                    HF.rendererCount--;
+                    rn->threadInfo.isRunning = false;
+                }
+                rn->threadInfo.thread.join();
                 rn->handle = nullptr;
-                HF.rendererCount--;
-                if (HF.rendererCount == 0)
-                {
-                    HF.renderingApi.isLoaded = false;
-                    HF.renderingApi.api.Unload();
-                    if (HF.renderingApi.additionalDll)
-                    {
-                        platform::UnloadDll(HF.renderingApi.additionalDll);
-                        HF.renderingApi.additionalDll = nullptr;
-                    }
-                }
             }
-        }
-
-        void UnloadAllResources_i(const bool internalOnly)
-        {
-            DestroyAllVertBuffers_i(internalOnly);
-            DestroyAllIndexBuffers_i(internalOnly);
-            DestroyAllStorageBuffers_i(internalOnly);
-            DestroyAllMeshes_i(internalOnly);
-            DestroyAllShaders_i(internalOnly);
-
-            DestroyAllTextures_i(internalOnly);
-            DestroyAllCubemaps_i(internalOnly);
-
-            DestroyAllTexturePackAllocators_i(internalOnly);
-            DestroyAllTexturePacks_i(internalOnly);
         }
 
         void RunRenderThread_i(const Ref<Renderer>& rn)
         {
             HF.renderingApi.api.PostInstanceLoad(rn->handle, rn->eventInfo.onPassCreationCallback(rn));
             rn->threadInfo.thread = std::thread(ThreadDraw, rn);
-            rn->threadInfo.thread.detach();
         }
     }
 

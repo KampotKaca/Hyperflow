@@ -133,6 +133,11 @@ namespace hf::inter::rendering
 
     }
 
+    void BindUniformBuffer(const void* rn, const UniformBufferBindInfo& info)
+    {
+
+    }
+
     uint32_t DefineShaderSetup(const ShaderSetupDefinitionInfo& info)
     {
         return 1;
@@ -144,6 +149,11 @@ namespace hf::inter::rendering
     }
 
     void BindShaderSetup(void* rn, ShaderSetup)
+    {
+
+    }
+
+    void UploadPushConstants(void* rn, const PushConstantUploadInfo& info)
     {
 
     }
@@ -203,6 +213,11 @@ namespace hf::inter::rendering
 
     }
 
+    void WaitForPreviousFrame(void* rn)
+    {
+
+    }
+
     bool GetReadyForRendering(void* rn)
     {
         auto renderer = (D3DRenderer*)rn;
@@ -238,7 +253,7 @@ namespace hf::inter::rendering
         Draw(renderer);
     }
 
-    void WaitForRendering()
+    void WaitForDevice()
     {
 
     }
@@ -268,6 +283,7 @@ namespace hf::inter::rendering
             //uniform storage
             .DefineShaderSetup          = DefineShaderSetup,
             .BindShaderSetup            = BindShaderSetup,
+            .UploadPushConstants        = UploadPushConstants,
 
             //texture
             .CreateTexture              = CreateTexture,
@@ -296,6 +312,7 @@ namespace hf::inter::rendering
             //uniform buffer
             .DefineUniformBuffer        = DefineUniformBuffer,
             .UploadUniformBuffer        = UploadUniformBuffer,
+            .BindUniformBuffer          = BindUniformBuffer,
 
             //uniform allocator
             .DefineUniformAllocator     = DefineUniformAllocator,
@@ -320,11 +337,12 @@ namespace hf::inter::rendering
             .SubmitTextureCopyOperations  = SubmitTextureCopyOperations,
 
             //rendering
+            .WaitForPreviousFrame       = WaitForPreviousFrame,
             .GetReadyForRendering       = GetReadyForRendering,
             .StartFrame                 = StartFrame,
             .EndFrame                   = EndFrame,
             .Draw                       = Draw,
-            .WaitForRendering           = WaitForRendering,
+            .WaitForDevice              = WaitForDevice,
 
             .RegisterFrameBufferChange  = RegisterFrameBufferChange,
             .SetVSync                   = SetVSync,

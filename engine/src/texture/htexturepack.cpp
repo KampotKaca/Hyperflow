@@ -161,7 +161,8 @@ namespace hf
         {
             if (texPack->handle)
             {
-                HF.renderingApi.api.DestroyTexturePack(texPack->handle);
+                std::lock_guard lock(HF.deletedResources.syncLock);
+                HF.deletedResources.texturePacks.push_back(texPack->handle);
                 texPack->handle = nullptr;
                 return true;
             }

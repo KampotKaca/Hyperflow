@@ -69,7 +69,8 @@ namespace hf
         {
             if (packAllocator->handle)
             {
-                HF.renderingApi.api.DestroyTexturePackAllocator(packAllocator->handle);
+                std::lock_guard lock(HF.deletedResources.syncLock);
+                HF.deletedResources.texturePackAllocators.push_back(packAllocator->handle);
                 packAllocator->handle = nullptr;
                 return true;
             }

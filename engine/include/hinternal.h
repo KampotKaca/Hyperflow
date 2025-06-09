@@ -44,6 +44,18 @@ namespace hf::inter
         Ref<StorageBuffer> materialDataStorage{};
     };
 
+    struct ResourcesMarkedForDeletion
+    {
+        std::mutex syncLock{};
+        std::vector<void*> shaders{};
+        std::vector<void*> vertBuffers{};
+        std::vector<void*> indexBuffers{};
+        std::vector<void*> storageBuffers{};
+        std::vector<void*> texturePacks{};
+        std::vector<void*> texturePackAllocators{};
+        std::vector<void*> textures{};
+    };
+
     struct StaticResources
     {
         TextureLayout emptyLayout{};
@@ -70,6 +82,7 @@ namespace hf::inter
         RenderingApi renderingApi{};
 
         GraphicsResources graphicsResources{};
+        ResourcesMarkedForDeletion deletedResources{};
         StaticResources staticResources{};
     };
 
@@ -80,6 +93,11 @@ namespace hf::inter
         vec4 planeNormal; // w is thickness
         vec4 color;
     };
+
+    //if true, will release internal resources, but will retain resource references
+    //it is made to be used for handling api changes.
+    void UnloadAllResources_i(bool internalOnly = false);
+    void CleanMarkedResources_i();
 
     namespace alloc
     {
@@ -144,10 +162,6 @@ namespace hf::inter
         void DestroyAllTexturePacks_i(bool internalOnly = false);
         void DestroyAllTexturePackAllocators_i(bool internalOnly = false);
         void DestroyAllShaders_i(bool internalOnly = false);
-
-        //if true, will release internal resources, but will retain resource references
-        //it is made to be used for handling api changes.
-        void UnloadAllResources_i(bool internalOnly = false);
 
         void SendMaterialPushConstants_i(Material* material);
     }

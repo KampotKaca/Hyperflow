@@ -85,7 +85,6 @@ namespace hf
     void UnloadVulkan()
     {
         SubmitAllOperations();
-        WaitForDevice();
 
         GRAPHICS_DATA.uniformAllocators.clear();
         GRAPHICS_DATA.shaderSetups.clear();

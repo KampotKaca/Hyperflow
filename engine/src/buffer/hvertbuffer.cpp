@@ -81,7 +81,8 @@ namespace hf
         {
             if (buffer->handle)
             {
-                HF.renderingApi.api.DestroyVertBuffer(buffer->handle);
+                std::lock_guard lock(HF.deletedResources.syncLock);
+                HF.deletedResources.vertBuffers.push_back(buffer->handle);
                 buffer->handle = nullptr;
                 return true;
             }
