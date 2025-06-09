@@ -26,6 +26,8 @@ namespace hf
 		inter::window::SetTitle(this, info.title);
 		inter::window::SetTitle(this, info.title);
 		inter::window::SetPointerState(this, info.pointerState);
+
+		if (info.iconFolderPath) inter::rendering::SetWindowIcons_i(this, info.iconFolderPath);
 	}
 
 	Window::~Window()
@@ -96,5 +98,7 @@ namespace hf
 		}
 
 		VsyncMode GetVSyncMode(const Ref<Window> &window) { return window->vSyncMode; }
+		bool SetIcons(const Ref<Window>& window, const char* folderPath)
+		{ return inter::rendering::SetWindowIcons_i(window.get(), folderPath); }
 	}
 }

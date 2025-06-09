@@ -123,6 +123,8 @@ namespace hf::inter
         void DestroyRenderer_i(Renderer* rn);
         void RunRenderThread_i(const Ref<Renderer>& rn);
 
+        bool SetWindowIcons_i(const Window* win, const char* folderPath);
+
         void RendererUpdate_i(const Ref<Renderer>& rn);
         void RendererDraw_i(const Ref<Renderer>& rn, const RenderPacket& packet);
 

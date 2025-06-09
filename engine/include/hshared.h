@@ -801,6 +801,7 @@ namespace hf
 	struct WindowCreationInfo
 	{
 		std::string title = "Untitled";
+		const char* iconFolderPath{};
 		WindowState state = WindowState::Restored;
 		WindowEventFlags eventFlags = WindowEventFlags::All;
 		WindowPointerState pointerState = WindowPointerState::Normal;

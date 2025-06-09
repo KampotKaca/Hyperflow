@@ -25,6 +25,12 @@ namespace hf::inter
 
     namespace window
     {
+        struct Image
+        {
+            ivec2 size{};
+            unsigned char* data{};
+        };
+
         void Open(Window* win, const WindowCreationInfo& info);
         bool Close(Window* win);
 
@@ -43,6 +49,8 @@ namespace hf::inter
         IRect GetFrameRect(const Window* win);
         ivec2 GetSize(const Window* win);
         ivec2 GetPosition(const Window* win);
+
+        void SetIcons(const Window* win, const Image* pImages, uint32_t count);
     }
 }
 

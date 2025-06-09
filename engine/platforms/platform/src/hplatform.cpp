@@ -331,5 +331,10 @@ namespace hf::inter
         }
 
         const char* GetTitle(const Window* win) { return glfwGetWindowTitle((GLFWwindow*)win->handle); }
+
+        void SetIcons(const Window* win, const Image* pImages, uint32_t count)
+        {
+            glfwSetWindowIcon((GLFWwindow*)win->handle, count, (GLFWimage*)pImages);
+        }
     }
 }

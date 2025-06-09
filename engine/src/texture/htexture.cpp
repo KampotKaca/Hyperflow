@@ -1,6 +1,9 @@
 #include "hyaml.h"
 #include <stb_image.h>
 #include "htexture.h"
+
+#include <filesystem>
+
 #include "hinternal.h"
 #include "hyperflow.h"
 #include "hstrconversion.h"
@@ -111,6 +114,9 @@ namespace hf
                 return false;
             }
 
+            if (HF.renderingApi.type == RenderingApiType::Vulkan)
+                stbi_set_flip_vertically_on_load(false);
+
             ivec3 size{};
             int32_t texChannels{};
             tex->pixelCache = stbi_load(texLoc.c_str(), &size.x, &size.y,
@@ -171,6 +177,52 @@ namespace hf
         TextureLayout Define(const TextureLayoutDefinitionInfo& info)
         {
             return inter::HF.renderingApi.api.DefineTextureLayout(info);
+        }
+    }
+
+    namespace inter::rendering
+    {
+        bool SetWindowIcons_i(const Window* win, const char* folderPath)
+        {
+            std::filesystem::path fPath = TO_RES_PATH(folderPath);
+            if (std::filesystem::exists(fPath) && std::filesystem::is_directory(fPath))
+            {
+                std::vector<window::Image> images{};
+                for (const auto& entry : std::filesystem::recursive_directory_iterator(fPath))
+                {
+                    if (entry.is_regular_file())
+                    {
+                        auto ext = entry.path().extension().string();
+                        std::ranges::transform(ext, ext.begin(), ::tolower);
+
+                        if (ext == ".png" || ext == ".jpg" || ext == ".jpeg")
+                        {
+                            ivec3 size{};
+                            int32_t texChannels{};
+                            stbi_set_flip_vertically_on_load(false);
+                            unsigned char* pixels = stbi_load(entry.path().string().c_str(), &size.x, &size.y,
+                            &texChannels, (uint32_t)TextureChannel::RGBA);
+                            if (!pixels)
+                            {
+                                LOG_ERROR("[Hyperflow] Invalid image, unable to load at location: %s", entry.path().string().c_str());
+                                continue;
+                            }
+
+                            images.emplace_back(size, pixels);
+                        }
+                    }
+                }
+
+                inter::window::SetIcons(win, images.data(), images.size());
+                for (auto& image : images) stbi_image_free(image.data);
+                images.clear();
+
+                return true;
+            }
+
+            Fail:
+            LOG_ERROR("[Hyperflow] Unable to load image at: %s", folderPath);
+            return false;
         }
     }
 }

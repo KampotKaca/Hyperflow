@@ -81,6 +81,7 @@ namespace hf
 
 		void Focus(const Ref<Window> &window);
 		void SetVSyncMode(const Ref<Window> &window, VsyncMode mode);
+		bool SetIcons(const Ref<Window>& window, const char* folderPath);
 	}
 
 	namespace time
