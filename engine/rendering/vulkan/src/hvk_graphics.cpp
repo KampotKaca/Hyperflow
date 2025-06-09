@@ -217,7 +217,7 @@ namespace hf
                 CheckDeviceExtensionSupport(device))
             {
                 SwapChainSupportDetails scs{};
-                QuerySwapChainSupport(device, *resultSurface, &scs);
+                QuerySwapChainSupport(device, *resultSurface, scs);
 
                 if (!scs.formats.empty() &&
                     !scs.presentModes.empty())

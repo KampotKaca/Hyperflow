@@ -138,17 +138,18 @@ namespace hf
         for (auto& image : rn->swapchain.images) delete image.frameBuffer;
     }
 
-    void QuerySwapChainSupport(const VkPhysicalDevice& device, const VkSurfaceKHR& surface, SwapChainSupportDetails* supportDetails)
+    void QuerySwapChainSupport(const VkPhysicalDevice& device, const VkSurfaceKHR& surface, SwapChainSupportDetails& supportDetails)
     {
-        VK_HANDLE_EXCEPT(vkGetPhysicalDeviceSurfaceCapabilitiesKHR(device, surface, &supportDetails->capabilities));
+        VK_HANDLE_EXCEPT(vkGetPhysicalDeviceSurfaceCapabilitiesKHR(device, surface, &supportDetails.capabilities));
 
         uint32_t formatCount;
         VK_HANDLE_EXCEPT(vkGetPhysicalDeviceSurfaceFormatsKHR(device, surface, &formatCount, nullptr));
+
         if (formatCount > 0)
         {
-            supportDetails->formats = std::vector<VkSurfaceFormatKHR>(formatCount);
+            supportDetails.formats = std::vector<VkSurfaceFormatKHR>(formatCount);
             vkGetPhysicalDeviceSurfaceFormatsKHR(device, surface, &formatCount,
-                supportDetails->formats.data());
+                supportDetails.formats.data());
         }
 
         uint32_t presentModeCount;
@@ -156,9 +157,9 @@ namespace hf
 
         if (presentModeCount > 0)
         {
-            supportDetails->presentModes = std::vector<VkPresentModeKHR>(presentModeCount);
+            supportDetails.presentModes = std::vector<VkPresentModeKHR>(presentModeCount);
             VK_HANDLE_EXCEPT(vkGetPhysicalDeviceSurfacePresentModesKHR(device, surface, &presentModeCount,
-                supportDetails->presentModes.data()));
+                supportDetails.presentModes.data()));
         }
     }
 

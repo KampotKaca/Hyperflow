@@ -268,7 +268,7 @@ namespace hf
                                     uvec2 targetExtents, GraphicsSwapchainDetails* result);
 
     bool CheckDeviceExtensionSupport(const VkPhysicalDevice& device);
-    void QuerySwapChainSupport(const VkPhysicalDevice& device, const VkSurfaceKHR& surface, SwapChainSupportDetails* supportDetails);
+    void QuerySwapChainSupport(const VkPhysicalDevice& device, const VkSurfaceKHR& surface, SwapChainSupportDetails& supportDetails);
 
     bool IsLayerSupported(const char* layer);
     bool IsExtensionSupported(const char* extension);

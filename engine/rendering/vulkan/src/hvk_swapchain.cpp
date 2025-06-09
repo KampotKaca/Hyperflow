@@ -8,7 +8,7 @@ namespace hf
     void CreateSwapchain(VkSurfaceKHR surface, uvec2 targetSize, VsyncMode vsyncMode, GraphicsSwapChain* result)
     {
         SwapChainSupportDetails scs{};
-        QuerySwapChainSupport(GRAPHICS_DATA.defaultDevice->device, surface, &scs);
+        QuerySwapChainSupport(GRAPHICS_DATA.defaultDevice->device, surface, scs);
 
         if (scs.formats.empty() ||
             scs.presentModes.empty())
@@ -144,7 +144,7 @@ namespace hf
 
     void RecreateSwapchain(VkRenderer* rn)
     {
-        rn->frameBufferResized = false;
+        rn->frameBufferChanged = false;
         WaitForDevice();
 
         DestroySwapchainFrameBuffers(rn);
@@ -152,6 +152,18 @@ namespace hf
         SetupViewportAndScissor(rn);
         RebindRendererToAllPasses(rn);
         CreateSwapchainFrameBuffers(rn);
+    }
+
+    void TryRecreateSwapchain(VkRenderer* rn)
+    {
+        std::lock_guard lock(rn->frameSync);
+        if (rn->frameBufferChanged) RecreateSwapchain(rn);
+    }
+
+    void LockedRecreateSwapchain(VkRenderer* rn)
+    {
+        std::lock_guard lock(rn->frameSync);
+        RecreateSwapchain(rn);
     }
 
     void PresentSwapchain(VkRenderer* rn)
@@ -170,7 +182,7 @@ namespace hf
 
         auto result = vkQueuePresentKHR(GRAPHICS_DATA.defaultDevice->logicalDevice.presentQueue, &presentInfo);
         if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR)
-            RecreateSwapchain(rn);
+            LockedRecreateSwapchain(rn);
         else if (result != VK_SUCCESS) throw GENERIC_EXCEPT("[Vulkan]", "Failed to present swapchain");
         vkQueueWaitIdle(GRAPHICS_DATA.defaultDevice->logicalDevice.presentQueue);
     }
@@ -179,7 +191,7 @@ namespace hf
     {
         auto& device = GRAPHICS_DATA.defaultDevice->logicalDevice.device;
         SubmitAllOperations();
-        if (rn->frameBufferResized) RecreateSwapchain(rn);
+        TryRecreateSwapchain(rn);
 
         uint32_t tryCount = 0;
         tryAgain:
@@ -189,7 +201,7 @@ namespace hf
         if (result == VK_ERROR_OUT_OF_DATE_KHR)
         {
             if (rn->targetSize.x == 0 || rn->targetSize.y == 0) return false;
-            RecreateSwapchain(rn);
+            LockedRecreateSwapchain(rn);
             tryCount++;
             if (tryCount < 144) goto tryAgain;
             LOG_WARN("Recreating swapchain failed 144 times");

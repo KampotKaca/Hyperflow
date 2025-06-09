@@ -33,14 +33,16 @@ namespace hf
 
     void RegisterFrameBufferChange(VkRenderer* rn, uvec2 newSize)
     {
+        std::lock_guard lock(rn->frameSync);
         rn->targetSize = newSize;
-        rn->frameBufferResized = true;
+        rn->frameBufferChanged = true;
     }
 
     void SetVSync(VkRenderer* rn, VsyncMode mode)
     {
+        std::lock_guard lock(rn->frameSync);
         rn->vSyncMode = mode;
-        rn->frameBufferResized = true;
+        rn->frameBufferChanged = true;
     }
 
     void Draw(const VkDrawInfo& info)

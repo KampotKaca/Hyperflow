@@ -34,7 +34,8 @@ namespace hf
         uint32_t currentFrame = 0;
         uint32_t imageIndex = UINT32_MAX;
         VsyncMode vSyncMode = VsyncMode::Relaxed;
-        bool frameBufferResized = false;
+        volatile bool frameBufferChanged = false;
+        std::mutex frameSync{};
     };
 
     struct VkDrawInfo
