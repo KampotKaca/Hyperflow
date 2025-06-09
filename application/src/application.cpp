@@ -108,6 +108,7 @@ namespace app
 			{
 				hf::AxisLines::StartDrawProcess(rn);
 				{
+					hf::Camera3DCore::BindCurrentToUniform(rn);
 					axisLines.Draw(rn);
 				}
 				hf::AxisLines::EndDrawProcess(rn);
