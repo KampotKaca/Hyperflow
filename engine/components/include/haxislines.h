@@ -10,6 +10,8 @@ namespace hf
         AxisLines() = default;
         ~AxisLines() = default;
 
+        static void StartDrawProcess(const Ref<Renderer>& rn);
+        static void EndDrawProcess(const Ref<Renderer>& rn);
         void Draw(const Ref<Renderer>& rn) const;
 
         struct UploadInfo

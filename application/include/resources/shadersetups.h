@@ -8,7 +8,6 @@ namespace app
     struct AppShaderSetups
     {
         hf::ShaderSetup viking_room{};
-        hf::ShaderSetup axis_lines{};
     };
 
     extern AppShaderSetups APP_SHADER_SETUPS;

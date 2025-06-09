@@ -17,6 +17,7 @@ namespace hf
             return glm::lookAt(position, position + direction, -up);
         }
 
+        void UploadInUniform(const Ref<Renderer>& rn) const;
         [[nodiscard]] mat4 ToViewProjectionMat4(const Ref<Renderer>& rn) const;
     };
 }

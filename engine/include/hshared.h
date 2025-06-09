@@ -711,7 +711,6 @@ namespace hf
 
 	struct MaterialCreationInfo
 	{
-		Ref<Shader> shader{};
 		uint32_t sizeInBytes{};
 	};
 

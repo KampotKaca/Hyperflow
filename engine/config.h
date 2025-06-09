@@ -5,6 +5,9 @@
 #define HF_ENGINE_TITLE "Hyperflow"
 #define FRAMES_IN_FLIGHT 2
 
+//Uniforms
+#define HF_UNIFORM_CAMERA_SET_INDEX 0
+
 //maximum size allocated memory for a material
 #define RENDERING_MAX_MATERIAL_MEMORY_BADGET 1024
 //each octree consists of 4096 materials

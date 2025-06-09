@@ -289,15 +289,17 @@ namespace hf
 		void ReadTextureDetails(void* yamlTree, void* yamlRoot, TextureDetails& result);
 	}
 
-	namespace resources
+	namespace primitives
 	{
 		BufferAttrib GetQuadBufferAttrib();
 		TextureLayout GetEmptyTextureLayout();
 
 		BufferAttrib GetCubeBufferAttrib();
 		TextureSampler GetCubemapSampler();
-		Ref<VertBuffer> GetCubeVertices();
-		Ref<IndexBuffer> GetCubeIndices();
+		UniformBuffer GetCameraUniform();
+
+		Ref<Mesh> GetCube();
+		Ref<Material> GetEmptyMaterial();
 	}
 }
 

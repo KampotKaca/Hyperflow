@@ -27,4 +27,25 @@ namespace hf
         }
         draw::EndDrawPacket(rn);
     }
+
+    void AxisLines::StartDrawProcess(const Ref<Renderer>& rn)
+    {
+        draw::StartShaderSetupPacket(rn, inter::HF.staticResources.axisLinesShaderSetup);
+
+        const ShaderBindingInfo shaderInfo
+        {
+            .shader = inter::HF.staticResources.axisLinesShader,
+            .attrib = primitives::GetQuadBufferAttrib(),
+            .bindingPoint = RenderBindingType::Graphics
+        };
+        draw::StartShaderPacket(rn, shaderInfo);
+        draw::StartMaterialPacket(rn, inter::HF.staticResources.emptyMaterial);
+    }
+
+    void AxisLines::EndDrawProcess(const Ref<Renderer>& rn)
+    {
+        draw::EndMaterialPacket(rn);
+        draw::EndShaderPacket(rn);
+        draw::EndShaderSetupPacket(rn);
+    }
 }

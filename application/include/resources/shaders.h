@@ -8,11 +8,9 @@ namespace app
     struct AppShaders
     {
         hf::Ref<hf::Shader> viking_room{};
-        hf::Ref<hf::Shader> axis_lines{};
     };
 
     extern AppShaders APP_SHADERS;
-
     void ShaderLoadAll();
 }
 

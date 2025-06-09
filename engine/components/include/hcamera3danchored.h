@@ -22,13 +22,17 @@ namespace hf
             return { cpr * sinf(yawRad), sinf(pitchRad), cpr * cosf(yawRad) };
         }
 
-        [[nodiscard]] inline mat4 ToViewMat4() const
+        [[nodiscard]] inline vec3 GetPosition() const
         {
-            vec3 direction = GetDirection();
-            vec3 position{ anchor - direction * distance };
-            return glm::lookAt(position, anchor, -up);
+            return anchor - GetDirection() * distance;
         }
 
+        [[nodiscard]] inline mat4 ToViewMat4() const
+        {
+            return glm::lookAt(GetPosition(), anchor, -up);
+        }
+
+        void UploadInUniform(const Ref<Renderer>& rn) const;
         [[nodiscard]] mat4 ToViewProjectionMat4(const Ref<Renderer>& rn) const;
     };
 }

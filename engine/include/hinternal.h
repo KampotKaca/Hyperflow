@@ -60,13 +60,19 @@ namespace hf::inter
     {
         TextureLayout emptyLayout{};
         BufferAttrib quadAttrib{};
-        Ref<VertBuffer> quadBuffer{};
 
         TextureSampler cubemapSampler{};
         BufferAttrib cubeAttrib{};
 
-        Ref<VertBuffer> cubeVertices{};
-        Ref<IndexBuffer> cubeIndices{};
+        UniformBuffer cameraUniform = 0;
+        UniformAllocator uniformAllocator = 0;
+
+        ShaderSetup axisLinesShaderSetup{};
+        Ref<Shader> axisLinesShader{};
+        Ref<Mesh> cube{};
+        Ref<VertBuffer> quadBuffer{};
+
+        Ref<Material> emptyMaterial{};
     };
 
     struct Hyperflow
@@ -109,6 +115,12 @@ namespace hf::inter
         void LogThreadMemoryStats_i();
     }
 
+    namespace primitives
+    {
+        void DefineStaticResources_i();
+        void LoadStaticResources_i();
+    }
+
     namespace rendering
     {
         void StartRenderPacket_i(const Ref<Renderer>& rn);
@@ -116,8 +128,6 @@ namespace hf::inter
 
         void LoadApi_i(RenderingApiType api);
         void UnloadCurrentApi_i(bool retainReferences);
-        void DefineStaticResources_i();
-        void LoadStaticResources_i();
 
         void CreateRenderer_i(Renderer* rn);
         void DestroyRenderer_i(Renderer* rn);

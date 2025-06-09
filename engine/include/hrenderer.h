@@ -25,6 +25,7 @@ namespace hf
 			RenderPacket drawPacket{};
 		};
 
+		RenderPass mainPass{};
 		RenderPacketDrawProcess currentDraw{};
 		bool isDrawing = false;
 		ThreadInfo threadInfo{};

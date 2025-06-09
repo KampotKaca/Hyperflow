@@ -7,7 +7,7 @@ namespace hf
 {
     static Octree<Material*, RENDERING_MAX_MATERIAL_OCTREE_COUNT> MATERIAL_OCTREE{};
 
-    Material::Material(const MaterialCreationInfo& info) : shader(info.shader), sizeInBytes(info.sizeInBytes)
+    Material::Material(const MaterialCreationInfo& info) : sizeInBytes(info.sizeInBytes)
     {
         if (sizeInBytes > RENDERING_MAX_MATERIAL_MEMORY_BADGET)
             throw GENERIC_EXCEPT("[Hyperflow]", "Size is over the maximum material badget!");

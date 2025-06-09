@@ -12,7 +12,6 @@ namespace hf
         ~Material();
 
         uint8_t* bufferMemory{};
-        Ref<Shader> shader{};
         uint32_t bufferIndex{}, sizeInBytes{};
         uvec3 octreePosition{};
     };

@@ -26,34 +26,5 @@ namespace app
 
             APP_SHADERS.viking_room = hf::shader::Create(shaderInfo);
         }
-
-        //Axis Lines Shader
-        {
-            auto quadAttrib = hf::resources::GetQuadBufferAttrib();
-            hf::ShaderCreationInfo shaderInfo
-            {
-                .renderPass = APP_RENDER_PASSES.mainPresentPass,
-                .setup = APP_SHADER_SETUPS.axis_lines,
-                .texturePack = nullptr,
-                .supportedAttribCount = 1,
-                .pSupportedAttribs = &quadAttrib,
-                .vertexShaderLoc = "axislines",
-                .fragmentShaderLoc = "axislines",
-                .alphaTestOptions =
-                {
-                    .blendMode = hf::ShaderBlendMode::Alpha,
-                    .blendOp = hf::ShaderBlendOp::XOr
-                },
-                .depthStencilOptions =
-                {
-                    .enableDepth = true,
-                    .writeDepth = false,
-                    .comparisonFunc = hf::DepthComparisonFunction::LessOrEqual,
-                    .enableDepthBounds = false,
-                    .enableStencil = false,
-                }
-            };
-            APP_SHADERS.axis_lines = hf::shader::Create(shaderInfo);
-        }
     }
 }

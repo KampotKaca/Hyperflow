@@ -116,7 +116,7 @@ namespace hf
                 RunRenderThread_i(win->renderer);
             }
 
-            DefineStaticResources_i();
+            primitives::DefineStaticResources_i();
             if (HF.lifecycleCallbacks.onRendererLoad) HF.lifecycleCallbacks.onRendererLoad();
 
             StorageBufferCreationInfo materialStorageInfo
@@ -169,135 +169,6 @@ namespace hf
             };
 
             HF.graphicsResources.bufferAttribs.clear();
-        }
-
-        void DefineStaticResources_i()
-        {
-            //Quat Attribute
-            {
-                BufferAttribFormat formats[]
-                {
-                    { .type = BufferDataType::I32, .size = 2, }
-                };
-
-                const BufferAttribDefinitionInfo attribInfo
-                {
-                    .bindingId = 0,
-                    .formatCount = 1,
-                    .pFormats = formats
-                };
-
-                HF.staticResources.quadAttrib = bufferattrib::Define(attribInfo);
-            }
-
-            //Empty Texture Layout
-            {
-                constexpr TextureLayoutDefinitionInfo layoutInfo
-                {
-                    .pBindings = nullptr,
-                    .bindingCount = 0
-                };
-
-                HF.staticResources.emptyLayout = texturelayout::Define(layoutInfo);
-            }
-
-            //Cubemap Sampler
-            {
-                constexpr TextureSamplerDefinitionInfo samplerInfo
-                {
-                    .filter = TextureFilter::Bilinear,
-                    .anisotropicFilter = TextureAnisotropicFilter::X16,
-                    .repeatMode = TextureRepeatMode::ClampToEdge,
-                    .useNormalizedCoordinates = true,
-                    .comparison = ComparisonOperation::Never,
-                };
-
-                HF.staticResources.cubemapSampler = texturesampler::Define(samplerInfo);
-            }
-
-            //Cubemap Attrib
-            {
-                BufferAttribFormat formats[]
-                {
-                    { .type = BufferDataType::I32, .size = 3, }
-                };
-
-                BufferAttribDefinitionInfo attribInfo
-                {
-                    .bindingId = 0,
-                    .formatCount = 1,
-                    .pFormats = formats
-                };
-
-                HF.staticResources.cubeAttrib = bufferattrib::Define(attribInfo);
-            }
-        }
-
-        void LoadStaticResources_i()
-        {
-            //Quad Vertices
-            {
-                ivec2 vertices[6]
-                {
-                    { -1, -1 }, { 1, 1 }, { -1, 1 },
-                    { -1, -1 }, { 1, -1 }, { 1, 1 },
-                };
-
-                const VertBufferCreationInfo bufferInfo
-                {
-                    .bufferAttrib = HF.staticResources.quadAttrib,
-                    .memoryType = BufferMemoryType::Static,
-                    .usageFlags = BufferUsageType::All,
-                    .vertexCount = 6,
-                    .pVertices = vertices
-                };
-
-                HF.staticResources.quadBuffer = vertbuffer::Create(bufferInfo);
-            }
-
-            //Cube Vertices
-            {
-                ivec3 vertices[8]
-                {
-                    { -1, -1, -1 }, { -1, -1, 1 }, { 1, -1, 1 }, { 1, -1, -1 },
-                    { -1, 1, -1 }, { -1, 1, 1 }, { 1, 1, 1 }, { 1, 1, -1 },
-                };
-
-                const VertBufferCreationInfo bufferInfo
-                {
-                    .bufferAttrib = HF.staticResources.cubeAttrib,
-                    .memoryType = BufferMemoryType::Static,
-                    .usageFlags = BufferUsageType::All,
-                    .vertexCount = 8,
-                    .pVertices = vertices
-                };
-
-                HF.staticResources.cubeVertices = vertbuffer::Create(bufferInfo);
-            }
-
-            //Cube Indices
-            {
-                uint8_t indices[36]
-                {
-                    0, 1, 2,   2, 3, 0,  //Bottom
-                    4, 6, 5,   4, 7, 6,  //Top
-                    1, 5, 6,   6, 2, 1,  //Front
-                    0, 7, 3,   0, 4, 7,  //Back
-                    0, 5, 1,   0, 4, 5,  //Left
-                    3, 6, 2,   3, 7, 6   //Right
-                };
-
-                IndexBufferCreationInfo bufferInfo
-                {
-                    .indexFormat = BufferDataType::U8,
-                    .memoryType = BufferMemoryType::Static,
-                    .usageFlags = BufferUsageType::All,
-                    .indexCount = 36,
-                    .pIndices = indices
-                };
-
-                HF.staticResources.cubeIndices = indexbuffer::Create(bufferInfo);
-            }
         }
 
         void CreateRenderer_i(Renderer* rn)
@@ -358,7 +229,8 @@ namespace hf
 
         void RunRenderThread_i(const Ref<Renderer>& rn)
         {
-            HF.renderingApi.api.PostInstanceLoad(rn->handle, rn->eventInfo.onPassCreationCallback(rn));
+            rn->mainPass = rn->eventInfo.onPassCreationCallback(rn);
+            HF.renderingApi.api.PostInstanceLoad(rn->handle, rn->mainPass);
             rn->threadInfo.thread = std::thread(ThreadDraw, rn);
         }
     }

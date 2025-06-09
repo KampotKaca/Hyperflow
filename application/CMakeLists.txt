@@ -41,71 +41,77 @@ endif()
 file(COPY ${CMAKE_SOURCE_DIR}/application/res DESTINATION ${CMAKE_BINARY_DIR})
 target_compile_definitions("${CMAKE_PROJECT_NAME}" PUBLIC RES_PATH="${CMAKE_BINARY_DIR}/res/")
 
-set(SHADER_SOURCE_DIR "${CMAKE_SOURCE_DIR}/application/assets/shaders/vulkan")
-set(SHADER_BINARY_DIR "${CMAKE_BINARY_DIR}/res/shaders/vulkan")
-
-# Find all shader source files
-file(GLOB_RECURSE SHADER_SOURCES
-        "${SHADER_SOURCE_DIR}/*.vert"
-        "${SHADER_SOURCE_DIR}/*.frag"
+# === Shader Setup ===
+set(SHADER_SOURCE_DIRS
+        "${CMAKE_SOURCE_DIR}/engine/res/shaders/vulkan"
+        "${CMAKE_SOURCE_DIR}/application/assets/shaders/vulkan"
+        # Add more shader source directories here
 )
 
-# Create the output directory
+set(SHADER_BINARY_DIR "${CMAKE_BINARY_DIR}/res/shaders/vulkan")
 file(MAKE_DIRECTORY ${SHADER_BINARY_DIR})
-
-# List to hold all compiled shader files
 set(COMPILED_SHADERS)
 
-foreach(SHADER ${SHADER_SOURCES})
-    # Get the filename without path
-    get_filename_component(FILE_NAME ${SHADER} NAME)
-    # Output file path
-    set(OUTPUT_FILE "${SHADER_BINARY_DIR}/${FILE_NAME}.spv")
-
-    add_custom_command(
-            OUTPUT ${OUTPUT_FILE}
-            COMMAND ${GLSLC_EXECUTABLE} ${SHADER} -o ${OUTPUT_FILE}
-            DEPENDS ${SHADER}
-            COMMENT "Compiling shader ${FILE_NAME}"
-            VERBATIM
+foreach(SHADER_SOURCE_DIR ${SHADER_SOURCE_DIRS})
+    file(GLOB_RECURSE SHADER_SOURCES_TMP
+            "${SHADER_SOURCE_DIR}/*.vert"
+            "${SHADER_SOURCE_DIR}/*.frag"
     )
 
-    list(APPEND COMPILED_SHADERS ${OUTPUT_FILE})
+    foreach(SHADER ${SHADER_SOURCES_TMP})
+        get_filename_component(FILE_NAME ${SHADER} NAME)
+        set(OUTPUT_FILE "${SHADER_BINARY_DIR}/${FILE_NAME}.spv")
+
+        add_custom_command(
+                OUTPUT ${OUTPUT_FILE}
+                COMMAND ${GLSLC_EXECUTABLE} ${SHADER} -o ${OUTPUT_FILE}
+                DEPENDS ${SHADER}
+                COMMENT "Compiling shader ${FILE_NAME}"
+                VERBATIM
+        )
+
+        list(APPEND COMPILED_SHADERS ${OUTPUT_FILE})
+    endforeach()
 endforeach()
 
-set(MESH_SOURCE_DIR "${CMAKE_SOURCE_DIR}/application/assets/meshes")
-set(MESH_BINARY_DIR "${CMAKE_BINARY_DIR}/res/meshes")
-
-file(MAKE_DIRECTORY ${MESH_BINARY_DIR})
-
-file(GLOB_RECURSE MESH_SOURCES
-        "${MESH_SOURCE_DIR}/*.obj"
+# === Mesh Setup ===
+set(MESH_SOURCE_DIRS
+        "${CMAKE_SOURCE_DIR}/engine/res/meshes"
+        "${CMAKE_SOURCE_DIR}/application/assets/meshes"
+        # Add more mesh source directories here
 )
 
+set(MESH_BINARY_DIR "${CMAKE_BINARY_DIR}/res/meshes")
+file(MAKE_DIRECTORY ${MESH_BINARY_DIR})
 set(CONVERTED_MESHES)
 
-foreach(MESH ${MESH_SOURCES})
-    # Get the filename without path
-    get_filename_component(FILE_NAME ${MESH} NAME)
-    # Output file path
-    set(OUTPUT_FILE "${MESH_BINARY_DIR}/${FILE_NAME}.mesh")
-
-    add_custom_command(
-            OUTPUT ${OUTPUT_FILE}
-            COMMAND meshconvertor
-            ARGS
-            "${MESH}"
-            "${OUTPUT_FILE}"
-            DEPENDS
-            meshconvertor
-            ${MESH}
-            COMMENT "Converting mesh: ${FILE_NAME}"
-            VERBATIM
+foreach(MESH_SOURCE_DIR ${MESH_SOURCE_DIRS})
+    file(GLOB_RECURSE MESH_SOURCES_TMP
+            "${MESH_SOURCE_DIR}/*.obj"
     )
 
-    list(APPEND CONVERTED_MESHES ${OUTPUT_FILE})
+    foreach(MESH ${MESH_SOURCES_TMP})
+        get_filename_component(FILE_NAME ${MESH} NAME)
+        set(OUTPUT_FILE "${MESH_BINARY_DIR}/${FILE_NAME}.mesh")
+
+        add_custom_command(
+                OUTPUT ${OUTPUT_FILE}
+                COMMAND meshconvertor
+                ARGS
+                "${MESH}"
+                "${OUTPUT_FILE}"
+                DEPENDS
+                meshconvertor
+                ${MESH}
+                COMMENT "Converting mesh: ${FILE_NAME}"
+                VERBATIM
+        )
+
+        list(APPEND CONVERTED_MESHES ${OUTPUT_FILE})
+    endforeach()
 endforeach()
 
+# === Prebuild Target ===
 add_custom_target(Prebuild
         ALL DEPENDS ${CONVERTED_MESHES} ${COMPILED_SHADERS}
         COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/application/res ${CMAKE_BINARY_DIR}/res
