@@ -315,6 +315,11 @@ namespace hf::inter::rendering
         Draw(drawInfo);
     }
 
+    void WaitForDevice()
+    {
+        hf::WaitForDevice();
+    }
+
     void RegisterFrameBufferChange(void* rn, uvec2 newSize)
     {
         auto renderer = (VkRenderer*)rn;
@@ -410,6 +415,7 @@ namespace hf::inter::rendering
             .StartFrame                 = StartFrame,
             .EndFrame                   = EndFrame,
             .Draw                       = Draw,
+            .WaitForDevice              = WaitForDevice,
 
             .RegisterFrameBufferChange  = RegisterFrameBufferChange,
             .SetVSync                   = SetVSync,

@@ -253,7 +253,7 @@ namespace hf
     void LoadDevice(void* windowHandle, VkSurfaceKHR* resultSurface);
     void UnloadDevice();
 
-    void DelayThreadUntilRenderingFinish();
+    void WaitForDevice();
 
     void CreateSwapchain(VkSurfaceKHR surface, uvec2 targetSize, VsyncMode vsyncMode, GraphicsSwapChain* result);
     void DestroySwapchain(GraphicsSwapChain& gc, VkSwapchainKHR* swapchain);

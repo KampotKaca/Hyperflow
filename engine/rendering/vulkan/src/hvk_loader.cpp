@@ -85,7 +85,7 @@ namespace hf
     void UnloadVulkan()
     {
         SubmitAllOperations();
-        DelayThreadUntilRenderingFinish();
+        WaitForDevice();
 
         GRAPHICS_DATA.uniformAllocators.clear();
         GRAPHICS_DATA.shaderSetups.clear();
@@ -101,7 +101,7 @@ namespace hf
 
     //--------------------------------------------------------------------------
 
-    void DelayThreadUntilRenderingFinish()
+    void WaitForDevice()
     {
         VK_HANDLE_EXCEPT(vkDeviceWaitIdle(GRAPHICS_DATA.defaultDevice->logicalDevice.device));
     }

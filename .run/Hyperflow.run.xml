@@ -1,8 +1,5 @@
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="Hyperflow" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="true" PASS_PARENT_ENVS_2="true" PROJECT_NAME="Hyperflow" TARGET_NAME="Hyperflow" CONFIG_NAME="Debug" RUN_TARGET_PROJECT_NAME="Hyperflow" RUN_TARGET_NAME="Hyperflow">
-    <envs>
-      <env name="MANGOHUD" value="1" />
-    </envs>
     <method v="2">
       <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
     </method>

@@ -145,7 +145,7 @@ namespace hf
     void RecreateSwapchain(VkRenderer* rn)
     {
         rn->frameBufferResized = false;
-        DelayThreadUntilRenderingFinish();
+        WaitForDevice();
 
         DestroySwapchainFrameBuffers(rn);
         CreateSwapchain(rn->swapchain.surface, rn->targetSize, rn->vSyncMode, &rn->swapchain);

@@ -16,6 +16,8 @@ namespace hf
             if (!inter::HF.isRunning) break;
         }
         rn->threadInfo.isRunning = false;
+        if (rn->handle) inter::HF.renderingApi.api.WaitForPreviousFrame(rn->handle);
+        inter::HF.renderingApi.api.WaitForDevice();
     }
 
     Renderer::Renderer(const Window* window, const RendererEventInfo& eventInfo)
@@ -327,18 +329,16 @@ namespace hf
         {
             if (rn->handle)
             {
-                auto handle = rn->handle;
-                rn->handle = nullptr;
                 rn->threadInfo.isRunning = false;
                 if (rn->threadInfo.thread.joinable()) rn->threadInfo.thread.join();
 
-                HF.renderingApi.api.WaitForPreviousFrame(handle);
                 if (HF.rendererCount == 1)
                 {
                     UnloadAllResources_i(IsRunning());
                 }
 
-                HF.renderingApi.api.DestroyInstance(handle);
+                HF.renderingApi.api.DestroyInstance(rn->handle);
+                rn->handle = nullptr;
                 HF.rendererCount--;
                 if (HF.rendererCount == 0)
                 {
