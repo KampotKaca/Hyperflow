@@ -79,7 +79,11 @@ namespace hf
             {
                 .shaderSetup = shaderSetup,
                 .shaderStart = packet.shaderCount,
-                .shaderCount = 0
+                .shaderCount = 0,
+                .uniformStart = packet.uniformCount,
+                .uniformCount = 0,
+                .texpackStart = packet.texpackCount,
+                .texpackCount = 0
             };
 
             currentDraw.currentShaderSetup = &packet.shaderSetups[packet.shaderSetupCount];

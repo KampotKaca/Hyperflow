@@ -78,10 +78,21 @@ namespace app
 
 		hf::draw::StartRenderPassPacket(rn, APP_RENDER_PASSES.mainPresentPass);
 		{
-			hf::draw::StartShaderSetupPacket(rn, APP_SHADER_SETUPS.viking_room); //Viking room setup
-			hf::Camera3DCore::BindCurrentToUniform(rn);
-			UniformBindTime(rn);
+			if (drawAxisLines)
 			{
+				hf::AxisLines::StartDrawProcess(rn);
+				{
+					hf::Camera3DCore::BindCurrentToUniform(rn);
+					axisLines.Draw(rn);
+				}
+				hf::AxisLines::EndDrawProcess(rn);
+			}
+
+			hf::draw::StartShaderSetupPacket(rn, APP_SHADER_SETUPS.viking_room); //Viking room setup
+			{
+				hf::Camera3DCore::BindCurrentToUniform(rn);
+				UniformBindTime(rn);
+
 				const hf::ShaderBindingInfo vikingRoomShaderInfo
 				{
 					.shader = APP_SHADERS.viking_room,
@@ -115,16 +126,6 @@ namespace app
 				hf::draw::EndShaderPacket(rn);
 			}
 			hf::draw::EndShaderSetupPacket(rn);
-
-			if (drawAxisLines)
-			{
-				hf::AxisLines::StartDrawProcess(rn);
-				{
-					hf::Camera3DCore::BindCurrentToUniform(rn);
-					axisLines.Draw(rn);
-				}
-				hf::AxisLines::EndDrawProcess(rn);
-			}
 
 			VoxelTerrainDraw(rn);
 		}

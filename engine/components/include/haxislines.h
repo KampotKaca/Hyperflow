@@ -5,6 +5,7 @@
 
 namespace hf
 {
+    //Drawing operation should always be done in prepass
     struct AxisLines
     {
         AxisLines() = default;

@@ -11,7 +11,7 @@ layout(set = 0, binding = 0) uniform Camera
     mat4 viewProj;
 } CAMERA;
 
-layout(location = 0) in ivec2 inPosition;
+layout(location = 0) in vec2 inPosition;
 layout(location = 0) out vec3 o_RayWorld;
 
 void main()

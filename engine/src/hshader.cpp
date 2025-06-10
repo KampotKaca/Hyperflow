@@ -10,7 +10,7 @@ namespace hf
     Shader::Shader(const ShaderCreationInfo& info)
         : vertLoc(info.vertexShaderLoc), fragLoc(info.fragmentShaderLoc),
           renderPass(info.renderPass), shaderSetup(info.setup),
-          texturePack(info.texturePack), supportedAttribCount(info.supportedAttribCount),
+          supportedAttribCount(info.supportedAttribCount),
           depthStencilOptions(info.depthStencilOptions), blendingOptions(info.alphaTestOptions)
     {
         uint32_t bufferSize = sizeof(BufferAttrib) * info.supportedAttribCount;
@@ -95,8 +95,6 @@ namespace hf
                         .depthStencilOptions = shader->depthStencilOptions,
                         .blendingOptions = shader->blendingOptions
                     };
-
-                    if (shader->texturePack) creationInfo.texPack = shader->texturePack->handle;
 
                     shader->handle = HF.renderingApi.api.CreateShader(creationInfo);
                 }

@@ -285,7 +285,6 @@ namespace hf
 	{
 		RenderPass renderPass{};
 		ShaderSetup setup{};
-		Ref<TexturePack> texturePack{};
 		uint32_t supportedAttribCount{};
 		const BufferAttrib* pSupportedAttribs{};
 		const char* vertexShaderLoc{};

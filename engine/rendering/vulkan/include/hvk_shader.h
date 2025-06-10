@@ -13,7 +13,6 @@ namespace hf
         ~VkShader();
 
         ShaderSetup shaderSetup{};
-        VkTexturePack* texturePack{};
         phmap::flat_hash_map<BufferAttrib, VkPipeline> pipelines{};
     };
 

@@ -13,7 +13,6 @@ namespace hf
         std::string vertLoc{}, fragLoc{};
         RenderPass renderPass{};
         ShaderSetup shaderSetup{};
-        Ref<TexturePack> texturePack{};
 
         BufferAttrib* pSupportedAttribs{};
         uint32_t supportedAttribCount{};

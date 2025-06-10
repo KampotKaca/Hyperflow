@@ -17,7 +17,6 @@ namespace app
             {
                 .renderPass = APP_RENDER_PASSES.mainPresentPass,
                 .setup = APP_SHADER_SETUPS.viking_room,
-                .texturePack = APP_TEXTURE_PACKS.viking_room_pack,
                 .supportedAttribCount = 1,
                 .pSupportedAttribs = &APP_BUFFER_ATTRIBUTES.pos_col_tex,
                 .vertexShaderLoc = "default",

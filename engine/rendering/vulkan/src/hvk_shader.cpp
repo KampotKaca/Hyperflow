@@ -19,7 +19,7 @@ namespace hf
     static void CreatePipeline(const VkPipelineInfo& info, VkPipeline* pipeline);
 
     VkShader::VkShader(const inter::rendering::ShaderCreationInfo& info)
-        : shaderSetup(info.shaderSetup), texturePack((VkTexturePack*)info.texPack)
+        : shaderSetup(info.shaderSetup)
     {
         VkShaderModule vertModule{}, fragModule{};
         CreateShaderModule(info.vCode, info.vCodeSize, &vertModule);

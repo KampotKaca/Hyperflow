@@ -45,7 +45,6 @@ namespace hf::inter::rendering
     {
         RenderPass renderPass{};
         ShaderSetup shaderSetup{};
-        void* texPack{};
         uint32_t supportedAttribCount{};
         const BufferAttrib* pSupportedAttribs{};
 

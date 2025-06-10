@@ -71,7 +71,7 @@ namespace hf
             //Quat Attribute
             {
                 std::array<BufferAttribFormat, 1> formats{};
-                formats[0] = { .type = BufferDataType::I32, .size = 2 }; //Position
+                formats[0] = { .type = BufferDataType::F32, .size = 2 }; //Position
 
                 const BufferAttribDefinitionInfo attribInfo
                 {
@@ -171,7 +171,7 @@ namespace hf
         {
             //Quad Vertices
             {
-                ivec2 vertices[6]
+                vec2 vertices[6]
                 {
                     { -1, -1 }, { 1, 1 }, { -1, 1 },
                     { -1, -1 }, { 1, -1 }, { 1, 1 },
@@ -214,7 +214,6 @@ namespace hf
                 {
                     .renderPass = HF.mainWindow->renderer->mainPass,
                     .setup = HF.staticResources.axisLinesShaderSetup,
-                    .texturePack = nullptr,
                     .supportedAttribCount = 1,
                     .pSupportedAttribs = &quadAttrib,
                     .vertexShaderLoc = "__axislines",
@@ -226,7 +225,7 @@ namespace hf
                     },
                     .depthStencilOptions =
                     {
-                        .enableDepth = true,
+                        .enableDepth = false,
                         .writeDepth = false,
                         .comparisonFunc = DepthComparisonFunction::LessOrEqual,
                         .enableDepthBounds = false,
