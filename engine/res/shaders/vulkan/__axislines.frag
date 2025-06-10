@@ -17,21 +17,8 @@ layout(push_constant) uniform PushConstants
     vec4 color;
 } PUSH_CONSTANT;
 
-layout(location = 0) in vec3 o_RayWorld;
+layout(location = 0) in vec3 outPosition;
 layout(location = 0) out vec4 outColor;
-
-const vec3 CENTER = vec3(0, 0, 0);
-
-bool RayIntersectsPlane(vec3 rayOrigin, vec3 rayDir, vec3 planeNormal, vec3 planePoint, out vec3 o_Intersection)
-{
-    float denom = dot(planeNormal, rayDir);
-    if (abs(denom) < 1e-6) return false;
-
-    float t = dot(planePoint - rayOrigin, planeNormal) / denom;
-    if(t < 0) return false;
-    o_Intersection = rayOrigin + t * rayDir;
-    return true;
-}
 
 bool GetGridColor(float dist, vec2 absIntersection, float scale, float opacity, out vec4 o_Color)
 {
@@ -39,7 +26,7 @@ bool GetGridColor(float dist, vec2 absIntersection, float scale, float opacity, 
     vec2 smoothWidth = PUSH_CONSTANT.planeNormal.w * fwidth(fraction);
 
     vec2 lines = smoothstep(vec2(0.0), smoothWidth, fraction) *
-    smoothstep(vec2(0.0), smoothWidth, vec2(1.0) - fraction);
+                 smoothstep(vec2(0.0), smoothWidth, vec2(1.0) - fraction);
 
     if(min(lines.x, lines.y) < 0.5)
     {
@@ -51,16 +38,11 @@ bool GetGridColor(float dist, vec2 absIntersection, float scale, float opacity, 
 
 void main()
 {
-    vec3 intersection;
-    if(RayIntersectsPlane(CAMERA.position, o_RayWorld, vec3(PUSH_CONSTANT.planeNormal), CENTER, intersection))
-    {
-        float dist = length(intersection - CAMERA.position);
-        vec2 absIntersection = abs(intersection.xz);
-
-        if(GetGridColor(dist, absIntersection, 0.01, 0.01, outColor)) return;
-        if(GetGridColor(dist, absIntersection, 0.1, 0.075, outColor)) return;
-        if(GetGridColor(dist, absIntersection, 1, 0.25, outColor)) return;
-    }
+    float dist = length(outPosition - CAMERA.position);
+    vec2 absIntersection = abs(outPosition.xz);
+    if(GetGridColor(dist, absIntersection, 0.01, 0.01, outColor)) return;
+    if(GetGridColor(dist, absIntersection, 0.1, 0.075, outColor)) return;
+    if(GetGridColor(dist, absIntersection, 1, 0.25, outColor)) return;
 
     discard;
 }

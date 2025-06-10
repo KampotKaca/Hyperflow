@@ -12,14 +12,10 @@ layout(set = 0, binding = 0) uniform Camera
 } CAMERA;
 
 layout(location = 0) in vec2 inPosition;
-layout(location = 0) out vec3 o_RayWorld;
+layout(location = 0) out vec3 outPosition;
 
 void main()
 {
-    gl_Position = vec4(inPosition, 0, 1.0);
-    vec4 clipPos = vec4(inPosition, -1.0, 1.0);
-    vec4 viewPos = CAMERA.invProj * clipPos;
-    viewPos /= viewPos.w;
-    vec3 rayDirView = normalize(viewPos.xyz);
-    o_RayWorld = normalize(mat3(CAMERA.invView) * rayDirView);
+    outPosition = vec3(inPosition.x * 1000 + CAMERA.position.x, 0, inPosition.y * 1000 + CAMERA.position.z);
+    gl_Position = CAMERA.viewProj * vec4(outPosition, 1.0);
 }

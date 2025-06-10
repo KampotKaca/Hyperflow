@@ -17,6 +17,7 @@ namespace hf
         BufferAttrib* pSupportedAttribs{};
         uint32_t supportedAttribCount{};
 
+        ShaderRasterizerOptions rasterizerOptions{};
         ShaderDepthStencilOptions depthStencilOptions{};
         ShaderBlendingOptions blendingOptions{};
         void* handle{};

@@ -11,6 +11,7 @@ namespace hf
         : vertLoc(info.vertexShaderLoc), fragLoc(info.fragmentShaderLoc),
           renderPass(info.renderPass), shaderSetup(info.setup),
           supportedAttribCount(info.supportedAttribCount),
+          rasterizerOptions(info.rasterizerOptions),
           depthStencilOptions(info.depthStencilOptions), blendingOptions(info.alphaTestOptions)
     {
         uint32_t bufferSize = sizeof(BufferAttrib) * info.supportedAttribCount;
@@ -92,6 +93,7 @@ namespace hf
                         .vCodeSize = (uint32_t)vertexCode.size(),
                         .fCode = fragmentCode.data(),
                         .fCodeSize = (uint32_t)fragmentCode.size(),
+                        .rasterizerOptions = shader->rasterizerOptions,
                         .depthStencilOptions = shader->depthStencilOptions,
                         .blendingOptions = shader->blendingOptions
                     };

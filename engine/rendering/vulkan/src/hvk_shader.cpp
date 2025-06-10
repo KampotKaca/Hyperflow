@@ -11,6 +11,7 @@ namespace hf
         BufferAttrib attrib{};
         VkPipelineLayout layout{};
         RenderPass renderPass{};
+        ShaderRasterizerOptions rasterizerOptions{};
         ShaderBlendingOptions blendingOptions{};
         ShaderDepthStencilOptions depthStencilOptions{};
     };
@@ -48,6 +49,7 @@ namespace hf
             .pStages = shaderStages,
             .layout = shaderSetup->layout,
             .renderPass = info.renderPass,
+            .rasterizerOptions = info.rasterizerOptions,
             .blendingOptions = info.blendingOptions,
             .depthStencilOptions = info.depthStencilOptions,
         };
@@ -137,8 +139,8 @@ namespace hf
             .depthClampEnable = VK_FALSE,
             .rasterizerDiscardEnable = VK_FALSE,
             .polygonMode = VK_POLYGON_MODE_FILL,
-            .cullMode = VK_CULL_MODE_BACK_BIT,
-            .frontFace = VK_FRONT_FACE_CLOCKWISE,
+            .cullMode = (VkCullModeFlags)info.rasterizerOptions.cullMode,
+            .frontFace = (VkFrontFace)info.rasterizerOptions.faceDirection,
             .depthBiasEnable = VK_FALSE,
             .depthBiasConstantFactor = 0.0f,
             .depthBiasClamp = 0.0f,

@@ -53,6 +53,7 @@ namespace hf::inter::rendering
         const char* fCode{};
         uint32_t fCodeSize = 0;
 
+        ShaderRasterizerOptions rasterizerOptions{};
         ShaderDepthStencilOptions depthStencilOptions{};
         ShaderBlendingOptions blendingOptions{};
     };

@@ -182,7 +182,9 @@ namespace hf
 	};
 	DEFINE_ENUM_FLAGS(BufferUsageType)
 
-	enum class ShaderBlendMode { None, Alpha, Logical };
+	enum class ShaderBlendMode { None = 0, Alpha = 1, Logical = 2 };
+	enum class ShaderCullMode { None = 0, Front = 1, Back = 2, Both = 3 };
+	enum class ShaderFaceDirection { CounterClockwise = 0, Clockwise = 1 };
 
 	enum class ShaderBlendOp
 	{
@@ -267,6 +269,12 @@ namespace hf
 		ShaderBlendOp blendOp = ShaderBlendOp::XOr; //Setting will be used only if you use Logical Blending
 	};
 
+	struct ShaderRasterizerOptions
+	{
+		ShaderCullMode cullMode = ShaderCullMode::Back;
+		ShaderFaceDirection faceDirection = ShaderFaceDirection::Clockwise;
+	};
+
 	struct ShaderDepthStencilOptions
 	{
 		bool enableDepth = true;
@@ -290,6 +298,7 @@ namespace hf
 		const char* vertexShaderLoc{};
 		const char* fragmentShaderLoc{};
 
+		ShaderRasterizerOptions rasterizerOptions{};
 		ShaderBlendingOptions alphaTestOptions{};
 		ShaderDepthStencilOptions depthStencilOptions{};
 	};

@@ -218,6 +218,10 @@ namespace hf
                     .pSupportedAttribs = &quadAttrib,
                     .vertexShaderLoc = "__axislines",
                     .fragmentShaderLoc = "__axislines",
+                    .rasterizerOptions =
+                    {
+                        .cullMode = ShaderCullMode::None,
+                    },
                     .alphaTestOptions =
                     {
                         .blendMode = ShaderBlendMode::Alpha,
@@ -225,8 +229,8 @@ namespace hf
                     },
                     .depthStencilOptions =
                     {
-                        .enableDepth = false,
-                        .writeDepth = false,
+                        .enableDepth = true,
+                        .writeDepth = true,
                         .comparisonFunc = DepthComparisonFunction::LessOrEqual,
                         .enableDepthBounds = false,
                         .enableStencil = false,
