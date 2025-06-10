@@ -45,6 +45,7 @@ namespace hf
 			{
 				inter::HF.time.StartFrame();
 				inter::platform::HandleEvents(inter::HF.updateType);
+				if (!IsRunning()) break;
 				if(inter::HF.lifecycleCallbacks.onUpdateCallback) inter::HF.lifecycleCallbacks.onUpdateCallback();
 
 				if(input::IsDown(Key::Escape))
@@ -53,7 +54,11 @@ namespace hf
 					Terminate();
 				}
 
-				for(auto& window : inter::HF.windows | std::views::values)
+				inter::HF.tempWindows.clear();
+				for (auto& window : inter::HF.windows | std::views::values)
+					inter::HF.tempWindows.push_back(window);
+
+				for(auto& window : inter::HF.tempWindows)
 				{
 					if (!window::IsClosed(window))
 					{

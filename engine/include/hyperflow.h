@@ -257,9 +257,6 @@ namespace hf
 		void StartShaderPacket(const Ref<Renderer>& rn, const ShaderBindingInfo& shaderBindingInfo);
 		void EndShaderPacket(const Ref<Renderer>& rn);
 
-		void StartShaderPacket(const Ref<Renderer>& rn, const ShaderBindingInfo& shaderBindingInfo);
-		void EndShaderPacket(const Ref<Renderer>& rn);
-
 		void StartMaterialPacket(const Ref<Renderer>& rn, const Ref<Material>& material);
 		void EndMaterialPacket(const Ref<Renderer>& rn);
 

@@ -220,6 +220,7 @@ namespace hf
                     std::lock_guard lock(HF.deletedResources.syncLock);
                     HF.rendererCount--;
                     rn->threadInfo.isRunning = false;
+                    rn->threadInfo.renderCondition.notify_all();
                 }
                 rn->threadInfo.thread.join();
                 rn->handle = nullptr;

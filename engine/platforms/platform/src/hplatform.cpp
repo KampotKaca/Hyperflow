@@ -38,15 +38,16 @@ namespace hf::inter
         {
             for(const auto& window : HF.windows | std::views::values)
             {
+                if (hf::window::IsClosed(window)) continue;
                 auto& eventData = window->eventData;
                 for (auto& currentState : eventData.keyStates)
                 {
                     switch (currentState)
                     {
-                    case KeyState::None: continue;
-                    case KeyState::Up: currentState = KeyState::None; continue;
-                    case KeyState::Down: currentState = KeyState::DownContinues; break;
-                    case KeyState::DownContinues: break;
+                        case KeyState::None: continue;
+                        case KeyState::Up: currentState = KeyState::None; continue;
+                        case KeyState::Down: currentState = KeyState::DownContinues; break;
+                        case KeyState::DownContinues: break;
                     }
                 }
 
@@ -54,10 +55,10 @@ namespace hf::inter
                 {
                     switch (currentState)
                     {
-                    case KeyState::None: continue;
-                    case KeyState::Up: currentState = KeyState::None; continue;
-                    case KeyState::Down: currentState = KeyState::DownContinues; break;
-                    case KeyState::DownContinues: break;
+                        case KeyState::None: continue;
+                        case KeyState::Up: currentState = KeyState::None; continue;
+                        case KeyState::Down: currentState = KeyState::DownContinues; break;
+                        case KeyState::DownContinues: break;
                     }
                 }
 
@@ -334,7 +335,12 @@ namespace hf::inter
 
         void SetIcons(const Window* win, const Image* pImages, uint32_t count)
         {
-            glfwSetWindowIcon((GLFWwindow*)win->handle, count, (GLFWimage*)pImages);
+            glfwSetWindowIcon((GLFWwindow*)win->handle, (int)count, (GLFWimage*)pImages);
+        }
+
+        bool ShouldClose(const Window* win)
+        {
+            return glfwWindowShouldClose((GLFWwindow*)win->handle);
         }
     }
 }

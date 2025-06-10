@@ -44,7 +44,7 @@ namespace app
 		DebugStart();
 
 		// VoxelTerrainGenerate();
-		hf::time::SetTargetFrameRate(-1);
+		hf::time::SetTargetFrameRate(165);
 	}
 
 	void AppUpdate()
@@ -55,6 +55,12 @@ namespace app
 		DebugUpdate();
 
 		if (hf::input::IsDown(hf::Key::N)) drawAxisLines = !drawAxisLines;
+
+		if (hf::input::IsDown(hf::Key::Key1)) hf::time::SetTargetFrameRate(165);
+		if (hf::input::IsDown(hf::Key::Key2)) hf::time::SetTargetFrameRate(50);
+		if (hf::input::IsDown(hf::Key::Key3)) hf::time::SetTargetFrameRate(30);
+		if (hf::input::IsDown(hf::Key::Key4)) hf::time::SetTargetFrameRate(5);
+		if (hf::input::IsDown(hf::Key::Key5)) hf::time::SetTargetFrameRate(-1);
 		// VoxelTerrainUpdate();
 	}
 

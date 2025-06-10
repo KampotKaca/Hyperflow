@@ -7,7 +7,7 @@ namespace hf
     TexturePackAllocator::TexturePackAllocator(const TexturePackAllocatorCreationInfo& info)
     {
         texturePacks = std::vector<Ref<TexturePack>>(info.texturePackCount);
-        memcpy(texturePacks.data(), info.pTexturePacks, info.texturePackCount * sizeof(Ref<TexturePack>));
+        for (uint32_t i = 0; i < info.texturePackCount; i++) texturePacks[i] = info.pTexturePacks[i];
         inter::rendering::CreateTexturePackAllocator_i(this);
     }
 

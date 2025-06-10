@@ -321,7 +321,8 @@ namespace hf
             RenderPacket packet;
             {
                 std::unique_lock lock(tInfo.threadLock);
-                tInfo.renderCondition.wait(lock, [&]{ return tInfo.packetIsReady; });
+                tInfo.renderCondition.wait(lock, [&]{ return tInfo.packetIsReady || !tInfo.isRunning; });
+                if (!tInfo.isRunning) return;
                 packet = tInfo.drawPacket;
                 tInfo.packetIsReady = false;
             }

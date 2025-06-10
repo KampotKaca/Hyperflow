@@ -51,6 +51,7 @@ namespace hf::inter
         ivec2 GetPosition(const Window* win);
 
         void SetIcons(const Window* win, const Image* pImages, uint32_t count);
+        bool ShouldClose(const Window* win);
     }
 }
 
