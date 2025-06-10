@@ -13,7 +13,7 @@ layout(set = 0, binding = 0) uniform Camera
 
 layout(push_constant) uniform PushConstants
 {
-    vec4 planeNormal;
+    float lineThickness;
     vec4 color;
 } PUSH_CONSTANT;
 
@@ -23,7 +23,7 @@ layout(location = 0) out vec4 outColor;
 bool GetGridColor(float dist, vec2 absIntersection, float scale, float opacity, out vec4 o_Color)
 {
     vec2 fraction = (absIntersection - ivec2(absIntersection * scale) / scale) * scale;
-    vec2 smoothWidth = PUSH_CONSTANT.planeNormal.w * fwidth(fraction);
+    vec2 smoothWidth = PUSH_CONSTANT.lineThickness * fwidth(fraction);
 
     vec2 lines = smoothstep(vec2(0.0), smoothWidth, fraction) *
                  smoothstep(vec2(0.0), smoothWidth, vec2(1.0) - fraction);

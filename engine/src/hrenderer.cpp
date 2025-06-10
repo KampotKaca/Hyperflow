@@ -14,10 +14,9 @@ namespace hf
         while (rn->threadInfo.isRunning)
         {
             inter::rendering::RendererUpdate_i(rn);
-            if (!inter::HF.isRunning) break;
         }
         rn->threadInfo.isRunning = false;
-        // if (handle) inter::HF.renderingApi.api.WaitForPreviousFrame(handle);
+
         inter::HF.renderingApi.api.WaitForDevice();
         inter::CleanMarkedResources_i();
 

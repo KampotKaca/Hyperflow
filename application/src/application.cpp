@@ -38,7 +38,7 @@ namespace app
 		anchoredCamera.distance = 2;
 		freeMoveCamera.camera3D.position = {0, 0.5, -2};
 		freeMoveCamera.camera3D.direction = {0, 0, 1};
-		vikingRoom2Transform.position = { 0, 0, 10 };
+		vikingRoom2Transform.position = { 3, 0, 3 };
 		// freeMoveCamera.camera3D.distance = 2;
 		UniformStartAll();
 		DebugStart();
@@ -78,16 +78,6 @@ namespace app
 
 		hf::draw::StartRenderPassPacket(rn, APP_RENDER_PASSES.mainPresentPass);
 		{
-			if (drawAxisLines)
-			{
-				hf::AxisLines::StartDrawProcess(rn);
-				{
-					hf::Camera3DCore::BindCurrentToUniform(rn);
-					axisLines.Draw(rn);
-				}
-				hf::AxisLines::EndDrawProcess(rn);
-			}
-
 			hf::draw::StartShaderSetupPacket(rn, APP_SHADER_SETUPS.viking_room); //Viking room setup
 			{
 				hf::Camera3DCore::BindCurrentToUniform(rn);
@@ -128,6 +118,7 @@ namespace app
 			hf::draw::EndShaderSetupPacket(rn);
 
 			VoxelTerrainDraw(rn);
+			if (drawAxisLines) axisLines.Draw(rn);
 		}
 		hf::draw::EndRenderPassPacket(rn);
 	}

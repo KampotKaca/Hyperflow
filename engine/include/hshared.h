@@ -281,7 +281,7 @@ namespace hf
 		bool writeDepth = true;
 		DepthComparisonFunction comparisonFunc = DepthComparisonFunction::LessOrEqual;
 		bool enableDepthBounds = false;
-		bool enableStencil = true;
+		bool enableStencil = false;
 
 		StencilOperation frontStencil = StencilOperation::Keep;
 		StencilOperation backStencil = StencilOperation::Zero;

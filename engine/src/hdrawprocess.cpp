@@ -120,7 +120,7 @@ namespace hf
             packet.shaders[packet.shaderCount] =
             {
                 .bindingInfo = shaderBindingInfo,
-                .materialPacketStart = packet.drawPacketCount,
+                .materialPacketStart = packet.materialCount,
                 .materialPacketCount = 0
             };
 
@@ -197,7 +197,7 @@ namespace hf
                 .texpackStart = packet.texpackCount,
                 .texpackCount = 0,
                 .drawCallStart = packet.drawCallCount,
-                .drawCallCount = 0
+                .drawCallCount = 0,
             };
 
             currentDraw.currentDraw = &packet.drawPackets[packet.drawPacketCount];

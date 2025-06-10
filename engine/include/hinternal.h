@@ -94,12 +94,6 @@ namespace hf::inter
 
     extern Hyperflow HF;
 
-    struct AxisLinePushConstant
-    {
-        vec4 planeNormal; // w is thickness
-        vec4 color;
-    };
-
     //if true, will release internal resources, but will retain resource references
     //it is made to be used for handling api changes.
     void UnloadAllResources_i(bool internalOnly = false);
