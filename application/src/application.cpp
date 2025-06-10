@@ -8,6 +8,7 @@ namespace app
 	hf::FreeMoveCamera3D freeMoveCamera{};
 	hf::Camera3DAnchored anchoredCamera{};
 	hf::Transform vikingRoomTransform{};
+	hf::Transform vikingRoom2Transform{};
 	hf::AxisLines axisLines{};
 	bool drawAxisLines = true;
 
@@ -37,6 +38,7 @@ namespace app
 		anchoredCamera.distance = 2;
 		freeMoveCamera.camera3D.position = {0, 0.5, -2};
 		freeMoveCamera.camera3D.direction = {0, 0, 1};
+		vikingRoom2Transform.position = { 0, 0, 10 };
 		// freeMoveCamera.camera3D.distance = 2;
 		UniformStartAll();
 		DebugStart();
@@ -48,6 +50,7 @@ namespace app
 	void AppUpdate()
 	{
 		vikingRoomTransform.euler.y -= (float)hf::time::GetDeltaTime() * 10.0f;
+		vikingRoom2Transform.euler.y -= (float)hf::time::GetDeltaTime() * 10.0f;
 		freeMoveCamera.Update(hf::GetMainWindow(), (float)hf::time::GetDeltaTime());
 		DebugUpdate();
 
@@ -97,6 +100,15 @@ namespace app
 							hf::draw::PacketAdd_DrawCall(rn, APP_MESHES.viking_room);
 						}
 						hf::draw::EndDrawPacket(rn);
+
+						hf::draw::StartDrawPacket(rn);
+						{
+							const auto trs = vikingRoom2Transform.ToMat4();
+							hf::draw::PacketAdd_TexturePackBinding(rn, APP_TEXTURE_PACKS.viking_room_pack);
+							hf::draw::PacketSet_PushConstant(rn, &trs, sizeof(trs));
+							hf::draw::PacketAdd_DrawCall(rn, APP_MESHES.viking_room);
+						}
+						hf::draw::EndDrawPacket(rn);
 					}
 					hf::draw::EndMaterialPacket(rn);
 				}
@@ -113,10 +125,9 @@ namespace app
 				}
 				hf::AxisLines::EndDrawProcess(rn);
 			}
+
+			VoxelTerrainDraw(rn);
 		}
-
-		VoxelTerrainDraw(rn);
-
 		hf::draw::EndRenderPassPacket(rn);
 	}
 }
