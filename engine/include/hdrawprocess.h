@@ -20,8 +20,12 @@ namespace hf
     struct MaterialPacketInfo
     {
         Ref<Material> material{};
+
         uint32_t drawPacketStart{};
         uint32_t drawPacketCount{};
+
+        uint32_t texpackStart{};
+        uint32_t texpackCount{};
     };
 
     struct ShaderPacketInfo
@@ -39,9 +43,6 @@ namespace hf
 
         uint32_t uniformStart{};
         uint32_t uniformCount{};
-
-        uint32_t texpackStart{};
-        uint32_t texpackCount{};
     };
 
     struct RenderPassPacketInfo

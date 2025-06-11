@@ -82,8 +82,6 @@ namespace hf
                 .shaderCount = 0,
                 .uniformStart = packet.uniformCount,
                 .uniformCount = 0,
-                .texpackStart = packet.texpackCount,
-                .texpackCount = 0
             };
 
             currentDraw.currentShaderSetup = &packet.shaderSetups[packet.shaderSetupCount];
@@ -159,7 +157,9 @@ namespace hf
             {
                 .material = material,
                 .drawPacketStart = packet.drawPacketCount,
-                .drawPacketCount = 0
+                .drawPacketCount = 0,
+                .texpackStart = packet.texpackCount,
+                .texpackCount = 0
             };
 
             currentDraw.currentMaterial = &packet.materials[packet.materialCount];
@@ -233,18 +233,18 @@ namespace hf
             currentDraw.currentShaderSetup->uniformCount++;
         }
 
-        void ShaderSetupAdd_TexturePackBinding(const Ref<Renderer>& rn, const Ref<TexturePack>& texPack)
+        void MaterialAdd_TexturePackBinding(const Ref<Renderer>& rn, const Ref<TexturePack>& texPack)
         {
             auto& currentDraw = rn->currentDraw;
 #if DEBUG
-            if (!currentDraw.currentShaderSetup)
-                throw GENERIC_EXCEPT("[Hyperflow]", "Shader Setup must be set!");
+            if (!currentDraw.currentMaterial)
+                throw GENERIC_EXCEPT("[Hyperflow]", "Material must be set!");
 #endif
 
             auto& packet = currentDraw.packet;
             packet.texpacks[packet.texpackCount] = texPack;
             packet.texpackCount++;
-            currentDraw.currentShaderSetup->texpackCount++;
+            currentDraw.currentMaterial->texpackCount++;
         }
 
         void PacketAdd_DrawCall(const Ref<Renderer>& rn, const DrawCallInfo& drawCall)
@@ -360,6 +360,8 @@ namespace hf
                 uint16_t shaderSetupEnd = pass.shaderSetupStart + pass.shaderSetupCount;
                 for (uint16_t shaderSetupIndex = pass.shaderSetupStart; shaderSetupIndex < shaderSetupEnd; shaderSetupIndex++)
                 {
+                    Ref<TexturePack> boundTexturePacks[MAX_NUM_BOUND_TEXTUREPACKS]{};
+
                     const auto& shaderSetup = packet.shaderSetups[shaderSetupIndex];
                     HF.renderingApi.api.BindShaderSetup(handle, shaderSetup.shaderSetup);
 
@@ -369,15 +371,6 @@ namespace hf
                         {
                             const auto& uniform = packet.uniforms[uniformIndex];
                             HF.renderingApi.api.BindUniformBuffer(handle, uniform);
-                        }
-                    }
-
-                    {
-                        uint32_t texturePackEnd = shaderSetup.texpackStart + shaderSetup.texpackCount;
-                        for (uint32_t texturePackIndex = shaderSetup.texpackStart; texturePackIndex < texturePackEnd; texturePackIndex++)
-                        {
-                            auto* texPack = packet.texpacks[texturePackIndex]->handle;
-                            if (texPack) HF.renderingApi.api.BindTexturePack(handle, texPack);
                         }
                     }
 
@@ -418,11 +411,37 @@ namespace hf
                                         HF.renderingApi.api.UploadPushConstants(handle, uploadInfo);
                                     }
 
-                                    uint32_t texpackEnd = drawPacket.texpackStart + drawPacket.texpackCount;
-                                    for (uint32_t texpackIndex = drawPacket.texpackStart; texpackIndex < texpackEnd; texpackIndex++)
-                                    {
-                                        auto* texPack = packet.texpacks[texpackIndex]->handle;
-                                        if (texPack) HF.renderingApi.api.BindTexturePack(handle, texPack);
+                                    {// Binding Texture packs
+                                        Ref<TexturePack> currentTexturePacks[MAX_NUM_BOUND_TEXTUREPACKS]{};
+                                        {
+                                            const uint32_t texpackEnd = material.texpackStart + material.texpackCount;
+                                            for (uint32_t texpackIndex = material.texpackStart; texpackIndex < texpackEnd; texpackIndex++)
+                                            {
+                                                const auto texPack = packet.texpacks[texpackIndex];
+                                                const auto index = texPack->setBindingIndex;
+                                                currentTexturePacks[index] = texPack;
+                                            }
+                                        }
+
+                                        {
+                                            const uint32_t texpackEnd = drawPacket.texpackStart + drawPacket.texpackCount;
+                                            for (uint32_t texpackIndex = drawPacket.texpackStart; texpackIndex < texpackEnd; texpackIndex++)
+                                            {
+                                                const auto texPack = packet.texpacks[texpackIndex];
+                                                const auto index = texPack->setBindingIndex;
+                                                currentTexturePacks[index] = texPack;
+                                            }
+                                        }
+
+                                        for (uint32_t i = 0; i < MAX_NUM_BOUND_TEXTUREPACKS; i++)
+                                        {
+                                            auto cPack = currentTexturePacks[i];
+                                            if (cPack != boundTexturePacks[i] && cPack && cPack->handle)
+                                            {
+                                                HF.renderingApi.api.BindTexturePack(handle, cPack->handle);
+                                                boundTexturePacks[i] = cPack;
+                                            }
+                                        }
                                     }
 
                                     uint32_t drawCallEnd = drawPacket.drawCallStart + drawPacket.drawCallCount;

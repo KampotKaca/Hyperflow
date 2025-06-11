@@ -4,7 +4,6 @@
 #include "hshared.h"
 #include "hexception.h"
 #include "hgenericexception.h"
-#include "hdrawprocess.h"
 #include "../components/include/hcomponents.h"
 
 namespace hf
@@ -264,7 +263,7 @@ namespace hf
 		void EndDrawPacket(const Ref<Renderer>& rn);
 
 		void ShaderSetupAdd_UniformBinding(const Ref<Renderer>& rn, const UniformBufferBindInfo& uniformBinding);
-		void ShaderSetupAdd_TexturePackBinding(const Ref<Renderer>& rn, const Ref<TexturePack>& texPack);
+		void MaterialAdd_TexturePackBinding(const Ref<Renderer>& rn, const Ref<TexturePack>& texPack);
 
 		void PacketAdd_DrawCall(const Ref<Renderer>& rn, const Ref<Mesh>& mesh);
 		void PacketAdd_DrawCall(const Ref<Renderer>& rn, const DrawCallInfo& drawCall);
