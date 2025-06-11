@@ -198,6 +198,8 @@ namespace hf
                 .texpackCount = 0,
                 .drawCallStart = packet.drawCallCount,
                 .drawCallCount = 0,
+                .pushConstantStart = packet.pushConstantUploadSize,
+                .pushConstantSize = 0
             };
 
             currentDraw.currentDraw = &packet.drawPackets[packet.drawPacketCount];
@@ -281,10 +283,15 @@ namespace hf
 #if DEBUG
             if (!currentDraw.currentDraw)
                 throw GENERIC_EXCEPT("[Hyperflow]", "DrawPacket must be set!");
+
+            if (currentDraw.currentDraw->pushConstantSize > 0)
+                throw GENERIC_EXCEPT("[Hyperflow]", "Cannot set push constant twice for a single draw packet!");
 #endif
 
-            currentDraw.currentDraw->pushConstantBuffer[0] = 1;
-            memcpy(currentDraw.currentDraw->pushConstantBuffer + 1, data, dataSize);
+            auto& packet = currentDraw.packet;
+            currentDraw.currentDraw->pushConstantSize = dataSize;
+            memcpy(&packet.pushConstantUploads[currentDraw.currentDraw->pushConstantStart], data, dataSize);
+            packet.pushConstantUploadSize += dataSize;
         }
     }
 
@@ -400,12 +407,12 @@ namespace hf
                                 {
                                     auto& drawPacket = packet.drawPackets[drawPacketIndex];
 
-                                    if (drawPacket.pushConstantBuffer[0] == 1)
+                                    if (drawPacket.pushConstantSize > 0)
                                     {
                                         PushConstantUploadInfo uploadInfo
                                         {
                                             .shaderSetup = shaderSetup.shaderSetup,
-                                            .data = &drawPacket.pushConstantBuffer[1]
+                                            .data = &packet.pushConstantUploads[drawPacket.pushConstantStart],
                                         };
 
                                         HF.renderingApi.api.UploadPushConstants(handle, uploadInfo);

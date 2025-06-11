@@ -14,7 +14,8 @@ namespace hf
         uint32_t drawCallStart{};
         uint32_t drawCallCount{};
 
-        uint8_t pushConstantBuffer[RENDERING_MAX_PUSH_CONSTANT_SIZE + 1];
+        uint32_t pushConstantStart{};
+        uint32_t pushConstantSize{};
     };
 
     struct MaterialPacketInfo
@@ -89,6 +90,9 @@ namespace hf
 
         uint8_t uniformUploads[RENDERING_MAX_UNIFORM_UPLOAD_BUFFER_SIZE]{};
         uint32_t uniformUploadSize{};
+
+        uint8_t pushConstantUploads[RENDERING_MAX_PUSH_CONSTANT_UPLOAD_BUFFER_SIZE];
+        uint32_t pushConstantUploadSize{};
 
         UniformUploadPacketInfo uniformUploadPackets[RENDERING_MAX_UNIFORM_UPLOAD_COUNT];
         uint32_t uniformUploadPacketCount{};

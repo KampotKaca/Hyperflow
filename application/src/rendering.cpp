@@ -36,6 +36,7 @@ namespace app
                         hf::draw::StartDrawPacket(rn);
                         {
                             const auto trs = APP_OBJECTS.vikingRoomTransform.ToMat4();
+                            // hf::draw::PacketAdd_TexturePackBinding(rn, APP_TEXTURE_PACKS.viking_room_pack);
                             hf::draw::PacketSet_PushConstant(rn, &trs, sizeof(trs));
                             hf::draw::PacketAdd_DrawCall(rn, APP_MESHES.viking_room);
                         }
@@ -44,6 +45,7 @@ namespace app
                         hf::draw::StartDrawPacket(rn);
                         {
                             const auto trs = APP_OBJECTS.vikingRoom2Transform.ToMat4();
+                            // hf::draw::PacketAdd_TexturePackBinding(rn, APP_TEXTURE_PACKS.viking_room_pack2);
                             hf::draw::PacketSet_PushConstant(rn, &trs, sizeof(trs));
                             hf::draw::PacketAdd_DrawCall(rn, APP_MESHES.viking_room);
                         }
