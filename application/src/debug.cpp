@@ -5,6 +5,8 @@
 
 namespace app
 {
+    AppDebug APP_DEBUG;
+
     struct DebugInfo
     {
         uint32_t count = 0;
@@ -41,6 +43,8 @@ namespace app
 
     void DebugStart()
     {
+        APP_DEBUG.camera.camera3D.position = {0, 0.5, -2};
+        APP_DEBUG.camera.camera3D.direction = {0, 0, 1};
         DEBUG_INFO.wn = hf::GetMainWindow();
         hf::time::SetTargetFrameRate(-1);
         DEBUG_INFO.count = 0;
@@ -122,6 +126,9 @@ namespace app
                     break;
             }
         }
+
+        APP_DEBUG.camera.Update(hf::GetMainWindow(), (float)hf::time::GetDeltaTime());
+        if (hf::input::IsDown(hf::Key::N)) APP_DEBUG.drawAxisLines = !APP_DEBUG.drawAxisLines;
     }
 
     void DebugQuit()
@@ -134,8 +141,13 @@ namespace app
 
     }
 
+    void DebugPrepass(const hf::Ref<hf::Renderer>& rn)
+    {
+        APP_DEBUG.camera.camera3D.UploadInUniform(rn);
+    }
+
     void DebugRender(const hf::Ref<hf::Renderer>& rn)
     {
-
+        if (APP_DEBUG.drawAxisLines) APP_DEBUG.axisLines.Draw(rn);
     }
 }

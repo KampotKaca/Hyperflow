@@ -5,6 +5,13 @@
 
 namespace app
 {
+	struct AppObjects
+	{
+		hf::Transform vikingRoomTransform{};
+		hf::Transform vikingRoom2Transform{};
+	};
+	extern AppObjects APP_OBJECTS;
+
 	void AppRendererLoad();
 	void AppLoadResources();
 	void AppStart();

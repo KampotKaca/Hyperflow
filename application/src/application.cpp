@@ -5,12 +5,7 @@
 
 namespace app
 {
-	hf::FreeMoveCamera3D freeMoveCamera{};
-	hf::Camera3DAnchored anchoredCamera{};
-	hf::Transform vikingRoomTransform{};
-	hf::Transform vikingRoom2Transform{};
-	hf::AxisLines axisLines{};
-	bool drawAxisLines = true;
+	AppObjects APP_OBJECTS;
 
 	void AppRendererLoad()
 	{
@@ -35,32 +30,19 @@ namespace app
 
 	void AppStart()
 	{
-		anchoredCamera.distance = 2;
-		freeMoveCamera.camera3D.position = {0, 0.5, -2};
-		freeMoveCamera.camera3D.direction = {0, 0, 1};
-		vikingRoom2Transform.position = { 3, 0, 3 };
-		// freeMoveCamera.camera3D.distance = 2;
+		APP_OBJECTS.vikingRoom2Transform.position = { 3, 0, 3 };
 		UniformStartAll();
 		DebugStart();
 
 		// VoxelTerrainGenerate();
-		hf::time::SetTargetFrameRate(165);
+		hf::time::SetTargetFrameRate(240);
 	}
 
 	void AppUpdate()
 	{
-		vikingRoomTransform.euler.y -= (float)hf::time::GetDeltaTime() * 10.0f;
-		vikingRoom2Transform.euler.y -= (float)hf::time::GetDeltaTime() * 10.0f;
-		freeMoveCamera.Update(hf::GetMainWindow(), (float)hf::time::GetDeltaTime());
+		APP_OBJECTS.vikingRoomTransform.euler.y -= (float)hf::time::GetDeltaTime() * 10.0f;
+		APP_OBJECTS.vikingRoom2Transform.euler.y -= (float)hf::time::GetDeltaTime() * 10.0f;
 		DebugUpdate();
-
-		if (hf::input::IsDown(hf::Key::N)) drawAxisLines = !drawAxisLines;
-
-		if (hf::input::IsDown(hf::Key::Key1)) hf::time::SetTargetFrameRate(165);
-		if (hf::input::IsDown(hf::Key::Key2)) hf::time::SetTargetFrameRate(50);
-		if (hf::input::IsDown(hf::Key::Key3)) hf::time::SetTargetFrameRate(30);
-		if (hf::input::IsDown(hf::Key::Key4)) hf::time::SetTargetFrameRate(5);
-		if (hf::input::IsDown(hf::Key::Key5)) hf::time::SetTargetFrameRate(-1);
 		// VoxelTerrainUpdate();
 	}
 
@@ -68,64 +50,5 @@ namespace app
 	{
 		// VoxelTerrainDispose();
 		DebugQuit();
-	}
-
-	void AppPreRender(const hf::Ref<hf::Renderer>& rn)
-	{
-		DebugPreRender(rn);
-	}
-
-	void AppRender(const hf::Ref<hf::Renderer>& rn)
-	{
-		DebugRender(rn);
-
-		freeMoveCamera.camera3D.UploadInUniform(rn);
-		UniformUploadTime(rn);
-
-		hf::draw::StartRenderPassPacket(rn, APP_RENDER_PASSES.mainPresentPass);
-		{
-			hf::draw::StartShaderSetupPacket(rn, APP_SHADER_SETUPS.viking_room); //Viking room setup
-			{
-				hf::Camera3DCore::BindCurrentToUniform(rn);
-				UniformBindTime(rn);
-
-				const hf::ShaderBindingInfo vikingRoomShaderInfo
-				{
-					.shader = APP_SHADERS.viking_room,
-					.attrib = APP_BUFFER_ATTRIBUTES.pos_col_tex,
-					.bindingPoint = hf::RenderBindingType::Graphics
-				};
-				hf::draw::StartShaderPacket(rn, vikingRoomShaderInfo);
-				{
-					hf::draw::StartMaterialPacket(rn, hf::primitives::GetEmptyMaterial());
-					{
-						hf::draw::StartDrawPacket(rn);
-						{
-							const auto trs = vikingRoomTransform.ToMat4();
-							hf::draw::PacketAdd_TexturePackBinding(rn, APP_TEXTURE_PACKS.viking_room_pack);
-							hf::draw::PacketSet_PushConstant(rn, &trs, sizeof(trs));
-							hf::draw::PacketAdd_DrawCall(rn, APP_MESHES.viking_room);
-						}
-						hf::draw::EndDrawPacket(rn);
-
-						hf::draw::StartDrawPacket(rn);
-						{
-							const auto trs = vikingRoom2Transform.ToMat4();
-							hf::draw::PacketAdd_TexturePackBinding(rn, APP_TEXTURE_PACKS.viking_room_pack);
-							hf::draw::PacketSet_PushConstant(rn, &trs, sizeof(trs));
-							hf::draw::PacketAdd_DrawCall(rn, APP_MESHES.viking_room);
-						}
-						hf::draw::EndDrawPacket(rn);
-					}
-					hf::draw::EndMaterialPacket(rn);
-				}
-				hf::draw::EndShaderPacket(rn);
-			}
-			hf::draw::EndShaderSetupPacket(rn);
-
-			VoxelTerrainDraw(rn);
-			if (drawAxisLines) axisLines.Draw(rn);
-		}
-		hf::draw::EndRenderPassPacket(rn);
 	}
 }
