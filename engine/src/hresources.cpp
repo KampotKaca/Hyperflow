@@ -64,6 +64,24 @@ namespace hf
 
                 HF.staticResources.axisLinesShaderSetup = shadersetup::Define(info);
             }
+
+            //Skybox Shader Setup
+            {
+                const ShaderSetupDefinitionInfo info
+                {
+                    .pushConstant =
+                    {
+                        .usageFlags = ShaderUsageStage::Vertex | ShaderUsageStage::Fragment,
+                        .sizeInBytes = 0,
+                    },
+                    .pBuffers = &HF.staticResources.cameraUniform,
+                    .bufferCount = 1,
+                    .pTextureLayouts = &HF.staticResources.skyboxLayout,
+                    .textureLayoutCount = 1
+                };
+
+                HF.staticResources.skyboxShaderSetup = shadersetup::Define(info);
+            }
         }
 
         void DefineBufferAttribs()
@@ -112,6 +130,24 @@ namespace hf
                 };
 
                 HF.staticResources.emptyLayout = texturelayout::Define(layoutInfo);
+            }
+
+            //Skybox Texture Layout
+            {
+                TextureLayoutBindingInfo cubemapBinding
+                {
+                    .bindingId = 0,
+                    .usageFlags = ShaderUsageStage::Vertex | ShaderUsageStage::Fragment,
+                    .arraySize = 1
+                };
+
+                const TextureLayoutDefinitionInfo layoutInfo
+                {
+                    .pBindings = &cubemapBinding,
+                    .bindingCount = 1
+                };
+
+                HF.staticResources.skyboxLayout = texturelayout::Define(layoutInfo);
             }
         }
 
@@ -209,13 +245,12 @@ namespace hf
         {
             //Axis Lines Shader
             {
-                auto quadAttrib = hf::primitives::GetQuadBufferAttrib();
-                ShaderCreationInfo shaderInfo
+                const ShaderCreationInfo shaderInfo
                 {
                     .renderPass = HF.mainWindow->renderer->mainPass,
                     .setup = HF.staticResources.axisLinesShaderSetup,
                     .supportedAttribCount = 1,
-                    .pSupportedAttribs = &quadAttrib,
+                    .pSupportedAttribs = &HF.staticResources.quadAttrib,
                     .vertexShaderLoc = "__axislines",
                     .fragmentShaderLoc = "__axislines",
                     .rasterizerOptions =
@@ -237,6 +272,37 @@ namespace hf
                     }
                 };
                 HF.staticResources.axisLinesShader = shader::Create(shaderInfo);
+            }
+
+            //Skybox Shader
+            {
+                const ShaderCreationInfo shaderInfo
+                {
+                    .renderPass = HF.mainWindow->renderer->mainPass,
+                    .setup = HF.staticResources.skyboxShaderSetup,
+                    .supportedAttribCount = 1,
+                    .pSupportedAttribs = &HF.staticResources.cubeAttrib,
+                    .vertexShaderLoc = "__skybox",
+                    .fragmentShaderLoc = "__skybox",
+                    .rasterizerOptions =
+                    {
+                        .cullMode = ShaderCullMode::Front,
+                    },
+                    .alphaTestOptions =
+                    {
+                        .blendMode = ShaderBlendMode::Alpha,
+                        .blendOp = ShaderBlendOp::XOr
+                    },
+                    .depthStencilOptions =
+                    {
+                        .enableDepth = true,
+                        .writeDepth = false,
+                        .comparisonFunc = DepthComparisonFunction::Less,
+                        .enableDepthBounds = false,
+                        .enableStencil = true,
+                    }
+                };
+                HF.staticResources.skyboxShader = shader::Create(shaderInfo);
             }
         }
 

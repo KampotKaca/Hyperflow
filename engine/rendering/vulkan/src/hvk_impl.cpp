@@ -104,9 +104,9 @@ namespace hf::inter::rendering
             info.sampler, (VkTexture**)info.pTextures, info.textureOffset, info.textureCount);
     }
 
-    void BindTexturePack(void* rn, void* texPack)
+    void BindTexturePack(void* rn, const TexturePackBindingInfo& info)
     {
-        hf::BindTexturePack((VkRenderer*)rn, (VkTexturePack*)texPack);
+        hf::BindTexturePack((VkRenderer*)rn, (VkTexturePack*)info.texturePack, info.setBindingIndex);
     }
 
     void* CreateTexturePackAllocator(const TexturePackAllocatorCreationInfo& info)

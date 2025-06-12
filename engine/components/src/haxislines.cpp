@@ -12,7 +12,7 @@ namespace hf
             const ShaderBindingInfo shaderInfo
             {
                 .shader = inter::HF.staticResources.axisLinesShader,
-                .attrib = primitives::GetQuadBufferAttrib(),
+                .attrib = inter::HF.staticResources.quadAttrib,
                 .bindingPoint = RenderBindingType::Graphics
             };
             draw::StartShaderPacket(rn, shaderInfo);
@@ -23,7 +23,7 @@ namespace hf
                     {
                         draw::PacketSet_PushConstant(rn, this, sizeof(AxisLines));
 
-                        DrawCallInfo info
+                        const DrawCallInfo info
                         {
                             .pVertBuffers = &inter::HF.staticResources.quadBuffer,
                             .bufferCount = 1,

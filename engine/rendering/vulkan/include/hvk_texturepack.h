@@ -22,7 +22,6 @@ namespace hf
         VkDescriptorSet descriptors[FRAMES_IN_FLIGHT]{};
         TextureLayout layout = 0;
         uint32_t bindingId = 0;
-        uint32_t setBindingIndex = 0;
     };
 
     struct VkTextureWriteOperation

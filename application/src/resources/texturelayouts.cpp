@@ -13,7 +13,7 @@ namespace app
             .arraySize = 1,
         };
 
-        hf::TextureLayoutDefinitionInfo vikingRoomLayoutInfo
+        const hf::TextureLayoutDefinitionInfo vikingRoomLayoutInfo
         {
             .pBindings = &vrMainTexBinding,
             .bindingCount = 1

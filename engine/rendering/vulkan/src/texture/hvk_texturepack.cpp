@@ -7,7 +7,7 @@
 namespace hf
 {
     VkTexturePack::VkTexturePack(const inter::rendering::TexturePackCreationInfo& info)
-        : bindingType(info.bindingType), layout(info.layout), setBindingIndex(info.setBindingIndex)
+        : bindingType(info.bindingType), layout(info.layout)
     {
         bindings = std::vector<VkTextureBinding>(info.bindingCount);
         bindingType = info.bindingType;
@@ -86,12 +86,12 @@ namespace hf
         else LOG_WARN("Unnecessary set binding call, noting changed");
     }
 
-    void BindTexturePack(VkRenderer* rn, VkTexturePack* pack)
+    void BindTexturePack(const VkRenderer* rn, const VkTexturePack* pack, uint32_t setBindingIndex)
     {
-        auto currentFrame = rn->currentFrame;
+        const auto currentFrame = rn->currentFrame;
 
         vkCmdBindDescriptorSets(rn->currentCommand, (VkPipelineBindPoint)pack->bindingType, rn->currentLayout,
-        pack->setBindingIndex, 1, &pack->descriptors[currentFrame],
+        setBindingIndex, 1, &pack->descriptors[currentFrame],
         0, nullptr);
     }
 }

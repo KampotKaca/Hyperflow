@@ -6,6 +6,12 @@
 
 namespace hf
 {
+    struct TextureBindingInfo
+    {
+        Ref<TexturePack> pack{};
+        uint32_t setBindingIndex{};
+    };
+
     struct DrawPacketInfo
     {
         uint32_t texpackStart{};
@@ -79,7 +85,7 @@ namespace hf
         DrawPacketInfo drawPackets[RENDERING_MAX_NUM_DRAWPACKETS];
         uint32_t drawPacketCount{};
 
-        Ref<TexturePack> texpacks[RENDERING_MAX_NUM_TEXPACKS];
+        TextureBindingInfo texpacks[RENDERING_MAX_NUM_TEXPACKS];
         uint32_t texpackCount{};
 
         UniformBufferBindInfo uniforms[RENDERING_MAX_NUM_UNIFORMS];

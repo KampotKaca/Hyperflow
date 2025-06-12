@@ -31,7 +31,7 @@ namespace app
                 {
                     hf::draw::StartMaterialPacket(rn, hf::primitives::GetEmptyMaterial());
                     {
-                        hf::draw::MaterialAdd_TexturePackBinding(rn, APP_TEXTURE_PACKS.viking_room_pack);
+                        hf::draw::MaterialAdd_TexturePackBinding(rn, APP_TEXTURE_PACKS.viking_room_pack, 2);
 
                         hf::draw::StartDrawPacket(rn);
                         {

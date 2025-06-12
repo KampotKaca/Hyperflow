@@ -263,11 +263,11 @@ namespace hf
 		void EndDrawPacket(const Ref<Renderer>& rn);
 
 		void ShaderSetupAdd_UniformBinding(const Ref<Renderer>& rn, const UniformBufferBindInfo& uniformBinding);
-		void MaterialAdd_TexturePackBinding(const Ref<Renderer>& rn, const Ref<TexturePack>& texPack);
+		void MaterialAdd_TexturePackBinding(const Ref<Renderer>& rn, const Ref<TexturePack>& texPack, uint32_t setBindingIndex);
 
 		void PacketAdd_DrawCall(const Ref<Renderer>& rn, const Ref<Mesh>& mesh);
 		void PacketAdd_DrawCall(const Ref<Renderer>& rn, const DrawCallInfo& drawCall);
-		void PacketAdd_TexturePackBinding(const Ref<Renderer>& rn, const Ref<TexturePack>& texPack);
+		void PacketAdd_TexturePackBinding(const Ref<Renderer>& rn, const Ref<TexturePack>& texPack, uint32_t setBindingIndex);
 		void PacketSet_PushConstant(const Ref<Renderer>& rn, const void* data, uint32_t dataSize);
 	}
 

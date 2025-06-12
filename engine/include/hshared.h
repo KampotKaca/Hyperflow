@@ -591,7 +591,7 @@ namespace hf
 		TextureDetails details{};
 	};
 
-	struct TexturePackBindingInfo
+	struct TexturePackTextureBindingInfo
 	{
 		//optional but, must be set until you try to render anything
 		TextureSampler sampler{};
@@ -605,8 +605,7 @@ namespace hf
 	{
 		RenderBindingType bindingType = RenderBindingType::Graphics;
 		uint32_t bindingId = 0;
-		uint32_t setBindingIndex = 0;
-		TexturePackBindingInfo* pBindings{};
+		TexturePackTextureBindingInfo* pBindings{};
 		uint32_t bindingCount = 0;
 		TextureLayout layout = 0;
 	};

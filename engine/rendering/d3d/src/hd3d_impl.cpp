@@ -88,7 +88,7 @@ namespace hf::inter::rendering
 
     }
 
-    void BindTexturePack(void* rn, void* texPack)
+    void BindTexturePack(void* rn, const TexturePackBindingInfo& info)
     {
 
     }

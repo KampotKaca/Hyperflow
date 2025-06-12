@@ -12,12 +12,31 @@ namespace hf
         folderPath(info.folderPath), desiredChannel(info.desiredChannel), details(info.details),
         mipLevels(info.mipLevels)
     {
-        texturePaths[0] = info.texturePaths.left;
-        texturePaths[1] = info.texturePaths.right;
-        texturePaths[2] = info.texturePaths.down;
-        texturePaths[3] = info.texturePaths.up;
-        texturePaths[4] = info.texturePaths.back;
-        texturePaths[5] = info.texturePaths.front;
+        switch (inter::HF.renderingApi.type)
+        {
+        case RenderingApiType::None: throw GENERIC_EXCEPT("[Hyperflow]", "No rendering api to use the texture for!");
+        case RenderingApiType::Vulkan:
+            {
+                texturePaths[0] = info.texturePaths.right;
+                texturePaths[1] = info.texturePaths.left;
+                texturePaths[2] = info.texturePaths.up;
+                texturePaths[3] = info.texturePaths.down;
+                texturePaths[4] = info.texturePaths.front;
+                texturePaths[5] = info.texturePaths.back;
+            }
+            break;
+        case RenderingApiType::Direct3D:
+            {
+                texturePaths[0] = info.texturePaths.left;
+                texturePaths[1] = info.texturePaths.right;
+                texturePaths[2] = info.texturePaths.down;
+                texturePaths[3] = info.texturePaths.up;
+                texturePaths[4] = info.texturePaths.back;
+                texturePaths[5] = info.texturePaths.front;
+            }
+            break;
+        }
+
         inter::rendering::CreateCubemap_i(this);
     }
 

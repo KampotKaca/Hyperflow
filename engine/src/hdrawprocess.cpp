@@ -235,7 +235,7 @@ namespace hf
             currentDraw.currentShaderSetup->uniformCount++;
         }
 
-        void MaterialAdd_TexturePackBinding(const Ref<Renderer>& rn, const Ref<TexturePack>& texPack)
+        void MaterialAdd_TexturePackBinding(const Ref<Renderer>& rn, const Ref<TexturePack>& texPack, const uint32_t setBindingIndex)
         {
             auto& currentDraw = rn->currentDraw;
 #if DEBUG
@@ -244,7 +244,11 @@ namespace hf
 #endif
 
             auto& packet = currentDraw.packet;
-            packet.texpacks[packet.texpackCount] = texPack;
+            packet.texpacks[packet.texpackCount] =
+            {
+                .pack = texPack,
+                .setBindingIndex = setBindingIndex
+            };
             packet.texpackCount++;
             currentDraw.currentMaterial->texpackCount++;
         }
@@ -263,7 +267,7 @@ namespace hf
             currentDraw.currentDraw->drawCallCount++;
         }
 
-        void PacketAdd_TexturePackBinding(const Ref<Renderer>& rn, const Ref<TexturePack>& texPack)
+        void PacketAdd_TexturePackBinding(const Ref<Renderer>& rn, const Ref<TexturePack>& texPack, const uint32_t setBindingIndex)
         {
             auto& currentDraw = rn->currentDraw;
 #if DEBUG
@@ -272,7 +276,11 @@ namespace hf
 #endif
 
             auto& packet = currentDraw.packet;
-            packet.texpacks[packet.texpackCount] = texPack;
+            packet.texpacks[packet.texpackCount] =
+            {
+                .pack = texPack,
+                .setBindingIndex = setBindingIndex
+            };
             packet.texpackCount++;
             currentDraw.currentDraw->texpackCount++;
         }
@@ -425,8 +433,7 @@ namespace hf
                                             for (uint32_t texpackIndex = material.texpackStart; texpackIndex < texpackEnd; texpackIndex++)
                                             {
                                                 const auto texPack = packet.texpacks[texpackIndex];
-                                                const auto index = texPack->setBindingIndex;
-                                                currentTexturePacks[index] = texPack;
+                                                currentTexturePacks[texPack.setBindingIndex] = texPack.pack;
                                             }
                                         }
 
@@ -435,8 +442,7 @@ namespace hf
                                             for (uint32_t texpackIndex = drawPacket.texpackStart; texpackIndex < texpackEnd; texpackIndex++)
                                             {
                                                 const auto texPack = packet.texpacks[texpackIndex];
-                                                const auto index = texPack->setBindingIndex;
-                                                currentTexturePacks[index] = texPack;
+                                                currentTexturePacks[texPack.setBindingIndex] = texPack.pack;
                                             }
                                         }
 
@@ -445,7 +451,13 @@ namespace hf
                                             auto cPack = currentTexturePacks[i];
                                             if (cPack != boundTexturePacks[i] && cPack && cPack->handle)
                                             {
-                                                HF.renderingApi.api.BindTexturePack(handle, cPack->handle);
+                                                TexturePackBindingInfo info
+                                                {
+                                                    .texturePack = cPack->handle,
+                                                    .setBindingIndex = i
+                                                };
+
+                                                HF.renderingApi.api.BindTexturePack(handle, info);
                                                 boundTexturePacks[i] = cPack;
                                             }
                                         }

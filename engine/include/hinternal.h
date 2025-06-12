@@ -59,6 +59,8 @@ namespace hf::inter
     struct StaticResources
     {
         TextureLayout emptyLayout{};
+        TextureLayout skyboxLayout{};
+
         BufferAttrib quadAttrib{};
 
         TextureSampler cubemapSampler{};
@@ -68,7 +70,11 @@ namespace hf::inter
         UniformAllocator uniformAllocator = 0;
 
         ShaderSetup axisLinesShaderSetup{};
+        ShaderSetup skyboxShaderSetup{};
+
         Ref<Shader> axisLinesShader{};
+        Ref<Shader> skyboxShader{};
+
         Ref<Mesh> cube{};
         Ref<VertBuffer> quadBuffer{};
 

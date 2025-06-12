@@ -6,7 +6,7 @@
 namespace hf
 {
     TexturePack::TexturePack(const TexturePackCreationInfo& info)
-        : bindingId(info.bindingId), layout(info.layout), bindingType(info.bindingType), setBindingIndex(info.setBindingIndex)
+        : bindingId(info.bindingId), layout(info.layout), bindingType(info.bindingType)
     {
         bindings = std::vector<TexturePackBinding>(info.bindingCount);
         for (uint32_t i = 0; i < info.bindingCount; i++)
@@ -127,7 +127,7 @@ namespace hf
         {
             if (texPack->handle) return false;
 
-            std::vector<TexturePackBinding> bindings(texPack->bindings.size());
+            std::vector<TexturePackTextureBindingInfo> bindings(texPack->bindings.size());
 
             for (uint32_t i = 0; i < texPack->bindings.size(); i++)
             {
@@ -143,11 +143,10 @@ namespace hf
                     binding.textures[j] = bInfo.textures[j] ? bInfo.textures[j]->handle : nullptr;
             }
 
-            TexturePackCreationInfo creationInfo
+            const TexturePackCreationInfo creationInfo
             {
                 .bindingType = texPack->bindingType,
                 .bindingId = texPack->bindingId,
-                .setBindingIndex = texPack->setBindingIndex,
                 .pBindings = bindings.data(),
                 .bindingCount = (uint32_t)bindings.size(),
                 .layout = texPack->layout
