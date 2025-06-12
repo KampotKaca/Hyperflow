@@ -34,6 +34,21 @@ namespace hf::inter::rendering
         TextureFormat::D32_Sfloat_S8_Uint,
     };
 
+    enum class TextureFlags
+    {
+        None = 0,
+        SparseBinding = 1 << 0, SparseResidency = 1 << 1, SparseAliased = 1 << 2, MutableFormat = 1 << 3,
+        CubeCompatible = 1 << 4, Array2DCompatible = 1 << 5, SplitInstanceBindRegions = 1 << 6, BlockTexelViewCompatible = 1 << 7,
+        ExtendedUsage = 1 << 8, Disjoint = 1 << 9, Aliased = 1 << 10, Protected = 1 << 11,
+    };
+
+	enum class TextureType { Tex1D = 0, Tex2D = 1, Tex3D = 2 };
+	enum class TextureViewType
+	{
+	    Tex1D = (uint32_t)TextureType::Tex1D, Tex2D = (uint32_t)TextureType::Tex2D, Tex3D = (uint32_t)TextureType::Tex3D,
+	    TexCube = 3, Tex1DArray = 4, Tex2DArray = 5, TexCubeArray = 6
+	};
+
     struct UniformBufferUploadInfo
     {
         const UniformUploadPacketInfo* pUploadPackets{};
@@ -109,11 +124,15 @@ namespace hf::inter::rendering
 
     struct TextureCreationInfo
     {
+		TextureType type = TextureType::Tex2D;
+		TextureViewType viewType = TextureViewType::Tex2D;
+        TextureFlags flags = TextureFlags::None;
         uvec3 size = { 1, 1, 1 };
         TextureChannel channel = TextureChannel::RGBA;
         uint32_t mipLevels = 1;
         uint32_t samples = 1;
-        void* data{};
+        const void* pTextures{};
+        uint32_t textureCount = 1;
         TextureDetails details{};
     };
 

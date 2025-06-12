@@ -1,5 +1,6 @@
 #include "hvk_texture.h"
 #include "hvk_graphics.h"
+#include "hyperflow.h"
 
 namespace hf
 {
@@ -9,9 +10,11 @@ namespace hf
     static void GenerateMimMaps(VkCommandBuffer command);
 
     VkTexture::VkTexture(const inter::rendering::TextureCreationInfo& info)
-        : channel(info.channel), details(info.details), size(info.size)
+        : type(info.type), viewType(info.viewType), flags(info.flags), channel(info.channel),
+          details(info.details), size(info.size)
     {
         bufferSize = size.x * size.y * size.z * 4;
+        bufferCount = info.textureCount;
         bufferOffset = 0;
 
         auto device = GRAPHICS_DATA.defaultDevice->logicalDevice.device;
@@ -19,17 +22,18 @@ namespace hf
         VkImageCreateInfo imageInfo
         {
             .sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO,
-            .imageType = (VkImageType)details.type,
+            .flags = (VkImageCreateFlags)info.flags,
+            .imageType = (VkImageType)info.type,
             .format = (VkFormat)details.format,
             .extent = { size.x, size.y, size.z },
-            .arrayLayers = 1,
+            .arrayLayers = info.textureCount,
             .samples = (VkSampleCountFlagBits)info.samples,
             .tiling = (VkImageTiling)details.tiling,
             .sharingMode = VK_SHARING_MODE_EXCLUSIVE,
             .initialLayout = VK_IMAGE_LAYOUT_UNDEFINED,
         };
 
-        if (info.data)
+        if (info.pTextures)
         {
             mipLevels = std::min(info.mipLevels, (uint32_t)std::floor(std::log2(std::max(size.x, size.y))) + 1);
 
@@ -56,11 +60,11 @@ namespace hf
         VK_HANDLE_EXCEPT(vkCreateImage(device, &imageInfo, nullptr, &image));
         AllocateImage(details.memoryType, image, &imageMemory);
 
-        if (info.data)
+        if (info.pTextures)
         {
             VkBuffer stagingBuffer;
             VmaAllocation stagingBufferMemory;
-            CreateStagingBuffer(bufferSize, info.data, &stagingBuffer, &stagingBufferMemory);
+            CreateStagingBuffer(bufferSize * bufferCount, info.pTextures, &stagingBuffer, &stagingBufferMemory);
 
             VkBufferImageCopy copyRegion
             {
@@ -242,7 +246,7 @@ namespace hf
         {
             .sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO,
             .image = texture->image,
-            .viewType = (VkImageViewType)texture->details.type,
+            .viewType = (VkImageViewType)texture->viewType,
             .format = (VkFormat)texture->details.format,
             .subresourceRange =
             {
@@ -250,7 +254,7 @@ namespace hf
                 .baseMipLevel = 0,
                 .levelCount = texture->mipLevels,
                 .baseArrayLayer = 0,
-                .layerCount = 1,
+                .layerCount = texture->bufferCount,
             }
         };
 

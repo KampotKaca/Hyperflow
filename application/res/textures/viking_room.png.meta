@@ -1,7 +1,6 @@
 desiredChannel: RGBA
 mipLevels: 8,
 
-type: Tex2D
 format: R8G8B8A8_Srgb
 aspectFlags:
   - Color

@@ -454,14 +454,16 @@ namespace hf
 
             inter::rendering::TextureCreationInfo textureInfo
             {
+                .type = inter::rendering::TextureType::Tex2D,
+                .viewType = inter::rendering::TextureViewType::Tex2D,
                 .size = uvec3(size, 1),
                 .channel = TextureChannel::RGBA,
                 .mipLevels = 1,
                 .samples = (uint32_t)attachment.samples,
-                .data = nullptr,
+                .pTextures = nullptr,
+                .textureCount = 1,
                 .details
                 {
-                    .type = TextureType::Tex2D,
                     .format = (TextureFormat)attachment.format,
                     .tiling = TextureTiling::Optimal,
                     .usageFlags = TextureUsageFlags::DepthStencil,
@@ -486,14 +488,16 @@ namespace hf
 
             inter::rendering::TextureCreationInfo textureInfo
             {
+                .type = inter::rendering::TextureType::Tex2D,
+                .viewType = inter::rendering::TextureViewType::Tex2D,
                 .size = uvec3(size, 1),
                 .channel = TextureChannel::RGBA,
                 .mipLevels = 1,
                 .samples = (uint32_t)renderPass->msaaSamples[i],
-                .data = nullptr,
+                .pTextures = nullptr,
+                .textureCount = 1,
                 .details
                 {
-                    .type = TextureType::Tex2D,
                     .format = (TextureFormat)attachment.format,
                     .aspectFlags = TextureAspectFlags::Color,
                     .tiling = TextureTiling::Optimal,

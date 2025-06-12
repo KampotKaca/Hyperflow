@@ -487,7 +487,6 @@ namespace hf
 	 //    ASTC_12x12_Sfloat_Block = 1000066013, A1B5G5R5_Unorm_Pack16 = 1000470000, A8_Unorm = 1000470001,
 	};
 
-	enum class TextureType   	{ Tex1D = 0, Tex2D = 1, Tex3D = 2 };
 	enum class TextureChannel   { Default = 0, Gray = 1, GrayAlpha = 2, RGB = 3, RGBA = 4 };
 	enum class TextureFilter			{ Point = 0, Bilinear = 1 };
 	enum class TextureAnisotropicFilter	{ None, X2 = 2, X4 = 4, X8 = 8, X16 = 16, X32 = 32 };
@@ -556,7 +555,6 @@ namespace hf
 
 	struct TextureDetails
 	{
-		TextureType type = TextureType::Tex2D;
 		TextureFormat format = TextureFormat::R8G8B8A8_Srgb;
 		TextureAspectFlags aspectFlags = TextureAspectFlags::Color;
 		TextureTiling tiling = TextureTiling::Optimal;

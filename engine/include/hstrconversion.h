@@ -61,18 +61,6 @@ namespace hf
         }
     }
 
-    constexpr TextureType STRING_TO_TEXTURE_TYPE(std::string_view str)
-    {
-        switch (fnv1a(str))
-        {
-        case fnv1a("Tex1D"): return TextureType::Tex1D;
-        case fnv1a("Tex2D"): return TextureType::Tex2D;
-        case fnv1a("Tex3D"): return TextureType::Tex3D;
-        default:
-            throw std::invalid_argument("Unknown TextureChannel string");
-        }
-    }
-
     constexpr TextureChannel STRING_TO_TEXTURE_CHANNEL(std::string_view str)
     {
         switch (fnv1a(str))

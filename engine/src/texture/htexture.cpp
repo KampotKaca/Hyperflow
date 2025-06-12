@@ -124,12 +124,15 @@ namespace hf
             size.z = 1;
             if (tex->pixelCache)
             {
-                TextureCreationInfo creationInfo =
+                const TextureCreationInfo creationInfo =
                 {
+                    .type = TextureType::Tex2D,
+                    .viewType = TextureViewType::Tex2D,
                     .size = size,
                     .channel = (TextureChannel)texChannels,
                     .mipLevels = tex->mipLevels,
-                    .data = tex->pixelCache,
+                    .pTextures = tex->pixelCache,
+                    .textureCount = 1,
                     .details = tex->details
                 };
 

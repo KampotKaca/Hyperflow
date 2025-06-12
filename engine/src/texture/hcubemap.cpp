@@ -1,4 +1,5 @@
 #include "hyaml.h"
+#include <stb_image.h>
 #include "hcubemap.h"
 #include "htexture.h"
 #include "hinternal.h"
@@ -17,23 +18,7 @@ namespace hf
         texturePaths[3] = info.texturePaths.up;
         texturePaths[4] = info.texturePaths.back;
         texturePaths[5] = info.texturePaths.front;
-
-        TextureCreationInfo texInfo
-        {
-            .useAbsolutePath = true,
-            .desiredChannel = desiredChannel,
-            .mipLevels = mipLevels,
-            .details = details
-        };
-
-        std::string fullCubemapFolderPath = TO_RES_PATH(std::string("cubemaps/") + folderPath + "/");
-        for (uint32_t i = 0; i < 6; i++)
-        {
-            std::string path = fullCubemapFolderPath + texturePaths[i];
-            texInfo.filePath = path.c_str();
-
-            textures[i] = MakeRef<Texture>(texInfo);
-        }
+        inter::rendering::CreateCubemap_i(this);
     }
 
     Cubemap::~Cubemap()
@@ -164,24 +149,101 @@ namespace hf
     {
         bool CreateCubemap_i(Cubemap* cubemap)
         {
-            bool state = false;
-            for (auto& texture : cubemap->textures)
+            struct TexData
             {
-                const auto result = CreateTexture_i(texture.get());
-                state = state || result;
+                uint8_t* pixels{};
+                uvec3 size{};
+            };
+
+#define VALIDATION_CHECK\
+            if (!validLoading)\
+            {\
+                for (uint32_t i = 0; i < 6; i++)\
+                    if (textures[i].pixels) stbi_image_free(textures[i].pixels);\
+                return false;\
             }
-            return state;
+
+            if (cubemap->handle) return false;
+
+            std::string fullCubemapFolderPath = TO_RES_PATH(std::string("cubemaps/") + cubemap->folderPath + "/");
+            TexData textures[6]{};
+            bool validLoading = true;
+
+            for (uint32_t i = 0; i < 6; i++)
+            {
+                std::string path = fullCubemapFolderPath + cubemap->texturePaths[i];
+
+                if (!utils::FileExists(path.c_str()))
+                {
+                    LOG_ERROR("[Hyperflow] Unable to find texture: %s", cubemap->texturePaths[i].c_str());
+                    validLoading = false;
+                    break;
+                }
+
+                if (HF.renderingApi.type == RenderingApiType::Vulkan)
+                    stbi_set_flip_vertically_on_load(false);
+
+                ivec3 size{};
+                int32_t texChannels{};
+                uint8_t* pixelData = stbi_load(path.c_str(), &size.x, &size.y,
+                &texChannels, (int32_t)cubemap->desiredChannel);
+                size.z = 1;
+
+                if (pixelData)
+                {
+                    textures[i] =
+                    {
+                        .pixels = pixelData,
+                        .size = size
+                    };
+                }
+            }
+            VALIDATION_CHECK
+
+            for (uint32_t i = 0; i < 5; i++)
+            {
+                if (textures[i].size != textures[i + 1].size)
+                {
+                    LOG_ERROR("[Hyperflow] Cubemap textures must be the same size!");
+                    validLoading = false;
+                    break;
+                }
+            }
+            VALIDATION_CHECK
+
+            const auto size = textures[0].size;
+            const auto texSize = size.x * size.y * size.z * 4;
+            auto allPixels = (uint8_t*)utils::Allocate(6 * texSize);
+            for (uint32_t i = 0; i < 6; i++) memcpy(allPixels + i * texSize, textures[i].pixels, texSize);
+
+            const TextureCreationInfo info
+            {
+                .type = TextureType::Tex2D,
+                .viewType = TextureViewType::TexCube,
+                .flags = TextureFlags::CubeCompatible,
+                .size = size,
+                .channel = TextureChannel::RGBA,
+                .mipLevels = cubemap->mipLevels,
+                .samples = 1,
+                .pTextures = allPixels,
+                .textureCount = 6,
+                .details = cubemap->details
+            };
+            cubemap->handle = HF.renderingApi.api.CreateTexture(info);
+
+            return true;
         }
 
         bool DestroyCubemap_i(Cubemap* cubemap)
         {
-            bool state = false;
-            for (auto& texture : cubemap->textures)
+            if (cubemap->handle)
             {
-                const auto result = DestroyTexture_i(texture.get());
-                state = state || result;
+                std::lock_guard lock(HF.deletedResources.syncLock);
+                HF.deletedResources.textures.push_back(cubemap->handle);
+                cubemap->handle = nullptr;
+                return true;
             }
-            return state;
+            return false;
         }
 
         void DestroyAllCubemaps_i(bool internalOnly)

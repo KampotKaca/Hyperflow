@@ -56,12 +56,6 @@ namespace hf::utils
         ryml::NodeRef root = *((ryml::NodeRef*)yamlRoot);
 
         {
-            const auto v = root["type"].val();
-            std::string_view vView{v.str, v.len};
-            result.type = STRING_TO_TEXTURE_TYPE(vView);
-        }
-
-        {
             const auto v = root["format"].val();
             std::string_view vView{v.str, v.len};
             result.format = STRING_TO_TEXTURE_FORMAT(vView);

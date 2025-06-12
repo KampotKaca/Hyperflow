@@ -72,16 +72,16 @@ namespace hf
     void CreateStagingBuffer(uint64_t bufferSize, const void* data, VkBuffer* bufferResult, VmaAllocation* memoryResult)
     {
         QueueFamilyIndices& familyIndices = GRAPHICS_DATA.defaultDevice->familyIndices;
-        uint32_t queus[2] = { familyIndices.transferFamily.value(), familyIndices.graphicsFamily.value() };
+        std::array queus = { familyIndices.transferFamily.value(), familyIndices.graphicsFamily.value() };
 
-        VkCreateBufferInfo createInfo
+        const VkCreateBufferInfo createInfo
         {
             .size = bufferSize,
             .usage = VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
             .sharingMode = VK_SHARING_MODE_CONCURRENT,
             .memoryType = BufferMemoryType::WriteOnly,
-            .pQueueFamilies = queus,
-            .familyCount = 2
+            .pQueueFamilies = queus.data(),
+            .familyCount = queus.size()
         };
 
         CreateBuffer(createInfo, bufferResult, memoryResult);
