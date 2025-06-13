@@ -17,12 +17,12 @@ namespace hf
         case RenderingApiType::None: throw GENERIC_EXCEPT("[Hyperflow]", "No rendering api to use the texture for!");
         case RenderingApiType::Vulkan:
             {
-                texturePaths[0] = info.texturePaths.right;
-                texturePaths[1] = info.texturePaths.left;
+                texturePaths[0] = info.texturePaths.front;
+                texturePaths[1] = info.texturePaths.back;
                 texturePaths[2] = info.texturePaths.up;
                 texturePaths[3] = info.texturePaths.down;
-                texturePaths[4] = info.texturePaths.front;
-                texturePaths[5] = info.texturePaths.back;
+                texturePaths[4] = info.texturePaths.right;
+                texturePaths[5] = info.texturePaths.left;
             }
             break;
         case RenderingApiType::Direct3D:

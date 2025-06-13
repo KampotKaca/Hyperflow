@@ -25,6 +25,8 @@ namespace hf
         static void DefineUniforms();
         static void DefineShaderSetups();
 
+        static void LoadCubemaps();
+        static void LoadTexturePacks();
         static void LoadMeshes();
         static void LoadShaders();
         static void LoadMaterials();
@@ -42,6 +44,8 @@ namespace hf
         {
             LoadShaders();
             LoadMeshes();
+            LoadCubemaps();
+            LoadTexturePacks();
             LoadMaterials();
         }
 
@@ -203,6 +207,73 @@ namespace hf
             }
         }
 
+        void LoadCubemaps()
+        {
+            //Skybox cubemap
+            {
+                constexpr CubemapCreationInfo info
+                {
+                    .folderPath = "__toony",
+                    .desiredChannel = TextureChannel::RGBA,
+                    .mipLevels = 1,
+                    .texturePaths =
+                    {
+                        .left =  "left.png",
+                        .right = "right.png",
+                        .down =  "down.png",
+                        .up =    "up.png",
+                        .back =  "back.png",
+                        .front = "front.png"
+                    },
+                    .details =
+                    {
+                        .format = TextureFormat::R8G8B8A8_Srgb,
+                        .aspectFlags = TextureAspectFlags::Color,
+                        .tiling = TextureTiling::Optimal,
+                        .usageFlags = TextureUsageFlags::Sampled,
+                        .memoryType = BufferMemoryType::Static,
+                        .finalLayout = TextureResultLayoutType::ShaderReadOnly,
+                    }
+                };
+
+                HF.staticResources.defaultSkyboxCubemap = cubemap::Create(info);
+            }
+        }
+
+        void LoadTexturePacks()
+        {
+            //Skybox texturepack
+            {
+                TexturePackCubemapBindingInfo binding
+                {
+                    .sampler = HF.staticResources.cubemapSampler,
+                    .pCubemaps = &HF.staticResources.defaultSkyboxCubemap,
+                    .arraySize = 1
+                };
+                const TexturePackCreationInfo info
+                {
+                    .bindingType = RenderBindingType::Graphics,
+                    .bindingId = 0,
+                    .pCubemapeBindings = &binding,
+                    .cubemapBindingCount = 1,
+                    .layout = HF.staticResources.skyboxLayout,
+                };
+                HF.staticResources.skyboxTexturePack = texturepack::Create(info);
+            }
+
+            texture::SubmitAll();
+
+            {
+                std::array texPacks = { HF.staticResources.skyboxTexturePack };
+                TexturePackAllocatorCreationInfo info
+                {
+                    .pTexturePacks = texPacks.data(),
+                    .texturePackCount = texPacks.size()
+                };
+                HF.staticResources.texPackAllocator = texturepackallocator::Create(info);
+            }
+        }
+
         void LoadMeshes()
         {
             //Quad Vertices
@@ -295,11 +366,11 @@ namespace hf
                     },
                     .depthStencilOptions =
                     {
-                        .enableDepth = true,
+                        .enableDepth = false,
                         .writeDepth = false,
                         .comparisonFunc = DepthComparisonFunction::Less,
                         .enableDepthBounds = false,
-                        .enableStencil = true,
+                        .enableStencil = false,
                     }
                 };
                 HF.staticResources.skyboxShader = shader::Create(shaderInfo);

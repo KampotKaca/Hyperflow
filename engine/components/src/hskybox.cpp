@@ -3,6 +3,11 @@
 
 namespace hf
 {
+    void Skybox::BindCubemap(const Ref<Cubemap>& cubemap)
+    {
+
+    }
+
     void Skybox::Draw(const Ref<Renderer>& rn)
     {
         draw::StartShaderSetupPacket(rn, inter::HF.staticResources.skyboxShaderSetup);
@@ -21,6 +26,7 @@ namespace hf
                 {
                     draw::StartDrawPacket(rn);
                     {
+                        draw::PacketAdd_TexturePackBinding(rn, inter::HF.staticResources.skyboxTexturePack, 1);
                         draw::PacketAdd_DrawCall(rn, inter::HF.staticResources.cube);
                     }
                     draw::EndDrawPacket(rn);

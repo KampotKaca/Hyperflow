@@ -16,7 +16,8 @@ layout(location = 0) out vec3 outTexcoord;
 
 void main()
 {
-    vec4 position = CAMERA.viewProj * vec4(inPosition, 1.0);
-    gl_Position = position.xyww;
+    vec4 pos = CAMERA.proj * mat4(mat3(CAMERA.view)) * vec4(inPosition, 1.0);
+    gl_Position = pos.xyww;
     outTexcoord = inPosition;
+
 }

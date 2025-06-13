@@ -16,6 +16,8 @@ namespace app
 
         hf::draw::StartRenderPassPacket(rn, APP_RENDER_PASSES.mainPresentPass);
         {
+            APP_OBJECTS.skybox.Draw(rn);
+
             hf::draw::StartShaderSetupPacket(rn, APP_SHADER_SETUPS.viking_room); //Viking room setup
             {
                 hf::Camera3DCore::BindCurrentToUniform(rn);
@@ -59,7 +61,6 @@ namespace app
 
             // VoxelTerrainDraw(rn);
             DebugRender(rn);
-            // APP_OBJECTS.skybox.Draw(rn);
         }
         hf::draw::EndRenderPassPacket(rn);
     }

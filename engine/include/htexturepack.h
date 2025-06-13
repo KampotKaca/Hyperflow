@@ -2,6 +2,7 @@
 #define HTEXTUREPACK_H
 
 #include "hshared.h"
+#include "hinternal.h"
 
 namespace hf
 {
@@ -19,6 +20,8 @@ namespace hf
         RenderBindingType bindingType = RenderBindingType::Graphics;
         std::vector<Binding> bindings{};
         std::vector<inter::rendering::TexturePackTextureBindingInfo> bindingsBuffer{};
+        uint32_t textureBindingCount = 0;
+        uint32_t cubemapBindingCount = 0;
         TextureLayout layout{};
         uint32_t bindingId = 0;
         void* handle{};

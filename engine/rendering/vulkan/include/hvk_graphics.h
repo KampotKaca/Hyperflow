@@ -102,35 +102,32 @@ namespace hf
         bool deleteSrcAfterCopy = false;
     };
 
-    struct VkCopyBufferToImageOperation
-    {
-        VkBuffer srcBuffer{};
-        VmaAllocation srcMemory{};
-        VkImageLayout srcLayout{};
-
-        VkImage dstImage{};
-        VmaAllocation dstMemory{};
-        VkImageLayout dstLayout{};
-
-        VkFormat format{};
-        VkImageAspectFlags aspectFlags{};
-
-        VkBufferImageCopy pRegions[VULKAN_API_MAX_NUM_COPY_REGIONS]{};
-        uint32_t regionCount = 0;
-        uint32_t mipLevels = 1;
-        uvec2 imageSize{};
-
-        void* uData{};
-        void (*taskCompletionCallback)(void* udata){};
-        bool deleteSrcAfterCopy = false;
-    };
-
     struct ImageTransitionInfo
     {
         VkImage image{};
         VkFormat format{};
         VkImageAspectFlags aspectFlags{};
         uint32_t mipLevels = 1;
+        uint32_t layerCount = 1;
+    };
+
+    struct VkCopyBufferToImageOperation
+    {
+        VkBuffer srcBuffer{};
+        VmaAllocation srcMemory{};
+        VkImageLayout srcLayout{};
+
+        VmaAllocation dstMemory{};
+        VkImageLayout dstLayout{};
+
+        ImageTransitionInfo imageInfo{};
+        VkBufferImageCopy pRegions[VULKAN_API_MAX_NUM_COPY_REGIONS]{};
+        uint32_t regionCount = 0;
+        uvec2 imageSize{};
+
+        void* uData{};
+        void (*taskCompletionCallback)(void* udata){};
+        bool deleteSrcAfterCopy = false;
     };
 
     struct ImageTransitionArray

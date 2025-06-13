@@ -154,9 +154,7 @@ namespace hf
 		void Destroy(const Ref<TexturePack>* pPacks, uint32_t count);
 		bool IsRunning(const Ref<TexturePack>& pack);
 
-		void SetBindingSampler(const Ref<TexturePack>& pack, uint32_t bindingIndex, TextureSampler sampler);
-		void SetBindingTextures(const Ref<TexturePack>& pack, uint32_t bindingIndex, const Ref<Texture>* pTextures, uint32_t textureCount, uint32_t textureOffset);
-		void SetBinding(const Ref<TexturePack>& pack, uint32_t bindingIndex, TextureSampler sampler, const Ref<Texture>* pTextures, uint32_t textureCount, uint32_t textureOffset);
+		void SetBinding(const Ref<TexturePack>& pack, const TexturePackBindingUploadInfo& info);
 	}
 
 	namespace texturepackallocator

@@ -6,7 +6,9 @@
 namespace hf
 {
     TexturePack::TexturePack(const TexturePackCreationInfo& info)
-        : bindingType(info.bindingType), layout(info.layout), bindingId(info.bindingId)
+        : bindingType(info.bindingType), textureBindingCount(info.textureBindingCount),
+          cubemapBindingCount(info.cubemapBindingCount),
+          layout(info.layout), bindingId(info.bindingId)
     {
         bindings = std::vector<Binding>(info.textureBindingCount + info.cubemapBindingCount);
         for (uint32_t i = 0; i < info.textureBindingCount; i++)
@@ -68,69 +70,56 @@ namespace hf
 
         bool IsRunning(const Ref<TexturePack>& pack) { return pack->handle; }
 
-        void SetBindingSampler(const Ref<TexturePack>& pack, uint32_t bindingIndex, TextureSampler sampler)
+        void SetBinding(const Ref<TexturePack>& pack, const TexturePackBindingUploadInfo& info)
         {
-            auto& binding = pack->bindings[bindingIndex];
-            binding.sampler = sampler;
-
-            const inter::rendering::TexturePackUploadInfo uploadInfo
-            {
-                .bindingIndex = bindingIndex,
-                .pTextures = nullptr,
-                .textureOffset = 0,
-                .textureCount = 0,
-                .sampler = binding.sampler
-            };
-            inter::HF.renderingApi.api.UploadTexturePack(pack->handle, uploadInfo);
-        }
-
-        void SetBindingTextures(const Ref<TexturePack>& pack, uint32_t bindingIndex,
-            const Ref<Texture>* pTextures, uint32_t textureCount, uint32_t textureOffset)
-        {
-            if (textureCount == 0) return;
-            auto& binding = pack->bindings[bindingIndex];
-            uint32_t end = textureOffset + textureCount;
-            for (uint32_t i = textureOffset; i < end; i++)
-                binding.textures[i] = pTextures[i]->handle;
+            auto& binding = pack->bindings[info.bindingIndex];
 
             inter::rendering::TexturePackUploadInfo uploadInfo
             {
-                .bindingIndex = bindingIndex,
-                .textureOffset = textureOffset,
-                .textureCount = textureCount,
-                .sampler = binding.sampler
+                .bindingIndex = info.bindingIndex,
             };
 
-            std::vector<void*> texHandles(textureCount);
-            for (uint32_t i = 0; i < textureCount; i++)
-                texHandles[i] = binding.textures[textureOffset + i];
-            uploadInfo.pTextures = texHandles.data();
-            inter::HF.renderingApi.api.UploadTexturePack(pack->handle, uploadInfo);
-        }
-
-        void SetBinding(const Ref<TexturePack>& pack, uint32_t bindingIndex, TextureSampler sampler,
-            const Ref<Texture>* pTextures, uint32_t textureCount, uint32_t textureOffset)
-        {
-            auto& binding = pack->bindings[bindingIndex];
-            for (uint32_t i = 0; i < textureCount; i++) binding.textures[textureOffset] = pTextures[i]->handle;
-            binding.sampler = sampler;
-
-            inter::rendering::TexturePackUploadInfo uploadInfo
+            if (info.sampler.has_value())
             {
-                .bindingIndex = bindingIndex,
-                .textureOffset = textureOffset,
-                .textureCount = textureCount,
-                .sampler = binding.sampler
-            };
+                binding.sampler = info.sampler.value();
+                uploadInfo.sampler = binding.sampler;
+            }
+            else uploadInfo.sampler = binding.sampler;
 
-            if (textureCount > 0)
+            if (info.texUpload.has_value())
             {
-                std::vector<void*> texHandles(textureCount);
-                for (uint32_t i = 0; i < textureCount; i++)
-                    texHandles[i] = binding.textures[textureOffset + i];
-                uploadInfo.pTextures = texHandles.data();
+                auto& texUpload = info.texUpload.value();
+                for (uint32_t i = 0; i < texUpload.count; i++)
+                    binding.textures[texUpload.offset + i] = texUpload.pTextures[i]->handle;
+
+                if (texUpload.count > 0)
+                {
+                    std::vector<void*> texHandles(texUpload.count);
+                    for (uint32_t i = 0; i < texUpload.count; i++)
+                        texHandles[i] = binding.textures[texUpload.offset + i];
+                    uploadInfo.pTextures = texHandles.data();
+                }
+                else uploadInfo.pTextures = nullptr;
             }
             else uploadInfo.pTextures = nullptr;
+
+            if (info.cubemapUpload.has_value())
+            {
+                auto& cubemapUpload = info.cubemapUpload.value();
+                for (uint32_t i = 0; i < cubemapUpload.count; i++)
+                    binding.textures[cubemapUpload.offset + i] = cubemapUpload.pCubemaps[i]->handle;
+
+                if (cubemapUpload.count > 0)
+                {
+                    std::vector<void*> texHandles(cubemapUpload.count);
+                    for (uint32_t i = 0; i < cubemapUpload.count; i++)
+                        texHandles[i] = binding.textures[cubemapUpload.offset + i];
+                    uploadInfo.pTextures = texHandles.data();
+                }
+                else uploadInfo.pTextures = nullptr;
+            }
+            else uploadInfo.pTextures = nullptr;
+
             inter::HF.renderingApi.api.UploadTexturePack(pack->handle, uploadInfo);
         }
     }

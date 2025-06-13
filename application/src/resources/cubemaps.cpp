@@ -6,6 +6,5 @@ namespace app
 
     void CubemapLoadAll()
     {
-        APP_CUBEMAPS.skybox = hf::cubemap::Create("toony");
     }
 }

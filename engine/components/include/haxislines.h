@@ -14,7 +14,7 @@ namespace hf
         void Draw(const Ref<Renderer>& rn) const;
 
         alignas(16) float lineThickness = 3.0f;
-        alignas(16) vec4 color{ 1.0f, 1.0f, 1.0f, 0.1f };
+        alignas(16) vec4 color{ 0.2f, 0.2f, 0.2f, 0.4f };
     };
 }
 

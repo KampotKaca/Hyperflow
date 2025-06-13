@@ -75,6 +75,12 @@ namespace hf::inter
         Ref<Shader> axisLinesShader{};
         Ref<Shader> skyboxShader{};
 
+        Ref<Cubemap> defaultSkyboxCubemap{};
+
+        Ref<TexturePack> skyboxTexturePack{};
+
+        Ref<TexturePackAllocator> texPackAllocator{};
+
         Ref<Mesh> cube{};
         Ref<VertBuffer> quadBuffer{};
 
