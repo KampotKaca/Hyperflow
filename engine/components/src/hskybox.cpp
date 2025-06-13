@@ -3,7 +3,7 @@
 
 namespace hf
 {
-    void Skybox::Draw(const Ref<Renderer>& rn) const
+    void Skybox::Draw(const Ref<Renderer>& rn)
     {
         draw::StartShaderSetupPacket(rn, inter::HF.staticResources.skyboxShaderSetup);
         {

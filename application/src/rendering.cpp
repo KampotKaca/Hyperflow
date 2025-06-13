@@ -59,6 +59,7 @@ namespace app
 
             // VoxelTerrainDraw(rn);
             DebugRender(rn);
+            // APP_OBJECTS.skybox.Draw(rn);
         }
         hf::draw::EndRenderPassPacket(rn);
     }

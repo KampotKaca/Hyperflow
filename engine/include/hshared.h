@@ -601,12 +601,24 @@ namespace hf
 		uint32_t arraySize = 0;
 	};
 
+	struct TexturePackCubemapBindingInfo
+	{
+		//optional but, must be set until you try to render anything
+		TextureSampler sampler{};
+		//optional but, must be set until you try to render anything
+		Ref<Cubemap>* pCubemaps{};
+		//optional but, must be set until you try to render anything
+		uint32_t arraySize = 0;
+	};
+
 	struct TexturePackCreationInfo
 	{
 		RenderBindingType bindingType = RenderBindingType::Graphics;
 		uint32_t bindingId = 0;
-		TexturePackTextureBindingInfo* pBindings{};
-		uint32_t bindingCount = 0;
+		TexturePackTextureBindingInfo* pTextureBindings{};
+		uint32_t textureBindingCount = 0;
+		TexturePackCubemapBindingInfo* pCubemapeBindings{};
+		uint32_t cubemapBindingCount = 0;
 		TextureLayout layout = 0;
 	};
 
@@ -730,7 +742,6 @@ namespace hf
 
 	enum class MeshIndexFormat
 	{
-		U8 = (uint32_t)BufferDataType::U8,
 		U16 = (uint32_t)BufferDataType::U16,
 		U32 = (uint32_t)BufferDataType::U32,
 	};

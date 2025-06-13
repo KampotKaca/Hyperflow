@@ -15,7 +15,7 @@ namespace hf
         if (info.pushConstant.usageFlags != ShaderUsageStage::None &&
             pushConstantInfo.sizeInBytes > 0)
         {
-            VkPushConstantRange pushConstant
+            const VkPushConstantRange pushConstant
             {
                 .stageFlags = (VkShaderStageFlags)pushConstantInfo.usageFlags,
                 .offset = 0,
@@ -35,7 +35,7 @@ namespace hf
         {
             for (uint32_t i = 0; i < info.bufferCount; i++)
             {
-                auto& buffer = GetUniform(info.pBuffers[i]);
+                const auto& buffer = GetUniform(info.pBuffers[i]);
                 GRAPHICS_DATA.preAllocBuffers.descLayouts[i] = buffer->layout;
             }
 
@@ -81,7 +81,7 @@ namespace hf
 
     void UploadPushConstants(const VkRenderer* rn, const PushConstantUploadInfo& info)
     {
-        auto& shaderSetup = GetShaderSetup(info.shaderSetup);
+        const auto& shaderSetup = GetShaderSetup(info.shaderSetup);
         vkCmdPushConstants(rn->currentCommand, rn->currentLayout, (VkShaderStageFlags)shaderSetup->pushConstantInfo.usageFlags,
             0, shaderSetup->pushConstantInfo.sizeInBytes, info.data);
     }

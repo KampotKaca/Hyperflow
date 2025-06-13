@@ -10,7 +10,7 @@ namespace hf
         Skybox() = default;
         ~Skybox() = default;
 
-        void Draw(const Ref<Renderer>& rn) const;
+        void Draw(const Ref<Renderer>& rn);
     };
 }
 

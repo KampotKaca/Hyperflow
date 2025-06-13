@@ -22,8 +22,8 @@ namespace app
             {
                 .bindingType = hf::RenderBindingType::Graphics,
                 .bindingId = 0,
-                .pBindings = &viking_room_binding,
-                .bindingCount = 1,
+                .pTextureBindings = &viking_room_binding,
+                .textureBindingCount = 1,
                 .layout = APP_TEXTURE_LAYOUTS.viking_room,
             };
 
@@ -43,8 +43,8 @@ namespace app
             {
                 .bindingType = hf::RenderBindingType::Graphics,
                 .bindingId = 0,
-                .pBindings = &viking_room_binding,
-                .bindingCount = 1,
+                .pTextureBindings = &viking_room_binding,
+                .textureBindingCount = 1,
                 .layout = APP_TEXTURE_LAYOUTS.viking_room,
             };
 

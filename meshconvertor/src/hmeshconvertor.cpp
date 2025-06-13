@@ -24,9 +24,9 @@ namespace std
         size_t operator()(Vertex const& vertex) const noexcept
         {
             return ((hash<glm::vec3>()(vertex.pos) ^
-                   (hash<glm::vec3>()(vertex.normal) << 1)) >> 1) ^
-                   (hash<glm::vec3>()(vertex.color) << 1) ^
-                   (hash<glm::vec2>()(vertex.texCoord) >> 1);
+                    (hash<glm::vec3>()(vertex.normal) << 1)) >> 1) ^
+                    (hash<glm::vec3>()(vertex.color) << 1) ^
+                    (hash<glm::vec2>()(vertex.texCoord) >> 1);
         }
     };
 }
@@ -275,24 +275,13 @@ void LoadModel(const char* path, MeshInfo* meshInfo)
             .dataFlags = (uint32_t)dataFlags,
         };
 
-        if (vertices.size() <= 255)
-        {
-            header.indexFormat = (uint32_t)hf::MeshIndexFormat::U8;
-            subMeshInfo.indices = std::vector<char>(indices.size());
-
-            for (uint32_t i = 0; i < indices.size(); ++i)
-            {
-                uint8_t result = (uint8_t)indices[i];
-                memcpy(&subMeshInfo.indices[i], &result, sizeof(uint8_t));
-            }
-        }
-        else if (vertices.size() <= 65535)
+        if (vertices.size() <= 65535)
         {
             header.indexFormat = (uint32_t)hf::MeshIndexFormat::U16;
             subMeshInfo.indices = std::vector<char>(indices.size() * 2);
             for (uint32_t i = 0; i < indices.size(); ++i)
             {
-                uint16_t result = (uint16_t)indices[i];
+                auto result = (uint16_t)indices[i];
                 memcpy(&subMeshInfo.indices[i * 2], &result, sizeof(uint16_t));
             }
         }

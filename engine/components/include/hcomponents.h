@@ -10,5 +10,6 @@
 #include "hoctree.h"
 #include "hstaticvector.h"
 #include "BS_thread_pool.hpp"
+#include "hskybox.h"
 
 #endif //HCOMPONENTS_H

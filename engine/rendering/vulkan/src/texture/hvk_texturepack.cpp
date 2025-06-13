@@ -2,7 +2,6 @@
 #include "hvk_graphics.h"
 #include "hvk_texturesampler.h"
 #include "hvk_renderer.h"
-#include "hyperflow.h"
 
 namespace hf
 {
@@ -21,8 +20,8 @@ namespace hf
                 .sampler = bInfo.sampler,
             };
 
-            binding.textures = std::vector<VkTexture*>(bInfo.textures.size());
-            memcpy(binding.textures.data(), bInfo.textures.data(), bInfo.textures.size() * sizeof(VkTexture*));
+            binding.textures = std::vector<VkTexture*>(bInfo.textureCount);
+            memcpy(binding.textures.data(), bInfo.pTextures, bInfo.textureCount * sizeof(VkTexture*));
         }
     }
 

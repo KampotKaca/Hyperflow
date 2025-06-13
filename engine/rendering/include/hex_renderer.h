@@ -139,7 +139,8 @@ namespace hf::inter::rendering
     struct TexturePackTextureBindingInfo
     {
         TextureSampler sampler{};
-        std::vector<void*> textures{};
+        void** pTextures{};
+        uint32_t textureCount = 0;
     };
 
     struct TexturePackCreationInfo
