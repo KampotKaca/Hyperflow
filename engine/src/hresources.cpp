@@ -366,7 +366,7 @@ namespace hf
                     },
                     .depthStencilOptions =
                     {
-                        .enableDepth = false,
+                        .enableDepth = true,
                         .writeDepth = false,
                         .comparisonFunc = DepthComparisonFunction::Less,
                         .enableDepthBounds = false,
