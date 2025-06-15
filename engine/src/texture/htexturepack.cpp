@@ -33,7 +33,7 @@ namespace hf
                 binding.textures[j] = bInfo.pCubemaps[j]->handle;
         }
 
-        bindingsBuffer = std::vector<inter::rendering::TexturePackTextureBindingInfo>(bindings.size());
+        bindingsBuffer = std::vector<inter::rendering::TexturePackBindingCreationInfo>(bindings.size());
         inter::rendering::CreateTexturePack_i(this);
     }
 
@@ -70,58 +70,47 @@ namespace hf
 
         bool IsRunning(const Ref<TexturePack>& pack) { return pack->handle; }
 
-        void SetBinding(const Ref<TexturePack>& pack, const TexturePackBindingUploadInfo& info)
+        template<typename T>
+        void SetBinding(const Ref<TexturePack>& pack, const TexturePackBindingUploadInfo<T>& info)
         {
+            static std::vector<void*> textures(32);
             auto& binding = pack->bindings[info.bindingIndex];
 
-            inter::rendering::TexturePackUploadInfo uploadInfo
+            inter::rendering::TexturePackBindingUploadInfo uploadInfo
             {
                 .bindingIndex = info.bindingIndex,
+                .sampler = info.sampler,
             };
 
-            if (info.sampler.has_value())
+            if (info.sampler.has_value()) binding.sampler = info.sampler.value();
+            if (info.texInfo.has_value())
             {
-                binding.sampler = info.sampler.value();
-                uploadInfo.sampler = binding.sampler;
-            }
-            else uploadInfo.sampler = binding.sampler;
-
-            if (info.texUpload.has_value())
-            {
-                auto& texUpload = info.texUpload.value();
+                auto& texUpload = info.texInfo.value();
                 for (uint32_t i = 0; i < texUpload.count; i++)
                     binding.textures[texUpload.offset + i] = texUpload.pTextures[i]->handle;
 
                 if (texUpload.count > 0)
                 {
-                    std::vector<void*> texHandles(texUpload.count);
+                    textures.clear();
+                    inter::rendering::TexturePackTextureUploadInfo texUploadInfo
+                    {
+                        .offset = texUpload.offset,
+                        .count = texUpload.count
+                    };
+
                     for (uint32_t i = 0; i < texUpload.count; i++)
-                        texHandles[i] = binding.textures[texUpload.offset + i];
-                    uploadInfo.pTextures = texHandles.data();
+                        textures.push_back(binding.textures[texUpload.offset + i]);
+                    texUploadInfo.pTextures = textures.data();
+
+                    uploadInfo.texInfo = texUploadInfo;
                 }
-                else uploadInfo.pTextures = nullptr;
             }
-            else uploadInfo.pTextures = nullptr;
 
-            if (info.cubemapUpload.has_value())
-            {
-                auto& cubemapUpload = info.cubemapUpload.value();
-                for (uint32_t i = 0; i < cubemapUpload.count; i++)
-                    binding.textures[cubemapUpload.offset + i] = cubemapUpload.pCubemaps[i]->handle;
-
-                if (cubemapUpload.count > 0)
-                {
-                    std::vector<void*> texHandles(cubemapUpload.count);
-                    for (uint32_t i = 0; i < cubemapUpload.count; i++)
-                        texHandles[i] = binding.textures[cubemapUpload.offset + i];
-                    uploadInfo.pTextures = texHandles.data();
-                }
-                else uploadInfo.pTextures = nullptr;
-            }
-            else uploadInfo.pTextures = nullptr;
-
-            inter::HF.renderingApi.api.UploadTexturePack(pack->handle, uploadInfo);
+            inter::HF.renderingApi.api.UploadTexturePackBinding(pack->handle, uploadInfo);
         }
+
+        template void SetBinding<Texture>(const Ref<TexturePack>&, const TexturePackBindingUploadInfo<Texture>&);
+        template void SetBinding<Cubemap>(const Ref<TexturePack>&, const TexturePackBindingUploadInfo<Cubemap>&);
     }
 
     namespace inter::rendering
@@ -136,7 +125,7 @@ namespace hf
                 auto& bindingBuffer = texPack->bindingsBuffer[i];
                 bindingBuffer.sampler = binding.sampler;
                 bindingBuffer.pTextures = binding.textures.data();
-                bindingBuffer.textureCount = binding.textures.size();
+                bindingBuffer.count = binding.textures.size();
             }
 
             const TexturePackCreationInfo creationInfo

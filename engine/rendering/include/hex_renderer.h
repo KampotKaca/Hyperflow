@@ -136,29 +136,34 @@ namespace hf::inter::rendering
         TextureDetails details{};
     };
 
-    struct TexturePackTextureBindingInfo
+    struct TexturePackTextureUploadInfo
+    {
+        void** pTextures{};
+        uint32_t offset = 0;
+        uint32_t count = 0;
+    };
+
+    struct TexturePackBindingCreationInfo
     {
         TextureSampler sampler{};
         void** pTextures{};
-        uint32_t textureCount = 0;
+        uint32_t count = 0;
+    };
+
+    struct TexturePackBindingUploadInfo
+    {
+        uint32_t bindingIndex = 0;
+        std::optional<TextureSampler> sampler{};
+        std::optional<TexturePackTextureUploadInfo> texInfo{};
     };
 
     struct TexturePackCreationInfo
     {
         RenderBindingType bindingType = RenderBindingType::Graphics;
         uint32_t bindingId = 0;
-        TexturePackTextureBindingInfo* pBindings{};
+        TexturePackBindingCreationInfo* pBindings{};
         uint32_t bindingCount = 0;
         TextureLayout layout = 0;
-    };
-
-    struct TexturePackUploadInfo
-    {
-        uint32_t bindingIndex = 0;
-        void** pTextures{};
-        uint32_t textureOffset = 0;
-        uint32_t textureCount = 0;
-        TextureSampler sampler{};
     };
 
     struct TexturePackAllocatorCreationInfo
@@ -212,7 +217,7 @@ namespace hf::inter::rendering
         //texture pack
         void* (*CreateTexturePack)(const TexturePackCreationInfo& info);
         void (*DestroyTexturePack)(void* texPack);
-        void (*UploadTexturePack)(void* texPack, const TexturePackUploadInfo& info);
+        void (*UploadTexturePackBinding)(void* texPack, const TexturePackBindingUploadInfo& info);
         void (*BindTexturePack)(void* rn, const TexturePackBindingInfo& info);
 
         //texture pack allocator

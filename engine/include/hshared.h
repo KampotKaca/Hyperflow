@@ -622,26 +622,20 @@ namespace hf
 		TextureLayout layout = 0;
 	};
 
+	template<typename T>
 	struct TexturePackTextureUploadInfo
 	{
-		const Ref<Texture>* pTextures{};
+		const Ref<T>* pTextures{};
 		uint32_t count = 0;
 		uint32_t offset = 0;
 	};
 
-	struct TexturePackCubemapUploadInfo
-	{
-		const Ref<Cubemap>* pCubemaps{};
-		uint32_t count = 0;
-		uint32_t offset = 0;
-	};
-
+	template<typename T>
 	struct TexturePackBindingUploadInfo
 	{
 		uint32_t bindingIndex = 0;
 		std::optional<TextureSampler> sampler{};
-		std::optional<TexturePackTextureUploadInfo> texUpload{};
-		std::optional<TexturePackCubemapUploadInfo> cubemapUpload{};
+		std::optional<TexturePackTextureUploadInfo<T>> texInfo{};
 	};
 
 	enum class LoadStoreOperationType

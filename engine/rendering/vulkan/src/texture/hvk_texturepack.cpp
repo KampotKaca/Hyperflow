@@ -20,8 +20,8 @@ namespace hf
                 .sampler = bInfo.sampler,
             };
 
-            binding.textures = std::vector<VkTexture*>(bInfo.textureCount);
-            memcpy(binding.textures.data(), bInfo.pTextures, bInfo.textureCount * sizeof(VkTexture*));
+            binding.textures = std::vector<VkTexture*>(bInfo.count);
+            memcpy(binding.textures.data(), bInfo.pTextures, bInfo.count * sizeof(VkTexture*));
         }
     }
 
@@ -70,18 +70,23 @@ namespace hf
                 0, nullptr);
     }
 
-    void SetTextureBinding(VkTexturePack* pack, uint32_t bindingIndex, TextureSampler sampler,
-        VkTexture** pTextures, uint32_t offset, uint32_t size)
+    void SetTextureBinding(VkTexturePack* pack, const inter::rendering::TexturePackBindingUploadInfo& info)
     {
-        auto& binding = pack->bindings[bindingIndex];
-        if (size > 0) memcpy(&binding.textures[offset], pTextures, size * sizeof(VkTexture*));
-
-        if (binding.sampler != sampler)
+        auto& binding = pack->bindings[info.bindingIndex];
+        bool wasModified = false;
+        if (info.sampler.has_value())
         {
-            binding.sampler = sampler;
-            UpdateTexturePack(pack, bindingIndex, 1);
+            binding.sampler = info.sampler.value();
+            wasModified = true;
         }
-        else if (size > 0) UpdateTexturePack(pack, bindingIndex, 1);
+
+        if (info.texInfo.has_value() && info.texInfo->count > 0)
+        {
+            memcpy(&binding.textures[info.texInfo->offset], info.texInfo->pTextures, info.texInfo->count * sizeof(VkTexture*));
+            wasModified = true;
+        }
+
+        if (wasModified) UpdateTexturePack(pack, info.bindingIndex, 1);
         else LOG_WARN("Unnecessary set binding call, noting changed");
     }
 

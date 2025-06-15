@@ -5,7 +5,17 @@ namespace hf
 {
     void Skybox::BindCubemap(const Ref<Cubemap>& cubemap)
     {
-
+        TexturePackBindingUploadInfo<Cubemap> bindingInfo
+        {
+            .bindingIndex = 0,
+            .texInfo = (TexturePackTextureUploadInfo<Cubemap>)
+            {
+                .pTextures = &cubemap,
+                .count = 1,
+                .offset = 0
+            }
+        };
+        texturepack::SetBinding(inter::HF.staticResources.skyboxTexturePack, bindingInfo);
     }
 
     void Skybox::Draw(const Ref<Renderer>& rn)

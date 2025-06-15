@@ -7,6 +7,7 @@ namespace app
 {
     struct AppCubemaps
     {
+        hf::Ref<hf::Cubemap> cosmos;
     };
 
     extern AppCubemaps APP_CUBEMAPS;

@@ -43,6 +43,11 @@ namespace app
 		APP_OBJECTS.vikingRoomTransform.euler.y -= (float)hf::time::GetDeltaTime() * 10.0f;
 		APP_OBJECTS.vikingRoom2Transform.euler.y -= (float)hf::time::GetDeltaTime() * 10.0f;
 		DebugUpdate();
+
+		if (hf::input::IsDown(hf::Key::G))
+		{
+			APP_OBJECTS.skybox.BindCubemap(APP_CUBEMAPS.cosmos);
+		}
 		// VoxelTerrainUpdate();
 	}
 

@@ -154,7 +154,8 @@ namespace hf
 		void Destroy(const Ref<TexturePack>* pPacks, uint32_t count);
 		bool IsRunning(const Ref<TexturePack>& pack);
 
-		void SetBinding(const Ref<TexturePack>& pack, const TexturePackBindingUploadInfo& info);
+		template<typename T>
+		void SetBinding(const Ref<TexturePack>& pack, const TexturePackBindingUploadInfo<T>& info);
 	}
 
 	namespace texturepackallocator

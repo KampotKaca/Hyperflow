@@ -31,8 +31,7 @@ namespace hf
     };
 
     void UpdateTexturePack(const VkTexturePack* pack, uint32_t bindingOffset, uint32_t bindingCount);
-    void SetTextureBinding(VkTexturePack* pack, uint32_t bindingIndex, TextureSampler sampler,
-        VkTexture** pTextures, uint32_t offset, uint32_t size);
+    void SetTextureBinding(VkTexturePack* pack, const inter::rendering::TexturePackBindingUploadInfo& info);
 }
 
 #endif //HVK_TEXTUREPACK_H
