@@ -17,6 +17,7 @@ target_link_libraries(${PROJECT_NAME}
         tiny_obj
         glm
         logc
+        lz4_static
         ext
 )
 

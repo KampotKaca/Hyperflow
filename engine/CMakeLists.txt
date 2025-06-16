@@ -99,6 +99,7 @@ add_subdirectory(external/logc)
 add_subdirectory(external/rpmalloc)
 add_subdirectory(external/rapidyaml)
 add_subdirectory(external/glfw)
+add_subdirectory(external/lz4/build/cmake)
 add_subdirectory(platforms/platform)
 add_subdirectory(components)
 
@@ -115,6 +116,7 @@ target_link_libraries(${PROJECT_NAME}
         stb
         logc
         ryml
+        lz4_static
         ext
         components
         PRIVATE

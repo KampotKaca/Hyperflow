@@ -2,6 +2,7 @@
 #include "tiny_obj_loader.h"
 #include <glm/gtx/hash.hpp>
 #include "hmeshconvertor.h"
+#include <lz4.h>
 
 struct Vertex
 {
@@ -69,30 +70,21 @@ int main(int argc, char* argv[])
 
 bool WriteMesh(const MeshInfo& meshInfo, const std::string& outputFilePath)
 {
-    std::ofstream outFile(outputFilePath, std::ios::binary);
-    if (!outFile)
-    {
-        std::cerr << "Failed to open output file" << std::endl;
-        return false;
-    }
-
     uint32_t submeshCount = meshInfo.headers.size();
     uint32_t headerDataSize = meshInfo.headers.size() * sizeof(SubMeshHeader);
     uint32_t fullHeaderSize = sizeof(uint32_t) + headerDataSize + 1;
-    std::vector<char> headersData = std::vector<char>(fullHeaderSize);
     uint32_t offset = 0;
-    memcpy(headersData.data() + offset, &submeshCount, sizeof(uint32_t));
-    offset += sizeof(uint32_t);
-    memcpy(headersData.data() + offset, meshInfo.headers.data(), headerDataSize);
-    offset += headerDataSize;
-    headersData[offset] = '\0';
+    std::vector<char> meshData = std::vector<char>(fullHeaderSize);
 
-    outFile.write(headersData.data(), fullHeaderSize);
+    memcpy(meshData.data() + offset, &submeshCount, sizeof(uint32_t));
+    offset += sizeof(uint32_t);
+    memcpy(meshData.data() + offset, meshInfo.headers.data(), headerDataSize);
+    offset += headerDataSize;
+    meshData[offset] = '\0';
 
     for (uint32_t i = 0; i < submeshCount; i++)
     {
         auto& subMesh = meshInfo.subMeshes[i];
-        auto& header = meshInfo.headers[i];
         offset = 0;
 
         uint32_t submeshDataSize = 1;
@@ -124,47 +116,53 @@ bool WriteMesh(const MeshInfo& meshInfo, const std::string& outputFilePath)
         }
 
         submeshDataSize += positionSize + normalSize + colorSize + texcoordSize + indexSize;
-        std::vector<char> subMeshData = std::vector<char>(submeshDataSize);
+        uint64_t oldSize = meshData.size();
+        meshData.resize(meshData.size() + submeshDataSize);
 
         if (positionSize > 0)
         {
-            memcpy(subMeshData.data() + offset, subMesh.positions.data(), positionSize);
+            memcpy(meshData.data() + oldSize + offset, subMesh.positions.data(), positionSize);
             offset += positionSize;
-            subMeshData[offset] = '\0';
+            meshData[oldSize + offset] = '\0';
             offset++;
         }
 
         if (normalSize > 0)
         {
-            memcpy(subMeshData.data() + offset, subMesh.normals.data(), normalSize);
+            memcpy(meshData.data() + oldSize + offset, subMesh.normals.data(), normalSize);
             offset += normalSize;
-            subMeshData[offset] = '\0';
+            meshData[offset + oldSize] = '\0';
             offset++;
         }
 
         if (colorSize > 0)
         {
-            memcpy(subMeshData.data() + offset, subMesh.colors.data(), colorSize);
+            memcpy(meshData.data() + oldSize + offset, subMesh.colors.data(), colorSize);
             offset += colorSize;
-            subMeshData[offset] = '\0';
+            meshData[offset + oldSize] = '\0';
             offset++;
         }
 
         if (texcoordSize > 0)
         {
-            memcpy(subMeshData.data() + offset, subMesh.texCoords.data(), texcoordSize);
+            memcpy(meshData.data() + oldSize + offset, subMesh.texCoords.data(), texcoordSize);
             offset += texcoordSize;
-            subMeshData[offset] = '\0';
+            meshData[offset + oldSize] = '\0';
             offset++;
         }
 
-        memcpy(subMeshData.data() + offset, subMesh.indices.data(), indexSize);
+        memcpy(meshData.data() + oldSize + offset, subMesh.indices.data(), indexSize);
         offset += indexSize;
-        subMeshData[offset] = '\0';
-
-        outFile.write(subMeshData.data(), submeshDataSize);
+        meshData[offset + oldSize] = '\0';
     }
 
+    std::ofstream outFile(outputFilePath, std::ios::binary);
+    if (!outFile)
+    {
+        std::cerr << "Failed to open output file" << std::endl;
+        return false;
+    }
+    outFile.write(meshData.data(), meshData.size());
     outFile.close();
     return true;
 }
