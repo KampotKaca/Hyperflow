@@ -242,6 +242,19 @@ namespace hf
 		uint16_t GetBufferIndex(const Ref<Material>& material);
 	}
 
+	namespace skybox
+	{
+		void BindDefaultCubemap();
+		void BindCubemap(const Ref<Cubemap>& cubemap);
+		void Draw(const Ref<Renderer>& rn, const SkyboxInfo& info);
+		[[nodiscard]] bool IsDefaultCubemapBound();
+	}
+
+	namespace gridlines
+	{
+		void Draw(const Ref<Renderer>& rn, const GridLinesInfo& info);
+	}
+
 	namespace draw
 	{
 		void UploadUniformPacket(const Ref<Renderer>& rn, const UniformBufferUpload& info);

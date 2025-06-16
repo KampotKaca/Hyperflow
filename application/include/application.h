@@ -7,7 +7,7 @@ namespace app
 {
 	struct AppObjects
 	{
-		hf::Skybox skybox{};
+		hf::SkyboxInfo skybox{};
 		hf::Transform vikingRoomTransform{};
 		hf::Transform vikingRoom2Transform{};
 	};

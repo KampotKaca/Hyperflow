@@ -880,6 +880,21 @@ namespace hf
 
 	//endregion
 
+	//region Constant Objects
+
+	struct GridLinesInfo
+	{
+		alignas(16) float lineThickness = 3.0f;
+		alignas(16) vec4 color{ 0.2f, 0.2f, 0.2f, 0.4f };
+	};
+
+	struct SkyboxInfo
+	{
+
+	};
+
+	//endregion
+
 	namespace utils
 	{
 		inline uint32_t GetFirstBitOne64(uint64_t n) { return n ? __builtin_ctzll(n) : 64u; }

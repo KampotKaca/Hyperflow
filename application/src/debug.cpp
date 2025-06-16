@@ -128,7 +128,7 @@ namespace app
         }
 
         APP_DEBUG.camera.Update(hf::GetMainWindow(), (float)hf::time::GetDeltaTime());
-        if (hf::input::IsDown(hf::Key::N)) APP_DEBUG.drawAxisLines = !APP_DEBUG.drawAxisLines;
+        if (hf::input::IsDown(hf::Key::N)) APP_DEBUG.drawGridLines = !APP_DEBUG.drawGridLines;
     }
 
     void DebugQuit()
@@ -148,6 +148,6 @@ namespace app
 
     void DebugRender(const hf::Ref<hf::Renderer>& rn)
     {
-        if (APP_DEBUG.drawAxisLines) APP_DEBUG.axisLines.Draw(rn);
+        if (APP_DEBUG.drawGridLines) hf::gridlines::Draw(rn, APP_DEBUG.gridLinesInfo);
     }
 }

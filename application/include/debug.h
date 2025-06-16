@@ -8,8 +8,8 @@ namespace app
     struct AppDebug
     {
         hf::FreeMoveCamera3D camera{};
-        hf::AxisLines axisLines{};
-        bool drawAxisLines = true;
+        hf::GridLinesInfo gridLinesInfo{};
+        bool drawGridLines = true;
     };
 
     extern AppDebug APP_DEBUG;

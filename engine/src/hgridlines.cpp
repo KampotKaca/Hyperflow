@@ -1,9 +1,9 @@
-#include "haxislines.h"
-#include "hexternal.h"
+#include "hyperflow.h"
+#include "hinternal.h"
 
-namespace hf
+namespace hf::gridlines
 {
-    void AxisLines::Draw(const Ref<Renderer>& rn) const
+    void Draw(const Ref<Renderer>& rn, const GridLinesInfo& info)
     {
         draw::StartShaderSetupPacket(rn, inter::HF.staticResources.axisLinesShaderSetup);
         {
@@ -21,9 +21,9 @@ namespace hf
                 {
                     draw::StartDrawPacket(rn);
                     {
-                        draw::PacketSet_PushConstant(rn, this, sizeof(AxisLines));
+                        draw::PacketSet_PushConstant(rn, &info, sizeof(GridLinesInfo));
 
-                        const DrawCallInfo info
+                        const DrawCallInfo drawCallInfo
                         {
                             .pVertBuffers = &inter::HF.staticResources.quadBuffer,
                             .bufferCount = 1,
@@ -31,7 +31,7 @@ namespace hf
                             .instanceCount = 1
                         };
 
-                        draw::PacketAdd_DrawCall(rn, info);
+                        draw::PacketAdd_DrawCall(rn, drawCallInfo);
                     }
                     draw::EndDrawPacket(rn);
                 }

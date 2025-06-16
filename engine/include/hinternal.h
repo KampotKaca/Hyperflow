@@ -76,6 +76,7 @@ namespace hf::inter
         Ref<Shader> skyboxShader{};
 
         Ref<Cubemap> defaultSkyboxCubemap{};
+        Ref<Cubemap> boundCubemap{};
 
         Ref<TexturePack> skyboxTexturePack{};
 

@@ -58,7 +58,7 @@ namespace hf
                     .pushConstant =
                     {
                         .usageFlags = ShaderUsageStage::Vertex | ShaderUsageStage::Fragment,
-                        .sizeInBytes = sizeof(AxisLines),
+                        .sizeInBytes = sizeof(GridLinesInfo),
                     },
                     .pBuffers = &HF.staticResources.cameraUniform,
                     .bufferCount = 1,

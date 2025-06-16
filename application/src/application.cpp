@@ -46,7 +46,8 @@ namespace app
 
 		if (hf::input::IsDown(hf::Key::G))
 		{
-			APP_OBJECTS.skybox.BindCubemap(APP_CUBEMAPS.cosmos);
+			if (hf::skybox::IsDefaultCubemapBound()) hf::skybox::BindCubemap(APP_CUBEMAPS.cosmos);
+			else hf::skybox::BindDefaultCubemap();
 		}
 		// VoxelTerrainUpdate();
 	}

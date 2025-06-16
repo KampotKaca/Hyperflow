@@ -1,9 +1,14 @@
-#include "hskybox.h"
-#include "hexternal.h"
+#include "hyperflow.h"
+#include "hinternal.h"
 
-namespace hf
+namespace hf::skybox
 {
-    void Skybox::BindCubemap(const Ref<Cubemap>& cubemap)
+    void BindDefaultCubemap()
+    {
+        BindCubemap(inter::HF.staticResources.defaultSkyboxCubemap);
+    }
+
+    void BindCubemap(const Ref<Cubemap>& cubemap)
     {
         TexturePackBindingUploadInfo<Cubemap> bindingInfo
         {
@@ -16,9 +21,10 @@ namespace hf
             }
         };
         texturepack::SetBinding(inter::HF.staticResources.skyboxTexturePack, bindingInfo);
+        inter::HF.staticResources.boundCubemap = cubemap;
     }
 
-    void Skybox::Draw(const Ref<Renderer>& rn)
+    void Draw(const Ref<Renderer>& rn, const SkyboxInfo& info)
     {
         draw::StartShaderSetupPacket(rn, inter::HF.staticResources.skyboxShaderSetup);
         {
@@ -47,4 +53,6 @@ namespace hf
         }
         draw::EndShaderSetupPacket(rn);
     }
+
+    bool IsDefaultCubemapBound() { return inter::HF.staticResources.boundCubemap == inter::HF.staticResources.defaultSkyboxCubemap; }
 }
