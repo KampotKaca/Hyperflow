@@ -4,6 +4,8 @@
 #include "hmeshconvertor.h"
 #include <lz4.h>
 
+#include "hyperflow.h"
+
 struct Vertex
 {
     glm::vec3 pos{};
@@ -74,14 +76,16 @@ bool WriteMesh(const MeshInfo& meshInfo, const std::string& outputFilePath)
     uint32_t headerDataSize = meshInfo.headers.size() * sizeof(SubMeshHeader);
     uint32_t fullHeaderSize = sizeof(uint32_t) + headerDataSize + 1;
     uint32_t offset = 0;
-    std::vector<char> meshData = std::vector<char>(fullHeaderSize);
+    std::vector<char> headerData = std::vector<char>(fullHeaderSize);
 
-    memcpy(meshData.data() + offset, &submeshCount, sizeof(uint32_t));
+    memcpy(headerData.data() + offset, &submeshCount, sizeof(uint32_t));
     offset += sizeof(uint32_t);
-    memcpy(meshData.data() + offset, meshInfo.headers.data(), headerDataSize);
+    memcpy(headerData.data() + offset, meshInfo.headers.data(), headerDataSize);
     offset += headerDataSize;
-    meshData[offset] = '\0';
+    headerData[offset] = '\0';
 
+    offset = 0;
+    std::vector<char> meshData{};
     for (uint32_t i = 0; i < submeshCount; i++)
     {
         auto& subMesh = meshInfo.subMeshes[i];
@@ -156,14 +160,32 @@ bool WriteMesh(const MeshInfo& meshInfo, const std::string& outputFilePath)
         meshData[offset + oldSize] = '\0';
     }
 
+    const int maxCompressedSize = LZ4_compressBound((int)meshData.size());
+    auto compressedBuffer = (char*)malloc(maxCompressedSize);
+    if (!compressedBuffer) std::cerr << "Failed to allocate memory" << std::endl;
+
+    auto dataSize = LZ4_compress_default(meshData.data(), compressedBuffer, (int)meshData.size(), maxCompressedSize);
+
+    if (dataSize <= 0)
+    {
+        std::cerr << "Failed to compress file" << std::endl;
+        free(compressedBuffer);
+        return false;
+    }
+
     std::ofstream outFile(outputFilePath, std::ios::binary);
     if (!outFile)
     {
         std::cerr << "Failed to open output file" << std::endl;
+        free(compressedBuffer);
         return false;
     }
-    outFile.write(meshData.data(), meshData.size());
+
+    outFile.write(headerData.data(), fullHeaderSize);
+    outFile.write(compressedBuffer, dataSize);
     outFile.close();
+
+    free(compressedBuffer);
     return true;
 }
 

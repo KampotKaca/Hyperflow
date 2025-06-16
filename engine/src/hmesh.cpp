@@ -5,6 +5,7 @@
 #include "hmesh.h"
 #include "hyaml.h"
 #include "hstrconversion.h"
+#include "lz4.h"
 
 namespace hf
 {
@@ -38,27 +39,41 @@ namespace hf
             return;
         }
 
-        std::vector<char> meshData{};
-        if (!utils::ReadFile(meshLoc, false, meshData))
+        std::vector<char> compressedData{};
+        if (!utils::ReadFile(meshLoc, false, compressedData))
         {
             LOG_ERROR("[Hyperflow] Unable to read mesh: %s", filePath.c_str());
             return;
         }
+
         uint32_t offset = 0;
 
         uint32_t submeshCount = 0;
-        memcpy(&submeshCount, meshData.data() + offset, sizeof(uint32_t));
+        memcpy(&submeshCount, compressedData.data() + offset, sizeof(uint32_t));
         offset += sizeof(uint32_t);
 
         std::vector<SubMeshHeader> headers(submeshCount);
-        memcpy(headers.data(), meshData.data() + offset, submeshCount * sizeof(SubMeshHeader));
+        memcpy(headers.data(), compressedData.data() + offset, submeshCount * sizeof(SubMeshHeader));
         offset += submeshCount * sizeof(SubMeshHeader);
-
-        if (!CheckFileIntegrity(meshData.data(), offset))
+        if (!CheckFileIntegrity(compressedData.data(), offset))
         {
             LOG_ERROR("[Hyperflow] Corrupted mesh file, unable to load: %s", filePath.c_str());
             return;
         }
+
+        uint32_t meshSize = 0;
+        for (auto& header : headers) meshSize += header.GetDataSize();
+
+        std::vector<char> meshData(meshSize);
+        auto maxSize = LZ4_decompress_safe(&compressedData[offset], meshData.data(), compressedData.size() - offset, meshSize);
+        offset = 0;
+
+        if (maxSize < 0)
+        {
+            LOG_ERROR("[Hyperflow] Unable to decompress mesh: %s", filePath.c_str());
+            return;
+        }
+
         uint32_t vertexStride = ComputeVertexStride(stats.typeFlags);
         subMeshes.reserve(submeshCount);
 

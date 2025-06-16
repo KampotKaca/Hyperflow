@@ -38,10 +38,8 @@ if(NOT GLSLC_EXECUTABLE)
     message(FATAL_ERROR "glslc not found! Please install Vulkan SDK or add glslc to PATH.")
 endif()
 
-file(COPY
-        ${CMAKE_SOURCE_DIR}/application/res
-        ${CMAKE_SOURCE_DIR}/engine/res
-        DESTINATION ${CMAKE_BINARY_DIR})
+file(COPY ${CMAKE_SOURCE_DIR}/application/res DESTINATION ${CMAKE_BINARY_DIR})
+file(COPY ${CMAKE_SOURCE_DIR}/engine/res/cubemaps DESTINATION ${CMAKE_BINARY_DIR}/res)
 target_compile_definitions("${CMAKE_PROJECT_NAME}" PUBLIC RES_PATH="${CMAKE_BINARY_DIR}/res/")
 
 # === Shader Setup ===

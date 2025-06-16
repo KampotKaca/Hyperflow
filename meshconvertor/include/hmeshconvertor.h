@@ -15,6 +15,32 @@ struct SubMeshHeader
     uint32_t indexCount = 0;
     uint32_t dataFlags = (uint32_t)hf::MeshDataType::None;
     uint32_t indexFormat = (uint32_t)hf::MeshIndexFormat::U16;
+
+    inline uint32_t GetDataSize() const
+    {
+        uint32_t dataSize = hf::BUFFER_DATA_SIZE[indexFormat] * indexCount + 1;
+        if (dataFlags & (uint32_t)hf::MeshDataType::Position)
+        {
+            dataSize += vertexCount * 3 * sizeof(float);
+            dataSize++;
+        }
+        if (dataFlags & (uint32_t)hf::MeshDataType::Normal)
+        {
+            dataSize += vertexCount * 3 * sizeof(float);
+            dataSize++;
+        }
+        if (dataFlags & (uint32_t)hf::MeshDataType::Color)
+        {
+            dataSize += vertexCount * 3 * sizeof(float);
+            dataSize++;
+        }
+        if (dataFlags & (uint32_t)hf::MeshDataType::TexCoord)
+        {
+            dataSize += vertexCount * 2 * sizeof(float);
+            dataSize++;
+        }
+        return dataSize;
+    }
 };
 
 struct SubMeshInfo
