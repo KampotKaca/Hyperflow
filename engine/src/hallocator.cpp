@@ -32,6 +32,7 @@ namespace hf
         void* AllocateAligned(std::size_t n, std::align_val_t align)
         {
             EnsureAllocatorInit();
+            inter::alloc::LoadAllocatorThread_i();
             void* memory = rpaligned_alloc((size_t)align, n);
             if (!memory) throw std::bad_alloc();
             return memory;

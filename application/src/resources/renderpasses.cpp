@@ -50,8 +50,8 @@ namespace app
             .pDependencies = &dependencyInfo,
             .dependencyCount = 1,
         };
-        APP_RENDER_PASSES.mainPresentPass = hf::renderpass::Define(drawPassDefinitionInfo);
-        hf::renderpass::Bind(rn, APP_RENDER_PASSES.mainPresentPass);
+        APP_RENDER_PASSES.mainPresentPass = hf::DefineRenderPass(drawPassDefinitionInfo);
+        rn->Bind(APP_RENDER_PASSES.mainPresentPass);
 
         return APP_RENDER_PASSES.mainPresentPass;
     }

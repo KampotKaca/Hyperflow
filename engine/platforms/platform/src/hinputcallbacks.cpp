@@ -1,3 +1,4 @@
+#define HF_ENGINE_INTERNALS
 #include "hinputcallbacks.h"
 #include "hinternal.h"
 #include "hyperflow.h"
@@ -95,7 +96,7 @@ namespace hf::callbacks
 
     void WindowCloseCallback(GLFWwindow* win)
     {
-        window::Close(inter::HF.windows[(uint64_t)win]);
+        inter::HF.windows[(uint64_t)win]->Close();
     }
 
     void JoystickEventCallback(int32_t jid, int32_t event)

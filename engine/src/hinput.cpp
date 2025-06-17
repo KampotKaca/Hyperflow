@@ -1,66 +1,23 @@
+#define HF_ENGINE_INTERNALS
 #include "hwindow.h"
 #include "hexception.h"
 #include "hyperflow.h"
 
 namespace hf::input
 {
-	ivec2 GetPointerPosition(const Ref<Window> &window)
-	{
-		if(!window) throw NULL_REF_EXCEPTION(Window, window);
-		return window->eventData.pointerPosition;
-	}
-	
-	ivec2 GetPointerDelta(const Ref<Window> &window)
-	{
-		if(!window) throw NULL_REF_EXCEPTION(Window, window);
-		return window->eventData.pointerDelta;
-	}
-	
-	vec2 GetScrollDelta(const Ref<Window> &window)
-	{
-		if(!window) throw NULL_REF_EXCEPTION(Window, window);
-		return window->eventData.scrollDelta;
-	}
+	vec2 GetPointerPosition()	{ return GetMainWindow()->GetPointerPosition(); }
+	vec2 GetPointerDelta()		{ return GetMainWindow()->GetPointerDelta(); }
+	vec2 GetScrollDelta()		{ return GetMainWindow()->GetScrollDelta(); }
 
-	KeyState GetState(const Ref<Window> &window, Key key)
-	{
-		if(!window) throw NULL_REF_EXCEPTION(Window, window);
-		return window->eventData.keyStates[(uint32_t)key];
-	}
+	KeyState GetState(Key key)			{ return GetMainWindow()->GetKeyState(key); }
+	ButtonState GetState(Button button) { return GetMainWindow()->GetButtonState(button); }
+	const std::string& GetWrite()		{ return GetMainWindow()->GetWrite(); }
 
-	ButtonState GetState(const Ref<Window> &window, Button button)
-	{
-		if(!window) throw NULL_REF_EXCEPTION(Window, window);
-		return window->eventData.buttonStates[(uint32_t)button];
-	}
+	bool IsDown(Key key)		  { return GetMainWindow()->IsKeyDown(key); }
+	bool IsDownContinues(Key key) { return GetMainWindow()->IsKeyDownContinues(key); }
+	bool IsUp(Key key)			  { return GetMainWindow()->IsKeyUp(key); }
 
-	const std::string& GetWrite(const Ref<Window> &window)
-	{
-		if(!window) throw NULL_REF_EXCEPTION(Window, window);
-		return window->eventData.charData;
-	}
-
-	ivec2 GetPointerPosition() { return GetPointerPosition(GetMainWindow()); }
-	ivec2 GetPointerDelta() { return GetPointerDelta(GetMainWindow()); }
-	vec2 GetScrollDelta() { return GetScrollDelta(GetMainWindow()); }
-
-	KeyState GetState(Key key) { return GetState(GetMainWindow(), key); }
-	ButtonState GetState(Button button) { return GetState(GetMainWindow(), button); }
-	const std::string& GetWrite() { return GetWrite(GetMainWindow()); }
-
-	bool IsDown(const Ref<Window> &window, Key key) { return GetState(window, key) == KeyState::Down; }
-	bool IsDownContinues(const Ref<Window> &window, Key key) { return GetState(window, key) == KeyState::DownContinues; }
-	bool IsUp(const Ref<Window> &window, Key key) { return GetState(window, key) == KeyState::Up; }
-
-	bool IsDown(const Ref<Window> &window, Button button) { return GetState(window, button) == ButtonState ::Down; }
-	bool IsDownContinues(const Ref<Window> &window, Button button) { return GetState(window, button) == ButtonState::DownContinues; }
-	bool IsUp(const Ref<Window> &window, Button button) { return GetState(window, button) == ButtonState::Up; }
-
-	bool IsDown(Key key) { return IsDown(GetMainWindow(), key); }
-	bool IsDownContinues(Key key) { return IsDownContinues(GetMainWindow(), key); }
-	bool IsUp(Key key) { return IsUp(GetMainWindow(), key); }
-
-	bool IsDown(Button button) { return IsDown(GetMainWindow(), button); }
-	bool IsDownContinues(Button button) { return IsDownContinues(GetMainWindow(), button); }
-	bool IsUp(Button button) { return IsUp(GetMainWindow(), button); }
+	bool IsDown(Button button)			{ return GetMainWindow()->IsButtonDown(button); }
+	bool IsDownContinues(Button button) { return GetMainWindow()->IsButtonDownContinues(button); }
+	bool IsUp(Button button)			{ return GetMainWindow()->IsButtonUp(button); }
 }

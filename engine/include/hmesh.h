@@ -10,6 +10,17 @@ namespace hf
         explicit Mesh(const MeshCreationInfo& info);
         ~Mesh();
 
+        [[nodiscard]] bool IsRunning() const;
+        [[nodiscard]] MeshStats GetStats() const;
+        void Destroy();
+
+        static Ref<Mesh> Create(const MeshCreationInfo& info);
+        static Ref<Mesh> Create(const char* assetPath);
+        static void Destroy(const Ref<Mesh>* pMeshes, uint32_t count);
+
+#ifndef HF_ENGINE_INTERNALS
+    private:
+#endif
         struct SubMesh
         {
             Ref<VertBuffer> vertBuffer{};

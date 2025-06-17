@@ -1,3 +1,4 @@
+#define HF_ENGINE_INTERNALS
 #include "hrenderer.h"
 #include <hyperflow.h>
 #include "hinternal.h"
@@ -9,7 +10,6 @@ namespace hf
 {
     static void ThreadDraw(const Ref<Renderer>& rn)
     {
-        // auto handle = rn->handle;
         rn->threadInfo.isRunning = true;
         while (rn->threadInfo.isRunning)
         {
@@ -47,40 +47,38 @@ namespace hf
         inter::rendering::DestroyRenderer_i(this);
     }
 
-    namespace renderer
+    bool Renderer::IsRunning() const { return handle; }
+    uvec2 Renderer::GetSize() const { return threadInfo.size; }
+    void Renderer::Resize(uvec2 size)
     {
-        bool IsRunning(const Ref<Renderer>& rn) { return rn->handle; }
-
-        void ChangeApi(RenderingApiType targetApi)
-        {
-            if (!IsValidApi(targetApi))
-            {
-                LOG_ERROR("[Hyperflow] %s", "Invalid render Api to load");
-                return;
-            }
-            inter::rendering::UnloadCurrentApi_i(true);
-            inter::rendering::LoadApi_i(targetApi);
-        }
-
-        RenderingApiType GetApiType() { return inter::HF.renderingApi.type; }
-        RenderingApiType GetBestApiType() { return inter::platform::GetBestRenderingApi(); }
-        bool IsValidApi(RenderingApiType targetApi)
-        {
-            if (targetApi == RenderingApiType::None ||
-                targetApi == inter::HF.renderingApi.type) return false;
-
-            return inter::platform::IsValidRenderingApi(targetApi);
-        }
-        uvec2 GetSize(const Ref<Renderer>& rn) { return rn->threadInfo.size; }
-
-        void Resize(const Ref<Renderer>& rn, uvec2 size)
-        {
-            std::lock_guard lock(rn->threadInfo.threadLock);
-            if (rn->window != nullptr) throw GENERIC_EXCEPT("[Hyperflow]", "Cannot resize renderer connected to the window");
-            rn->threadInfo.size = size;
-            inter::HF.renderingApi.api.RegisterFrameBufferChange(rn->handle, size);
-        }
+        std::lock_guard lock(threadInfo.threadLock);
+        if (window != nullptr) throw GENERIC_EXCEPT("[Hyperflow]", "Cannot resize renderer connected to the window");
+        threadInfo.size = size;
+        inter::HF.renderingApi.api.RegisterFrameBufferChange(handle, size);
     }
+
+    RenderingApiType Renderer::GetApiType()     { return inter::HF.renderingApi.type; }
+    RenderingApiType Renderer::GetBestApiType() { return inter::platform::GetBestRenderingApi(); }
+
+    //Destroy every renderer which is not connected to the window, before you try to change api
+    void Renderer::ChangeApi(RenderingApiType targetApi)
+    {
+        if (!IsValidApi(targetApi))
+        {
+            LOG_ERROR("[Hyperflow] %s", "Invalid render Api to load");
+            return;
+        }
+        inter::rendering::UnloadCurrentApi_i(true);
+        inter::rendering::LoadApi_i(targetApi);
+    }
+
+    bool Renderer::IsValidApi(RenderingApiType targetApi)
+    {
+        if (targetApi == RenderingApiType::None || targetApi == inter::HF.renderingApi.type) return false;
+        return inter::platform::IsValidRenderingApi(targetApi);
+    }
+
+    void Renderer::Bind(RenderPass pass) const { inter::HF.renderingApi.api.BindRenderPass(handle, pass); }
 
     namespace inter::rendering
     {
@@ -128,20 +126,27 @@ namespace hf
                 .data = nullptr
             };
 
-            HF.graphicsResources.materialDataStorage = storagebuffer::Create(materialStorageInfo);
+            HF.graphicsResources.materialDataStorage = StorageBuffer::Create(materialStorageInfo);
 
             for (auto& shader : std::ranges::views::values(HF.graphicsResources.shaders)) CreateShader_i(shader.get());
 
-            for (auto& vertBuffer : std::ranges::views::values(HF.graphicsResources.vertBuffers)) CreateVertBuffer_i(vertBuffer.get());
-            for (auto& indexBuffer : std::ranges::views::values(HF.graphicsResources.indexBuffers)) CreateIndexBuffer_i(indexBuffer.get());
-            for (auto& storageBuffer : std::ranges::views::values(HF.graphicsResources.storageBuffers)) CreateStorageBuffer_i(storageBuffer.get());
+            for (auto& buffer : std::ranges::views::values(HF.graphicsResources.buffers))
+            {
+                switch (buffer->GetType())
+                {
+                    case BufferType::Vertex: CreateVertBuffer_i((VertBuffer*)buffer.get()); break;
+                    case BufferType::Index: CreateIndexBuffer_i((IndexBuffer*)buffer.get()); break;
+                    case BufferType::Storage: CreateStorageBuffer_i((StorageBuffer*)buffer.get()); break;
+                }
+            }
+
             for (auto& mesh : std::ranges::views::values(HF.graphicsResources.meshes)) CreateMesh_i(mesh.get());
-            buffer::SubmitAll();
+            Buffer::SubmitAll();
 
             for (auto& texture : std::ranges::views::values(HF.graphicsResources.textures)) CreateTexture_i(texture.get());
             for (auto& cubemap : std::ranges::views::values(HF.graphicsResources.cubemaps)) CreateCubemap_i(cubemap.get());
             for (auto& texPack : std::ranges::views::values(HF.graphicsResources.texturePacks)) CreateTexturePack_i(texPack.get());
-            texture::SubmitAll();
+            TexturePack::SubmitAll();
 
             for (auto& texPackAllocator : std::ranges::views::values(HF.graphicsResources.texturePackAllocators)) CreateTexturePackAllocator_i(texPackAllocator.get());
         }
@@ -232,19 +237,6 @@ namespace hf
             rn->mainPass = rn->eventInfo.onPassCreationCallback(rn);
             HF.renderingApi.api.PostInstanceLoad(rn->handle, rn->mainPass);
             rn->threadInfo.thread = std::thread(ThreadDraw, rn);
-        }
-    }
-
-    namespace renderpass
-    {
-        RenderPass Define(const RenderPassDefinitionInfo& info)
-        {
-            return inter::HF.renderingApi.api.DefineRenderPass(info);
-        }
-
-        void Bind(const Ref<Renderer>& rn, RenderPass pass)
-        {
-            inter::HF.renderingApi.api.BindRenderPass(rn->handle, pass);
         }
     }
 }

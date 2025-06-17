@@ -27,7 +27,7 @@ namespace app
                 .layout = APP_TEXTURE_LAYOUTS.viking_room,
             };
 
-            APP_TEXTURE_PACKS.viking_room_pack = hf::texturepack::Create(texPackInfo);
+            APP_TEXTURE_PACKS.viking_room_pack = hf::TexturePack::Create(texPackInfo);
         }
 
         //viking_room_pack
@@ -48,10 +48,10 @@ namespace app
                 .layout = APP_TEXTURE_LAYOUTS.viking_room,
             };
 
-            APP_TEXTURE_PACKS.viking_room_pack2 = hf::texturepack::Create(texPackInfo);
+            APP_TEXTURE_PACKS.viking_room_pack2 = hf::TexturePack::Create(texPackInfo);
         }
 
-        hf::texture::SubmitAll();
+        hf::TexturePack::SubmitAll();
 
         //allocator
         {
@@ -62,7 +62,7 @@ namespace app
                 .texturePackCount = packs.size()
             };
 
-            APP_TEXTURE_PACKS.allocator = hf::texturepackallocator::Create(texPackAllocInfo);
+            APP_TEXTURE_PACKS.allocator = hf::TexturePackAllocator::Create(texPackAllocInfo);
         }
     }
 }

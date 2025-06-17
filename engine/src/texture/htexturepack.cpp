@@ -1,3 +1,4 @@
+#define HF_ENGINE_INTERNALS
 #include "htexturepack.h"
 #include "hinternal.h"
 #include "hyperflow.h"
@@ -43,75 +44,73 @@ namespace hf
         inter::rendering::DestroyTexturePack_i(this);
     }
 
-    namespace texturepack
+    bool TexturePack::IsRunning() const { return handle; }
+
+    void TexturePack::Destroy()
     {
-        Ref<TexturePack> Create(const TexturePackCreationInfo& info)
+        if (inter::rendering::DestroyTexturePack_i(this))
+            inter::HF.graphicsResources.texturePacks.erase((uint64_t)this);
+    }
+
+    template<typename T>
+    void TexturePack::SetBinding(const TexturePackBindingUploadInfo<T>& info)
+    {
+        static std::vector<void*> textures(32);
+        auto& binding = bindings[info.bindingIndex];
+
+        inter::rendering::TexturePackBindingUploadInfo uploadInfo
         {
-            Ref<TexturePack> texPack = MakeRef<TexturePack>(info);
-            inter::HF.graphicsResources.texturePacks[(uint64_t)texPack.get()] = texPack;
-            return texPack;
+            .bindingIndex = info.bindingIndex,
+            .sampler = info.sampler,
+        };
+
+        if (info.sampler.has_value()) binding.sampler = info.sampler.value();
+        if (info.texInfo.has_value())
+        {
+            auto& texUpload = info.texInfo.value();
+            for (uint32_t i = 0; i < texUpload.count; i++)
+                binding.textures[texUpload.offset + i] = texUpload.pTextures[i]->handle;
+
+            if (texUpload.count > 0)
+            {
+                textures.clear();
+                inter::rendering::TexturePackTextureUploadInfo texUploadInfo
+                {
+                    .offset = texUpload.offset,
+                    .count = texUpload.count
+                };
+
+                for (uint32_t i = 0; i < texUpload.count; i++)
+                    textures.push_back(binding.textures[texUpload.offset + i]);
+                texUploadInfo.pTextures = textures.data();
+
+                uploadInfo.texInfo = texUploadInfo;
+            }
         }
 
-        void Destroy(const Ref<TexturePack>& pack)
+        inter::HF.renderingApi.api.UploadTexturePackBinding(handle, uploadInfo);
+    }
+
+    void TexturePack::SubmitAll() { inter::HF.renderingApi.api.SubmitTextureCopyOperations(); }
+    Ref<TexturePack> TexturePack::Create(const TexturePackCreationInfo& info)
+    {
+        Ref<TexturePack> texPack = MakeRef<TexturePack>(info);
+        inter::HF.graphicsResources.texturePacks[(uint64_t)texPack.get()] = texPack;
+        return texPack;
+    }
+
+    void TexturePack::Destroy(const Ref<TexturePack>* pPacks, uint32_t count)
+    {
+        for (uint32_t i = 0; i < count; i++)
         {
+            auto pack = pPacks[i];
             if (inter::rendering::DestroyTexturePack_i(pack.get()))
                 inter::HF.graphicsResources.texturePacks.erase((uint64_t)pack.get());
         }
-
-        void Destroy(const Ref<TexturePack>* pPacks, uint32_t count)
-        {
-            for (uint32_t i = 0; i < count; i++)
-            {
-                auto pack = pPacks[i];
-                if (inter::rendering::DestroyTexturePack_i(pack.get()))
-                    inter::HF.graphicsResources.texturePacks.erase((uint64_t)pack.get());
-            }
-        }
-
-        bool IsRunning(const Ref<TexturePack>& pack) { return pack->handle; }
-
-        template<typename T>
-        void SetBinding(const Ref<TexturePack>& pack, const TexturePackBindingUploadInfo<T>& info)
-        {
-            static std::vector<void*> textures(32);
-            auto& binding = pack->bindings[info.bindingIndex];
-
-            inter::rendering::TexturePackBindingUploadInfo uploadInfo
-            {
-                .bindingIndex = info.bindingIndex,
-                .sampler = info.sampler,
-            };
-
-            if (info.sampler.has_value()) binding.sampler = info.sampler.value();
-            if (info.texInfo.has_value())
-            {
-                auto& texUpload = info.texInfo.value();
-                for (uint32_t i = 0; i < texUpload.count; i++)
-                    binding.textures[texUpload.offset + i] = texUpload.pTextures[i]->handle;
-
-                if (texUpload.count > 0)
-                {
-                    textures.clear();
-                    inter::rendering::TexturePackTextureUploadInfo texUploadInfo
-                    {
-                        .offset = texUpload.offset,
-                        .count = texUpload.count
-                    };
-
-                    for (uint32_t i = 0; i < texUpload.count; i++)
-                        textures.push_back(binding.textures[texUpload.offset + i]);
-                    texUploadInfo.pTextures = textures.data();
-
-                    uploadInfo.texInfo = texUploadInfo;
-                }
-            }
-
-            inter::HF.renderingApi.api.UploadTexturePackBinding(pack->handle, uploadInfo);
-        }
-
-        template void SetBinding<Texture>(const Ref<TexturePack>&, const TexturePackBindingUploadInfo<Texture>&);
-        template void SetBinding<Cubemap>(const Ref<TexturePack>&, const TexturePackBindingUploadInfo<Cubemap>&);
     }
+
+    template void TexturePack::SetBinding<Texture>(const TexturePackBindingUploadInfo<Texture>&);
+    template void TexturePack::SetBinding<Cubemap>(const TexturePackBindingUploadInfo<Cubemap>&);
 
     namespace inter::rendering
     {

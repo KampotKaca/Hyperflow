@@ -6,6 +6,6 @@ namespace app
 
     void CubemapLoadAll()
     {
-        APP_CUBEMAPS.cosmos = hf::cubemap::Create("cosmos");
+        APP_CUBEMAPS.cosmos = hf::Cubemap::Create("cosmos");
     }
 }

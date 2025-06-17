@@ -1,11 +1,12 @@
+#define HF_ENGINE_INTERNALS
 #include "hyperflow.h"
 #include "hinternal.h"
 #include "hyaml.h"
 #include "hstrconversion.h"
 
-namespace hf::bufferattrib
+namespace hf
 {
-    BufferAttrib Define(const BufferAttribDefinitionInfo& info)
+    BufferAttrib DefineBufferAttrib(const BufferAttribDefinitionInfo& info)
     {
         uint32_t fullStride = 0;
         for (uint32_t i = 0; i < info.formatCount; i++)
@@ -18,7 +19,7 @@ namespace hf::bufferattrib
         return inter::HF.renderingApi.api.DefineVertBufferAttrib(info, fullStride);
     }
 
-    BufferAttrib Define(const char* assetPath)
+    BufferAttrib DefineBufferAttrib(const char* assetPath)
     {
         std::string assetLoc = TO_RES_PATH(std::string("bufferattribs/") + assetPath) + ".meta";
         if (!utils::FileExists(assetLoc.c_str()))
@@ -59,7 +60,7 @@ namespace hf::bufferattrib
             info.formatCount = (uint32_t)formatList.size();
             info.pFormats = formatList.data();
 
-            auto attrib = Define(info);
+            auto attrib = DefineBufferAttrib(info);
             inter::HF.graphicsResources.bufferAttribs[assetPath] = attrib;
             return attrib;
         }catch (...)

@@ -1,7 +1,7 @@
+#define HF_ENGINE_INTERNALS
 #include "hyaml.h"
 #include <stb_image.h>
 #include "hcubemap.h"
-#include "htexture.h"
 #include "hinternal.h"
 #include "hstrconversion.h"
 #include "hyperflow.h"
@@ -45,122 +45,120 @@ namespace hf
         inter::rendering::DestroyCubemap_i(this);
     }
 
-    namespace cubemap
+    bool Cubemap::IsRunning() const { return handle; }
+    void Cubemap::Destroy()
     {
-        Ref<Cubemap> Create(const CubemapCreationInfo& info)
+        if (inter::rendering::DestroyCubemap_i(this))
+            inter::HF.graphicsResources.cubemaps.erase(folderPath);
+    }
+
+    Ref<Cubemap> Cubemap::Create(const CubemapCreationInfo& info)
+    {
+        Ref<Cubemap> cubemap = MakeRef<Cubemap>(info);
+        inter::HF.graphicsResources.cubemaps[info.folderPath] = cubemap;
+        return cubemap;
+    }
+
+    Ref<Cubemap> Cubemap::Create(const char* assetPath)
+    {
+        std::string assetLoc = TO_RES_PATH(std::string("cubemaps/") + assetPath) + ".meta";
+        if (!utils::FileExists(assetLoc.c_str()))
         {
-            Ref<Cubemap> cubemap = MakeRef<Cubemap>(info);
-            inter::HF.graphicsResources.cubemaps[info.folderPath] = cubemap;
+            LOG_ERROR("[Hyperflow] Unable to find cubemap meta file: %s", assetPath);
+            return nullptr;
+        }
+
+        std::vector<char> metadata{};
+        if (!utils::ReadFile(assetLoc, true, metadata))
+        {
+            LOG_ERROR("[Hyperflow] Unable to read cubemap meta: %s", assetPath);
+            return nullptr;
+        }
+
+        try
+        {
+            CubemapCreationInfo info
+            {
+                .folderPath = assetPath,
+            };
+
+            ryml::Tree tree = ryml::parse_in_place(ryml::to_substr(metadata.data()));
+            ryml::NodeRef root = tree.rootref();
+
+            {
+                const auto v = root["desiredChannel"].val();
+                std::string_view vView{v.str, v.len};
+                info.desiredChannel = STRING_TO_TEXTURE_CHANNEL(vView);
+            }
+
+            info.mipLevels = std::stoi(root["mipLevels"].val().str);
+            std::string left, right, down, up, back, front;
+
+            {
+                const auto v = root["left"].val();
+                std::string_view vView{v.str, v.len};
+                left = vView;
+            }
+
+            {
+                const auto v = root["right"].val();
+                std::string_view vView{v.str, v.len};
+                right = vView;
+            }
+
+            {
+                const auto v = root["down"].val();
+                std::string_view vView{v.str, v.len};
+                down = vView;
+            }
+
+            {
+                const auto v = root["up"].val();
+                std::string_view vView{v.str, v.len};
+                up = vView;
+            }
+
+            {
+                const auto v = root["back"].val();
+                std::string_view vView{v.str, v.len};
+                back = vView;
+            }
+
+            {
+                const auto v = root["front"].val();
+                std::string_view vView{v.str, v.len};
+                front = vView;
+            }
+
+            info.texturePaths =
+            {
+                .left = left.c_str(),
+                .right = right.c_str(),
+                .down = down.c_str(),
+                .up = up.c_str(),
+                .back = back.c_str(),
+                .front = front.c_str()
+            };
+
+            utils::ReadTextureDetails(&tree, &root, info.details);
+
+            auto cubemap = Create(info);
+            inter::HF.graphicsResources.cubemaps[cubemap->folderPath] = cubemap;
             return cubemap;
-        }
-
-        Ref<Cubemap> Create(const char* assetPath)
+        }catch (...)
         {
-            std::string assetLoc = TO_RES_PATH(std::string("cubemaps/") + assetPath) + ".meta";
-            if (!utils::FileExists(assetLoc.c_str()))
-            {
-                LOG_ERROR("[Hyperflow] Unable to find cubemap meta file: %s", assetPath);
-                return nullptr;
-            }
-
-            std::vector<char> metadata{};
-            if (!utils::ReadFile(assetLoc, true, metadata))
-            {
-                LOG_ERROR("[Hyperflow] Unable to read cubemap meta: %s", assetPath);
-                return nullptr;
-            }
-
-            try
-            {
-                CubemapCreationInfo info
-                {
-                    .folderPath = assetPath,
-                };
-
-                ryml::Tree tree = ryml::parse_in_place(ryml::to_substr(metadata.data()));
-                ryml::NodeRef root = tree.rootref();
-
-                {
-                    const auto v = root["desiredChannel"].val();
-                    std::string_view vView{v.str, v.len};
-                    info.desiredChannel = STRING_TO_TEXTURE_CHANNEL(vView);
-                }
-
-                info.mipLevels = std::stoi(root["mipLevels"].val().str);
-                std::string left, right, down, up, back, front;
-
-                {
-                    const auto v = root["left"].val();
-                    std::string_view vView{v.str, v.len};
-                    left = vView;
-                }
-
-                {
-                    const auto v = root["right"].val();
-                    std::string_view vView{v.str, v.len};
-                    right = vView;
-                }
-
-                {
-                    const auto v = root["down"].val();
-                    std::string_view vView{v.str, v.len};
-                    down = vView;
-                }
-
-                {
-                    const auto v = root["up"].val();
-                    std::string_view vView{v.str, v.len};
-                    up = vView;
-                }
-
-                {
-                    const auto v = root["back"].val();
-                    std::string_view vView{v.str, v.len};
-                    back = vView;
-                }
-
-                {
-                    const auto v = root["front"].val();
-                    std::string_view vView{v.str, v.len};
-                    front = vView;
-                }
-
-                info.texturePaths =
-                {
-                    .left = left.c_str(),
-                    .right = right.c_str(),
-                    .down = down.c_str(),
-                    .up = up.c_str(),
-                    .back = back.c_str(),
-                    .front = front.c_str()
-                };
-
-                utils::ReadTextureDetails(&tree, &root, info.details);
-
-                auto cubemap = Create(info);
-                inter::HF.graphicsResources.cubemaps[cubemap->folderPath] = cubemap;
-                return cubemap;
-            }catch (...)
-            {
-                LOG_ERROR("[Hyperflow] Error parsing Cubemap: %s", assetPath);
-                return nullptr;
-            }
+            LOG_ERROR("[Hyperflow] Error parsing Cubemap: %s", assetPath);
+            return nullptr;
         }
+    }
 
-        void Destroy(const Ref<Cubemap>& cubemap)
+    void Cubemap::Destroy(const Ref<Cubemap>* pCubemaps, uint32_t count)
+    {
+        for (uint32_t i = 0; i < count; i++)
         {
+            auto cubemap = pCubemaps[i];
             if (inter::rendering::DestroyCubemap_i(cubemap.get()))
                 inter::HF.graphicsResources.cubemaps.erase(cubemap->folderPath);
-        }
-
-        void Destroy(const Ref<Cubemap>* pCubemaps, uint32_t count)
-        {
-            for (uint32_t i = 0; i < count; i++)
-            {
-                auto cubemap = pCubemaps[i];
-                if (inter::rendering::DestroyCubemap_i(cubemap.get()))
-                    inter::HF.graphicsResources.cubemaps.erase(cubemap->folderPath);
-            }
         }
     }
 

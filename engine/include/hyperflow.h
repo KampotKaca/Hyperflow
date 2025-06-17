@@ -6,6 +6,18 @@
 #include "hgenericexception.h"
 #include "../components/include/hcomponents.h"
 
+#include "hwindow.h"
+#include "hrenderer.h"
+#include "htexture.h"
+#include "htexturepack.h"
+#include "htexturepackallocator.h"
+#include "hshader.h"
+#include "hbuffer.h"
+#include "hvertbuffer.h"
+#include "hindexbuffer.h"
+#include "hstoragebuffer.h"
+#include "hmesh.h"
+
 namespace hf
 {
 	void Preload();
@@ -19,14 +31,6 @@ namespace hf
 
 	namespace input
 	{
-		bool IsDown(const Ref<Window> &window, Key key);
-		bool IsDownContinues(const Ref<Window> &window, Key key);
-		bool IsUp(const Ref<Window> &window, Key key);
-
-		bool IsDown(const Ref<Window> &window, Button button);
-		bool IsDownContinues(const Ref<Window> &window, Button button);
-		bool IsUp(const Ref<Window> &window, Button button);
-
 		bool IsDown(Key key);
 		bool IsDownContinues(Key key);
 		bool IsUp(Key key);
@@ -39,48 +43,9 @@ namespace hf
 		ButtonState GetState(Button button);
 		const std::string& GetWrite();
 
-		ivec2 GetPointerPosition();
-		ivec2 GetPointerDelta();
+		vec2 GetPointerPosition();
+		vec2 GetPointerDelta();
 		vec2 GetScrollDelta();
-
-		KeyState GetState(const Ref<Window> &window, Key key);
-		ButtonState GetState(const Ref<Window> &window, Button button);
-		const std::string& GetWrite(const Ref<Window> &window);
-
-		ivec2 GetPointerPosition(const Ref<Window> &window);
-		ivec2 GetPointerDelta(const Ref<Window> &window);
-		vec2 GetScrollDelta(const Ref<Window> &window);
-	}
-
-	namespace window
-	{
-		Ref<Window> Open(const WindowCreationInfo& data, const Ref<Window>& parent);
-		void Close(const Ref<Window> &window);
-		void CloseAll();
-
-		const std::string& GetTitle(const Ref<Window> &window);
-		ivec2 GetSize(const Ref<Window> &window);
-		ivec2 GetPosition(const Ref<Window> &window);
-		IRect GetRect(const Ref<Window> &window);
-		IRect GetFrameRect(const Ref<Window> &window);
-		WindowState GetState(const Ref<Window> &window);
-		WindowStyle GetStyle(const Ref<Window> &window);
-		WindowPointerState GetPointerState(const Ref<Window> &window);
-		void* GetHandle(const Ref<Window> &window);
-		Ref<Renderer> GetRenderer(const Ref<Window> &window);
-		bool IsClosed(const Ref<Window> &window);
-		VsyncMode GetVSyncMode(const Ref<Window> &window);
-
-		void SetTitle(const Ref<Window> &window, const std::string& title);
-		void SetSize(const Ref<Window> &window, ivec2 size);
-		void SetPosition(const Ref<Window> &window, ivec2 position);
-		void SetRect(const Ref<Window> &window, IRect rect);
-		void SetState(const Ref<Window> &window, WindowState state);
-		void SetPointerState(const Ref<Window> &window, WindowPointerState state);
-
-		void Focus(const Ref<Window> &window);
-		void SetVSyncMode(const Ref<Window> &window, VsyncMode mode);
-		bool SetIcons(const Ref<Window>& window, const char* folderPath);
 	}
 
 	namespace time
@@ -95,144 +60,15 @@ namespace hf
 		void SetTargetFrameRate(int16_t targetFrameRate);
 	}
 
-	namespace renderer
-	{
-		bool IsRunning(const Ref<Renderer>& rn);
+	RenderPass DefineRenderPass(const RenderPassDefinitionInfo& info);
+	ShaderSetup DefineShaderSetup(const ShaderSetupDefinitionInfo& info);
+	TextureSampler DefineTextureSampler(const TextureSamplerDefinitionInfo& info);
+	TextureLayout DefineTextureLayout(const TextureLayoutDefinitionInfo& info);
 
-		//Destroy every renderer which is not connected to the window, before you try to change api
-		void ChangeApi(RenderingApiType targetApi);
-		RenderingApiType GetApiType();
-		RenderingApiType GetBestApiType();
-		bool IsValidApi(RenderingApiType targetApi);
-		uvec2 GetSize(const Ref<Renderer>& rn);
-
-		void Resize(const Ref<Renderer>& rn, uvec2 size);
-	}
-
-	namespace renderpass
-	{
-		RenderPass Define(const RenderPassDefinitionInfo& info);
-		void Bind(const Ref<Renderer>& rn, RenderPass pass);
-	}
-
-	namespace shader
-	{
-		Ref<Shader> Create(const ShaderCreationInfo& info);
-		void Destroy(const Ref<Shader>& shader);
-		void Destroy(const Ref<Shader>* pShaders, uint32_t count);
-		bool IsRunning(const Ref<Shader>& shader);
-	}
-
-	namespace shadersetup
-	{
-		ShaderSetup Define(const ShaderSetupDefinitionInfo& info);
-	}
-
-	namespace texture
-	{
-		Ref<Texture> Create(const TextureCreationInfo& info);
-		Ref<Texture> Create(const char* assetPath);
-		void Destroy(const Ref<Texture>& texture);
-		void Destroy(const Ref<Texture>* pTextures, uint32_t count);
-		bool IsRunning(const Ref<Texture>& texture);
-
-		void SubmitAll();
-	}
-
-	namespace cubemap
-	{
-		Ref<Cubemap> Create(const CubemapCreationInfo& info);
-		Ref<Cubemap> Create(const char* assetPath);
-		void Destroy(const Ref<Cubemap>& cubemap);
-		void Destroy(const Ref<Cubemap>* pCubemaps, uint32_t count);
-	}
-
-	namespace texturepack
-	{
-		Ref<TexturePack> Create(const TexturePackCreationInfo& info);
-		void Destroy(const Ref<TexturePack>& pack);
-		void Destroy(const Ref<TexturePack>* pPacks, uint32_t count);
-		bool IsRunning(const Ref<TexturePack>& pack);
-
-		template<typename T>
-		void SetBinding(const Ref<TexturePack>& pack, const TexturePackBindingUploadInfo<T>& info);
-	}
-
-	namespace texturepackallocator
-	{
-		Ref<TexturePackAllocator> Create(const TexturePackAllocatorCreationInfo& info);
-		void Destroy(const Ref<TexturePackAllocator>& texPackAllocator);
-		void Destroy(const Ref<TexturePackAllocator>* pTexPackAllocators, uint32_t count);
-		bool IsRunning(const Ref<TexturePackAllocator>& texPackAllocator);
-	}
-
-	namespace texturesampler
-	{
-		TextureSampler Define(const TextureSamplerDefinitionInfo& info);
-	}
-
-	namespace texturelayout
-	{
-		TextureLayout Define(const TextureLayoutDefinitionInfo& info);
-	}
-
-	namespace bufferattrib
-	{
-		BufferAttrib Define(const BufferAttribDefinitionInfo& info);
-		BufferAttrib Define(const char* assetPath);
-	}
-
-	namespace uniformbuffer
-	{
-		UniformBuffer Define(const UniformBufferDefinitionInfo& info);
-	}
-
-	namespace uniformallocator
-	{
-		UniformAllocator Define(const UniformAllocatorDefinitionInfo& info);
-	}
-
-	namespace buffer
-	{
-		void SubmitAll();
-	}
-
-	namespace vertbuffer
-	{
-		Ref<VertBuffer> Create(const VertBufferCreationInfo& info);
-		void Destroy(const Ref<VertBuffer>& buffer);
-		void Destroy(const Ref<VertBuffer>* pBuffers, uint32_t count);
-		bool IsRunning(const Ref<VertBuffer>& buffer);
-		void Upload(const VertBufferUploadInfo& info);
-	}
-
-	namespace indexbuffer
-	{
-		Ref<IndexBuffer> Create(const IndexBufferCreationInfo& info);
-		void Destroy(const Ref<IndexBuffer>& buffer);
-		void Destroy(const Ref<IndexBuffer>* pBuffers, uint32_t count);
-		bool IsRunning(const Ref<IndexBuffer>& buffer);
-		void Upload(const IndexBufferUploadInfo& info);
-	}
-
-	namespace storagebuffer
-	{
-		Ref<StorageBuffer> Create(const StorageBufferCreationInfo& info);
-		void Destroy(const Ref<StorageBuffer>& buffer);
-		void Destroy(const Ref<StorageBuffer>* pBuffers, uint32_t count);
-		bool IsRunning(const Ref<StorageBuffer>& buffer);
-		void Upload(const StorageBufferUploadInfo& info);
-	}
-
-	namespace mesh
-	{
-		Ref<Mesh> Create(const MeshCreationInfo& info);
-		Ref<Mesh> Create(const char* assetPath);
-		void Destroy(const Ref<Mesh>& mesh);
-		void Destroy(const Ref<Mesh>* pMeshes, uint32_t count);
-		bool IsRunning(const Ref<Mesh>& mesh);
-		MeshStats GetStats(const Ref<Mesh>& mesh);
-	}
+	BufferAttrib DefineBufferAttrib(const BufferAttribDefinitionInfo& info);
+	BufferAttrib DefineBufferAttrib(const char* assetPath);
+	UniformBuffer DefineUniformBuffer(const UniformBufferDefinitionInfo& info);
+	UniformAllocator DefineUniformAllocator(const UniformAllocatorDefinitionInfo& info);
 
 	namespace material
 	{

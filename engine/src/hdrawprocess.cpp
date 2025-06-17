@@ -1,3 +1,4 @@
+#define HF_ENGINE_INTERNALS
 #include "hdrawprocess.h"
 #include "hyperflow.h"
 #include "hgenericexception.h"

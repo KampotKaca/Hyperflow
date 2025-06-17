@@ -27,7 +27,7 @@ namespace app
 
     static hf::RenderPass CreateSubWindowRenderPass(const hf::Ref<hf::Renderer>& rn)
     {
-        hf::renderpass::Bind(rn, APP_RENDER_PASSES.mainPresentPass);
+        rn->Bind(APP_RENDER_PASSES.mainPresentPass);
         return APP_RENDER_PASSES.mainPresentPass;
     }
 
@@ -54,20 +54,20 @@ namespace app
     {
         if (hf::input::IsDown(hf::Key::L))
         {
-            auto state = (hf::WindowState)std::max(1, ((int32_t)hf::window::GetState(DEBUG_INFO.wn) + 1) % (int32_t)hf::WindowState::FullscreenBorderless);
+            auto state = (hf::WindowState)std::max(1, ((int32_t)DEBUG_INFO.wn->GetState() + 1) % (int32_t)hf::WindowState::FullscreenBorderless);
             if (state == hf::WindowState::Hidden) state = hf::WindowState::Fullscreen;
-            hf::window::SetState(DEBUG_INFO.wn, state);
+            DEBUG_INFO.wn->SetState(state);
         }
 
         if (hf::input::IsDown(hf::Key::M))
         {
-            hf::window::SetState(DEBUG_INFO.wn, hf::WindowState::FullscreenBorderless);
+            DEBUG_INFO.wn->SetState(hf::WindowState::FullscreenBorderless);
         }
 
         if (hf::input::IsDown(hf::Key::B))
         {
-            auto state = (hf::WindowPointerState)(((uint32_t)hf::window::GetPointerState(DEBUG_INFO.wn) + 1) % 4);
-            hf::window::SetPointerState(DEBUG_INFO.wn, state);
+            auto state = (hf::WindowPointerState)(((uint32_t)DEBUG_INFO.wn->GetPointerState() + 1) % 4);
+            DEBUG_INFO.wn->SetPointerState(state);
         }
 
         if (hf::input::IsDown(hf::Key::V))
@@ -86,13 +86,13 @@ namespace app
         			.onRenderCallback = AppRender
         		},
         	};
-        	DEBUG_INFO.wn = hf::window::Open(data, nullptr);
+        	DEBUG_INFO.wn = hf::Window::Open(data, nullptr);
         	DEBUG_INFO.count++;
         }
 
         if (hf::input::IsDown(hf::Key::K))
         {
-            hf::window::SetVSyncMode(DEBUG_INFO.wn, (hf::VsyncMode)(((uint32_t)hf::window::GetVSyncMode(DEBUG_INFO.wn) + 1) % (uint32_t)hf::VsyncMode::Count));
+            DEBUG_INFO.wn->SetVSyncMode((hf::VsyncMode)(((uint32_t)DEBUG_INFO.wn->GetVSyncMode() + 1) % (uint32_t)hf::VsyncMode::Count));
         }
 
         // auto delta = hf::input::GetScrollDelta();
@@ -104,25 +104,24 @@ namespace app
         auto cReq = (int32_t)(hf::time::GetTimePassed() / 0.2);
         if (cReq != DEBUG_INFO.reqCount)
         {
-            // std::ostringstream oss;
             // oss << "[Hyperflow] " << hf::time::GetFrameRate();
             // oss << "[Hyperflow] " << hf::Time::GetTimePassed();
-            std::string str = std::string("[Hyperflow] ") + std::to_string(hf::time::GetFrameRate());
-            hf::window::SetTitle(hf::GetMainWindow(), str);
+            const std::string str = std::string("[Hyperflow] ") + std::to_string(hf::time::GetFrameRate());
+            DEBUG_INFO.wn->SetTitle(str);
             DEBUG_INFO.reqCount = cReq;
         }
 
         if (hf::input::IsDown(hf::Key::T))
         {
-            switch (hf::renderer::GetApiType())
+            switch (hf::Renderer::GetApiType())
             {
                 case hf::RenderingApiType::None:
                     break;
                 case hf::RenderingApiType::Vulkan:
-                    hf::renderer::ChangeApi(hf::RenderingApiType::Direct3D);
+                    hf::Renderer::ChangeApi(hf::RenderingApiType::Direct3D);
                     break;
                 case hf::RenderingApiType::Direct3D:
-                    hf::renderer::ChangeApi(hf::RenderingApiType::Vulkan);
+                    hf::Renderer::ChangeApi(hf::RenderingApiType::Vulkan);
                     break;
             }
         }

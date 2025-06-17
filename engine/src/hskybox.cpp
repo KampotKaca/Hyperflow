@@ -20,7 +20,7 @@ namespace hf::skybox
                 .offset = 0
             }
         };
-        texturepack::SetBinding(inter::HF.staticResources.skyboxTexturePack, bindingInfo);
+        inter::HF.staticResources.skyboxTexturePack->SetBinding(bindingInfo);
         inter::HF.staticResources.boundCubemap = cubemap;
     }
 

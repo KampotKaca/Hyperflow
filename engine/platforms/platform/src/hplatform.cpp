@@ -1,3 +1,4 @@
+#define HF_ENGINE_INTERNALS
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
 #include "hinputcallbacks.h"
@@ -38,7 +39,7 @@ namespace hf::inter
         {
             for(const auto& window : HF.windows | std::views::values)
             {
-                if (hf::window::IsClosed(window)) continue;
+                if (window->IsClosed()) continue;
                 auto& eventData = window->eventData;
                 for (auto& currentState : eventData.keyStates)
                 {

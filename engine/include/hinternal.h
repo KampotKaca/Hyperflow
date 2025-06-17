@@ -30,9 +30,7 @@ namespace hf::inter
     struct GraphicsResources
     {
         phmap::flat_hash_map<uint64_t, Ref<Shader>> shaders{};
-        phmap::flat_hash_map<uint64_t, Ref<VertBuffer>> vertBuffers{};
-        phmap::flat_hash_map<uint64_t, Ref<IndexBuffer>> indexBuffers{};
-        phmap::flat_hash_map<uint64_t, Ref<StorageBuffer>> storageBuffers{};
+        phmap::flat_hash_map<uint64_t, Ref<Buffer>> buffers{};
         phmap::flat_hash_map<uint64_t, Ref<TexturePack>> texturePacks{};
         phmap::flat_hash_map<uint64_t, Ref<TexturePackAllocator>> texturePackAllocators{};
 
@@ -46,11 +44,15 @@ namespace hf::inter
 
     struct ResourcesMarkedForDeletion
     {
+        struct TypedBuffer
+        {
+            void* buffer{};
+            BufferType type{};
+        };
+
         std::mutex syncLock{};
         std::vector<void*> shaders{};
-        std::vector<void*> vertBuffers{};
-        std::vector<void*> indexBuffers{};
-        std::vector<void*> storageBuffers{};
+        std::vector<TypedBuffer> buffers{};
         std::vector<void*> texturePacks{};
         std::vector<void*> texturePackAllocators{};
         std::vector<void*> textures{};
@@ -150,13 +152,10 @@ namespace hf::inter
         bool DestroyShader_i(Shader* shader);
 
         bool CreateVertBuffer_i(VertBuffer* buffer);
-        bool DestroyVertBuffer_i(VertBuffer* buffer);
-
         bool CreateIndexBuffer_i(IndexBuffer* buffer);
-        bool DestroyIndexBuffer_i(IndexBuffer* buffer);
-
         bool CreateStorageBuffer_i(StorageBuffer* buffer);
-        bool DestroyStorageBuffer_i(StorageBuffer* buffer);
+
+        bool DestroyBuffer_i(Buffer* buffer);
 
         bool CreateMesh_i(Mesh* mesh);
         bool DestroyMesh_i(Mesh* mesh);
@@ -173,9 +172,7 @@ namespace hf::inter
         bool CreateTexturePackAllocator_i(TexturePackAllocator* packAllocator);
         bool DestroyTexturePackAllocator_i(TexturePackAllocator* packAllocator);
 
-        void DestroyAllVertBuffers_i(bool internalOnly = false);
-        void DestroyAllIndexBuffers_i(bool internalOnly = false);
-        void DestroyAllStorageBuffers_i(bool internalOnly = false);
+        void DestroyAllBuffers_i(bool internalOnly = false);
         void DestroyAllMeshes_i(bool internalOnly = false);
         void DestroyAllTextures_i(bool internalOnly = false);
         void DestroyAllCubemaps_i(bool internalOnly = false);

@@ -23,7 +23,7 @@ namespace app
                 .bindingCount = 1
             };
 
-            APP_UNIFORMS.timeUniform = hf::uniformbuffer::Define(uniform);
+            APP_UNIFORMS.timeUniform = hf::DefineUniformBuffer(uniform);
         }
 
         //allocator
@@ -36,7 +36,7 @@ namespace app
                 .bufferCount = APP_UNIFORMS.uniforms.size(),
             };
 
-            APP_UNIFORMS.allocator = hf::uniformallocator::Define(info);
+            APP_UNIFORMS.allocator = hf::DefineUniformAllocator(info);
         }
     }
 

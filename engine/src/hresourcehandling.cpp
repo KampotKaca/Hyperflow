@@ -4,9 +4,7 @@ namespace hf::inter
 {
     void UnloadAllResources_i(const bool internalOnly)
     {
-        rendering::DestroyAllVertBuffers_i(internalOnly);
-        rendering::DestroyAllIndexBuffers_i(internalOnly);
-        rendering::DestroyAllStorageBuffers_i(internalOnly);
+        rendering::DestroyAllBuffers_i(internalOnly);
         rendering::DestroyAllMeshes_i(internalOnly);
         rendering::DestroyAllShaders_i(internalOnly);
 
@@ -23,12 +21,15 @@ namespace hf::inter
 
         for (auto shader : HF.deletedResources.shaders)
             HF.renderingApi.api.DestroyShader(shader);
-        for (auto vBuffer : HF.deletedResources.vertBuffers)
-            HF.renderingApi.api.DestroyVertBuffer(vBuffer);
-        for (auto iBuffer : HF.deletedResources.indexBuffers)
-            HF.renderingApi.api.DestroyIndexBuffer(iBuffer);
-        for (auto sBuffer : HF.deletedResources.storageBuffers)
-            HF.renderingApi.api.DestroyStorageBuffer(sBuffer);
+        for (auto buffer : HF.deletedResources.buffers)
+        {
+            switch (buffer.type)
+            {
+                case BufferType::Vertex: HF.renderingApi.api.DestroyVertBuffer(buffer.buffer); break;
+                case BufferType::Index: HF.renderingApi.api.DestroyIndexBuffer(buffer.buffer); break;
+                case BufferType::Storage: HF.renderingApi.api.DestroyStorageBuffer(buffer.buffer); break;
+            }
+        }
         for (auto texPack : HF.deletedResources.texturePacks)
             HF.renderingApi.api.DestroyTexturePack(texPack);
         for (auto allocator : HF.deletedResources.texturePackAllocators)
@@ -37,9 +38,7 @@ namespace hf::inter
             HF.renderingApi.api.DestroyTexture(tex);
 
         HF.deletedResources.shaders.clear();
-        HF.deletedResources.vertBuffers.clear();
-        HF.deletedResources.indexBuffers.clear();
-        HF.deletedResources.storageBuffers.clear();
+        HF.deletedResources.buffers.clear();
         HF.deletedResources.texturePacks.clear();
         HF.deletedResources.texturePackAllocators.clear();
         HF.deletedResources.textures.clear();

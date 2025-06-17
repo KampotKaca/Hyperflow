@@ -1,3 +1,4 @@
+#define HF_ENGINE_INTERNALS
 #include "hwindow.h"
 #include "hyperflow.h"
 #include "hrenderer.h"
@@ -31,7 +32,7 @@ namespace hf
 			inter::HF.updateType = engineData.updateType;
 			inter::HF.appTitle = engineData.appTitle;
 
-			inter::HF.mainWindow = window::Open(engineData.windowData, nullptr);
+			inter::HF.mainWindow = Window::Open(engineData.windowData, nullptr);
 
 			inter::rendering::LoadApi_i(engineData.renderingApi);
 			inter::primitives::LoadStaticResources_i();
@@ -60,7 +61,7 @@ namespace hf
 
 				for(auto& window : inter::HF.tempWindows)
 				{
-					if (!window::IsClosed(window))
+					if (!window->IsClosed())
 					{
 						auto rn = window->renderer;
 						auto& cInfo = rn->eventInfo;
@@ -72,7 +73,7 @@ namespace hf
 			}
 			if (inter::HF.lifecycleCallbacks.onQuitCallback) inter::HF.lifecycleCallbacks.onQuitCallback();
 
-			window::CloseAll();
+			Window::CloseAll();
 			inter::platform::Unload();
 		}
 		catch(const HyperException& e)
@@ -89,7 +90,7 @@ namespace hf
 		}
 	}
 
-	bool IsRunning() { return inter::HF.isRunning && !window::IsClosed(inter::HF.mainWindow); }
+	bool IsRunning() { return inter::HF.isRunning && !inter::HF.mainWindow->IsClosed(); }
 
 	Ref<Window> GetMainWindow() { return inter::HF.mainWindow; }
 	const std::string& GetApplicationTitle() { return inter::HF.appTitle; }

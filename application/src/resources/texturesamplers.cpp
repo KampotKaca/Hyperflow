@@ -21,6 +21,6 @@ namespace app
                 .lodBias = 0.0f
             }
         };
-        APP_TEXTURE_SAMPLERS.defaultSampler = hf::texturesampler::Define(defaultSamplerInfo);
+        APP_TEXTURE_SAMPLERS.defaultSampler = hf::DefineTextureSampler(defaultSamplerInfo);
     }
 }

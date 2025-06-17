@@ -24,7 +24,7 @@ namespace app
                 .textureLayoutCount = 1
             };
 
-            APP_SHADER_SETUPS.viking_room = hf::shadersetup::Define(info);
+            APP_SHADER_SETUPS.viking_room = hf::DefineShaderSetup(info);
         }
     }
 }

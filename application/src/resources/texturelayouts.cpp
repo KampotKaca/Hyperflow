@@ -19,6 +19,6 @@ namespace app
             .bindingCount = 1
         };
 
-        APP_TEXTURE_LAYOUTS.viking_room = hf::texturelayout::Define(vikingRoomLayoutInfo);
+        APP_TEXTURE_LAYOUTS.viking_room = hf::DefineTextureLayout(vikingRoomLayoutInfo);
     }
 }

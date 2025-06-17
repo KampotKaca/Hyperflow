@@ -1,3 +1,4 @@
+#define HF_ENGINE_INTERNALS
 #include "hvertbuffer.h"
 #include "hinternal.h"
 #include "hyperflow.h"
@@ -5,67 +6,38 @@
 
 namespace hf
 {
-    VertBuffer::VertBuffer(const VertBufferCreationInfo& info, DataTransferType transferType)
-    : details(info), transferType(transferType)
+    VertBuffer::VertBuffer(const VertBufferCreationInfo& info, DataTransferType transferType) : details(info)
     {
         if (info.bufferAttrib == 0) throw GENERIC_EXCEPT("[Hyperflow]", "buffer attribute must be set");
 
+        this->transferType = transferType;
         if (transferType == DataTransferType::CopyData)
         {
             uint64_t bufferSize = info.vertexCount * inter::HF.renderingApi.api.GetVertBufferAttribSize(info.bufferAttrib);
-            details.pVertices = utils::Allocate(bufferSize);
-            memcpy(details.pVertices, info.pVertices, bufferSize);
+            buffer = utils::Allocate(bufferSize);
+            memcpy(buffer, info.pVertices, bufferSize);
         }
 
         inter::rendering::CreateVertBuffer_i(this);
     }
 
-    VertBuffer::~VertBuffer()
+    Ref<VertBuffer> VertBuffer::Create(const VertBufferCreationInfo& info)
     {
-        if (transferType == DataTransferType::CopyData ||
-            transferType == DataTransferType::TransferOwnership)
-            utils::Deallocate(details.pVertices);
-        inter::rendering::DestroyVertBuffer_i(this);
+        Ref<VertBuffer> buffer = MakeRef<VertBuffer>(info, DataTransferType::CopyData);
+        inter::HF.graphicsResources.buffers[(uint64_t)buffer.get()] = buffer;
+        return buffer;
     }
 
-    namespace vertbuffer
+    void VertBuffer::Upload(const VertBufferUploadInfo& info) const
     {
-        Ref<VertBuffer> Create(const VertBufferCreationInfo& info)
+        inter::rendering::VertBufferUploadInfo uploadInfo
         {
-            Ref<VertBuffer> buffer = MakeRef<VertBuffer>(info, DataTransferType::CopyData);
-            inter::HF.graphicsResources.vertBuffers[(uint64_t)buffer.get()] = buffer;
-            return buffer;
-        }
-
-        void Destroy(const Ref<VertBuffer>& buffer)
-        {
-            if (inter::rendering::DestroyVertBuffer_i(buffer.get()))
-                inter::HF.graphicsResources.vertBuffers.erase((uint64_t)buffer.get());
-        }
-
-        void Destroy(const Ref<VertBuffer>* pBuffers, uint32_t count)
-        {
-            for (uint32_t i = 0; i < count; i++)
-            {
-                auto buffer = pBuffers[i];
-                if (inter::rendering::DestroyVertBuffer_i(buffer.get()))
-                    inter::HF.graphicsResources.vertBuffers.erase((uint64_t)buffer.get());
-            }
-        }
-
-        bool IsRunning(const Ref<VertBuffer>& buffer) { return buffer->handle; }
-
-        void Upload(const VertBufferUploadInfo& info)
-        {
-            inter::rendering::VertBufferUploadInfo uploadInfo
-            {
-                .buffer = info.buffer->handle,
-                .data = info.data,
-                .offset = info.offset,
-                .vertexCount = info.vertCount
-            };
-            inter::HF.renderingApi.api.UploadVertBuffer(uploadInfo);
-        }
+            .buffer = handle,
+            .data = buffer,
+            .offset = info.offset,
+            .vertexCount = info.vertCount
+        };
+        inter::HF.renderingApi.api.UploadVertBuffer(uploadInfo);
     }
 
     namespace inter::rendering
@@ -75,33 +47,6 @@ namespace hf
             if (buffer->handle) return false;
             buffer->handle = HF.renderingApi.api.CreateVertBuffer(buffer->details);
             return true;
-        }
-
-        bool DestroyVertBuffer_i(VertBuffer* buffer)
-        {
-            if (buffer->handle)
-            {
-                std::lock_guard lock(HF.deletedResources.syncLock);
-                HF.deletedResources.vertBuffers.push_back(buffer->handle);
-                buffer->handle = nullptr;
-                return true;
-            }
-            return false;
-        }
-
-        void DestroyAllVertBuffers_i(bool internalOnly)
-        {
-            for (const auto& buffer : std::ranges::views::values(HF.graphicsResources.vertBuffers))
-                DestroyVertBuffer_i(buffer.get());
-            if (!internalOnly) HF.graphicsResources.vertBuffers.clear();
-        }
-    }
-
-    namespace buffer
-    {
-        void SubmitAll()
-        {
-			inter::HF.renderingApi.api.SubmitBufferCopyOperations();
         }
     }
 }

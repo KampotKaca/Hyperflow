@@ -46,12 +46,11 @@ namespace hf
             memcpy(material->bufferMemory, data, material->sizeInBytes);
             const StorageBufferUploadInfo uploadInfo
             {
-                .buffer = inter::HF.graphicsResources.materialDataStorage,
                 .data = material->bufferMemory,
                 .offset = material->bufferIndex * RENDERING_MAX_MATERIAL_MEMORY_BADGET,
                 .size = material->sizeInBytes
             };
-            storagebuffer::Upload(uploadInfo);
+            inter::HF.graphicsResources.materialDataStorage->Upload(uploadInfo);
         }
 
         uint16_t GetBufferIndex(const Ref<Material>& material) { return material->bufferIndex; }

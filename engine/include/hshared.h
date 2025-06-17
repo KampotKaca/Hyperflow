@@ -20,6 +20,7 @@
 #include <bitset>
 #include <queue>
 #include <optional>
+#include <filesystem>
 
 extern "C"
 {
@@ -239,7 +240,6 @@ namespace hf
 
 	struct VertBufferUploadInfo
 	{
-		const Ref<VertBuffer>& buffer{};
 		const void* data{};
 
 		//data alignment will be size of the vertex, so offset should be set as how many vertices should be skipped.
@@ -249,7 +249,6 @@ namespace hf
 
 	struct IndexBufferUploadInfo
 	{
-		const Ref<IndexBuffer>& buffer{};
 		const void* data{};
 		uint32_t offset{};
 		uint32_t indexCount{};
@@ -257,7 +256,6 @@ namespace hf
 
 	struct StorageBufferUploadInfo
 	{
-		const Ref<StorageBuffer>& buffer{};
 		const void* data{};
 		uint32_t offset{};
 		uint32_t size{};

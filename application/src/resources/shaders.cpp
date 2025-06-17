@@ -1,7 +1,5 @@
 #include "resources/shaders.h"
-#include "resources/uniforms.h"
 #include "resources/bufferattributes.h"
-#include "resources/texturepacks.h"
 #include "resources/shadersetups.h"
 #include "resources/renderpasses.h"
 
@@ -23,7 +21,7 @@ namespace app
                 .fragmentShaderLoc = "default",
             };
 
-            APP_SHADERS.viking_room = hf::shader::Create(shaderInfo);
+            APP_SHADERS.viking_room = hf::Shader::Create(shaderInfo);
         }
     }
 }

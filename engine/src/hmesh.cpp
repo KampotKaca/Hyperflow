@@ -1,3 +1,4 @@
+#define HF_ENGINE_INTERNALS
 #include "hdrawprocess.h"
 #include "hyperflow.h"
 #include "hinternal.h"
@@ -65,7 +66,7 @@ namespace hf
         for (auto& header : headers) meshSize += header.GetDataSize();
 
         std::vector<char> meshData(meshSize);
-        auto maxSize = LZ4_decompress_safe(&compressedData[offset], meshData.data(), compressedData.size() - offset, meshSize);
+        auto maxSize = LZ4_decompress_safe(&compressedData[offset], meshData.data(), (int32_t)compressedData.size() - (int32_t)offset, (int32_t)meshSize);
         offset = 0;
 
         if (maxSize < 0)
@@ -201,91 +202,85 @@ namespace hf
         inter::rendering::DestroyMesh_i(this);
     }
 
-    namespace mesh
+    bool Mesh::IsRunning() const { return isLoaded; }
+    MeshStats Mesh::GetStats() const { return stats; }
+    void Mesh::Destroy()
     {
-        Ref<Mesh> Create(const MeshCreationInfo& info)
+        if (inter::rendering::DestroyMesh_i(this))
+            inter::HF.graphicsResources.meshes.erase(filePath);
+    }
+
+    Ref<Mesh> Mesh::Create(const MeshCreationInfo& info)
+    {
+        Ref<Mesh> mesh = MakeRef<Mesh>(info);
+        inter::HF.graphicsResources.meshes[mesh->filePath] = mesh;
+        return mesh;
+    }
+
+    Ref<Mesh> Mesh::Create(const char* assetPath)
+    {
+        std::string assetLoc = TO_RES_PATH(std::string("meshes/") + assetPath) + ".meta";
+        if (!utils::FileExists(assetLoc.c_str()))
         {
-            Ref<Mesh> mesh = MakeRef<Mesh>(info);
-            inter::HF.graphicsResources.meshes[mesh->filePath] = mesh;
-            return mesh;
+            LOG_ERROR("[Hyperflow] Unable to find mesh meta file: %s", assetPath);
+            return nullptr;
         }
 
-        Ref<Mesh> Create(const char* assetPath)
+        std::vector<char> metadata{};
+        if (!utils::ReadFile(assetLoc, true, metadata))
         {
-            std::string assetLoc = TO_RES_PATH(std::string("meshes/") + assetPath) + ".meta";
-            if (!utils::FileExists(assetLoc.c_str()))
-            {
-                LOG_ERROR("[Hyperflow] Unable to find mesh meta file: %s", assetPath);
-                return nullptr;
-            }
-
-            std::vector<char> metadata{};
-            if (!utils::ReadFile(assetLoc, true, metadata))
-            {
-                LOG_ERROR("[Hyperflow] Unable to read mesh meta: %s", assetPath);
-                return nullptr;
-            }
-
-            try
-            {
-                MeshCreationInfo info
-                {
-                    .filePath = assetPath,
-                    .stats = {}
-                };
-
-                ryml::Tree tree = ryml::parse_in_place(ryml::to_substr(metadata.data()));
-                ryml::NodeRef root = tree.rootref();
-
-                auto typeFlags = root["typeFlags"];
-
-                for (ryml::NodeRef fmt : typeFlags.children())
-                {
-                    auto v = fmt.val();
-                    std::string_view valView{v.str, v.len};
-                    info.stats.typeFlags |= STRING_TO_MESH_DATA_TYPE(valView);
-                }
-
-                {
-                    auto v = root["memoryType"].val();
-                    std::string_view memTypeView(v.str, v.len);
-                    info.stats.memoryType = STRING_TO_BUFFER_MEMORY_TYPE(memTypeView);
-                }
-
-                {
-                    auto v = root["bufferAttrib"].val();
-                    std::string_view memTypeView(v.str, v.len);
-                    info.stats.bufferAttrib = inter::HF.graphicsResources.bufferAttribs[memTypeView];
-                }
-
-                auto mesh = Create(info);
-                inter::HF.graphicsResources.meshes[mesh->filePath] = mesh;
-                return mesh;
-            }catch (...)
-            {
-                LOG_ERROR("[Hyperflow] Error parsing BufferAttribute: %s", assetPath);
-                return nullptr;
-            }
+            LOG_ERROR("[Hyperflow] Unable to read mesh meta: %s", assetPath);
+            return nullptr;
         }
 
-        void Destroy(const Ref<Mesh>& mesh)
+        try
         {
+            MeshCreationInfo info
+            {
+                .filePath = assetPath,
+                .stats = {}
+            };
+
+            ryml::Tree tree = ryml::parse_in_place(ryml::to_substr(metadata.data()));
+            ryml::NodeRef root = tree.rootref();
+
+            auto typeFlags = root["typeFlags"];
+
+            for (ryml::NodeRef fmt : typeFlags.children())
+            {
+                auto v = fmt.val();
+                std::string_view valView{v.str, v.len};
+                info.stats.typeFlags |= STRING_TO_MESH_DATA_TYPE(valView);
+            }
+
+            {
+                auto v = root["memoryType"].val();
+                std::string_view memTypeView(v.str, v.len);
+                info.stats.memoryType = STRING_TO_BUFFER_MEMORY_TYPE(memTypeView);
+            }
+
+            {
+                auto v = root["bufferAttrib"].val();
+                std::string_view memTypeView(v.str, v.len);
+                info.stats.bufferAttrib = inter::HF.graphicsResources.bufferAttribs[memTypeView];
+            }
+
+            return Create(info);
+        }catch (...)
+        {
+            LOG_ERROR("[Hyperflow] Error parsing BufferAttribute: %s", assetPath);
+            return nullptr;
+        }
+    }
+
+    void Mesh::Destroy(const Ref<Mesh>* pMeshes, uint32_t count)
+    {
+        for (uint32_t i = 0; i < count; i++)
+        {
+            auto mesh = pMeshes[i];
             if (inter::rendering::DestroyMesh_i(mesh.get()))
                 inter::HF.graphicsResources.meshes.erase(mesh->filePath);
         }
-
-        void Destroy(const Ref<Mesh>* pMeshes, uint32_t count)
-        {
-            for (uint32_t i = 0; i < count; i++)
-            {
-                auto mesh = pMeshes[i];
-                if (inter::rendering::DestroyMesh_i(mesh.get()))
-                    inter::HF.graphicsResources.meshes.erase(mesh->filePath);
-            }
-        }
-
-        bool IsRunning(const Ref<Mesh>& mesh) { return mesh->isLoaded; }
-        MeshStats GetStats(const Ref<Mesh>& mesh) { return mesh->stats; }
     }
 
     namespace inter::rendering
@@ -309,8 +304,8 @@ namespace hf
             {
                 for (auto& submesh : mesh->subMeshes)
                 {
-                    DestroyVertBuffer_i(submesh.vertBuffer.get());
-                    DestroyIndexBuffer_i(submesh.indexBuffer.get());
+                    DestroyBuffer_i(submesh.vertBuffer.get());
+                    DestroyBuffer_i(submesh.indexBuffer.get());
                 }
 
                 mesh->isLoaded = false;

@@ -1,3 +1,4 @@
+#define HF_ENGINE_INTERNALS
 #include "hinternal.h"
 #include "hyperflow.h"
 #include "hwindow.h"
@@ -35,70 +36,78 @@ namespace hf
 		inter::window::Close(this);
 	}
 
-	namespace window
+	bool Window::IsKeyDown(Key key)			 const	{ return GetKeyState(key) == KeyState::Down; }
+	bool Window::IsKeyDownContinues(Key key) const  { return GetKeyState(key) == KeyState::DownContinues; }
+	bool Window::IsKeyUp(Key key)			 const	{ return GetKeyState(key) == KeyState::Up; }
+
+	bool Window::IsButtonDown(Button button)		  const	{ return GetButtonState(button) == ButtonState::Down; }
+	bool Window::IsButtonDownContinues(Button button) const { return GetButtonState(button) == ButtonState::DownContinues; }
+	bool Window::IsButtonUp(Button button)			  const	{ return GetButtonState(button) == ButtonState::Up; }
+
+	KeyState Window::GetKeyState(Key key)			  const	{ return eventData.keyStates[(uint32_t)key]; }
+	ButtonState Window::GetButtonState(Button button) const { return eventData.buttonStates[(uint32_t)button]; }
+	const std::string& Window::GetWrite()			  const	{ return eventData.charData; }
+
+	vec2 Window::GetPointerPosition() const { return eventData.pointerPosition; }
+	vec2 Window::GetPointerDelta()	  const { return eventData.pointerDelta; }
+	vec2 Window::GetScrollDelta()	  const { return eventData.scrollDelta; }
+
+	const std::string& Window::GetTitle() const { return title; }
+	ivec2 Window::GetSize() const { return inter::window::GetSize(this); }
+	ivec2 Window::GetPosition() const { return inter::window::GetPosition(this); }
+
+	IRect Window::GetRect() const
 	{
-		Ref<Window> Open(const WindowCreationInfo &data, const Ref<Window> &parent)
+		IRect result{};
+		result.position = inter::window::GetPosition(this);
+		result.size = inter::window::GetSize(this);
+		return result;
+	}
+
+	IRect Window::GetFrameRect()				 const { return inter::window::GetFrameRect(this); }
+	WindowState Window::GetState() 				 const { return state; }
+	WindowStyle Window::GetStyle() 				 const { return style; }
+	WindowPointerState Window::GetPointerState() const { return pointerState; }
+	void* Window::GetHandle()					 const { return handle; }
+	Ref<Renderer> Window::GetRenderer()			 const { return renderer; }
+	bool Window::IsClosed()						 const { return handle == nullptr; }
+	VsyncMode Window::GetVSyncMode()			 const { return vSyncMode; }
+
+	void Window::SetTitle(const std::string& title) 	   { if (!IsClosed()) inter::window::SetTitle(this, title); }
+	void Window::SetSize(ivec2 size) const				   { if (!IsClosed()) inter::window::SetSize(this, size); }
+	void Window::SetPosition(ivec2 position) const  	   { if (!IsClosed()) inter::window::SetPosition(this, position); }
+	void Window::SetRect(IRect rect) const				   { if (!IsClosed()) inter::window::SetRect(this, rect); }
+	void Window::SetState(WindowState state)			   { if (!IsClosed()) inter::window::SetState(this, state); }
+	void Window::SetPointerState(WindowPointerState state) { if (!IsClosed()) inter::window::SetPointerState(this, state); }
+
+	void Window::Focus() const { if (!IsClosed()) inter::window::Focus(this); }
+
+	void Window::SetVSyncMode(VsyncMode mode)
+	{
+		vSyncMode = mode;
+		inter::HF.renderingApi.api.SetVSync(renderer->handle, mode);
+	}
+
+	bool Window::SetIcons(const char* folderPath) const { return inter::rendering::SetWindowIcons_i(this, folderPath); }
+	void Window::Close() { if (inter::window::Close(this)) inter::HF.windows.erase((uint64_t)handle); }
+
+	void Window::CloseAll()
+	{
+		for (auto& win : inter::HF.windows | std::views::values)
+			inter::window::Close(win.get());
+		inter::HF.windows.clear();
+	}
+
+	Ref<Window> Window::Open(const WindowCreationInfo &data, const Ref<Window> &parent)
+	{
+		auto newWindow = MakeRef<Window>(data, parent);
+		inter::HF.windows[(uint64_t)newWindow->handle] = newWindow;
+
+		if (inter::HF.renderingApi.type != RenderingApiType::None)
 		{
-			auto newWindow = MakeRef<Window>(data, parent);
-			inter::HF.windows[(uint64_t)newWindow->handle] = newWindow;
-
-			if (inter::HF.renderingApi.type != RenderingApiType::None)
-			{
-				newWindow->renderer = MakeRef<Renderer>(newWindow.get(), newWindow->rnEventInfo);
-				inter::rendering::RunRenderThread_i(newWindow->renderer);
-			}
-			return newWindow;
+			newWindow->renderer = MakeRef<Renderer>(newWindow.get(), newWindow->rnEventInfo);
+			inter::rendering::RunRenderThread_i(newWindow->renderer);
 		}
-
-		void Close(const Ref<Window> &window)
-		{
-			if (inter::window::Close(window.get()))
-				inter::HF.windows.erase((uint64_t)window->handle);
-		}
-
-		void CloseAll()
-		{
-			for (auto& win : inter::HF.windows | std::views::values)
-				inter::window::Close(win.get());
-			inter::HF.windows.clear();
-		}
-
-		const std::string& GetTitle(const Ref<Window> &window) { return window->title; }
-		ivec2 GetSize(const Ref<Window> &window) { return inter::window::GetSize(window.get()); }
-		ivec2 GetPosition(const Ref<Window> &window) { return inter::window::GetPosition(window.get()); }
-		IRect GetRect(const Ref<Window> &window)
-		{
-			IRect result{};
-			result.position = inter::window::GetPosition(window.get());
-			result.size = inter::window::GetSize(window.get());
-			return result;
-		}
-		IRect GetFrameRect(const Ref<Window> &window) { return inter::window::GetFrameRect(window.get()); }
-		WindowState GetState(const Ref<Window> &window) { return window->state; }
-		WindowStyle GetStyle(const Ref<Window> &window) { return window->style; }
-		WindowPointerState GetPointerState(const Ref<Window> &window) { return window->pointerState; }
-		void* GetHandle(const Ref<Window> &window) { return window->handle; }
-		Ref<Renderer> GetRenderer(const Ref<Window> &window) { return window->renderer; }
-
-		bool IsClosed(const Ref<Window> &window) { return window->handle == nullptr; }
-
-		void SetTitle(const Ref<Window> &window, const std::string& title) { if (!IsClosed(window)) inter::window::SetTitle(window.get(), title); }
-		void SetSize(const Ref<Window> &window, const ivec2 size) { if (!IsClosed(window)) inter::window::SetSize(window.get(), size); }
-		void SetPosition(const Ref<Window> &window, const ivec2 position) { if (!IsClosed(window)) inter::window::SetPosition(window.get(), position); }
-		void SetRect(const Ref<Window> &window, const IRect rect) { if (!IsClosed(window)) inter::window::SetRect(window.get(), rect); }
-
-		void SetState(const Ref<Window> &window, WindowState state) { if (!IsClosed(window)) inter::window::SetState(window.get(), state); }
-		void SetPointerState(const Ref<Window> &window, WindowPointerState state) { if (!IsClosed(window)) inter::window::SetPointerState(window.get(), state); }
-		void Focus(const Ref<Window> &window) { if (!IsClosed(window)) inter::window::Focus(window.get()); }
-
-		void SetVSyncMode(const Ref<Window> &window, VsyncMode mode)
-		{
-			window->vSyncMode = mode;
-			inter::HF.renderingApi.api.SetVSync(window->renderer->handle, mode);
-		}
-
-		VsyncMode GetVSyncMode(const Ref<Window> &window) { return window->vSyncMode; }
-		bool SetIcons(const Ref<Window>& window, const char* folderPath)
-		{ return inter::rendering::SetWindowIcons_i(window.get(), folderPath); }
+		return newWindow;
 	}
 }

@@ -1,3 +1,4 @@
+#define HF_ENGINE_INTERNALS
 #include "hshader.h"
 #include "hshared.h"
 #include "hinternal.h"
@@ -26,33 +27,30 @@ namespace hf
         inter::rendering::DestroyShader_i(this);
     }
 
-    namespace shader
+    Ref<Shader> Shader::Create(const ShaderCreationInfo& info)
     {
-        Ref<Shader> Create(const ShaderCreationInfo& info)
-        {
-            Ref<Shader> shader = MakeRef<Shader>(info);
-            inter::HF.graphicsResources.shaders[(uint64_t)shader.get()] = shader;
-            return shader;
-        }
+        Ref<Shader> shader = MakeRef<Shader>(info);
+        inter::HF.graphicsResources.shaders[(uint64_t)shader.get()] = shader;
+        return shader;
+    }
 
-        void Destroy(const Ref<Shader>& shader)
+    void Shader::Destroy(const Ref<Shader>* pShaders, uint32_t count)
+    {
+        for (uint32_t i = 0; i < count; i++)
         {
+            auto shader = pShaders[i];
             if (inter::rendering::DestroyShader_i(shader.get()))
                 inter::HF.graphicsResources.shaders.erase((uint64_t)shader.get());
         }
-
-        void Destroy(const Ref<Shader>* pShaders, uint32_t count)
-        {
-            for (uint32_t i = 0; i < count; i++)
-            {
-                auto shader = pShaders[i];
-                if (inter::rendering::DestroyShader_i(shader.get()))
-                    inter::HF.graphicsResources.shaders.erase((uint64_t)shader.get());
-            }
-        }
-
-        bool IsRunning(const Ref<Shader>& shader) { return shader->handle; }
     }
+
+    void Shader::Destroy()
+    {
+        if (inter::rendering::DestroyShader_i(this))
+            inter::HF.graphicsResources.shaders.erase((uint64_t)this);
+    }
+
+    bool Shader::IsRunning() const { return handle; }
 
     namespace inter::rendering
     {
@@ -127,14 +125,6 @@ namespace hf
             for (const auto& shader : std::ranges::views::values(HF.graphicsResources.shaders))
                 DestroyShader_i(shader.get());
             if (!internalOnly) HF.graphicsResources.shaders.clear();
-        }
-    }
-
-    namespace shadersetup
-    {
-        ShaderSetup Define(const ShaderSetupDefinitionInfo& info)
-        {
-            return (ShaderSetup)inter::HF.renderingApi.api.DefineShaderSetup(info);
         }
     }
 }
