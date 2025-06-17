@@ -83,7 +83,7 @@ namespace hf::inter::rendering
 
     }
 
-    void UploadTexturePack(void* texPack, const TexturePackUploadInfo& info)
+    void UploadTexturePackBinding(void* texPack, const TexturePackBindingUploadGroupInfo& info)
     {
 
     }
@@ -292,7 +292,7 @@ namespace hf::inter::rendering
             //texture pack
             .CreateTexturePack          = CreateTexturePack,
             .DestroyTexturePack         = DestroyTexturePack,
-            .UploadTexturePack          = UploadTexturePack,
+            .UploadTexturePackBinding   = UploadTexturePackBinding,
             .BindTexturePack            = BindTexturePack,
 
             //texture pack allocator

@@ -11,10 +11,8 @@ namespace hf
         explicit TexturePack(const TexturePackCreationInfo& info);
         ~TexturePack();
 
-        bool IsRunning() const;
+        [[nodiscard]] bool IsRunning() const;
         void Destroy();
-        template<typename T>
-        void SetBinding(const TexturePackBindingUploadInfo<T>& info);
 
         static void SubmitAll();
         static Ref<TexturePack> Create(const TexturePackCreationInfo& info);
@@ -23,6 +21,7 @@ namespace hf
 #ifndef HF_ENGINE_INTERNALS
     private:
 #endif
+
         struct Binding
         {
             TextureSampler sampler{};

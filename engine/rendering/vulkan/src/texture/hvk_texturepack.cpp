@@ -30,12 +30,12 @@ namespace hf
         bindings.clear();
     }
 
-    void UpdateTexturePack(const VkTexturePack* pack, uint32_t bindingOffset, uint32_t bindingCount)
+    void UpdateTexturePack(const VkTexturePack* pack, const uint32_t* bindingIndices, uint32_t bindingCount)
     {
         uint32_t writeCount = 0;
-        for (uint32_t i = bindingOffset; i < bindingCount; i++)
+        for (uint32_t i = 0; i < bindingCount; i++)
         {
-            auto& binding = pack->bindings[i];
+            auto& binding = pack->bindings[bindingIndices[i]];
             auto& texSampler = GetSampler(binding.sampler);
 
             for (uint32_t j = 0; j < binding.textures.size(); j++)
@@ -70,23 +70,37 @@ namespace hf
                 0, nullptr);
     }
 
-    void SetTextureBinding(VkTexturePack* pack, const inter::rendering::TexturePackBindingUploadInfo& info)
+    void SetTextureBinding(VkTexturePack* pack, const inter::rendering::TexturePackBindingUploadInfo* bindings, uint32_t bindingCount)
     {
-        auto& binding = pack->bindings[info.bindingIndex];
-        bool wasModified = false;
-        if (info.sampler.has_value())
+        uint32_t count = 0;
+        for (uint32_t i = 0; i < bindingCount; i++)
         {
-            binding.sampler = info.sampler.value();
-            wasModified = true;
+            bool wasModified = false;
+            auto& current = bindings[i];
+            auto& binding = pack->bindings[current.bindingIndex];
+            if (current.sampler.has_value())
+            {
+                binding.sampler = current.sampler.value();
+                wasModified = true;
+            }
+
+            if (current.texInfo.has_value() && current.texInfo->count > 0)
+            {
+                memcpy(&binding.textures[current.texInfo->offset], current.texInfo->pTextures, current.texInfo->count * sizeof(VkTexture*));
+                wasModified = true;
+            }
+
+            if (wasModified)
+            {
+                GRAPHICS_DATA.preAllocBuffers.indices[count] = current.bindingIndex;
+                count++;
+            }
         }
 
-        if (info.texInfo.has_value() && info.texInfo->count > 0)
+        if (count > 0)
         {
-            memcpy(&binding.textures[info.texInfo->offset], info.texInfo->pTextures, info.texInfo->count * sizeof(VkTexture*));
-            wasModified = true;
+            UpdateTexturePack(pack, GRAPHICS_DATA.preAllocBuffers.indices, count);
         }
-
-        if (wasModified) UpdateTexturePack(pack, info.bindingIndex, 1);
         else LOG_WARN("Unnecessary set binding call, noting changed");
     }
 

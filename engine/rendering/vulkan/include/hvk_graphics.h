@@ -146,6 +146,7 @@ namespace hf
         VkDescriptorImageInfo descImageBindings[VK_MAX_IMAGE_BINDINGS]{};
         VkImageMemoryBarrier imageBarriers[VK_MAX_IMAGE_BARRIERS]{};
         ImageTransitionArray imageTransitions[9]{};
+        uint32_t indices[VK_MAX_INDICES]{};
     };
 
     struct GraphicsData

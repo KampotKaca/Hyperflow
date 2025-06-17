@@ -98,9 +98,9 @@ namespace hf::inter::rendering
         delete (VkTexturePack*)txPack;
     }
 
-    void UploadTexturePackBinding(void* texPack, const TexturePackBindingUploadInfo& info)
+    void UploadTexturePackBinding(void* texPack, const TexturePackBindingUploadGroupInfo& info)
     {
-        SetTextureBinding((VkTexturePack*)texPack, info);
+        SetTextureBinding((VkTexturePack*)texPack, info.bindings, info.bindingCount);
     }
 
     void BindTexturePack(void* rn, const TexturePackBindingInfo& info)

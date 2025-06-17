@@ -238,6 +238,7 @@ namespace hf
                 };
 
                 HF.staticResources.defaultSkyboxCubemap = Cubemap::Create(info);
+                HF.staticResources.boundCubemap = HF.staticResources.defaultSkyboxCubemap;
             }
         }
 

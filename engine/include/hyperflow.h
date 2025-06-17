@@ -80,8 +80,8 @@ namespace hf
 
 	namespace skybox
 	{
-		void BindDefaultCubemap();
-		void BindCubemap(const Ref<Cubemap>& cubemap);
+		void BindDefaultCubemap(const Ref<Renderer>& rn);
+		void BindCubemap(const Ref<Renderer>& rn, const Ref<Cubemap>& cubemap);
 		void Draw(const Ref<Renderer>& rn, const SkyboxInfo& info);
 		[[nodiscard]] bool IsDefaultCubemapBound();
 	}
@@ -94,6 +94,12 @@ namespace hf
 	namespace draw
 	{
 		void UploadUniformPacket(const Ref<Renderer>& rn, const UniformBufferUpload& info);
+
+		void StartTexturePackUpload(const Ref<Renderer>& rn, const Ref<TexturePack>& texPack);
+		void EndTexturePackUpload(const Ref<Renderer>& rn);
+
+		template<typename T>
+		void TexturePackAdd_BindingPacket(const Ref<Renderer>& rn, const TexturePackBindingUploadInfo<T>& info);
 
 		void StartRenderPassPacket(const Ref<Renderer>& rn, RenderPass pass);
 		void EndRenderPassPacket(const Ref<Renderer>& rn);

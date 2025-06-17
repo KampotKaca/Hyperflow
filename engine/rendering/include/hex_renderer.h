@@ -157,6 +157,12 @@ namespace hf::inter::rendering
         std::optional<TexturePackTextureUploadInfo> texInfo{};
     };
 
+    struct TexturePackBindingUploadGroupInfo
+    {
+        TexturePackBindingUploadInfo* bindings{};
+        uint32_t bindingCount = 0;
+    };
+
     struct TexturePackCreationInfo
     {
         RenderBindingType bindingType = RenderBindingType::Graphics;
@@ -217,7 +223,7 @@ namespace hf::inter::rendering
         //texture pack
         void* (*CreateTexturePack)(const TexturePackCreationInfo& info);
         void (*DestroyTexturePack)(void* texPack);
-        void (*UploadTexturePackBinding)(void* texPack, const TexturePackBindingUploadInfo& info);
+        void (*UploadTexturePackBinding)(void* texPack, const TexturePackBindingUploadGroupInfo& info);
         void (*BindTexturePack)(void* rn, const TexturePackBindingInfo& info);
 
         //texture pack allocator

@@ -125,6 +125,7 @@ namespace hf
 	typedef uint32_t ShaderSetup;
 	typedef uint32_t RenderPass;
 
+    enum class TexturePackBindingType { Texture2D, Cubemap };
 	enum class CubemapTextureType { Left, Right, Down, Up, Back, Front };
 
 	enum class BufferDataType { U8, I8, U16, I16, U32, I32, U64, I64, F16, F32, F64, Count };

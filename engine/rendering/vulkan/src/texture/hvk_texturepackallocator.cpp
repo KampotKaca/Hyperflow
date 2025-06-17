@@ -63,13 +63,15 @@ namespace hf
 
         VK_HANDLE_EXCEPT(vkAllocateDescriptorSets(device, &allocInfo, GRAPHICS_DATA.preAllocBuffers.descriptors));
 
+        for (uint32_t i = 0; i < info.texturePackCount; i++)
         {
-            for (uint32_t i = 0; i < info.texturePackCount; i++)
-            {
-                auto* texPack = (VkTexturePack*)info.pTexturePacks[i];
-                memcpy(texPack->descriptors, &GRAPHICS_DATA.preAllocBuffers.descriptors[i * FRAMES_IN_FLIGHT], sizeof(VkDescriptorSet) * FRAMES_IN_FLIGHT);
-                UpdateTexturePack(texPack, 0, texPack->bindings.size());
-            }
+            auto* texPack = (VkTexturePack*)info.pTexturePacks[i];
+            memcpy(texPack->descriptors, &GRAPHICS_DATA.preAllocBuffers.descriptors[i * FRAMES_IN_FLIGHT], sizeof(VkDescriptorSet) * FRAMES_IN_FLIGHT);
+
+            for (uint32_t k = 0; k < texPack->bindings.size(); k++)
+                GRAPHICS_DATA.preAllocBuffers.indices[k] = k;
+
+            UpdateTexturePack(texPack, GRAPHICS_DATA.preAllocBuffers.indices, texPack->bindings.size());
         }
     }
 

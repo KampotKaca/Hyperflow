@@ -3,6 +3,7 @@
 
 #include "hshared.h"
 #include "../config.h"
+#include "../components/include/hstaticvector.h"
 
 namespace hf
 {
@@ -12,96 +13,91 @@ namespace hf
         uint32_t setBindingIndex{};
     };
 
+    template<typename T>
+    struct AssetRange
+    {
+        T start{}, size{};
+        T end() const { return start + size; }
+    };
+
+    struct TexturePackRebindingPacketInfo
+    {
+        struct TextureBinding
+        {
+            uint32_t offset{};
+            TexturePackBindingType type{};
+            AssetRange<uint16_t> range{};
+        };
+
+        uint32_t bindingIndex = 0;
+        std::optional<TextureSampler> sampler{};
+        std::optional<TextureBinding> textures{};
+    };
+
+    struct TexturePackRebindingGroupPacketInfo
+    {
+        Ref<TexturePack> texturePack;
+        AssetRange<uint16_t> bindingPacketRange{};
+    };
+
     struct DrawPacketInfo
     {
-        uint32_t texpackStart{};
-        uint32_t texpackCount{};
-
-        uint32_t drawCallStart{};
-        uint32_t drawCallCount{};
-
-        uint32_t pushConstantStart{};
-        uint32_t pushConstantSize{};
+        AssetRange<uint32_t> texpackRange{};
+        AssetRange<uint32_t> drawCallRange{};
+        AssetRange<uint32_t> pushConstantRange{};
     };
 
     struct MaterialPacketInfo
     {
         Ref<Material> material{};
-
-        uint32_t drawPacketStart{};
-        uint32_t drawPacketCount{};
-
-        uint32_t texpackStart{};
-        uint32_t texpackCount{};
+        AssetRange<uint32_t> drawPacketRange{};
+        AssetRange<uint32_t> texpackRange{};
     };
 
     struct ShaderPacketInfo
     {
         ShaderBindingInfo bindingInfo{};
-        uint32_t materialPacketStart{};
-        uint32_t materialPacketCount{};
+        AssetRange<uint16_t> materialPacketRange{};
     };
 
     struct ShaderSetupPacketInfo
     {
         ShaderSetup shaderSetup{};
-        uint16_t shaderStart{};
-        uint16_t shaderCount{};
-
-        uint32_t uniformStart{};
-        uint32_t uniformCount{};
+        AssetRange<uint16_t> shaderPacketRange{};
+        AssetRange<uint32_t> uniformRange{};
     };
 
     struct RenderPassPacketInfo
     {
         RenderPass pass{};
-        uint16_t shaderSetupStart{};
-        uint16_t shaderSetupCount{};
+        AssetRange<uint16_t> shaderSetupRange{};
     };
 
     struct UniformUploadPacketInfo
     {
         UniformBuffer buffer{};
         uint32_t offsetInBytes{};
-
-        uint32_t uniformStart{};
-        uint32_t uniformSize{};
+        AssetRange<uint32_t> uniformRange{};
     };
 
     struct RenderPacket
     {
-        RenderPassPacketInfo passes[RENDERING_MAX_NUM_RENDER_PASSES];
-        uint8_t passCount{};
+        StaticVector<RenderPassPacketInfo, RENDERING_MAX_NUM_RENDER_PASSES> passes{};
+        StaticVector<ShaderSetupPacketInfo, RENDERING_MAX_NUM_SHADER_SETUPS> shaderSetups{};
+        StaticVector<ShaderPacketInfo, RENDERING_MAX_NUM_SHADERS> shaders{};
+        StaticVector<MaterialPacketInfo, RENDERING_MAX_NUM_MATERIALS> materials{};
+        StaticVector<DrawPacketInfo, RENDERING_MAX_NUM_DRAWPACKETS> drawPackets{};
+        StaticVector<TextureBindingInfo, RENDERING_MAX_NUM_TEXPACKS> texpacks{};
 
-        ShaderSetupPacketInfo shaderSetups[RENDERING_MAX_NUM_SHADER_SETUPS];
-        uint16_t shaderSetupCount{};
+        StaticVector<TexturePackRebindingGroupPacketInfo, RENDERING_MAX_NUM_TEXPACK_REBINDING> textureGroupRebindings{};
+        StaticVector<TexturePackRebindingPacketInfo, RENDERING_MAX_NUM_TEXPACK_REBINDING> textureRebindings{};
+        StaticVector<void*, RENDERING_MAX_NUM_TEXTURES> textures{};
 
-        ShaderPacketInfo shaders[RENDERING_MAX_NUM_SHADERS];
-        uint16_t shaderCount{};
-
-        MaterialPacketInfo materials[RENDERING_MAX_NUM_MATERIALS];
-        uint16_t materialCount{};
-
-        DrawPacketInfo drawPackets[RENDERING_MAX_NUM_DRAWPACKETS];
-        uint32_t drawPacketCount{};
-
-        TextureBindingInfo texpacks[RENDERING_MAX_NUM_TEXPACKS];
-        uint32_t texpackCount{};
-
-        UniformBufferBindInfo uniforms[RENDERING_MAX_NUM_UNIFORMS];
-        uint32_t uniformCount{};
-
-        DrawCallInfo drawCalls[RENDERING_MAX_NUM_DRAW_CALLS]{};
-        uint32_t drawCallCount{};
-
-        uint8_t uniformUploads[RENDERING_MAX_UNIFORM_UPLOAD_BUFFER_SIZE]{};
-        uint32_t uniformUploadSize{};
-
-        uint8_t pushConstantUploads[RENDERING_MAX_PUSH_CONSTANT_UPLOAD_BUFFER_SIZE]{};
-        uint32_t pushConstantUploadSize{};
-
-        UniformUploadPacketInfo uniformUploadPackets[RENDERING_MAX_UNIFORM_UPLOAD_COUNT]{};
-        uint32_t uniformUploadPacketCount{};
+        StaticVector<UniformBufferBindInfo, RENDERING_MAX_NUM_UNIFORMS> uniforms{};
+        StaticVector<DrawCallInfo, RENDERING_MAX_NUM_DRAW_CALLS> drawCalls{};
+        StaticVector<uint8_t, RENDERING_MAX_UNIFORM_UPLOAD_BUFFER_SIZE> uniformUploads{};
+        StaticVector<uint8_t, RENDERING_MAX_PUSH_CONSTANT_UPLOAD_BUFFER_SIZE> pushConstantUploads{};
+        StaticVector<UniformUploadPacketInfo, RENDERING_MAX_UNIFORM_UPLOAD_COUNT> uniformUploadPackets{};
     };
 
     struct RenderPacketDrawProcess
@@ -111,6 +107,7 @@ namespace hf
         ShaderPacketInfo* currentShader{};
         MaterialPacketInfo* currentMaterial{};
         DrawPacketInfo* currentDraw{};
+        TexturePackRebindingGroupPacketInfo* currentTexturePackBinding{};
 
         RenderPacket packet{};
     };

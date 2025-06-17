@@ -3,25 +3,29 @@
 
 namespace hf::skybox
 {
-    void BindDefaultCubemap()
+    void BindDefaultCubemap(const Ref<Renderer>& rn)
     {
-        BindCubemap(inter::HF.staticResources.defaultSkyboxCubemap);
+        BindCubemap(rn, inter::HF.staticResources.defaultSkyboxCubemap);
     }
 
-    void BindCubemap(const Ref<Cubemap>& cubemap)
+    void BindCubemap(const Ref<Renderer>& rn, const Ref<Cubemap>& cubemap)
     {
-        TexturePackBindingUploadInfo<Cubemap> bindingInfo
-        {
-            .bindingIndex = 0,
-            .texInfo = (TexturePackTextureUploadInfo<Cubemap>)
-            {
-                .pTextures = &cubemap,
-                .count = 1,
-                .offset = 0
-            }
-        };
-        inter::HF.staticResources.skyboxTexturePack->SetBinding(bindingInfo);
         inter::HF.staticResources.boundCubemap = cubemap;
+        draw::StartTexturePackUpload(rn, inter::HF.staticResources.skyboxTexturePack);
+        {
+            TexturePackBindingUploadInfo<Cubemap> bindingInfo
+            {
+                .bindingIndex = 0,
+                .texInfo = (TexturePackTextureUploadInfo<Cubemap>)
+                {
+                    .pTextures = &cubemap,
+                    .count = 1,
+                    .offset = 0
+                }
+            };
+            draw::TexturePackAdd_BindingPacket(rn, bindingInfo);
+        }
+        draw::EndTexturePackUpload(rn);
     }
 
     void Draw(const Ref<Renderer>& rn, const SkyboxInfo& info)

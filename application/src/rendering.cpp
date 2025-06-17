@@ -12,7 +12,14 @@ namespace app
     void AppRender(const hf::Ref<hf::Renderer>& rn)
     {
         DebugPrepass(rn);
+
         UniformUploadTime(rn);
+
+        if (hf::input::IsDown(hf::Key::G))
+        {
+            if (hf::skybox::IsDefaultCubemapBound()) hf::skybox::BindCubemap(rn, APP_CUBEMAPS.cosmos);
+            else hf::skybox::BindDefaultCubemap(rn);
+        }
 
         hf::draw::StartRenderPassPacket(rn, APP_RENDER_PASSES.mainPresentPass);
         {
@@ -32,7 +39,6 @@ namespace app
                     hf::draw::StartMaterialPacket(rn, hf::primitives::GetEmptyMaterial());
                     {
                         hf::draw::MaterialAdd_TexturePackBinding(rn, APP_TEXTURE_PACKS.viking_room_pack, 2);
-
                         hf::draw::StartDrawPacket(rn);
                         {
                             const auto trs = APP_OBJECTS.vikingRoomTransform.ToMat4();

@@ -21,15 +21,12 @@ namespace hf
 #endif
 
             auto& packet = currentDraw.packet;
-            packet.passes[packet.passCount] =
-            {
+            packet.passes.push_back({
                 .pass = pass,
-                .shaderSetupStart = packet.shaderSetupCount,
-                .shaderSetupCount = 0
-            };
+                .shaderSetupRange = (AssetRange<uint16_t>){ .start = (uint16_t)packet.shaderSetups.size(), .size = 0 }
+            });
 
-            currentDraw.currentPass = &packet.passes[packet.passCount];
-            packet.passCount++;
+            currentDraw.currentPass = packet.passes.atP(packet.passes.size() - 1);
         }
 
         void EndRenderPassPacket(const Ref<Renderer>& rn)
@@ -51,17 +48,96 @@ namespace hf
 #endif
 
             auto& packet = rn->currentDraw.packet;
-            memcpy(&packet.uniformUploads[packet.uniformUploadSize], info.data, info.sizeInBytes);
-            packet.uniformUploadPackets[packet.uniformUploadPacketCount] =
+            packet.uniformUploadPackets.push_back(
             {
                 .buffer = info.buffer,
                 .offsetInBytes = info.offsetInBytes,
-                .uniformStart = packet.uniformUploadSize,
-                .uniformSize = info.sizeInBytes
+                .uniformRange = (AssetRange<uint32_t>) { .start = (uint32_t)packet.uniformUploads.size(), .size = info.sizeInBytes }
+            });
+
+            packet.uniformUploads.push_back((uint8_t*)info.data, info.sizeInBytes);
+        }
+
+        void StartTexturePackUpload(const Ref<Renderer>& rn, const Ref<TexturePack>& texPack)
+        {
+            auto& currentDraw = rn->currentDraw;
+#if DEBUG
+            if (!rn->isDrawing)
+                throw GENERIC_EXCEPT("[Hyperflow]", "Cannot upload texture pack util drawing process starts");
+            if (currentDraw.currentTexturePackBinding)
+                throw GENERIC_EXCEPT("[Hyperflow]", "Cannot start texture pack upload util you end previous one");
+#endif
+
+            auto& packet = currentDraw.packet;
+            packet.textureGroupRebindings.push_back(TexturePackRebindingGroupPacketInfo
+            {
+                .texturePack = texPack,
+                .bindingPacketRange = (AssetRange<uint16_t>){ .start = (uint16_t)packet.textureRebindings.size(), .size = 0 }
+            });
+            currentDraw.currentTexturePackBinding = packet.textureGroupRebindings.atP(packet.textureGroupRebindings.size() - 1);
+        }
+
+        void EndTexturePackUpload(const Ref<Renderer>& rn)
+        {
+            auto& currentDraw = rn->currentDraw;
+#if DEBUG
+            if (!currentDraw.currentTexturePackBinding)
+                throw GENERIC_EXCEPT("[Hyperflow]", "You need to start texture pack first");
+#endif
+            currentDraw.currentTexturePackBinding = nullptr;
+        }
+
+        template void TexturePackAdd_BindingPacket(const Ref<Renderer>& rn, const TexturePackBindingUploadInfo<Texture>& info);
+        template void TexturePackAdd_BindingPacket(const Ref<Renderer>& rn, const TexturePackBindingUploadInfo<Cubemap>& info);
+
+        template<typename T>
+        void TexturePackAdd_BindingPacket(const Ref<Renderer>& rn, const TexturePackBindingUploadInfo<T>& info)
+        {
+            auto& currentDraw = rn->currentDraw;
+#if DEBUG
+            if (!currentDraw.currentTexturePackBinding)
+                throw GENERIC_EXCEPT("[Hyperflow]", "Cannot add binding packet without starting texture pack upload");
+#endif
+            auto& packet = currentDraw.packet;
+            auto& b = currentDraw.currentTexturePackBinding->texturePack->bindings[info.bindingIndex];
+
+            bool wasModified = false;
+            auto binding = (TexturePackRebindingPacketInfo)
+            {
+                .bindingIndex = info.bindingIndex,
+                .sampler = info.sampler,
             };
 
-            packet.uniformUploadSize += info.sizeInBytes;
-            packet.uniformUploadPacketCount++;
+            if (info.sampler.has_value())
+            {
+                b.sampler = info.sampler.value();
+                wasModified = true;
+            }
+
+            if (info.texInfo.has_value())
+            {
+                auto textures = info.texInfo.value();
+                for (uint32_t i = 0; i < textures.count; i++)
+                    b.textures[textures.offset + i] = textures.pTextures[i]->handle;
+
+                binding.textures = (TexturePackRebindingPacketInfo::TextureBinding)
+                {
+                    .offset = textures.offset,
+                    .type = TexturePackBindingType::Texture2D,
+                    .range = (AssetRange<uint16_t>){ .start = (uint16_t)packet.textures.size(), .size = (uint16_t)textures.count }
+                };
+
+                for (uint32_t i = 0; i < textures.count; i++)
+                    packet.textures.push_back(textures.pTextures[i]->handle);
+                if (textures.count > 0) wasModified = true;
+            }
+
+            if (wasModified)
+            {
+                packet.textureRebindings.push_back(binding);
+                currentDraw.currentTexturePackBinding->bindingPacketRange.size++;
+            }
+            else LOG_WARN("Unnecessary binding upload! nothing changed");
         }
 
         void StartShaderSetupPacket(const Ref<Renderer>& rn, ShaderSetup shaderSetup)
@@ -76,18 +152,14 @@ namespace hf
 #endif
 
             auto& packet = currentDraw.packet;
-            packet.shaderSetups[packet.shaderSetupCount] =
-            {
+            packet.shaderSetups.push_back({
                 .shaderSetup = shaderSetup,
-                .shaderStart = packet.shaderCount,
-                .shaderCount = 0,
-                .uniformStart = packet.uniformCount,
-                .uniformCount = 0,
-            };
+                .shaderPacketRange = (AssetRange<uint16_t>){ .start = (uint16_t)packet.shaders.size(), .size = 0 } ,
+                .uniformRange = (AssetRange<uint32_t>){ .start = (uint32_t)packet.uniforms.size(), .size = 0 } ,
+            });
 
-            currentDraw.currentShaderSetup = &packet.shaderSetups[packet.shaderSetupCount];
-            packet.shaderSetupCount++;
-            currentDraw.currentPass->shaderSetupCount++;
+            currentDraw.currentShaderSetup = packet.shaderSetups.atP(packet.shaderSetups.size() - 1);
+            currentDraw.currentPass->shaderSetupRange.size++;
         }
 
         void EndShaderSetupPacket(const Ref<Renderer>& rn)
@@ -116,16 +188,13 @@ namespace hf
 #endif
 
             auto& packet = currentDraw.packet;
-            packet.shaders[packet.shaderCount] =
-            {
+            packet.shaders.push_back({
                 .bindingInfo = shaderBindingInfo,
-                .materialPacketStart = packet.materialCount,
-                .materialPacketCount = 0
-            };
+                .materialPacketRange = (AssetRange<uint16_t>){ .start = (uint16_t)packet.materials.size(), .size = 0 }
+            });
 
-            currentDraw.currentShader = &packet.shaders[packet.shaderCount];
-            packet.shaderCount++;
-            currentDraw.currentShaderSetup->shaderCount++;
+            currentDraw.currentShader = packet.shaders.atP(packet.shaders.size() - 1);
+            currentDraw.currentShaderSetup->shaderPacketRange.size++;
         }
 
         void EndShaderPacket(const Ref<Renderer>& rn)
@@ -154,18 +223,14 @@ namespace hf
 #endif
 
             auto& packet = currentDraw.packet;
-            packet.materials[packet.materialCount] =
-            {
+            packet.materials.push_back({
                 .material = material,
-                .drawPacketStart = packet.drawPacketCount,
-                .drawPacketCount = 0,
-                .texpackStart = packet.texpackCount,
-                .texpackCount = 0
-            };
+                .drawPacketRange = (AssetRange<uint32_t>){ .start = (uint32_t)packet.drawPackets.size(), .size = 0 },
+                .texpackRange = (AssetRange<uint32_t>){ .start = (uint32_t)packet.texpacks.size(), .size = 0 },
+            });
 
-            currentDraw.currentMaterial = &packet.materials[packet.materialCount];
-            packet.materialCount++;
-            currentDraw.currentShader->materialPacketCount++;
+            currentDraw.currentMaterial = packet.materials.atP(packet.materials.size() - 1);
+            currentDraw.currentShader->materialPacketRange.size++;
         }
 
         void EndMaterialPacket(const Ref<Renderer>& rn)
@@ -193,19 +258,14 @@ namespace hf
 #endif
 
             auto& packet = currentDraw.packet;
-            packet.drawPackets[packet.drawPacketCount] =
-            {
-                .texpackStart = packet.texpackCount,
-                .texpackCount = 0,
-                .drawCallStart = packet.drawCallCount,
-                .drawCallCount = 0,
-                .pushConstantStart = packet.pushConstantUploadSize,
-                .pushConstantSize = 0
-            };
+            packet.drawPackets.push_back({
+                .texpackRange = (AssetRange<uint32_t>){ .start = (uint32_t)packet.texpacks.size(), .size = 0 },
+                .drawCallRange = (AssetRange<uint32_t>){ .start = (uint32_t)packet.drawCalls.size(), .size = 0 },
+                .pushConstantRange = (AssetRange<uint32_t>){ .start = (uint32_t)packet.pushConstantUploads.size(), .size = 0 },
+            });
 
-            currentDraw.currentDraw = &packet.drawPackets[packet.drawPacketCount];
-            packet.drawPacketCount++;
-            currentDraw.currentMaterial->drawPacketCount++;
+            currentDraw.currentDraw = packet.drawPackets.atP(packet.drawPackets.size() - 1);
+            currentDraw.currentMaterial->drawPacketRange.size++;
         }
 
         void EndDrawPacket(const Ref<Renderer>& rn)
@@ -231,9 +291,8 @@ namespace hf
 #endif
 
             auto& packet = currentDraw.packet;
-            packet.uniforms[packet.uniformCount] = uniformBinding;
-            packet.uniformCount++;
-            currentDraw.currentShaderSetup->uniformCount++;
+            packet.uniforms.push_back(uniformBinding);
+            currentDraw.currentShaderSetup->uniformRange.size++;
         }
 
         void MaterialAdd_TexturePackBinding(const Ref<Renderer>& rn, const Ref<TexturePack>& texPack, const uint32_t setBindingIndex)
@@ -245,13 +304,11 @@ namespace hf
 #endif
 
             auto& packet = currentDraw.packet;
-            packet.texpacks[packet.texpackCount] =
-            {
+            packet.texpacks.push_back({
                 .pack = texPack,
-                .setBindingIndex = setBindingIndex
-            };
-            packet.texpackCount++;
-            currentDraw.currentMaterial->texpackCount++;
+                .setBindingIndex = setBindingIndex,
+            });
+            currentDraw.currentMaterial->texpackRange.size++;
         }
 
         void PacketAdd_DrawCall(const Ref<Renderer>& rn, const DrawCallInfo& drawCall)
@@ -263,9 +320,8 @@ namespace hf
 #endif
 
             auto& packet = currentDraw.packet;
-            packet.drawCalls[packet.drawCallCount] = drawCall;
-            packet.drawCallCount++;
-            currentDraw.currentDraw->drawCallCount++;
+            packet.drawCalls.push_back(drawCall);
+            currentDraw.currentDraw->drawCallRange.size++;
         }
 
         void PacketAdd_TexturePackBinding(const Ref<Renderer>& rn, const Ref<TexturePack>& texPack, const uint32_t setBindingIndex)
@@ -277,13 +333,11 @@ namespace hf
 #endif
 
             auto& packet = currentDraw.packet;
-            packet.texpacks[packet.texpackCount] =
-            {
+            packet.texpacks.push_back({
                 .pack = texPack,
                 .setBindingIndex = setBindingIndex
-            };
-            packet.texpackCount++;
-            currentDraw.currentDraw->texpackCount++;
+            });
+            currentDraw.currentDraw->texpackRange.size++;
         }
 
         void PacketSet_PushConstant(const Ref<Renderer>& rn, const void* data, uint32_t dataSize)
@@ -293,14 +347,13 @@ namespace hf
             if (!currentDraw.currentDraw)
                 throw GENERIC_EXCEPT("[Hyperflow]", "DrawPacket must be set!");
 
-            if (currentDraw.currentDraw->pushConstantSize > 0)
+            if (currentDraw.currentDraw->pushConstantRange.size > 0)
                 throw GENERIC_EXCEPT("[Hyperflow]", "Cannot set push constant twice for a single draw packet!");
 #endif
 
             auto& packet = currentDraw.packet;
-            currentDraw.currentDraw->pushConstantSize = dataSize;
-            memcpy(&packet.pushConstantUploads[currentDraw.currentDraw->pushConstantStart], data, dataSize);
-            packet.pushConstantUploadSize += dataSize;
+            currentDraw.currentDraw->pushConstantRange.size = dataSize;
+            packet.pushConstantUploads.push_back((uint8_t*)data, dataSize);
         }
     }
 
@@ -324,7 +377,9 @@ namespace hf
                 tInfo.packetIsReady = true;
                 tInfo.renderCondition.notify_one();
             }
+
             rn->currentDraw = {};
+
             rn->isDrawing = false;
         }
 
@@ -353,7 +408,7 @@ namespace hf
             }
         }
 
-        void RendererDraw_i(const Ref<Renderer>& rn, const RenderPacket& packet)
+        void RendererDraw_i(const Ref<Renderer>& rn, RenderPacket& packet)
         {
             void* vBufferCache[MAX_NUM_BUFFER_CACHE];
             auto handle = rn->handle;
@@ -361,39 +416,80 @@ namespace hf
             {
                 const UniformBufferUploadInfo uploadInfo
                 {
-                    .pUploadPackets = packet.uniformUploadPackets,
-                    .uploadPacketCount = packet.uniformUploadPacketCount,
-                    .pUniformDataBuffer = packet.uniformUploads
+                    .pUploadPackets = packet.uniformUploadPackets.begin(),
+                    .uploadPacketCount = (uint16_t)packet.uniformUploadPackets.size(),
+                    .pUniformDataBuffer = packet.uniformUploads.begin()
                 };
                 HF.renderingApi.api.UploadUniformBuffer(handle, uploadInfo);
             }
 
-            for (uint8_t passIndex = 0; passIndex < packet.passCount; passIndex++)
             {
-                const auto& pass = packet.passes[passIndex];
+                static TexturePackBindingUploadInfo uploads[128];
+                for (uint32_t i = 0; i < packet.textureGroupRebindings.size(); i++)
+                {
+                    const auto& group = packet.textureGroupRebindings.atC(i);
+                    TexturePackBindingUploadGroupInfo uploadInfo
+                    {
+                        .bindings = uploads,
+                        .bindingCount = group.bindingPacketRange.size
+                    };
+
+                    uint32_t end = group.bindingPacketRange.end();
+                    uint32_t current = 0;
+                    for (uint32_t j = group.bindingPacketRange.start; j < end; j++)
+                    {
+                        auto& p = packet.textureRebindings.atC(j);
+                        TexturePackBindingUploadInfo binding
+                        {
+                            .bindingIndex = p.bindingIndex,
+                            .sampler = p.sampler,
+                        };
+
+                        if (p.textures.has_value())
+                        {
+                            auto& textures = p.textures.value();
+                            binding.texInfo = (TexturePackTextureUploadInfo)
+                            {
+                                .pTextures = packet.textures.atP(textures.range.start),
+                                .offset = textures.offset,
+                                .count = textures.range.size
+                            };
+                        }
+
+                        uploads[current] = binding;
+                        current++;
+                    }
+
+                    HF.renderingApi.api.UploadTexturePackBinding(group.texturePack->handle, uploadInfo);
+                }
+            }
+
+            for (uint8_t passIndex = 0; passIndex < (uint8_t)packet.passes.size(); passIndex++)
+            {
+                auto& pass = packet.passes.atC(passIndex);
                 HF.renderingApi.api.BeginRenderPass(handle, pass.pass);
 
-                uint16_t shaderSetupEnd = pass.shaderSetupStart + pass.shaderSetupCount;
-                for (uint16_t shaderSetupIndex = pass.shaderSetupStart; shaderSetupIndex < shaderSetupEnd; shaderSetupIndex++)
+                uint16_t shaderSetupEnd = pass.shaderSetupRange.end();
+                for (uint16_t shaderSetupIndex = pass.shaderSetupRange.start; shaderSetupIndex < shaderSetupEnd; shaderSetupIndex++)
                 {
                     Ref<TexturePack> boundTexturePacks[MAX_NUM_BOUND_TEXTUREPACKS]{};
 
-                    const auto& shaderSetup = packet.shaderSetups[shaderSetupIndex];
+                    const auto& shaderSetup = packet.shaderSetups.atC(shaderSetupIndex);
                     HF.renderingApi.api.BindShaderSetup(handle, shaderSetup.shaderSetup);
 
                     {
-                        uint32_t uniformEnd = shaderSetup.uniformStart + shaderSetup.uniformCount;
-                        for (uint32_t uniformIndex = shaderSetup.uniformStart; uniformIndex < uniformEnd; uniformIndex++)
+                        uint32_t uniformEnd = shaderSetup.uniformRange.end();
+                        for (uint32_t uniformIndex = shaderSetup.uniformRange.start; uniformIndex < uniformEnd; uniformIndex++)
                         {
-                            const auto& uniform = packet.uniforms[uniformIndex];
+                            const auto& uniform = packet.uniforms.atC(uniformIndex);
                             HF.renderingApi.api.BindUniformBuffer(handle, uniform);
                         }
                     }
 
-                    uint16_t shaderEnd = shaderSetup.shaderStart + shaderSetup.shaderCount;
-                    for (uint16_t shaderIndex = shaderSetup.shaderStart; shaderIndex < shaderEnd; shaderIndex++)
+                    uint16_t shaderEnd = shaderSetup.shaderPacketRange.end();
+                    for (uint16_t shaderIndex = shaderSetup.shaderPacketRange.start; shaderIndex < shaderEnd; shaderIndex++)
                     {
-                        const auto& shader = packet.shaders[shaderIndex];
+                        const auto& shader = packet.shaders.atC(shaderIndex);
                         auto* shaderHandle = shader.bindingInfo.shader->handle;
 
                         if (shaderHandle)
@@ -406,22 +502,22 @@ namespace hf
                             };
                             HF.renderingApi.api.BindShader(handle, shaderInfo);
 
-                            uint16_t materialEnd = shader.materialPacketStart + shader.materialPacketCount;
-                            for (uint16_t materialIndex = shader.materialPacketStart; materialIndex < materialEnd; materialIndex++)
+                            uint16_t materialEnd = shader.materialPacketRange.end();
+                            for (uint16_t materialIndex = shader.materialPacketRange.start; materialIndex < materialEnd; materialIndex++)
                             {
-                                auto& material = packet.materials[materialIndex];
+                                auto& material = packet.materials.atC(materialIndex);
 
-                                uint32_t drawPacketEnd = material.drawPacketStart + material.drawPacketCount;
-                                for (uint32_t drawPacketIndex = material.drawPacketStart; drawPacketIndex < drawPacketEnd; drawPacketIndex++)
+                                uint32_t drawPacketEnd = material.drawPacketRange.end();
+                                for (uint32_t drawPacketIndex = material.drawPacketRange.start; drawPacketIndex < drawPacketEnd; drawPacketIndex++)
                                 {
-                                    auto& drawPacket = packet.drawPackets[drawPacketIndex];
+                                    auto& drawPacket = packet.drawPackets.atC(drawPacketIndex);
 
-                                    if (drawPacket.pushConstantSize > 0)
+                                    if (drawPacket.pushConstantRange.size > 0)
                                     {
                                         PushConstantUploadInfo uploadInfo
                                         {
                                             .shaderSetup = shaderSetup.shaderSetup,
-                                            .data = &packet.pushConstantUploads[drawPacket.pushConstantStart],
+                                            .data = &packet.pushConstantUploads.atC(drawPacket.pushConstantRange.start),
                                         };
 
                                         HF.renderingApi.api.UploadPushConstants(handle, uploadInfo);
@@ -430,19 +526,19 @@ namespace hf
                                     {// Binding Texture packs
                                         Ref<TexturePack> currentTexturePacks[MAX_NUM_BOUND_TEXTUREPACKS]{};
                                         {
-                                            const uint32_t texpackEnd = material.texpackStart + material.texpackCount;
-                                            for (uint32_t texpackIndex = material.texpackStart; texpackIndex < texpackEnd; texpackIndex++)
+                                            const uint32_t texpackEnd = material.texpackRange.end();
+                                            for (uint32_t texpackIndex = material.texpackRange.start; texpackIndex < texpackEnd; texpackIndex++)
                                             {
-                                                const auto texPack = packet.texpacks[texpackIndex];
+                                                const auto texPack = packet.texpacks.atC(texpackIndex);
                                                 currentTexturePacks[texPack.setBindingIndex] = texPack.pack;
                                             }
                                         }
 
                                         {
-                                            const uint32_t texpackEnd = drawPacket.texpackStart + drawPacket.texpackCount;
-                                            for (uint32_t texpackIndex = drawPacket.texpackStart; texpackIndex < texpackEnd; texpackIndex++)
+                                            const uint32_t texpackEnd = drawPacket.texpackRange.end();
+                                            for (uint32_t texpackIndex = drawPacket.texpackRange.start; texpackIndex < texpackEnd; texpackIndex++)
                                             {
-                                                const auto texPack = packet.texpacks[texpackIndex];
+                                                const auto texPack = packet.texpacks.atC(texpackIndex);
                                                 currentTexturePacks[texPack.setBindingIndex] = texPack.pack;
                                             }
                                         }
@@ -464,10 +560,10 @@ namespace hf
                                         }
                                     }
 
-                                    uint32_t drawCallEnd = drawPacket.drawCallStart + drawPacket.drawCallCount;
-                                    for (uint32_t drawCallIndex = drawPacket.drawCallStart; drawCallIndex < drawCallEnd; drawCallIndex++)
+                                    uint32_t drawCallEnd = drawPacket.drawCallRange.end();
+                                    for (uint32_t drawCallIndex = drawPacket.drawCallRange.start; drawCallIndex < drawCallEnd; drawCallIndex++)
                                     {
-                                        const auto& drawCall = packet.drawCalls[drawCallIndex];
+                                        const auto& drawCall = packet.drawCalls.atC(drawCallIndex);
 
 #if DEBUG
                                         if (drawCall.bufferCount > MAX_NUM_BUFFER_CACHE)

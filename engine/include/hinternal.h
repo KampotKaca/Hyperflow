@@ -146,7 +146,7 @@ namespace hf::inter
         bool SetWindowIcons_i(const Window* win, const char* folderPath);
 
         void RendererUpdate_i(const Ref<Renderer>& rn);
-        void RendererDraw_i(const Ref<Renderer>& rn, const RenderPacket& packet);
+        void RendererDraw_i(const Ref<Renderer>& rn, RenderPacket& packet);
 
         bool CreateShader_i(Shader* shader);
         bool DestroyShader_i(Shader* shader);

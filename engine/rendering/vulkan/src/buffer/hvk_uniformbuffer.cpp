@@ -140,7 +140,7 @@ namespace hf
             auto& packet = info.pUploadPackets[i];
             auto& uniform = GetUniform(packet.buffer);
             memcpy((uint8_t*)uniform->memoryMappings[currentFrame] + packet.offsetInBytes,
-                &info.pUniformDataBuffer[packet.uniformStart], packet.uniformSize);
+                &info.pUniformDataBuffer[packet.uniformRange.start], packet.uniformRange.size);
         }
     }
 

@@ -52,45 +52,6 @@ namespace hf
             inter::HF.graphicsResources.texturePacks.erase((uint64_t)this);
     }
 
-    template<typename T>
-    void TexturePack::SetBinding(const TexturePackBindingUploadInfo<T>& info)
-    {
-        static std::vector<void*> textures(32);
-        auto& binding = bindings[info.bindingIndex];
-
-        inter::rendering::TexturePackBindingUploadInfo uploadInfo
-        {
-            .bindingIndex = info.bindingIndex,
-            .sampler = info.sampler,
-        };
-
-        if (info.sampler.has_value()) binding.sampler = info.sampler.value();
-        if (info.texInfo.has_value())
-        {
-            auto& texUpload = info.texInfo.value();
-            for (uint32_t i = 0; i < texUpload.count; i++)
-                binding.textures[texUpload.offset + i] = texUpload.pTextures[i]->handle;
-
-            if (texUpload.count > 0)
-            {
-                textures.clear();
-                inter::rendering::TexturePackTextureUploadInfo texUploadInfo
-                {
-                    .offset = texUpload.offset,
-                    .count = texUpload.count
-                };
-
-                for (uint32_t i = 0; i < texUpload.count; i++)
-                    textures.push_back(binding.textures[texUpload.offset + i]);
-                texUploadInfo.pTextures = textures.data();
-
-                uploadInfo.texInfo = texUploadInfo;
-            }
-        }
-
-        inter::HF.renderingApi.api.UploadTexturePackBinding(handle, uploadInfo);
-    }
-
     void TexturePack::SubmitAll() { inter::HF.renderingApi.api.SubmitTextureCopyOperations(); }
     Ref<TexturePack> TexturePack::Create(const TexturePackCreationInfo& info)
     {
@@ -108,9 +69,6 @@ namespace hf
                 inter::HF.graphicsResources.texturePacks.erase((uint64_t)pack.get());
         }
     }
-
-    template void TexturePack::SetBinding<Texture>(const TexturePackBindingUploadInfo<Texture>&);
-    template void TexturePack::SetBinding<Cubemap>(const TexturePackBindingUploadInfo<Cubemap>&);
 
     namespace inter::rendering
     {
