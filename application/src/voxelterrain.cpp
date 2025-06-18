@@ -11,7 +11,7 @@ namespace app
 
     void VoxelTerrainGenerate()
     {
-        VOXEL_TERRAIN.jobPool = new BS::thread_pool<>();
+        VOXEL_TERRAIN.jobPool = new hf::ThreadPool<>();
 
         CreateVoxelOctreeRoot();
         CreateUnPrunableBranches();

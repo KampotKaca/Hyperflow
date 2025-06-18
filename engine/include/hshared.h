@@ -71,6 +71,9 @@ namespace hf
 		return std::make_unique<T>(std::forward<Args>(args)...);
 	}
 
+	template <class K, class V>
+	using unordered_map = phmap::flat_hash_map<K, V>;
+
 #define TO_RES_PATH(x) (std::string(RES_PATH) + (x))
 
 #if PLATFORM_WINDOWS

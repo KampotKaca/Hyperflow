@@ -40,7 +40,7 @@ namespace app
         uint32_t terrainAxisSize{};
         uint32_t usedOctaves{};
 
-        BS::thread_pool<>* jobPool{};
+        hf::ThreadPool<>* jobPool{};
     };
 
     extern VoxelTerrain VOXEL_TERRAIN;

@@ -29,15 +29,15 @@ namespace hf::inter
 
     struct GraphicsResources
     {
-        phmap::flat_hash_map<uint64_t, Ref<Shader>> shaders{};
-        phmap::flat_hash_map<uint64_t, Ref<Buffer>> buffers{};
-        phmap::flat_hash_map<uint64_t, Ref<TexturePack>> texturePacks{};
-        phmap::flat_hash_map<uint64_t, Ref<TexturePackAllocator>> texturePackAllocators{};
+        unordered_map<uint64_t, Ref<Shader>> shaders{};
+        unordered_map<uint64_t, Ref<Buffer>> buffers{};
+        unordered_map<uint64_t, Ref<TexturePack>> texturePacks{};
+        unordered_map<uint64_t, Ref<TexturePackAllocator>> texturePackAllocators{};
 
-        phmap::flat_hash_map<std::string, BufferAttrib> bufferAttribs{};
-        phmap::flat_hash_map<std::string, Ref<Mesh>> meshes{};
-        phmap::flat_hash_map<std::string, Ref<Texture>> textures{};
-        phmap::flat_hash_map<std::string, Ref<Cubemap>> cubemaps{};
+        unordered_map<std::string, BufferAttrib> bufferAttribs{};
+        unordered_map<std::string, Ref<Mesh>> meshes{};
+        unordered_map<std::string, Ref<Texture>> textures{};
+        unordered_map<std::string, Ref<Cubemap>> cubemaps{};
 
         Ref<StorageBuffer> materialDataStorage{};
     };
@@ -99,7 +99,7 @@ namespace hf::inter
         Time time{};
         Ref<Window> mainWindow{};
         std::vector<Ref<Window>> tempWindows{};
-        phmap::flat_hash_map<uint64_t, Ref<Window>> windows{};
+        unordered_map<uint64_t, Ref<Window>> windows{};
         uint32_t rendererCount{};
         RenderingApi renderingApi{};
 

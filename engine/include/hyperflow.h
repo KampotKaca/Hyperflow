@@ -20,6 +20,9 @@
 
 namespace hf
 {
+	template <BS::opt_t OptFlags = BS::tp::none>
+	using ThreadPool = BS::thread_pool<OptFlags>;
+
 	void Preload();
 	void Shutdown();
 
