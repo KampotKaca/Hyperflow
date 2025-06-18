@@ -321,22 +321,4 @@ namespace hf
             if (!internalOnly) HF.graphicsResources.meshes.clear();
         }
     }
-
-    namespace draw
-    {
-        void PacketAdd_DrawCall(const Ref<Renderer>& rn, const Ref<Mesh>& mesh)
-        {
-            for (auto& submesh : mesh->subMeshes)
-            {
-                DrawCallInfo drawInfo
-                {
-                    .pVertBuffers = &submesh.vertBuffer,
-                    .bufferCount = 1,
-                    .indexBuffer = submesh.indexBuffer,
-                    .instanceCount = 1
-                };
-                PacketAdd_DrawCall(rn, drawInfo);
-            }
-        }
-    }
 }

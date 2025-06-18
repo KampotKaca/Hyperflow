@@ -5,7 +5,7 @@ namespace hf::gridlines
 {
     void Draw(const Ref<Renderer>& rn, const GridLinesInfo& info)
     {
-        draw::StartShaderSetupPacket(rn, inter::HF.staticResources.axisLinesShaderSetup);
+        rn->Start_ShaderSetup(inter::HF.staticResources.axisLinesShaderSetup);
         {
             Camera3DCore::BindCurrentToUniform(rn);
 
@@ -15,13 +15,14 @@ namespace hf::gridlines
                 .attrib = inter::HF.staticResources.quadAttrib,
                 .bindingPoint = RenderBindingType::Graphics
             };
-            draw::StartShaderPacket(rn, shaderInfo);
+
+            rn->Start_Shader(shaderInfo);
             {
-                draw::StartMaterialPacket(rn, inter::HF.staticResources.emptyMaterial);
+                rn->Start_Material(inter::HF.staticResources.emptyMaterial);
                 {
-                    draw::StartDrawPacket(rn);
+                    rn->Start_Draw();
                     {
-                        draw::PacketSet_PushConstant(rn, &info, sizeof(GridLinesInfo));
+                        rn->DrawSet_PushConstant(&info, sizeof(GridLinesInfo));
 
                         const DrawCallInfo drawCallInfo
                         {
@@ -31,14 +32,14 @@ namespace hf::gridlines
                             .instanceCount = 1
                         };
 
-                        draw::PacketAdd_DrawCall(rn, drawCallInfo);
+                        rn->DrawAdd_DrawCall(drawCallInfo);
                     }
-                    draw::EndDrawPacket(rn);
+                    rn->End_Draw();
                 }
-                draw::EndMaterialPacket(rn);
+                rn->End_Material();
             }
-            draw::EndShaderPacket(rn);
+            rn->End_Shader();
         }
-        draw::EndShaderSetupPacket(rn);
+        rn->End_ShaderSetup();
     }
 }

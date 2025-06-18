@@ -45,7 +45,7 @@ namespace hf
             .uniformCount = 1,
         };
 
-        draw::ShaderSetupAdd_UniformBinding(rn, info);
+        rn->ShaderSetupAdd_UniformBinding(info);
     }
 
     void UploadUniform(const Ref<Renderer>& rn, const Camera3DCore& core,
@@ -68,6 +68,6 @@ namespace hf
             .data = &UNIFORM
         };
 
-        draw::UploadUniformPacket(rn, uniformUpload);
+        rn->Upload_Uniform(uniformUpload);
     }
 }

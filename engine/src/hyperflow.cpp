@@ -64,8 +64,9 @@ namespace hf
 					if (!window->IsClosed())
 					{
 						auto rn = window->renderer;
-						auto& cInfo = rn->eventInfo;
 						inter::rendering::StartRenderPacket_i(rn);
+						auto& cInfo = rn->eventInfo;
+						if (cInfo.onPreRenderCallback) cInfo.onPreRenderCallback(rn);
 						if (cInfo.onRenderCallback) cInfo.onRenderCallback(rn);
 						inter::rendering::EndRenderPacket_i(rn);
 					}

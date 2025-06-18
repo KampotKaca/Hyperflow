@@ -59,7 +59,7 @@ namespace app
             .data = &UNIFORM
         };
 
-        hf::draw::UploadUniformPacket(rn, uniformUpload);
+        rn->Upload_Uniform(uniformUpload);
     }
 
     void UniformBindTime(const hf::Ref<hf::Renderer>& rn)
@@ -72,6 +72,6 @@ namespace app
             .uniformCount = 1,
         };
 
-        hf::draw::ShaderSetupAdd_UniformBinding(rn, info);
+        rn->ShaderSetupAdd_UniformBinding(info);
     }
 }

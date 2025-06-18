@@ -23,6 +23,37 @@ namespace hf
 
 		void Bind(RenderPass pass) const;
 
+		void Upload_Uniform(const UniformBufferUpload& info);
+
+		void UploadStart_TexturePack(const Ref<TexturePack>& texPack);
+		void UploadEnd_TexturePack();
+
+		template<typename T>
+		void UploadAdd_TexturePackBinding(const TexturePackBindingUploadInfo<T>& info);
+
+		void Start_RenderPass(RenderPass pass);
+		void End_RenderPass();
+
+		void Start_ShaderSetup(ShaderSetup shaderSetup);
+		void End_ShaderSetup();
+
+		void Start_Shader(const ShaderBindingInfo& shaderBindingInfo);
+		void End_Shader();
+
+		void Start_Material(const Ref<Material>& material);
+		void End_Material();
+
+		void Start_Draw();
+		void End_Draw();
+
+		void ShaderSetupAdd_UniformBinding(const UniformBufferBindInfo& uniformBinding);
+		void MaterialAdd_TexturePackBinding(const Ref<TexturePack>& texPack, uint32_t setBindingIndex);
+
+		void DrawAdd_DrawCall(const Ref<Mesh>& mesh);
+		void DrawAdd_DrawCall(const DrawCallInfo& drawCall);
+		void DrawAdd_TexturePackBinding(const Ref<TexturePack>& texPack, uint32_t setBindingIndex);
+		void DrawSet_PushConstant(const void* data, uint32_t dataSize);
+
 #ifndef HF_ENGINE_INTERNALS
 	private:
 #endif

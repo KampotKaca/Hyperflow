@@ -29,6 +29,16 @@ namespace hf
 	const std::string& GetApplicationTitle();
 	void Terminate();
 
+	RenderPass DefineRenderPass(const RenderPassDefinitionInfo& info);
+	ShaderSetup DefineShaderSetup(const ShaderSetupDefinitionInfo& info);
+	TextureSampler DefineTextureSampler(const TextureSamplerDefinitionInfo& info);
+	TextureLayout DefineTextureLayout(const TextureLayoutDefinitionInfo& info);
+
+	BufferAttrib DefineBufferAttrib(const BufferAttribDefinitionInfo& info);
+	BufferAttrib DefineBufferAttrib(const char* assetPath);
+	UniformBuffer DefineUniformBuffer(const UniformBufferDefinitionInfo& info);
+	UniformAllocator DefineUniformAllocator(const UniformAllocatorDefinitionInfo& info);
+
 	namespace input
 	{
 		bool IsDown(Key key);
@@ -60,16 +70,6 @@ namespace hf
 		void SetTargetFrameRate(int16_t targetFrameRate);
 	}
 
-	RenderPass DefineRenderPass(const RenderPassDefinitionInfo& info);
-	ShaderSetup DefineShaderSetup(const ShaderSetupDefinitionInfo& info);
-	TextureSampler DefineTextureSampler(const TextureSamplerDefinitionInfo& info);
-	TextureLayout DefineTextureLayout(const TextureLayoutDefinitionInfo& info);
-
-	BufferAttrib DefineBufferAttrib(const BufferAttribDefinitionInfo& info);
-	BufferAttrib DefineBufferAttrib(const char* assetPath);
-	UniformBuffer DefineUniformBuffer(const UniformBufferDefinitionInfo& info);
-	UniformAllocator DefineUniformAllocator(const UniformAllocatorDefinitionInfo& info);
-
 	namespace material
 	{
 		//No need to destroy the material, if it goes out of scope it is automatically freed!
@@ -89,40 +89,6 @@ namespace hf
 	namespace gridlines
 	{
 		void Draw(const Ref<Renderer>& rn, const GridLinesInfo& info);
-	}
-
-	namespace draw
-	{
-		void UploadUniformPacket(const Ref<Renderer>& rn, const UniformBufferUpload& info);
-
-		void StartTexturePackUpload(const Ref<Renderer>& rn, const Ref<TexturePack>& texPack);
-		void EndTexturePackUpload(const Ref<Renderer>& rn);
-
-		template<typename T>
-		void TexturePackAdd_BindingPacket(const Ref<Renderer>& rn, const TexturePackBindingUploadInfo<T>& info);
-
-		void StartRenderPassPacket(const Ref<Renderer>& rn, RenderPass pass);
-		void EndRenderPassPacket(const Ref<Renderer>& rn);
-
-		void StartShaderSetupPacket(const Ref<Renderer>& rn, ShaderSetup shaderSetup);
-		void EndShaderSetupPacket(const Ref<Renderer>& rn);
-
-		void StartShaderPacket(const Ref<Renderer>& rn, const ShaderBindingInfo& shaderBindingInfo);
-		void EndShaderPacket(const Ref<Renderer>& rn);
-
-		void StartMaterialPacket(const Ref<Renderer>& rn, const Ref<Material>& material);
-		void EndMaterialPacket(const Ref<Renderer>& rn);
-
-		void StartDrawPacket(const Ref<Renderer>& rn);
-		void EndDrawPacket(const Ref<Renderer>& rn);
-
-		void ShaderSetupAdd_UniformBinding(const Ref<Renderer>& rn, const UniformBufferBindInfo& uniformBinding);
-		void MaterialAdd_TexturePackBinding(const Ref<Renderer>& rn, const Ref<TexturePack>& texPack, uint32_t setBindingIndex);
-
-		void PacketAdd_DrawCall(const Ref<Renderer>& rn, const Ref<Mesh>& mesh);
-		void PacketAdd_DrawCall(const Ref<Renderer>& rn, const DrawCallInfo& drawCall);
-		void PacketAdd_TexturePackBinding(const Ref<Renderer>& rn, const Ref<TexturePack>& texPack, uint32_t setBindingIndex);
-		void PacketSet_PushConstant(const Ref<Renderer>& rn, const void* data, uint32_t dataSize);
 	}
 
 	namespace utils

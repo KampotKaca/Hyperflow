@@ -1,7 +1,6 @@
 #define HF_ENGINE_INTERNALS
 #include "hdrawprocess.h"
 #include "hyperflow.h"
-#include "hgenericexception.h"
 #include "hrenderer.h"
 #include "hinternal.h"
 #include "hshader.h"
@@ -10,351 +9,344 @@
 
 namespace hf
 {
-    namespace draw
+    void Renderer::Upload_Uniform(const UniformBufferUpload& info)
     {
-        void StartRenderPassPacket(const Ref<Renderer>& rn, RenderPass pass)
-        {
-            auto& currentDraw = rn->currentDraw;
 #if DEBUG
-            if (currentDraw.currentPass)
-                throw GENERIC_EXCEPT("[Hyperflow]", "Cannot start RenderPass, without ending the previous one!");
+        if (!isDrawing)
+            throw GENERIC_EXCEPT("[Hyperflow]", "Cannot upload uniform util drawing process starts");
 #endif
 
-            auto& packet = currentDraw.packet;
-            packet.passes.push_back({
-                .pass = pass,
-                .shaderSetupRange = (AssetRange<uint16_t>){ .start = (uint16_t)packet.shaderSetups.size(), .size = 0 }
-            });
+        auto& packet = currentDraw.packet;
+        packet.uniformUploadPackets.push_back(
+        {
+            .buffer = info.buffer,
+            .offsetInBytes = info.offsetInBytes,
+            .uniformRange = (AssetRange<uint32_t>) { .start = (uint32_t)packet.uniformUploads.size(), .size = info.sizeInBytes }
+        });
 
-            currentDraw.currentPass = packet.passes.atP(packet.passes.size() - 1);
+        packet.uniformUploads.push_back((uint8_t*)info.data, info.sizeInBytes);
+    }
+
+    void Renderer::UploadStart_TexturePack(const Ref<TexturePack>& texPack)
+    {
+#if DEBUG
+        if (!isDrawing)
+            throw GENERIC_EXCEPT("[Hyperflow]", "Cannot upload texture pack util drawing process starts");
+        if (currentDraw.currentTexturePackBinding)
+            throw GENERIC_EXCEPT("[Hyperflow]", "Cannot start texture pack upload util you end previous one");
+#endif
+
+        auto& packet = currentDraw.packet;
+        packet.textureGroupRebindings.push_back(TexturePackRebindingGroupPacketInfo
+        {
+            .texturePack = texPack,
+            .bindingPacketRange = (AssetRange<uint16_t>){ .start = (uint16_t)packet.textureRebindings.size(), .size = 0 }
+        });
+        currentDraw.currentTexturePackBinding = packet.textureGroupRebindings.atP(packet.textureGroupRebindings.size() - 1);
+    }
+
+    void Renderer::UploadEnd_TexturePack()
+    {
+#if DEBUG
+        if (!currentDraw.currentTexturePackBinding)
+            throw GENERIC_EXCEPT("[Hyperflow]", "You need to start texture pack first");
+#endif
+        currentDraw.currentTexturePackBinding = nullptr;
+    }
+
+    template void Renderer::UploadAdd_TexturePackBinding(const TexturePackBindingUploadInfo<Texture>& info);
+    template void Renderer::UploadAdd_TexturePackBinding(const TexturePackBindingUploadInfo<Cubemap>& info);
+    template<typename T>
+    void Renderer::UploadAdd_TexturePackBinding(const TexturePackBindingUploadInfo<T>& info)
+    {
+#if DEBUG
+        if (!currentDraw.currentTexturePackBinding)
+            throw GENERIC_EXCEPT("[Hyperflow]", "Cannot add binding packet without starting texture pack upload");
+#endif
+        auto& packet = currentDraw.packet;
+        auto& b = currentDraw.currentTexturePackBinding->texturePack->bindings[info.bindingIndex];
+
+        bool wasModified = false;
+        auto binding = (TexturePackRebindingPacketInfo)
+        {
+            .bindingIndex = info.bindingIndex,
+            .sampler = info.sampler,
+        };
+
+        if (info.sampler.has_value())
+        {
+            b.sampler = info.sampler.value();
+            wasModified = true;
         }
 
-        void EndRenderPassPacket(const Ref<Renderer>& rn)
+        if (info.texInfo.has_value())
         {
-            auto& currentDraw = rn->currentDraw;
-#if DEBUG
-            if (!currentDraw.currentPass)
-                throw GENERIC_EXCEPT("[Hyperflow]", "Cannot end RenderPass, without starting it!");
-#endif
+            auto textures = info.texInfo.value();
+            for (uint32_t i = 0; i < textures.count; i++)
+                b.textures[textures.offset + i] = textures.pTextures[i]->handle;
 
-            currentDraw.currentPass = nullptr;
-        }
-
-        void UploadUniformPacket(const Ref<Renderer>& rn, const UniformBufferUpload& info)
-        {
-#if DEBUG
-            if (!rn->isDrawing)
-                throw GENERIC_EXCEPT("[Hyperflow]", "Cannot upload uniform util drawing process starts");
-#endif
-
-            auto& packet = rn->currentDraw.packet;
-            packet.uniformUploadPackets.push_back(
+            binding.textures = (TexturePackRebindingPacketInfo::TextureBinding)
             {
-                .buffer = info.buffer,
-                .offsetInBytes = info.offsetInBytes,
-                .uniformRange = (AssetRange<uint32_t>) { .start = (uint32_t)packet.uniformUploads.size(), .size = info.sizeInBytes }
-            });
-
-            packet.uniformUploads.push_back((uint8_t*)info.data, info.sizeInBytes);
-        }
-
-        void StartTexturePackUpload(const Ref<Renderer>& rn, const Ref<TexturePack>& texPack)
-        {
-            auto& currentDraw = rn->currentDraw;
-#if DEBUG
-            if (!rn->isDrawing)
-                throw GENERIC_EXCEPT("[Hyperflow]", "Cannot upload texture pack util drawing process starts");
-            if (currentDraw.currentTexturePackBinding)
-                throw GENERIC_EXCEPT("[Hyperflow]", "Cannot start texture pack upload util you end previous one");
-#endif
-
-            auto& packet = currentDraw.packet;
-            packet.textureGroupRebindings.push_back(TexturePackRebindingGroupPacketInfo
-            {
-                .texturePack = texPack,
-                .bindingPacketRange = (AssetRange<uint16_t>){ .start = (uint16_t)packet.textureRebindings.size(), .size = 0 }
-            });
-            currentDraw.currentTexturePackBinding = packet.textureGroupRebindings.atP(packet.textureGroupRebindings.size() - 1);
-        }
-
-        void EndTexturePackUpload(const Ref<Renderer>& rn)
-        {
-            auto& currentDraw = rn->currentDraw;
-#if DEBUG
-            if (!currentDraw.currentTexturePackBinding)
-                throw GENERIC_EXCEPT("[Hyperflow]", "You need to start texture pack first");
-#endif
-            currentDraw.currentTexturePackBinding = nullptr;
-        }
-
-        template void TexturePackAdd_BindingPacket(const Ref<Renderer>& rn, const TexturePackBindingUploadInfo<Texture>& info);
-        template void TexturePackAdd_BindingPacket(const Ref<Renderer>& rn, const TexturePackBindingUploadInfo<Cubemap>& info);
-
-        template<typename T>
-        void TexturePackAdd_BindingPacket(const Ref<Renderer>& rn, const TexturePackBindingUploadInfo<T>& info)
-        {
-            auto& currentDraw = rn->currentDraw;
-#if DEBUG
-            if (!currentDraw.currentTexturePackBinding)
-                throw GENERIC_EXCEPT("[Hyperflow]", "Cannot add binding packet without starting texture pack upload");
-#endif
-            auto& packet = currentDraw.packet;
-            auto& b = currentDraw.currentTexturePackBinding->texturePack->bindings[info.bindingIndex];
-
-            bool wasModified = false;
-            auto binding = (TexturePackRebindingPacketInfo)
-            {
-                .bindingIndex = info.bindingIndex,
-                .sampler = info.sampler,
+                .offset = textures.offset,
+                .type = TexturePackBindingType::Texture2D,
+                .range = (AssetRange<uint16_t>){ .start = (uint16_t)packet.textures.size(), .size = (uint16_t)textures.count }
             };
 
-            if (info.sampler.has_value())
+            for (uint32_t i = 0; i < textures.count; i++)
+                packet.textures.push_back(textures.pTextures[i]->handle);
+            if (textures.count > 0) wasModified = true;
+        }
+
+        if (wasModified)
+        {
+            packet.textureRebindings.push_back(binding);
+            currentDraw.currentTexturePackBinding->bindingPacketRange.size++;
+        }
+        else LOG_WARN("Unnecessary binding upload! nothing changed");
+    }
+
+    void Renderer::Start_RenderPass(RenderPass pass)
+    {
+#if DEBUG
+        if (currentDraw.currentPass)
+            throw GENERIC_EXCEPT("[Hyperflow]", "Cannot start RenderPass, without ending the previous one!");
+#endif
+
+        auto& packet = currentDraw.packet;
+        packet.passes.push_back({
+            .pass = pass,
+            .shaderSetupRange = (AssetRange<uint16_t>){ .start = (uint16_t)packet.shaderSetups.size(), .size = 0 }
+        });
+
+        currentDraw.currentPass = packet.passes.atP(packet.passes.size() - 1);
+    }
+
+    void Renderer::End_RenderPass()
+    {
+#if DEBUG
+        if (!currentDraw.currentPass)
+            throw GENERIC_EXCEPT("[Hyperflow]", "Cannot end RenderPass, without starting it!");
+#endif
+
+        currentDraw.currentPass = nullptr;
+    }
+
+    void Renderer::Start_ShaderSetup(ShaderSetup shaderSetup)
+    {
+#if DEBUG
+        if (!currentDraw.currentPass)
+            throw GENERIC_EXCEPT("[Hyperflow]", "RenderPass must be set!");
+
+        if (currentDraw.currentShaderSetup)
+            throw GENERIC_EXCEPT("[Hyperflow]", "Cannot start ShaderSetup without ending previous one!");
+#endif
+
+        auto& packet = currentDraw.packet;
+        packet.shaderSetups.push_back({
+            .shaderSetup = shaderSetup,
+            .shaderPacketRange = (AssetRange<uint16_t>){ .start = (uint16_t)packet.shaders.size(), .size = 0 } ,
+            .uniformRange = (AssetRange<uint32_t>){ .start = (uint32_t)packet.uniforms.size(), .size = 0 } ,
+        });
+
+        currentDraw.currentShaderSetup = packet.shaderSetups.atP(packet.shaderSetups.size() - 1);
+        currentDraw.currentPass->shaderSetupRange.size++;
+    }
+
+    void Renderer::End_ShaderSetup()
+    {
+#if DEBUG
+        if (!currentDraw.currentPass)
+            throw GENERIC_EXCEPT("[Hyperflow]", "RenderPass must be set!");
+
+        if (!currentDraw.currentShaderSetup)
+            throw GENERIC_EXCEPT("[Hyperflow]", "Cannot end ShaderSetup without starting it!");
+#endif
+
+        currentDraw.currentShaderSetup = nullptr;
+    }
+
+    void Renderer::Start_Shader(const ShaderBindingInfo& shaderBindingInfo)
+    {
+#if DEBUG
+        if (!currentDraw.currentShaderSetup)
+            throw GENERIC_EXCEPT("[Hyperflow]", "ShaderSetup must be set!");
+
+        if (currentDraw.currentShader)
+            throw GENERIC_EXCEPT("[Hyperflow]", "Cannot start Shader without ending previous one!");
+#endif
+
+        auto& packet = currentDraw.packet;
+        packet.shaders.push_back({
+            .bindingInfo = shaderBindingInfo,
+            .materialPacketRange = (AssetRange<uint16_t>){ .start = (uint16_t)packet.materials.size(), .size = 0 }
+        });
+
+        currentDraw.currentShader = packet.shaders.atP(packet.shaders.size() - 1);
+        currentDraw.currentShaderSetup->shaderPacketRange.size++;
+    }
+
+    void Renderer::End_Shader()
+    {
+#if DEBUG
+        if (!currentDraw.currentShaderSetup)
+            throw GENERIC_EXCEPT("[Hyperflow]", "ShaderSetup must be set!");
+
+        if (!currentDraw.currentShader)
+            throw GENERIC_EXCEPT("[Hyperflow]", "Cannot end Shader without starting it!");
+#endif
+
+        currentDraw.currentShader = nullptr;
+    }
+
+    void Renderer::Start_Material(const Ref<Material>& material)
+    {
+#if DEBUG
+        if (!currentDraw.currentShader)
+            throw GENERIC_EXCEPT("[Hyperflow]", "Shader must be set!");
+
+        if (currentDraw.currentMaterial)
+            throw GENERIC_EXCEPT("[Hyperflow]", "Cannot start Material without ending previous one!");
+#endif
+
+        auto& packet = currentDraw.packet;
+        packet.materials.push_back({
+            .material = material,
+            .drawPacketRange = (AssetRange<uint32_t>){ .start = (uint32_t)packet.drawPackets.size(), .size = 0 },
+            .texpackRange = (AssetRange<uint32_t>){ .start = (uint32_t)packet.texpacks.size(), .size = 0 },
+        });
+
+        currentDraw.currentMaterial = packet.materials.atP(packet.materials.size() - 1);
+        currentDraw.currentShader->materialPacketRange.size++;
+    }
+
+    void Renderer::End_Material()
+    {
+#if DEBUG
+        if (!currentDraw.currentShader)
+            throw GENERIC_EXCEPT("[Hyperflow]", "Shader must be set!");
+
+        if (!currentDraw.currentMaterial)
+            throw GENERIC_EXCEPT("[Hyperflow]", "Cannot end material without starting it!");
+#endif
+        currentDraw.currentMaterial = nullptr;
+    }
+
+    void Renderer::Start_Draw()
+    {
+#if DEBUG
+        if (!currentDraw.currentMaterial)
+            throw GENERIC_EXCEPT("[Hyperflow]", "Material must be set!");
+
+        if (currentDraw.currentDraw)
+            throw GENERIC_EXCEPT("[Hyperflow]", "Need to end draw before starting new one!");
+#endif
+
+        auto& packet = currentDraw.packet;
+        packet.drawPackets.push_back({
+            .texpackRange = (AssetRange<uint32_t>){ .start = (uint32_t)packet.texpacks.size(), .size = 0 },
+            .drawCallRange = (AssetRange<uint32_t>){ .start = (uint32_t)packet.drawCalls.size(), .size = 0 },
+            .pushConstantRange = (AssetRange<uint32_t>){ .start = (uint32_t)packet.pushConstantUploads.size(), .size = 0 },
+        });
+
+        currentDraw.currentDraw = packet.drawPackets.atP(packet.drawPackets.size() - 1);
+        currentDraw.currentMaterial->drawPacketRange.size++;
+    }
+
+    void Renderer::End_Draw()
+    {
+#if DEBUG
+        if (!currentDraw.currentShader)
+            throw GENERIC_EXCEPT("[Hyperflow]", "Shader must be set!");
+
+        if (!currentDraw.currentDraw)
+            throw GENERIC_EXCEPT("[Hyperflow]", "Need to start draw before ending it!");
+#endif
+
+        currentDraw.currentDraw = nullptr;
+    }
+
+    void Renderer::ShaderSetupAdd_UniformBinding(const UniformBufferBindInfo& uniformBinding)
+    {
+#if DEBUG
+        if (!currentDraw.currentShaderSetup)
+            throw GENERIC_EXCEPT("[Hyperflow]", "Shader Setup must be set!");
+#endif
+
+        auto& packet = currentDraw.packet;
+        packet.uniforms.push_back(uniformBinding);
+        currentDraw.currentShaderSetup->uniformRange.size++;
+    }
+
+    void Renderer::MaterialAdd_TexturePackBinding(const Ref<TexturePack>& texPack, uint32_t setBindingIndex)
+    {
+#if DEBUG
+        if (!currentDraw.currentMaterial)
+            throw GENERIC_EXCEPT("[Hyperflow]", "Material must be set!");
+#endif
+
+        auto& packet = currentDraw.packet;
+        packet.texpacks.push_back({
+            .pack = texPack,
+            .setBindingIndex = setBindingIndex,
+        });
+        currentDraw.currentMaterial->texpackRange.size++;
+    }
+
+    void Renderer::DrawAdd_DrawCall(const Ref<Mesh>& mesh)
+    {
+        for (auto& submesh : mesh->subMeshes)
+        {
+            DrawCallInfo drawInfo
             {
-                b.sampler = info.sampler.value();
-                wasModified = true;
-            }
-
-            if (info.texInfo.has_value())
-            {
-                auto textures = info.texInfo.value();
-                for (uint32_t i = 0; i < textures.count; i++)
-                    b.textures[textures.offset + i] = textures.pTextures[i]->handle;
-
-                binding.textures = (TexturePackRebindingPacketInfo::TextureBinding)
-                {
-                    .offset = textures.offset,
-                    .type = TexturePackBindingType::Texture2D,
-                    .range = (AssetRange<uint16_t>){ .start = (uint16_t)packet.textures.size(), .size = (uint16_t)textures.count }
-                };
-
-                for (uint32_t i = 0; i < textures.count; i++)
-                    packet.textures.push_back(textures.pTextures[i]->handle);
-                if (textures.count > 0) wasModified = true;
-            }
-
-            if (wasModified)
-            {
-                packet.textureRebindings.push_back(binding);
-                currentDraw.currentTexturePackBinding->bindingPacketRange.size++;
-            }
-            else LOG_WARN("Unnecessary binding upload! nothing changed");
+                .pVertBuffers = &submesh.vertBuffer,
+                .bufferCount = 1,
+                .indexBuffer = submesh.indexBuffer,
+                .instanceCount = 1
+            };
+            DrawAdd_DrawCall(drawInfo);
         }
+    }
 
-        void StartShaderSetupPacket(const Ref<Renderer>& rn, ShaderSetup shaderSetup)
-        {
-            auto& currentDraw = rn->currentDraw;
+    void Renderer::DrawAdd_DrawCall(const DrawCallInfo& drawCall)
+    {
 #if DEBUG
-            if (!currentDraw.currentPass)
-                throw GENERIC_EXCEPT("[Hyperflow]", "RenderPass must be set!");
-
-            if (currentDraw.currentShaderSetup)
-                throw GENERIC_EXCEPT("[Hyperflow]", "Cannot start ShaderSetup without ending previous one!");
+        if (!currentDraw.currentDraw)
+            throw GENERIC_EXCEPT("[Hyperflow]", "DrawPacket must be set!");
 #endif
 
-            auto& packet = currentDraw.packet;
-            packet.shaderSetups.push_back({
-                .shaderSetup = shaderSetup,
-                .shaderPacketRange = (AssetRange<uint16_t>){ .start = (uint16_t)packet.shaders.size(), .size = 0 } ,
-                .uniformRange = (AssetRange<uint32_t>){ .start = (uint32_t)packet.uniforms.size(), .size = 0 } ,
-            });
+        auto& packet = currentDraw.packet;
+        packet.drawCalls.push_back(drawCall);
+        currentDraw.currentDraw->drawCallRange.size++;
+    }
 
-            currentDraw.currentShaderSetup = packet.shaderSetups.atP(packet.shaderSetups.size() - 1);
-            currentDraw.currentPass->shaderSetupRange.size++;
-        }
-
-        void EndShaderSetupPacket(const Ref<Renderer>& rn)
-        {
-            auto& currentDraw = rn->currentDraw;
+    void Renderer::DrawAdd_TexturePackBinding(const Ref<TexturePack>& texPack, uint32_t setBindingIndex)
+    {
 #if DEBUG
-            if (!currentDraw.currentPass)
-                throw GENERIC_EXCEPT("[Hyperflow]", "RenderPass must be set!");
-
-            if (!currentDraw.currentShaderSetup)
-                throw GENERIC_EXCEPT("[Hyperflow]", "Cannot end ShaderSetup without starting it!");
+        if (!currentDraw.currentDraw)
+            throw GENERIC_EXCEPT("[Hyperflow]", "DrawPacket must be set!");
 #endif
 
-            currentDraw.currentShaderSetup = nullptr;
-        }
+        auto& packet = currentDraw.packet;
+        packet.texpacks.push_back({
+            .pack = texPack,
+            .setBindingIndex = setBindingIndex
+        });
+        currentDraw.currentDraw->texpackRange.size++;
+    }
 
-        void StartShaderPacket(const Ref<Renderer>& rn, const ShaderBindingInfo& shaderBindingInfo)
-        {
-            auto& currentDraw = rn->currentDraw;
+    void Renderer::DrawSet_PushConstant(const void* data, uint32_t dataSize)
+    {
 #if DEBUG
-            if (!currentDraw.currentShaderSetup)
-                throw GENERIC_EXCEPT("[Hyperflow]", "ShaderSetup must be set!");
+        if (!currentDraw.currentDraw)
+            throw GENERIC_EXCEPT("[Hyperflow]", "DrawPacket must be set!");
 
-            if (currentDraw.currentShader)
-                throw GENERIC_EXCEPT("[Hyperflow]", "Cannot start Shader without ending previous one!");
+        if (currentDraw.currentDraw->pushConstantRange.size > 0)
+            throw GENERIC_EXCEPT("[Hyperflow]", "Cannot set push constant twice for a single draw packet!");
 #endif
 
-            auto& packet = currentDraw.packet;
-            packet.shaders.push_back({
-                .bindingInfo = shaderBindingInfo,
-                .materialPacketRange = (AssetRange<uint16_t>){ .start = (uint16_t)packet.materials.size(), .size = 0 }
-            });
-
-            currentDraw.currentShader = packet.shaders.atP(packet.shaders.size() - 1);
-            currentDraw.currentShaderSetup->shaderPacketRange.size++;
-        }
-
-        void EndShaderPacket(const Ref<Renderer>& rn)
-        {
-            auto& currentDraw = rn->currentDraw;
-#if DEBUG
-            if (!currentDraw.currentShaderSetup)
-                throw GENERIC_EXCEPT("[Hyperflow]", "ShaderSetup must be set!");
-
-            if (!currentDraw.currentShader)
-                throw GENERIC_EXCEPT("[Hyperflow]", "Cannot end Shader without starting it!");
-#endif
-
-            currentDraw.currentShader = nullptr;
-        }
-
-        void StartMaterialPacket(const Ref<Renderer>& rn, const Ref<Material>& material)
-        {
-            auto& currentDraw = rn->currentDraw;
-#if DEBUG
-            if (!currentDraw.currentShader)
-                throw GENERIC_EXCEPT("[Hyperflow]", "Shader must be set!");
-
-            if (currentDraw.currentMaterial)
-                throw GENERIC_EXCEPT("[Hyperflow]", "Cannot start Material without ending previous one!");
-#endif
-
-            auto& packet = currentDraw.packet;
-            packet.materials.push_back({
-                .material = material,
-                .drawPacketRange = (AssetRange<uint32_t>){ .start = (uint32_t)packet.drawPackets.size(), .size = 0 },
-                .texpackRange = (AssetRange<uint32_t>){ .start = (uint32_t)packet.texpacks.size(), .size = 0 },
-            });
-
-            currentDraw.currentMaterial = packet.materials.atP(packet.materials.size() - 1);
-            currentDraw.currentShader->materialPacketRange.size++;
-        }
-
-        void EndMaterialPacket(const Ref<Renderer>& rn)
-        {
-            auto& currentDraw = rn->currentDraw;
-#if DEBUG
-            if (!currentDraw.currentShader)
-                throw GENERIC_EXCEPT("[Hyperflow]", "Shader must be set!");
-
-            if (!currentDraw.currentMaterial)
-                throw GENERIC_EXCEPT("[Hyperflow]", "Cannot end material without starting it!");
-#endif
-            currentDraw.currentMaterial = nullptr;
-        }
-
-        void StartDrawPacket(const Ref<Renderer>& rn)
-        {
-            auto& currentDraw = rn->currentDraw;
-#if DEBUG
-            if (!currentDraw.currentMaterial)
-                throw GENERIC_EXCEPT("[Hyperflow]", "Material must be set!");
-
-            if (currentDraw.currentDraw)
-                throw GENERIC_EXCEPT("[Hyperflow]", "Need to end draw before starting new one!");
-#endif
-
-            auto& packet = currentDraw.packet;
-            packet.drawPackets.push_back({
-                .texpackRange = (AssetRange<uint32_t>){ .start = (uint32_t)packet.texpacks.size(), .size = 0 },
-                .drawCallRange = (AssetRange<uint32_t>){ .start = (uint32_t)packet.drawCalls.size(), .size = 0 },
-                .pushConstantRange = (AssetRange<uint32_t>){ .start = (uint32_t)packet.pushConstantUploads.size(), .size = 0 },
-            });
-
-            currentDraw.currentDraw = packet.drawPackets.atP(packet.drawPackets.size() - 1);
-            currentDraw.currentMaterial->drawPacketRange.size++;
-        }
-
-        void EndDrawPacket(const Ref<Renderer>& rn)
-        {
-            auto& currentDraw = rn->currentDraw;
-#if DEBUG
-            if (!currentDraw.currentShader)
-                throw GENERIC_EXCEPT("[Hyperflow]", "Shader must be set!");
-
-            if (!currentDraw.currentDraw)
-                throw GENERIC_EXCEPT("[Hyperflow]", "Need to start draw before ending it!");
-#endif
-
-            currentDraw.currentDraw = nullptr;
-        }
-
-        void ShaderSetupAdd_UniformBinding(const Ref<Renderer>& rn, const UniformBufferBindInfo& uniformBinding)
-        {
-            auto& currentDraw = rn->currentDraw;
-#if DEBUG
-            if (!currentDraw.currentShaderSetup)
-                throw GENERIC_EXCEPT("[Hyperflow]", "Shader Setup must be set!");
-#endif
-
-            auto& packet = currentDraw.packet;
-            packet.uniforms.push_back(uniformBinding);
-            currentDraw.currentShaderSetup->uniformRange.size++;
-        }
-
-        void MaterialAdd_TexturePackBinding(const Ref<Renderer>& rn, const Ref<TexturePack>& texPack, const uint32_t setBindingIndex)
-        {
-            auto& currentDraw = rn->currentDraw;
-#if DEBUG
-            if (!currentDraw.currentMaterial)
-                throw GENERIC_EXCEPT("[Hyperflow]", "Material must be set!");
-#endif
-
-            auto& packet = currentDraw.packet;
-            packet.texpacks.push_back({
-                .pack = texPack,
-                .setBindingIndex = setBindingIndex,
-            });
-            currentDraw.currentMaterial->texpackRange.size++;
-        }
-
-        void PacketAdd_DrawCall(const Ref<Renderer>& rn, const DrawCallInfo& drawCall)
-        {
-            auto& currentDraw = rn->currentDraw;
-#if DEBUG
-            if (!currentDraw.currentDraw)
-                throw GENERIC_EXCEPT("[Hyperflow]", "DrawPacket must be set!");
-#endif
-
-            auto& packet = currentDraw.packet;
-            packet.drawCalls.push_back(drawCall);
-            currentDraw.currentDraw->drawCallRange.size++;
-        }
-
-        void PacketAdd_TexturePackBinding(const Ref<Renderer>& rn, const Ref<TexturePack>& texPack, const uint32_t setBindingIndex)
-        {
-            auto& currentDraw = rn->currentDraw;
-#if DEBUG
-            if (!currentDraw.currentDraw)
-                throw GENERIC_EXCEPT("[Hyperflow]", "DrawPacket must be set!");
-#endif
-
-            auto& packet = currentDraw.packet;
-            packet.texpacks.push_back({
-                .pack = texPack,
-                .setBindingIndex = setBindingIndex
-            });
-            currentDraw.currentDraw->texpackRange.size++;
-        }
-
-        void PacketSet_PushConstant(const Ref<Renderer>& rn, const void* data, uint32_t dataSize)
-        {
-            auto& currentDraw = rn->currentDraw;
-#if DEBUG
-            if (!currentDraw.currentDraw)
-                throw GENERIC_EXCEPT("[Hyperflow]", "DrawPacket must be set!");
-
-            if (currentDraw.currentDraw->pushConstantRange.size > 0)
-                throw GENERIC_EXCEPT("[Hyperflow]", "Cannot set push constant twice for a single draw packet!");
-#endif
-
-            auto& packet = currentDraw.packet;
-            currentDraw.currentDraw->pushConstantRange.size = dataSize;
-            packet.pushConstantUploads.push_back((uint8_t*)data, dataSize);
-        }
+        auto& packet = currentDraw.packet;
+        currentDraw.currentDraw->pushConstantRange.size = dataSize;
+        packet.pushConstantUploads.push_back((uint8_t*)data, dataSize);
     }
 
     namespace inter::rendering
@@ -400,8 +392,6 @@ namespace hf
 
             if(HF.renderingApi.api.GetReadyForRendering(rn->handle))
             {
-                auto& cInfo = rn->eventInfo;
-                if (cInfo.onPreRenderCallback) cInfo.onPreRenderCallback(rn);
                 HF.renderingApi.api.StartFrame(rn->handle);
                 RendererDraw_i(rn, packet);
                 HF.renderingApi.api.EndFrame(rn->handle);
