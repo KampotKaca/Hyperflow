@@ -46,7 +46,9 @@ namespace hf
 		void Start_Draw();
 		void End_Draw();
 
-		void ShaderSetupAdd_UniformBinding(const UniformBufferBindInfo& uniformBinding);
+		void Start_UniformSet(RenderBindingType bindingType, uint32_t setBindingIndex);
+		void End_UniformSet();
+		void UniformSetAdd_Uniform(UniformBuffer buffer);
 		void MaterialAdd_TexturePackBinding(const Ref<TexturePack>& texPack, uint32_t setBindingIndex);
 
 		void DrawAdd_DrawCall(const Ref<Mesh>& mesh);

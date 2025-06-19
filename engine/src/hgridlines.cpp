@@ -7,7 +7,7 @@ namespace hf::gridlines
     {
         rn->Start_ShaderSetup(inter::HF.staticResources.axisLinesShaderSetup);
         {
-            Camera3DCore::BindCurrentToUniform(rn);
+            primitives::BindGlobalUniformBuffer(rn);
 
             const ShaderBindingInfo shaderInfo
             {

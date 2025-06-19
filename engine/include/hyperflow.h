@@ -17,6 +17,7 @@
 #include "hindexbuffer.h"
 #include "hstoragebuffer.h"
 #include "hmesh.h"
+#include "hmaterial.h"
 
 namespace hf
 {
@@ -71,14 +72,7 @@ namespace hf
 		double GetSystemTime();
 		int32_t GetFrameRate();
 		void SetTargetFrameRate(int16_t targetFrameRate);
-	}
-
-	namespace material
-	{
-		//No need to destroy the material, if it goes out of scope it is automatically freed!
-		Ref<Material> Create(const MaterialCreationInfo& info);
-		void Upload(const Ref<Material>& material, const void* data);
-		uint16_t GetBufferIndex(const Ref<Material>& material);
+		TimeUniformInfo GetUniformInfo();
 	}
 
 	namespace skybox
@@ -112,10 +106,11 @@ namespace hf
 	{
 		BufferAttrib GetQuadBufferAttrib();
 		TextureLayout GetEmptyTextureLayout();
+		UniformBuffer GetGlobalUniformBuffer();
+		void BindGlobalUniformBuffer(const Ref<Renderer>& rn);
 
 		BufferAttrib GetCubeBufferAttrib();
 		TextureSampler GetCubemapSampler();
-		UniformBuffer GetCameraUniform();
 
 		Ref<Mesh> GetCube();
 		Ref<Material> GetEmptyMaterial();

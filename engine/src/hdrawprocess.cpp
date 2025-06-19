@@ -145,7 +145,7 @@ namespace hf
         packet.shaderSetups.push_back({
             .shaderSetup = shaderSetup,
             .shaderPacketRange = (AssetRange<uint16_t>){ .start = (uint16_t)packet.shaders.size(), .size = 0 } ,
-            .uniformRange = (AssetRange<uint32_t>){ .start = (uint32_t)packet.uniforms.size(), .size = 0 } ,
+            .uniformSetRange = (AssetRange<uint32_t>){ .start = (uint32_t)packet.uniformSets.size(), .size = 0 } ,
         });
 
         currentDraw.currentShaderSetup = packet.shaderSetups.atP(packet.shaderSetups.size() - 1);
@@ -265,16 +265,45 @@ namespace hf
         currentDraw.currentDraw = nullptr;
     }
 
-    void Renderer::ShaderSetupAdd_UniformBinding(const UniformBufferBindInfo& uniformBinding)
+    void Renderer::Start_UniformSet(RenderBindingType bindingType, uint32_t setBindingIndex)
     {
 #if DEBUG
         if (!currentDraw.currentShaderSetup)
-            throw GENERIC_EXCEPT("[Hyperflow]", "Shader Setup must be set!");
+            throw GENERIC_EXCEPT("[Hyperflow]", "Shader Setup must be set until you set uniform set");
+        if (currentDraw.currentUniformSet)
+            throw GENERIC_EXCEPT("[Hyperflow]", "Cannot start uniform set without ending previous one!");
 #endif
 
         auto& packet = currentDraw.packet;
-        packet.uniforms.push_back(uniformBinding);
-        currentDraw.currentShaderSetup->uniformRange.size++;
+        packet.uniformSets.push_back(UniformBufferSetPacketInfo
+        {
+            .bindingType = bindingType,
+            .setBindingIndex = setBindingIndex,
+            .bufferRange = (AssetRange<uint16_t>){ .start = (uint16_t)packet.uniformBuffers.size(), .size = 0 },
+        });
+        currentDraw.currentUniformSet = packet.uniformSets.atP(packet.uniformSets.size() - 1);
+        currentDraw.currentShaderSetup->uniformSetRange.size++;
+    }
+
+    void Renderer::End_UniformSet()
+    {
+#if DEBUG
+        if (!currentDraw.currentUniformSet)
+            throw GENERIC_EXCEPT("[Hyperflow]", "Cannot end uniform set without starting it!");
+#endif
+        currentDraw.currentUniformSet = nullptr;
+    }
+
+    void Renderer::UniformSetAdd_Uniform(UniformBuffer buffer)
+    {
+#if DEBUG
+        if (!currentDraw.currentUniformSet)
+            throw GENERIC_EXCEPT("[Hyperflow]", "Uniform Set must be set!");
+#endif
+
+        auto& packet = currentDraw.packet;
+        packet.uniformBuffers.push_back(buffer);
+        currentDraw.currentUniformSet->bufferRange.size++;
     }
 
     void Renderer::MaterialAdd_TexturePackBinding(const Ref<TexturePack>& texPack, uint32_t setBindingIndex)
@@ -468,11 +497,18 @@ namespace hf
                     HF.renderingApi.api.BindShaderSetup(handle, shaderSetup.shaderSetup);
 
                     {
-                        uint32_t uniformEnd = shaderSetup.uniformRange.end();
-                        for (uint32_t uniformIndex = shaderSetup.uniformRange.start; uniformIndex < uniformEnd; uniformIndex++)
+                        uint32_t uniformEnd = shaderSetup.uniformSetRange.end();
+                        for (uint32_t uniformIndex = shaderSetup.uniformSetRange.start; uniformIndex < uniformEnd; uniformIndex++)
                         {
-                            const auto& uniform = packet.uniforms.atC(uniformIndex);
-                            HF.renderingApi.api.BindUniformBuffer(handle, uniform);
+                            const auto& uniformSet = packet.uniformSets.atC(uniformIndex);
+                            UniformBufferBindInfo info
+                            {
+                                .bindingType = uniformSet.bindingType,
+                                .setBindingIndex = uniformSet.setBindingIndex,
+                                .pUniforms = packet.uniformBuffers.atP(uniformSet.bufferRange.start),
+                                .uniformCount = uniformSet.bufferRange.size
+                            };
+                            HF.renderingApi.api.BindUniformBuffer(handle, info);
                         }
                     }
 

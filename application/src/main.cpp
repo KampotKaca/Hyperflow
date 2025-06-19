@@ -15,6 +15,12 @@ int main()
 		// .renderingApi = hf::renderer::GetBestApiType(),
 		.renderingApi = hf::RenderingApiType::Vulkan,
 		.updateType = hf::EngineUpdateType::Continues,
+		.globalUniformBindingInfo =
+		{
+			.usageFlags = hf::ShaderUsageStage::All,
+			.arraySize = 1,
+			.elementSizeInBytes = sizeof(app::GlobalUniformInfo)
+		},
 		.lifecycleCallbacks =
 		{
 			.onRendererLoad     	 = app::AppRendererLoad,

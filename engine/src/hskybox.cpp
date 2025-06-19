@@ -32,7 +32,7 @@ namespace hf::skybox
     {
         rn->Start_ShaderSetup(inter::HF.staticResources.skyboxShaderSetup);
         {
-            Camera3DCore::BindCurrentToUniform(rn);
+            primitives::BindGlobalUniformBuffer(rn);
 
             const ShaderBindingInfo shaderInfo
             {

@@ -1,6 +1,6 @@
 #version 450
 
-layout(set = 0, binding = 0) uniform Camera
+struct Camera
 {
     vec3 lookDirection;
     vec3 position;
@@ -9,7 +9,19 @@ layout(set = 0, binding = 0) uniform Camera
     mat4 proj;
     mat4 invProj;
     mat4 viewProj;
-} CAMERA;
+};
+
+struct Time
+{
+    double deltaTime;
+    double timeSinceStartup;
+};
+
+layout(set = 0, binding = 0) uniform Global
+{
+    Camera CAMERA;
+    Time TIME;
+} GLOBAL;
 
 layout(push_constant) uniform PushConstants
 {
@@ -38,7 +50,7 @@ bool GetGridColor(float dist, vec2 absIntersection, float scale, float opacity, 
 
 void main()
 {
-    float dist = length(outPosition - CAMERA.position);
+    float dist = length(outPosition - GLOBAL.CAMERA.position);
     vec2 absIntersection = abs(outPosition.xz);
     if(GetGridColor(dist, absIntersection, 0.01, 0.01, outColor)) return;
     if(GetGridColor(dist, absIntersection, 0.1, 0.075, outColor)) return;

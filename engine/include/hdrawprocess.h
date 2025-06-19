@@ -20,6 +20,13 @@ namespace hf
         T end() const { return start + size; }
     };
 
+    struct UniformBufferSetPacketInfo
+    {
+        RenderBindingType bindingType = RenderBindingType::Graphics;
+        uint32_t setBindingIndex = 0;
+        AssetRange<uint16_t> bufferRange{};
+    };
+
     struct TexturePackRebindingPacketInfo
     {
         struct TextureBinding
@@ -64,7 +71,7 @@ namespace hf
     {
         ShaderSetup shaderSetup{};
         AssetRange<uint16_t> shaderPacketRange{};
-        AssetRange<uint32_t> uniformRange{};
+        AssetRange<uint32_t> uniformSetRange{};
     };
 
     struct RenderPassPacketInfo
@@ -93,7 +100,9 @@ namespace hf
         StaticVector<TexturePackRebindingPacketInfo, RENDERING_MAX_NUM_TEXPACK_REBINDING> textureRebindings{};
         StaticVector<void*, RENDERING_MAX_NUM_TEXTURES> textures{};
 
-        StaticVector<UniformBufferBindInfo, RENDERING_MAX_NUM_UNIFORMS> uniforms{};
+        StaticVector<UniformBufferSetPacketInfo, RENDERING_MAX_NUM_UNIFORMS> uniformSets{};
+        StaticVector<UniformBuffer, RENDERING_MAX_NUM_UNIFORMS> uniformBuffers{};
+
         StaticVector<DrawCallInfo, RENDERING_MAX_NUM_DRAW_CALLS> drawCalls{};
         StaticVector<uint8_t, RENDERING_MAX_UNIFORM_UPLOAD_BUFFER_SIZE> uniformUploads{};
         StaticVector<uint8_t, RENDERING_MAX_PUSH_CONSTANT_UPLOAD_BUFFER_SIZE> pushConstantUploads{};
@@ -106,6 +115,7 @@ namespace hf
         ShaderSetupPacketInfo* currentShaderSetup{};
         ShaderPacketInfo* currentShader{};
         MaterialPacketInfo* currentMaterial{};
+        UniformBufferSetPacketInfo* currentUniformSet{};
         DrawPacketInfo* currentDraw{};
         TexturePackRebindingGroupPacketInfo* currentTexturePackBinding{};
 

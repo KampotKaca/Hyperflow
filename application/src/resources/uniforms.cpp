@@ -7,37 +7,7 @@ namespace app
 
     void UniformDefineAll()
     {
-        //Time uniform
-        {
-            hf::UniformBufferBindingInfo bindingInfo
-            {
-                .usageFlags = hf::ShaderUsageStage::Default,
-                .arraySize = 1,
-                .elementSizeInBytes = sizeof(TimeUniform)
-            };
 
-            hf::UniformBufferDefinitionInfo uniform
-            {
-                .bindingId = 0,
-                .pBindings = &bindingInfo,
-                .bindingCount = 1
-            };
-
-            APP_UNIFORMS.timeUniform = hf::DefineUniformBuffer(uniform);
-        }
-
-        //allocator
-        {
-            APP_UNIFORMS.uniforms[0] = APP_UNIFORMS.timeUniform;
-
-            const hf::UniformAllocatorDefinitionInfo info
-            {
-                .pBuffers = APP_UNIFORMS.uniforms.data(),
-                .bufferCount = APP_UNIFORMS.uniforms.size(),
-            };
-
-            APP_UNIFORMS.allocator = hf::DefineUniformAllocator(info);
-        }
     }
 
     void UniformStartAll()
@@ -45,33 +15,16 @@ namespace app
 
     }
 
-    void UniformUploadTime(const hf::Ref<hf::Renderer>& rn)
+    void UniformUploadAll(const hf::Ref<hf::Renderer>& rn)
     {
-        static TimeUniform UNIFORM{};
-        UNIFORM.deltaTime = hf::time::GetDeltaTime();
-        UNIFORM.timeSinceStartup = hf::time::GetTimePassed();
-
         const hf::UniformBufferUpload uniformUpload
         {
-            .buffer = APP_UNIFORMS.timeUniform,
+            .buffer = hf::primitives::GetGlobalUniformBuffer(),
             .offsetInBytes = 0,
-            .sizeInBytes = sizeof(TimeUniform),
-            .data = &UNIFORM
+            .sizeInBytes = sizeof(GlobalUniformInfo),
+            .data = &APP_UNIFORMS.globalUniformInfo
         };
 
         rn->Upload_Uniform(uniformUpload);
-    }
-
-    void UniformBindTime(const hf::Ref<hf::Renderer>& rn)
-    {
-        constexpr hf::UniformBufferBindInfo info
-        {
-            .bindingType = hf::RenderBindingType::Graphics,
-            .setBindingIndex = UNIFORM_TIME_SET_INDEX,
-            .pUniforms = &APP_UNIFORMS.timeUniform,
-            .uniformCount = 1,
-        };
-
-        rn->ShaderSetupAdd_UniformBinding(info);
     }
 }

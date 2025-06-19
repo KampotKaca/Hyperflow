@@ -1,3 +1,4 @@
+HF_ENGINE_INTERNALS
 #include "hmaterial.h"
 #include "hgenericexception.h"
 #include "hinternal.h"
@@ -32,27 +33,22 @@ namespace hf
         }
     }
 
-    namespace material
+    Ref<Material> Material::Create(const MaterialCreationInfo& info)
     {
-        Ref<Material> Create(const MaterialCreationInfo& info)
+        return MakeRef<Material>(info);
+    }
+
+    void Material::Upload(const void* data) const
+    {
+        if (sizeInBytes == 0) return;
+
+        memcpy(bufferMemory, data, sizeInBytes);
+        const StorageBufferUploadInfo uploadInfo
         {
-            return MakeRef<Material>(info);
-        }
-
-        void Upload(const Ref<Material>& material, const void* data)
-        {
-            if (material->sizeInBytes == 0) return;
-
-            memcpy(material->bufferMemory, data, material->sizeInBytes);
-            const StorageBufferUploadInfo uploadInfo
-            {
-                .data = material->bufferMemory,
-                .offset = material->bufferIndex * RENDERING_MAX_MATERIAL_MEMORY_BADGET,
-                .size = material->sizeInBytes
-            };
-            inter::HF.graphicsResources.materialDataStorage->Upload(uploadInfo);
-        }
-
-        uint16_t GetBufferIndex(const Ref<Material>& material) { return material->bufferIndex; }
+            .data = bufferMemory,
+            .offset = bufferIndex * RENDERING_MAX_MATERIAL_MEMORY_BADGET,
+            .size = sizeInBytes
+        };
+        inter::HF.graphicsResources.materialDataStorage->Upload(uploadInfo);
     }
 }

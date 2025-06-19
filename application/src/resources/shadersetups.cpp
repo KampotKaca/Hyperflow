@@ -10,7 +10,7 @@ namespace app
     {
         //viking_room
         {
-            std::array uniforms { hf::primitives::GetCameraUniform(), APP_UNIFORMS.timeUniform };
+            std::array uniforms { hf::primitives::GetGlobalUniformBuffer() };
             const hf::ShaderSetupDefinitionInfo info
             {
                 .pushConstant =

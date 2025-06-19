@@ -1,6 +1,6 @@
 #version 450
 
-layout(set = 0, binding = 0) uniform Camera
+struct Camera
 {
     vec3 lookDirection;
     vec3 position;
@@ -9,18 +9,34 @@ layout(set = 0, binding = 0) uniform Camera
     mat4 proj;
     mat4 invProj;
     mat4 viewProj;
-} CAMERA;
+};
 
-layout (set = 1, binding = 0) uniform Time
+struct Time
 {
     double deltaTime;
     double timeSinceStartup;
-} TIME;
+};
+
+layout(set = 0, binding = 0) uniform Global
+{
+    Camera CAMERA;
+    Time TIME;
+} GLOBAL;
 
 layout(push_constant) uniform PushConstants
 {
     mat4 model;
 } PUSH_CONSTANT;
+
+//struct Material
+//{
+//
+//};
+//
+//layout(std430, binding = 0) buffer MaterialBuffer
+//{
+//    uint data[];
+//};
 
 layout(location = 0) in vec3 inPosition;
 layout(location = 1) in vec3 inColor;
@@ -31,8 +47,8 @@ layout(location = 1) out vec3 o_Color;
 
 void main()
 {
-    gl_Position = CAMERA.viewProj * PUSH_CONSTANT.model * vec4(inPosition, 1.0);
+    gl_Position = GLOBAL.CAMERA.viewProj * PUSH_CONSTANT.model * vec4(inPosition, 1.0);
     o_Color = inColor;
-    o_Color.r *= (sin(float(TIME.timeSinceStartup)) + 1) * 0.5f;
+    o_Color.r *= (sin(float(GLOBAL.TIME.timeSinceStartup)) + 1) * 0.5f;
     o_TexCoord = inTexCoord;
 }

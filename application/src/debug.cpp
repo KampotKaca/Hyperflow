@@ -137,12 +137,12 @@ namespace app
 
     void DebugPreRender(const hf::Ref<hf::Renderer>& rn)
     {
-
+        APP_UNIFORMS.globalUniformInfo.camera = APP_DEBUG.camera.camera3D.GetUniformInfo(rn);
     }
 
     void DebugPrepass(const hf::Ref<hf::Renderer>& rn)
     {
-        APP_DEBUG.camera.camera3D.UploadInUniform(rn);
+
     }
 
     void DebugRender(const hf::Ref<hf::Renderer>& rn)

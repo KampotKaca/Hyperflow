@@ -350,14 +350,6 @@ namespace hf
 		uint32_t sizeInBytes{};
 		const void* data{};
 	};
-	
-	struct UniformBufferBindInfo
-	{
-		RenderBindingType bindingType = RenderBindingType::Graphics;
-		uint32_t setBindingIndex = 0;
-		UniformBuffer* pUniforms{};
-		uint32_t uniformCount = 0;
-	};
 
 	struct TextureLayoutBindingInfo
 	{
@@ -876,8 +868,30 @@ namespace hf
 		std::string appTitle = "Hyperflow";
 		RenderingApiType renderingApi = RenderingApiType::Vulkan; // type of initial api, can be changed later
 		EngineUpdateType updateType = EngineUpdateType::EventRaised; // type of application updates
+		UniformBufferBindingInfo globalUniformBindingInfo{}; //this is binding for global uniform which should contain at least Camera and Time uniforms
 		EngineLifecycleCallbacks lifecycleCallbacks{}; //passed engine callbacks to interact with the engine
 		WindowCreationInfo windowData{}; //properties of the initial window
+	};
+
+	//endregion
+
+	//region Global Uniforms
+
+	struct CameraUniformInfo
+	{
+		alignas(16) vec3 lookDirection;
+		alignas(16) vec3 position;
+		alignas(16) mat4 view{};
+		alignas(16) mat4 invView{};
+		alignas(16) mat4 proj{};
+		alignas(16) mat4 invProj{};
+		alignas(16) mat4 viewProj{};
+	};
+
+	struct TimeUniformInfo
+	{
+		alignas(8) double deltaTime;
+		alignas(8) double timeSinceStartup;
 	};
 
 	//endregion

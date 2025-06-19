@@ -7,7 +7,8 @@ namespace app
     void AppPreRender(const hf::Ref<hf::Renderer>& rn)
     {
         DebugPreRender(rn);
-        UniformUploadTime(rn);
+        APP_UNIFORMS.globalUniformInfo.time = hf::time::GetUniformInfo();
+        UniformUploadAll(rn);
 
         if (hf::input::IsDown(hf::Key::G))
         {
@@ -24,8 +25,7 @@ namespace app
         {
             rn->Start_ShaderSetup(APP_SHADER_SETUPS.viking_room); //Viking room setup
             {
-                hf::Camera3DCore::BindCurrentToUniform(rn);
-                UniformBindTime(rn);
+                hf::primitives::BindGlobalUniformBuffer(rn);
 
                 const hf::ShaderBindingInfo vikingRoomShaderInfo
                 {
@@ -37,7 +37,7 @@ namespace app
                 {
                     rn->Start_Material(hf::primitives::GetEmptyMaterial());
                     {
-                        rn->MaterialAdd_TexturePackBinding(APP_TEXTURE_PACKS.viking_room_pack, 2);
+                        rn->MaterialAdd_TexturePackBinding(APP_TEXTURE_PACKS.viking_room_pack, 1);
                         rn->Start_Draw();
                         {
                             const auto trs = APP_OBJECTS.vikingRoomTransform.ToMat4();

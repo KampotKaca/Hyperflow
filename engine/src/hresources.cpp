@@ -9,10 +9,16 @@ namespace hf
     {
         BufferAttrib GetQuadBufferAttrib() { return inter::HF.staticResources.quadAttrib; }
         TextureLayout GetEmptyTextureLayout() { return inter::HF.staticResources.emptyLayout; }
+        UniformBuffer GetGlobalUniformBuffer() { return inter::HF.staticResources.globalUniform; }
+        void BindGlobalUniformBuffer(const Ref<Renderer>& rn)
+        {
+            rn->Start_UniformSet(RenderBindingType::Graphics, 0);
+            rn->UniformSetAdd_Uniform(inter::HF.staticResources.globalUniform);
+            rn->End_UniformSet();
+        }
 
         BufferAttrib GetCubeBufferAttrib() { return inter::HF.staticResources.cubeAttrib; }
         TextureSampler GetCubemapSampler() { return inter::HF.staticResources.cubemapSampler; }
-        UniformBuffer GetCameraUniform() { return inter::HF.staticResources.cameraUniform; }
 
         Ref<Mesh> GetCube() { return inter::HF.staticResources.cube; }
         Ref<Material> GetEmptyMaterial() { return inter::HF.staticResources.emptyMaterial; }
@@ -48,45 +54,6 @@ namespace hf
             LoadCubemaps();
             LoadTexturePacks();
             LoadMaterials();
-        }
-
-        void DefineShaderSetups()
-        {
-            //Axis Lines Shader Setup
-            {
-                const ShaderSetupDefinitionInfo info
-                {
-                    .pushConstant =
-                    {
-                        .usageFlags = ShaderUsageStage::Vertex | ShaderUsageStage::Fragment,
-                        .sizeInBytes = sizeof(GridLinesInfo),
-                    },
-                    .pBuffers = &HF.staticResources.cameraUniform,
-                    .bufferCount = 1,
-                    .pTextureLayouts = &HF.staticResources.emptyLayout,
-                    .textureLayoutCount = 1
-                };
-
-                HF.staticResources.axisLinesShaderSetup = DefineShaderSetup(info);
-            }
-
-            //Skybox Shader Setup
-            {
-                const ShaderSetupDefinitionInfo info
-                {
-                    .pushConstant =
-                    {
-                        .usageFlags = ShaderUsageStage::Vertex | ShaderUsageStage::Fragment,
-                        .sizeInBytes = 0,
-                    },
-                    .pBuffers = &HF.staticResources.cameraUniform,
-                    .bufferCount = 1,
-                    .pTextureLayouts = &HF.staticResources.skyboxLayout,
-                    .textureLayoutCount = 1
-                };
-
-                HF.staticResources.skyboxShaderSetup = DefineShaderSetup(info);
-            }
         }
 
         void DefineBufferAttribs()
@@ -175,28 +142,20 @@ namespace hf
 
         void DefineUniforms()
         {
-            //Camera uniform
             {
-                UniformBufferBindingInfo bindingInfo
-                {
-                    .usageFlags = ShaderUsageStage::Default,
-                    .arraySize = 1,
-                    .elementSizeInBytes = sizeof(CameraUniform)
-                };
-
-                const UniformBufferDefinitionInfo info
+                UniformBufferDefinitionInfo uniform
                 {
                     .bindingId = 0,
-                    .pBindings = &bindingInfo,
+                    .pBindings = &HF.globalUniformBindingInfo,
                     .bindingCount = 1
                 };
 
-                HF.staticResources.cameraUniform = DefineUniformBuffer(info);
+                HF.staticResources.globalUniform = DefineUniformBuffer(uniform);
             }
 
             //allocator
             {
-                std::array uniforms{ HF.staticResources.cameraUniform };
+                std::array uniforms = { HF.staticResources.globalUniform };
 
                 const UniformAllocatorDefinitionInfo info
                 {
@@ -205,6 +164,45 @@ namespace hf
                 };
 
                 HF.staticResources.uniformAllocator = DefineUniformAllocator(info);
+            }
+        }
+
+        void DefineShaderSetups()
+        {
+            //Axis Lines Shader Setup
+            {
+                const ShaderSetupDefinitionInfo info
+                {
+                    .pushConstant =
+                    {
+                        .usageFlags = ShaderUsageStage::Vertex | ShaderUsageStage::Fragment,
+                        .sizeInBytes = sizeof(GridLinesInfo),
+                    },
+                    .pBuffers = &HF.staticResources.globalUniform,
+                    .bufferCount = 1,
+                    .pTextureLayouts = &HF.staticResources.emptyLayout,
+                    .textureLayoutCount = 1
+                };
+
+                HF.staticResources.axisLinesShaderSetup = DefineShaderSetup(info);
+            }
+
+            //Skybox Shader Setup
+            {
+                const ShaderSetupDefinitionInfo info
+                {
+                    .pushConstant =
+                    {
+                        .usageFlags = ShaderUsageStage::Vertex | ShaderUsageStage::Fragment,
+                        .sizeInBytes = 0,
+                    },
+                    .pBuffers = &HF.staticResources.globalUniform,
+                    .bufferCount = 1,
+                    .pTextureLayouts = &HF.staticResources.skyboxLayout,
+                    .textureLayoutCount = 1
+                };
+
+                HF.staticResources.skyboxShaderSetup = DefineShaderSetup(info);
             }
         }
 
@@ -385,7 +383,7 @@ namespace hf
             {
                 .sizeInBytes = 0
             };
-            HF.staticResources.emptyMaterial = material::Create(materialInfo);
+            HF.staticResources.emptyMaterial = Material::Create(materialInfo);
         }
     }
 }

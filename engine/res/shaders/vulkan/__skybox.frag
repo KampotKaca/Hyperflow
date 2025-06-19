@@ -1,6 +1,6 @@
 #version 450
 
-layout(set = 0, binding = 0) uniform Camera
+struct Camera
 {
     vec3 lookDirection;
     vec3 position;
@@ -9,7 +9,19 @@ layout(set = 0, binding = 0) uniform Camera
     mat4 proj;
     mat4 invProj;
     mat4 viewProj;
-} CAMERA;
+};
+
+struct Time
+{
+    double deltaTime;
+    double timeSinceStartup;
+};
+
+layout(set = 0, binding = 0) uniform Global
+{
+    Camera CAMERA;
+    Time TIME;
+} GLOBAL;
 
 layout(set = 1, binding = 0) uniform samplerCube skyboxSampler;
 

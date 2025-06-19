@@ -1,6 +1,6 @@
 #version 450
 
-layout(set = 0, binding = 0) uniform Camera
+struct Camera
 {
     vec3 lookDirection;
     vec3 position;
@@ -9,13 +9,25 @@ layout(set = 0, binding = 0) uniform Camera
     mat4 proj;
     mat4 invProj;
     mat4 viewProj;
-} CAMERA;
+};
+
+struct Time
+{
+    double deltaTime;
+    double timeSinceStartup;
+};
+
+layout(set = 0, binding = 0) uniform Global
+{
+    Camera CAMERA;
+    Time TIME;
+} GLOBAL;
 
 layout(location = 0) in vec2 inPosition;
 layout(location = 0) out vec3 outPosition;
 
 void main()
 {
-    outPosition = vec3(inPosition.x * 1000 + CAMERA.position.x, 0, inPosition.y * 1000 + CAMERA.position.z);
-    gl_Position = CAMERA.viewProj * vec4(outPosition, 1.0);
+    outPosition = vec3(inPosition.x * 1000 + GLOBAL.CAMERA.position.x, 0, inPosition.y * 1000 + GLOBAL.CAMERA.position.z);
+    gl_Position = GLOBAL.CAMERA.viewProj * vec4(outPosition, 1.0);
 }

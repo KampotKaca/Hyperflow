@@ -5,18 +5,15 @@
 
 namespace app
 {
-    struct AppUniforms
+    struct GlobalUniformInfo
     {
-        hf::UniformBuffer timeUniform = 0;
-
-        std::array<hf::UniformBuffer, 1> uniforms{};
-        hf::UniformAllocator allocator = 0;
+        hf::CameraUniformInfo camera{};
+        hf::TimeUniformInfo time{};
     };
 
-    struct TimeUniform
+    struct AppUniforms
     {
-        alignas(8) double deltaTime;
-        alignas(8) double timeSinceStartup;
+        GlobalUniformInfo globalUniformInfo{};
     };
 
     extern AppUniforms APP_UNIFORMS;
@@ -24,8 +21,7 @@ namespace app
     void UniformDefineAll();
     void UniformStartAll();
 
-    void UniformUploadTime(const hf::Ref<hf::Renderer>& rn);
-    void UniformBindTime(const hf::Ref<hf::Renderer>& rn);
+    void UniformUploadAll(const hf::Ref<hf::Renderer>& rn);
 }
 
 #endif //UNIFORMS_H

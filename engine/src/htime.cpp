@@ -57,6 +57,15 @@ namespace hf
 		int32_t GetFrameRate() { return inter::HF.time.GetFrameRate(); }
 		void SetTargetFrameRate(int16_t targetFrameRate) { return inter::HF.time.SetTargetFrameRate(targetFrameRate); }
 
+		TimeUniformInfo GetUniformInfo()
+		{
+			return
+			{
+				.deltaTime = inter::HF.time.deltaTime,
+				.timeSinceStartup = inter::HF.time.GetTimePassed(),
+			};
+		}
+
 		double GetSystemTime()
 		{
 			using namespace std::chrono;

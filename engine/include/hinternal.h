@@ -68,7 +68,7 @@ namespace hf::inter
         TextureSampler cubemapSampler{};
         BufferAttrib cubeAttrib{};
 
-        UniformBuffer cameraUniform = 0;
+        UniformBuffer globalUniform = 0;
         UniformAllocator uniformAllocator = 0;
 
         ShaderSetup axisLinesShaderSetup{};
@@ -94,6 +94,7 @@ namespace hf::inter
     {
         EngineLifecycleCallbacks lifecycleCallbacks{};
         EngineUpdateType updateType = EngineUpdateType::Continues;
+        UniformBufferBindingInfo globalUniformBindingInfo{};
         std::atomic_bool isRunning{};
         std::string appTitle{};
         Time time{};

@@ -32,7 +32,7 @@ namespace hf
             return glm::lookAt(GetPosition(), anchor, -up);
         }
 
-        void UploadInUniform(const Ref<Renderer>& rn) const;
+        CameraUniformInfo GetUniformInfo(const Ref<Renderer>& rn) const;
         [[nodiscard]] mat4 ToViewProjectionMat4(const Ref<Renderer>& rn) const;
     };
 }

@@ -30,6 +30,7 @@ namespace hf
 
 			inter::HF.lifecycleCallbacks = engineData.lifecycleCallbacks;
 			inter::HF.updateType = engineData.updateType;
+			inter::HF.globalUniformBindingInfo = engineData.globalUniformBindingInfo;
 			inter::HF.appTitle = engineData.appTitle;
 
 			inter::HF.mainWindow = Window::Open(engineData.windowData, nullptr);

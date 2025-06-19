@@ -144,7 +144,7 @@ namespace hf
         }
     }
 
-    void BindUniforms(const VkRenderer* rn, const UniformBufferBindInfo& info)
+    void BindUniforms(const VkRenderer* rn, const inter::rendering::UniformBufferBindInfo& info)
     {
         auto currentFrame = rn->currentFrame;
 
