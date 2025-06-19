@@ -29,5 +29,6 @@ elseif(CMAKE_BUILD_TYPE STREQUAL "Release")
 endif()
 
 add_subdirectory(meshconvertor)
+add_subdirectory(shaderconvertor)
 add_subdirectory(engine)
 add_subdirectory(application)

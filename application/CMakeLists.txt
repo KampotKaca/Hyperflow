@@ -32,12 +32,6 @@ target_link_libraries(${PROJECT_NAME}
 )
 
 #region Prebuild
-find_program(GLSLC_EXECUTABLE glslc REQUIRED)
-
-if(NOT GLSLC_EXECUTABLE)
-    message(FATAL_ERROR "glslc not found! Please install Vulkan SDK or add glslc to PATH.")
-endif()
-
 file(COPY ${CMAKE_SOURCE_DIR}/application/res DESTINATION ${CMAKE_BINARY_DIR})
 file(COPY ${CMAKE_SOURCE_DIR}/engine/res/cubemaps DESTINATION ${CMAKE_BINARY_DIR}/res)
 target_compile_definitions("${CMAKE_PROJECT_NAME}" PUBLIC RES_PATH="${CMAKE_BINARY_DIR}/res/")
@@ -51,7 +45,9 @@ set(SHADER_SOURCE_DIRS
 
 set(SHADER_BINARY_DIR "${CMAKE_BINARY_DIR}/res/shaders/vulkan")
 file(MAKE_DIRECTORY ${SHADER_BINARY_DIR})
-set(COMPILED_SHADERS)
+
+set(SHADERCONVERTOR_ARGS)
+set(PROCESSED_SHADERS)
 
 foreach(SHADER_SOURCE_DIR ${SHADER_SOURCE_DIRS})
     file(GLOB_RECURSE SHADER_SOURCES_TMP
@@ -63,17 +59,17 @@ foreach(SHADER_SOURCE_DIR ${SHADER_SOURCE_DIRS})
         get_filename_component(FILE_NAME ${SHADER} NAME)
         set(OUTPUT_FILE "${SHADER_BINARY_DIR}/${FILE_NAME}.spv")
 
-        add_custom_command(
-                OUTPUT ${OUTPUT_FILE}
-                COMMAND ${GLSLC_EXECUTABLE} ${SHADER} -o ${OUTPUT_FILE}
-                DEPENDS ${SHADER}
-                COMMENT "Compiling shader ${FILE_NAME}"
-                VERBATIM
-        )
-
-        list(APPEND COMPILED_SHADERS ${OUTPUT_FILE})
+        list(APPEND SHADERCONVERTOR_ARGS "${SHADER}" "${OUTPUT_FILE}")
+        list(APPEND PROCESSED_SHADERS "${OUTPUT_FILE}")
     endforeach()
 endforeach()
+
+add_custom_command(
+        OUTPUT ${PROCESSED_SHADERS}
+        COMMAND shaderconvertor ${SHADERCONVERTOR_ARGS}
+        COMMENT "Preprocessing all shaders with shaderconvertor"
+        VERBATIM
+)
 
 # === Mesh Setup ===
 set(MESH_SOURCE_DIRS
@@ -114,7 +110,7 @@ endforeach()
 
 # === Prebuild Target ===
 add_custom_target(Prebuild
-        ALL DEPENDS ${CONVERTED_MESHES} ${COMPILED_SHADERS}
+        ALL DEPENDS ${CONVERTED_MESHES} ${PROCESSED_SHADERS}
         COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/application/res ${CMAKE_BINARY_DIR}/res
 )
 
