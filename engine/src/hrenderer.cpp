@@ -18,20 +18,6 @@ namespace hf
         rn->threadInfo.isRunning = false;
 
         inter::HF.renderingApi.api.WaitForDevice();
-        inter::CleanMarkedResources_i();
-
-        inter::HF.renderingApi.api.DestroyInstance(rn->handle);
-
-        if (inter::HF.rendererCount == 0)
-        {
-            inter::HF.renderingApi.isLoaded = false;
-            inter::HF.renderingApi.api.Unload();
-            if (inter::HF.renderingApi.additionalDll)
-            {
-                inter::platform::UnloadDll(inter::HF.renderingApi.additionalDll);
-                inter::HF.renderingApi.additionalDll = nullptr;
-            }
-        }
     }
 
     Renderer::Renderer(const Window* window, const RendererEventInfo& eventInfo)
@@ -220,14 +206,31 @@ namespace hf
             if (rn->handle)
             {
                 {
-                    if (HF.rendererCount == 1) UnloadAllResources_i(IsRunning());
-
                     std::lock_guard lock(HF.deletedResources.syncLock);
                     HF.rendererCount--;
                     rn->threadInfo.isRunning = false;
                     rn->threadInfo.renderCondition.notify_all();
+                    rn->threadInfo.thread.join();
                 }
-                rn->threadInfo.thread.join();
+
+                if (HF.rendererCount == 0)
+                {
+                    UnloadAllResources_i(IsRunning());
+                    CleanMarkedResources_i();
+                }
+
+                HF.renderingApi.api.DestroyInstance(rn->handle);
+
+                if (HF.rendererCount == 0)
+                {
+                    HF.renderingApi.isLoaded = false;
+                    HF.renderingApi.api.Unload();
+                    if (HF.renderingApi.additionalDll)
+                    {
+                        platform::UnloadDll(HF.renderingApi.additionalDll);
+                        HF.renderingApi.additionalDll = nullptr;
+                    }
+                }
                 rn->handle = nullptr;
             }
         }

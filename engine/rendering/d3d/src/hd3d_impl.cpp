@@ -16,7 +16,7 @@ namespace hf::inter::rendering
 
     void* CreateInstance(const RendererInstanceCreationInfo& info)
     {
-        return hf::CreateRenderer((HWND)info.handle);
+        return hf::CreateRenderer((HWND)info.handle, info.size, info.vSyncMode);
     }
 
     void PostInstanceLoad(void* rn, RenderPass pass)

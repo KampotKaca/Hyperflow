@@ -12,7 +12,7 @@ namespace hf
         ID3D11RenderTargetView* renderTexture{};
     };
 
-    D3DRenderer* CreateRenderer(HWND window);
+    D3DRenderer* CreateRenderer(HWND window, uvec2 size, VsyncMode vsyncMode);
     void DestroyRenderer(D3DRenderer* instance);
 
     bool GetReadyForRendering(D3DRenderer* rn);

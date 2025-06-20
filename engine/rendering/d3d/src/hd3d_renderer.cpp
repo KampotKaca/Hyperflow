@@ -2,14 +2,14 @@
 
 namespace hf
 {
-    D3DRenderer* CreateRenderer(HWND window)
+    D3DRenderer* CreateRenderer(HWND window, uvec2 size, VsyncMode vsyncMode)
     {
         DXGI_SWAP_CHAIN_DESC dc =
         {
             .BufferDesc =
             {
-                .Width = 0,
-                .Height = 0,
+                .Width = size.x,
+                .Height = size.y,
                 .RefreshRate =
                     {
                     .Numerator = 0,
