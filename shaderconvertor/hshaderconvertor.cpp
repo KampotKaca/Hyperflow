@@ -67,7 +67,7 @@ int main(int argc, char* argv[])
 {
     if (argc < 3 || (argc - 1) % 2 != 0)
     {
-        std::cerr << "Usage: " << argv[0] << " <input1.glsl> <output1.glsl> [<input2.glsl> <output2.glsl> ...]\n";
+        std::cerr << "Usage: " << argv[0] << " <input1> <output1> [<input2> <output2> ...]\n";
         return 1;
     }
 

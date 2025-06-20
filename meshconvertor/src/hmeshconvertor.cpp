@@ -39,32 +39,33 @@ static bool WriteMesh(const MeshInfo& meshInfo, const std::string& outputFilePat
 
 int main(int argc, char* argv[])
 {
+    if (argc < 3 || (argc - 1) % 2 != 0)
+    {
+        std::cerr << "Usage: " << argv[0] << " <input1> <output1> [<input2> <output2> ...]\n";
+        return 1;
+    }
+
     std::ios_base::sync_with_stdio(true);
 
-    if (argc != 3)
+    for (uint32_t i = 1; i < argc; i += 2)
     {
-        std::cout << "Usage: meshconv <input.obj> <output.mesh>" << std::endl;
-        return 1;
-    }
+        std::string inputPath = argv[i];
+        std::string outputPath = argv[i + 1];
+        // std::cout << "Started converting " << inputPath << " to " << outputPath << std::endl;
 
-    std::string inputPath = argv[1];
-    std::string outputPath = argv[2];
-
-    try
-    {
-        MeshInfo meshInfo{};
-        LoadModel(inputPath.c_str(), &meshInfo);
-
-        if (WriteMesh(meshInfo, outputPath))
+        try
         {
-            std::cout << "Successfully converted " << inputPath << " to " << outputPath << std::endl;
-            return 0;
+            MeshInfo meshInfo{};
+            LoadModel(inputPath.c_str(), &meshInfo);
+
+            if (WriteMesh(meshInfo, outputPath))
+                std::cout << "Successfully converted " << inputPath << " to " << outputPath << std::endl;
         }
-    }
-    catch (const std::exception& e)
-    {
-        std::cerr << "Error: " << e.what() << std::endl;
-        return 1;
+        catch (const std::exception& e)
+        {
+            std::cerr << "Error: " << e.what() << std::endl;
+            return 1;
+        }
     }
 
     return 0;

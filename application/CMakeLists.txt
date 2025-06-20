@@ -80,7 +80,8 @@ set(MESH_SOURCE_DIRS
 
 set(MESH_BINARY_DIR "${CMAKE_BINARY_DIR}/res/meshes")
 file(MAKE_DIRECTORY ${MESH_BINARY_DIR})
-set(CONVERTED_MESHES)
+set(MESHCONVERTOR_ARGS)
+set(PROCESSED_MESHES)
 
 foreach(MESH_SOURCE_DIR ${MESH_SOURCE_DIRS})
     file(GLOB_RECURSE MESH_SOURCES_TMP
@@ -91,26 +92,21 @@ foreach(MESH_SOURCE_DIR ${MESH_SOURCE_DIRS})
         get_filename_component(FILE_NAME ${MESH} NAME)
         set(OUTPUT_FILE "${MESH_BINARY_DIR}/${FILE_NAME}.mesh")
 
-        add_custom_command(
-                OUTPUT ${OUTPUT_FILE}
-                COMMAND meshconvertor
-                ARGS
-                "${MESH}"
-                "${OUTPUT_FILE}"
-                DEPENDS
-                meshconvertor
-                ${MESH}
-                COMMENT "Converting mesh: ${FILE_NAME}"
-                VERBATIM
-        )
-
-        list(APPEND CONVERTED_MESHES ${OUTPUT_FILE})
+        list(APPEND MESHCONVERTOR_ARGS "${MESH}" "${OUTPUT_FILE}")
+        list(APPEND PROCESSED_MESHES "${OUTPUT_FILE}")
     endforeach()
 endforeach()
 
+add_custom_command(
+        OUTPUT ${PROCESSED_MESHES}
+        COMMAND meshconvertor ${MESHCONVERTOR_ARGS}
+        COMMENT "Preprocessing all meshes with meshconvertor"
+        VERBATIM
+)
+
 # === Prebuild Target ===
 add_custom_target(Prebuild
-        ALL DEPENDS ${CONVERTED_MESHES} ${PROCESSED_SHADERS}
+        ALL DEPENDS ${PROCESSED_MESHES} ${PROCESSED_SHADERS}
         COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/application/res ${CMAKE_BINARY_DIR}/res
 )
 
