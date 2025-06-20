@@ -1,8 +1,3 @@
-if(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-    set(CMAKE_CXX_FLAGS_RELEASE "-O3 -march=native -flto -funroll-loops")
-elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-    set(CMAKE_CXX_FLAGS_RELEASE "-O3 -march=native -funroll-loops")
-endif()
 project(meshconvertor)
 
 set(CMAKE_CXX_STANDARD 23)

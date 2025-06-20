@@ -1,5 +1,6 @@
 cmake_minimum_required(VERSION 3.30)
 
+option(BUILD_PRODUCTION "build_production" ON)
 file(READ "appconfig.h" CONFIG_HEADER_CONTENTS)
 
 string(REGEX MATCH "#define VERSION \"([0-9]+\\.[0-9]+\\.[0-9]+)\"" VERSION_MATCH "${CONFIG_H_CONTENTS}")
@@ -112,3 +113,11 @@ add_custom_target(Prebuild
 
 #endregion
 add_dependencies(${CMAKE_PROJECT_NAME} Prebuild)
+
+if (BUILD_PRODUCTION STREQUAL "ON")
+    set(CMAKE_EXE_LINKER_FLAGS_RELEASE "${CMAKE_EXE_LINKER_FLAGS_RELEASE} -s")
+    add_custom_command(TARGET Hyperflow POST_BUILD
+            COMMAND ${CMAKE_STRIP} $<TARGET_FILE:Hyperflow>
+            COMMENT "Stripping binary"
+    )
+endif ()
