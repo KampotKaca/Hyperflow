@@ -1,6 +1,7 @@
-﻿if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
-add_subdirectory(windows)
-message(STATUS "VULKAN WINDOWS")
+﻿
+if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
+    file(GLOB_RECURSE ADDITIONAL_SRC CONFIGURE_DEPENDS windows/*.cpp)
+    message(STATUS "VULKAN WINDOWS")
 elseif (CMAKE_SYSTEM_NAME STREQUAL "Linux")
 
     execute_process(
@@ -23,7 +24,7 @@ elseif (CMAKE_SYSTEM_NAME STREQUAL "Linux")
 
         if(WAYLAND_FOUND)
             add_definitions(-DWAYLAND)
-            add_subdirectory(wayland)
+            file(GLOB_RECURSE ADDITIONAL_SRC CONFIGURE_DEPENDS wayland/*.cpp)
             message(STATUS "VULKAN WAYLAND")
         else()
             message(FATAL_ERROR "Wayland session detected but wayland-client not found")
@@ -32,7 +33,7 @@ elseif (CMAKE_SYSTEM_NAME STREQUAL "Linux")
         find_package(X11 REQUIRED)
         if(X11_FOUND)
             add_definitions(-DX11)
-            add_subdirectory(x11)
+            file(GLOB_RECURSE ADDITIONAL_SRC CONFIGURE_DEPENDS x11/*.cpp)
             message(STATUS "VULKAN X11")
         else()
             message(FATAL_ERROR "X11 libraries not found")
@@ -44,19 +45,9 @@ file(GLOB_RECURSE VULKAN_SRC CONFIGURE_DEPENDS src/*.cpp)
 
 add_subdirectory(external/vma)
 
-add_library(vk SHARED ${VULKAN_SRC})
+add_library(vk SHARED ${VULKAN_SRC} ${ADDITIONAL_SRC})
 target_precompile_headers(vk PRIVATE "include/hvk_shared.h")
 set_target_properties(vk PROPERTIES UNITY_BUILD ON)
-
-if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
-    add_dependencies(vk vkwin)
-elseif (CMAKE_SYSTEM_NAME STREQUAL "Linux")
-    if(WAYLAND)
-        add_dependencies(vk vkwayland)
-    elseif (X11)
-        add_dependencies(vk vkx11)
-    endif ()
-endif ()
 
 target_link_libraries(vk
         PRIVATE

@@ -1,6 +1,5 @@
 file(GLOB_RECURSE VMA_SRC CONFIGURE_DEPENDS src/*.cpp)
 add_library(vma ${VMA_SRC})
-set_target_properties(vma PROPERTIES POSITION_INDEPENDENT_CODE ON)
 target_compile_options(vma PRIVATE -fPIC)
 
 find_package(Vulkan REQUIRED)

@@ -22,7 +22,6 @@ namespace hf::inter
     {
         RenderingApiType type = RenderingApiType::None;
         void* handle{};
-        void* additionalDll{};
         bool isLoaded = false;
         rendering::RendererAPI api{};
     };

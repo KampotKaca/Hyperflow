@@ -13,10 +13,7 @@ namespace hf::inter::rendering
     {
         GRAPHICS_DATA.platform.createVulkanSurfaceFunc = info.createVulkanSurfaceFunc;
         GRAPHICS_DATA.platform.platformDll = info.platformDll;
-        auto func = (VulkanPlatformAPI*(*)())info.getFuncFromDll(GRAPHICS_DATA.platform.platformDll, "GetAPI");
-
-        if (!func) throw GENERIC_EXCEPT("[Hyperflow]", "Failed to get vulkan platform API");
-        GRAPHICS_DATA.platform.api = func();
+        GRAPHICS_DATA.platform.api = GetAPI();
         LoadVulkan(info);
     }
 

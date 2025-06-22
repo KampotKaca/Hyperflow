@@ -16,13 +16,14 @@ elseif(CMAKE_BUILD_TYPE STREQUAL "Release")
         set(CMAKE_CXX_FLAGS_RELEASE "-O3 -march=native -flto -funroll-loops")
         set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O3 -march=native -flto -funroll-loops")
     elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-        set(CMAKE_CXX_FLAGS_RELEASE "-O3 -march=native -funroll-loops")
+        set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O3 -march=native -funroll-loops -s -static -static-libgcc -static-libstdc++")
         set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O3 -march=native -funroll-loops")
-        set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O3 -march=native -s -static -static-libgcc -static-libstdc++")
     endif()
 endif()
 
 set(CMAKE_CXX_STANDARD 23)
+
+set(PRODUCTION_BUILD_DIR "" CACHE STRING "Path to export stripped build")
 
 if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE Release CACHE STRING "Choose the type of build." FORCE)

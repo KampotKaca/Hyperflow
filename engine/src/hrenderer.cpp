@@ -177,11 +177,7 @@ namespace hf
                 };
 
                 if (HF.renderingApi.type == RenderingApiType::Vulkan)
-                {
-                    HF.renderingApi.additionalDll = platform::LoadDll(VK_DLL);
-                    loadInfo.platformDll = HF.renderingApi.additionalDll;
                     loadInfo.createVulkanSurfaceFunc = platform::CreateVulkanSurface;
-                }
 
                 HF.renderingApi.api.Load(loadInfo);
                 HF.renderingApi.isLoaded = true;
@@ -225,11 +221,6 @@ namespace hf
                 {
                     HF.renderingApi.isLoaded = false;
                     HF.renderingApi.api.Unload();
-                    if (HF.renderingApi.additionalDll)
-                    {
-                        platform::UnloadDll(HF.renderingApi.additionalDll);
-                        HF.renderingApi.additionalDll = nullptr;
-                    }
                 }
                 rn->handle = nullptr;
             }

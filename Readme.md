@@ -105,10 +105,22 @@ The renderer runs on a seperate thread, so the rendering process consists of fil
 - C++23 compiler support.
 
 ### Building the Project
+### 1. Clion
+      1. Clone the repository.
+      2. Open the project in CLion.
+      3. Configure the appropriate CMake build settings.
+      4. Build and run the project.
+
+### 2. Cmake, Linux + Clang
 1. Clone the repository.
-2. Open the project in CLion.
-3. Configure the appropriate CMake build settings.
-4. Build and run the project.
+2. Change the terminal directory to the Hyperflow.
+3. Run the command to create cmake build folder, 
+   (On linux Clang is necessary!)
+   (adding -DPRODUCTION_BUILD_DIR=Hyperflow will create stripped production ready build beside the basic cmake build folder):  
+`cmake -S . -B build -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_BUILD_TYPE=Release -DPRODUCTION_BUILD_DIR=Hyperflow`
+      
+4. Build the project. (-j flag simply runs build process on multiple thread, very helpful if you want to build quickly.)  
+`cmake --build build -j 14`
 
 ## Known Limitations
 - The Direct3D backend is currently incomplete and cannot draw frames.
@@ -118,6 +130,6 @@ The renderer runs on a seperate thread, so the rendering process consists of fil
 
 ## Future Enhancements
 - Expand Direct3D functionality to match Vulkan's capabilities.
-- Add support for additional graphics APIs, like Metal.
+- Add support for additional graphics APIs, like Metal, or at least MoltenVk.
 - Provide advanced debugging tools for rendering processes.
 - Extend documentation and example scenes.

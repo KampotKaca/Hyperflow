@@ -1,6 +1,5 @@
 cmake_minimum_required(VERSION 3.30)
 
-option(BUILD_PRODUCTION "build_production" ON)
 file(READ "appconfig.h" CONFIG_HEADER_CONTENTS)
 
 string(REGEX MATCH "#define VERSION \"([0-9]+\\.[0-9]+\\.[0-9]+)\"" VERSION_MATCH "${CONFIG_H_CONTENTS}")
@@ -35,7 +34,6 @@ target_link_libraries(${PROJECT_NAME}
 #region Prebuild
 file(COPY ${CMAKE_SOURCE_DIR}/application/res DESTINATION ${CMAKE_BINARY_DIR})
 file(COPY ${CMAKE_SOURCE_DIR}/engine/res/cubemaps DESTINATION ${CMAKE_BINARY_DIR}/res)
-target_compile_definitions("${CMAKE_PROJECT_NAME}" PUBLIC RES_PATH="${CMAKE_BINARY_DIR}/res/")
 
 # === Shader Setup ===
 set(SHADER_SOURCE_DIRS
@@ -114,10 +112,23 @@ add_custom_target(Prebuild
 #endregion
 add_dependencies(${CMAKE_PROJECT_NAME} Prebuild)
 
-if (BUILD_PRODUCTION STREQUAL "ON")
-    set(CMAKE_EXE_LINKER_FLAGS_RELEASE "${CMAKE_EXE_LINKER_FLAGS_RELEASE} -s")
-    add_custom_command(TARGET Hyperflow POST_BUILD
-            COMMAND ${CMAKE_STRIP} $<TARGET_FILE:Hyperflow>
-            COMMENT "Stripping binary"
+if(PRODUCTION_BUILD_DIR)
+    set(EXPORT_DIR "../../${PRODUCTION_BUILD_DIR}")
+
+    add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+            COMMAND ${CMAKE_COMMAND} -E make_directory "${EXPORT_DIR}"
+            COMMAND ${CMAKE_COMMAND} -E make_directory "${EXPORT_DIR}/res"
+            COMMAND ${CMAKE_COMMAND} -E make_directory "${EXPORT_DIR}/application"
+
+            COMMAND ${CMAKE_COMMAND} -E copy_directory "${CMAKE_BINARY_DIR}/res" "${EXPORT_DIR}/res"
+            COMMAND ${CMAKE_STRIP} $<TARGET_FILE:Hyperflow> -o "${EXPORT_DIR}/application/$<TARGET_FILE_NAME:Hyperflow>"
+
+            COMMAND ${CMAKE_COMMAND} -E copy_if_different
+            $<TARGET_FILE_DIR:Hyperflow>/*.so
+            $<TARGET_FILE_DIR:Hyperflow>/*.dll
+            $<TARGET_FILE_DIR:Hyperflow>/*.dylib
+            "${EXPORT_DIR}/application"
+
+            COMMENT "Stripping and exporting production build to ${EXPORT_DIR}"
     )
-endif ()
+endif()

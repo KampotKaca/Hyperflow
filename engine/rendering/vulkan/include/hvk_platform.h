@@ -13,6 +13,8 @@ namespace hf
         uint32_t requiredExtensionCount = 0;
         uint32_t deviceExtensionCount = 0;
     };
+
+    VulkanPlatformAPI* GetAPI();
 }
 
 #endif //HVK_PLATFORM_H

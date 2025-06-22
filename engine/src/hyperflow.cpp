@@ -23,6 +23,7 @@ namespace hf
 	{
 		try
 		{
+			std::filesystem::current_path(std::filesystem::current_path().parent_path() / "res");
 			inter::HF.time = Time();
 			inter::platform::Load();
 

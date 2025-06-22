@@ -26,7 +26,7 @@ namespace hf
         VK_KHR_MAINTENANCE3_EXTENSION_NAME,
     };
 
-    API VulkanPlatformAPI* GetAPI()
+    VulkanPlatformAPI* GetAPI()
     {
         static VulkanPlatformAPI api =
         {

@@ -74,7 +74,7 @@ namespace hf
 	template <class K, class V>
 	using unordered_map = phmap::flat_hash_map<K, V>;
 
-#define TO_RES_PATH(x) (std::string(RES_PATH) + (x))
+#define TO_RES_PATH(x) (std::filesystem::current_path() / (x)).string()
 
 #if PLATFORM_WINDOWS
 #define API extern "C" __declspec(dllexport)
