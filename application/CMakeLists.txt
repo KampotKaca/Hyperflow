@@ -123,12 +123,19 @@ if(PRODUCTION_BUILD_DIR)
             COMMAND ${CMAKE_COMMAND} -E copy_directory "${CMAKE_BINARY_DIR}/res" "${EXPORT_DIR}/res"
             COMMAND ${CMAKE_STRIP} $<TARGET_FILE:Hyperflow> -o "${EXPORT_DIR}/application/$<TARGET_FILE_NAME:Hyperflow>"
 
-            COMMAND ${CMAKE_COMMAND} -E copy_if_different
-            $<TARGET_FILE_DIR:Hyperflow>/*.so
-            $<TARGET_FILE_DIR:Hyperflow>/*.dll
-            $<TARGET_FILE_DIR:Hyperflow>/*.dylib
-            "${EXPORT_DIR}/application"
-
             COMMENT "Stripping and exporting production build to ${EXPORT_DIR}"
     )
+
+    if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
+        add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+                COMMAND cmd /c "for %f in (\"$<TARGET_FILE_DIR:Hyperflow>\\*.dll\") do copy /Y \"%f\" \"${EXPORT_DIR}/application/\""
+        )
+    elseif (CMAKE_SYSTEM_NAME STREQUAL "Linux")
+        add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+                COMMAND ${CMAKE_COMMAND} -E copy_if_different
+                $<TARGET_FILE_DIR:Hyperflow>/*.so
+                "${EXPORT_DIR}/application"
+        )
+    endif ()
+
 endif()

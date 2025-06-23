@@ -99,9 +99,11 @@ The renderer runs on a seperate thread, so the rendering process consists of fil
 - CMake build system
 
 ### Prerequisites
-- A Windows 10 operating system.
-- CLion IDE 2025.1.2 or compatible build system.
-- Installed Vulkan and/or Direct3D runtime libraries.
+- A Windows 10-11, or Linux (I can guarantee that app works on Arch and Windows 10, try other at your own risk) operating system.
+  - CLion IDE 2025 on all platforms.
+  - Linux: Cmake + Clang
+  - Windows: Cmake + GCC + Ninja
+- Installed Vulkan sdk on window and vulkan-devel package on arch is required.
 - C++23 compiler support.
 
 ### Building the Project
@@ -116,11 +118,26 @@ The renderer runs on a seperate thread, so the rendering process consists of fil
 2. Change the terminal directory to the Hyperflow.
 3. Run the command to create cmake build folder, 
    (On linux Clang is necessary!)
-   (adding -DPRODUCTION_BUILD_DIR=Hyperflow will create stripped production ready build beside the basic cmake build folder):  
-`cmake -S . -B build -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_BUILD_TYPE=Release -DPRODUCTION_BUILD_DIR=Hyperflow`
+   (adding -DPRODUCTION_BUILD_DIR=Hyperflow will create stripped production ready build beside the basic cmake build folder):
+
+       cmake -S . -B build -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_BUILD_TYPE=Release -DPRODUCTION_BUILD_DIR=Hyperflow
       
 4. Build the project. (-j flag simply runs build process on multiple thread, very helpful if you want to build quickly.)  
-`cmake --build build -j 14`
+   
+       cmake --build build -j 14
+
+### 3. Cmake, Windows + GCC
+1. Clone the repository.
+2. Change the terminal directory to the Hyperflow.
+3. Run the command to create cmake build folder,
+   (On windows gcc, g++ and ninja are necessary!)
+   (adding -DPRODUCTION_BUILD_DIR=Hyperflow will create stripped production ready build beside the basic cmake build folder):
+
+       cmake -S . -B build -G Ninja -DCMAKE_MAKE_PROGRAM=ninja -DCMAKE_C_COMPILER=gcc -DCMAKE_CXX_COMPILER=g++ -DCMAKE_BUILD_TYPE=Release -DPRODUCTION_BUILD_DIR=Hyperflow
+
+4. Build the project. (-j flag simply runs build process on multiple thread, very helpful if you want to build quickly.)
+
+       cmake --build build -j 14
 
 ## Known Limitations
 - The Direct3D backend is currently incomplete and cannot draw frames.

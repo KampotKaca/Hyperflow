@@ -20,10 +20,10 @@ namespace hf::platform
 
     void* LoadDll(const char* dllName)
     {
-        const std::string path = std::string("lib") + dllName + ".dll";
-        if (!utils::FileExists(path.c_str()))
+        auto path = std::filesystem::current_path().parent_path() / "application" / (std::string("lib") + dllName + ".dll");
+        if (!utils::FileExists(path.string().c_str()))
             throw GENERIC_EXCEPT("[Hyperflow]", "Unable to find dll at path %s", path.c_str());
-        auto dll = LoadLibraryA(path.c_str());
+        auto dll = LoadLibraryA(path.string().c_str());
         if (!dll) throw GENERIC_EXCEPT("[Hyperflow]", "Unable to load dll\n[Error] %s", GetLastError());
         return dll;
     }
