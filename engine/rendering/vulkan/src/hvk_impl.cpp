@@ -139,20 +139,26 @@ namespace hf::inter::rendering
         return attribute->vertexSize;
     }
 
-    UniformBuffer DefineUniformBuffer(const UniformBufferDefinitionInfo& info)
+    Buffer DefineUniformBuffer(const BufferDefinitionInfo& info)
     {
-        GRAPHICS_DATA.uniformBuffers.emplace_back(MakeURef<VkUniformBuffer>(info));
-        return GRAPHICS_DATA.uniformBuffers.size();
+        GRAPHICS_DATA.buffers.emplace_back(MakeURef<VkUniformBuffer>(info));
+        return GRAPHICS_DATA.buffers.size();
     }
 
-    void UploadUniformBuffer(const void* rn, const UniformBufferUploadInfo& info)
+    Buffer DefineStorageBuffer(const StorageBufferDefinitionInfo& info)
     {
-        UploadUniforms((VkRenderer*)rn, info);
+        GRAPHICS_DATA.buffers.emplace_back(MakeURef<VkStorageBuffer>(info));
+        return GRAPHICS_DATA.buffers.size();
     }
 
-    void BindUniformBuffer(const void* rn, const UniformBufferBindInfo& info)
+    void UploadBuffer(const void* rn, const BufferUploadInfo& info)
     {
-        BindUniforms((VkRenderer*)rn, info);
+        UploadBuffers((VkRenderer*)rn, info);
+    }
+
+    void BindBuffer(const void* rn, const BufferBindInfo& info)
+    {
+        BindBuffers((VkRenderer*)rn, info);
     }
 
     ShaderSetup DefineShaderSetup(const ShaderSetupDefinitionInfo& info)
@@ -171,10 +177,10 @@ namespace hf::inter::rendering
         hf::UploadPushConstants((VkRenderer*)rn, info);
     }
 
-    UniformAllocator DefineUniformAllocator(const UniformAllocatorDefinitionInfo& info)
+    BufferAllocator DefineBufferAllocator(const BufferAllocatorDefinitionInfo& info)
     {
-        GRAPHICS_DATA.uniformAllocators.emplace_back(MakeURef<VkUniformAllocator>(info));
-        return GRAPHICS_DATA.uniformAllocators.size();
+        GRAPHICS_DATA.bufferAllocators.emplace_back(MakeURef<VkBufferAllocator>(info));
+        return GRAPHICS_DATA.bufferAllocators.size();
     }
 
     void* CreateVertBuffer(const VertBufferCreationInfo& info)
@@ -220,26 +226,6 @@ namespace hf::inter::rendering
         auto fullOffset = (uint64_t)info.offset * info.indexCount;
 
         UploadBufferMemory(buffer->bufferMemory, info.data, fullOffset, fullSize);
-    }
-
-    void* CreateStorageBuffer(const StorageBufferCreationInfo& info)
-    {
-        return new VkStorageBuffer(info);
-    }
-
-    void DestroyStorageBuffer(void* handle)
-    {
-        delete (VkStorageBuffer*)handle;
-    }
-
-    void UploadStorageBuffer(const StorageBufferUploadInfo& info)
-    {
-        auto buffer = (VkStorageBuffer*)info.storage;
-        if (buffer->memoryType == BufferMemoryType::Static)
-            throw GENERIC_EXCEPT("[Hyperflow]", "Cannot modify static buffer");
-
-        if (buffer->mapping) UploadBufferMemory(info.data, buffer->mapping, info.offsetInBytes, info.sizeInBytes);
-        else UploadBufferMemory(buffer->bufferMemory, info.data, info.offsetInBytes, info.sizeInBytes);
     }
 
     void SubmitBufferCopyOperations()
@@ -378,13 +364,14 @@ namespace hf::inter::rendering
             .DefineVertBufferAttrib     = DefineVertBufferAttrib,
             .GetVertBufferAttribSize    = GetVertBufferAttribSize,
 
-            //uniform buffer
+            //buffers
             .DefineUniformBuffer        = DefineUniformBuffer,
-            .UploadUniformBuffer        = UploadUniformBuffer,
-            .BindUniformBuffer          = BindUniformBuffer,
+            .DefineStorageBuffer        = DefineStorageBuffer,
+            .UploadBuffer               = UploadBuffer,
+            .BindBuffer                 = BindBuffer,
 
             //uniform allocator
-            .DefineUniformAllocator     = DefineUniformAllocator,
+            .DefineBufferAllocator     = DefineBufferAllocator,
 
             //vertex buffer
             .CreateVertBuffer           = CreateVertBuffer,
@@ -395,11 +382,6 @@ namespace hf::inter::rendering
             .CreateIndexBuffer          = CreateIndexBuffer,
             .DestroyIndexBuffer         = DestroyIndexBuffer,
             .UploadIndexBuffer          = UploadIndexBuffer,
-
-            //storage buffer
-            .CreateStorageBuffer        = CreateStorageBuffer,
-            .DestroyStorageBuffer       = DestroyStorageBuffer,
-            .UploadStorageBuffer        = UploadStorageBuffer,
 
             //buffer operations
             .SubmitBufferCopyOperations   = SubmitBufferCopyOperations,

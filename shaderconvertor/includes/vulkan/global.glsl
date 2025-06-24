@@ -22,3 +22,5 @@ layout(set = 0, binding = 0) uniform Global
     Camera CAMERA;
     Time TIME;
 } GLOBAL;
+
+const uint MAX_MATERIAL_SIZE = 1024;

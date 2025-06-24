@@ -9,12 +9,13 @@ namespace hf
     {
         BufferAttrib GetQuadBufferAttrib() { return inter::HF.staticResources.quadAttrib; }
         TextureLayout GetEmptyTextureLayout() { return inter::HF.staticResources.emptyLayout; }
-        UniformBuffer GetGlobalUniformBuffer() { return inter::HF.staticResources.globalUniform; }
+        Buffer GetGlobalUniformBuffer() { return inter::HF.staticResources.globalUniform; }
+        Buffer GetMaterialStorageBuffer() { return inter::HF.graphicsResources.materialDataStorageBuffer; }
         void BindGlobalUniformBuffer(const Ref<Renderer>& rn)
         {
-            rn->Start_UniformSet(RenderBindingType::Graphics, 0);
-            rn->UniformSetAdd_Uniform(inter::HF.staticResources.globalUniform);
-            rn->End_UniformSet();
+            rn->Start_BufferSet(RenderBindingType::Graphics, 0);
+            rn->BufferSetAdd_Buffer(inter::HF.staticResources.globalUniform);
+            rn->End_BufferSet();
         }
 
         BufferAttrib GetCubeBufferAttrib() { return inter::HF.staticResources.cubeAttrib; }
@@ -29,7 +30,7 @@ namespace hf
         static void DefineTextureLayouts();
         static void DefineBufferAttribs();
         static void DefineTextureSamplers();
-        static void DefineUniforms();
+        static void DefineBuffers();
         static void DefineShaderSetups();
 
         static void LoadCubemaps();
@@ -43,7 +44,7 @@ namespace hf
             DefineTextureLayouts();
             DefineBufferAttribs();
             DefineTextureSamplers();
-            DefineUniforms();
+            DefineBuffers();
             DefineShaderSetups();
         }
 
@@ -140,10 +141,10 @@ namespace hf
             }
         }
 
-        void DefineUniforms()
+        void DefineBuffers()
         {
             {
-                UniformBufferDefinitionInfo uniform
+                constexpr BufferDefinitionInfo uniform
                 {
                     .bindingId = 0,
                     .pBindings = &HF.globalUniformBindingInfo,
@@ -153,17 +154,39 @@ namespace hf
                 HF.staticResources.globalUniform = DefineUniformBuffer(uniform);
             }
 
-            //allocator
             {
-                std::array uniforms = { HF.staticResources.globalUniform };
-
-                const UniformAllocatorDefinitionInfo info
+                BufferBindingInfo bindingInfo
                 {
-                    .pBuffers = uniforms.data(),
-                    .bufferCount = uniforms.size(),
+                    .usageFlags = ShaderUsageStage::All,
+                    .arraySize = 1,
+                    .elementSizeInBytes = 64 * 64 * RENDERING_MAX_MATERIAL_OCTREE_COUNT * RENDERING_MAX_MATERIAL_MEMORY_BADGET
+                };
+                const StorageBufferDefinitionInfo info
+                {
+                    .bufferInfo =
+                    {
+                        .bindingId = 0,
+                        .pBindings = &bindingInfo,
+                        .bindingCount = 1
+                    },
+                    .memoryType = BufferMemoryType::WriteOnly,
+                    .data = nullptr
                 };
 
-                HF.staticResources.uniformAllocator = DefineUniformAllocator(info);
+                HF.graphicsResources.materialDataStorageBuffer = DefineStorageBuffer(info);
+            }
+
+            //allocator
+            {
+                std::array buffers = { HF.staticResources.globalUniform, HF.graphicsResources.materialDataStorageBuffer };
+
+                const BufferAllocatorDefinitionInfo info
+                {
+                    .pBuffers = buffers.data(),
+                    .bufferCount = buffers.size(),
+                };
+
+                HF.staticResources.bufferAllocator = DefineBufferAllocator(info);
             }
         }
 

@@ -17,7 +17,7 @@ namespace app
 
     void UniformUploadAll(const hf::Ref<hf::Renderer>& rn)
     {
-        const hf::UniformBufferUpload uniformUpload
+        const hf::BufferUploadInfo uniformUpload
         {
             .buffer = hf::primitives::GetGlobalUniformBuffer(),
             .offsetInBytes = 0,
@@ -25,6 +25,6 @@ namespace app
             .data = &APP_UNIFORMS.globalUniformInfo
         };
 
-        rn->Upload_Uniform(uniformUpload);
+        rn->Upload_Buffer(uniformUpload);
     }
 }

@@ -6,12 +6,12 @@
 
 namespace hf
 {
-    struct VertBuffer : public Buffer
+    struct VertBuffer : public RuntimeBufferBase
     {
         VertBuffer(const VertBufferCreationInfo& info, DataTransferType transferType);
         ~VertBuffer() override = default;
 
-        [[nodiscard]] BufferType GetType() const override { return BufferType::Vertex; }
+        [[nodiscard]] RuntimeBufferType GetType() const override { return RuntimeBufferType::Vertex; }
         void Upload(const VertBufferUploadInfo& info) const;
         static Ref<VertBuffer> Create(const VertBufferCreationInfo& info);
 

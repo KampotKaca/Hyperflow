@@ -29,7 +29,7 @@ namespace hf::inter
     struct GraphicsResources
     {
         unordered_map<uint64_t, Ref<Shader>> shaders{};
-        unordered_map<uint64_t, Ref<Buffer>> buffers{};
+        unordered_map<uint64_t, Ref<RuntimeBufferBase>> buffers{};
         unordered_map<uint64_t, Ref<TexturePack>> texturePacks{};
         unordered_map<uint64_t, Ref<TexturePackAllocator>> texturePackAllocators{};
 
@@ -38,7 +38,9 @@ namespace hf::inter
         unordered_map<std::string, Ref<Texture>> textures{};
         unordered_map<std::string, Ref<Cubemap>> cubemaps{};
 
-        Ref<StorageBuffer> materialDataStorage{};
+        unordered_map<uint64_t, Ref<Material>> materials{};
+
+        Buffer materialDataStorageBuffer{};
     };
 
     struct ResourcesMarkedForDeletion
@@ -46,7 +48,7 @@ namespace hf::inter
         struct TypedBuffer
         {
             void* buffer{};
-            BufferType type{};
+            RuntimeBufferType type{};
         };
 
         std::mutex syncLock{};
@@ -67,8 +69,8 @@ namespace hf::inter
         TextureSampler cubemapSampler{};
         BufferAttrib cubeAttrib{};
 
-        UniformBuffer globalUniform = 0;
-        UniformAllocator uniformAllocator = 0;
+        Buffer globalUniform = 0;
+        BufferAllocator bufferAllocator = 0;
 
         ShaderSetup axisLinesShaderSetup{};
         ShaderSetup skyboxShaderSetup{};
@@ -93,7 +95,7 @@ namespace hf::inter
     {
         EngineLifecycleCallbacks lifecycleCallbacks{};
         EngineUpdateType updateType = EngineUpdateType::Continues;
-        UniformBufferBindingInfo globalUniformBindingInfo{};
+        BufferBindingInfo globalUniformBindingInfo{};
         std::atomic_bool isRunning{};
         std::string appTitle{};
         Time time{};
@@ -135,6 +137,7 @@ namespace hf::inter
     {
         void StartRenderPacket_i(const Ref<Renderer>& rn);
         void EndRenderPacket_i(const Ref<Renderer>& rn);
+        void PreDraw_i(const Ref<Renderer>& rn);
 
         void LoadApi_i(RenderingApiType api);
         void UnloadCurrentApi_i(bool retainReferences);
@@ -153,9 +156,8 @@ namespace hf::inter
 
         bool CreateVertBuffer_i(VertBuffer* buffer);
         bool CreateIndexBuffer_i(IndexBuffer* buffer);
-        bool CreateStorageBuffer_i(StorageBuffer* buffer);
 
-        bool DestroyBuffer_i(Buffer* buffer);
+        bool DestroyBuffer_i(RuntimeBufferBase* buffer);
 
         bool CreateMesh_i(Mesh* mesh);
         bool DestroyMesh_i(Mesh* mesh);

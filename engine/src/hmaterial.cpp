@@ -33,22 +33,20 @@ namespace hf
         }
     }
 
-    Ref<Material> Material::Create(const MaterialCreationInfo& info)
+    void Material::Upload(const void* data)
     {
-        return MakeRef<Material>(info);
+        if (sizeInBytes > 0)
+        {
+            memcpy(bufferMemory, data, sizeInBytes);
+            isMarkedAsModified = true;
+        }
+        else throw GENERIC_EXCEPT("[Hyperflow]", "Cannot upload in empty material!");
     }
 
-    void Material::Upload(const void* data) const
+    Ref<Material> Material::Create(const MaterialCreationInfo& info)
     {
-        if (sizeInBytes == 0) return;
-
-        memcpy(bufferMemory, data, sizeInBytes);
-        const StorageBufferUploadInfo uploadInfo
-        {
-            .data = bufferMemory,
-            .offset = bufferIndex * RENDERING_MAX_MATERIAL_MEMORY_BADGET,
-            .size = sizeInBytes
-        };
-        inter::HF.graphicsResources.materialDataStorage->Upload(uploadInfo);
+        auto mat = MakeRef<Material>(info);
+        inter::HF.graphicsResources.materials[(uint64_t)mat.get()] = mat;
+        return mat;
     }
 }

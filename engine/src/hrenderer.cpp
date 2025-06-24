@@ -102,32 +102,19 @@ namespace hf
             primitives::DefineStaticResources_i();
             if (HF.lifecycleCallbacks.onRendererLoad) HF.lifecycleCallbacks.onRendererLoad();
 
-            StorageBufferCreationInfo materialStorageInfo
-            {
-                .bindingId = 0,
-                .elementSizeInBytes = RENDERING_MAX_MATERIAL_MEMORY_BADGET,
-                .elementCount = 64 * 64 * RENDERING_MAX_MATERIAL_OCTREE_COUNT,
-                .memoryType = BufferMemoryType::WriteOnly,
-                .usageFlags = BufferUsageType::All,
-                .data = nullptr
-            };
-
-            HF.graphicsResources.materialDataStorage = StorageBuffer::Create(materialStorageInfo);
-
             for (auto& shader : std::ranges::views::values(HF.graphicsResources.shaders)) CreateShader_i(shader.get());
 
             for (auto& buffer : std::ranges::views::values(HF.graphicsResources.buffers))
             {
                 switch (buffer->GetType())
                 {
-                    case BufferType::Vertex: CreateVertBuffer_i((VertBuffer*)buffer.get()); break;
-                    case BufferType::Index: CreateIndexBuffer_i((IndexBuffer*)buffer.get()); break;
-                    case BufferType::Storage: CreateStorageBuffer_i((StorageBuffer*)buffer.get()); break;
+                    case RuntimeBufferType::Vertex: CreateVertBuffer_i((VertBuffer*)buffer.get()); break;
+                    case RuntimeBufferType::Index: CreateIndexBuffer_i((IndexBuffer*)buffer.get()); break;
                 }
             }
 
             for (auto& mesh : std::ranges::views::values(HF.graphicsResources.meshes)) CreateMesh_i(mesh.get());
-            Buffer::SubmitAll();
+            RuntimeBufferBase::SubmitAll();
 
             for (auto& texture : std::ranges::views::values(HF.graphicsResources.textures)) CreateTexture_i(texture.get());
             for (auto& cubemap : std::ranges::views::values(HF.graphicsResources.cubemaps)) CreateCubemap_i(cubemap.get());

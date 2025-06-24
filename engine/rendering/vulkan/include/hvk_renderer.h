@@ -85,8 +85,8 @@ namespace hf
     void RegisterFrameBufferChange(VkRenderer* rn, uvec2 newSize);
     void SetVSync(VkRenderer* rn, VsyncMode mode);
 
-    void UploadUniforms(const VkRenderer* rn, const inter::rendering::UniformBufferUploadInfo& info);
-    void BindUniforms(const VkRenderer* rn, const inter::rendering::UniformBufferBindInfo& info);
+    void UploadBuffers(const VkRenderer* rn, const inter::rendering::BufferUploadInfo& info);
+    void BindBuffers(const VkRenderer* rn, const inter::rendering::BufferBindInfo& info);
     void BindTexturePack(const VkRenderer* rn, const VkTexturePack* pack, uint32_t setBindingIndex);
     void BindShaderSetup(VkRenderer* rn, ShaderSetup setup);
     void UploadPushConstants(const VkRenderer* rn, const PushConstantUploadInfo& info);

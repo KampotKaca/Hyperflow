@@ -5,17 +5,17 @@
 
 namespace hf
 {
-    enum class BufferType { Vertex, Index, Storage };
-    struct Buffer
+    enum class RuntimeBufferType { Vertex, Index };
+    struct RuntimeBufferBase
     {
-        virtual ~Buffer();
+        virtual ~RuntimeBufferBase();
 
         [[nodiscard]] bool IsRunning() const;
         void Destroy();
 
         static void SubmitAll();
-        static void Destroy(const Ref<Buffer>* pBuffers, uint32_t count);
-        [[nodiscard]] virtual BufferType GetType() const = 0;
+        static void Destroy(const Ref<RuntimeBufferBase>* pBuffers, uint32_t count);
+        [[nodiscard]] virtual RuntimeBufferType GetType() const = 0;
 
 #ifndef HF_ENGINE_INTERNALS
     private:

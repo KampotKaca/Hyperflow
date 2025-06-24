@@ -86,10 +86,10 @@ namespace hf
     {
         SubmitAllOperations();
 
-        GRAPHICS_DATA.uniformAllocators.clear();
+        GRAPHICS_DATA.bufferAllocators.clear();
         GRAPHICS_DATA.shaderSetups.clear();
         GRAPHICS_DATA.bufferAttribs.clear();
-        GRAPHICS_DATA.uniformBuffers.clear();
+        GRAPHICS_DATA.buffers.clear();
         GRAPHICS_DATA.textureSamplers.clear();
         GRAPHICS_DATA.textureLayouts.clear();
         GRAPHICS_DATA.renderPasses.clear();

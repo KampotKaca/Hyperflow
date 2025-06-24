@@ -5,12 +5,12 @@
 
 namespace hf
 {
-    struct IndexBuffer : public Buffer
+    struct IndexBuffer : public RuntimeBufferBase
     {
         IndexBuffer(const IndexBufferCreationInfo& info, DataTransferType transferType);
         ~IndexBuffer() override = default;
 
-        [[nodiscard]] BufferType GetType() const override { return BufferType::Index; }
+        [[nodiscard]] RuntimeBufferType GetType() const override { return RuntimeBufferType::Index; }
         void Upload(const IndexBufferUploadInfo& info) const;
         static Ref<IndexBuffer> Create(const IndexBufferCreationInfo& info);
 

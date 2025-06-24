@@ -17,7 +17,7 @@ Hyperflow is a C++23 graphics engine project with various components for mesh pr
 The project is divided into several key components:
 
 ### 1. **Core Engine Components**
-- **Main Entry Point (`main.cpp`)**: Runs the engine, passes window configuration, and program lifecycle evens, like start, update, renderer, quit and etc.
+- **Main Entry Point (`main.cpp`)**: Runs the engine, passes window configuration, and program lifecycle evens, like start, update, renderer, quit etc.
 - **EngineData**: Configures the main parameters for the engine, including rendering API, lifecycle callbacks, and window settings.
 
 ### 2. **Rendering API**
@@ -31,7 +31,7 @@ The project is divided into several key components:
     - Texture management.
     - Rendering frame loop control.
     - VSync and buffer synchronization.
-    - Multithreaded, runtime swappable renderer vulkan -> direct3d and back.
+    - Multithreaded, runtime swappable renderer vulkan to direct3d and back.
 
 ### 3. **Resources Management**
 - **Textures, Shaders, Buffers** (`hresourcehandling.cpp`, `hbuffer.cpp`, etc.):
@@ -41,7 +41,7 @@ The project is divided into several key components:
     - Unused resources and buffers are marked for deletion and cleaned up systematically.
 
 ### 4. **Engine Lifecycle**
-The graphics engine lifecycle is configurable using callbacks:
+The engine lifecycle is configurable using callbacks, which are passed in main by **EngineData**:
 - `RendererLoad`
 - `ResourcesLoad`
 - `StartCallback`
@@ -130,7 +130,7 @@ The renderer runs on a seperate thread, so the rendering process consists of fil
 1. Clone the repository.
 2. Change the terminal directory to the Hyperflow.
 3. Run the command to create cmake build folder,
-   (On windows gcc, g++ and ninja are necessary!)
+   (On windows gcc, g++, and ninja are necessary!)
    (adding -DPRODUCTION_BUILD_DIR=Hyperflow will create stripped production ready build beside the basic cmake build folder):
 
        cmake -S . -B build -G Ninja -DCMAKE_MAKE_PROGRAM=ninja -DCMAKE_C_COMPILER=gcc -DCMAKE_CXX_COMPILER=g++ -DCMAKE_BUILD_TYPE=Release -DPRODUCTION_BUILD_DIR=Hyperflow

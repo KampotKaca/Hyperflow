@@ -1,6 +1,7 @@
 #include "resources/uniforms.h"
 #include "resources/texturelayouts.h"
 #include "resources/shadersetups.h"
+#include "resources/materials.h"
 
 namespace app
 {
@@ -10,16 +11,16 @@ namespace app
     {
         //viking_room
         {
-            std::array uniforms { hf::primitives::GetGlobalUniformBuffer() };
+            std::array buffers { hf::primitives::GetGlobalUniformBuffer(), hf::primitives::GetMaterialStorageBuffer() };
             const hf::ShaderSetupDefinitionInfo info
             {
                 .pushConstant =
                 {
                     .usageFlags = hf::ShaderUsageStage::Vertex | hf::ShaderUsageStage::Fragment,
-                    .sizeInBytes = sizeof(hf::mat4)
+                    .sizeInBytes = sizeof(VikingRoomPushConstant)
                 },
-                .pBuffers = uniforms.data(),
-                .bufferCount = uniforms.size(),
+                .pBuffers = buffers.data(),
+                .bufferCount = buffers.size(),
                 .pTextureLayouts = &APP_TEXTURE_LAYOUTS.viking_room,
                 .textureLayoutCount = 1
             };

@@ -116,13 +116,12 @@ namespace hf
 
 	struct VertBuffer;
 	struct IndexBuffer;
-	struct StorageBuffer;
 	struct Mesh;
 	struct Material;
 
 	typedef uint32_t BufferAttrib;
-	typedef uint32_t UniformBuffer;
-	typedef uint32_t UniformAllocator;
+	typedef uint32_t Buffer;
+	typedef uint32_t BufferAllocator;
 	typedef uint32_t TextureLayout;
 	typedef uint32_t TextureSampler;
 	typedef uint32_t ShaderSetup;
@@ -132,7 +131,7 @@ namespace hf
 	enum class CubemapTextureType { Left, Right, Down, Up, Back, Front };
 
 	enum class BufferDataType { U8, I8, U16, I16, U32, I32, U64, I64, F16, F32, F64, Count };
-	enum class BufferMemoryType { Static, WriteOnly, ReadWrite, Count };
+	enum class BufferMemoryType { Static, WriteOnly, PerFrameWriteOnly, ReadWrite, PerFrameReadWrite, Count };
 	enum class RenderBindingType { Graphics = 0, Compute = 1, RayTracing = 1000165000, HuaweiSubpassShading = 1000369003 };
 
 	enum class AccessType
@@ -258,13 +257,6 @@ namespace hf
 		uint32_t indexCount{};
 	};
 
-	struct StorageBufferUploadInfo
-	{
-		const void* data{};
-		uint32_t offset{};
-		uint32_t size{};
-	};
-
 	struct ShaderBlendingOptions
 	{
 		ShaderBlendMode blendMode = ShaderBlendMode::Alpha;
@@ -312,7 +304,7 @@ namespace hf
 		RenderBindingType bindingPoint = RenderBindingType::Graphics;
 	};
 
-	struct UniformBufferBindingInfo
+	struct BufferBindingInfo
 	{
 		ShaderUsageStage usageFlags = ShaderUsageStage::Vertex | ShaderUsageStage::Fragment;
 
@@ -326,26 +318,23 @@ namespace hf
 	};
 
 	//scalar alignment 4, vec2 -> 8 vec3 and up -> 16
-	struct UniformBufferDefinitionInfo
+	struct BufferDefinitionInfo
 	{
 		uint32_t bindingId{};
-		UniformBufferBindingInfo* pBindings{};
+		BufferBindingInfo* pBindings{};
 		uint32_t bindingCount{};
 	};
 
-	struct StorageBufferCreationInfo
+	struct StorageBufferDefinitionInfo
 	{
-		uint32_t bindingId = 0;
-		uint32_t elementSizeInBytes = 0;
-		uint32_t elementCount = 0;
+		BufferDefinitionInfo bufferInfo;
 		BufferMemoryType memoryType = BufferMemoryType::Static;
-		BufferUsageType usageFlags = BufferUsageType::Storage;
-		void* data{};
+		const uint8_t* data{};
 	};
 
-	struct UniformBufferUpload
+	struct BufferUploadInfo
 	{
-		UniformBuffer buffer{};
+		Buffer buffer{};
 		uint32_t offsetInBytes{};
 		uint32_t sizeInBytes{};
 		const void* data{};
@@ -394,16 +383,16 @@ namespace hf
 	{
 		PushConstantInfo pushConstant{};
 
-		UniformBuffer* pBuffers{};
+		Buffer* pBuffers{};
 		uint32_t bufferCount{};
 
 		TextureLayout* pTextureLayouts{};
 		uint32_t textureLayoutCount{};
 	};
 
-	struct UniformAllocatorDefinitionInfo
+	struct BufferAllocatorDefinitionInfo
 	{
-		UniformBuffer* pBuffers{};
+		Buffer* pBuffers{};
 		uint32_t bufferCount{};
 	};
 
@@ -868,7 +857,7 @@ namespace hf
 		std::string appTitle = "Hyperflow";
 		RenderingApiType renderingApi = RenderingApiType::Vulkan; // type of initial api, can be changed later
 		EngineUpdateType updateType = EngineUpdateType::EventRaised; // type of application updates
-		UniformBufferBindingInfo globalUniformBindingInfo{}; //this is binding for global uniform which should contain at least Camera and Time uniforms
+		BufferBindingInfo globalUniformBindingInfo{}; //this is binding for global uniform which should contain at least Camera and Time uniforms
 		EngineLifecycleCallbacks lifecycleCallbacks{}; //passed engine callbacks to interact with the engine
 		WindowCreationInfo windowData{}; //properties of the initial window
 	};

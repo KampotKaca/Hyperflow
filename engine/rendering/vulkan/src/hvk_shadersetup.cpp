@@ -35,7 +35,7 @@ namespace hf
         {
             for (uint32_t i = 0; i < info.bufferCount; i++)
             {
-                const auto& buffer = GetUniform(info.pBuffers[i]);
+                const auto& buffer = GetBuffer(info.pBuffers[i]);
                 GRAPHICS_DATA.preAllocBuffers.descLayouts[i] = buffer->layout;
             }
 

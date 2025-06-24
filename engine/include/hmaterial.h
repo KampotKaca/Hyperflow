@@ -11,9 +11,9 @@ namespace hf
         explicit Material(const MaterialCreationInfo& info);
         ~Material();
 
-        uint16_t GetBufferIndex() const { return bufferIndex; }
-        void Upload(const void* data) const;
+        [[nodiscard]] uint16_t GetBufferIndex() const { return bufferIndex; }
 
+        void Upload(const void* data);
         //No need to destroy the material, if it goes out of scope it is automatically freed!
         static Ref<Material> Create(const MaterialCreationInfo& info);
 
@@ -24,6 +24,7 @@ namespace hf
         uint8_t* bufferMemory{};
         uint32_t bufferIndex{}, sizeInBytes{};
         uvec3 octreePosition{};
+        bool isMarkedAsModified = false;
     };
 }
 

@@ -4,7 +4,7 @@
 
 namespace hf
 {
-    Buffer::~Buffer()
+    RuntimeBufferBase::~RuntimeBufferBase()
     {
         if (transferType == DataTransferType::CopyData ||
             transferType == DataTransferType::TransferOwnership)
@@ -12,15 +12,15 @@ namespace hf
         inter::rendering::DestroyBuffer_i(this);
     }
 
-    bool Buffer::IsRunning() const { return handle; }
-    void Buffer::Destroy()
+    bool RuntimeBufferBase::IsRunning() const { return handle; }
+    void RuntimeBufferBase::Destroy()
     {
         if (inter::rendering::DestroyBuffer_i(this))
             inter::HF.graphicsResources.buffers.erase((uint64_t)this);
     }
 
-    void Buffer::SubmitAll() { inter::HF.renderingApi.api.SubmitBufferCopyOperations(); }
-    void Buffer::Destroy(const Ref<Buffer>* pBuffers, uint32_t count)
+    void RuntimeBufferBase::SubmitAll() { inter::HF.renderingApi.api.SubmitBufferCopyOperations(); }
+    void RuntimeBufferBase::Destroy(const Ref<RuntimeBufferBase>* pBuffers, uint32_t count)
     {
         for (uint32_t i = 0; i < count; i++)
         {
@@ -32,7 +32,7 @@ namespace hf
 
     namespace inter::rendering
     {
-        bool DestroyBuffer_i(Buffer* buffer)
+        bool DestroyBuffer_i(RuntimeBufferBase* buffer)
         {
             if (buffer->handle)
             {

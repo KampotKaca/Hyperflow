@@ -35,21 +35,29 @@ namespace app
                 };
                 rn->Start_Shader(vikingRoomShaderInfo);
                 {
-                    rn->Start_Material(hf::primitives::GetEmptyMaterial());
+                    rn->Start_Material(APP_MATERIALS.viking_room);
                     {
-                        rn->MaterialAdd_TexturePackBinding(APP_TEXTURE_PACKS.viking_room_pack, 1);
+                        rn->MaterialAdd_TexturePackBinding(APP_TEXTURE_PACKS.viking_room_pack, 2);
                         rn->Start_Draw();
                         {
-                            const auto trs = APP_OBJECTS.vikingRoomTransform.ToMat4();
-                            rn->DrawSet_PushConstant(&trs, sizeof(trs));
+                            const VikingRoomPushConstant pc
+                            {
+                                .modelMatrix = APP_OBJECTS.vikingRoomTransform.ToMat4(),
+                                .materialIndex = APP_MATERIALS.viking_room->GetBufferIndex()
+                            };
+                            rn->DrawSet_PushConstant(&pc, sizeof(VikingRoomPushConstant));
                             rn->DrawAdd_DrawCall(APP_MESHES.viking_room);
                         }
                         rn->End_Draw();
 
                         rn->Start_Draw();
                         {
-                            const auto trs = APP_OBJECTS.vikingRoom2Transform.ToMat4();
-                            rn->DrawSet_PushConstant(&trs, sizeof(trs));
+                            const VikingRoomPushConstant pc
+                            {
+                                .modelMatrix = APP_OBJECTS.vikingRoomTransform.ToMat4(),
+                                .materialIndex = APP_MATERIALS.viking_room->GetBufferIndex()
+                            };
+                            rn->DrawSet_PushConstant(&pc, sizeof(VikingRoomPushConstant));
                             rn->DrawAdd_DrawCall(APP_MESHES.viking_room);
                         }
                         rn->End_Draw();

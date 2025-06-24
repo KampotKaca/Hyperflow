@@ -25,9 +25,8 @@ namespace hf::inter
         {
             switch (buffer.type)
             {
-                case BufferType::Vertex: HF.renderingApi.api.DestroyVertBuffer(buffer.buffer); break;
-                case BufferType::Index: HF.renderingApi.api.DestroyIndexBuffer(buffer.buffer); break;
-                case BufferType::Storage: HF.renderingApi.api.DestroyStorageBuffer(buffer.buffer); break;
+                case RuntimeBufferType::Vertex: HF.renderingApi.api.DestroyVertBuffer(buffer.buffer); break;
+                case RuntimeBufferType::Index: HF.renderingApi.api.DestroyIndexBuffer(buffer.buffer); break;
             }
         }
         for (auto texPack : HF.deletedResources.texturePacks)

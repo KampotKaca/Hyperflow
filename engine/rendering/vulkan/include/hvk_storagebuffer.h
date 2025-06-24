@@ -2,21 +2,14 @@
 #define HVK_SHADERSTORAGE_H
 
 #include "hvk_shared.h"
+#include "hvk_buffer.h"
 
 namespace hf
 {
-    struct VkStorageBuffer
+    struct VkStorageBuffer : public VkBufferBase
     {
-        explicit VkStorageBuffer(const StorageBufferCreationInfo& info);
-        ~VkStorageBuffer();
-
-        uint32_t bindingId{};
-        uint64_t bufferSize{};
-        BufferMemoryType memoryType = BufferMemoryType::Static;
-        void* mapping{};
-
-        VkBuffer buffer{};
-        VmaAllocation bufferMemory{};
+        explicit VkStorageBuffer(const StorageBufferDefinitionInfo& info);
+        ~VkStorageBuffer() override = default;
     };
 }
 

@@ -15,7 +15,6 @@
 #include "hbuffer.h"
 #include "hvertbuffer.h"
 #include "hindexbuffer.h"
-#include "hstoragebuffer.h"
 #include "hmesh.h"
 #include "hmaterial.h"
 
@@ -40,8 +39,9 @@ namespace hf
 
 	BufferAttrib DefineBufferAttrib(const BufferAttribDefinitionInfo& info);
 	BufferAttrib DefineBufferAttrib(const char* assetPath);
-	UniformBuffer DefineUniformBuffer(const UniformBufferDefinitionInfo& info);
-	UniformAllocator DefineUniformAllocator(const UniformAllocatorDefinitionInfo& info);
+	Buffer DefineUniformBuffer(const BufferDefinitionInfo& info);
+	Buffer DefineStorageBuffer(const StorageBufferDefinitionInfo& info);
+	BufferAllocator DefineBufferAllocator(const BufferAllocatorDefinitionInfo& info);
 
 	namespace input
 	{
@@ -106,7 +106,8 @@ namespace hf
 	{
 		BufferAttrib GetQuadBufferAttrib();
 		TextureLayout GetEmptyTextureLayout();
-		UniformBuffer GetGlobalUniformBuffer();
+		Buffer GetGlobalUniformBuffer();
+		Buffer GetMaterialStorageBuffer();
 		void BindGlobalUniformBuffer(const Ref<Renderer>& rn);
 
 		BufferAttrib GetCubeBufferAttrib();

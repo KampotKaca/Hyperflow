@@ -7,6 +7,18 @@ namespace app
 
     void MaterialLoadAll()
     {
+        {
+            APP_MATERIALS.viking_room_info =
+            {
+                .color = hf::vec4(0.1f, 0.1f, 0.1f, 1.0f)
+            };
 
+            constexpr hf::MaterialCreationInfo info
+            {
+                .sizeInBytes = sizeof(VikingRoomMaterialInfo)
+            };
+            APP_MATERIALS.viking_room = hf::Material::Create(info);
+            APP_MATERIALS.viking_room->Upload(&APP_MATERIALS.viking_room_info);
+        }
     }
 }

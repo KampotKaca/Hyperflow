@@ -63,12 +63,12 @@ foreach(SHADER_SOURCE_DIR ${SHADER_SOURCE_DIRS})
     endforeach()
 endforeach()
 
-add_custom_command(
-        OUTPUT ${PROCESSED_SHADERS}
-        COMMAND shaderconvertor ${SHADERCONVERTOR_ARGS}
-        COMMENT "Preprocessing all shaders with shaderconvertor"
-        VERBATIM
-)
+#add_custom_command(
+#        OUTPUT ${PROCESSED_SHADERS}
+#        COMMAND shaderconvertor ${SHADERCONVERTOR_ARGS}
+#        COMMENT "Preprocessing all shaders with shaderconvertor"
+#        VERBATIM
+#)
 
 # === Mesh Setup ===
 set(MESH_SOURCE_DIRS
@@ -96,16 +96,18 @@ foreach(MESH_SOURCE_DIR ${MESH_SOURCE_DIRS})
     endforeach()
 endforeach()
 
-add_custom_command(
-        OUTPUT ${PROCESSED_MESHES}
-        COMMAND meshconvertor ${MESHCONVERTOR_ARGS}
-        COMMENT "Preprocessing all meshes with meshconvertor"
-        VERBATIM
-)
+#add_custom_command(
+#        OUTPUT ${PROCESSED_MESHES}
+#        COMMAND meshconvertor ${MESHCONVERTOR_ARGS}
+#        COMMENT "Preprocessing all meshes with meshconvertor"
+#        VERBATIM
+#)
 
 # === Prebuild Target ===
-add_custom_target(Prebuild
-        ALL DEPENDS ${PROCESSED_MESHES} ${PROCESSED_SHADERS}
+add_custom_target(Prebuild ALL
+#        ALL DEPENDS ${PROCESSED_MESHES} ${PROCESSED_SHADERS}
+        COMMAND meshconvertor ${MESHCONVERTOR_ARGS}
+        COMMAND shaderconvertor ${SHADERCONVERTOR_ARGS}
         COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/application/res ${CMAKE_BINARY_DIR}/res
 )
 

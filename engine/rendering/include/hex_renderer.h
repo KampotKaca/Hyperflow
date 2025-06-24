@@ -49,9 +49,9 @@ namespace hf::inter::rendering
 	    TexCube = 3, Tex1DArray = 4, Tex2DArray = 5, TexCubeArray = 6
 	};
 
-    struct UniformBufferUploadInfo
+    struct BufferUploadInfo
     {
-        const UniformUploadPacketInfo* pUploadPackets{};
+        const BufferUploadPacketInfo* pUploadPackets{};
         uint32_t uploadPacketCount{};
         const uint8_t* pUniformDataBuffer{};
     };
@@ -104,14 +104,6 @@ namespace hf::inter::rendering
         const void* data{};
         uint32_t offset{};
         uint32_t indexCount{};
-    };
-
-    struct StorageBufferUploadInfo
-    {
-        const void* storage{};
-        const void* data{};
-        uint64_t offsetInBytes{};
-        uint64_t sizeInBytes{};
     };
 
     struct RendererInstanceCreationInfo
@@ -184,12 +176,18 @@ namespace hf::inter::rendering
         uint32_t setBindingIndex = 0;
     };
 
-    struct UniformBufferBindInfo
+    struct StorageBufferBindingInfo
+    {
+        const void* storageBuffer{};
+        uint32_t setBindingIndex = 0;
+    };
+
+    struct BufferBindInfo
     {
         RenderBindingType bindingType = RenderBindingType::Graphics;
         uint32_t setBindingIndex = 0;
-        UniformBuffer* pUniforms{};
-        uint32_t uniformCount = 0;
+        Buffer* pBuffers{};
+        uint32_t bufferCount = 0;
     };
 
     struct DrawCallInfo
@@ -248,13 +246,14 @@ namespace hf::inter::rendering
         BufferAttrib (*DefineVertBufferAttrib)(const BufferAttribDefinitionInfo& info, uint32_t fullStride);
         uint32_t (*GetVertBufferAttribSize)(BufferAttrib attrib);
 
-        //uniform buffer
-        UniformBuffer (*DefineUniformBuffer)(const UniformBufferDefinitionInfo& info);
-        void (*UploadUniformBuffer)(const void* rn, const UniformBufferUploadInfo& info);
-        void (*BindUniformBuffer)(const void* rn, const UniformBufferBindInfo& info);
+        //buffers
+        Buffer (*DefineUniformBuffer)(const BufferDefinitionInfo& info);
+        Buffer (*DefineStorageBuffer)(const StorageBufferDefinitionInfo& info);
+        void (*UploadBuffer)(const void* rn, const BufferUploadInfo& info);
+        void (*BindBuffer)(const void* rn, const BufferBindInfo& info);
 
         //uniform allocator
-        UniformAllocator (*DefineUniformAllocator)(const UniformAllocatorDefinitionInfo& info);
+        BufferAllocator (*DefineBufferAllocator)(const BufferAllocatorDefinitionInfo& info);
 
         //vertex buffer
         void* (*CreateVertBuffer)(const VertBufferCreationInfo& info);
@@ -265,11 +264,6 @@ namespace hf::inter::rendering
         void* (*CreateIndexBuffer)(const IndexBufferCreationInfo& info);
         void (*DestroyIndexBuffer)(void* handle);
         void (*UploadIndexBuffer)(const IndexBufferUploadInfo& info);
-
-        //shader storage
-        void* (*CreateStorageBuffer)(const StorageBufferCreationInfo& info);
-        void (*DestroyStorageBuffer)(void* handle);
-        void (*UploadStorageBuffer)(const StorageBufferUploadInfo& info);
 
         //copy operations
         void (*SubmitBufferCopyOperations)();

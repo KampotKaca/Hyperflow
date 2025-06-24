@@ -7,6 +7,13 @@
 
 namespace hf
 {
+    enum DescriptorType { BUFFER, TEXPACK };
+    struct DescriptorBindingInfo
+    {
+        void* object;
+        DescriptorType type;
+    };
+
     struct TextureBindingInfo
     {
         Ref<TexturePack> pack{};
@@ -20,7 +27,7 @@ namespace hf
         T end() const { return start + size; }
     };
 
-    struct UniformBufferSetPacketInfo
+    struct BufferSetPacketInfo
     {
         RenderBindingType bindingType = RenderBindingType::Graphics;
         uint32_t setBindingIndex = 0;
@@ -71,7 +78,7 @@ namespace hf
     {
         ShaderSetup shaderSetup{};
         AssetRange<uint16_t> shaderPacketRange{};
-        AssetRange<uint32_t> uniformSetRange{};
+        AssetRange<uint32_t> bufferSetRange{};
     };
 
     struct RenderPassPacketInfo
@@ -80,11 +87,11 @@ namespace hf
         AssetRange<uint16_t> shaderSetupRange{};
     };
 
-    struct UniformUploadPacketInfo
+    struct BufferUploadPacketInfo
     {
-        UniformBuffer buffer{};
+        Buffer buffer{};
         uint32_t offsetInBytes{};
-        AssetRange<uint32_t> uniformRange{};
+        AssetRange<uint32_t> bufferRange{};
     };
 
     struct RenderPacket
@@ -100,13 +107,13 @@ namespace hf
         StaticVector<TexturePackRebindingPacketInfo, RENDERING_MAX_NUM_TEXPACK_REBINDING> textureRebindings{};
         StaticVector<void*, RENDERING_MAX_NUM_TEXTURES> textures{};
 
-        StaticVector<UniformBufferSetPacketInfo, RENDERING_MAX_NUM_UNIFORMS> uniformSets{};
-        StaticVector<UniformBuffer, RENDERING_MAX_NUM_UNIFORMS> uniformBuffers{};
+        StaticVector<BufferSetPacketInfo, RENDERING_MAX_NUM_UNIFORMS> bufferSets{};
+        StaticVector<Buffer, RENDERING_MAX_NUM_UNIFORMS> buffers{};
 
         StaticVector<DrawCallInfo, RENDERING_MAX_NUM_DRAW_CALLS> drawCalls{};
-        StaticVector<uint8_t, RENDERING_MAX_UNIFORM_UPLOAD_BUFFER_SIZE> uniformUploads{};
+        StaticVector<uint8_t, RENDERING_MAX_UNIFORM_UPLOAD_BUFFER_SIZE> bufferUploads{};
         StaticVector<uint8_t, RENDERING_MAX_PUSH_CONSTANT_UPLOAD_BUFFER_SIZE> pushConstantUploads{};
-        StaticVector<UniformUploadPacketInfo, RENDERING_MAX_UNIFORM_UPLOAD_COUNT> uniformUploadPackets{};
+        StaticVector<BufferUploadPacketInfo, RENDERING_MAX_UNIFORM_UPLOAD_COUNT> bufferUploadPackets{};
     };
 
     struct RenderPacketDrawProcess
@@ -115,7 +122,7 @@ namespace hf
         ShaderSetupPacketInfo* currentShaderSetup{};
         ShaderPacketInfo* currentShader{};
         MaterialPacketInfo* currentMaterial{};
-        UniformBufferSetPacketInfo* currentUniformSet{};
+        BufferSetPacketInfo* currentUniformSet{};
         DrawPacketInfo* currentDraw{};
         TexturePackRebindingGroupPacketInfo* currentTexturePackBinding{};
 

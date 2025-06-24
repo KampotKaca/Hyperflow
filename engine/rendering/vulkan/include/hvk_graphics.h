@@ -11,7 +11,7 @@
 #include "hvk_texturelayout.h"
 #include "hvk_texturepack.h"
 #include "hvk_texturepackallocator.h"
-#include "hvk_uniformallocator.h"
+#include "hvk_bufferallocator.h"
 #include "hvk_texturesampler.h"
 #include "hvk_platform.h"
 
@@ -170,8 +170,8 @@ namespace hf
         VmaAllocator allocator{};
 
         std::vector<URef<VkBufferAttrib>> bufferAttribs{};
-        std::vector<URef<VkUniformBuffer>> uniformBuffers{};
-        std::vector<URef<VkUniformAllocator>> uniformAllocators{};
+        std::vector<URef<VkBufferBase>> buffers{};
+        std::vector<URef<VkBufferAllocator>> bufferAllocators{};
         std::vector<URef<VkTextureSampler>> textureSamplers{};
         std::vector<URef<VkTextureLayout>> textureLayouts{};
         std::vector<URef<VkShaderSetup>> shaderSetups{};

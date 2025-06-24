@@ -23,7 +23,8 @@ namespace hf
 
 		void Bind(RenderPass pass) const;
 
-		void Upload_Uniform(const UniformBufferUpload& info);
+		void Upload_Buffer(const BufferUploadInfo& info);
+		void Upload_Material(const Ref<Material>& material);
 
 		void UploadStart_TexturePack(const Ref<TexturePack>& texPack);
 		void UploadEnd_TexturePack();
@@ -46,13 +47,15 @@ namespace hf
 		void Start_Draw();
 		void End_Draw();
 
-		void Start_UniformSet(RenderBindingType bindingType, uint32_t setBindingIndex);
-		void End_UniformSet();
-		void UniformSetAdd_Uniform(UniformBuffer buffer);
+		void Start_BufferSet(RenderBindingType bindingType, uint32_t setBindingIndex);
+		void End_BufferSet();
+		void BufferSetAdd_Buffer(Buffer buffer);
+
 		void MaterialAdd_TexturePackBinding(const Ref<TexturePack>& texPack, uint32_t setBindingIndex);
 
 		void DrawAdd_DrawCall(const Ref<Mesh>& mesh);
 		void DrawAdd_DrawCall(const DrawCallInfo& drawCall);
+
 		void DrawAdd_TexturePackBinding(const Ref<TexturePack>& texPack, uint32_t setBindingIndex);
 		void DrawSet_PushConstant(const void* data, uint32_t dataSize);
 
