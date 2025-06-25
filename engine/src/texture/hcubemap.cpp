@@ -44,21 +44,21 @@ namespace hf
         inter::rendering::DestroyCubemap_i(this);
     }
 
-    bool Cubemap::IsRunning() const { return handle; }
-    void Cubemap::Destroy()
+    bool IsRunning(const Ref<Cubemap>& cb) { return cb->handle; }
+    void Destroy(const Ref<Cubemap>& cb)
     {
-        if (inter::rendering::DestroyCubemap_i(this))
-            inter::HF.graphicsResources.cubemaps.erase(folderPath);
+        if (inter::rendering::DestroyCubemap_i(cb.get()))
+            inter::HF.graphicsResources.cubemaps.erase(cb->folderPath);
     }
 
-    Ref<Cubemap> Cubemap::Create(const CubemapCreationInfo& info)
+    Ref<Cubemap> Create(const CubemapCreationInfo& info)
     {
         Ref<Cubemap> cubemap = MakeRef<Cubemap>(info);
         inter::HF.graphicsResources.cubemaps[info.folderPath] = cubemap;
         return cubemap;
     }
 
-    Ref<Cubemap> Cubemap::Create(const char* assetPath)
+    Ref<Cubemap> CreateCubemapAsset(const char* assetPath)
     {
         std::string assetLoc = TO_RES_PATH(std::string("cubemaps/") + assetPath) + ".meta";
         if (!utils::FileExists(assetLoc.c_str()))
@@ -151,7 +151,7 @@ namespace hf
         }
     }
 
-    void Cubemap::Destroy(const Ref<Cubemap>* pCubemaps, uint32_t count)
+    void Destroy(const Ref<Cubemap>* pCubemaps, uint32_t count)
     {
         for (uint32_t i = 0; i < count; i++)
         {

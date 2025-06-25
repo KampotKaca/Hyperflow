@@ -12,8 +12,6 @@ namespace hf
         ~VertBuffer() override = default;
 
         [[nodiscard]] RuntimeBufferType GetType() const override { return RuntimeBufferType::Vertex; }
-        void Upload(const VertBufferUploadInfo& info) const;
-        static Ref<VertBuffer> Create(const VertBufferCreationInfo& info);
 
         VertBufferCreationInfo details{};
     };

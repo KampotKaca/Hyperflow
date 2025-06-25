@@ -35,13 +35,13 @@ namespace app
 		DebugStart();
 
 		// VoxelTerrainGenerate();
-		hf::time::SetTargetFrameRate(240);
+		hf::SetTargetFrameRate(240);
 	}
 
 	void AppUpdate()
 	{
-		APP_OBJECTS.vikingRoomTransform.euler.y -= (float)hf::time::GetDeltaTime() * 10.0f;
-		APP_OBJECTS.vikingRoom2Transform.euler.y -= (float)hf::time::GetDeltaTime() * 10.0f;
+		APP_OBJECTS.vikingRoomTransform.euler.y -= (float)hf::GetDeltaTime() * 10.0f;
+		APP_OBJECTS.vikingRoom2Transform.euler.y -= (float)hf::GetDeltaTime() * 10.0f;
 		DebugUpdate();
 		// VoxelTerrainUpdate();
 	}

@@ -10,12 +10,6 @@ namespace hf
         explicit TexturePackAllocator(const TexturePackAllocatorCreationInfo& info);
         ~TexturePackAllocator();
 
-        [[nodiscard]] bool IsRunning() const;
-        void Destroy();
-
-        static Ref<TexturePackAllocator> Create(const TexturePackAllocatorCreationInfo& info);
-        static void Destroy(const Ref<TexturePackAllocator>* pTexPackAllocators, uint32_t count);
-
         std::vector<Ref<TexturePack>> texturePacks{};
         void* handle{};
     };

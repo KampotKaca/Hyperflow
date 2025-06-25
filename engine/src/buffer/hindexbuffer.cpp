@@ -20,19 +20,19 @@ namespace hf
         inter::rendering::CreateIndexBuffer_i(this);
     }
 
-    void IndexBuffer::Upload(const IndexBufferUploadInfo& info) const
+    void Upload(const Ref<IndexBuffer>& ib, const IndexBufferUploadInfo& info)
     {
         inter::rendering::IndexBufferUploadInfo uploadInfo
         {
-            .buffer = handle,
-            .data = buffer,
+            .buffer = ib->handle,
+            .data = ib->buffer,
             .offset = info.offset,
             .indexCount = info.indexCount
         };
         inter::HF.renderingApi.api.UploadIndexBuffer(uploadInfo);
     }
 
-    Ref<IndexBuffer> IndexBuffer::Create(const IndexBufferCreationInfo& info)
+    Ref<IndexBuffer> Create(const IndexBufferCreationInfo& info)
     {
         Ref<IndexBuffer> buffer = MakeRef<IndexBuffer>(info, DataTransferType::CopyData);
         inter::HF.graphicsResources.buffers[(uint64_t)buffer.get()] = buffer;

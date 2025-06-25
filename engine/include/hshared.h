@@ -114,6 +114,7 @@ namespace hf
 	struct TexturePack;
 	struct TexturePackAllocator;
 
+	struct RuntimeBufferBase;
 	struct VertBuffer;
 	struct IndexBuffer;
 	struct Mesh;

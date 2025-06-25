@@ -12,15 +12,13 @@ namespace hf
             .sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO,
         };
 
+        VkPushConstantRange pushConstant{};
         if (info.pushConstant.usageFlags != ShaderUsageStage::None &&
             pushConstantInfo.sizeInBytes > 0)
         {
-            const VkPushConstantRange pushConstant
-            {
-                .stageFlags = (VkShaderStageFlags)pushConstantInfo.usageFlags,
-                .offset = 0,
-                .size = pushConstantInfo.sizeInBytes
-            };
+            pushConstant.stageFlags = (VkShaderStageFlags)pushConstantInfo.usageFlags;
+            pushConstant.offset = 0;
+            pushConstant.size = pushConstantInfo.sizeInBytes;
 
             pipelineLayoutInfo.pushConstantRangeCount = 1;
             pipelineLayoutInfo.pPushConstantRanges = &pushConstant;

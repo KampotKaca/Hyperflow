@@ -1,5 +1,6 @@
 #include "hbuffer.h"
 #include "hyperflow.h"
+#include "hinternal.h"
 
 namespace hf
 {
@@ -11,15 +12,15 @@ namespace hf
         inter::rendering::DestroyBuffer_i(this);
     }
 
-    bool RuntimeBufferBase::IsRunning() const { return handle; }
-    void RuntimeBufferBase::Destroy()
+    bool IsRunning(const Ref<RuntimeBufferBase>& rbb) { return rbb->handle; }
+    void Destroy(const Ref<RuntimeBufferBase>& rbb)
     {
-        if (inter::rendering::DestroyBuffer_i(this))
-            inter::HF.graphicsResources.buffers.erase((uint64_t)this);
+        if (inter::rendering::DestroyBuffer_i(rbb.get()))
+            inter::HF.graphicsResources.buffers.erase((uint64_t)rbb.get());
     }
 
-    void RuntimeBufferBase::SubmitAll() { inter::HF.renderingApi.api.SubmitBufferCopyOperations(); }
-    void RuntimeBufferBase::Destroy(const Ref<RuntimeBufferBase>* pBuffers, uint32_t count)
+    void SubmitAllBuffers() { inter::HF.renderingApi.api.SubmitBufferCopyOperations(); }
+    void Destroy(const Ref<RuntimeBufferBase>* pBuffers, uint32_t count)
     {
         for (uint32_t i = 0; i < count; i++)
         {

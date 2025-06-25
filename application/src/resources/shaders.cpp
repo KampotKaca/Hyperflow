@@ -21,7 +21,7 @@ namespace app
                 .fragmentShaderLoc = "default",
             };
 
-            APP_SHADERS.viking_room = hf::Shader::Create(shaderInfo);
+            APP_SHADERS.viking_room = hf::Create(shaderInfo);
         }
     }
 }

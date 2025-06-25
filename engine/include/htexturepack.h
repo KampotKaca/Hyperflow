@@ -11,13 +11,6 @@ namespace hf
         explicit TexturePack(const TexturePackCreationInfo& info);
         ~TexturePack();
 
-        [[nodiscard]] bool IsRunning() const;
-        void Destroy();
-
-        static void SubmitAll();
-        static Ref<TexturePack> Create(const TexturePackCreationInfo& info);
-        static void Destroy(const Ref<TexturePack>* pPacks, uint32_t count);
-
         struct Binding
         {
             TextureSampler sampler{};

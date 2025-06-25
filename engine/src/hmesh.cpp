@@ -201,22 +201,22 @@ namespace hf
         inter::rendering::DestroyMesh_i(this);
     }
 
-    bool Mesh::IsRunning() const { return isLoaded; }
-    MeshStats Mesh::GetStats() const { return stats; }
-    void Mesh::Destroy()
+    bool IsRunning(const Ref<Mesh>& mesh) { return mesh->isLoaded; }
+    MeshStats GetStats(const Ref<Mesh>& mesh) { return mesh->stats; }
+    void Destroy(const Ref<Mesh>& mesh)
     {
-        if (inter::rendering::DestroyMesh_i(this))
-            inter::HF.graphicsResources.meshes.erase(filePath);
+        if (inter::rendering::DestroyMesh_i(mesh.get()))
+            inter::HF.graphicsResources.meshes.erase(mesh->filePath);
     }
 
-    Ref<Mesh> Mesh::Create(const MeshCreationInfo& info)
+    Ref<Mesh> Create(const MeshCreationInfo& info)
     {
         Ref<Mesh> mesh = MakeRef<Mesh>(info);
         inter::HF.graphicsResources.meshes[mesh->filePath] = mesh;
         return mesh;
     }
 
-    Ref<Mesh> Mesh::Create(const char* assetPath)
+    Ref<Mesh> CreateMeshAsset(const char* assetPath)
     {
         std::string assetLoc = TO_RES_PATH(std::string("meshes/") + assetPath) + ".meta";
         if (!utils::FileExists(assetLoc.c_str()))
@@ -272,7 +272,7 @@ namespace hf
         }
     }
 
-    void Mesh::Destroy(const Ref<Mesh>* pMeshes, uint32_t count)
+    void Destroy(const Ref<Mesh>* pMeshes, uint32_t count)
     {
         for (uint32_t i = 0; i < count; i++)
         {

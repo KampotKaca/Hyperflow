@@ -17,8 +17,8 @@ namespace app
             {
                 .sizeInBytes = sizeof(VikingRoomMaterialInfo)
             };
-            APP_MATERIALS.viking_room = hf::Material::Create(info);
-            APP_MATERIALS.viking_room->Upload(&APP_MATERIALS.viking_room_info);
+            APP_MATERIALS.viking_room = hf::Create(info);
+            hf::Upload(APP_MATERIALS.viking_room, &APP_MATERIALS.viking_room_info);
         }
     }
 }

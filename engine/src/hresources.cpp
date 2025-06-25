@@ -12,9 +12,9 @@ namespace hf
         Buffer GetMaterialStorageBuffer() { return inter::HF.graphicsResources.materialDataStorageBuffer; }
         void BindGlobalUniformBuffer(const Ref<Renderer>& rn)
         {
-            rn->Start_BufferSet(RenderBindingType::Graphics, 0);
-            rn->BufferSetAdd_Buffer(inter::HF.staticResources.globalUniform);
-            rn->End_BufferSet();
+            Start_BufferSet(rn, RenderBindingType::Graphics, 0);
+            BufferSetAdd_Buffer(rn, inter::HF.staticResources.globalUniform);
+            End_BufferSet(rn);
         }
 
         BufferAttrib GetCubeBufferAttrib() { return inter::HF.staticResources.cubeAttrib; }
@@ -257,7 +257,7 @@ namespace hf
                     }
                 };
 
-                HF.staticResources.defaultSkyboxCubemap = Cubemap::Create(info);
+                HF.staticResources.defaultSkyboxCubemap = Create(info);
                 HF.staticResources.boundCubemap = HF.staticResources.defaultSkyboxCubemap;
             }
         }
@@ -280,10 +280,10 @@ namespace hf
                     .cubemapBindingCount = 1,
                     .layout = HF.staticResources.skyboxLayout,
                 };
-                HF.staticResources.skyboxTexturePack = TexturePack::Create(info);
+                HF.staticResources.skyboxTexturePack = Create(info);
             }
 
-            TexturePack::SubmitAll();
+            SubmitAllTexturePacks();
 
             {
                 std::array texPacks = { HF.staticResources.skyboxTexturePack };
@@ -292,7 +292,7 @@ namespace hf
                     .pTexturePacks = texPacks.data(),
                     .texturePackCount = texPacks.size()
                 };
-                HF.staticResources.texPackAllocator = TexturePackAllocator::Create(info);
+                HF.staticResources.texPackAllocator = Create(info);
             }
         }
 
@@ -315,7 +315,7 @@ namespace hf
                     .pVertices = vertices
                 };
 
-                HF.staticResources.quadBuffer = VertBuffer::Create(bufferInfo);
+                HF.staticResources.quadBuffer = Create(bufferInfo);
             }
 
             //Cube Mesh
@@ -330,7 +330,7 @@ namespace hf
                         .bufferAttrib = HF.staticResources.cubeAttrib,
                     }
                 };
-                HF.staticResources.cube = Mesh::Create(info);
+                HF.staticResources.cube = Create(info);
             }
         }
 
@@ -364,7 +364,7 @@ namespace hf
                         .enableStencil = false,
                     }
                 };
-                HF.staticResources.axisLinesShader = Shader::Create(shaderInfo);
+                HF.staticResources.axisLinesShader = Create(shaderInfo);
             }
 
             //Skybox Shader
@@ -395,7 +395,7 @@ namespace hf
                         .enableStencil = false,
                     }
                 };
-                HF.staticResources.skyboxShader = Shader::Create(shaderInfo);
+                HF.staticResources.skyboxShader = Create(shaderInfo);
             }
         }
 
@@ -405,7 +405,7 @@ namespace hf
             {
                 .sizeInBytes = 0
             };
-            HF.staticResources.emptyMaterial = Material::Create(materialInfo);
+            HF.staticResources.emptyMaterial = Create(materialInfo);
         }
     }
 }

@@ -43,23 +43,23 @@ namespace hf
         inter::rendering::DestroyTexturePack_i(this);
     }
 
-    bool TexturePack::IsRunning() const { return handle; }
+    bool IsRunning(const Ref<TexturePack>& texPack) { return texPack->handle; }
 
-    void TexturePack::Destroy()
+    void Destroy(const Ref<TexturePack>& texPack)
     {
-        if (inter::rendering::DestroyTexturePack_i(this))
-            inter::HF.graphicsResources.texturePacks.erase((uint64_t)this);
+        if (inter::rendering::DestroyTexturePack_i(texPack.get()))
+            inter::HF.graphicsResources.texturePacks.erase((uint64_t)texPack.get());
     }
 
-    void TexturePack::SubmitAll() { inter::HF.renderingApi.api.SubmitTextureCopyOperations(); }
-    Ref<TexturePack> TexturePack::Create(const TexturePackCreationInfo& info)
+    void SubmitAllTexturePacks() { inter::HF.renderingApi.api.SubmitTextureCopyOperations(); }
+    Ref<TexturePack> Create(const TexturePackCreationInfo& info)
     {
         Ref<TexturePack> texPack = MakeRef<TexturePack>(info);
         inter::HF.graphicsResources.texturePacks[(uint64_t)texPack.get()] = texPack;
         return texPack;
     }
 
-    void TexturePack::Destroy(const Ref<TexturePack>* pPacks, uint32_t count)
+    void Destroy(const Ref<TexturePack>* pPacks, uint32_t count)
     {
         for (uint32_t i = 0; i < count; i++)
         {

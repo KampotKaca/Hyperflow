@@ -25,6 +25,6 @@ namespace app
             .data = &APP_UNIFORMS.globalUniformInfo
         };
 
-        rn->Upload_Buffer(uniformUpload);
+        hf::Upload_Buffer(rn, uniformUpload);
     }
 }

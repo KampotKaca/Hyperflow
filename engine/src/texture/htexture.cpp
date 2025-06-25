@@ -19,21 +19,21 @@ namespace hf
         inter::rendering::DestroyTexture_i(this);
     }
 
-    bool Texture::IsRunning() const { return handle; }
-    void Texture::Destroy()
+    bool IsRunning(const Ref<Texture>& tex) { return tex->handle; }
+    void Destroy(const Ref<Texture>& tex)
     {
-        if (inter::rendering::DestroyTexture_i(this))
-            inter::HF.graphicsResources.textures.erase(filePath);
+        if (inter::rendering::DestroyTexture_i(tex.get()))
+            inter::HF.graphicsResources.textures.erase(tex->filePath);
     }
 
-    Ref<Texture> Texture::Create(const TextureCreationInfo& info)
+    Ref<Texture> Create(const TextureCreationInfo& info)
     {
         Ref<Texture> texture = MakeRef<Texture>(info);
         inter::HF.graphicsResources.textures[texture->filePath] = texture;
         return texture;
     }
 
-    Ref<Texture> Texture::Create(const char* assetPath)
+    Ref<Texture> CreateTextureAsset(const char* assetPath)
     {
         std::string assetLoc = TO_RES_PATH(std::string("textures/") + assetPath) + ".meta";
         if (!utils::FileExists(assetLoc.c_str()))
@@ -79,7 +79,7 @@ namespace hf
         }
     }
 
-    void Texture::Destroy(const Ref<Texture>* pTextures, uint32_t count)
+    void Destroy(const Ref<Texture>* pTextures, uint32_t count)
     {
         for (uint32_t i = 0; i < count; i++)
         {

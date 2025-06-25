@@ -35,69 +35,69 @@ namespace hf
 		inter::window::Close(this);
 	}
 
-	bool Window::IsKeyDown(Key key)			 const	{ return GetKeyState(key) == KeyState::Down; }
-	bool Window::IsKeyDownContinues(Key key) const  { return GetKeyState(key) == KeyState::DownContinues; }
-	bool Window::IsKeyUp(Key key)			 const	{ return GetKeyState(key) == KeyState::Up; }
+	bool IsKeyDown(const Ref<Window>& win, Key key)			 { return GetKeyState(win, key) == KeyState::Down; }
+	bool IsKeyDownContinues(const Ref<Window>& win, Key key) { return GetKeyState(win, key) == KeyState::DownContinues; }
+	bool IsKeyUp(const Ref<Window>& win, Key key)			 { return GetKeyState(win, key) == KeyState::Up; }
 
-	bool Window::IsButtonDown(Button button)		  const	{ return GetButtonState(button) == ButtonState::Down; }
-	bool Window::IsButtonDownContinues(Button button) const { return GetButtonState(button) == ButtonState::DownContinues; }
-	bool Window::IsButtonUp(Button button)			  const	{ return GetButtonState(button) == ButtonState::Up; }
+	bool IsButtonDown(const Ref<Window>& win, Button button)		  { return GetButtonState(win, button) == ButtonState::Down; }
+	bool IsButtonDownContinues(const Ref<Window>& win, Button button) { return GetButtonState(win, button) == ButtonState::DownContinues; }
+	bool IsButtonUp(const Ref<Window>& win, Button button)			  { return GetButtonState(win, button) == ButtonState::Up; }
 
-	KeyState Window::GetKeyState(Key key)			  const	{ return eventData.keyStates[(uint32_t)key]; }
-	ButtonState Window::GetButtonState(Button button) const { return eventData.buttonStates[(uint32_t)button]; }
-	const std::string& Window::GetWrite()			  const	{ return eventData.charData; }
+	KeyState GetKeyState(const Ref<Window>& win, Key key)			  { return win->eventData.keyStates[(uint32_t)key]; }
+	ButtonState GetButtonState(const Ref<Window>& win, Button button) { return win->eventData.buttonStates[(uint32_t)button]; }
+	const std::string& GetWrite(const Ref<Window>& win)			      { return win->eventData.charData; }
 
-	vec2 Window::GetPointerPosition() const { return eventData.pointerPosition; }
-	vec2 Window::GetPointerDelta()	  const { return eventData.pointerDelta; }
-	vec2 Window::GetScrollDelta()	  const { return eventData.scrollDelta; }
+	vec2 GetPointerPosition(const Ref<Window>& win) { return win->eventData.pointerPosition; }
+	vec2 GetPointerDelta(const Ref<Window>& win)	{ return win->eventData.pointerDelta; }
+	vec2 GetScrollDelta(const Ref<Window>& win)	    { return win->eventData.scrollDelta; }
 
-	const std::string& Window::GetTitle() const { return title; }
-	ivec2 Window::GetSize() const { return inter::window::GetSize(this); }
-	ivec2 Window::GetPosition() const { return inter::window::GetPosition(this); }
+	const std::string& GetTitle(const Ref<Window>& win) { return win->title; }
+	ivec2 GetSize(const Ref<Window>& win)				{ return inter::window::GetSize(win.get()); }
+	ivec2 GetPosition(const Ref<Window>& win)			{ return inter::window::GetPosition(win.get()); }
 
-	IRect Window::GetRect() const
+	IRect GetRect(const Ref<Window>& win)
 	{
 		IRect result{};
-		result.position = inter::window::GetPosition(this);
-		result.size = inter::window::GetSize(this);
+		result.position = inter::window::GetPosition(win.get());
+		result.size = inter::window::GetSize(win.get());
 		return result;
 	}
 
-	IRect Window::GetFrameRect()				 const { return inter::window::GetFrameRect(this); }
-	WindowState Window::GetState() 				 const { return state; }
-	WindowStyle Window::GetStyle() 				 const { return style; }
-	WindowPointerState Window::GetPointerState() const { return pointerState; }
-	void* Window::GetHandle()					 const { return handle; }
-	Ref<Renderer> Window::GetRenderer()			 const { return renderer; }
-	bool Window::IsClosed()						 const { return handle == nullptr; }
-	VsyncMode Window::GetVSyncMode()			 const { return vSyncMode; }
+	IRect GetFrameRect(const Ref<Window>& win)				   { return inter::window::GetFrameRect(win.get()); }
+	WindowState GetState(const Ref<Window>& win) 			   { return win->state; }
+	WindowStyle GetStyle(const Ref<Window>& win) 			   { return win->style; }
+	WindowPointerState GetPointerState(const Ref<Window>& win) { return win->pointerState; }
+	void* GetHandle(const Ref<Window>& win)					   { return win->handle; }
+	Ref<Renderer> GetRenderer(const Ref<Window>& win)		   { return win->renderer; }
+	bool IsClosed(const Ref<Window>& win)					   { return win->handle == nullptr; }
+	VsyncMode GetVSyncMode(const Ref<Window>& win)			   { return win->vSyncMode; }
 
-	void Window::SetTitle(const std::string& title) 	   { if (!IsClosed()) inter::window::SetTitle(this, title); }
-	void Window::SetSize(ivec2 size) const				   { if (!IsClosed()) inter::window::SetSize(this, size); }
-	void Window::SetPosition(ivec2 position) const  	   { if (!IsClosed()) inter::window::SetPosition(this, position); }
-	void Window::SetRect(IRect rect) const				   { if (!IsClosed()) inter::window::SetRect(this, rect); }
-	void Window::SetState(WindowState state)			   { if (!IsClosed()) inter::window::SetState(this, state); }
-	void Window::SetPointerState(WindowPointerState state) { if (!IsClosed()) inter::window::SetPointerState(this, state); }
+	void SetTitle(const Ref<Window>& win, const std::string& title) 	   { if (!IsClosed(win)) inter::window::SetTitle(win.get(), title); }
+	void SetSize(const Ref<Window>& win, ivec2 size)				       { if (!IsClosed(win)) inter::window::SetSize(win.get(), size); }
+	void SetPosition(const Ref<Window>& win, ivec2 position)  			   { if (!IsClosed(win)) inter::window::SetPosition(win.get(), position); }
+	void SetRect(const Ref<Window>& win, IRect rect)					   { if (!IsClosed(win)) inter::window::SetRect(win.get(), rect); }
+	void SetState(const Ref<Window>& win, WindowState state)			   { if (!IsClosed(win)) inter::window::SetState(win.get(), state); }
+	void SetPointerState(const Ref<Window>& win, WindowPointerState state) { if (!IsClosed(win)) inter::window::SetPointerState(win.get(), state); }
 
-	void Window::Focus() const { if (!IsClosed()) inter::window::Focus(this); }
+	void Focus(const Ref<Window>& win) { if (!IsClosed(win)) inter::window::Focus(win.get()); }
+	void Destroy(const Ref<Window>& win) { if (inter::window::Close(win.get())) inter::HF.windows.erase((uint64_t)win.get()); }
 
-	void Window::SetVSyncMode(VsyncMode mode)
+	void SetVSyncMode(const Ref<Window>& win, VsyncMode mode)
 	{
-		vSyncMode = mode;
-		inter::HF.renderingApi.api.SetVSync(renderer->handle, mode);
+		win->vSyncMode = mode;
+		inter::HF.renderingApi.api.SetVSync(win->renderer->handle, mode);
 	}
 
-	bool Window::SetIcons(const char* folderPath) const { return inter::rendering::SetWindowIcons_i(this, folderPath); }
-	void Window::Close() { if (inter::window::Close(this)) inter::HF.windows.erase((uint64_t)handle); }
+	bool SetIcons(const Ref<Window>& win, const char* folderPath) { return inter::rendering::SetWindowIcons_i(win.get(), folderPath); }
 
-	void Window::CloseAll()
+	void DestroyAllWindows()
 	{
 		for (auto& win : inter::HF.windows | std::views::values)
 			inter::window::Close(win.get());
 		inter::HF.windows.clear();
 	}
 
-	Ref<Window> Window::Open(const WindowCreationInfo &data, const Ref<Window> &parent)
+	Ref<Window> Create(const WindowCreationInfo &data, const Ref<Window> &parent)
 	{
 		auto newWindow = MakeRef<Window>(data, parent);
 		inter::HF.windows[(uint64_t)newWindow->handle] = newWindow;

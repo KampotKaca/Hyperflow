@@ -33,7 +33,7 @@ namespace hf
 			inter::HF.globalUniformBindingInfo = engineData.globalUniformBindingInfo;
 			inter::HF.appTitle = engineData.appTitle;
 
-			inter::HF.mainWindow = Window::Open(engineData.windowData, nullptr);
+			inter::HF.mainWindow = Create(engineData.windowData, nullptr);
 
 			inter::rendering::LoadApi_i(engineData.renderingApi);
 			inter::primitives::LoadStaticResources_i();
@@ -50,7 +50,7 @@ namespace hf
 				if (!IsRunning()) break;
 				if(inter::HF.lifecycleCallbacks.onUpdateCallback) inter::HF.lifecycleCallbacks.onUpdateCallback();
 
-				if(input::IsDown(Key::Escape))
+				if(IsKeyDown(Key::Escape))
 				{
 					inter::alloc::LogThreadMemoryStats_i();
 					Terminate();
@@ -62,7 +62,7 @@ namespace hf
 
 				for(auto& window : inter::HF.tempWindows)
 				{
-					if (!window->IsClosed())
+					if (!IsClosed(window))
 					{
 						auto rn = window->renderer;
 						inter::rendering::StartRenderPacket_i(rn);
@@ -76,7 +76,7 @@ namespace hf
 			}
 			if (inter::HF.lifecycleCallbacks.onQuitCallback) inter::HF.lifecycleCallbacks.onQuitCallback();
 
-			Window::CloseAll();
+			DestroyAllWindows();
 			inter::platform::Unload();
 		}
 		catch(const HyperException& e)
@@ -93,7 +93,7 @@ namespace hf
 		}
 	}
 
-	bool IsRunning() { return inter::HF.isRunning && !inter::HF.mainWindow->IsClosed(); }
+	bool IsRunning() { return inter::HF.isRunning && !IsClosed(inter::HF.mainWindow); }
 
 	Ref<Window> GetMainWindow() { return inter::HF.mainWindow; }
 	const std::string& GetApplicationTitle() { return inter::HF.appTitle; }

@@ -32,21 +32,21 @@ namespace hf
         inter::rendering::DestroyRenderer_i(this);
     }
 
-    bool Renderer::IsRunning() const { return handle; }
-    uvec2 Renderer::GetSize() const { return threadInfo.size; }
-    void Renderer::Resize(uvec2 size)
+    bool IsRunning(const Ref<Renderer>& rn) { return rn->handle; }
+    uvec2 GetSize(const Ref<Renderer>& rn)  { return rn->threadInfo.size; }
+    void Resize(const Ref<Renderer>& rn, uvec2 size)
     {
-        std::lock_guard lock(threadInfo.threadLock);
-        if (window != nullptr) throw GENERIC_EXCEPT("[Hyperflow]", "Cannot resize renderer connected to the window");
-        threadInfo.size = size;
-        inter::HF.renderingApi.api.RegisterFrameBufferChange(handle, size);
+        std::lock_guard lock(rn->threadInfo.threadLock);
+        if (rn->window != nullptr) throw GENERIC_EXCEPT("[Hyperflow]", "Cannot resize renderer connected to the window");
+        rn->threadInfo.size = size;
+        inter::HF.renderingApi.api.RegisterFrameBufferChange(rn->handle, size);
     }
 
-    RenderingApiType Renderer::GetApiType()     { return inter::HF.renderingApi.type; }
-    RenderingApiType Renderer::GetBestApiType() { return inter::platform::GetBestRenderingApi(); }
+    RenderingApiType GetApiType()     { return inter::HF.renderingApi.type; }
+    RenderingApiType GetBestApiType() { return inter::platform::GetBestRenderingApi(); }
 
     //Destroy every renderer which is not connected to the window, before you try to change api
-    void Renderer::ChangeApi(RenderingApiType targetApi)
+    void ChangeApi(RenderingApiType targetApi)
     {
         if (!IsValidApi(targetApi))
         {
@@ -57,13 +57,13 @@ namespace hf
         inter::rendering::LoadApi_i(targetApi);
     }
 
-    bool Renderer::IsValidApi(RenderingApiType targetApi)
+    bool IsValidApi(RenderingApiType targetApi)
     {
         if (targetApi == RenderingApiType::None || targetApi == inter::HF.renderingApi.type) return false;
         return inter::platform::IsValidRenderingApi(targetApi);
     }
 
-    void Renderer::Bind(RenderPass pass) const { inter::HF.renderingApi.api.BindRenderPass(handle, pass); }
+    void Bind(const Ref<Renderer>& rn, RenderPass pass) { inter::HF.renderingApi.api.BindRenderPass(rn->handle, pass); }
 
     namespace inter::rendering
     {
@@ -113,12 +113,12 @@ namespace hf
             }
 
             for (auto& mesh : std::ranges::views::values(HF.graphicsResources.meshes)) CreateMesh_i(mesh.get());
-            RuntimeBufferBase::SubmitAll();
+            SubmitAllBuffers();
 
             for (auto& texture : std::ranges::views::values(HF.graphicsResources.textures)) CreateTexture_i(texture.get());
             for (auto& cubemap : std::ranges::views::values(HF.graphicsResources.cubemaps)) CreateCubemap_i(cubemap.get());
             for (auto& texPack : std::ranges::views::values(HF.graphicsResources.texturePacks)) CreateTexturePack_i(texPack.get());
-            TexturePack::SubmitAll();
+            SubmitAllTexturePacks();
 
             for (auto& texPackAllocator : std::ranges::views::values(HF.graphicsResources.texturePackAllocators)) CreateTexturePackAllocator_i(texPackAllocator.get());
         }

@@ -5,7 +5,7 @@ namespace hf::gridlines
 {
     void Draw(const Ref<Renderer>& rn, const GridLinesInfo& info)
     {
-        rn->Start_ShaderSetup(inter::HF.staticResources.axisLinesShaderSetup);
+        Start_ShaderSetup(rn, inter::HF.staticResources.axisLinesShaderSetup);
         {
             primitives::BindGlobalUniformBuffer(rn);
 
@@ -16,13 +16,13 @@ namespace hf::gridlines
                 .bindingPoint = RenderBindingType::Graphics
             };
 
-            rn->Start_Shader(shaderInfo);
+            Start_Shader(rn, shaderInfo);
             {
-                rn->Start_Material(inter::HF.staticResources.emptyMaterial);
+                Start_Material(rn, inter::HF.staticResources.emptyMaterial);
                 {
-                    rn->Start_Draw();
+                    Start_Draw(rn);
                     {
-                        rn->DrawSet_PushConstant(&info, sizeof(GridLinesInfo));
+                        DrawSet_PushConstant(rn, &info, sizeof(GridLinesInfo));
 
                         const DrawCallInfo drawCallInfo
                         {
@@ -32,14 +32,14 @@ namespace hf::gridlines
                             .instanceCount = 1
                         };
 
-                        rn->DrawAdd_DrawCall(drawCallInfo);
+                        DrawAdd_DrawCall(rn, drawCallInfo);
                     }
-                    rn->End_Draw();
+                    End_Draw(rn);
                 }
-                rn->End_Material();
+                End_Material(rn);
             }
-            rn->End_Shader();
+            End_Shader(rn);
         }
-        rn->End_ShaderSetup();
+        End_ShaderSetup(rn);
     }
 }

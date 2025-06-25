@@ -1,5 +1,6 @@
 #include "application.h"
 #include "debug.h"
+#include "hrenderer.h"
 #include "resources.h"
 
 namespace app
@@ -7,10 +8,10 @@ namespace app
     void AppPreRender(const hf::Ref<hf::Renderer>& rn)
     {
         DebugPreRender(rn);
-        APP_UNIFORMS.globalUniformInfo.time = hf::time::GetUniformInfo();
+        APP_UNIFORMS.globalUniformInfo.time = hf::GetTimeUniformInfo();
         UniformUploadAll(rn);
 
-        if (hf::input::IsDown(hf::Key::G))
+        if (hf::IsKeyDown(hf::Key::G))
         {
             if (hf::skybox::IsDefaultCubemapBound()) hf::skybox::BindCubemap(rn, APP_CUBEMAPS.cosmos);
             else hf::skybox::BindDefaultCubemap(rn);
@@ -21,9 +22,9 @@ namespace app
     {
         DebugPrepass(rn);
 
-        rn->Start_RenderPass(APP_RENDER_PASSES.mainPresentPass);
+        hf::Start_RenderPass(rn, APP_RENDER_PASSES.mainPresentPass);
         {
-            rn->Start_ShaderSetup(APP_SHADER_SETUPS.viking_room); //Viking room setup
+            hf::Start_ShaderSetup(rn, APP_SHADER_SETUPS.viking_room); //Viking room setup
             {
                 hf::primitives::BindGlobalUniformBuffer(rn);
 
@@ -33,45 +34,45 @@ namespace app
                     .attrib = APP_BUFFER_ATTRIBUTES.pos_col_tex,
                     .bindingPoint = hf::RenderBindingType::Graphics
                 };
-                rn->Start_Shader(vikingRoomShaderInfo);
+                hf::Start_Shader(rn, vikingRoomShaderInfo);
                 {
-                    rn->Start_Material(APP_MATERIALS.viking_room);
+                    hf::Start_Material(rn, APP_MATERIALS.viking_room);
                     {
-                        rn->MaterialAdd_TexturePackBinding(APP_TEXTURE_PACKS.viking_room_pack, 2);
-                        rn->Start_Draw();
+                        hf::MaterialAdd_TexturePackBinding(rn, APP_TEXTURE_PACKS.viking_room_pack, 2);
+                        hf::Start_Draw(rn);
                         {
                             const VikingRoomPushConstant pc
                             {
                                 .modelMatrix = APP_OBJECTS.vikingRoomTransform.ToMat4(),
-                                .materialIndex = APP_MATERIALS.viking_room->GetBufferIndex()
+                                .materialIndex = GetBufferIndex(APP_MATERIALS.viking_room)
                             };
-                            rn->DrawSet_PushConstant(&pc, sizeof(VikingRoomPushConstant));
-                            rn->DrawAdd_DrawCall(APP_MESHES.viking_room);
+                            hf::DrawSet_PushConstant(rn, &pc, sizeof(VikingRoomPushConstant));
+                            hf::DrawAdd_DrawCall(rn, APP_MESHES.viking_room);
                         }
-                        rn->End_Draw();
+                        hf::End_Draw(rn);
 
-                        rn->Start_Draw();
+                        hf::Start_Draw(rn);
                         {
                             const VikingRoomPushConstant pc
                             {
                                 .modelMatrix = APP_OBJECTS.vikingRoomTransform.ToMat4(),
-                                .materialIndex = APP_MATERIALS.viking_room->GetBufferIndex()
+                                .materialIndex = GetBufferIndex(APP_MATERIALS.viking_room)
                             };
-                            rn->DrawSet_PushConstant(&pc, sizeof(VikingRoomPushConstant));
-                            rn->DrawAdd_DrawCall(APP_MESHES.viking_room);
+                            hf::DrawSet_PushConstant(rn, &pc, sizeof(VikingRoomPushConstant));
+                            hf::DrawAdd_DrawCall(rn, APP_MESHES.viking_room);
                         }
-                        rn->End_Draw();
+                        hf::End_Draw(rn);
                     }
-                    rn->End_Material();
+                    hf::End_Material(rn);
                 }
-                rn->End_Shader();
+                hf::End_Shader(rn);
             }
-            rn->End_ShaderSetup();
+            hf::End_ShaderSetup(rn);
 
             // VoxelTerrainDraw(rn);
             hf::skybox::Draw(rn, APP_OBJECTS.skybox);
             DebugRender(rn);
         }
-        rn->End_RenderPass();
+        hf::End_RenderPass(rn);
     }
 }

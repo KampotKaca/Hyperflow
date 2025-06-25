@@ -27,7 +27,7 @@ namespace app
 
     static hf::RenderPass CreateSubWindowRenderPass(const hf::Ref<hf::Renderer>& rn)
     {
-        rn->Bind(APP_RENDER_PASSES.mainPresentPass);
+        hf::Bind(rn, APP_RENDER_PASSES.mainPresentPass);
         return APP_RENDER_PASSES.mainPresentPass;
     }
 
@@ -46,31 +46,31 @@ namespace app
         APP_DEBUG.camera.camera3D.position = {0, 0.5, -2};
         APP_DEBUG.camera.camera3D.direction = {0, 0, 1};
         DEBUG_INFO.wn = hf::GetMainWindow();
-        hf::time::SetTargetFrameRate(-1);
+        hf::SetTargetFrameRate(-1);
         DEBUG_INFO.count = 0;
     }
 
     void DebugUpdate()
     {
-        if (hf::input::IsDown(hf::Key::L))
+        if (hf::IsKeyDown(hf::Key::L))
         {
-            auto state = (hf::WindowState)std::max(1, ((int32_t)DEBUG_INFO.wn->GetState() + 1) % (int32_t)hf::WindowState::FullscreenBorderless);
+            auto state = (hf::WindowState)std::max(1, ((int32_t)hf::GetState(DEBUG_INFO.wn) + 1) % (int32_t)hf::WindowState::FullscreenBorderless);
             if (state == hf::WindowState::Hidden) state = hf::WindowState::Fullscreen;
-            DEBUG_INFO.wn->SetState(state);
+            hf::SetState(DEBUG_INFO.wn, state);
         }
 
-        if (hf::input::IsDown(hf::Key::M))
+        if (hf::IsKeyDown(hf::Key::M))
         {
-            DEBUG_INFO.wn->SetState(hf::WindowState::FullscreenBorderless);
+            hf::SetState(DEBUG_INFO.wn, hf::WindowState::FullscreenBorderless);
         }
 
-        if (hf::input::IsDown(hf::Key::B))
+        if (hf::IsKeyDown(hf::Key::B))
         {
-            auto state = (hf::WindowPointerState)(((uint32_t)DEBUG_INFO.wn->GetPointerState() + 1) % 4);
-            DEBUG_INFO.wn->SetPointerState(state);
+            auto state = (hf::WindowPointerState)(((uint32_t)hf::GetPointerState(DEBUG_INFO.wn) + 1) % 4);
+            hf::SetPointerState(DEBUG_INFO.wn, state);
         }
 
-        if (hf::input::IsDown(hf::Key::V))
+        if (hf::IsKeyDown(hf::Key::V))
         {
         	hf::WindowCreationInfo data =
         	{
@@ -86,13 +86,13 @@ namespace app
         			.onRenderCallback = AppRender
         		},
         	};
-        	DEBUG_INFO.wn = hf::Window::Open(data, nullptr);
+        	DEBUG_INFO.wn = hf::Create(data, nullptr);
         	DEBUG_INFO.count++;
         }
 
-        if (hf::input::IsDown(hf::Key::K))
+        if (hf::IsKeyDown(hf::Key::K))
         {
-            DEBUG_INFO.wn->SetVSyncMode((hf::VsyncMode)(((uint32_t)DEBUG_INFO.wn->GetVSyncMode() + 1) % (uint32_t)hf::VsyncMode::Count));
+            hf::SetVSyncMode(DEBUG_INFO.wn, (hf::VsyncMode)(((uint32_t)hf::GetVSyncMode(DEBUG_INFO.wn) + 1) % (uint32_t)hf::VsyncMode::Count));
         }
 
         // auto delta = hf::input::GetScrollDelta();
@@ -101,33 +101,33 @@ namespace app
         // auto mDelta = hf::input::GetPointerDelta();
         // if (mDelta != hf::ivec2(0, 0)) LOG_INFO("Move: (X: %i, Y: %i)", mDelta.x, mDelta.y);
 
-        auto cReq = (int32_t)(hf::time::GetTimePassed() / 0.2);
+        auto cReq = (int32_t)(hf::GetTimePassed() / 0.2);
         if (cReq != DEBUG_INFO.reqCount)
         {
             // oss << "[Hyperflow] " << hf::time::GetFrameRate();
             // oss << "[Hyperflow] " << hf::Time::GetTimePassed();
-            const std::string str = std::string("[Hyperflow] ") + std::to_string(hf::time::GetFrameRate());
-            DEBUG_INFO.wn->SetTitle(str);
+            const std::string str = std::string("[Hyperflow] ") + std::to_string(hf::GetFrameRate());
+            hf::SetTitle(DEBUG_INFO.wn, str);
             DEBUG_INFO.reqCount = cReq;
         }
 
-        if (hf::input::IsDown(hf::Key::T))
+        if (hf::IsKeyDown(hf::Key::T))
         {
-            switch (hf::Renderer::GetApiType())
+            switch (hf::GetApiType())
             {
                 case hf::RenderingApiType::None:
                     break;
                 case hf::RenderingApiType::Vulkan:
-                    hf::Renderer::ChangeApi(hf::RenderingApiType::Direct3D);
+                    hf::ChangeApi(hf::RenderingApiType::Direct3D);
                     break;
                 case hf::RenderingApiType::Direct3D:
-                    hf::Renderer::ChangeApi(hf::RenderingApiType::Vulkan);
+                    hf::ChangeApi(hf::RenderingApiType::Vulkan);
                     break;
             }
         }
 
-        APP_DEBUG.camera.Update(hf::GetMainWindow(), (float)hf::time::GetDeltaTime());
-        if (hf::input::IsDown(hf::Key::N)) APP_DEBUG.drawGridLines = !APP_DEBUG.drawGridLines;
+        APP_DEBUG.camera.Update(hf::GetMainWindow(), (float)hf::GetDeltaTime());
+        if (hf::IsKeyDown(hf::Key::N)) APP_DEBUG.drawGridLines = !APP_DEBUG.drawGridLines;
     }
 
     void DebugQuit()

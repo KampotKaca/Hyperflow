@@ -10,12 +10,6 @@ namespace hf
         explicit Shader(const ShaderCreationInfo& info);
         ~Shader();
 
-        static Ref<Shader> Create(const ShaderCreationInfo& info);
-        static void Destroy(const Ref<Shader>* pShaders, uint32_t count);
-
-        void Destroy();
-        [[nodiscard]] bool IsRunning() const;
-
         std::string vertLoc{}, fragLoc{};
         RenderPass renderPass{};
         ShaderSetup shaderSetup{};

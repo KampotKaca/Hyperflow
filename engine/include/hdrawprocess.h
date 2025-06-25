@@ -10,8 +10,8 @@ namespace hf
     enum DescriptorType { BUFFER, TEXPACK };
     struct DescriptorBindingInfo
     {
-        void* object;
-        DescriptorType type;
+        void* object{};
+        DescriptorType type{};
     };
 
     struct TextureBindingInfo
@@ -50,7 +50,7 @@ namespace hf
 
     struct TexturePackRebindingGroupPacketInfo
     {
-        Ref<TexturePack> texturePack;
+        Ref<TexturePack> texturePack{};
         AssetRange<uint16_t> bindingPacketRange{};
     };
 

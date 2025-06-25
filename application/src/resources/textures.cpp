@@ -8,7 +8,7 @@ namespace app
 
     void TextureLoadAll()
     {
-        APP_TEXTURES.viking_room = hf::Texture::Create("viking_room.png");
-        APP_TEXTURES.greek_head = hf::Texture::Create("greek_head.jpg");
+        APP_TEXTURES.viking_room = hf::CreateTextureAsset("viking_room.png");
+        APP_TEXTURES.greek_head = hf::CreateTextureAsset("greek_head.jpg");
     }
 }

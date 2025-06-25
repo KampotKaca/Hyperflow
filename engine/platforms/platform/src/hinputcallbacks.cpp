@@ -95,7 +95,7 @@ namespace hf::callbacks
 
     void WindowCloseCallback(GLFWwindow* win)
     {
-        inter::HF.windows[(uint64_t)win]->Close();
+        Destroy(inter::HF.windows[(uint64_t)win]);
     }
 
     void JoystickEventCallback(int32_t jid, int32_t event)

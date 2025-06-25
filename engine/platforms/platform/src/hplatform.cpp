@@ -38,7 +38,7 @@ namespace hf::inter
         {
             for(const auto& window : HF.windows | std::views::values)
             {
-                if (window->IsClosed()) continue;
+                if (IsClosed(window)) continue;
                 auto& eventData = window->eventData;
                 for (auto& currentState : eventData.keyStates)
                 {

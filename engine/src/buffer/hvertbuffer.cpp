@@ -20,19 +20,19 @@ namespace hf
         inter::rendering::CreateVertBuffer_i(this);
     }
 
-    Ref<VertBuffer> VertBuffer::Create(const VertBufferCreationInfo& info)
+    Ref<VertBuffer> Create(const VertBufferCreationInfo& info)
     {
         Ref<VertBuffer> buffer = MakeRef<VertBuffer>(info, DataTransferType::CopyData);
         inter::HF.graphicsResources.buffers[(uint64_t)buffer.get()] = buffer;
         return buffer;
     }
 
-    void VertBuffer::Upload(const VertBufferUploadInfo& info) const
+    void Upload(const Ref<VertBuffer>& vb, const VertBufferUploadInfo& info)
     {
-        inter::rendering::VertBufferUploadInfo uploadInfo
+        const inter::rendering::VertBufferUploadInfo uploadInfo
         {
-            .buffer = handle,
-            .data = buffer,
+            .buffer = vb->handle,
+            .data = vb->buffer,
             .offset = info.offset,
             .vertexCount = info.vertCount
         };

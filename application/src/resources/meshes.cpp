@@ -6,7 +6,7 @@ namespace app
 
     void MeshLoadAll()
     {
-        APP_MESHES.viking_room = hf::Mesh::Create("viking_room.obj");
-        hf::RuntimeBufferBase::SubmitAll();
+        APP_MESHES.viking_room = hf::CreateMeshAsset("viking_room.obj");
+        hf::SubmitAllBuffers();
     }
 }

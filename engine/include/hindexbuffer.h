@@ -11,8 +11,6 @@ namespace hf
         ~IndexBuffer() override = default;
 
         [[nodiscard]] RuntimeBufferType GetType() const override { return RuntimeBufferType::Index; }
-        void Upload(const IndexBufferUploadInfo& info) const;
-        static Ref<IndexBuffer> Create(const IndexBufferCreationInfo& info);
 
         IndexBufferCreationInfo details{};
     };
