@@ -16,9 +16,6 @@ namespace hf
         void Destroy();
         [[nodiscard]] bool IsRunning() const;
 
-#ifndef HF_ENGINE_INTERNALS
-    private:
-#endif
         std::string vertLoc{}, fragLoc{};
         RenderPass renderPass{};
         ShaderSetup shaderSetup{};

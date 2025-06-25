@@ -1,4 +1,3 @@
-#define HF_ENGINE_INTERNALS
 #include "hmaterial.h"
 #include "hgenericexception.h"
 #include "hinternal.h"

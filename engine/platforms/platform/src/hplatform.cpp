@@ -1,4 +1,3 @@
-#define HF_ENGINE_INTERNALS
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
 #include "hinputcallbacks.h"

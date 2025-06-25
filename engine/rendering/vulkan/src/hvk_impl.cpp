@@ -161,6 +161,12 @@ namespace hf::inter::rendering
         BindBuffers((VkRenderer*)rn, info);
     }
 
+    BufferAllocator DefineBufferAllocator(const BufferAllocatorDefinitionInfo& info)
+    {
+        GRAPHICS_DATA.bufferAllocators.emplace_back(MakeURef<VkBufferAllocator>(info));
+        return GRAPHICS_DATA.bufferAllocators.size();
+    }
+
     ShaderSetup DefineShaderSetup(const ShaderSetupDefinitionInfo& info)
     {
         GRAPHICS_DATA.shaderSetups.emplace_back(MakeURef<VkShaderSetup>(info));
@@ -175,12 +181,6 @@ namespace hf::inter::rendering
     void UploadPushConstants(void* rn, const PushConstantUploadInfo& info)
     {
         hf::UploadPushConstants((VkRenderer*)rn, info);
-    }
-
-    BufferAllocator DefineBufferAllocator(const BufferAllocatorDefinitionInfo& info)
-    {
-        GRAPHICS_DATA.bufferAllocators.emplace_back(MakeURef<VkBufferAllocator>(info));
-        return GRAPHICS_DATA.bufferAllocators.size();
     }
 
     void* CreateVertBuffer(const VertBufferCreationInfo& info)

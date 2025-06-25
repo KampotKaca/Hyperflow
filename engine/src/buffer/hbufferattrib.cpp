@@ -1,4 +1,3 @@
-#define HF_ENGINE_INTERNALS
 #include "hyperflow.h"
 #include "hinternal.h"
 #include "hyaml.h"

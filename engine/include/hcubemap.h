@@ -17,9 +17,6 @@ namespace hf
         static Ref<Cubemap> Create(const char* assetPath);
         static void Destroy(const Ref<Cubemap>* pCubemaps, uint32_t count);
 
-#ifndef HF_ENGINE_INTERNALS
-    private:
-#endif
         std::string folderPath{};
         std::string texturePaths[6]{};
         TextureChannel desiredChannel = TextureChannel::RGBA;

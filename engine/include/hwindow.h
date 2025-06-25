@@ -56,9 +56,6 @@ namespace hf
 		static Ref<Window> Open(const WindowCreationInfo &data, const Ref<Window> &parent);
 		static void CloseAll();
 
-#ifndef HF_ENGINE_INTERNALS
-	private:
-#endif
 		struct EventData
 		{
 			KeyState keyStates[(uint32_t)Key::MAX]{};

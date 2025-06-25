@@ -17,9 +17,6 @@ namespace hf
         static Ref<Texture> Create(const char* assetPath);
         static void Destroy(const Ref<Texture>* pTextures, uint32_t count);
 
-#ifndef HF_ENGINE_INTERNALS
-    private:
-#endif
         std::string filePath{};
         bool useAbsolutePath{};
         TextureChannel desiredChannel = TextureChannel::RGBA;

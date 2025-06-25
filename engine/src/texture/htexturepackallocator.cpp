@@ -1,4 +1,3 @@
-#define HF_ENGINE_INTERNALS
 #include "htexturepackallocator.h"
 #include "hinternal.h"
 #include "htexturepack.h"

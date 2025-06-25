@@ -17,9 +17,6 @@ namespace hf
         static void Destroy(const Ref<RuntimeBufferBase>* pBuffers, uint32_t count);
         [[nodiscard]] virtual RuntimeBufferType GetType() const = 0;
 
-#ifndef HF_ENGINE_INTERNALS
-    private:
-#endif
         DataTransferType transferType = DataTransferType::DoNotOwn;
         void* handle{};
         void* buffer{};

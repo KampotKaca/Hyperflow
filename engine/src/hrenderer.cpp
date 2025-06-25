@@ -1,4 +1,3 @@
-#define HF_ENGINE_INTERNALS
 #include "hrenderer.h"
 #include <hyperflow.h>
 #include "hinternal.h"

@@ -1,4 +1,3 @@
-#define HF_ENGINE_INTERNALS
 #include "hshader.h"
 #include "hshared.h"
 #include "hinternal.h"

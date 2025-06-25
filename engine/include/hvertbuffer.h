@@ -15,9 +15,6 @@ namespace hf
         void Upload(const VertBufferUploadInfo& info) const;
         static Ref<VertBuffer> Create(const VertBufferCreationInfo& info);
 
-#ifndef HF_ENGINE_INTERNALS
-    private:
-#endif
         VertBufferCreationInfo details{};
     };
 }

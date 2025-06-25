@@ -1,4 +1,3 @@
-#define HF_ENGINE_INTERNALS
 #include "hfreemovecamera3d.h"
 #include "hexternal.h"
 

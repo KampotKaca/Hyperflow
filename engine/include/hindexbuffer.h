@@ -14,9 +14,6 @@ namespace hf
         void Upload(const IndexBufferUploadInfo& info) const;
         static Ref<IndexBuffer> Create(const IndexBufferCreationInfo& info);
 
-#ifndef HF_ENGINE_INTERNALS
-    private:
-#endif
         IndexBufferCreationInfo details{};
     };
 }

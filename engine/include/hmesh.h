@@ -18,9 +18,6 @@ namespace hf
         static Ref<Mesh> Create(const char* assetPath);
         static void Destroy(const Ref<Mesh>* pMeshes, uint32_t count);
 
-#ifndef HF_ENGINE_INTERNALS
-    private:
-#endif
         struct SubMesh
         {
             Ref<VertBuffer> vertBuffer{};

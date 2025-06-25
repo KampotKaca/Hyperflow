@@ -59,9 +59,6 @@ namespace hf
 		void DrawAdd_TexturePackBinding(const Ref<TexturePack>& texPack, uint32_t setBindingIndex);
 		void DrawSet_PushConstant(const void* data, uint32_t dataSize);
 
-#ifndef HF_ENGINE_INTERNALS
-	private:
-#endif
 		struct ThreadInfo
 		{
 			std::thread thread;

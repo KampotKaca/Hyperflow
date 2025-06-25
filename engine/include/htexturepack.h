@@ -18,10 +18,6 @@ namespace hf
         static Ref<TexturePack> Create(const TexturePackCreationInfo& info);
         static void Destroy(const Ref<TexturePack>* pPacks, uint32_t count);
 
-#ifndef HF_ENGINE_INTERNALS
-    private:
-#endif
-
         struct Binding
         {
             TextureSampler sampler{};

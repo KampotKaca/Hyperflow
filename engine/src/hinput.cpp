@@ -1,4 +1,3 @@
-#define HF_ENGINE_INTERNALS
 #include "hwindow.h"
 #include "hexception.h"
 #include "hyperflow.h"

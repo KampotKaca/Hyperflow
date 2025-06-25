@@ -1,4 +1,3 @@
-#define HF_ENGINE_INTERNALS
 #include "hyaml.h"
 #include <stb_image.h>
 #include "htexture.h"

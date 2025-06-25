@@ -1,4 +1,3 @@
-#define HF_ENGINE_INTERNALS
 #include "hinternal.h"
 #include "hyperflow.h"
 #include "hwindow.h"

@@ -123,27 +123,32 @@ namespace hf::inter::rendering
         return 0;
     }
 
-    uint32_t DefineUniformBuffer(const UniformBufferDefinitionInfo& info)
+    Buffer DefineUniformBuffer(const BufferDefinitionInfo& info)
     {
         return 1;
     }
 
-    void UploadUniformBuffer(const void* rn, const UniformBufferUploadInfo& info)
+    Buffer DefineStorageBuffer(const StorageBufferDefinitionInfo& info)
+    {
+        return 1;
+    }
+
+    void UploadBuffer(const void* rn, const BufferUploadInfo& info)
     {
 
     }
 
-    void BindUniformBuffer(const void* rn, const UniformBufferBindInfo& info)
+    void BindBuffer(const void* rn, const BufferBindInfo& info)
     {
 
+    }
+
+    BufferAllocator DefineBufferAllocator(const BufferAllocatorDefinitionInfo& info)
+    {
+        return 1;
     }
 
     uint32_t DefineShaderSetup(const ShaderSetupDefinitionInfo& info)
-    {
-        return 1;
-    }
-
-    uint32_t DefineUniformAllocator(const UniformAllocatorDefinitionInfo& info)
     {
         return 1;
     }
@@ -184,21 +189,6 @@ namespace hf::inter::rendering
     }
 
     void UploadIndexBuffer(const IndexBufferUploadInfo& info)
-    {
-
-    }
-
-    void* CreateStorageBuffer(const StorageBufferCreationInfo& info)
-    {
-        return nullptr;
-    }
-
-    void DestroyStorageBuffer(void* handle)
-    {
-
-    }
-
-    void UploadStorageBuffer(const StorageBufferUploadInfo& info)
     {
 
     }
@@ -311,11 +301,12 @@ namespace hf::inter::rendering
 
             //uniform buffer
             .DefineUniformBuffer        = DefineUniformBuffer,
-            .UploadUniformBuffer        = UploadUniformBuffer,
-            .BindUniformBuffer          = BindUniformBuffer,
+            .DefineStorageBuffer        = DefineStorageBuffer,
+            .UploadBuffer               = UploadBuffer,
+            .BindBuffer                 = BindBuffer,
 
             //uniform allocator
-            .DefineUniformAllocator     = DefineUniformAllocator,
+            .DefineBufferAllocator     = DefineBufferAllocator,
 
             //vertex buffer
             .CreateVertBuffer           = CreateVertBuffer,
@@ -326,11 +317,6 @@ namespace hf::inter::rendering
             .CreateIndexBuffer          = CreateIndexBuffer,
             .DestroyIndexBuffer         = DestroyIndexBuffer,
             .UploadIndexBuffer          = UploadIndexBuffer,
-
-            //storage buffer
-            .CreateStorageBuffer        = CreateStorageBuffer,
-            .DestroyStorageBuffer       = DestroyStorageBuffer,
-            .UploadStorageBuffer        = UploadStorageBuffer,
 
             //buffer operations
             .SubmitBufferCopyOperations   = SubmitBufferCopyOperations,
