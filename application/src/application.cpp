@@ -1,7 +1,7 @@
 #include "application.h"
 #include "debug.h"
 #include "resources.h"
-#include "voxelterrain.h"
+#include "voxelterrain/voxelterrain.h"
 
 namespace app
 {
@@ -34,7 +34,7 @@ namespace app
 		UniformStartAll();
 		DebugStart();
 
-		// VoxelTerrainGenerate();
+		VoxelTerrainGenerate();
 		hf::SetTargetFrameRate(240);
 	}
 
@@ -43,12 +43,12 @@ namespace app
 		APP_OBJECTS.vikingRoomTransform.euler.y -= (float)hf::GetDeltaTime() * 10.0f;
 		APP_OBJECTS.vikingRoom2Transform.euler.y -= (float)hf::GetDeltaTime() * 10.0f;
 		DebugUpdate();
-		// VoxelTerrainUpdate();
+		VoxelTerrainUpdate();
 	}
 
 	void AppQuit()
 	{
-		// VoxelTerrainDispose();
+		VoxelTerrainDispose();
 		DebugQuit();
 	}
 }

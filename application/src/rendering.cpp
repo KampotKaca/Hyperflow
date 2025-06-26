@@ -16,6 +16,8 @@ namespace app
             if (hf::skybox::IsDefaultCubemapBound()) hf::skybox::BindCubemap(rn, APP_CUBEMAPS.cosmos);
             else hf::skybox::BindDefaultCubemap(rn);
         }
+
+        VoxelTerrainPreDraw(rn);
     }
 
     void AppRender(const hf::Ref<hf::Renderer>& rn)
@@ -69,7 +71,7 @@ namespace app
             }
             hf::End_ShaderSetup(rn);
 
-            // VoxelTerrainDraw(rn);
+            VoxelTerrainDraw(rn);
             hf::skybox::Draw(rn, APP_OBJECTS.skybox);
             DebugRender(rn);
         }

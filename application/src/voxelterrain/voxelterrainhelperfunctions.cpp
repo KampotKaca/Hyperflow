@@ -1,58 +1,8 @@
-#include "voxelterrain.h"
-#include "FastNoiseLite.h"
+#include "voxelterrain/voxelterrainhelpersfunctions.h"
 
 namespace app
 {
-    VoxelTerrain VOXEL_TERRAIN;
-    static void CreateVoxelOctreeRoot();
-    static void CreateUnPrunableBranches();
-
-    static void GenerateOctaveMap2D_Thread(VoxelOctave* octave, hf::uvec3 position, hf::uvec3 size);
-
-    void VoxelTerrainGenerate()
-    {
-        VOXEL_TERRAIN.jobPool = new hf::ThreadPool<>();
-
-        CreateVoxelOctreeRoot();
-        CreateUnPrunableBranches();
-
-        for (uint32_t x = 0; x < 32; x++)
-        {
-            for (uint32_t z = 0; z < 32; z++)
-            {
-                for (uint32_t y = 0; y < 32; y++)
-                {
-                    SetVoxel(hf::uvec3(x, y, z), VOXEL_GRASS);
-                }
-            }
-
-            for (uint32_t z = 128; z < 128 + 32; z++)
-            {
-                for (uint32_t y = 0; y < 32; y++)
-                {
-                    SetVoxel(hf::uvec3(x, y, z), VOXEL_GRASS);
-                }
-            }
-        }
-
-        LOG_WARN("%s", "Finish");
-    }
-
-    void VoxelTerrainUpdate()
-    {
-
-    }
-
-    void VoxelTerrainDraw(const hf::Ref<hf::Renderer>& rn)
-    {
-
-    }
-
-    void VoxelTerrainDispose()
-    {
-        delete VOXEL_TERRAIN.jobPool;
-        VOXEL_TERRAIN.jobPool = nullptr;
-    }
+    static void CreateChildrenLoop(VoxelOctave* octave, hf::uvec4 index, uint32_t depth);
 
     VoxelOctave* SetVoxel(hf::uvec3 position, VoxelType type)
     {
@@ -64,8 +14,11 @@ namespace app
         while (currentAxisSize > 1)
         {
             const auto step = currentAxisSize / 2u;
-            hf::uvec3 posOffset = hf::uvec3((uint32_t)(position.x >= step), (uint32_t)(position.y >= step), (uint32_t)(position.z >= step));
-            uint32_t index = (posOffset.x << 2u) | (posOffset.y << 1u) | posOffset.z;
+            auto posOffset = hf::uvec3(
+                (uint32_t)(position.x >= step),
+                (uint32_t)(position.y >= step),
+                (uint32_t)(position.z >= step));
+            const uint32_t index = (posOffset.x << 2u) | (posOffset.y << 1u) | posOffset.z;
             position -= posOffset * step;
 
             TrySetChildren(currentOctave, pathIndex);
@@ -229,7 +182,12 @@ namespace app
         VOXEL_TERRAIN.usedOctaves = 8;
     }
 
-    static void CreateChildrenLoop(VoxelOctave* octave, hf::uvec4 index, uint32_t depth)
+    void CreateUnPrunableBranches()
+    {
+        CreateChildrenLoop(VOXEL_TERRAIN.octreeRoot, VOXEL_TERRAIN.octreeRootIndex, VOXEL_TERRAIN_MAX_DEPTH - VOXEL_TERRAIN_MAX_CLEAR_DEPTH);
+    }
+
+    void CreateChildrenLoop(VoxelOctave* octave, hf::uvec4 index, uint32_t depth)
     {
         if (depth == 0) return;
         TrySetChildren(octave, index);
@@ -237,10 +195,5 @@ namespace app
         index = GetIndexPath(octave->firstChildLocation);
         auto* children = GetOctave(index);
         for (uint32_t i = 0; i < 8; i++) CreateChildrenLoop(&children[i], index, depth);
-    }
-
-    void CreateUnPrunableBranches()
-    {
-        CreateChildrenLoop(VOXEL_TERRAIN.octreeRoot, VOXEL_TERRAIN.octreeRootIndex, VOXEL_TERRAIN_MAX_DEPTH - VOXEL_TERRAIN_MAX_CLEAR_DEPTH);
     }
 }
