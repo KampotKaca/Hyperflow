@@ -55,7 +55,7 @@ namespace app
                         {
                             const VikingRoomPushConstant pc
                             {
-                                .modelMatrix = APP_OBJECTS.vikingRoomTransform.ToMat4(),
+                                .modelMatrix = APP_OBJECTS.vikingRoom2Transform.ToMat4(),
                                 .materialIndex = GetBufferIndex(APP_MATERIALS.viking_room)
                             };
                             hf::DrawSet_PushConstant(rn, &pc, sizeof(VikingRoomPushConstant));

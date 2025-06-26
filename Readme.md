@@ -51,9 +51,9 @@ The engine lifecycle is configurable using callbacks, which are passed in main b
 ### 5. **Renderer Lifecycle**
 The renderer runs on a seperate thread, so the rendering process consists of filling the packet with necessary data and sending it to the render thread, which will draw the packet when the gpu is availble, drawing process is similar to Imgui api, for example:
 
-        rn->Start_RenderPass(APP_RENDER_PASSES.mainPresentPass);
+        hf::Start_RenderPass(rn, APP_RENDER_PASSES.mainPresentPass);
         {
-            rn->Start_ShaderSetup(APP_SHADER_SETUPS.viking_room); //Viking room setup
+            hf::Start_ShaderSetup(rn, APP_SHADER_SETUPS.viking_room); //Viking room setup
             {
                 hf::primitives::BindGlobalUniformBuffer(rn);
 
@@ -63,35 +63,43 @@ The renderer runs on a seperate thread, so the rendering process consists of fil
                     .attrib = APP_BUFFER_ATTRIBUTES.pos_col_tex,
                     .bindingPoint = hf::RenderBindingType::Graphics
                 };
-                rn->Start_Shader(vikingRoomShaderInfo);
+                hf::Start_Shader(rn, vikingRoomShaderInfo);
                 {
-                    rn->Start_Material(hf::primitives::GetEmptyMaterial());
+                    hf::Start_Material(rn, APP_MATERIALS.viking_room);
                     {
-                        rn->MaterialAdd_TexturePackBinding(APP_TEXTURE_PACKS.viking_room_pack, 1);
-                        rn->Start_Draw();
+                        hf::MaterialAdd_TexturePackBinding(rn, APP_TEXTURE_PACKS.viking_room_pack, 2);
+                        hf::Start_Draw(rn);
                         {
-                            const auto trs = APP_OBJECTS.vikingRoomTransform.ToMat4();
-                            rn->DrawSet_PushConstant(&trs, sizeof(trs));
-                            rn->DrawAdd_DrawCall(APP_MESHES.viking_room);
+                            const VikingRoomPushConstant pc
+                            {
+                                .modelMatrix = APP_OBJECTS.vikingRoomTransform.ToMat4(),
+                                .materialIndex = GetBufferIndex(APP_MATERIALS.viking_room)
+                            };
+                            hf::DrawSet_PushConstant(rn, &pc, sizeof(VikingRoomPushConstant));
+                            hf::DrawAdd_DrawCall(rn, APP_MESHES.viking_room);
                         }
-                        rn->End_Draw();
+                        hf::End_Draw(rn);
 
-                        rn->Start_Draw();
+                        hf::Start_Draw(rn);
                         {
-                            const auto trs = APP_OBJECTS.vikingRoom2Transform.ToMat4();
-                            rn->DrawSet_PushConstant(&trs, sizeof(trs));
-                            rn->DrawAdd_DrawCall(APP_MESHES.viking_room);
+                            const VikingRoomPushConstant pc
+                            {
+                                .modelMatrix = APP_OBJECTS.vikingRoom2Transform.ToMat4(),
+                                .materialIndex = GetBufferIndex(APP_MATERIALS.viking_room)
+                            };
+                            hf::DrawSet_PushConstant(rn, &pc, sizeof(VikingRoomPushConstant));
+                            hf::DrawAdd_DrawCall(rn, APP_MESHES.viking_room);
                         }
-                        rn->End_Draw();
+                        hf::End_Draw(rn);
                     }
-                    rn->End_Material();
+                    hf::End_Material(rn);
                 }
-                rn->End_Shader();
+                hf::End_Shader(rn);
             }
-            rn->End_ShaderSetup();
+            hf::End_ShaderSetup(rn);
             hf::skybox::Draw(rn, APP_OBJECTS.skybox);
         }
-        rn->End_RenderPass();
+        hf::End_RenderPass(rn);
 
 ## Requirements
 
