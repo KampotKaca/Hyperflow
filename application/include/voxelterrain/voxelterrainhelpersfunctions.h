@@ -17,6 +17,9 @@ namespace app
     OctavePath CreateChildren(OctavePath parentPath);
     void FreeOctaves(OctavePath path, uint32_t count);
 
+    void CreateVoxelOctreeRoot();
+    void CreateUnPrunableBranches();
+
     inline OctavePath ToPath(const hf::uvec4 index) { return index.w << 18u | index.x << 12u | index.y << 6u | index.z; }
 
     inline hf::uvec4 GetIndexPath(OctavePath path)

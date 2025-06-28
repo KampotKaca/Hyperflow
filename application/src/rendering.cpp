@@ -2,6 +2,7 @@
 #include "debug.h"
 #include "hrenderer.h"
 #include "resources.h"
+#include "voxelterrain/voxelterrain.h"
 
 namespace app
 {

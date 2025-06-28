@@ -159,7 +159,6 @@ namespace hf
         createInfo.enabledLayerCount = NUM_VK_VALIDATION_LAYERS;
         createInfo.pNext = (VkDebugUtilsMessengerCreateInfoEXT*)&GRAPHICS_DATA.debugCreateInfo;
 #endif
-
         VK_HANDLE_EXCEPT(vkCreateInstance(&createInfo, nullptr, &GRAPHICS_DATA.instance));
 
 #if DEBUG
