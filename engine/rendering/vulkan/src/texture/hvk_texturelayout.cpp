@@ -29,13 +29,13 @@ namespace hf
             .pBindings = GRAPHICS_DATA.preAllocBuffers.descLayoutBindings,
         };
 
-        VK_HANDLE_EXCEPT(vkCreateDescriptorSetLayout(GRAPHICS_DATA.defaultDevice->logicalDevice.device,
+        VK_HANDLE_EXCEPT(vkCreateDescriptorSetLayout(GRAPHICS_DATA.device.logicalDevice.device,
             &layoutInfo, nullptr, &layout));
     }
 
     VkTextureLayout::~VkTextureLayout()
     {
-        if (layout) vkDestroyDescriptorSetLayout(GRAPHICS_DATA.defaultDevice->logicalDevice.device, layout, nullptr);
+        if (layout) vkDestroyDescriptorSetLayout(GRAPHICS_DATA.device.logicalDevice.device, layout, nullptr);
     }
 
     bool IsValidLayout(TextureLayout layout)

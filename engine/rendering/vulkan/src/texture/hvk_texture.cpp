@@ -15,7 +15,7 @@ namespace hf
     {
         bufferSize = size.x * size.y * size.z * 4;
 
-        auto device = GRAPHICS_DATA.defaultDevice->logicalDevice.device;
+        auto device = GRAPHICS_DATA.device.logicalDevice.device;
 
         VkImageCreateInfo imageInfo
         {
@@ -35,7 +35,7 @@ namespace hf
         {
             mipLevels = std::min(info.mipLevels, (uint32_t)std::floor(std::log2(std::max(size.x, size.y))) + 1);
 
-            if (!(GRAPHICS_DATA.defaultDevice->formatProps[(uint32_t)details.format].optimalTilingFeatures & VK_FORMAT_FEATURE_SAMPLED_IMAGE_FILTER_LINEAR_BIT))
+            if (!(GRAPHICS_DATA.device.formatProps[(uint32_t)details.format].optimalTilingFeatures & VK_FORMAT_FEATURE_SAMPLED_IMAGE_FILTER_LINEAR_BIT))
             {
                 LOG_WARN("[Hyperflow]", "texture image format does not support linear blitting, disabling mimmaps!");
                 return;
@@ -43,7 +43,7 @@ namespace hf
 
             imageInfo.usage = VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | (uint32_t)details.usageFlags;
 
-            auto& transferData = GRAPHICS_DATA.defaultDevice->transferData;
+            auto& transferData = GRAPHICS_DATA.device.transferData;
             imageInfo.queueFamilyIndexCount = (uint32_t)transferData.indices.size();
             imageInfo.pQueueFamilyIndices = transferData.indices.data();
         }
@@ -110,7 +110,7 @@ namespace hf
 
     VkTexture::~VkTexture()
     {
-        if (view) vkDestroyImageView(GRAPHICS_DATA.defaultDevice->logicalDevice.device, view, nullptr);
+        if (view) vkDestroyImageView(GRAPHICS_DATA.device.logicalDevice.device, view, nullptr);
         vmaDestroyImage(GRAPHICS_DATA.allocator, image, imageMemory);
     }
 
@@ -217,7 +217,7 @@ namespace hf
     {
         if (!GRAPHICS_DATA.bufferToImageCopyOperations.empty())
         {
-            auto& device = GRAPHICS_DATA.defaultDevice->logicalDevice;
+            auto& device = GRAPHICS_DATA.device.logicalDevice;
             BufferOperation(GRAPHICS_DATA.transferPool.buffers[0], device.transferQueue, TransitionBufferToImageStart);
             BufferOperation(GRAPHICS_DATA.transferPool.buffers[0], device.transferQueue, CopyBufferToImage);
             BufferOperation(GRAPHICS_DATA.graphicsPool.buffers[0], device.graphicsQueue, GenerateMimMaps);
@@ -252,7 +252,7 @@ namespace hf
             }
         };
 
-        auto device = GRAPHICS_DATA.defaultDevice->logicalDevice.device;
+        auto device = GRAPHICS_DATA.device.logicalDevice.device;
         VK_HANDLE_EXCEPT(vkCreateImageView(device, &viewInfo, nullptr, &texture->view));
     }
 

@@ -18,7 +18,7 @@ namespace hf
             .layers = 1,
         };
 
-        VK_HANDLE_EXCEPT(vkCreateFramebuffer(GRAPHICS_DATA.defaultDevice->logicalDevice.device,
+        VK_HANDLE_EXCEPT(vkCreateFramebuffer(GRAPHICS_DATA.device.logicalDevice.device,
             &frameBufferInfo, nullptr, &buffer));
     }
 
@@ -26,7 +26,7 @@ namespace hf
     {
         if (buffer != VK_NULL_HANDLE)
         {
-            vkDestroyFramebuffer(GRAPHICS_DATA.defaultDevice->logicalDevice.device, buffer, nullptr);
+            vkDestroyFramebuffer(GRAPHICS_DATA.device.logicalDevice.device, buffer, nullptr);
         }
     }
 }

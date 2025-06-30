@@ -52,13 +52,13 @@ namespace hf
             pipelineLayoutInfo.setLayoutCount = 0;
         }
 
-        VK_HANDLE_EXCEPT(vkCreatePipelineLayout(GRAPHICS_DATA.defaultDevice->logicalDevice.device,
+        VK_HANDLE_EXCEPT(vkCreatePipelineLayout(GRAPHICS_DATA.device.logicalDevice.device,
                          &pipelineLayoutInfo, nullptr, &layout));
     }
 
     VkShaderSetup::~VkShaderSetup()
     {
-        if (layout) vkDestroyPipelineLayout(GRAPHICS_DATA.defaultDevice->logicalDevice.device, layout, nullptr);
+        if (layout) vkDestroyPipelineLayout(GRAPHICS_DATA.device.logicalDevice.device, layout, nullptr);
     }
 
     bool IsValidShaderSetup(ShaderSetup setup)

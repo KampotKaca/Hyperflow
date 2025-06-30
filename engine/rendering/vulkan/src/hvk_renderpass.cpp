@@ -272,13 +272,13 @@ namespace hf
             .pDependencies = dependencies.data(),
         };
 
-        VK_HANDLE_EXCEPT(vkCreateRenderPass(GRAPHICS_DATA.defaultDevice->logicalDevice.device,
+        VK_HANDLE_EXCEPT(vkCreateRenderPass(GRAPHICS_DATA.device.logicalDevice.device,
             &renderPassInfo, nullptr, &pass));
     }
 
     VkDrawPass::~VkDrawPass()
     {
-        if (pass) vkDestroyRenderPass(GRAPHICS_DATA.defaultDevice->logicalDevice.device, pass, nullptr);
+        if (pass) vkDestroyRenderPass(GRAPHICS_DATA.device.logicalDevice.device, pass, nullptr);
     }
 
     bool IsValidRenderPass(RenderPass pass)
@@ -413,7 +413,7 @@ namespace hf
 
     bool CheckFormatSupport(VkFormat format, VkImageTiling tiling, VkFormatFeatureFlags features)
     {
-        auto& prop = GRAPHICS_DATA.defaultDevice->formatProps[(uint32_t)format];
+        auto& prop = GRAPHICS_DATA.device.formatProps[(uint32_t)format];
         switch (tiling)
         {
         case VK_IMAGE_TILING_LINEAR:

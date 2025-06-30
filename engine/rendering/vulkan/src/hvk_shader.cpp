@@ -63,14 +63,14 @@ namespace hf
             pipelines[attrib] = pipeline;
         }
 
-        auto& device = GRAPHICS_DATA.defaultDevice->logicalDevice.device;
+        auto& device = GRAPHICS_DATA.device.logicalDevice.device;
         vkDestroyShaderModule(device, vertModule, nullptr);
         vkDestroyShaderModule(device, fragModule, nullptr);
     }
 
     VkShader::~VkShader()
     {
-        auto& device = GRAPHICS_DATA.defaultDevice->logicalDevice.device;
+        auto& device = GRAPHICS_DATA.device.logicalDevice.device;
         for (auto& pipeline : pipelines | std::views::values)
             vkDestroyPipeline(device, pipeline, nullptr);
 
@@ -86,7 +86,7 @@ namespace hf
             .codeSize = codeSize,
             .pCode = (uint32_t*)code,
         };
-        VK_HANDLE_EXCEPT(vkCreateShaderModule(GRAPHICS_DATA.defaultDevice->logicalDevice.device,
+        VK_HANDLE_EXCEPT(vkCreateShaderModule(GRAPHICS_DATA.device.logicalDevice.device,
             &createInfo, nullptr, result));
     }
 
@@ -165,7 +165,7 @@ namespace hf
         }
         else multisampling.rasterizationSamples = VK_SAMPLE_COUNT_1_BIT;
 
-        if (!pass->msaaSamples.empty() && GRAPHICS_DATA.defaultDevice->features.sampleRateShading)
+        if (!pass->msaaSamples.empty() && GRAPHICS_DATA.device.features.sampleRateShading)
         {
             multisampling.sampleShadingEnable = VK_TRUE;
             multisampling.minSampleShading = VK_MSAA_MIN_SAMPLE_SHADING;
@@ -250,7 +250,7 @@ namespace hf
             pipelineInfo.pDepthStencilState = &depthStencilInfo;
         else pipelineInfo.pDepthStencilState = nullptr;
 
-        VK_HANDLE_EXCEPT(vkCreateGraphicsPipelines(GRAPHICS_DATA.defaultDevice->logicalDevice.device,
+        VK_HANDLE_EXCEPT(vkCreateGraphicsPipelines(GRAPHICS_DATA.device.logicalDevice.device,
             VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, pipeline));
     }
 

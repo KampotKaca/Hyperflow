@@ -22,11 +22,11 @@ namespace hf
         };
 
         if (info.anisotropicFilter != TextureAnisotropicFilter::None &&
-            GRAPHICS_DATA.defaultDevice->features.samplerAnisotropy)
+            GRAPHICS_DATA.device.features.samplerAnisotropy)
         {
             samplerInfo.anisotropyEnable = true;
             samplerInfo.maxAnisotropy = glm::min(
-                GRAPHICS_DATA.defaultDevice->properties.limits.maxSamplerAnisotropy,
+                GRAPHICS_DATA.device.properties.limits.maxSamplerAnisotropy,
                 (float)info.anisotropicFilter);
         }
         else
@@ -46,13 +46,13 @@ namespace hf
             samplerInfo.compareOp = VK_COMPARE_OP_ALWAYS;
         }
 
-        VK_HANDLE_EXCEPT(vkCreateSampler(GRAPHICS_DATA.defaultDevice->logicalDevice.device,
+        VK_HANDLE_EXCEPT(vkCreateSampler(GRAPHICS_DATA.device.logicalDevice.device,
             &samplerInfo, nullptr, &sampler));
     }
 
     VkTextureSampler::~VkTextureSampler()
     {
-        if (sampler) vkDestroySampler(GRAPHICS_DATA.defaultDevice->logicalDevice.device, sampler, nullptr);
+        if (sampler) vkDestroySampler(GRAPHICS_DATA.device.logicalDevice.device, sampler, nullptr);
     }
 
     bool IsValidSampler(TextureSampler sampler)

@@ -8,7 +8,7 @@ namespace hf
     void CreateSwapchain(VkSurfaceKHR surface, uvec2 targetSize, VsyncMode vsyncMode, GraphicsSwapChain* result)
     {
         SwapChainSupportDetails scs{};
-        QuerySwapChainSupport(GRAPHICS_DATA.defaultDevice->device, surface, scs);
+        QuerySwapChainSupport(GRAPHICS_DATA.device.device, surface, scs);
 
         if (scs.formats.empty() ||
             scs.presentModes.empty())
@@ -49,7 +49,7 @@ namespace hf
             uint32_t maxImageCount = scs.capabilities.maxImageCount;
             if (maxImageCount > 0 && imageCount > maxImageCount) imageCount = maxImageCount;
 
-            auto& transferData = GRAPHICS_DATA.defaultDevice->transferData;
+            auto& transferData = GRAPHICS_DATA.device.transferData;
             VkSwapchainCreateInfoKHR createInfo
             {
                 .sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR,
@@ -70,18 +70,18 @@ namespace hf
                 .oldSwapchain = oldSwapchain
             };
 
-            VK_HANDLE_EXCEPT(vkCreateSwapchainKHR(GRAPHICS_DATA.defaultDevice->logicalDevice.device, &createInfo,
+            VK_HANDLE_EXCEPT(vkCreateSwapchainKHR(GRAPHICS_DATA.device.logicalDevice.device, &createInfo,
                 nullptr, &result->swapchain));
             result->details = details;
         }
         else throw GENERIC_EXCEPT("[Vulkan]", "Unable to create swapchain");
 
         uint32_t imageCount;
-        VK_HANDLE_EXCEPT(vkGetSwapchainImagesKHR(GRAPHICS_DATA.defaultDevice->logicalDevice.device,
+        VK_HANDLE_EXCEPT(vkGetSwapchainImagesKHR(GRAPHICS_DATA.device.logicalDevice.device,
             result->swapchain, &imageCount, nullptr));
 
         auto images = std::vector<VkImage>(imageCount);
-        VK_HANDLE_EXCEPT(vkGetSwapchainImagesKHR(GRAPHICS_DATA.defaultDevice->logicalDevice.device,
+        VK_HANDLE_EXCEPT(vkGetSwapchainImagesKHR(GRAPHICS_DATA.device.logicalDevice.device,
             result->swapchain, &imageCount, images.data()));
 
         auto imageViews = std::vector<VkImageView>(imageCount);
@@ -110,7 +110,7 @@ namespace hf
                 }
             };
 
-            VK_HANDLE_EXCEPT(vkCreateImageView(GRAPHICS_DATA.defaultDevice->logicalDevice.device,
+            VK_HANDLE_EXCEPT(vkCreateImageView(GRAPHICS_DATA.device.logicalDevice.device,
                 &createInfo, nullptr, &imageViews[i]));
         }
 
@@ -129,7 +129,7 @@ namespace hf
         if (*swapchain != VK_NULL_HANDLE)
         {
             DestroyExistingViews(gc);
-            auto& device = GRAPHICS_DATA.defaultDevice->logicalDevice.device;
+            auto& device = GRAPHICS_DATA.device.logicalDevice.device;
             vkDestroySwapchainKHR(device, *swapchain, nullptr);
             *swapchain = VK_NULL_HANDLE;
         }
@@ -137,7 +137,7 @@ namespace hf
 
     void DestroyExistingViews(GraphicsSwapChain& swapchain)
     {
-        auto& device = GRAPHICS_DATA.defaultDevice->logicalDevice.device;
+        auto& device = GRAPHICS_DATA.device.logicalDevice.device;
         for (auto& image : swapchain.images)
             vkDestroyImageView(device, image.view, nullptr);
     }
@@ -180,16 +180,16 @@ namespace hf
             .pResults = nullptr,
         };
 
-        auto result = vkQueuePresentKHR(GRAPHICS_DATA.defaultDevice->logicalDevice.presentQueue, &presentInfo);
+        auto result = vkQueuePresentKHR(GRAPHICS_DATA.device.logicalDevice.presentQueue, &presentInfo);
         if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR)
             LockedRecreateSwapchain(rn);
         else if (result != VK_SUCCESS) throw GENERIC_EXCEPT("[Vulkan]", "Failed to present swapchain");
-        vkQueueWaitIdle(GRAPHICS_DATA.defaultDevice->logicalDevice.presentQueue);
+        vkQueueWaitIdle(GRAPHICS_DATA.device.logicalDevice.presentQueue);
     }
 
     bool AcquireNextImage(VkRenderer* rn)
     {
-        auto& device = GRAPHICS_DATA.defaultDevice->logicalDevice.device;
+        auto& device = GRAPHICS_DATA.device.logicalDevice.device;
         SubmitAllOperations();
         TryRecreateSwapchain(rn);
 
@@ -218,7 +218,7 @@ namespace hf
     {
         if (rn->imageIndex != UINT32_MAX)
         {
-            auto& device = GRAPHICS_DATA.defaultDevice->logicalDevice.device;
+            auto& device = GRAPHICS_DATA.device.logicalDevice.device;
             auto& previousImage = rn->swapchain.images[rn->imageIndex];
             vkWaitForFences(device, 1, &previousImage.isInFlight, true, VULKAN_API_MAX_TIMEOUT);
             vkResetFences(device, 1, &previousImage.isInFlight);

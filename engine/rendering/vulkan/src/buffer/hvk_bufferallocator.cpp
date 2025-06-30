@@ -59,7 +59,7 @@ namespace hf
             .pPoolSizes = chosenPoolSizes.begin(),
         };
 
-        auto& device = GRAPHICS_DATA.defaultDevice->logicalDevice.device;
+        auto& device = GRAPHICS_DATA.device.logicalDevice.device;
         VK_HANDLE_EXCEPT(vkCreateDescriptorPool(device, &poolInfo, nullptr, &pool));
 
         {
@@ -108,7 +108,7 @@ namespace hf
     VkBufferAllocator::~VkBufferAllocator()
     {
         if (pool != VK_NULL_HANDLE)
-            vkDestroyDescriptorPool(GRAPHICS_DATA.defaultDevice->logicalDevice.device, pool, nullptr);
+            vkDestroyDescriptorPool(GRAPHICS_DATA.device.logicalDevice.device, pool, nullptr);
     }
 
     bool IsValidAllocator(BufferAllocator allocator)

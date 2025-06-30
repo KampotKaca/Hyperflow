@@ -160,10 +160,9 @@ namespace hf
 
         uint32_t supportedVersion{};
         std::set<std::string> availableExtensionNames{};
-        std::vector<GraphicsDevice> suitableDevices{};
-        GraphicsDevice* defaultDevice{};
+        GraphicsDevice device{};
 
-        bool devicesAreLoaded = false;
+        bool deviceIsLoaded = false;
 
         CommandPool transferPool{};
         CommandPool graphicsPool{};

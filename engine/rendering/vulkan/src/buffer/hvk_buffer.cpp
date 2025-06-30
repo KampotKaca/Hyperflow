@@ -41,7 +41,7 @@ namespace hf
             .pBindings = GRAPHICS_DATA.preAllocBuffers.descLayoutBindings,
         };
 
-        VK_HANDLE_EXCEPT(vkCreateDescriptorSetLayout(GRAPHICS_DATA.defaultDevice->logicalDevice.device,
+        VK_HANDLE_EXCEPT(vkCreateDescriptorSetLayout(GRAPHICS_DATA.device.logicalDevice.device,
             &layoutInfo, nullptr, &layout));
 
         switch (memoryType)
@@ -116,7 +116,7 @@ namespace hf
                 vmaDestroyBuffer(GRAPHICS_DATA.allocator, buffers[i], memoryRegions[i]);
             }
 
-            vkDestroyDescriptorSetLayout(GRAPHICS_DATA.defaultDevice->logicalDevice.device, layout, nullptr);
+            vkDestroyDescriptorSetLayout(GRAPHICS_DATA.device.logicalDevice.device, layout, nullptr);
             isLoaded = false;
         }
     }
@@ -173,7 +173,7 @@ namespace hf
         for (uint32_t i = count; i < FRAMES_IN_FLIGHT; i++)
             buffer->descriptorSets[i] = buffer->descriptorSets[0];
 
-        vkUpdateDescriptorSets(GRAPHICS_DATA.defaultDevice->logicalDevice.device,
+        vkUpdateDescriptorSets(GRAPHICS_DATA.device.logicalDevice.device,
                 totalWrites, GRAPHICS_DATA.preAllocBuffers.descWrites,
                 0, nullptr);
     }
@@ -208,7 +208,7 @@ namespace hf
 
     uint32_t GetMemoryType(uint32_t filter, VkMemoryPropertyFlags props)
     {
-        auto& memProps = GRAPHICS_DATA.defaultDevice->memProps;
+        auto& memProps = GRAPHICS_DATA.device.memProps;
         for (uint32_t i = 0; i < memProps.memoryTypeCount; i++)
         {
             if ((filter & (1 << i)) && (memProps.memoryTypes[i].propertyFlags & props) == props) return i;
@@ -272,7 +272,7 @@ namespace hf
 
     void CreateStagingBuffer(uint64_t bufferSize, const void* data, VkBuffer* bufferResult, VmaAllocation* memoryResult)
     {
-        QueueFamilyIndices& familyIndices = GRAPHICS_DATA.defaultDevice->familyIndices;
+        QueueFamilyIndices& familyIndices = GRAPHICS_DATA.device.familyIndices;
         std::array queus = { familyIndices.transferFamily.value(), familyIndices.graphicsFamily.value() };
 
         const VkCreateBufferInfo createInfo
@@ -294,7 +294,7 @@ namespace hf
         VkBuffer stagingBuffer;
         VmaAllocation stagingBufferMemory;
         CreateStagingBuffer(info.bufferSize, info.data, &stagingBuffer, &stagingBufferMemory);
-        QueueFamilyIndices& familyIndices = GRAPHICS_DATA.defaultDevice->familyIndices;
+        QueueFamilyIndices& familyIndices = GRAPHICS_DATA.device.familyIndices;
         uint32_t queus[2] = { familyIndices.transferFamily.value(), familyIndices.graphicsFamily.value() };
 
         VkCreateBufferInfo createInfo
@@ -359,7 +359,7 @@ namespace hf
         if (!GRAPHICS_DATA.bufferToBufferCopyOperations.empty())
         {
             BufferOperation(GRAPHICS_DATA.transferPool.buffers[0],
-                GRAPHICS_DATA.defaultDevice->logicalDevice.transferQueue, CopyBufferToBuffer);
+                GRAPHICS_DATA.device.logicalDevice.transferQueue, CopyBufferToBuffer);
 
             for (auto& operation : GRAPHICS_DATA.bufferToBufferCopyOperations)
             {

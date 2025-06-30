@@ -82,7 +82,7 @@ namespace hf
             .pSignalSemaphores = &image.isRenderingFinished,
         };
 
-        auto& device = GRAPHICS_DATA.defaultDevice->logicalDevice;
+        auto& device = GRAPHICS_DATA.device.logicalDevice;
         vkResetFences(device.device, 1, &image.isInFlight);
         VK_HANDLE_EXCEPT(vkQueueSubmit(device.graphicsQueue,
             1, &submitInfo, image.isInFlight));

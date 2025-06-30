@@ -14,7 +14,7 @@ namespace hf
     VkRenderer::VkRenderer(const inter::rendering::RendererInstanceCreationInfo& info)
         : windowHandle(info.handle), targetSize(info.size), vSyncMode(info.vSyncMode)
     {
-        if (!GRAPHICS_DATA.devicesAreLoaded) LoadDevice(windowHandle, &swapchain.surface);
+        if (!GRAPHICS_DATA.deviceIsLoaded) LoadDevice(windowHandle, &swapchain.surface);
         else VK_HANDLE_EXCEPT((VkResult)GRAPHICS_DATA.platform.createVulkanSurfaceFunc(windowHandle, GRAPHICS_DATA.instance, &swapchain.surface));
     }
 
@@ -23,19 +23,19 @@ namespace hf
         for (uint32_t i = 0; i < swapchain.images.size(); ++i)
         {
             auto& image = swapchain.images[i];
-            DestroySemaphore(*GRAPHICS_DATA.defaultDevice, image.isRenderingFinished);
-            DestroyFence(*GRAPHICS_DATA.defaultDevice, image.isInFlight);
+            DestroySemaphore(GRAPHICS_DATA.device, image.isRenderingFinished);
+            DestroyFence(GRAPHICS_DATA.device, image.isInFlight);
         }
 
         for (uint32_t i = 0; i < FRAMES_IN_FLIGHT; ++i)
-            DestroySemaphore(*GRAPHICS_DATA.defaultDevice, frames[i].isImageAvailable);
+            DestroySemaphore(GRAPHICS_DATA.device, frames[i].isImageAvailable);
         frames.clear();
 
         ClearRendererPassData(this);
 
         DestroySwapchainFrameBuffers(this);
         DestroySwapchain(swapchain, &swapchain.swapchain);
-        DestroyCommandPool(*GRAPHICS_DATA.defaultDevice, commandPool);
+        DestroyCommandPool(GRAPHICS_DATA.device, commandPool);
         DestroySurface(this);
     }
 
@@ -48,17 +48,17 @@ namespace hf
         SetupViewportAndScissor(rn);
 
         CreateSwapchainFrameBuffers(rn);
-        CreateCommandPool(*GRAPHICS_DATA.defaultDevice, GRAPHICS_DATA.defaultDevice->familyIndices.graphicsFamily.value(), &rn->commandPool);
-        CreateCommandBuffers(*GRAPHICS_DATA.defaultDevice, &rn->commandPool, FRAMES_IN_FLIGHT);
+        CreateCommandPool(GRAPHICS_DATA.device, GRAPHICS_DATA.device.familyIndices.graphicsFamily.value(), &rn->commandPool);
+        CreateCommandBuffers(GRAPHICS_DATA.device, &rn->commandPool, FRAMES_IN_FLIGHT);
 
         rn->frames = std::vector<VkFrame>(FRAMES_IN_FLIGHT);
         for (uint32_t i = 0; i < FRAMES_IN_FLIGHT; ++i)
-            CreateSemaphore(*GRAPHICS_DATA.defaultDevice, &rn->frames[i].isImageAvailable);
+            CreateSemaphore(GRAPHICS_DATA.device, &rn->frames[i].isImageAvailable);
 
         for (auto& image : rn->swapchain.images)
         {
-            CreateSemaphore(*GRAPHICS_DATA.defaultDevice, &image.isRenderingFinished);
-            CreateFence(*GRAPHICS_DATA.defaultDevice, &image.isInFlight, true);
+            CreateSemaphore(GRAPHICS_DATA.device, &image.isRenderingFinished);
+            CreateFence(GRAPHICS_DATA.device, &image.isInFlight, true);
         }
     }
 
@@ -66,13 +66,14 @@ namespace hf
 
     void CreateLogicalDevice(GraphicsDevice& device)
     {
-        std::vector<VkDeviceQueueCreateInfo> queueCreateInfos{};
         std::set uniqueQueueFamilies =
         {
             device.familyIndices.graphicsFamily.value(),
             device.familyIndices.presentFamily.value(),
             device.familyIndices.transferFamily.value()
         };
+        std::vector<VkDeviceQueueCreateInfo> queueCreateInfos{};
+        queueCreateInfos.reserve(uniqueQueueFamilies.size());
 
         float queuePriority = 1.0f;
         for (uint32_t queueFamily : uniqueQueueFamilies)
@@ -210,6 +211,8 @@ namespace hf
 
         VK_HANDLE_EXCEPT((VkResult)GRAPHICS_DATA.platform.createVulkanSurfaceFunc(windowHandle, GRAPHICS_DATA.instance, resultSurface));
 
+        std::vector<GraphicsDevice> devices{};
+
         for (const auto& device : availableDevices)
         {
             GraphicsDevice deviceData{};
@@ -218,41 +221,38 @@ namespace hf
             {
                 SwapChainSupportDetails scs{};
                 QuerySwapChainSupport(device, *resultSurface, scs);
-
-                if (!scs.formats.empty() &&
-                    !scs.presentModes.empty())
-                {
-                    CreateLogicalDevice(deviceData);
-                    GRAPHICS_DATA.suitableDevices.push_back(deviceData);
-                }
+                if (!scs.formats.empty() && !scs.presentModes.empty()) devices.push_back(deviceData);
             }
         }
 
-        if (GRAPHICS_DATA.suitableDevices.empty())
+        if (devices.empty())
             throw GENERIC_EXCEPT("[Vulkan]", "No suitable graphics device found");
 
-        std::ranges::stable_sort(GRAPHICS_DATA.suitableDevices,
+        std::ranges::stable_sort(devices,
             [](const GraphicsDevice& a, const GraphicsDevice& b)
             { return a.score > b.score; });
-        GRAPHICS_DATA.devicesAreLoaded = true;
-        GRAPHICS_DATA.defaultDevice = &GRAPHICS_DATA.suitableDevices[0];
-        LOG_LOG("Graphics device found [%s]", GRAPHICS_DATA.defaultDevice->properties.deviceName);
+
+        GRAPHICS_DATA.device = devices[0];
+        CreateLogicalDevice(GRAPHICS_DATA.device);
+        GRAPHICS_DATA.deviceIsLoaded = true;
+
+        LOG_LOG("Graphics device found [%s]", GRAPHICS_DATA.device.properties.deviceName);
 
         VmaAllocatorCreateInfo allocatorInfo
         {
-            .physicalDevice = GRAPHICS_DATA.defaultDevice->device,
-            .device = GRAPHICS_DATA.defaultDevice->logicalDevice.device,
+            .physicalDevice = GRAPHICS_DATA.device.device,
+            .device = GRAPHICS_DATA.device.logicalDevice.device,
             .pAllocationCallbacks = nullptr,
             .instance = GRAPHICS_DATA.instance,
         };
 
         VK_HANDLE_EXCEPT(vmaCreateAllocator(&allocatorInfo, &GRAPHICS_DATA.allocator));
 
-        CreateCommandPool(*GRAPHICS_DATA.defaultDevice, GRAPHICS_DATA.defaultDevice->familyIndices.transferFamily.value(), &GRAPHICS_DATA.transferPool);
-        CreateCommandBuffers(*GRAPHICS_DATA.defaultDevice, &GRAPHICS_DATA.transferPool, 1);
+        CreateCommandPool(GRAPHICS_DATA.device, GRAPHICS_DATA.device.familyIndices.transferFamily.value(), &GRAPHICS_DATA.transferPool);
+        CreateCommandBuffers(GRAPHICS_DATA.device, &GRAPHICS_DATA.transferPool, 1);
 
-        CreateCommandPool(*GRAPHICS_DATA.defaultDevice, GRAPHICS_DATA.defaultDevice->familyIndices.graphicsFamily.value(), &GRAPHICS_DATA.graphicsPool);
-        CreateCommandBuffers(*GRAPHICS_DATA.defaultDevice, &GRAPHICS_DATA.graphicsPool, 1);
+        CreateCommandPool(GRAPHICS_DATA.device, GRAPHICS_DATA.device.familyIndices.graphicsFamily.value(), &GRAPHICS_DATA.graphicsPool);
+        CreateCommandBuffers(GRAPHICS_DATA.device, &GRAPHICS_DATA.graphicsPool, 1);
     }
 
     static void DestroyLogicalDevice(LogicalDevice& device)
@@ -267,10 +267,8 @@ namespace hf
     void UnloadDevice()
     {
         vmaDestroyAllocator(GRAPHICS_DATA.allocator);
-        DestroyCommandPool(*GRAPHICS_DATA.defaultDevice, GRAPHICS_DATA.transferPool);
-        DestroyCommandPool(*GRAPHICS_DATA.defaultDevice, GRAPHICS_DATA.graphicsPool);
-
-        for (auto& device : GRAPHICS_DATA.suitableDevices)
-            DestroyLogicalDevice(device.logicalDevice);
+        DestroyCommandPool(GRAPHICS_DATA.device, GRAPHICS_DATA.transferPool);
+        DestroyCommandPool(GRAPHICS_DATA.device, GRAPHICS_DATA.graphicsPool);
+        DestroyLogicalDevice(GRAPHICS_DATA.device.logicalDevice);
     }
 }

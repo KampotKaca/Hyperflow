@@ -35,7 +35,7 @@ namespace hf
             .pPoolSizes = &poolSize
         };
 
-        auto& device = GRAPHICS_DATA.defaultDevice->logicalDevice.device;
+        auto& device = GRAPHICS_DATA.device.logicalDevice.device;
         VK_HANDLE_EXCEPT(vkCreateDescriptorPool(device, &poolInfo, nullptr, &pool));
 
         {
@@ -77,6 +77,6 @@ namespace hf
 
     VkTexturePackAllocator::~VkTexturePackAllocator()
     {
-        vkDestroyDescriptorPool(GRAPHICS_DATA.defaultDevice->logicalDevice.device, pool, nullptr);
+        vkDestroyDescriptorPool(GRAPHICS_DATA.device.logicalDevice.device, pool, nullptr);
     }
 }

@@ -102,7 +102,7 @@ namespace hf
 
     void WaitForDevice()
     {
-        VK_HANDLE_EXCEPT(vkDeviceWaitIdle(GRAPHICS_DATA.defaultDevice->logicalDevice.device));
+        VK_HANDLE_EXCEPT(vkDeviceWaitIdle(GRAPHICS_DATA.device.logicalDevice.device));
     }
 
     void InitLayers()

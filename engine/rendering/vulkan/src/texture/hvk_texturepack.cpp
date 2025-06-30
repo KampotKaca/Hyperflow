@@ -65,7 +65,7 @@ namespace hf
             }
         }
 
-        vkUpdateDescriptorSets(GRAPHICS_DATA.defaultDevice->logicalDevice.device,
+        vkUpdateDescriptorSets(GRAPHICS_DATA.device.logicalDevice.device,
                 writeCount, GRAPHICS_DATA.preAllocBuffers.descWrites,
                 0, nullptr);
     }
