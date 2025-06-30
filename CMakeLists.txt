@@ -2,12 +2,11 @@ cmake_minimum_required(VERSION 3.30)
 project(Hyperflow)
 
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
-    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O0")
-    set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS} -O0")
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Og")
 
     if(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
     elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3 -march=native -s -static -static-libgcc -static-libstdc++ -pthread")
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Og -g -march=native -static -static-libgcc -static-libstdc++ -pthread")
     endif()
 
 elseif(CMAKE_BUILD_TYPE STREQUAL "Release")

@@ -22,11 +22,17 @@ namespace hf
 	{
 		try
 		{
-			std::filesystem::current_path(std::filesystem::current_path().parent_path() / "res");
 			inter::HF.time = Time();
 			inter::platform::Load();
 
 			log_set_level(LOG_TRACE);
+
+			{
+				using namespace std::filesystem;
+				auto target = current_path().parent_path() / "res";
+
+				if (exists(target)) current_path(target);
+			}
 
 			inter::HF.lifecycleCallbacks = engineData.lifecycleCallbacks;
 			inter::HF.updateType = engineData.updateType;
