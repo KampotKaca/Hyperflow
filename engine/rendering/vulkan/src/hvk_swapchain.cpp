@@ -5,7 +5,7 @@ namespace hf
 {
     static void DestroyExistingViews(GraphicsSwapChain& swapchain);
 
-    void CreateSwapchain(VkSurfaceKHR surface, uvec2 targetSize, VsyncMode vsyncMode, GraphicsSwapChain* result)
+    void CreateSwapchain(VkSurfaceKHR surface, uvec2 targetSize, VsyncMode vsyncMode, GraphicsSwapChain& result)
     {
         SwapChainSupportDetails scs{};
         QuerySwapChainSupport(GRAPHICS_DATA.device.device, surface, scs);
@@ -14,7 +14,7 @@ namespace hf
             scs.presentModes.empty())
             throw GENERIC_EXCEPT("[Vulkan]", "Device is not suitable!!!");
 
-        auto oldSwapchain = result->swapchain;
+        auto oldSwapchain = result.swapchain;
         GraphicsSwapchainDetails details{};
         VkPresentModeKHR targetPresentMode{};
         VkPresentModeKHR defaultPresentMode{};
@@ -71,18 +71,18 @@ namespace hf
             };
 
             VK_HANDLE_EXCEPT(vkCreateSwapchainKHR(GRAPHICS_DATA.device.logicalDevice.device, &createInfo,
-                nullptr, &result->swapchain));
-            result->details = details;
+                nullptr, &result.swapchain));
+            result.details = details;
         }
         else throw GENERIC_EXCEPT("[Vulkan]", "Unable to create swapchain");
 
         uint32_t imageCount;
         VK_HANDLE_EXCEPT(vkGetSwapchainImagesKHR(GRAPHICS_DATA.device.logicalDevice.device,
-            result->swapchain, &imageCount, nullptr));
+            result.swapchain, &imageCount, nullptr));
 
         auto images = std::vector<VkImage>(imageCount);
         VK_HANDLE_EXCEPT(vkGetSwapchainImagesKHR(GRAPHICS_DATA.device.logicalDevice.device,
-            result->swapchain, &imageCount, images.data()));
+            result.swapchain, &imageCount, images.data()));
 
         auto imageViews = std::vector<VkImageView>(imageCount);
         for (uint32_t i = 0; i < imageCount; i++)
@@ -114,11 +114,11 @@ namespace hf
                 &createInfo, nullptr, &imageViews[i]));
         }
 
-        DestroySwapchain(*result, &oldSwapchain);
-        if (result->images.size() != imageCount) result->images = std::vector<SwapchainImage>(imageCount);
+        DestroySwapchain(result, &oldSwapchain);
+        if (result.images.size() != imageCount) result.images = std::vector<SwapchainImage>(imageCount);
         for (uint32_t i = 0; i < imageCount; i++)
         {
-            auto& resImage = result->images[i];
+            auto& resImage = result.images[i];
             resImage.image = images[i];
             resImage.view = imageViews[i];
         }
@@ -148,7 +148,7 @@ namespace hf
         WaitForDevice();
 
         DestroySwapchainFrameBuffers(rn);
-        CreateSwapchain(rn->swapchain.surface, rn->targetSize, rn->vSyncMode, &rn->swapchain);
+        CreateSwapchain(rn->swapchain.surface, rn->targetSize, rn->vSyncMode, rn->swapchain);
         SetupViewportAndScissor(rn);
         RebindRendererToAllPasses(rn);
         CreateSwapchainFrameBuffers(rn);
@@ -183,8 +183,11 @@ namespace hf
         auto result = vkQueuePresentKHR(GRAPHICS_DATA.device.logicalDevice.presentQueue, &presentInfo);
         if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR)
             LockedRecreateSwapchain(rn);
-        else if (result != VK_SUCCESS) throw GENERIC_EXCEPT("[Vulkan]", "Failed to present swapchain");
-        vkQueueWaitIdle(GRAPHICS_DATA.device.logicalDevice.presentQueue);
+        else if (result != VK_SUCCESS)
+        {
+            LOG_ERROR("Failed to present swapchain %i", rn->currentFrame);
+            VK_HANDLE_EXCEPT(result);
+        }
     }
 
     bool AcquireNextImage(VkRenderer* rn)

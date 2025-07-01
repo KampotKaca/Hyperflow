@@ -252,7 +252,7 @@ namespace hf
 
     void WaitForDevice();
 
-    void CreateSwapchain(VkSurfaceKHR surface, uvec2 targetSize, VsyncMode vsyncMode, GraphicsSwapChain* result);
+    void CreateSwapchain(VkSurfaceKHR surface, uvec2 targetSize, VsyncMode vsyncMode, GraphicsSwapChain& result);
     void DestroySwapchain(GraphicsSwapChain& gc, VkSwapchainKHR* swapchain);
 
     void CreateCommandPool(const GraphicsDevice& device, uint32_t familyIndex, CommandPool* result);

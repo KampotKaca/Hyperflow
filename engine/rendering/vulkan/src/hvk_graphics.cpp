@@ -7,7 +7,7 @@ namespace hf
 
     //Logical devices are destroyed in loader
     static void CreateLogicalDevice(GraphicsDevice& device);
-    static bool SetupPhysicalDevice(VkSurfaceKHR surface, VkPhysicalDevice device, GraphicsDevice* deviceData);
+    static bool SetupPhysicalDevice(VkSurfaceKHR surface, VkPhysicalDevice device, GraphicsDevice& deviceData);
 
     //------------------------------------------------------------------------------------
 
@@ -44,7 +44,7 @@ namespace hf
         rn->mainPass = mainPass;
         auto& pass = GetRenderPass(mainPass);
         if (!pass->hasPresentationAttachment) throw GENERIC_EXCEPT("[Vulkan]", "Main render pass must have presentation attachment");
-        CreateSwapchain(rn->swapchain.surface, rn->targetSize, rn->vSyncMode,  &rn->swapchain);
+        CreateSwapchain(rn->swapchain.surface, rn->targetSize, rn->vSyncMode,  rn->swapchain);
         SetupViewportAndScissor(rn);
 
         CreateSwapchainFrameBuffers(rn);
@@ -125,13 +125,13 @@ namespace hf
 
     //------------------------------------------------------------------------------------
 
-    bool SetupPhysicalDevice(VkSurfaceKHR surface, VkPhysicalDevice device, GraphicsDevice* deviceData)
+    bool SetupPhysicalDevice(VkSurfaceKHR surface, VkPhysicalDevice device, GraphicsDevice& deviceData)
     {
-        deviceData->device = device;
-        vkGetPhysicalDeviceProperties(device, &deviceData->properties);
-        vkGetPhysicalDeviceFeatures(device, &deviceData->features);
+        deviceData.device = device;
+        vkGetPhysicalDeviceProperties(device, &deviceData.properties);
+        vkGetPhysicalDeviceFeatures(device, &deviceData.features);
 
-        if (!deviceData->features.geometryShader) return false;
+        if (!deviceData.features.geometryShader) return false;
 
         uint32_t familyCount = 0;
         vkGetPhysicalDeviceQueueFamilyProperties(device, &familyCount, nullptr);
@@ -143,25 +143,25 @@ namespace hf
         {
             auto& flags = queueFamilies[i].queueFlags;
             if (flags & VK_QUEUE_GRAPHICS_BIT)
-                deviceData->familyIndices.graphicsFamily = i;
+                deviceData.familyIndices.graphicsFamily = i;
             else if (flags & VK_QUEUE_TRANSFER_BIT)
-                deviceData->familyIndices.transferFamily = i;
+                deviceData.familyIndices.transferFamily = i;
             else if (flags & VK_QUEUE_COMPUTE_BIT)
-                deviceData->familyIndices.computeFamily = i;
+                deviceData.familyIndices.computeFamily = i;
 
             VkBool32 presentSupport = false;
             VK_HANDLE_EXCEPT(vkGetPhysicalDeviceSurfaceSupportKHR(device, i, surface, &presentSupport));
 
-            if (presentSupport) deviceData->familyIndices.presentFamily = i;
-            if (deviceData->familyIndices.IsComplete()) break;
+            if (presentSupport) deviceData.familyIndices.presentFamily = i;
+            if (deviceData.familyIndices.IsComplete()) break;
         }
 
-        auto& indices = deviceData->familyIndices;
+        auto& indices = deviceData.familyIndices;
         if (!indices.computeFamily.has_value() && indices.graphicsFamily.has_value())
         {
             auto& graphicsFlags = queueFamilies[indices.graphicsFamily.value()].queueFlags;
             if (graphicsFlags & VK_QUEUE_COMPUTE_BIT)
-                deviceData->familyIndices.computeFamily = indices.graphicsFamily.value();
+                deviceData.familyIndices.computeFamily = indices.graphicsFamily.value();
             else return false;
         }
 
@@ -169,31 +169,31 @@ namespace hf
 
         if (indices.graphicsFamily != indices.presentFamily)
         {
-            deviceData->transferData =
+            deviceData.transferData =
             {
                 .indices = { indices.graphicsFamily.value(), indices.presentFamily.value() },
                 .sharingMode = VK_SHARING_MODE_CONCURRENT
             };
         }
-        else deviceData->transferData =
+        else deviceData.transferData =
         {
             .indices = {},
             .sharingMode = VK_SHARING_MODE_EXCLUSIVE
         };
 
-        auto& limits = deviceData->properties.limits;
-        VkSampleCountFlags maxMsaa = limits.framebufferColorSampleCounts & limits.framebufferDepthSampleCounts;
+        const auto& limits = deviceData.properties.limits;
+        const VkSampleCountFlags maxMsaa = limits.framebufferColorSampleCounts & limits.framebufferDepthSampleCounts;
 
         int32_t score = 0;
-        score += (deviceData->properties.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU) * 1000;
-        score += (int32_t)deviceData->properties.limits.maxImageDimension2D;
+        score += (deviceData.properties.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU) * 1000;
+        score += (int32_t)deviceData.properties.limits.maxImageDimension2D;
         score += (int32_t)maxMsaa;
-        deviceData->score = score;
+        deviceData.score = score;
 
-        vkGetPhysicalDeviceMemoryProperties(deviceData->device, &deviceData->memProps);
+        vkGetPhysicalDeviceMemoryProperties(deviceData.device, &deviceData.memProps);
 
         for (uint32_t i = 0; i < (uint32_t)TextureFormat::Count; ++i)
-            vkGetPhysicalDeviceFormatProperties(deviceData->device, (VkFormat)i, &deviceData->formatProps[i]);
+            vkGetPhysicalDeviceFormatProperties(deviceData.device, (VkFormat)i, &deviceData.formatProps[i]);
         return true;
     }
 
@@ -216,7 +216,7 @@ namespace hf
         for (const auto& device : availableDevices)
         {
             GraphicsDevice deviceData{};
-            if (SetupPhysicalDevice(*resultSurface, device, &deviceData) &&
+            if (SetupPhysicalDevice(*resultSurface, device, deviceData) &&
                 CheckDeviceExtensionSupport(device))
             {
                 SwapChainSupportDetails scs{};
@@ -225,8 +225,7 @@ namespace hf
             }
         }
 
-        if (devices.empty())
-            throw GENERIC_EXCEPT("[Vulkan]", "No suitable graphics device found");
+        if (devices.empty()) throw GENERIC_EXCEPT("[Vulkan]", "No suitable graphics device found");
 
         std::ranges::stable_sort(devices,
             [](const GraphicsDevice& a, const GraphicsDevice& b)
