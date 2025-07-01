@@ -6,8 +6,12 @@ namespace hf
 {
     namespace primitives
     {
+        Ref<Mesh> GetCubeMesh() { return inter::HF.staticResources.cube; }
+
+        Ref<VertBuffer> GetQuadBuffer() { return inter::HF.staticResources.quadBuffer; }
+        Ref<VertBuffer>* GetQuadBufferP() { return &inter::HF.staticResources.quadBuffer; }
+
         BufferAttrib GetQuadBufferAttrib() { return inter::HF.staticResources.quadAttrib; }
-        TextureLayout GetEmptyTextureLayout() { return inter::HF.staticResources.emptyLayout; }
         Buffer GetGlobalUniformBuffer() { return inter::HF.staticResources.globalUniform; }
         Buffer GetMaterialStorageBuffer() { return inter::HF.graphicsResources.materialDataStorageBuffer; }
         void BindGlobalUniformBuffer(const Ref<Renderer>& rn)
@@ -93,17 +97,6 @@ namespace hf
 
         void DefineTextureLayouts()
         {
-            //Empty Texture Layout
-            {
-                constexpr TextureLayoutDefinitionInfo layoutInfo
-                {
-                    .pBindings = nullptr,
-                    .bindingCount = 0
-                };
-
-                HF.staticResources.emptyLayout = DefineTextureLayout(layoutInfo);
-            }
-
             //Skybox Texture Layout
             {
                 TextureLayoutBindingInfo cubemapBinding
@@ -202,8 +195,8 @@ namespace hf
                     },
                     .pBuffers = &HF.staticResources.globalUniform,
                     .bufferCount = 1,
-                    .pTextureLayouts = &HF.staticResources.emptyLayout,
-                    .textureLayoutCount = 1
+                    .pTextureLayouts = nullptr,
+                    .textureLayoutCount = 0
                 };
 
                 HF.staticResources.axisLinesShaderSetup = DefineShaderSetup(info);
@@ -359,7 +352,7 @@ namespace hf
                     {
                         .enableDepth = true,
                         .writeDepth = true,
-                        .comparisonFunc = DepthComparisonFunction::LessOrEqual,
+                        .comparisonFunc = DepthComparisonFunction::Always,
                         .enableDepthBounds = false,
                         .enableStencil = false,
                     }

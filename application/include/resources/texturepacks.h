@@ -8,7 +8,6 @@ namespace app
     struct AppTexturePacks
     {
         hf::Ref<hf::TexturePack> viking_room_pack;
-        hf::Ref<hf::TexturePack> viking_room_pack2;
         hf::Ref<hf::TexturePackAllocator> allocator{};
     };
 

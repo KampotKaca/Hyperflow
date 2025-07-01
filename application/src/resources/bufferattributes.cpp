@@ -6,6 +6,6 @@ namespace app
 
     void BufferAttributeDefineAll()
     {
-        APP_BUFFER_ATTRIBUTES.pos_col_tex = hf::DefineBufferAttrib("pos_col_tex");
+        APP_BUFFER_ATTRIBUTES.pos_nor_tex = hf::DefineBufferAttrib("pos_nor_tex");
     }
 }

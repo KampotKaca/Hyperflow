@@ -12,7 +12,7 @@ namespace hf
         vec3 up = { 0, 1, 0 };
         Camera3DCore core{};
 
-        [[nodiscard]] inline mat4 ToViewMat4() const
+        [[nodiscard]] mat4 ToViewMat4() const
         {
             return glm::lookAt(position, position + direction, -up);
         }

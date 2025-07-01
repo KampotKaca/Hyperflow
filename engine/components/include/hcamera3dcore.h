@@ -11,6 +11,7 @@ namespace hf
         float nearPlane = 0.1f;
         float farPlane = 1000.0f;
 
+        void SetFov(const float newValue) { fov = glm::clamp(newValue, 1.0f, 179.0f); }
         [[nodiscard]] mat4 ToProjectionMat4(const Ref<Renderer>& rn) const;
     };
 }

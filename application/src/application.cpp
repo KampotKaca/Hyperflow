@@ -42,6 +42,7 @@ namespace app
 	{
 		APP_OBJECTS.vikingRoomTransform.euler.y -= (float)hf::GetDeltaTime() * 10.0f;
 		APP_OBJECTS.vikingRoom2Transform.euler.y -= (float)hf::GetDeltaTime() * 10.0f;
+		APP_OBJECTS.groundTransform.scale = { 100, 1, 100 };
 		DebugUpdate();
 		VoxelTerrainUpdate();
 	}

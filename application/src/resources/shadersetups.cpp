@@ -11,13 +11,13 @@ namespace app
     {
         //viking_room
         {
-            std::array buffers { hf::primitives::GetGlobalUniformBuffer(), hf::primitives::GetMaterialStorageBuffer() };
+            std::array buffers { hf::primitives::GetGlobalUniformBuffer() };
             const hf::ShaderSetupDefinitionInfo info
             {
                 .pushConstant =
                 {
                     .usageFlags = hf::ShaderUsageStage::Vertex | hf::ShaderUsageStage::Fragment,
-                    .sizeInBytes = sizeof(VikingRoomPushConstant)
+                    .sizeInBytes = sizeof(DefaultPushConstant)
                 },
                 .pBuffers = buffers.data(),
                 .bufferCount = buffers.size(),
@@ -26,6 +26,25 @@ namespace app
             };
 
             APP_SHADER_SETUPS.viking_room = hf::DefineShaderSetup(info);
+        }
+
+        //color
+        {
+            std::array buffers { hf::primitives::GetGlobalUniformBuffer() };
+            const hf::ShaderSetupDefinitionInfo info
+            {
+                .pushConstant =
+                {
+                    .usageFlags = hf::ShaderUsageStage::Vertex | hf::ShaderUsageStage::Fragment,
+                    .sizeInBytes = sizeof(DefaultPushConstant)
+                },
+                .pBuffers = buffers.data(),
+                .bufferCount = buffers.size(),
+                .pTextureLayouts = nullptr,
+                .textureLayoutCount = 0
+            };
+
+            APP_SHADER_SETUPS.color = hf::DefineShaderSetup(info);
         }
     }
 }

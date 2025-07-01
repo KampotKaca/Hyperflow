@@ -5,21 +5,15 @@
 
 namespace app
 {
-    struct VikingRoomPushConstant
+    struct DefaultPushConstant
     {
         hf::mat4 modelMatrix;
-        uint32_t materialIndex;
-    };
-
-    struct VikingRoomMaterialInfo
-    {
-        hf::vec4 color{};
+        hf::vec4 color;
     };
 
     struct AppMaterials
     {
-        VikingRoomMaterialInfo viking_room_info{};
-        hf::Ref<hf::Material> viking_room{};
+
     };
 
     extern AppMaterials APP_MATERIALS;

@@ -222,8 +222,11 @@ namespace hf
 
 	namespace primitives
 	{
+		Ref<Mesh> GetCubeMesh();
+		Ref<VertBuffer> GetQuadBuffer();
+		Ref<VertBuffer>* GetQuadBufferP();
+
 		BufferAttrib GetQuadBufferAttrib();
-		TextureLayout GetEmptyTextureLayout();
 		Buffer GetGlobalUniformBuffer();
 		Buffer GetMaterialStorageBuffer();
 		void BindGlobalUniformBuffer(const Ref<Renderer>& rn);

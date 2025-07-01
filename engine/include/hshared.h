@@ -905,6 +905,14 @@ namespace hf
 	{
 		inline uint32_t GetFirstBitOne64(uint64_t n) { return n ? __builtin_ctzll(n) : 64u; }
 		inline uint32_t GetFirstBitZero64(uint64_t n) { return ~n ? __builtin_ctzll(~n) : 64u; }
+
+		constexpr vec3 ColorFromHash(const uint32_t colorHash)
+		{
+			const float r = ((colorHash >> 16) & 0xFF) / 255.0f;
+			const float g = ((colorHash >> 8) & 0xFF) / 255.0f;
+			const float b = (colorHash & 0xFF) / 255.0f;
+			return vec3(r, g, b);
+		}
 	}
 }
 

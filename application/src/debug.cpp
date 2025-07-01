@@ -128,6 +128,10 @@ namespace app
 
         APP_DEBUG.camera.Update(hf::GetMainWindow(), (float)hf::GetDeltaTime());
         if (hf::IsKeyDown(hf::Key::N)) APP_DEBUG.drawGridLines = !APP_DEBUG.drawGridLines;
+
+        APP_DEBUG.camera.camera3D.core.SetFov(
+            APP_DEBUG.camera.camera3D.core.fov -
+            hf::GetScrollDelta().y * hf::GetDeltaTime() * 1000.0f);
     }
 
     void DebugQuit()

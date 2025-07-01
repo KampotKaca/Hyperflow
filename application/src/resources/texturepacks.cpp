@@ -30,32 +30,11 @@ namespace app
             APP_TEXTURE_PACKS.viking_room_pack = hf::Create(texPackInfo);
         }
 
-        //viking_room_pack
-        {
-            hf::TexturePackTextureBindingInfo viking_room_binding
-            {
-                .sampler = APP_TEXTURE_SAMPLERS.defaultSampler,
-                .pTextures = &APP_TEXTURES.greek_head,
-                .arraySize = 1
-            };
-
-            hf::TexturePackCreationInfo texPackInfo
-            {
-                .bindingType = hf::RenderBindingType::Graphics,
-                .bindingId = 0,
-                .pTextureBindings = &viking_room_binding,
-                .textureBindingCount = 1,
-                .layout = APP_TEXTURE_LAYOUTS.viking_room,
-            };
-
-            APP_TEXTURE_PACKS.viking_room_pack2 = hf::Create(texPackInfo);
-        }
-
         hf::SubmitAllTexturePacks();
 
         //allocator
         {
-            std::array packs { APP_TEXTURE_PACKS.viking_room_pack, APP_TEXTURE_PACKS.viking_room_pack2 };
+            std::array packs { APP_TEXTURE_PACKS.viking_room_pack };
             hf::TexturePackAllocatorCreationInfo texPackAllocInfo
             {
                 .pTexturePacks = packs.data(),

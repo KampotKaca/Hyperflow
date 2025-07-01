@@ -61,7 +61,6 @@ namespace hf::inter
 
     struct StaticResources
     {
-        TextureLayout emptyLayout{};
         TextureLayout skyboxLayout{};
 
         BufferAttrib quadAttrib{};

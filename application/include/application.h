@@ -10,6 +10,7 @@ namespace app
 		hf::SkyboxInfo skybox{};
 		hf::Transform vikingRoomTransform{};
 		hf::Transform vikingRoom2Transform{};
+		hf::Transform groundTransform{};
 	};
 	extern AppObjects APP_OBJECTS;
 
