@@ -36,7 +36,7 @@ namespace app
                 .pushConstant =
                 {
                     .usageFlags = hf::ShaderUsageStage::Vertex | hf::ShaderUsageStage::Fragment,
-                    .sizeInBytes = sizeof(DefaultPushConstant)
+                    .sizeInBytes = sizeof(UnlitColorPushConstant)
                 },
                 .pBuffers = buffers.data(),
                 .bufferCount = buffers.size(),
@@ -44,7 +44,7 @@ namespace app
                 .textureLayoutCount = 0
             };
 
-            APP_SHADER_SETUPS.color = hf::DefineShaderSetup(info);
+            APP_SHADER_SETUPS.unlit_color = hf::DefineShaderSetup(info);
         }
     }
 }

@@ -8,6 +8,9 @@
 #include "htransform.h"
 #include "hoctree.h"
 #include "hstaticvector.h"
+#include "hdirectionallight.h"
+#include "hspotlight.h"
+#include "hpointlight.h"
 #include "BS_thread_pool.hpp"
 
 #endif //HCOMPONENTS_H

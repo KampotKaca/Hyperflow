@@ -121,7 +121,14 @@ namespace hf
 	void DrawAdd_DrawCall(const Ref<Renderer>& rn, const DrawCallInfo& drawCall);
 
 	void DrawAdd_TexturePackBinding(const Ref<Renderer>& rn, const Ref<TexturePack>& texPack, uint32_t setBindingIndex);
+
 	void DrawSet_PushConstant(const Ref<Renderer>& rn, const void* data, uint32_t dataSize);
+
+	template<typename T>
+	void DrawSet_PushConstant(const Ref<Renderer>& rn, const T& data)
+	{
+		DrawSet_PushConstant(rn, &data, sizeof(T));
+	}
 
 	uint16_t GetBufferIndex(const Ref<Material>& mat);
 

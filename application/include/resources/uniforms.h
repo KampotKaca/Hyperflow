@@ -9,6 +9,7 @@ namespace app
     {
         hf::CameraUniformInfo camera{};
         hf::TimeUniformInfo time{};
+        hf::LightUniformInfo light{};
     };
 
     struct AppUniforms

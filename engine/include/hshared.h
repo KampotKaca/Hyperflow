@@ -37,6 +37,7 @@ extern "C"
 
 #include "hmath.h"
 #include "hinput.h"
+#include "../config.h"
 
 #if PLATFORM_LINUX
 #ifdef None
@@ -768,6 +769,10 @@ namespace hf
 
 		Ref<IndexBuffer> indexBuffer{}; //is optional property, if nullptr engine will render vertex buffer in ordered manner.
 		uint32_t instanceCount = 0; //amount of instances to render
+
+#if DEBUG
+		char debugName[16];
+#endif
 	};
 
 	//endregion
@@ -871,17 +876,46 @@ namespace hf
 	{
 		alignas(16) vec3 lookDirection;
 		alignas(16) vec3 position;
-		alignas(16) mat4 view{};
-		alignas(16) mat4 invView{};
-		alignas(16) mat4 proj{};
-		alignas(16) mat4 invProj{};
-		alignas(16) mat4 viewProj{};
+		alignas(16) mat4 view;
+		alignas(16) mat4 invView;
+		alignas(16) mat4 proj;
+		alignas(16) mat4 invProj;
+		alignas(16) mat4 viewProj;
 	};
 
 	struct TimeUniformInfo
 	{
 		alignas(8) double deltaTime;
 		alignas(8) double timeSinceStartup;
+	};
+
+	struct LightUniformInfo
+	{
+		struct alignas(16) Directional
+		{
+			alignas(16) vec3 direction;
+			alignas(16) vec3 color;
+		};
+
+		struct alignas(16) Spot
+		{
+			alignas(16) vec3 position;
+			alignas(16) vec3 direction;
+			alignas(16) vec3 color;
+			alignas(16) vec3 rangeStats; //x innerAngle, y outerAngle, z range
+		};
+
+		struct alignas(16) Point
+		{
+			alignas(16) vec3 position;
+			alignas(16) vec4 color; // w is range
+		};
+
+		alignas(16) Directional directionalLights[MAX_DIRECTIONAL_LIGHTS]{};
+		alignas(16) Spot spotLights[MAX_SPOT_LIGHTS]{};
+		alignas(16) Point pointLights[MAX_POINT_LIGHTS]{};
+
+		alignas(16) uvec3 lightCounts{}; //x directional, y spot, z point
 	};
 
 	//endregion
@@ -908,10 +942,10 @@ namespace hf
 
 		constexpr vec3 ColorFromHash(const uint32_t colorHash)
 		{
-			const float r = ((colorHash >> 16) & 0xFF) / 255.0f;
-			const float g = ((colorHash >> 8) & 0xFF) / 255.0f;
-			const float b = (colorHash & 0xFF) / 255.0f;
-			return vec3(r, g, b);
+			const float r = (float)((colorHash >> 16) & 0xFF) / 255.0f;
+			const float g = (float)((colorHash >> 8) & 0xFF) / 255.0f;
+			const float b = (float)(colorHash & 0xFF) / 255.0f;
+			return { r, g, b };
 		}
 	}
 }

@@ -131,7 +131,7 @@ namespace app
 
         APP_DEBUG.camera.camera3D.core.SetFov(
             APP_DEBUG.camera.camera3D.core.fov -
-            hf::GetScrollDelta().y * hf::GetDeltaTime() * 1000.0f);
+            hf::GetScrollDelta().y * (float)hf::GetDeltaTime() * 1000.0f);
     }
 
     void DebugQuit()

@@ -8,7 +8,7 @@ namespace app
     struct AppShaders
     {
         hf::Ref<hf::Shader> viking_room{};
-        hf::Ref<hf::Shader> color{};
+        hf::Ref<hf::Shader> unlit_color{};
     };
 
     extern AppShaders APP_SHADERS;

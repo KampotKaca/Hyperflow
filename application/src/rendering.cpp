@@ -10,6 +10,10 @@ namespace app
     {
         DebugPreRender(rn);
         APP_UNIFORMS.globalUniformInfo.time = hf::GetTimeUniformInfo();
+
+        APP_UNIFORMS.globalUniformInfo.light.lightCounts = { 1, 0, 0 };
+        APP_UNIFORMS.globalUniformInfo.light.directionalLights[0] = APP_OBJECTS.mainLight.GetUniformInfo();
+
         UniformUploadAll(rn);
 
         if (hf::IsKeyDown(hf::Key::G))
@@ -47,9 +51,10 @@ namespace app
                             const DefaultPushConstant pc
                             {
                                 .modelMatrix = APP_OBJECTS.vikingRoomTransform.ToMat4(),
-                                .color = { hf::utils::ColorFromHash(0xFFFFFF), 1 }
+                                .color = { hf::utils::ColorFromHash(0xFFFFFF), 1 },
+                                .smoothness = 0.5f
                             };
-                            hf::DrawSet_PushConstant(rn, &pc, sizeof(DefaultPushConstant));
+                            hf::DrawSet_PushConstant(rn, pc);
                             hf::DrawAdd_DrawCall(rn, APP_MESHES.viking_room);
                         }
                         hf::End_Draw(rn);
@@ -59,9 +64,10 @@ namespace app
                             const DefaultPushConstant pc
                             {
                                 .modelMatrix = APP_OBJECTS.vikingRoom2Transform.ToMat4(),
-                                .color = { hf::utils::ColorFromHash(0xFFFFFF), 1 }
+                                .color = { hf::utils::ColorFromHash(0xFFFFFF), 1 },
+                                .smoothness = 0.5f
                             };
-                            hf::DrawSet_PushConstant(rn, &pc, sizeof(DefaultPushConstant));
+                            hf::DrawSet_PushConstant(rn, pc);
                             hf::DrawAdd_DrawCall(rn, APP_MESHES.viking_room);
                         }
                         hf::End_Draw(rn);
@@ -72,11 +78,12 @@ namespace app
             }
             hf::End_ShaderSetup(rn);
 
-            hf::Start_ShaderSetup(rn, APP_SHADER_SETUPS.color); //Ground setup
+            hf::Start_ShaderSetup(rn, APP_SHADER_SETUPS.unlit_color); //Ground setup
             {
+                hf::primitives::BindGlobalUniformBuffer(rn);
                 hf::ShaderBindingInfo shaderInfo
                 {
-                    .shader = APP_SHADERS.color,
+                    .shader = APP_SHADERS.unlit_color,
                     .attrib = APP_BUFFER_ATTRIBUTES.pos_nor_tex,
                     .bindingPoint = hf::RenderBindingType::Graphics
                 };
@@ -87,12 +94,12 @@ namespace app
                     {
                         hf::Start_Draw(rn);
                         {
-                            const DefaultPushConstant pc
+                            const UnlitColorPushConstant pc
                             {
                                 .modelMatrix = APP_OBJECTS.groundTransform.ToMat4(),
                                 .color = { hf::utils::ColorFromHash(0x19CB1E), 1 }
                             };
-                            hf::DrawSet_PushConstant(rn, &pc, sizeof(DefaultPushConstant));
+                            hf::DrawSet_PushConstant(rn, pc);
                             hf::DrawAdd_DrawCall(rn, APP_MESHES.plane);
                         }
                         hf::End_Draw(rn);

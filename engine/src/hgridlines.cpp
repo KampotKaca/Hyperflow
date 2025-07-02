@@ -22,7 +22,7 @@ namespace hf::gridlines
                 {
                     Start_Draw(rn);
                     {
-                        DrawSet_PushConstant(rn, &info, sizeof(GridLinesInfo));
+                        DrawSet_PushConstant(rn, info);
 
                         const DrawCallInfo drawCallInfo
                         {

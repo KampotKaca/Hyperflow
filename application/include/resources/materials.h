@@ -5,10 +5,17 @@
 
 namespace app
 {
+    struct UnlitColorPushConstant
+    {
+        alignas(16) hf::mat4 modelMatrix;
+        alignas(16) hf::vec4 color;
+    };
+
     struct DefaultPushConstant
     {
-        hf::mat4 modelMatrix;
-        hf::vec4 color;
+        alignas(16) hf::mat4 modelMatrix;
+        alignas(16) hf::vec4 color;
+        alignas(16) float smoothness;
     };
 
     struct AppMaterials

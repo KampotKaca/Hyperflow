@@ -8,7 +8,7 @@ namespace app
     struct AppShaderSetups
     {
         hf::ShaderSetup viking_room{};
-        hf::ShaderSetup color{};
+        hf::ShaderSetup unlit_color{};
     };
 
     extern AppShaderSetups APP_SHADER_SETUPS;

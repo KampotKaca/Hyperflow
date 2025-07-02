@@ -346,6 +346,9 @@ namespace hf
                 .indexBuffer = submesh.indexBuffer,
                 .instanceCount = 1
             };
+#if DEBUG
+            strcpy(drawInfo.debugName, mesh->filePath.c_str());
+#endif
             DrawAdd_DrawCall(rn, drawInfo);
         }
     }
@@ -379,16 +382,17 @@ namespace hf
 
     void DrawSet_PushConstant(const Ref<Renderer>& rn, const void* data, uint32_t dataSize)
     {
+        auto& currentDraw = rn->currentDraw;
 #if DEBUG
-        if (!rn->currentDraw.currentDraw)
+        if (!currentDraw.currentDraw)
             throw GENERIC_EXCEPT("[Hyperflow]", "DrawPacket must be set!");
 
-        if (rn->currentDraw.currentDraw->pushConstantRange.size > 0)
+        if (currentDraw.currentDraw->pushConstantRange.size > 0)
             throw GENERIC_EXCEPT("[Hyperflow]", "Cannot set push constant twice for a single draw packet!");
 #endif
 
-        auto& packet = rn->currentDraw.packet;
-        rn->currentDraw.currentDraw->pushConstantRange.size = dataSize;
+        auto& packet = currentDraw.packet;
+        currentDraw.currentDraw->pushConstantRange.size = dataSize;
         packet.pushConstantUploads.push_back((uint8_t*)data, dataSize);
     }
 
