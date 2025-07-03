@@ -52,7 +52,7 @@ namespace app
                             {
                                 .modelMatrix = APP_OBJECTS.vikingRoomTransform.ToMat4(),
                                 .color = { hf::utils::ColorFromHash(0xFFFFFF), 1 },
-                                .smoothness = 0.5f
+                                .phongData = { hf::utils::ColorFromHash(0x9B9B9B), 0.8 }
                             };
                             hf::DrawSet_PushConstant(rn, pc);
                             hf::DrawAdd_DrawCall(rn, APP_MESHES.viking_room);
@@ -65,10 +65,23 @@ namespace app
                             {
                                 .modelMatrix = APP_OBJECTS.vikingRoom2Transform.ToMat4(),
                                 .color = { hf::utils::ColorFromHash(0xFFFFFF), 1 },
-                                .smoothness = 0.5f
+                                .phongData = { hf::utils::ColorFromHash(0x9B9B9B), 0.5 }
                             };
                             hf::DrawSet_PushConstant(rn, pc);
                             hf::DrawAdd_DrawCall(rn, APP_MESHES.viking_room);
+                        }
+                        hf::End_Draw(rn);
+
+                        hf::Start_Draw(rn);
+                        {
+                            const DefaultPushConstant pc
+                            {
+                                .modelMatrix = APP_OBJECTS.sphereTransform.ToMat4(),
+                                .color = { hf::utils::ColorFromHash(0xFFFFFF), 1 },
+                                .phongData = { hf::utils::ColorFromHash(0x9B9B9B), 1.0 }
+                            };
+                            hf::DrawSet_PushConstant(rn, pc);
+                            hf::DrawAdd_DrawCall(rn, hf::primitives::GetSphere());
                         }
                         hf::End_Draw(rn);
                     }
@@ -100,7 +113,7 @@ namespace app
                                 .color = { hf::utils::ColorFromHash(0x19CB1E), 1 }
                             };
                             hf::DrawSet_PushConstant(rn, pc);
-                            hf::DrawAdd_DrawCall(rn, APP_MESHES.plane);
+                            hf::DrawAdd_DrawCall(rn, hf::primitives::GetPlane());
                         }
                         hf::End_Draw(rn);
                     }

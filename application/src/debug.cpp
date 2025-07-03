@@ -3,6 +3,8 @@
 #include "resources.h"
 #include <hyaml.h>
 
+#include "glm/gtx/rotate_vector.hpp"
+
 namespace app
 {
     AppDebug APP_DEBUG;
@@ -132,6 +134,12 @@ namespace app
         APP_DEBUG.camera.camera3D.core.SetFov(
             APP_DEBUG.camera.camera3D.core.fov -
             hf::GetScrollDelta().y * (float)hf::GetDeltaTime() * 1000.0f);
+
+        if (hf::IsKeyDownContinues(hf::Key::Z))
+            APP_OBJECTS.mainLight.direction = glm::rotateX(APP_OBJECTS.mainLight.direction, glm::radians((float)hf::GetDeltaTime() * 25.0f));
+
+        if (hf::IsKeyDownContinues(hf::Key::X))
+            APP_OBJECTS.mainLight.direction = glm::rotateX(APP_OBJECTS.mainLight.direction, -glm::radians((float)hf::GetDeltaTime() * 25.0f));
     }
 
     void DebugQuit()

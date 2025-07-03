@@ -61,12 +61,11 @@ namespace hf::inter
 
     struct StaticResources
     {
-        TextureLayout skyboxLayout{};
-
         BufferAttrib quadAttrib{};
+        BufferAttrib defaultAttrib{};
 
+        TextureLayout skyboxLayout{};
         TextureSampler cubemapSampler{};
-        BufferAttrib cubeAttrib{};
 
         Buffer globalUniform = 0;
         BufferAllocator bufferAllocator = 0;
@@ -85,9 +84,12 @@ namespace hf::inter
         Ref<TexturePackAllocator> texPackAllocator{};
 
         Ref<Mesh> cube{};
-        Ref<VertBuffer> quadBuffer{};
+        Ref<Mesh> plane{};
+        Ref<Mesh> sphere{};
 
         Ref<Material> emptyMaterial{};
+
+        Ref<VertBuffer> quadBuffer{};
     };
 
     struct Hyperflow

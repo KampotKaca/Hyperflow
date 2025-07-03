@@ -242,6 +242,9 @@ namespace hf
 		TextureSampler GetCubemapSampler();
 
 		Ref<Mesh> GetCube();
+		Ref<Mesh> GetPlane();
+		Ref<Mesh> GetSphere();
+
 		Ref<Material> GetEmptyMaterial();
 	}
 }

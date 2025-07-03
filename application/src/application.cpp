@@ -31,6 +31,7 @@ namespace app
 	void AppStart()
 	{
 		APP_OBJECTS.vikingRoom2Transform.position = { 3, 0, 3 };
+		APP_OBJECTS.sphereTransform.position = { -3, 1, 3 };
 		UniformStartAll();
 		DebugStart();
 

@@ -21,10 +21,12 @@ namespace hf
             End_BufferSet(rn);
         }
 
-        BufferAttrib GetCubeBufferAttrib() { return inter::HF.staticResources.cubeAttrib; }
+        BufferAttrib GetCubeBufferAttrib() { return inter::HF.staticResources.defaultAttrib; }
         TextureSampler GetCubemapSampler() { return inter::HF.staticResources.cubemapSampler; }
 
         Ref<Mesh> GetCube() { return inter::HF.staticResources.cube; }
+        Ref<Mesh> GetPlane() { return inter::HF.staticResources.plane; }
+        Ref<Mesh> GetSphere() { return inter::HF.staticResources.sphere; }
         Ref<Material> GetEmptyMaterial() { return inter::HF.staticResources.emptyMaterial; }
     }
 
@@ -91,7 +93,7 @@ namespace hf
                     .pFormats = formats.data()
                 };
 
-                HF.staticResources.cubeAttrib = DefineBufferAttrib(attribInfo);
+                HF.staticResources.defaultAttrib = DefineBufferAttrib(attribInfo);
             }
         }
 
@@ -320,10 +322,40 @@ namespace hf
                     {
                         .typeFlags = MeshDataType::Position | MeshDataType::Normal | MeshDataType::TexCoord,
                         .memoryType = BufferMemoryType::Static,
-                        .bufferAttrib = HF.staticResources.cubeAttrib,
+                        .bufferAttrib = HF.staticResources.defaultAttrib,
                     }
                 };
                 HF.staticResources.cube = Create(info);
+            }
+
+            //Plane mesh
+            {
+                const MeshCreationInfo info
+                {
+                    .filePath = "__plane.obj",
+                    .stats =
+                    {
+                        .typeFlags = MeshDataType::Position | MeshDataType::Normal | MeshDataType::TexCoord,
+                        .memoryType = BufferMemoryType::Static,
+                        .bufferAttrib = HF.staticResources.defaultAttrib,
+                    }
+                };
+                HF.staticResources.plane = Create(info);
+            }
+
+            //Sphere mesh
+            {
+                const MeshCreationInfo info
+                {
+                    .filePath = "__sphere.obj",
+                    .stats =
+                    {
+                        .typeFlags = MeshDataType::Position | MeshDataType::Normal | MeshDataType::TexCoord,
+                        .memoryType = BufferMemoryType::Static,
+                        .bufferAttrib = HF.staticResources.defaultAttrib,
+                    }
+                };
+                HF.staticResources.sphere = Create(info);
             }
         }
 
@@ -367,7 +399,7 @@ namespace hf
                     .renderPass = HF.mainWindow->renderer->mainPass,
                     .setup = HF.staticResources.skyboxShaderSetup,
                     .supportedAttribCount = 1,
-                    .pSupportedAttribs = &HF.staticResources.cubeAttrib,
+                    .pSupportedAttribs = &HF.staticResources.defaultAttrib,
                     .vertexShaderLoc = "__skybox",
                     .fragmentShaderLoc = "__skybox",
                     .rasterizerOptions =

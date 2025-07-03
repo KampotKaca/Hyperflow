@@ -15,7 +15,7 @@ namespace app
     {
         alignas(16) hf::mat4 modelMatrix;
         alignas(16) hf::vec4 color;
-        alignas(16) float smoothness;
+        alignas(16) hf::vec4 phongData; //xyz specular color, w smoothness
     };
 
     struct AppMaterials

@@ -37,7 +37,7 @@ namespace hf::skybox
             const ShaderBindingInfo shaderInfo
             {
                 .shader = inter::HF.staticResources.skyboxShader,
-                .attrib = inter::HF.staticResources.cubeAttrib,
+                .attrib = inter::HF.staticResources.defaultAttrib,
                 .bindingPoint = RenderBindingType::Graphics
             };
             Start_Shader(rn, shaderInfo);

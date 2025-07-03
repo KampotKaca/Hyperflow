@@ -56,28 +56,4 @@ layout(set = 0, binding = 0) uniform Global
     Light LIGHT;
 } GLOBAL;
 
-vec3 GetPhongLighting(vec3 position, vec3 normal, float smoothness)
-{
-    vec3 outputColor = vec3(0.5f, 0.5f, 0.5f);
-    for (uint i = 0; i < GLOBAL.LIGHT.lightCounts.x; i++)
-    {
-        DirectionalLight light = GLOBAL.LIGHT.directionalLights[i];
-        vec3 r = reflect(-light.direction, normal);
-        float diff = max(dot(normal, -light.direction), 0.0);
-        float spec = (diff > 0.0) ? pow(max(dot(r, -position), 0.0), smoothness) : 0.0;
-        outputColor += (diff + spec) * light.color;
-    }
-
-    for (uint i = 0; i < GLOBAL.LIGHT.lightCounts.y; i++)
-    {
-
-    }
-
-    for (uint i = 0; i < GLOBAL.LIGHT.lightCounts.z; i++)
-    {
-
-    }
-    return outputColor;
-}
-
 const uint MAX_MATERIAL_SIZE = 1024;
