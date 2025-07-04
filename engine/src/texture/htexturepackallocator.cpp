@@ -16,7 +16,7 @@ namespace hf
         inter::rendering::DestroyTexturePackAllocator_i(this);
     }
 
-    bool IsRunning(const Ref<TexturePackAllocator>& tpa) { return tpa->handle; }
+    bool IsLoaded(const Ref<TexturePackAllocator>& tpa) { return tpa->handle; }
     void Destroy(const Ref<TexturePackAllocator>& tpa)
     {
         if (inter::rendering::DestroyTexturePackAllocator_i(tpa.get()))

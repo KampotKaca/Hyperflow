@@ -43,7 +43,7 @@ namespace hf
         inter::rendering::DestroyTexturePack_i(this);
     }
 
-    bool IsRunning(const Ref<TexturePack>& texPack) { return texPack->handle; }
+    bool IsLoaded(const Ref<TexturePack>& texPack) { return texPack->handle; }
 
     void Destroy(const Ref<TexturePack>& texPack)
     {

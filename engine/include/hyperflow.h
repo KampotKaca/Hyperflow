@@ -41,6 +41,7 @@ namespace hf
 	Ref<VertBuffer> Create(const VertBufferCreationInfo& info);
 	Ref<Cubemap> Create(const CubemapCreationInfo& info);
 	Ref<IndexBuffer> Create(const IndexBufferCreationInfo& info);
+	Ref<AudioClip> Create(const AudioClipCreationInfo& info);
 
 	void Destroy(const Ref<Mesh>& mesh);
 	void Destroy(const Ref<Shader>& shader);
@@ -50,6 +51,7 @@ namespace hf
 	void Destroy(const Ref<RuntimeBufferBase>& rbb);
 	void Destroy(const Ref<Cubemap>& cb);
 	void Destroy(const Ref<Window>& win);
+	void Destroy(const Ref<AudioClip>& clip);
 
 	void DestroyAllWindows();
 	void Destroy(const Ref<Cubemap>* pCubemaps, uint32_t count);
@@ -59,24 +61,38 @@ namespace hf
 	void Destroy(const Ref<Texture>* pTextures, uint32_t count);
 	void Destroy(const Ref<Mesh>* pMeshes, uint32_t count);
 	void Destroy(const Ref<Shader>* pShaders, uint32_t count);
+	void Destroy(const Ref<AudioClip>* pClips, uint32_t count);
 
 	Ref<Mesh> CreateMeshAsset(const char* assetPath);
 	Ref<Texture> CreateTextureAsset(const char* assetPath);
 	Ref<Cubemap> CreateCubemapAsset(const char* assetPath);
 
 	bool IsRunning();
-	bool IsRunning(const Ref<Renderer>& rn);
-	bool IsRunning(const Ref<Mesh>& mesh);
-	bool IsRunning(const Ref<Shader>& shader);
-	bool IsRunning(const Ref<Texture>& tex);
-	bool IsRunning(const Ref<TexturePack>& texPack);
-	bool IsRunning(const Ref<TexturePackAllocator>& tpa);
-	bool IsRunning(const Ref<RuntimeBufferBase>& rbb);
-	bool IsRunning(const Ref<Cubemap>& cb);
+	bool IsLoaded(const Ref<Renderer>& rn);
+	bool IsLoaded(const Ref<Mesh>& mesh);
+	bool IsLoaded(const Ref<Shader>& shader);
+	bool IsLoaded(const Ref<Texture>& tex);
+	bool IsLoaded(const Ref<TexturePack>& texPack);
+	bool IsLoaded(const Ref<TexturePackAllocator>& tpa);
+	bool IsLoaded(const Ref<RuntimeBufferBase>& rbb);
+	bool IsLoaded(const Ref<Cubemap>& cb);
+	bool IsLoaded(const Ref<AudioClip>& clip);
 
 	void Upload(const Ref<Material>& mat, const void* data);
 	void Upload(const Ref<VertBuffer>& vb, const VertBufferUploadInfo& info);
 	void Upload(const Ref<IndexBuffer>& ib, const IndexBufferUploadInfo& info);
+
+	void ChangeClip(const Ref<AudioPlayer>& player, const Ref<AudioClip>& clip);
+
+	void Play(const Ref<AudioPlayer>& player);
+	void Pause(const Ref<AudioPlayer>& player);
+	void Stop(const Ref<AudioPlayer>& player);
+
+	void SetVolume(const Ref<AudioPlayer>& player, float volume);
+	void SetPitch(const Ref<AudioPlayer>& player, float pitch);
+	void SetLooping(const Ref<AudioPlayer>& player, bool looping);
+	void SetPosition(const Ref<AudioPlayer>& player, float position);
+	void SetConfig(const Ref<AudioPlayer>& player, const AudioPlayerConfig& config);
 
 	//Destroy every renderer which is not connected to the window, before you try to change api
 	void ChangeApi(RenderingApiType targetApi);

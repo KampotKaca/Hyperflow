@@ -9,6 +9,7 @@
 #include "htime.h"
 #include "../rendering/include/hex_renderer.h"
 #include "../platforms/include/hex_platform.h"
+#include "audio/haudioclip.h"
 
 #if PLATFORM_LINUX
 #ifdef None
@@ -41,6 +42,11 @@ namespace hf::inter
         unordered_map<uint64_t, Ref<Material>> materials{};
 
         Buffer materialDataStorageBuffer{};
+    };
+
+    struct AudioResources
+    {
+        unordered_map<std::string, Ref<AudioClip>> clips{};
     };
 
     struct ResourcesMarkedForDeletion
@@ -109,6 +115,7 @@ namespace hf::inter
         GraphicsResources graphicsResources{};
         ResourcesMarkedForDeletion deletedResources{};
         StaticResources staticResources{};
+        AudioResources audioResources{};
     };
 
     extern Hyperflow HF;
@@ -132,6 +139,15 @@ namespace hf::inter
     {
         void DefineStaticResources_i();
         void LoadStaticResources_i();
+    }
+
+    namespace audio
+    {
+        void Load_i();
+        void Unload_i();
+
+        bool CreateClip_i(AudioClip* clip);
+        bool DestroyClip_i(AudioClip* clip);
     }
 
     namespace rendering

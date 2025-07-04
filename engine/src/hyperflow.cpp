@@ -3,6 +3,7 @@
 #include "hrenderer.h"
 #include "htime.h"
 #include "hinternal.h"
+#include "hinternal.h"
 
 namespace hf
 {
@@ -41,6 +42,7 @@ namespace hf
 
 			inter::HF.mainWindow = Create(engineData.windowData, nullptr);
 
+			inter::audio::Load_i();
 			inter::rendering::LoadApi_i(engineData.renderingApi);
 			inter::primitives::LoadStaticResources_i();
 			if(inter::HF.lifecycleCallbacks.onResourcesLoad) inter::HF.lifecycleCallbacks.onResourcesLoad();
@@ -83,6 +85,7 @@ namespace hf
 			if (inter::HF.lifecycleCallbacks.onQuitCallback) inter::HF.lifecycleCallbacks.onQuitCallback();
 
 			DestroyAllWindows();
+			inter::audio::Unload_i();
 			inter::platform::Unload();
 		}
 		catch(const HyperException& e)

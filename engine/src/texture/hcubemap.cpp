@@ -44,7 +44,7 @@ namespace hf
         inter::rendering::DestroyCubemap_i(this);
     }
 
-    bool IsRunning(const Ref<Cubemap>& cb) { return cb->handle; }
+    bool IsLoaded(const Ref<Cubemap>& cb) { return cb->handle; }
     void Destroy(const Ref<Cubemap>& cb)
     {
         if (inter::rendering::DestroyCubemap_i(cb.get()))

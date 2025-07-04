@@ -935,6 +935,42 @@ namespace hf
 
 	//endregion
 
+	//region Audio
+
+	struct AudioClip;
+	struct AudioPlayer;
+
+	enum class AudioClipFormat { Default = 0, U8 = 1, S16 = 2, S24 = 3, S32 = 4, F32 };
+	enum class AudioClipChannelMixMode { Rectangular = 0, Simple = 1, CustomWeights = 2 };
+	enum class AudioClipDitherMode { None = 0, Rectangle = 1, Triangle = 2 };
+	enum class AudioClipEncodingFormat { Unknown = 0, Wav = 1, Flac = 2, Mp3 = 3, Vorbis = 4 };
+
+	struct AudioClipConfig
+	{
+		AudioClipFormat format = AudioClipFormat::Default;
+		uint32_t sampleRate = 0;
+		AudioClipChannelMixMode channelMixMode = AudioClipChannelMixMode::Rectangular;
+		AudioClipDitherMode ditherMode = AudioClipDitherMode::None;
+		AudioClipEncodingFormat encodingFormat = AudioClipEncodingFormat::Unknown;
+	};
+
+	struct AudioClipCreationInfo
+	{
+		const char* filePath;
+		bool useAbsolutePath = false;
+		AudioClipConfig config{};
+	};
+
+	struct AudioPlayerConfig
+	{
+		float volume = 1.0f;
+		float pitch = 1.0f;
+		bool isLooping = false;
+		float position = 0.0f;
+	};
+
+	//endregion
+
 	namespace utils
 	{
 		inline uint32_t GetFirstBitOne64(uint64_t n) { return n ? __builtin_ctzll(n) : 64u; }

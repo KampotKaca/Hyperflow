@@ -201,7 +201,7 @@ namespace hf
         inter::rendering::DestroyMesh_i(this);
     }
 
-    bool IsRunning(const Ref<Mesh>& mesh) { return mesh->isLoaded; }
+    bool IsLoaded(const Ref<Mesh>& mesh) { return mesh->isLoaded; }
     MeshStats GetStats(const Ref<Mesh>& mesh) { return mesh->stats; }
     void Destroy(const Ref<Mesh>& mesh)
     {

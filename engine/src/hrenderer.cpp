@@ -32,7 +32,7 @@ namespace hf
         inter::rendering::DestroyRenderer_i(this);
     }
 
-    bool IsRunning(const Ref<Renderer>& rn) { return rn->handle; }
+    bool IsLoaded(const Ref<Renderer>& rn) { return rn->handle; }
     uvec2 GetSize(const Ref<Renderer>& rn)  { return rn->threadInfo.size; }
     void Resize(const Ref<Renderer>& rn, uvec2 size)
     {

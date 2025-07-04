@@ -12,7 +12,7 @@ namespace hf
         inter::rendering::DestroyBuffer_i(this);
     }
 
-    bool IsRunning(const Ref<RuntimeBufferBase>& rbb) { return rbb->handle; }
+    bool IsLoaded(const Ref<RuntimeBufferBase>& rbb) { return rbb->handle; }
     void Destroy(const Ref<RuntimeBufferBase>& rbb)
     {
         if (inter::rendering::DestroyBuffer_i(rbb.get()))

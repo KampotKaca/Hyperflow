@@ -19,7 +19,7 @@ namespace hf
         inter::rendering::DestroyTexture_i(this);
     }
 
-    bool IsRunning(const Ref<Texture>& tex) { return tex->handle; }
+    bool IsLoaded(const Ref<Texture>& tex) { return tex->handle; }
     void Destroy(const Ref<Texture>& tex)
     {
         if (inter::rendering::DestroyTexture_i(tex.get()))

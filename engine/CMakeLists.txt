@@ -100,13 +100,17 @@ add_subdirectory(external/rpmalloc)
 add_subdirectory(external/rapidyaml)
 add_subdirectory(external/glfw)
 add_subdirectory(external/lz4/build/cmake)
+add_subdirectory(external/miniaudio)
 add_subdirectory(platforms/platform)
 add_subdirectory(components)
 
 add_subdirectory(others/exception)
 
 add_library(${PROJECT_NAME} ${ENGINE_SRC})
-target_precompile_headers(${PROJECT_NAME} PRIVATE "include/hshared.h")
+target_precompile_headers(${PROJECT_NAME}
+        PRIVATE
+        "include/hshared.h"
+)
 set_target_properties(${PROJECT_NAME} PROPERTIES UNITY_BUILD ON)
 
 # Using keyword-based signature consistently
@@ -123,6 +127,7 @@ target_link_libraries(${PROJECT_NAME}
         rpmalloc
         glfw
         platform
+        miniaudio
 )
 
 if(D3D)
@@ -157,18 +162,18 @@ target_include_directories(${PROJECT_NAME}
         PUBLIC
         src/
         include/
-        external/stb/include
         external/glm
         external/logc/include
-        external/rpmalloc
         external/rapidyaml/src
-        external/glfw/include
         PRIVATE
+        external/stb/include
+        external/rpmalloc
+        external/glfw/include
+        external/miniaudio
 )
 
 target_include_directories(${PROJECT_NAME}
-        PUBLIC
-        include/
+        PRIVATE
         platforms/include
         rendering/include
         components/include

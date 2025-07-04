@@ -49,7 +49,7 @@ namespace hf
             inter::HF.graphicsResources.shaders.erase((uint64_t)shader.get());
     }
 
-    bool IsRunning(const Ref<Shader>& shader) { return shader->handle; }
+    bool IsLoaded(const Ref<Shader>& shader) { return shader->handle; }
 
     namespace inter::rendering
     {
