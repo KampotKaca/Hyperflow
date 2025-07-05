@@ -10,3 +10,7 @@
 [submodule "engine/external/lz4"]
 	path = engine/external/lz4
 	url = https://github.com/lz4/lz4.git
+[submodule "editor/external/ImGui"]
+	path = editor/external/ImGui
+	url = https://github.com/KampotKaca/ImGui.git
+	branch = docking

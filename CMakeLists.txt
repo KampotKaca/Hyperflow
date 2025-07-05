@@ -30,6 +30,7 @@ endif()
 
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
     add_definitions(-DDEBUG)
+    add_subdirectory(editor)
 elseif(CMAKE_BUILD_TYPE STREQUAL "Release")
     add_definitions(-DRELEASE)
 endif()

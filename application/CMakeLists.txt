@@ -31,6 +31,13 @@ target_link_libraries(${PROJECT_NAME}
         Hyperflow_Engine
 )
 
+if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+target_link_libraries(${PROJECT_NAME}
+        PRIVATE
+        Hyperflow_Editor
+)
+endif ()
+
 #region Prebuild
 file(COPY ${CMAKE_SOURCE_DIR}/application/res DESTINATION ${CMAKE_BINARY_DIR})
 file(COPY ${CMAKE_SOURCE_DIR}/engine/res/cubemaps DESTINATION ${CMAKE_BINARY_DIR}/res)
@@ -63,13 +70,6 @@ foreach(SHADER_SOURCE_DIR ${SHADER_SOURCE_DIRS})
     endforeach()
 endforeach()
 
-#add_custom_command(
-#        OUTPUT ${PROCESSED_SHADERS}
-#        COMMAND shaderconvertor ${SHADERCONVERTOR_ARGS}
-#        COMMENT "Preprocessing all shaders with shaderconvertor"
-#        VERBATIM
-#)
-
 # === Mesh Setup ===
 set(MESH_SOURCE_DIRS
         "${CMAKE_SOURCE_DIR}/engine/res/meshes"
@@ -95,13 +95,6 @@ foreach(MESH_SOURCE_DIR ${MESH_SOURCE_DIRS})
         list(APPEND PROCESSED_MESHES "${OUTPUT_FILE}")
     endforeach()
 endforeach()
-
-#add_custom_command(
-#        OUTPUT ${PROCESSED_MESHES}
-#        COMMAND meshconvertor ${MESHCONVERTOR_ARGS}
-#        COMMENT "Preprocessing all meshes with meshconvertor"
-#        VERBATIM
-#)
 
 # === Prebuild Target ===
 add_custom_target(Prebuild ALL
