@@ -10,6 +10,7 @@
 #include "../rendering/include/hex_renderer.h"
 #include "../platforms/include/hex_platform.h"
 #include "audio/haudioclip.h"
+#include "audio/haudioplayer.h"
 
 #if PLATFORM_LINUX
 #ifdef None
@@ -47,6 +48,7 @@ namespace hf::inter
     struct AudioResources
     {
         unordered_map<std::string, Ref<AudioClip>> clips{};
+        unordered_map<uint64_t, Ref<AudioPlayer>> players{};
     };
 
     struct ResourcesMarkedForDeletion
@@ -143,7 +145,7 @@ namespace hf::inter
 
     namespace audio
     {
-        void Load_i();
+        void Load_i(bool isEnabled = true, float volume = 1.0f);
         void Unload_i();
 
         bool CreateClip_i(AudioClip* clip);

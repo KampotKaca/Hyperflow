@@ -42,6 +42,7 @@ namespace hf
 	Ref<Cubemap> Create(const CubemapCreationInfo& info);
 	Ref<IndexBuffer> Create(const IndexBufferCreationInfo& info);
 	Ref<AudioClip> Create(const AudioClipCreationInfo& info);
+	Ref<AudioPlayer> Create(const AudioPlayerCreationInfo& info);
 
 	void Destroy(const Ref<Mesh>& mesh);
 	void Destroy(const Ref<Shader>& shader);
@@ -52,6 +53,7 @@ namespace hf
 	void Destroy(const Ref<Cubemap>& cb);
 	void Destroy(const Ref<Window>& win);
 	void Destroy(const Ref<AudioClip>& clip);
+	void Destroy(const Ref<AudioPlayer>& player);
 
 	void DestroyAllWindows();
 	void Destroy(const Ref<Cubemap>* pCubemaps, uint32_t count);
@@ -62,6 +64,7 @@ namespace hf
 	void Destroy(const Ref<Mesh>* pMeshes, uint32_t count);
 	void Destroy(const Ref<Shader>* pShaders, uint32_t count);
 	void Destroy(const Ref<AudioClip>* pClips, uint32_t count);
+	void Destroy(const Ref<AudioPlayer>* pPlayers, uint32_t count);
 
 	Ref<Mesh> CreateMeshAsset(const char* assetPath);
 	Ref<Texture> CreateTextureAsset(const char* assetPath);
@@ -77,22 +80,35 @@ namespace hf
 	bool IsLoaded(const Ref<RuntimeBufferBase>& rbb);
 	bool IsLoaded(const Ref<Cubemap>& cb);
 	bool IsLoaded(const Ref<AudioClip>& clip);
+	bool IsLoaded(const Ref<AudioPlayer>& player);
 
 	void Upload(const Ref<Material>& mat, const void* data);
 	void Upload(const Ref<VertBuffer>& vb, const VertBufferUploadInfo& info);
 	void Upload(const Ref<IndexBuffer>& ib, const IndexBufferUploadInfo& info);
 
-	void ChangeClip(const Ref<AudioPlayer>& player, const Ref<AudioClip>& clip);
+	void ChangeClip(const Ref<AudioPlayer>& player, const Ref<AudioClip>& clip, int64_t startingFrame = -1);
 
 	void Play(const Ref<AudioPlayer>& player);
-	void Pause(const Ref<AudioPlayer>& player);
 	void Stop(const Ref<AudioPlayer>& player);
+
+	void SetVolume(float volume);
+	void EnableAudio(bool isEnabled);
 
 	void SetVolume(const Ref<AudioPlayer>& player, float volume);
 	void SetPitch(const Ref<AudioPlayer>& player, float pitch);
-	void SetLooping(const Ref<AudioPlayer>& player, bool looping);
-	void SetPosition(const Ref<AudioPlayer>& player, float position);
+	void SetLoopingMode(const Ref<AudioPlayer>& player, bool enableLoop);
+	void Seek(const Ref<AudioPlayer>& player, uint64_t frame);
 	void SetConfig(const Ref<AudioPlayer>& player, const AudioPlayerConfig& config);
+
+	const AudioPlayerConfig& GetConfig(const Ref<AudioPlayer>& player);
+	float GetPitch(const Ref<AudioPlayer>& player);
+	float GetVolume(const Ref<AudioPlayer>& player);
+	float GetDuration(const Ref<AudioPlayer>& player);
+	bool IsLoopingEnabled(const Ref<AudioPlayer>& player);
+
+	uint64_t GetFrameCount(const Ref<AudioClip>& clip);
+	uint32_t GetChannels(const Ref<AudioClip>& clip);
+	uint32_t GetSampleRate(const Ref<AudioClip>& clip);
 
 	//Destroy every renderer which is not connected to the window, before you try to change api
 	void ChangeApi(RenderingApiType targetApi);

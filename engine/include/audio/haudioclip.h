@@ -14,8 +14,8 @@ namespace hf
         bool useAbsolutePath{};
         AudioClipConfig config{};
 
+        void* pcmData{};
         void* buffer{};
-        void* sharedBuffer{};
 
         uint64_t frameCount{};
         uint32_t channels{};

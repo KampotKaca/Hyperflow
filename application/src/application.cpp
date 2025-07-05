@@ -25,6 +25,7 @@ namespace app
 		TexturePackLoadAll();
 		ShaderLoadAll();
 		MaterialLoadAll();
+		AudioLoadAll();
 		DebugLoad();
 	}
 

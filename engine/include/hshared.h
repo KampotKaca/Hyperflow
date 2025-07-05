@@ -956,7 +956,7 @@ namespace hf
 
 	struct AudioClipCreationInfo
 	{
-		const char* filePath;
+		const char* filePath{};
 		bool useAbsolutePath = false;
 		AudioClipConfig config{};
 	};
@@ -965,8 +965,14 @@ namespace hf
 	{
 		float volume = 1.0f;
 		float pitch = 1.0f;
-		bool isLooping = false;
-		float position = 0.0f;
+		bool loopingEnabled = false;
+		uint64_t frame = 0;
+	};
+
+	struct AudioPlayerCreationInfo
+	{
+		Ref<AudioClip> clip{};
+		AudioPlayerConfig config{};
 	};
 
 	//endregion

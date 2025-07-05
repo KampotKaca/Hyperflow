@@ -6,12 +6,20 @@
 
 namespace hf
 {
-#define CHECK(x, s) if ((x) != MA_SUCCESS) { LOG_ERROR("[Hyperflow] Unable to load the audio\n[File] %s", s); return false; }
+#define CHECK(x, s)\
+    {\
+        auto r = (x);\
+        if (r != MA_SUCCESS)\
+        {\
+            LOG_ERROR("[Hyperflow] Unable to load the audio, Error Code: %i\n[File] %s", r, s);\
+            return false;\
+        }\
+    }
 
     AudioClip::AudioClip(const AudioClipCreationInfo& info)
     : filePath(info.filePath), useAbsolutePath(info.useAbsolutePath), config(info.config)
     {
-        inter::audio::CreateClip_i(this);
+        if(!inter::audio::CreateClip_i(this)) inter::audio::DestroyClip_i(this);
     }
 
     AudioClip::~AudioClip()
@@ -44,6 +52,10 @@ namespace hf
         }
     }
 
+    uint64_t GetFrameCount(const Ref<AudioClip>& clip) { return clip->frameCount; }
+    uint32_t GetChannels(const Ref<AudioClip>& clip) { return clip->channels; }
+    uint32_t GetSampleRate(const Ref<AudioClip>& clip) { return clip->sampleRate; }
+
     namespace inter::audio
     {
         bool CreateClip_i(AudioClip* clip)
@@ -53,7 +65,7 @@ namespace hf
             std::string audioLoc{};
 
             if (clip->useAbsolutePath) audioLoc = clip->filePath;
-            else audioLoc = TO_RES_PATH(std::string("audio/clips/") + clip->filePath);
+            else audioLoc = TO_RES_PATH(std::string("audio/") + clip->filePath);
 
             if (!utils::FileExists(audioLoc.c_str()))
             {
@@ -79,28 +91,38 @@ namespace hf
             clip->channels = decoder.outputChannels;
             clip->sampleRate = decoder.outputSampleRate;
 
-            clip->buffer = utils::Allocate(clip->frameCount * decoder.outputChannels * sizeof(float));
+            clip->pcmData = utils::Allocate(clip->frameCount * decoder.outputChannels * sizeof(float));
 
             ma_uint64 framesRead;
-            CHECK(ma_decoder_read_pcm_frames(&decoder, clip->buffer, clip->frameCount, &framesRead), clip->filePath.c_str())
+            CHECK(ma_decoder_read_pcm_frames(&decoder, clip->pcmData, clip->frameCount, &framesRead), clip->filePath.c_str())
             ma_decoder_uninit(&decoder);
 
-            auto bufferConfig = ma_audio_buffer_config_init(ma_format_f32, clip->channels, framesRead, clip->buffer, nullptr);
-            CHECK(ma_audio_buffer_init(&bufferConfig, (ma_audio_buffer*)clip->sharedBuffer), clip->filePath.c_str())
+            auto bufferConfig = ma_audio_buffer_config_init(decoder.outputFormat, clip->channels, framesRead, clip->pcmData, nullptr);
+            clip->buffer = new ma_audio_buffer();
+            CHECK(ma_audio_buffer_init(&bufferConfig, (ma_audio_buffer*)clip->buffer), clip->filePath.c_str())
 
             return true;
         }
 
         bool DestroyClip_i(AudioClip* clip)
         {
+            bool changed = false;
             if (clip->buffer)
             {
-                ma_audio_buffer_uninit((ma_audio_buffer*)clip->sharedBuffer);
-                utils::Deallocate(clip->buffer);
+                ma_audio_buffer_uninit((ma_audio_buffer*)clip->buffer);
+                delete (ma_audio_buffer*)clip->buffer;
                 clip->buffer = nullptr;
-                return true;
+                changed = true;
             }
-            return false;
+
+            if (clip->pcmData)
+            {
+                utils::Deallocate(clip->pcmData);
+                clip->pcmData = nullptr;
+                changed = true;
+            }
+
+            return changed;
         }
     }
 }

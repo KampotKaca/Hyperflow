@@ -13,5 +13,6 @@
 #include "resources/texturepacks.h"
 #include "resources/shadersetups.h"
 #include "resources/cubemaps.h"
+#include "resources/audios.h"
 
 #endif //RESOURCES_H
