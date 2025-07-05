@@ -74,7 +74,7 @@ namespace hf
             ma_decoder decoder;
             CHECK(ma_decoder_init_file(audioLoc.c_str(), &decoderConfig, &decoder), clip->filePath.c_str());
 
-            CHECK(ma_decoder_get_length_in_pcm_frames(&decoder, &clip->frameCount), clip->filePath.c_str())
+            CHECK(ma_decoder_get_length_in_pcm_frames(&decoder, (ma_uint64*)&clip->frameCount), clip->filePath.c_str())
 
             clip->channels = decoder.outputChannels;
             clip->sampleRate = decoder.outputSampleRate;
