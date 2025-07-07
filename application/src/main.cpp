@@ -15,12 +15,20 @@ int main()
 		// .renderingApi = hf::renderer::GetBestApiType(),
 		.renderingApi = hf::RenderingApiType::Vulkan,
 		.updateType = hf::EngineUpdateType::Continues,
-		.globalUniformBindingInfo =
-		{
-			.usageFlags = hf::ShaderUsageStage::All,
-			.arraySize = 1,
-			.elementSizeInBytes = sizeof(app::GlobalUniformInfo)
-		},
+	    .internalResourcesFormat =
+	    {
+		    .globalUniformBindingInfo =
+        {
+		        .usageFlags = hf::ShaderUsageStage::All,
+                .arraySize = 1,
+                .elementSizeInBytes = sizeof(app::GlobalUniformInfo)
+            },
+		    .drawOutputFormats =
+		    {
+		        .sampleMode = MSAA_MODE,
+		        .depthFormat = DEPTH_STENCIL_MODE,
+		    }
+	    },
 		.lifecycleCallbacks =
 		{
 			.onRendererLoad     	 = app::AppRendererLoad,
@@ -42,7 +50,6 @@ int main()
 			.vsyncMode			 = hf::VsyncMode::Relaxed,
 			.rnEventInfo =
 			{
-				.onPassCreationCallback = app::DefineMainPresentationPass,
 				.onPreRenderCallback 	= app::AppPreRender,
 				.onRenderCallback    	= app::AppRender,
 			},

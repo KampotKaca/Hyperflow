@@ -19,34 +19,9 @@ namespace hf::inter::rendering
         return hf::CreateRenderer((HWND)info.handle, info.size, info.vSyncMode);
     }
 
-    void PostInstanceLoad(void* rn, RenderPass pass)
-    {
-
-    }
-
     void DestroyInstance(void* rnInstance)
     {
         hf::DestroyRenderer((D3DRenderer*)rnInstance);
-    }
-
-    RenderPass DefineRenderPass(const RenderPassDefinitionInfo& info)
-    {
-        return 1;
-    }
-
-    void BindRenderPass(void* rn, RenderPass pass)
-    {
-
-    }
-
-    void BeginRenderPass(void* rn, RenderPass pass)
-    {
-
-    }
-
-    void EndRenderPass(void* rn)
-    {
-
     }
 
     void* CreateShader(const ShaderCreationInfo& info)
@@ -248,6 +223,11 @@ namespace hf::inter::rendering
 
     }
 
+    void* GetEditorInfo()
+    {
+        return nullptr;
+    }
+
     API RendererAPI* GetAPI()
     {
         static RendererAPI api =
@@ -256,14 +236,7 @@ namespace hf::inter::rendering
             .Load                       = Load,
             .Unload                     = Unload,
             .CreateInstance             = CreateInstance,
-            .PostInstanceLoad           = PostInstanceLoad,
             .DestroyInstance            = DestroyInstance,
-
-            //draw pass
-            .DefineRenderPass           = DefineRenderPass,
-            .BindRenderPass             = BindRenderPass,
-            .BeginRenderPass            = BeginRenderPass,
-            .EndRenderPass              = EndRenderPass,
 
             //shader
             .CreateShader               = CreateShader,
@@ -332,6 +305,8 @@ namespace hf::inter::rendering
 
             .RegisterFrameBufferChange  = RegisterFrameBufferChange,
             .SetVSync                   = SetVSync,
+
+            .GetEditorInfo              = GetEditorInfo,
         };
         return &api;
     }

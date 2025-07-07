@@ -92,8 +92,8 @@ namespace hf
         GRAPHICS_DATA.buffers.clear();
         GRAPHICS_DATA.textureSamplers.clear();
         GRAPHICS_DATA.textureLayouts.clear();
-        GRAPHICS_DATA.renderPasses.clear();
 
+        UnloadEditorInfo();
         UnloadDevice();
         DestroyInstance();
     }
@@ -174,5 +174,62 @@ namespace hf
 #endif
 
         vkDestroyInstance(GRAPHICS_DATA.instance, nullptr);
+    }
+
+    void* LoadEditorInfo()
+    {
+        GRAPHICS_DATA.editorInfo = new RenderApiEditorInfo();
+
+        VkDescriptorPoolSize pool_sizes[] =
+        {
+            { VK_DESCRIPTOR_TYPE_SAMPLER, 1000 },
+            { VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1000 },
+            { VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, 1000 },
+            { VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, 1000 },
+            { VK_DESCRIPTOR_TYPE_UNIFORM_TEXEL_BUFFER, 1000 },
+            { VK_DESCRIPTOR_TYPE_STORAGE_TEXEL_BUFFER, 1000 },
+            { VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 1000 },
+            { VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, 1000 },
+            { VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, 1000 },
+            { VK_DESCRIPTOR_TYPE_STORAGE_BUFFER_DYNAMIC, 1000 },
+            { VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT, 1000 }
+        };
+
+        VkDescriptorPoolCreateInfo pool_info = {};
+        pool_info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
+        pool_info.flags = VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT;
+        pool_info.maxSets = 1000 * (int32_t)std::size(pool_sizes);
+        pool_info.poolSizeCount = (uint32_t)std::size(pool_sizes);
+        pool_info.pPoolSizes = pool_sizes;
+
+        VK_HANDLE_EXCEPT(vkCreateDescriptorPool(GRAPHICS_DATA.device.logicalDevice.device,
+            &pool_info, nullptr, &GRAPHICS_DATA.editorInfo->descriptorPool));
+
+        GRAPHICS_DATA.editorInfo->version = GRAPHICS_DATA.supportedVersion;
+        GRAPHICS_DATA.editorInfo->instance = GRAPHICS_DATA.instance;
+        GRAPHICS_DATA.editorInfo->physicalDevice = GRAPHICS_DATA.device.device;
+        GRAPHICS_DATA.editorInfo->device = GRAPHICS_DATA.device.logicalDevice.device;
+        GRAPHICS_DATA.editorInfo->queueFamily = GRAPHICS_DATA.device.familyIndices.graphicsFamily.value();
+        GRAPHICS_DATA.editorInfo->queue = GRAPHICS_DATA.device.logicalDevice.graphicsQueue;
+
+        GRAPHICS_DATA.editorInfo->CheckVkResultFn = [](VkResult err)
+        {
+            VK_HANDLE_EXCEPT(err);
+        };
+
+        GRAPHICS_DATA.editorInfo->commandBuffer = GRAPHICS_DATA.graphicsPool.buffers[0];
+
+        return GRAPHICS_DATA.editorInfo;
+    }
+
+    void UnloadEditorInfo()
+    {
+        if (GRAPHICS_DATA.editorInfo)
+        {
+            vkDestroyDescriptorPool(GRAPHICS_DATA.device.logicalDevice.device,
+                GRAPHICS_DATA.editorInfo->descriptorPool, nullptr);
+            delete GRAPHICS_DATA.editorInfo;
+            GRAPHICS_DATA.editorInfo = nullptr;
+        }
     }
 }

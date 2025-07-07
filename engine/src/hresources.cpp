@@ -141,7 +141,7 @@ namespace hf
                 constexpr BufferDefinitionInfo uniform
                 {
                     .bindingId = 0,
-                    .pBindings = &HF.globalUniformBindingInfo,
+                    .pBindings = &HF.internalResourcesFormat.globalUniformBindingInfo,
                     .bindingCount = 1
                 };
 
@@ -365,12 +365,12 @@ namespace hf
             {
                 const ShaderCreationInfo shaderInfo
                 {
-                    .renderPass = HF.mainWindow->renderer->mainPass,
                     .setup = HF.staticResources.axisLinesShaderSetup,
                     .supportedAttribCount = 1,
                     .pSupportedAttribs = &HF.staticResources.quadAttrib,
                     .vertexShaderLoc = "__axislines",
                     .fragmentShaderLoc = "__axislines",
+                    .drawOutputFormats = HF.internalResourcesFormat.drawOutputFormats,
                     .rasterizerOptions =
                     {
                         .cullMode = ShaderCullMode::None,
@@ -396,12 +396,12 @@ namespace hf
             {
                 const ShaderCreationInfo shaderInfo
                 {
-                    .renderPass = HF.mainWindow->renderer->mainPass,
                     .setup = HF.staticResources.skyboxShaderSetup,
                     .supportedAttribCount = 1,
                     .pSupportedAttribs = &HF.staticResources.defaultAttrib,
                     .vertexShaderLoc = "__skybox",
                     .fragmentShaderLoc = "__skybox",
+                    .drawOutputFormats = HF.internalResourcesFormat.drawOutputFormats,
                     .rasterizerOptions =
                     {
                         .cullMode = ShaderCullMode::Front,

@@ -19,7 +19,8 @@ namespace hf
 	const std::string& GetApplicationTitle();
 	void Terminate();
 
-	RenderPass DefineRenderPass(const RenderPassDefinitionInfo& info);
+    void Attach(const Ref<Renderer>& rn, const Ref<RenderTexture>& tex);
+
 	ShaderSetup DefineShaderSetup(const ShaderSetupDefinitionInfo& info);
 	TextureSampler DefineTextureSampler(const TextureSamplerDefinitionInfo& info);
 	TextureLayout DefineTextureLayout(const TextureLayoutDefinitionInfo& info);
@@ -36,6 +37,7 @@ namespace hf
 	Ref<Mesh> Create(const MeshCreationInfo& info);
 	Ref<Shader> Create(const ShaderCreationInfo& info);
 	Ref<Texture> Create(const TextureCreationInfo& info);
+	Ref<RenderTexture> Create(const RenderTextureCreationInfo& info);
 	Ref<TexturePack> Create(const TexturePackCreationInfo& info);
 	Ref<TexturePackAllocator> Create(const TexturePackAllocatorCreationInfo& info);
 	Ref<VertBuffer> Create(const VertBufferCreationInfo& info);
@@ -47,6 +49,7 @@ namespace hf
 	void Destroy(const Ref<Mesh>& mesh);
 	void Destroy(const Ref<Shader>& shader);
 	void Destroy(const Ref<Texture>& tex);
+	void Destroy(const Ref<RenderTexture>& tex);
 	void Destroy(const Ref<TexturePack>& texPack);
 	void Destroy(const Ref<TexturePackAllocator>& tpa);
 	void Destroy(const Ref<RuntimeBufferBase>& rbb);
@@ -61,6 +64,7 @@ namespace hf
 	void Destroy(const Ref<TexturePackAllocator>* pTexPackAllocators, uint32_t count);
 	void Destroy(const Ref<TexturePack>* pPacks, uint32_t count);
 	void Destroy(const Ref<Texture>* pTextures, uint32_t count);
+	void Destroy(const Ref<RenderTexture>* pTextures, uint32_t count);
 	void Destroy(const Ref<Mesh>* pMeshes, uint32_t count);
 	void Destroy(const Ref<Shader>* pShaders, uint32_t count);
 	void Destroy(const Ref<AudioClip>* pClips, uint32_t count);
@@ -75,6 +79,7 @@ namespace hf
 	bool IsLoaded(const Ref<Mesh>& mesh);
 	bool IsLoaded(const Ref<Shader>& shader);
 	bool IsLoaded(const Ref<Texture>& tex);
+	bool IsLoaded(const Ref<RenderTexture>& tex);
 	bool IsLoaded(const Ref<TexturePack>& texPack);
 	bool IsLoaded(const Ref<TexturePackAllocator>& tpa);
 	bool IsLoaded(const Ref<RuntimeBufferBase>& rbb);
@@ -117,7 +122,6 @@ namespace hf
 	bool IsValidApi(RenderingApiType targetApi);
 	uvec2 GetSize(const Ref<Renderer>& rn);
 	void Resize(const Ref<Renderer>& rn, uvec2 size);
-	void Bind(const Ref<Renderer>& rn, RenderPass pass);
 
 	void Upload_Buffer(const Ref<Renderer>& rn, const BufferUploadInfo& info);
 	void Upload_Material(const Ref<Renderer>& rn, const Ref<Material>& material);
@@ -128,8 +132,7 @@ namespace hf
 	template<typename T>
 	void UploadAdd_TexturePackBinding(const Ref<Renderer>& rn, const TexturePackBindingUploadInfo<T>& info);
 
-	void Start_RenderPass(const Ref<Renderer>& rn, RenderPass pass);
-	void End_RenderPass(const Ref<Renderer>& rn);
+    void Push_RenderAttachmentDependency(const Ref<Renderer>& rn, const RenderAttachmentDependencyInfo& info);
 
 	void Start_ShaderSetup(const Ref<Renderer>& rn, ShaderSetup shaderSetup);
 	void End_ShaderSetup(const Ref<Renderer>& rn);
@@ -231,6 +234,8 @@ namespace hf
 	int32_t GetFrameRate();
 	void SetTargetFrameRate(int16_t targetFrameRate);
 	TimeUniformInfo GetTimeUniformInfo();
+
+    void* GetEditorApiHandles();
 
 	namespace skybox
 	{

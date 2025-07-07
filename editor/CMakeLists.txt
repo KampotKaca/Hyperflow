@@ -11,7 +11,7 @@ add_library(${PROJECT_NAME} ${EDITOR_SRC})
 
 target_precompile_headers(${PROJECT_NAME}
         PRIVATE
-        "../engine/include/hyperflow.h"
+        "../engine/include/hshared.h"
 )
 set_target_properties(${PROJECT_NAME} PROPERTIES UNITY_BUILD ON)
 

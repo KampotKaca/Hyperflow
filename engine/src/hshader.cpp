@@ -9,7 +9,7 @@ namespace hf
 {
     Shader::Shader(const ShaderCreationInfo& info)
         : vertLoc(info.vertexShaderLoc), fragLoc(info.fragmentShaderLoc),
-          renderPass(info.renderPass), shaderSetup(info.setup),
+          drawOutputFormats(info.drawOutputFormats), shaderSetup(info.setup),
           supportedAttribCount(info.supportedAttribCount),
           rasterizerOptions(info.rasterizerOptions),
           depthStencilOptions(info.depthStencilOptions), blendingOptions(info.alphaTestOptions)
@@ -82,7 +82,6 @@ namespace hf
 
                     ShaderCreationInfo creationInfo
                     {
-                        .renderPass = shader->renderPass,
                         .shaderSetup = shader->shaderSetup,
                         .supportedAttribCount = shader->supportedAttribCount,
                         .pSupportedAttribs = shader->pSupportedAttribs,
@@ -90,6 +89,7 @@ namespace hf
                         .vCodeSize = (uint32_t)vertexCode.size(),
                         .fCode = fragmentCode.data(),
                         .fCodeSize = (uint32_t)fragmentCode.size(),
+                        .drawOutputFormats = shader->drawOutputFormats,
                         .rasterizerOptions = shader->rasterizerOptions,
                         .depthStencilOptions = shader->depthStencilOptions,
                         .blendingOptions = shader->blendingOptions

@@ -3,7 +3,6 @@
 
 namespace hf
 {
-    RenderPass DefineRenderPass(const RenderPassDefinitionInfo& info) { return inter::HF.renderingApi.api.DefineRenderPass(info); }
     ShaderSetup DefineShaderSetup(const ShaderSetupDefinitionInfo& info) { return inter::HF.renderingApi.api.DefineShaderSetup(info); }
 
     Buffer DefineUniformBuffer(const BufferDefinitionInfo& info) { return inter::HF.renderingApi.api.DefineUniformBuffer(info); }

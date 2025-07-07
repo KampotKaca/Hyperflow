@@ -8,6 +8,7 @@ namespace hf
     //Logical devices are destroyed in loader
     static void CreateLogicalDevice(GraphicsDevice& device);
     static bool SetupPhysicalDevice(VkSurfaceKHR surface, VkPhysicalDevice device, GraphicsDevice& deviceData);
+    static void LoadExtensionFunctions();
 
     //------------------------------------------------------------------------------------
 
@@ -16,6 +17,22 @@ namespace hf
     {
         if (!GRAPHICS_DATA.deviceIsLoaded) LoadDevice(windowHandle, &swapchain.surface);
         else VK_HANDLE_EXCEPT((VkResult)GRAPHICS_DATA.platform.createVulkanSurfaceFunc(windowHandle, GRAPHICS_DATA.instance, &swapchain.surface));
+
+        CreateSwapchain(swapchain.surface, targetSize, vSyncMode,  swapchain);
+        SetupViewportAndScissor(this);
+
+        CreateCommandPool(GRAPHICS_DATA.device, GRAPHICS_DATA.device.familyIndices.graphicsFamily.value(), &commandPool);
+        CreateCommandBuffers(GRAPHICS_DATA.device, &commandPool, FRAMES_IN_FLIGHT);
+
+        frames = std::vector<VkFrame>(FRAMES_IN_FLIGHT);
+        for (uint32_t i = 0; i < FRAMES_IN_FLIGHT; ++i)
+            CreateSemaphore(GRAPHICS_DATA.device, &frames[i].isImageAvailable);
+
+        for (auto& image : swapchain.images)
+        {
+            CreateSemaphore(GRAPHICS_DATA.device, &image.isRenderingFinished);
+            CreateFence(GRAPHICS_DATA.device, &image.isInFlight, true);
+        }
     }
 
     VkRenderer::~VkRenderer()
@@ -31,35 +48,9 @@ namespace hf
             DestroySemaphore(GRAPHICS_DATA.device, frames[i].isImageAvailable);
         frames.clear();
 
-        ClearRendererPassData(this);
-
-        DestroySwapchainFrameBuffers(this);
         DestroySwapchain(swapchain, &swapchain.swapchain);
         DestroyCommandPool(GRAPHICS_DATA.device, commandPool);
         DestroySurface(this);
-    }
-
-    void PostRendererLoad(VkRenderer* rn, RenderPass mainPass)
-    {
-        rn->mainPass = mainPass;
-        auto& pass = GetRenderPass(mainPass);
-        if (!pass->hasPresentationAttachment) throw GENERIC_EXCEPT("[Vulkan]", "Main render pass must have presentation attachment");
-        CreateSwapchain(rn->swapchain.surface, rn->targetSize, rn->vSyncMode,  rn->swapchain);
-        SetupViewportAndScissor(rn);
-
-        CreateSwapchainFrameBuffers(rn);
-        CreateCommandPool(GRAPHICS_DATA.device, GRAPHICS_DATA.device.familyIndices.graphicsFamily.value(), &rn->commandPool);
-        CreateCommandBuffers(GRAPHICS_DATA.device, &rn->commandPool, FRAMES_IN_FLIGHT);
-
-        rn->frames = std::vector<VkFrame>(FRAMES_IN_FLIGHT);
-        for (uint32_t i = 0; i < FRAMES_IN_FLIGHT; ++i)
-            CreateSemaphore(GRAPHICS_DATA.device, &rn->frames[i].isImageAvailable);
-
-        for (auto& image : rn->swapchain.images)
-        {
-            CreateSemaphore(GRAPHICS_DATA.device, &image.isRenderingFinished);
-            CreateFence(GRAPHICS_DATA.device, &image.isInFlight, true);
-        }
     }
 
     //------------------------------------------------------------------------------------
@@ -86,15 +77,36 @@ namespace hf
             queueCreateInfos.push_back(queueCreateInfo);
         }
 
+        VkPhysicalDeviceSynchronization2Features sync2Features =
+        {
+            .sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SYNCHRONIZATION_2_FEATURES,
+            .pNext = nullptr,
+            .synchronization2 = VK_TRUE
+        };
+
+        VkPhysicalDeviceDynamicRenderingFeaturesKHR dynamicRenderingFeature
+        {
+            .sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DYNAMIC_RENDERING_FEATURES_KHR,
+            .pNext = &sync2Features,
+            .dynamicRendering = VK_TRUE
+        };
+
+        VkPhysicalDeviceFeatures2 deviceFeatures2 =
+        {
+            .sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2,
+            .pNext = &dynamicRenderingFeature,
+            .features = device.features
+        };
+
         VkDeviceCreateInfo createInfo
         {
             .sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO,
+            .pNext = &deviceFeatures2,
             .queueCreateInfoCount = (uint32_t)queueCreateInfos.size(),
             .pQueueCreateInfos = queueCreateInfos.data(),
             .enabledLayerCount = 0,
             .enabledExtensionCount = GRAPHICS_DATA.platform.api->deviceExtensionCount,
             .ppEnabledExtensionNames = GRAPHICS_DATA.platform.api->deviceExtension,
-            .pEnabledFeatures = &device.features,
         };
 
 #if DEBUG
@@ -252,6 +264,8 @@ namespace hf
 
         CreateCommandPool(GRAPHICS_DATA.device, GRAPHICS_DATA.device.familyIndices.graphicsFamily.value(), &GRAPHICS_DATA.graphicsPool);
         CreateCommandBuffers(GRAPHICS_DATA.device, &GRAPHICS_DATA.graphicsPool, 1);
+
+        LoadExtensionFunctions();
     }
 
     static void DestroyLogicalDevice(LogicalDevice& device)
@@ -269,5 +283,23 @@ namespace hf
         DestroyCommandPool(GRAPHICS_DATA.device, GRAPHICS_DATA.transferPool);
         DestroyCommandPool(GRAPHICS_DATA.device, GRAPHICS_DATA.graphicsPool);
         DestroyLogicalDevice(GRAPHICS_DATA.device.logicalDevice);
+    }
+
+    void LoadExtensionFunctions()
+    {
+        auto device = GRAPHICS_DATA.device.logicalDevice.device;
+        GRAPHICS_DATA.extensionFunctions.vkCmdBeginRenderingKHR = (PFN_vkCmdBeginRenderingKHR)
+        vkGetDeviceProcAddr(device, "vkCmdBeginRenderingKHR");
+
+        GRAPHICS_DATA.extensionFunctions.vkCmdEndRenderingKHR = (PFN_vkCmdEndRenderingKHR)
+        vkGetDeviceProcAddr(device, "vkCmdEndRenderingKHR");
+
+        GRAPHICS_DATA.extensionFunctions.vkCmdPipelineBarrier2KHR = (PFN_vkCmdPipelineBarrier2KHR)
+        vkGetDeviceProcAddr(device, "vkCmdPipelineBarrier2KHR");
+
+        if (!GRAPHICS_DATA.extensionFunctions.vkCmdBeginRenderingKHR ||
+            !GRAPHICS_DATA.extensionFunctions.vkCmdEndRenderingKHR ||
+            !GRAPHICS_DATA.extensionFunctions.vkCmdPipelineBarrier2KHR)
+            throw GENERIC_EXCEPT("[Vulkan]", "Failed to load extension functions");
     }
 }

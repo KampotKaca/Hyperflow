@@ -36,6 +36,11 @@ target_link_libraries(${PROJECT_NAME}
         PRIVATE
         Hyperflow_Editor
 )
+
+target_include_directories(${PROJECT_NAME}
+        PRIVATE
+        "../editor/include"
+)
 endif ()
 
 #region Prebuild

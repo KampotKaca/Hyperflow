@@ -1,15 +1,34 @@
 #include "hyperfloweditor.h"
-#include "hyperflow.h"
 #include "imgui.h"
 #include "imgui_impl_vulkan.h"
+#include "imgui_impl_glfw.h"
 
 namespace hf
 {
+    struct RenderApiInfo
+    {
+        uint32_t version{};
+        VkInstance instance{};
+        VkPhysicalDevice physicalDevice{};
+        VkDevice device{};
+        uint32_t queueFamily{};
+        VkQueue queue{};
+        VkDescriptorPool descriptorPool{};
+        void (*CheckVkResultFn)(VkResult err){};
+
+        VkCommandBuffer commandBuffer{};
+    };
+
     static void SetStyle();
     static void SetDarkThemeColors();
 
-    void LoadEditor()
+    static VkCommandBuffer drawEndCommand{};
+
+    void LoadEditor(const EditorInfo& info)
     {
+        IMGUI_CHECKVERSION();
+        ImGui::CreateContext();
+
         ImGuiIO &io = ImGui::GetIO();
         io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard |
                           ImGuiConfigFlags_DockingEnable |
@@ -21,15 +40,43 @@ namespace hf
         SetDarkThemeColors();
         SetStyle();
 
-        ImGui_ImplVulkan_InitInfo initInfo{};
-        ImGui_ImplVulkan_Init(&initInfo);
+        ImGui_ImplGlfw_InitForVulkan((GLFWwindow*)info.windowHandle, true);
 
-
+        // auto vkApi = *(RenderApiInfo*)info.renderApiHandles;
+        // auto format = VK_FORMAT_B8G8R8A8_SRGB;
+        // ImGui_ImplVulkan_InitInfo initInfo
+        // {
+        //     .ApiVersion = vkApi.version,
+        //     .Instance = vkApi.instance,
+        //     .PhysicalDevice = vkApi.physicalDevice,
+        //     .Device = vkApi.device,
+        //     .QueueFamily = vkApi.queueFamily,
+        //     .Queue = vkApi.queue,
+        //     .DescriptorPool = vkApi.descriptorPool,
+        //     .MinImageCount = 2,
+        //     .ImageCount = 2,
+        //     .MSAASamples = (VkSampleCountFlagBits)info.multisampleMode,
+        //     .PipelineCache = VK_NULL_HANDLE,
+        //     .UseDynamicRendering = true,
+        //     .PipelineRenderingCreateInfo =
+        //     {
+        //         .sType = VK_STRUCTURE_TYPE_PIPELINE_RENDERING_CREATE_INFO_KHR,
+        //         .pNext = nullptr,
+        //         .colorAttachmentCount = 1,
+        //         .pColorAttachmentFormats = &format,
+        //         .depthAttachmentFormat = VK_FORMAT_UNDEFINED,
+        //         .stencilAttachmentFormat = VK_FORMAT_UNDEFINED
+        //     },
+        //     .CheckVkResultFn = vkApi.CheckVkResultFn,
+        //     .MinAllocationSize = 1024 * 1024,
+        // };
+        // ImGui_ImplVulkan_Init(&initInfo);
     }
 
     void UnloadEditor()
     {
-        ImGui_ImplVulkan_Shutdown();
+        // ImGui_ImplVulkan_Shutdown();
+        ImGui_ImplGlfw_Shutdown();
         ImGui::DestroyContext();
     }
 

@@ -11,12 +11,12 @@ namespace hf
         ~Shader();
 
         std::string vertLoc{}, fragLoc{};
-        RenderPass renderPass{};
         ShaderSetup shaderSetup{};
 
         BufferAttrib* pSupportedAttribs{};
         uint32_t supportedAttribCount{};
 
+        ShaderDrawOutputFormats drawOutputFormats{};
         ShaderRasterizerOptions rasterizerOptions{};
         ShaderDepthStencilOptions depthStencilOptions{};
         ShaderBlendingOptions blendingOptions{};

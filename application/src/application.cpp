@@ -27,11 +27,12 @@ namespace app
 		MaterialLoadAll();
 		AudioLoadAll();
 		DebugLoad();
+
+	    CreateRenderTextures();
 	}
 
 	void AppStart()
 	{
-		APP_OBJECTS.vikingRoom2Transform.position = { 3, 0, 3 };
 		APP_OBJECTS.sphereTransform.position = { -3, 1, 3 };
 		UniformStartAll();
 		DebugStart();
@@ -43,7 +44,6 @@ namespace app
 	void AppUpdate()
 	{
 		APP_OBJECTS.vikingRoomTransform.euler.y -= (float)hf::GetDeltaTime() * 10.0f;
-		APP_OBJECTS.vikingRoom2Transform.euler.y -= (float)hf::GetDeltaTime() * 10.0f;
 		APP_OBJECTS.groundTransform.scale = { 100, 1, 100 };
 		DebugUpdate();
 		VoxelTerrainUpdate();

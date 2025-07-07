@@ -81,12 +81,6 @@ namespace hf
         AssetRange<uint32_t> bufferSetRange{};
     };
 
-    struct RenderPassPacketInfo
-    {
-        RenderPass pass{};
-        AssetRange<uint16_t> shaderSetupRange{};
-    };
-
     struct BufferUploadPacketInfo
     {
         Buffer buffer{};
@@ -96,7 +90,7 @@ namespace hf
 
     struct RenderPacket
     {
-        StaticVector<RenderPassPacketInfo, RENDERING_MAX_NUM_RENDER_PASSES> passes{};
+        StaticVector<RenderAttachmentDependencyInfo, RENDERING_MAX_NUM_RENDER_ATTACHMENT_DEPENDENCIES> attachmentDependencies{};
         StaticVector<ShaderSetupPacketInfo, RENDERING_MAX_NUM_SHADER_SETUPS> shaderSetups{};
         StaticVector<ShaderPacketInfo, RENDERING_MAX_NUM_SHADERS> shaders{};
         StaticVector<MaterialPacketInfo, RENDERING_MAX_NUM_MATERIALS> materials{};
@@ -118,7 +112,6 @@ namespace hf
 
     struct RenderPacketDrawProcess
     {
-        RenderPassPacketInfo* currentPass{};
         ShaderSetupPacketInfo* currentShaderSetup{};
         ShaderPacketInfo* currentShader{};
         MaterialPacketInfo* currentMaterial{};

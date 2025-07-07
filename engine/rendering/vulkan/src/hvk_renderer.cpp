@@ -38,6 +38,12 @@ namespace hf
         rn->frameBufferChanged = true;
     }
 
+    void AttachRenderTexture(VkRenderer* rn, VkRenderTexture* tex)
+    {
+        rn->renderTex = tex;
+        ResizeRenderTexture(tex, rn->targetSize);
+    }
+
     void SetVSync(VkRenderer* rn, VsyncMode mode)
     {
         std::lock_guard lock(rn->frameSync);

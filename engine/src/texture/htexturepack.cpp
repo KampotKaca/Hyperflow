@@ -115,5 +115,12 @@ namespace hf
                 DestroyTexturePack_i(pack.get());
             if (!internalOnly) HF.graphicsResources.texturePacks.clear();
         }
+
+        void DestroyAllRenderTextures_i(bool internalOnly)
+        {
+            for (const auto& tex : std::ranges::views::values(HF.graphicsResources.renderTextures))
+                DestroyRenderTexture_i(tex.get());
+            if (!internalOnly) HF.graphicsResources.renderTextures.clear();
+        }
     }
 }

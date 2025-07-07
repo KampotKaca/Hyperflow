@@ -10,7 +10,6 @@ namespace app
 		hf::DirectionalLight mainLight{};
 		hf::SkyboxInfo skybox{};
 		hf::Transform vikingRoomTransform{};
-		hf::Transform vikingRoom2Transform{};
 		hf::Transform sphereTransform{};
 		hf::Transform groundTransform{};
 	};

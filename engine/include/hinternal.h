@@ -32,6 +32,7 @@ namespace hf::inter
     {
         unordered_map<uint64_t, Ref<Shader>> shaders{};
         unordered_map<uint64_t, Ref<RuntimeBufferBase>> buffers{};
+        unordered_map<uint64_t, Ref<RenderTexture>> renderTextures{};
         unordered_map<uint64_t, Ref<TexturePack>> texturePacks{};
         unordered_map<uint64_t, Ref<TexturePackAllocator>> texturePackAllocators{};
 
@@ -65,6 +66,7 @@ namespace hf::inter
         std::vector<void*> texturePacks{};
         std::vector<void*> texturePackAllocators{};
         std::vector<void*> textures{};
+        std::vector<void*> renderTextures{};
     };
 
     struct StaticResources
@@ -104,7 +106,7 @@ namespace hf::inter
     {
         EngineLifecycleCallbacks lifecycleCallbacks{};
         EngineUpdateType updateType = EngineUpdateType::Continues;
-        BufferBindingInfo globalUniformBindingInfo{};
+        EngineInternalResourceFormatInfo internalResourcesFormat{};
         std::atomic_bool isRunning{};
         std::string appTitle{};
         Time time{};
@@ -161,6 +163,9 @@ namespace hf::inter
         void LoadApi_i(RenderingApiType api);
         void UnloadCurrentApi_i(bool retainReferences);
 
+        bool CreateRenderTexture_i(RenderTexture* tex);
+        bool DestroyRenderTexture_i(RenderTexture* tex);
+
         void CreateRenderer_i(Renderer* rn);
         void DestroyRenderer_i(Renderer* rn);
         void RunRenderThread_i(const Ref<Renderer>& rn);
@@ -198,10 +203,9 @@ namespace hf::inter
         void DestroyAllTextures_i(bool internalOnly = false);
         void DestroyAllCubemaps_i(bool internalOnly = false);
         void DestroyAllTexturePacks_i(bool internalOnly = false);
+        void DestroyAllRenderTextures_i(bool internalOnly = false);
         void DestroyAllTexturePackAllocators_i(bool internalOnly = false);
         void DestroyAllShaders_i(bool internalOnly = false);
-
-        void SendMaterialPushConstants_i(Material* material);
     }
 }
 

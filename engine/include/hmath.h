@@ -18,6 +18,7 @@
 #include "glm/detail/type_quat.hpp"
 #include "glm/gtc/quaternion.hpp"
 #include "glm/gtx/quaternion.hpp"
+#include "glm/gtx/rotate_vector.hpp"
 
 namespace hf
 {

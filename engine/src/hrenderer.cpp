@@ -1,6 +1,7 @@
 #include "hrenderer.h"
 #include <hyperflow.h>
 #include "hinternal.h"
+#include "hrendertexture.h"
 #include "../config.h"
 #include "../../application/appconfig.h"
 #include "../rendering/include/hex_renderer.h"
@@ -40,6 +41,7 @@ namespace hf
         if (rn->window != nullptr) throw GENERIC_EXCEPT("[Hyperflow]", "Cannot resize renderer connected to the window");
         rn->threadInfo.size = size;
         inter::HF.renderingApi.api.RegisterFrameBufferChange(rn->handle, size);
+        rn->attachedTexture->createInfo.size = size;
     }
 
     RenderingApiType GetApiType()     { return inter::HF.renderingApi.type; }
@@ -63,7 +65,12 @@ namespace hf
         return inter::platform::IsValidRenderingApi(targetApi);
     }
 
-    void Bind(const Ref<Renderer>& rn, RenderPass pass) { inter::HF.renderingApi.api.BindRenderPass(rn->handle, pass); }
+    void Attach(const Ref<Renderer>& rn, const Ref<RenderTexture>& texture)
+    {
+        rn->attachedTexture = texture;
+        texture->createInfo.size = rn->threadInfo.size;
+        inter::HF.renderingApi.api.AttachRenderTextureToRenderer(rn->handle, texture->handle);
+    }
 
     namespace inter::rendering
     {
@@ -214,8 +221,6 @@ namespace hf
 
         void RunRenderThread_i(const Ref<Renderer>& rn)
         {
-            rn->mainPass = rn->eventInfo.onPassCreationCallback(rn);
-            HF.renderingApi.api.PostInstanceLoad(rn->handle, rn->mainPass);
             rn->threadInfo.thread = std::thread(ThreadDraw, rn);
         }
     }

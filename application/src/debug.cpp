@@ -3,7 +3,9 @@
 #include "resources.h"
 #include <hyaml.h>
 
-#include "glm/gtx/rotate_vector.hpp"
+#if DEBUG
+#include "hyperfloweditor.h"
+#endif
 
 namespace app
 {
@@ -27,12 +29,6 @@ namespace app
         "N5",
     };
 
-    static hf::RenderPass CreateSubWindowRenderPass(const hf::Ref<hf::Renderer>& rn)
-    {
-        hf::Bind(rn, APP_RENDER_PASSES.mainPresentPass);
-        return APP_RENDER_PASSES.mainPresentPass;
-    }
-
     void DebugDefine()
     {
 
@@ -45,6 +41,15 @@ namespace app
 
     void DebugStart()
     {
+#if DEBUG
+        hf::EditorInfo editorInfo
+        {
+            .windowHandle = GetHandle(hf::GetMainWindow()),
+        };
+        editorInfo.renderApiHandles = hf::GetEditorApiHandles();
+        hf::LoadEditor(editorInfo);
+#endif
+
         APP_DEBUG.camera.camera3D.position = {0, 0.5, -2};
         APP_DEBUG.camera.camera3D.direction = {0, 0, 1};
         DEBUG_INFO.wn = hf::GetMainWindow();
@@ -83,7 +88,6 @@ namespace app
         		.vsyncMode = hf::VsyncMode::Relaxed,
         		.rnEventInfo =
         		{
-        			.onPassCreationCallback = CreateSubWindowRenderPass,
         			.onPreRenderCallback = AppPreRender,
         			.onRenderCallback = AppRender
         		},
@@ -144,7 +148,9 @@ namespace app
 
     void DebugQuit()
     {
-
+#if DEBUG
+        hf::UnloadEditor();
+#endif
     }
 
     void DebugPreRender(const hf::Ref<hf::Renderer>& rn)

@@ -1,7 +1,7 @@
 #ifndef RESOURCES_H
 #define RESOURCES_H
 
-#include "resources/renderpasses.h"
+#include "resources/rendertextures.h"
 #include "resources/uniforms.h"
 #include "resources/textures.h"
 #include "resources/meshes.h"

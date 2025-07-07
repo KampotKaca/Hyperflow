@@ -58,7 +58,6 @@ namespace hf::inter::rendering
 
     struct ShaderCreationInfo
     {
-        RenderPass renderPass{};
         ShaderSetup shaderSetup{};
         uint32_t supportedAttribCount{};
         const BufferAttrib* pSupportedAttribs{};
@@ -68,6 +67,7 @@ namespace hf::inter::rendering
         const char* fCode{};
         uint32_t fCodeSize = 0;
 
+        ShaderDrawOutputFormats drawOutputFormats{};
         ShaderRasterizerOptions rasterizerOptions{};
         ShaderDepthStencilOptions depthStencilOptions{};
         ShaderBlendingOptions blendingOptions{};
@@ -108,7 +108,6 @@ namespace hf::inter::rendering
 
     struct RendererInstanceCreationInfo
     {
-        RenderPass mainPass{};
         void* handle{};
         uvec2 size{};
         VsyncMode vSyncMode = VsyncMode::NoSync;
@@ -122,7 +121,7 @@ namespace hf::inter::rendering
         uvec3 size = { 1, 1, 1 };
         TextureChannel channel = TextureChannel::RGBA;
         uint32_t mipLevels = 1;
-        uint32_t samples = 1;
+        MultisampleMode samples = MultisampleMode::MSAA_1X;
         const void* pTextures{};
         uint32_t textureCount = 1;
         TextureDetails details{};
@@ -205,13 +204,7 @@ namespace hf::inter::rendering
         void (*Load)(const RendererLoadInfo& info);
         void (*Unload)();
         void* (*CreateInstance)(const RendererInstanceCreationInfo& info);
-        void (*PostInstanceLoad)(void* rn, RenderPass pass);
         void (*DestroyInstance)(void* rn);
-
-        RenderPass (*DefineRenderPass)(const RenderPassDefinitionInfo& info);
-        void (*BindRenderPass)(void* rn, RenderPass pass);
-        void (*BeginRenderPass)(void* rn, RenderPass pass);
-        void (*EndRenderPass)(void* rn);
 
         //Shaders
         void* (*CreateShader)(const ShaderCreationInfo& info);
@@ -222,9 +215,15 @@ namespace hf::inter::rendering
         ShaderSetup (*DefineShaderSetup)(const ShaderSetupDefinitionInfo& info);
         void (*BindShaderSetup)(void* rn, ShaderSetup setup);
         void (*UploadPushConstants)(void* rn, const PushConstantUploadInfo& info);
+
         //texture
         void* (*CreateTexture)(const TextureCreationInfo& info);
         void (*DestroyTexture)(void* tex);
+
+        //render texture
+        void* (*CreateRenderTexture)(const RenderTextureCreationInfo& info);
+        void (*DestroyRenderTexture)(void* tex);
+        void (*AttachRenderTextureToRenderer)(void* rn, void* tex);
 
         //texture pack
         void* (*CreateTexturePack)(const TexturePackCreationInfo& info);
@@ -275,10 +274,16 @@ namespace hf::inter::rendering
         void (*StartFrame)(void* rn);
         void (*EndFrame)(void* rn);
         void (*Draw)(void* rn, const DrawCallInfo& info);
+        void (*ApplyRenderAttachmentDependencies)(void* rn, RenderAttachmentDependencyInfo* pInfos, uint32_t count);
         void (*WaitForDevice)();
+
+        void (*BeginRendering)(void* rn);
+        void (*EndRendering)(void* rn);
 
         void (*RegisterFrameBufferChange)(void* rn, uvec2 newSize);
         void (*SetVSync)(void* rn, VsyncMode mode);
+
+        void* (*GetEditorInfo)();
     };
 }
 

@@ -23,7 +23,7 @@ namespace hf
 			RenderPacket drawPacket{};
 		};
 
-		RenderPass mainPass{};
+	    Ref<RenderTexture> attachedTexture{};
 		RenderPacketDrawProcess currentDraw{};
 		bool isDrawing = false;
 		ThreadInfo threadInfo{};

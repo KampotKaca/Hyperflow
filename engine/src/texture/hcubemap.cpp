@@ -240,7 +240,7 @@ namespace hf
                 .size = size,
                 .channel = TextureChannel::RGBA,
                 .mipLevels = cubemap->mipLevels,
-                .samples = 1,
+                .samples = MultisampleMode::MSAA_1X,
                 .pTextures = allPixels,
                 .textureCount = 6,
                 .details = cubemap->details

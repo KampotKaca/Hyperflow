@@ -1,5 +1,6 @@
 #ifndef HSTATICVECTOR_H
 #define HSTATICVECTOR_H
+#include "hgenericexception.h"
 
 namespace hf
 {
@@ -36,12 +37,15 @@ namespace hf
 
         inline void push_back(T element)
         {
+            if (m_Size + 1 > N) throw GENERIC_EXCEPT("[Hyperflow]", "Array out of bounds!");
             m_Elements[m_Size] = element;
             m_Size++;
         }
 
         inline void push_back(const T* element, size_t size)
         {
+            if (m_Size + size > N) throw GENERIC_EXCEPT("[Hyperflow]", "Array out of bounds!");
+
             memcpy(&m_Elements[m_Size], element, size * sizeof(T));
             m_Size += size;
         }

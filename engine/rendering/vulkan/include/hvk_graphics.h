@@ -2,12 +2,10 @@
 #define HVK_GRAPHICS_H
 
 #include "hvk_shared.h"
-#include "hvk_framebuffer.h"
 #include "hvk_bufferattrib.h"
 #include "hvk_vertbuffer.h"
 #include "hvk_uniformbuffer.h"
 #include "hvk_shadersetup.h"
-#include "hvk_renderpass.h"
 #include "hvk_texturelayout.h"
 #include "hvk_texturepack.h"
 #include "hvk_texturepackallocator.h"
@@ -87,6 +85,13 @@ namespace hf
         VulkanPlatformAPI* api{};
     };
 
+    struct VkExtensionFunctions
+    {
+        PFN_vkCmdBeginRenderingKHR vkCmdBeginRenderingKHR{};
+        PFN_vkCmdEndRenderingKHR vkCmdEndRenderingKHR{};
+        PFN_vkCmdPipelineBarrier2KHR vkCmdPipelineBarrier2KHR{};
+    };
+
     struct VkCopyBufferToBufferOperation
     {
         VkBuffer srcBuffer{};
@@ -149,6 +154,20 @@ namespace hf
         uint32_t indices[VK_MAX_INDICES]{};
     };
 
+    struct RenderApiEditorInfo
+    {
+        uint32_t version{};
+        VkInstance instance{};
+        VkPhysicalDevice physicalDevice{};
+        VkDevice device{};
+        uint32_t queueFamily{};
+        VkQueue queue{};
+        VkDescriptorPool descriptorPool{};
+        void (*CheckVkResultFn)(VkResult err){};
+
+        VkCommandBuffer commandBuffer{};
+    };
+
     struct GraphicsData
     {
         int32_t rendererCount = 0;
@@ -174,12 +193,13 @@ namespace hf
         std::vector<URef<VkTextureSampler>> textureSamplers{};
         std::vector<URef<VkTextureLayout>> textureLayouts{};
         std::vector<URef<VkShaderSetup>> shaderSetups{};
-        std::vector<URef<VkDrawPass>> renderPasses{};
 
         std::vector<VkCopyBufferToBufferOperation> bufferToBufferCopyOperations{};
         std::vector<VkCopyBufferToImageOperation> bufferToImageCopyOperations{};
 
         PreAllocatedBuffers preAllocBuffers{};
+        RenderApiEditorInfo* editorInfo{};
+        VkExtensionFunctions extensionFunctions{};
 
 #if DEBUG
         VkDebugUtilsMessengerCreateInfoEXT debugCreateInfo
@@ -204,7 +224,6 @@ namespace hf
     {
         VkImage image{};
         VkImageView view{};
-        VkFrameBuffer* frameBuffer{};
 
         VkSemaphore isRenderingFinished{};
         VkFence isInFlight{};
@@ -246,6 +265,9 @@ namespace hf
 
     void LoadVulkan(const inter::rendering::RendererLoadInfo& info);
     void UnloadVulkan();
+
+    void* LoadEditorInfo();
+    void UnloadEditorInfo();
 
     void LoadDevice(void* windowHandle, VkSurfaceKHR* resultSurface);
     void UnloadDevice();

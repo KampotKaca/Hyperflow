@@ -5,7 +5,7 @@
 #include "hvk_texturepack.h"
 #include "hvk_vertbuffer.h"
 #include "hvk_storagebuffer.h"
-#include "hvk_renderpass.h"
+#include "hvk_rendertexture.h"
 
 namespace hf::inter::rendering
 {
@@ -28,36 +28,9 @@ namespace hf::inter::rendering
         return new VkRenderer(info);
     }
 
-    void PostInstanceLoad(void* rn, RenderPass pass)
-    {
-        PostRendererLoad((VkRenderer*)rn, pass);
-    }
-
     void DestroyInstance(void* rn)
     {
         delete (VkRenderer*)rn;
-    }
-
-    RenderPass DefineRenderPass(const RenderPassDefinitionInfo& info)
-    {
-        GRAPHICS_DATA.renderPasses.emplace_back(MakeURef<VkDrawPass>(info));
-        return GRAPHICS_DATA.renderPasses.size();
-    }
-
-    void BindRenderPass(void* rn, RenderPass pass)
-    {
-        auto rend = (VkRenderer*)rn;
-        BindPassToRenderer(rend, pass, rend->targetSize);
-    }
-
-    void BeginRenderPass(void* rn, RenderPass pass)
-    {
-        BeginPass((VkRenderer*)rn, pass);
-    }
-
-    void EndRenderPass(void* rn)
-    {
-        EndPass((VkRenderer*)rn);
     }
 
     void* CreateShader(const ShaderCreationInfo& info)
@@ -83,6 +56,21 @@ namespace hf::inter::rendering
     void DestroyTexture(void* tex)
     {
         delete (VkTexture*)tex;
+    }
+
+    void* CreateRenderTexture(const RenderTextureCreationInfo& info)
+    {
+        return new VkRenderTexture(info);
+    }
+
+    void DestroyRenderTexture(void* tex)
+    {
+        delete (VkRenderTexture*)tex;
+    }
+
+    void AttachRenderTextureToRenderer(void* rn, void* tex)
+    {
+        AttachRenderTexture((VkRenderer*)rn, (VkRenderTexture*)tex);
     }
 
     void* CreateTexturePack(const TexturePackCreationInfo& info)
@@ -297,9 +285,62 @@ namespace hf::inter::rendering
         Draw(drawInfo);
     }
 
+    void ApplyRenderAttachmentDependencies(void* rn, RenderAttachmentDependencyInfo* pInfos, uint32_t count)
+    {
+        static VkImageMemoryBarrier2 barriers[RENDERING_MAX_NUM_RENDER_ATTACHMENT_DEPENDENCIES]{};
+        auto* vrn = (VkRenderer*)rn;
+
+        for (uint32_t i = 0; i < count; i++)
+        {
+            auto& info = pInfos[i];
+            barriers[i] =
+            {
+                .sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER_2,
+                .srcStageMask = (VkPipelineStageFlags2)info.src.stageMask,
+                .srcAccessMask = (VkAccessFlags2)info.src.accessMask,
+                .dstStageMask = (VkPipelineStageFlags2)info.dst.stageMask,
+                .dstAccessMask = (VkAccessFlags2)info.dst.accessMask,
+                .oldLayout = (VkImageLayout)info.src.targetLayout,
+                .newLayout = (VkImageLayout)info.dst.targetLayout,
+                .srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
+                .dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
+                .image = GetRenderTextureImage(vrn->renderTex, info.attachmentIndex),
+                .subresourceRange =
+                {
+                    .aspectMask = (VkImageAspectFlags)info.aspectFlags,
+                    .baseMipLevel = 0,
+                    .levelCount = 1,
+                    .baseArrayLayer = 0,
+                    .layerCount = 1,
+                },
+            };
+        }
+
+        VkDependencyInfo depInfo
+        {
+            .sType = VK_STRUCTURE_TYPE_DEPENDENCY_INFO,
+            .imageMemoryBarrierCount = count,
+            .pImageMemoryBarriers = barriers,
+        };
+
+        GRAPHICS_DATA.extensionFunctions.vkCmdPipelineBarrier2KHR(vrn->currentCommand, &depInfo);
+    }
+
     void WaitForDevice()
     {
         hf::WaitForDevice();
+    }
+
+    void BeginRendering(void* rn)
+    {
+        auto vrn = (VkRenderer*)rn;
+        hf::BeginRendering(vrn, vrn->renderTex);
+    }
+
+    void EndRendering(void* rn)
+    {
+        auto vrn = (VkRenderer*)rn;
+        hf::EndRendering(vrn, vrn->renderTex);
     }
 
     void RegisterFrameBufferChange(void* rn, uvec2 newSize)
@@ -313,6 +354,11 @@ namespace hf::inter::rendering
         SetVSync((VkRenderer*)rn, mode);
     }
 
+    void* GetEditorInfo()
+    {
+        return LoadEditorInfo();
+    }
+
     API RendererAPI* GetAPI()
     {
         static RendererAPI api =
@@ -321,14 +367,7 @@ namespace hf::inter::rendering
             .Load                       = Load,
             .Unload                     = Unload,
             .CreateInstance             = CreateInstance,
-            .PostInstanceLoad           = PostInstanceLoad,
             .DestroyInstance            = DestroyInstance,
-
-            //draw pass
-            .DefineRenderPass           = DefineRenderPass,
-            .BindRenderPass             = BindRenderPass,
-            .BeginRenderPass            = BeginRenderPass,
-            .EndRenderPass              = EndRenderPass,
 
             //shader
             .CreateShader               = CreateShader,
@@ -343,6 +382,11 @@ namespace hf::inter::rendering
             //texture
             .CreateTexture              = CreateTexture,
             .DestroyTexture             = DestroyTexture,
+
+            //render texture
+            .CreateRenderTexture        = CreateRenderTexture,
+            .DestroyRenderTexture       = DestroyRenderTexture,
+            .AttachRenderTextureToRenderer = AttachRenderTextureToRenderer,
 
             //texture pack
             .CreateTexturePack          = CreateTexturePack,
@@ -393,10 +437,16 @@ namespace hf::inter::rendering
             .StartFrame                 = StartFrame,
             .EndFrame                   = EndFrame,
             .Draw                       = Draw,
+            .ApplyRenderAttachmentDependencies = ApplyRenderAttachmentDependencies,
             .WaitForDevice              = WaitForDevice,
+
+            .BeginRendering             = BeginRendering,
+            .EndRendering               = EndRendering,
 
             .RegisterFrameBufferChange  = RegisterFrameBufferChange,
             .SetVSync                   = SetVSync,
+
+            .GetEditorInfo              = GetEditorInfo,
         };
         return &api;
     }

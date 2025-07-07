@@ -10,7 +10,7 @@ namespace hf
         VkPipelineShaderStageCreateInfo* pStages = nullptr;
         BufferAttrib attrib{};
         VkPipelineLayout layout{};
-        RenderPass renderPass{};
+        ShaderDrawOutputFormats drawOutputFormats{};
         ShaderRasterizerOptions rasterizerOptions{};
         ShaderBlendingOptions blendingOptions{};
         ShaderDepthStencilOptions depthStencilOptions{};
@@ -48,7 +48,7 @@ namespace hf
             .stageCount = 2,
             .pStages = shaderStages,
             .layout = shaderSetup->layout,
-            .renderPass = info.renderPass,
+            .drawOutputFormats = info.drawOutputFormats,
             .rasterizerOptions = info.rasterizerOptions,
             .blendingOptions = info.blendingOptions,
             .depthStencilOptions = info.depthStencilOptions,
@@ -93,7 +93,6 @@ namespace hf
     void CreatePipeline(const VkPipelineInfo& info, VkPipeline* pipeline)
     {
         const auto& attribute = GetAttrib(info.attrib);
-        auto& pass = GetRenderPass(info.renderPass);
 
         VkPipelineVertexInputStateCreateInfo vertexInputInfo
         {
@@ -151,21 +150,13 @@ namespace hf
         VkPipelineMultisampleStateCreateInfo multisampling
         {
             .sType = VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO,
-            .pSampleMask = nullptr,
+            .rasterizationSamples = (VkSampleCountFlagBits)info.drawOutputFormats.sampleMode,
             .alphaToCoverageEnable = VK_FALSE,
-            .alphaToOneEnable = VK_FALSE,
+            .alphaToOneEnable = VK_FALSE
         };
 
-        if (pass->msaaSamples.size() > 0)
-        {
-            uint32_t maxSamples = pass->msaaSamples[0];
-            for (uint32_t i = 1; i < pass->msaaSamples.size(); i++)
-                if (maxSamples < pass->msaaSamples[i]) maxSamples = pass->msaaSamples[i];
-            multisampling.rasterizationSamples = (VkSampleCountFlagBits)maxSamples;
-        }
-        else multisampling.rasterizationSamples = VK_SAMPLE_COUNT_1_BIT;
-
-        if (!pass->msaaSamples.empty() && GRAPHICS_DATA.device.features.sampleRateShading)
+        if (info.drawOutputFormats.sampleMode != MultisampleMode::MSAA_1X &&
+            GRAPHICS_DATA.device.features.sampleRateShading)
         {
             multisampling.sampleShadingEnable = VK_TRUE;
             multisampling.minSampleShading = VK_MSAA_MIN_SAMPLE_SHADING;
@@ -212,9 +203,19 @@ namespace hf
             .blendConstants = { 0.0f, 0.0f, 0.0f, 0.0f },
         };
 
+        VkPipelineRenderingCreateInfo renderingInfo
+        {
+            .sType = VK_STRUCTURE_TYPE_PIPELINE_RENDERING_CREATE_INFO_KHR,
+            .colorAttachmentCount = info.drawOutputFormats.colorFormatCount,
+            .pColorAttachmentFormats = (VkFormat*)info.drawOutputFormats.colorFormats,
+            .depthAttachmentFormat = (VkFormat)info.drawOutputFormats.depthFormat,
+            .stencilAttachmentFormat = (VkFormat)info.drawOutputFormats.stencilFormat
+        };
+
         VkGraphicsPipelineCreateInfo pipelineInfo
         {
             .sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO,
+            .pNext = &renderingInfo,
             .stageCount = info.stageCount,
             .pStages = info.pStages,
             .pVertexInputState = &vertexInputInfo,
@@ -225,7 +226,7 @@ namespace hf
             .pColorBlendState = &colorBlending,
             .pDynamicState = &dynamicState,
             .layout = info.layout,
-            .renderPass = pass->pass,
+            .renderPass = nullptr,
             .subpass = 0,
             .basePipelineHandle = VK_NULL_HANDLE,
             .basePipelineIndex = -1,
@@ -246,7 +247,7 @@ namespace hf
             .maxDepthBounds = dsOptions.depthBounds.y
         };
 
-        if (pass->depthAttachmentRefs.size() > 0)
+        if (info.drawOutputFormats.depthFormat != TextureFormat::Undefined)
             pipelineInfo.pDepthStencilState = &depthStencilInfo;
         else pipelineInfo.pDepthStencilState = nullptr;
 

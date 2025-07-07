@@ -3,7 +3,7 @@
 
 #include "hvk_shared.h"
 #include "hvk_graphics.h"
-#include "hvk_renderpass.h"
+#include "hvk_rendertexture.h"
 
 namespace hf
 {
@@ -20,16 +20,13 @@ namespace hf
         uvec2 targetSize{};
 
         VkCommandBuffer currentCommand{};
-        VkRenderPass currentPass{};
 
         VkBuffer vertBufferCache[MAX_NUM_BUFFER_CACHE]{};
         VkDeviceSize drawOffsets[MAX_NUM_BUFFER_CACHE]{};
 
-        std::vector<VkRendererPassTextureCollection> passTextureCollections{};
-
         VkPipelineLayout currentLayout{};
-        RenderPass mainPass{};
 
+        VkRenderTexture* renderTex{};
         std::vector<VkFrame> frames{};
         uint32_t currentFrame = 0;
         uint32_t imageIndex = UINT32_MAX;
@@ -53,12 +50,6 @@ namespace hf
         uint32_t instanceCount{};
     };
 
-    void PostRendererLoad(VkRenderer* rn, RenderPass pass);
-
-    void BindPassToRenderer(VkRenderer* rn, RenderPass pass, uvec2 size);
-    void RebindRendererToAllPasses(VkRenderer* rn);
-    void ClearRendererPassData(VkRenderer* rn);
-
     void DestroySurface(VkRenderer* rn);
     void SetupViewportAndScissor(VkRenderer* rn);
 
@@ -66,15 +57,13 @@ namespace hf
     bool AcquireNextImage(VkRenderer* rn);
     void DelayUntilPreviousFrameFinish(VkRenderer* rn);
 
-    void BeginPass(VkRenderer* rn, RenderPass pass);
-    void EndPass(VkRenderer* rn);
+    void BeginRendering(const VkRenderer* rn, VkRenderTexture* tex);
+    void EndRendering(VkRenderer* rn, VkRenderTexture* tex);
 
     void BeginCommandBuffer(VkRenderer* rn, VkCommandBuffer buffer);
     void EndCommandBuffer(VkRenderer* rn);
     void SubmitCommands(VkRenderer* rn);
 
-    void CreateSwapchainFrameBuffers(VkRenderer* rn);
-    void DestroySwapchainFrameBuffers(VkRenderer* rn);
     void UploadViewportAndScissor(const VkRenderer* rn);
 
     bool GetReadyForRendering(VkRenderer* rn);
@@ -83,6 +72,8 @@ namespace hf
     void Draw(const VkDrawInfo& info);
 
     void RegisterFrameBufferChange(VkRenderer* rn, uvec2 newSize);
+    void AttachRenderTexture(VkRenderer* rn, VkRenderTexture* tex);
+
     void SetVSync(VkRenderer* rn, VsyncMode mode);
 
     void UploadBuffers(const VkRenderer* rn, const inter::rendering::BufferUploadInfo& info);

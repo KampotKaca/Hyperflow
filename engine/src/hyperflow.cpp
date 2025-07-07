@@ -3,7 +3,6 @@
 #include "hrenderer.h"
 #include "htime.h"
 #include "hinternal.h"
-#include "hinternal.h"
 
 namespace hf
 {
@@ -37,7 +36,7 @@ namespace hf
 
 			inter::HF.lifecycleCallbacks = engineData.lifecycleCallbacks;
 			inter::HF.updateType = engineData.updateType;
-			inter::HF.globalUniformBindingInfo = engineData.globalUniformBindingInfo;
+			inter::HF.internalResourcesFormat = engineData.internalResourcesFormat;
 			inter::HF.appTitle = engineData.appTitle;
 
 			inter::HF.mainWindow = Create(engineData.windowData, nullptr);
@@ -108,4 +107,9 @@ namespace hf
 	const std::string& GetApplicationTitle() { return inter::HF.appTitle; }
 
 	void Terminate() { inter::HF.isRunning = false; }
+
+    void* GetEditorApiHandles()
+	{
+	    return inter::HF.renderingApi.api.GetEditorInfo();
+	}
 }

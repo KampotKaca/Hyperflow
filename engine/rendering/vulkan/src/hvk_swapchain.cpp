@@ -50,7 +50,7 @@ namespace hf
             if (maxImageCount > 0 && imageCount > maxImageCount) imageCount = maxImageCount;
 
             auto& transferData = GRAPHICS_DATA.device.transferData;
-            VkSwapchainCreateInfoKHR createInfo
+            const VkSwapchainCreateInfoKHR createInfo
             {
                 .sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR,
                 .surface = surface,
@@ -147,11 +147,9 @@ namespace hf
         rn->frameBufferChanged = false;
         WaitForDevice();
 
-        DestroySwapchainFrameBuffers(rn);
         CreateSwapchain(rn->swapchain.surface, rn->targetSize, rn->vSyncMode, rn->swapchain);
         SetupViewportAndScissor(rn);
-        RebindRendererToAllPasses(rn);
-        CreateSwapchainFrameBuffers(rn);
+        if (rn->renderTex) ResizeRenderTexture(rn->renderTex, rn->targetSize);
     }
 
     void TryRecreateSwapchain(VkRenderer* rn)

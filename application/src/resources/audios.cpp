@@ -26,7 +26,7 @@ namespace app
                 }
             };
             APP_AUDIOS.background_music = hf::Create(info);
-            hf::Play(APP_AUDIOS.background_music);
+            // hf::Play(APP_AUDIOS.background_music);
         }
     }
 }
