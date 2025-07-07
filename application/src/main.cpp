@@ -1,6 +1,7 @@
 #include "hyperflow.h"
 #include "application.h"
 #include "resources.h"
+#include "../appconfig.h"
 
 static void __attribute__((constructor)) global_init()
 {

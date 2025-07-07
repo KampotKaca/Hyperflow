@@ -2,6 +2,7 @@
 #include "resources/bufferattributes.h"
 #include "resources/shadersetups.h"
 #include "resources/rendertextures.h"
+#include "../appconfig.h"
 
 namespace app
 {

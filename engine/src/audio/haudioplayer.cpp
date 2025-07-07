@@ -1,5 +1,6 @@
 #include "audio/haudioplayer.h"
 #include "haudiointernal.h"
+#include "hinternal.h"
 
 namespace hf
 {

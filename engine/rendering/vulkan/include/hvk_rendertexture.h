@@ -2,6 +2,7 @@
 #define HVK_RENDERTEXTURE_H
 
 #include "hvk_shared.h"
+#include "hvk_texture.h"
 
 namespace hf
 {
