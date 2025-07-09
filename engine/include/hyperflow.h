@@ -123,6 +123,8 @@ namespace hf
 	uvec2 GetSize(const Ref<Renderer>& rn);
 	void Resize(const Ref<Renderer>& rn, uvec2 size);
 
+    //region Draw Process
+    void Push_EditorDrawCallback(const Ref<Renderer>& rn, void (*callback)(const Ref<Renderer>&, void*));
 	void Upload_Buffer(const Ref<Renderer>& rn, const BufferUploadInfo& info);
 	void Upload_Material(const Ref<Renderer>& rn, const Ref<Material>& material);
 
@@ -164,6 +166,7 @@ namespace hf
 	{
 		DrawSet_PushConstant(rn, &data, sizeof(T));
 	}
+    //endregion
 
 	uint16_t GetBufferIndex(const Ref<Material>& mat);
 

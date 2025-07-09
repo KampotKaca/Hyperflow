@@ -67,7 +67,7 @@ namespace hf
             };
 
             SetOperations(attachment.loadOp, attachment.storeOp, attachmentInfo.lsOperation);
-            colorFormats[info.colorAttachmentCount] = VULKAN_API_COLOR_FORMAT;
+            colorFormats[info.colorAttachmentCount] = (VkFormat)VULKAN_API_COLOR_FORMAT;
         }
 
         //Depth Attachment

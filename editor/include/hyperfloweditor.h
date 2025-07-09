@@ -17,6 +17,7 @@ namespace hf
 
     void EditorBeginFrame();
     void EditorEndFrame();
+    void EditorDraw(void* cmd);
 }
 
 #endif //HHYPERFLOWEDITOR_H

@@ -13,11 +13,12 @@ namespace hf
     //------------------------------------------------------------------------------------
 
     VkRenderer::VkRenderer(const inter::rendering::RendererInstanceCreationInfo& info)
-        : windowHandle(info.handle), targetSize(info.size), vSyncMode(info.vSyncMode)
+        : shutdownCallback(info.shutdownCallback), windowHandle(info.handle), targetSize(info.size), vSyncMode(info.vSyncMode)
     {
         if (!GRAPHICS_DATA.deviceIsLoaded) LoadDevice(windowHandle, &swapchain.surface);
         else VK_HANDLE_EXCEPT((VkResult)GRAPHICS_DATA.platform.createVulkanSurfaceFunc(windowHandle, GRAPHICS_DATA.instance, &swapchain.surface));
 
+        if (info.initCallback) info.initCallback();
         CreateSwapchain(swapchain.surface, targetSize, vSyncMode,  swapchain);
         SetupViewportAndScissor(this);
 
@@ -37,6 +38,8 @@ namespace hf
 
     VkRenderer::~VkRenderer()
     {
+        if (shutdownCallback) shutdownCallback();
+
         for (uint32_t i = 0; i < swapchain.images.size(); ++i)
         {
             auto& image = swapchain.images[i];

@@ -217,8 +217,6 @@ namespace hf
             VK_HANDLE_EXCEPT(err);
         };
 
-        GRAPHICS_DATA.editorInfo->commandBuffer = GRAPHICS_DATA.graphicsPool.buffers[0];
-
         return GRAPHICS_DATA.editorInfo;
     }
 

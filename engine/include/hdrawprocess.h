@@ -108,6 +108,8 @@ namespace hf
         StaticVector<uint8_t, RENDERING_MAX_UNIFORM_UPLOAD_BUFFER_SIZE> bufferUploads{};
         StaticVector<uint8_t, RENDERING_MAX_PUSH_CONSTANT_UPLOAD_BUFFER_SIZE> pushConstantUploads{};
         StaticVector<BufferUploadPacketInfo, RENDERING_MAX_UNIFORM_UPLOAD_COUNT> bufferUploadPackets{};
+
+        void (*onEditorDrawCallback)(const Ref<Renderer>& rn, void* cmd){};
     };
 
     struct RenderPacketDrawProcess

@@ -15,6 +15,8 @@ target_precompile_headers(${PROJECT_NAME}
 )
 set_target_properties(${PROJECT_NAME} PROPERTIES UNITY_BUILD ON)
 
+find_package(Vulkan REQUIRED)
+
 target_link_libraries(${PROJECT_NAME}
         PUBLIC
         Hyperflow_Engine
@@ -26,12 +28,15 @@ target_link_libraries(${PROJECT_NAME}
         components
         PRIVATE
         imgui
+        Vulkan::Vulkan
+        glfw
 )
 
 target_include_directories(${PROJECT_NAME}
         PUBLIC
         src/
         include/
-        PRIVATE
-        external/stb/include
+        external/ImGui/
+        ../engine/external/glfw/include
+        ${Vulkan_INCLUDE_DIRS}
 )

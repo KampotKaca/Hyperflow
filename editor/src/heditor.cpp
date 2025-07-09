@@ -1,7 +1,12 @@
 #include "hyperfloweditor.h"
 #include "imgui.h"
-#include "imgui_impl_vulkan.h"
-#include "imgui_impl_glfw.h"
+#include "backends/imgui_impl_vulkan.h"
+#include "backends/imgui_impl_glfw.h"
+#include <vulkan/vulkan.h>
+#include <GLFW/glfw3.h>
+
+#include "hinternal.h"
+#include "hshared.h"
 
 namespace hf
 {
@@ -15,19 +20,38 @@ namespace hf
         VkQueue queue{};
         VkDescriptorPool descriptorPool{};
         void (*CheckVkResultFn)(VkResult err){};
-
-        VkCommandBuffer commandBuffer{};
     };
+
+    struct EditorRenderer
+    {
+        struct CommandBuffer
+        {
+            std::vector<ImDrawVert> vertices;
+            std::vector<ImDrawIdx> indices;
+            std::vector<ImDrawCmd> commands;
+            ImDrawData drawData;
+        };
+
+        std::array<CommandBuffer, 2> commandBuffers;
+        std::atomic<size_t> currentBuffer{0};
+        std::mutex bufferMutex;
+        ImGuiContext* context;
+    };
+
+    static EditorRenderer EDITOR_RENDERER{};
 
     static void SetStyle();
     static void SetDarkThemeColors();
+    static void CaptureDrawData(ImDrawData* source, EditorRenderer::CommandBuffer& target);
 
-    static VkCommandBuffer drawEndCommand{};
+    static RenderApiInfo API_INFO;
 
     void LoadEditor(const EditorInfo& info)
     {
         IMGUI_CHECKVERSION();
-        ImGui::CreateContext();
+
+        EDITOR_RENDERER.context = ImGui::CreateContext();
+        ImGui::SetCurrentContext(EDITOR_RENDERER.context);
 
         ImGuiIO &io = ImGui::GetIO();
         io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard |
@@ -42,42 +66,86 @@ namespace hf
 
         ImGui_ImplGlfw_InitForVulkan((GLFWwindow*)info.windowHandle, true);
 
-        // auto vkApi = *(RenderApiInfo*)info.renderApiHandles;
-        // auto format = VK_FORMAT_B8G8R8A8_SRGB;
-        // ImGui_ImplVulkan_InitInfo initInfo
-        // {
-        //     .ApiVersion = vkApi.version,
-        //     .Instance = vkApi.instance,
-        //     .PhysicalDevice = vkApi.physicalDevice,
-        //     .Device = vkApi.device,
-        //     .QueueFamily = vkApi.queueFamily,
-        //     .Queue = vkApi.queue,
-        //     .DescriptorPool = vkApi.descriptorPool,
-        //     .MinImageCount = 2,
-        //     .ImageCount = 2,
-        //     .MSAASamples = (VkSampleCountFlagBits)info.multisampleMode,
-        //     .PipelineCache = VK_NULL_HANDLE,
-        //     .UseDynamicRendering = true,
-        //     .PipelineRenderingCreateInfo =
-        //     {
-        //         .sType = VK_STRUCTURE_TYPE_PIPELINE_RENDERING_CREATE_INFO_KHR,
-        //         .pNext = nullptr,
-        //         .colorAttachmentCount = 1,
-        //         .pColorAttachmentFormats = &format,
-        //         .depthAttachmentFormat = VK_FORMAT_UNDEFINED,
-        //         .stencilAttachmentFormat = VK_FORMAT_UNDEFINED
-        //     },
-        //     .CheckVkResultFn = vkApi.CheckVkResultFn,
-        //     .MinAllocationSize = 1024 * 1024,
-        // };
-        // ImGui_ImplVulkan_Init(&initInfo);
+        API_INFO = *(RenderApiInfo*)info.renderApiHandles;
+        auto format = VK_FORMAT_R8G8B8A8_UNORM;
+        ImGui_ImplVulkan_InitInfo initInfo
+        {
+            .ApiVersion = API_INFO.version,
+            .Instance = API_INFO.instance,
+            .PhysicalDevice = API_INFO.physicalDevice,
+            .Device = API_INFO.device,
+            .QueueFamily = API_INFO.queueFamily,
+            .Queue = API_INFO.queue,
+            .DescriptorPool = API_INFO.descriptorPool,
+            .MinImageCount = 2,
+            .ImageCount = 2,
+            .MSAASamples = (VkSampleCountFlagBits)info.multisampleMode,
+            .PipelineCache = VK_NULL_HANDLE,
+            .UseDynamicRendering = true,
+            .PipelineRenderingCreateInfo =
+            {
+                .sType = VK_STRUCTURE_TYPE_PIPELINE_RENDERING_CREATE_INFO_KHR,
+                .pNext = nullptr,
+                .colorAttachmentCount = 1,
+                .pColorAttachmentFormats = &format,
+                .depthAttachmentFormat = VK_FORMAT_UNDEFINED,
+                .stencilAttachmentFormat = VK_FORMAT_UNDEFINED
+            },
+            .CheckVkResultFn = API_INFO.CheckVkResultFn,
+            .MinAllocationSize = 1024 * 1024,
+        };
+        ImGui_ImplVulkan_Init(&initInfo);
     }
 
     void UnloadEditor()
     {
-        // ImGui_ImplVulkan_Shutdown();
+        ImGui_ImplVulkan_Shutdown();
         ImGui_ImplGlfw_Shutdown();
         ImGui::DestroyContext();
+    }
+
+    void EditorBeginFrame()
+    {
+        ImGui::SetCurrentContext(EDITOR_RENDERER.context);
+        ImGui_ImplVulkan_NewFrame();
+        ImGui_ImplGlfw_NewFrame();
+        ImGui::NewFrame();
+    }
+
+    void EditorEndFrame()
+    {
+        ImGui::Render();
+        size_t currentIdx = EDITOR_RENDERER.currentBuffer.load();
+
+        {
+            auto& buffer = EDITOR_RENDERER.commandBuffers[currentIdx];
+            ImDrawData* drawData = ImGui::GetDrawData();
+
+            std::lock_guard lock(EDITOR_RENDERER.bufferMutex);
+            std::lock_guard lockGuard(inter::HF.drawLock);
+
+            GLFWwindow* backup_current_context = glfwGetCurrentContext();
+            ImGui::UpdatePlatformWindows();
+            ImGui::RenderPlatformWindowsDefault();
+            glfwMakeContextCurrent(backup_current_context);
+
+            CaptureDrawData(drawData, buffer);
+        }
+
+        EDITOR_RENDERER.currentBuffer.store((currentIdx + 1) % 2);
+    }
+
+    void EditorDraw(void* cmd)
+    {
+        size_t renderIdx = (EDITOR_RENDERER.currentBuffer.load() + 1) % 2;
+        auto& buffer = EDITOR_RENDERER.commandBuffers[renderIdx];
+
+        std::lock_guard lock(EDITOR_RENDERER.bufferMutex);
+        const bool main_is_minimized = (buffer.drawData.DisplaySize.x <= 0.0f ||
+                                        buffer.drawData.DisplaySize.y <= 0.0f);
+
+        if (!main_is_minimized)
+            ImGui_ImplVulkan_RenderDrawData(&buffer.drawData, (VkCommandBuffer)cmd);
     }
 
     void SetStyle()
@@ -128,5 +196,39 @@ namespace hf
         colors[ImGuiCol_TitleBg] = ImVec4{ 0.15f, 0.1505f, 0.151f, 1.0f };
         colors[ImGuiCol_TitleBgActive] = ImVec4{ 0.15f, 0.1505f, 0.151f, 1.0f };
         colors[ImGuiCol_TitleBgCollapsed] = ImVec4{ 0.15f, 0.1505f, 0.151f, 1.0f };
+    }
+
+    void CaptureDrawData(ImDrawData* source, EditorRenderer::CommandBuffer& target)
+    {
+        target.vertices.clear();
+        target.indices.clear();
+        target.commands.clear();
+
+        for (int n = 0; n < source->CmdListsCount; n++)
+        {
+            const ImDrawList* cmdList = source->CmdLists[n];
+
+            size_t vertexOffset = target.vertices.size();
+            size_t indexOffset = target.indices.size();
+
+            target.vertices.insert(
+                target.vertices.end(),
+                cmdList->VtxBuffer.Data,
+                cmdList->VtxBuffer.Data + cmdList->VtxBuffer.Size
+            );
+
+            target.indices.insert(
+                target.indices.end(),
+                cmdList->IdxBuffer.Data,
+                cmdList->IdxBuffer.Data + cmdList->IdxBuffer.Size
+            );
+
+            for (const ImDrawCmd& cmd : cmdList->CmdBuffer)
+            {
+                target.commands.push_back(cmd);
+                target.commands.back().IdxOffset += indexOffset;
+                target.commands.back().VtxOffset += vertexOffset;
+            }
+        }
     }
 }

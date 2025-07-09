@@ -187,6 +187,8 @@ namespace hf
                 createInfo.handle = rn->window->handle;
             }
 
+            createInfo.initCallback = rn->eventInfo.onRendererInitCallback;
+            createInfo.shutdownCallback = rn->eventInfo.onRendererShutdownCallback;
             rn->handle = HF.renderingApi.api.CreateInstance(createInfo);
         }
 

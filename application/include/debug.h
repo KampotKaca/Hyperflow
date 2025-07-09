@@ -14,6 +14,9 @@ namespace app
 
     extern AppDebug APP_DEBUG;
 
+    void DebugRendererInit();
+    void DebugRendererShutdown();
+
     void DebugDefine();
     void DebugLoad();
     void DebugStart();

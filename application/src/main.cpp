@@ -51,6 +51,8 @@ int main()
 			.vsyncMode			 = hf::VsyncMode::Relaxed,
 			.rnEventInfo =
 			{
+				.onRendererInitCallback 	= app::AppRendererInit,
+				.onRendererShutdownCallback = app::AppRendererShutdown,
 				.onPreRenderCallback 	= app::AppPreRender,
 				.onRenderCallback    	= app::AppRender,
 			},

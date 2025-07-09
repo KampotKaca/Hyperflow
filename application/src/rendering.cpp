@@ -6,6 +6,16 @@
 
 namespace app
 {
+    void AppRendererInit()
+    {
+        DebugRendererInit();
+    }
+
+    void AppRendererShutdown()
+    {
+        DebugRendererShutdown();
+    }
+
     void AppPreRender(const hf::Ref<hf::Renderer>& rn)
     {
         DebugPreRender(rn);

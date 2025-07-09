@@ -212,6 +212,11 @@ namespace hf::inter::rendering
 
     }
 
+    void* GetCmd(void* rn)
+    {
+        return nullptr;
+    }
+
     void Draw(void* rn, const DrawCallInfo& info)
     {
         auto renderer = (D3DRenderer*)rn;
@@ -305,6 +310,7 @@ namespace hf::inter::rendering
 
             .RegisterFrameBufferChange  = RegisterFrameBufferChange,
             .SetVSync                   = SetVSync,
+            .GetCmd                     = GetCmd,
 
             .GetEditorInfo              = GetEditorInfo,
         };

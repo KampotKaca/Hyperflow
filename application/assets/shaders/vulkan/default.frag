@@ -22,9 +22,9 @@ void main()
 {
     vec4 color = texture(viking_room, o_TexCoord) * vec4(o_Color, 1.0f);
     PhongLightInfo lightInfo;
-    lightInfo.ambient = 0.2f;
+    lightInfo.ambient = 1.2f;
     lightInfo.smoothness = PUSH_CONSTANT.phongData.w;
     lightInfo.specularColor = PUSH_CONSTANT.phongData.xyz;
 
-    outColor = vec4(GetPhongLighting(color.xyz, o_ViewPosition.xyz, o_ViewNormal, lightInfo), color.w);
+    outColor = FinalizeColor(vec4(GetPhongLighting(color.xyz, o_ViewPosition.xyz, o_ViewNormal, lightInfo), color.w));
 }

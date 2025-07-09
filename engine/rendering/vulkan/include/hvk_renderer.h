@@ -12,6 +12,7 @@ namespace hf
         explicit VkRenderer(const inter::rendering::RendererInstanceCreationInfo& info);
         ~VkRenderer();
 
+        void (*shutdownCallback)();
         void* windowHandle = nullptr;
         GraphicsSwapChain swapchain{};
         VkViewport viewport{};

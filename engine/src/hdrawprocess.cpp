@@ -10,6 +10,24 @@
 
 namespace hf
 {
+    void Push_EditorDrawCallback(const Ref<Renderer>& rn, void (*callback)(const Ref<Renderer>&, void*))
+    {
+        try
+        {
+#if DEBUG
+            if (!rn->isDrawing)
+                throw GENERIC_EXCEPT("[Hyperflow]", "Cannot push editor draw util drawing process starts");
+#endif
+
+            rn->currentDraw.packet.onEditorDrawCallback = callback;
+        }
+        catch (...)
+        {
+            LOG_ERROR("%s", "Unable to push editor draw!");
+            throw;
+        }
+    }
+
     void Upload_Buffer(const Ref<Renderer>& rn, const BufferUploadInfo& info)
     {
         try
@@ -560,6 +578,10 @@ namespace hf
 
             if(HF.renderingApi.api.GetReadyForRendering(rn->handle))
             {
+#if DEBUG
+                std::lock_guard lock(HF.drawLock);
+#endif
+
                 HF.renderingApi.api.StartFrame(rn->handle);
                 RendererDraw_i(rn, packet);
                 HF.renderingApi.api.EndFrame(rn->handle);
@@ -699,6 +721,9 @@ namespace hf
                     }
                 }
             }
+
+            if (packet.onEditorDrawCallback)
+                packet.onEditorDrawCallback(rn, HF.renderingApi.api.GetCmd(handle));
             HF.renderingApi.api.EndRendering(handle);
         }
 

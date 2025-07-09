@@ -354,6 +354,11 @@ namespace hf::inter::rendering
         SetVSync((VkRenderer*)rn, mode);
     }
 
+    void* GetCmd(void* rn)
+    {
+        return ((VkRenderer*)rn)->currentCommand;
+    }
+
     void* GetEditorInfo()
     {
         return LoadEditorInfo();
@@ -445,6 +450,7 @@ namespace hf::inter::rendering
 
             .RegisterFrameBufferChange  = RegisterFrameBufferChange,
             .SetVSync                   = SetVSync,
+            .GetCmd                     = GetCmd,
 
             .GetEditorInfo              = GetEditorInfo,
         };

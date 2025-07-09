@@ -42,7 +42,7 @@ namespace hf
         default: throw GENERIC_EXCEPT("[Vulkan]", "Unsupported vsync mode!");
         }
 
-        if (GetAvailableSurfaceDetails(scs, VULKAN_API_COLOR_FORMAT,
+        if (GetAvailableSurfaceDetails(scs, (VkFormat)VULKAN_API_COLOR_FORMAT,
             targetPresentMode, defaultPresentMode, targetSize, &details))
         {
             uint32_t imageCount = scs.capabilities.minImageCount + 1;

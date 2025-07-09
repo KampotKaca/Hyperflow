@@ -111,6 +111,8 @@ namespace hf::inter::rendering
         void* handle{};
         uvec2 size{};
         VsyncMode vSyncMode = VsyncMode::NoSync;
+        void (*initCallback)();
+        void (*shutdownCallback)();
     };
 
     struct TextureCreationInfo
@@ -282,6 +284,7 @@ namespace hf::inter::rendering
 
         void (*RegisterFrameBufferChange)(void* rn, uvec2 newSize);
         void (*SetVSync)(void* rn, VsyncMode mode);
+        void* (*GetCmd)(void* rn);
 
         void* (*GetEditorInfo)();
     };

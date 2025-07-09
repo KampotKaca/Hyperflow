@@ -29,6 +29,25 @@ namespace app
         "N5",
     };
 
+    void DebugRendererInit()
+    {
+#if DEBUG
+        hf::EditorInfo editorInfo
+        {
+            .windowHandle = GetHandle(hf::GetMainWindow()),
+        };
+        editorInfo.renderApiHandles = hf::GetEditorApiHandles();
+        hf::LoadEditor(editorInfo);
+#endif
+    }
+
+    void DebugRendererShutdown()
+    {
+#if DEBUG
+        hf::UnloadEditor();
+#endif
+    }
+
     void DebugDefine()
     {
 
@@ -41,15 +60,6 @@ namespace app
 
     void DebugStart()
     {
-#if DEBUG
-        hf::EditorInfo editorInfo
-        {
-            .windowHandle = GetHandle(hf::GetMainWindow()),
-        };
-        editorInfo.renderApiHandles = hf::GetEditorApiHandles();
-        hf::LoadEditor(editorInfo);
-#endif
-
         APP_DEBUG.camera.camera3D.position = {0, 0.5, -2};
         APP_DEBUG.camera.camera3D.direction = {0, 0, 1};
         DEBUG_INFO.wn = hf::GetMainWindow();
@@ -148,9 +158,7 @@ namespace app
 
     void DebugQuit()
     {
-#if DEBUG
-        hf::UnloadEditor();
-#endif
+
     }
 
     void DebugPreRender(const hf::Ref<hf::Renderer>& rn)
@@ -163,8 +171,23 @@ namespace app
 
     }
 
+#if DEBUG
+    void GuiDraw(const hf::Ref<hf::Renderer>& rn, void* cmd)
+    {
+        void EditorDraw(void* cmd);
+    }
+#endif
+
     void DebugRender(const hf::Ref<hf::Renderer>& rn)
     {
         if (APP_DEBUG.drawGridLines) hf::gridlines::Draw(rn, APP_DEBUG.gridLinesInfo);
+
+#if DEBUG
+
+        hf::EditorBeginFrame();
+        hf::EditorEndFrame();
+
+        hf::Push_EditorDrawCallback(rn, GuiDraw);
+#endif
     }
 }

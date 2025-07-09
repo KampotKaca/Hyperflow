@@ -21,7 +21,10 @@ namespace app
 	void AppUpdate();
 	void AppQuit();
 
-	void AppPreRender(const hf::Ref<hf::Renderer>& rn);
+	void AppRendererInit();
+	void AppRendererShutdown();
+
+    void AppPreRender(const hf::Ref<hf::Renderer>& rn);
 	void AppRender(const hf::Ref<hf::Renderer>& rn);
 }
 

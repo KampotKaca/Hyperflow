@@ -365,7 +365,7 @@ namespace hf
     {
         MultisampleMode sampleMode = MultisampleMode::MSAA_1X;
         uint32_t colorFormatCount = 1;
-        TextureFormat colorFormats[MAX_COLOR_ATTACHMENTS] = { TextureFormat::B8G8R8A8_Srgb };
+        TextureFormat colorFormats[MAX_COLOR_ATTACHMENTS] = { VULKAN_API_COLOR_FORMAT };
         TextureFormat depthFormat = TextureFormat::D32_Sfloat;
         TextureFormat stencilFormat = TextureFormat::Undefined;
     };
@@ -796,6 +796,9 @@ namespace hf
 
 	struct RendererEventInfo
 	{
+		void (*onRendererInitCallback)(){};
+		void (*onRendererShutdownCallback)(){};
+
 		void (*onPreRenderCallback)(const Ref<Renderer>&){};
 		void (*onRenderCallback)(const Ref<Renderer>&){};
 	};
