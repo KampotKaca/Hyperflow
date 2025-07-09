@@ -15,6 +15,11 @@ namespace hf
 		{
 			std::thread thread;
 			std::mutex threadLock{};
+
+#if DEBUG
+            std::mutex drawLock{};
+#endif
+
 			std::condition_variable renderCondition;
 			uvec2 size{};
 

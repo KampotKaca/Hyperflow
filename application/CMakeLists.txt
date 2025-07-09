@@ -22,6 +22,7 @@ set_target_properties(${PROJECT_NAME} PROPERTIES UNITY_BUILD ON)
 target_include_directories(${PROJECT_NAME}
         PUBLIC
         include/
+        ../editor/include
         PRIVATE
 )
 
@@ -35,11 +36,6 @@ if(CMAKE_BUILD_TYPE STREQUAL "Debug")
 target_link_libraries(${PROJECT_NAME}
         PRIVATE
         Hyperflow_Editor
-)
-
-target_include_directories(${PROJECT_NAME}
-        PRIVATE
-        "../editor/include"
 )
 endif ()
 

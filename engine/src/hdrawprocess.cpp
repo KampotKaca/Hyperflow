@@ -10,6 +10,8 @@
 
 namespace hf
 {
+#if DEBUG
+
     void Push_EditorDrawCallback(const Ref<Renderer>& rn, void (*callback)(const Ref<Renderer>&, void*))
     {
         try
@@ -27,6 +29,8 @@ namespace hf
             throw;
         }
     }
+
+#endif
 
     void Upload_Buffer(const Ref<Renderer>& rn, const BufferUploadInfo& info)
     {
@@ -579,9 +583,8 @@ namespace hf
             if(HF.renderingApi.api.GetReadyForRendering(rn->handle))
             {
 #if DEBUG
-                std::lock_guard lock(HF.drawLock);
+                std::lock_guard lock(tInfo.drawLock);
 #endif
-
                 HF.renderingApi.api.StartFrame(rn->handle);
                 RendererDraw_i(rn, packet);
                 HF.renderingApi.api.EndFrame(rn->handle);
@@ -722,8 +725,11 @@ namespace hf
                 }
             }
 
+#if DEBUG
             if (packet.onEditorDrawCallback)
                 packet.onEditorDrawCallback(rn, HF.renderingApi.api.GetCmd(handle));
+#endif
+
             HF.renderingApi.api.EndRendering(handle);
         }
 

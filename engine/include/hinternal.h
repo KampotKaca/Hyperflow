@@ -120,10 +120,6 @@ namespace hf::inter
         ResourcesMarkedForDeletion deletedResources{};
         StaticResources staticResources{};
         AudioResources audioResources{};
-
-#if DEBUG
-        std::mutex drawLock{};
-#endif
     };
 
     extern Hyperflow HF;

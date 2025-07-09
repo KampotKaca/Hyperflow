@@ -3,9 +3,7 @@
 #include "resources.h"
 #include <hyaml.h>
 
-#if DEBUG
 #include "hyperfloweditor.h"
-#endif
 
 namespace app
 {
@@ -31,21 +29,17 @@ namespace app
 
     void DebugRendererInit()
     {
-#if DEBUG
-        hf::EditorInfo editorInfo
+        hf::editor::LoadInfo editorInfo
         {
             .windowHandle = GetHandle(hf::GetMainWindow()),
         };
         editorInfo.renderApiHandles = hf::GetEditorApiHandles();
-        hf::LoadEditor(editorInfo);
-#endif
+        hf::editor::Load(editorInfo);
     }
 
     void DebugRendererShutdown()
     {
-#if DEBUG
-        hf::UnloadEditor();
-#endif
+        hf::editor::Unload();
     }
 
     void DebugDefine()
@@ -171,23 +165,29 @@ namespace app
 
     }
 
-#if DEBUG
     void GuiDraw(const hf::Ref<hf::Renderer>& rn, void* cmd)
     {
         void EditorDraw(void* cmd);
     }
-#endif
 
     void DebugRender(const hf::Ref<hf::Renderer>& rn)
     {
         if (APP_DEBUG.drawGridLines) hf::gridlines::Draw(rn, APP_DEBUG.gridLinesInfo);
 
-#if DEBUG
+        hf::editor::StartFrame();
 
-        hf::EditorBeginFrame();
-        hf::EditorEndFrame();
+        if (hf::editor::StartWindow("Transformer", hf::editor::WindowCreationInfo
+            {
+                .size = hf::ivec2{ 200, 200 },
+                .position = hf::ivec2 { 0, 0 }
+            }))
+        {
+            hf::editor::EndWindow();
+        }
+
+
+        hf::editor::EndFrame();
 
         hf::Push_EditorDrawCallback(rn, GuiDraw);
-#endif
     }
 }

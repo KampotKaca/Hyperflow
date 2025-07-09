@@ -124,8 +124,13 @@ namespace hf
 	void Resize(const Ref<Renderer>& rn, uvec2 size);
 
     //region Draw Process
+#if DEBUG
     void Push_EditorDrawCallback(const Ref<Renderer>& rn, void (*callback)(const Ref<Renderer>&, void*));
-	void Upload_Buffer(const Ref<Renderer>& rn, const BufferUploadInfo& info);
+#else
+    inline void Push_EditorDrawCallback(const Ref<Renderer>& rn, void (*callback)(const Ref<Renderer>&, void*)){}
+#endif
+
+    void Upload_Buffer(const Ref<Renderer>& rn, const BufferUploadInfo& info);
 	void Upload_Material(const Ref<Renderer>& rn, const Ref<Material>& material);
 
 	void UploadStart_TexturePack(const Ref<Renderer>& rn, const Ref<TexturePack>& texPack);

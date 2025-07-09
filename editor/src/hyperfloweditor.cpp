@@ -1,14 +1,8 @@
+#include "heditorinternal.h"
 #include "hyperfloweditor.h"
-#include "imgui.h"
-#include "backends/imgui_impl_vulkan.h"
-#include "backends/imgui_impl_glfw.h"
-#include <vulkan/vulkan.h>
-#include <GLFW/glfw3.h>
+#include "hyperflow.h"
 
-#include "hinternal.h"
-#include "hshared.h"
-
-namespace hf
+namespace hf::editor
 {
     struct RenderApiInfo
     {
@@ -46,7 +40,7 @@ namespace hf
 
     static RenderApiInfo API_INFO;
 
-    void LoadEditor(const EditorInfo& info)
+    void Load(const LoadInfo& info)
     {
         IMGUI_CHECKVERSION();
 
@@ -97,14 +91,14 @@ namespace hf
         ImGui_ImplVulkan_Init(&initInfo);
     }
 
-    void UnloadEditor()
+    void Unload()
     {
         ImGui_ImplVulkan_Shutdown();
         ImGui_ImplGlfw_Shutdown();
         ImGui::DestroyContext();
     }
 
-    void EditorBeginFrame()
+    void StartFrame()
     {
         ImGui::SetCurrentContext(EDITOR_RENDERER.context);
         ImGui_ImplVulkan_NewFrame();
@@ -112,7 +106,7 @@ namespace hf
         ImGui::NewFrame();
     }
 
-    void EditorEndFrame()
+    void EndFrame()
     {
         ImGui::Render();
         size_t currentIdx = EDITOR_RENDERER.currentBuffer.load();
@@ -122,12 +116,10 @@ namespace hf
             ImDrawData* drawData = ImGui::GetDrawData();
 
             std::lock_guard lock(EDITOR_RENDERER.bufferMutex);
-            std::lock_guard lockGuard(inter::HF.drawLock);
+            std::lock_guard lockGuard(GetRenderer(hf::GetMainWindow())->threadInfo.drawLock);
 
-            GLFWwindow* backup_current_context = glfwGetCurrentContext();
             ImGui::UpdatePlatformWindows();
             ImGui::RenderPlatformWindowsDefault();
-            glfwMakeContextCurrent(backup_current_context);
 
             CaptureDrawData(drawData, buffer);
         }
@@ -135,7 +127,7 @@ namespace hf
         EDITOR_RENDERER.currentBuffer.store((currentIdx + 1) % 2);
     }
 
-    void EditorDraw(void* cmd)
+    void Draw(void* cmd)
     {
         size_t renderIdx = (EDITOR_RENDERER.currentBuffer.load() + 1) % 2;
         auto& buffer = EDITOR_RENDERER.commandBuffers[renderIdx];
