@@ -19,9 +19,11 @@ namespace hf::editor
         NoBackground = 1 << 7, NoSavedSettings = 1 << 8, NoMouseInputs = 1 << 9,
         MenuBar  = 1 << 10, HorizontalScrollbar = 1 << 11, NoFocusOnAppearing = 1 << 12,
         NoBringToFrontOnFocus = 1 << 13, AlwaysVerticalScrollbar = 1 << 14,
-        AlwaysHorizontalScrollbar = 1<< 15, NoNavInputs = 1 << 16,
+        AlwaysHorizontalScrollbar = 1 << 15, NoNavInputs = 1 << 16,
         NoNavFocus = 1 << 17, UnsavedDocument = 1 << 18,
     };
+
+    enum class Condition { None = 0, Always = 1 << 0, Once = 1 << 1, FirstUseEver = 1 << 2, Appearing = 1 << 3 };
 
 #if DEBUG
 
@@ -32,16 +34,11 @@ namespace hf::editor
     void EndFrame();
     void Draw(void* cmd);
 
-    struct WindowCreationInfo
-    {
-        bool* pOpen{};
-        WindowFlags flags = WindowFlags::None;
-        std::optional<uvec2> size{};
-        std::optional<uvec2> position{};
-    };
-
-    bool StartWindow(const char* name = "New Window", const WindowCreationInfo& info = {});
+    bool StartWindow(const char* name = "New Window", bool* isOpen = nullptr, WindowFlags flags = WindowFlags::None);
     void EndWindow();
+
+    void SetNextWindowSize(vec2 size, Condition cond = Condition::None);
+    void SetNextWindowPos(vec2 pos, Condition cond = Condition::None);
 
 #else
 
@@ -52,8 +49,11 @@ namespace hf::editor
     inline void EndFrame(){}
     inline void Draw(void* cmd){}
 
-    bool StartWindow(const char* name = "New Window", const WindowCreationInfo& info = {}){}
-    void EndWindow(){}
+    bool Start(const WindowInfo& info){}
+    void End(){}
+
+    void SetNextWindowSize(vec2 size, Condition cond = Condition::None){}
+    void SetNextWindowPosition(vec2 pos, Condition cond = Condition::None){}
 
 #endif
 }

@@ -183,13 +183,13 @@ namespace hf::inter::rendering
 
     }
 
-    bool GetReadyForRendering(void* rn)
+    uvec2 GetReadyForRendering(void* rn, void** pTextures, uint32_t textureCount)
     {
         auto renderer = (D3DRenderer*)rn;
         return GetReadyForRendering(renderer);
     }
 
-    void StartFrame(void* rn)
+    void StartFrame(void* rn, uint32_t renderTextureCount)
     {
         auto renderer = (D3DRenderer*)rn;
         StartFrame(renderer);

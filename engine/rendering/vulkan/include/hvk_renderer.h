@@ -27,13 +27,17 @@ namespace hf
 
         VkPipelineLayout currentLayout{};
 
-        VkRenderTexture* renderTex{};
         std::vector<VkFrame> frames{};
         uint32_t currentFrame = 0;
         uint32_t imageIndex = UINT32_MAX;
         VsyncMode vSyncMode = VsyncMode::Relaxed;
         volatile bool frameBufferChanged = false;
         std::mutex frameSync{};
+
+        VkRenderTexture* prevRenderTexture{};
+        VkRenderTexture* currentRenderTexture{};
+        uint32_t targetRenderTextureCount = 0;
+        uint32_t currentRenderTextureCount = 0;
     };
 
     struct VkDrawInfo
@@ -55,11 +59,11 @@ namespace hf
     void SetupViewportAndScissor(VkRenderer* rn);
 
     void PresentSwapchain(VkRenderer* rn);
-    bool AcquireNextImage(VkRenderer* rn);
+    uvec2 AcquireNextImage(VkRenderer* rn, VkRenderTexture** pTextures, uint32_t textureCount);
     void DelayUntilPreviousFrameFinish(VkRenderer* rn);
 
-    void BeginRendering(const VkRenderer* rn, VkRenderTexture* tex);
-    void EndRendering(VkRenderer* rn, VkRenderTexture* tex);
+    void BeginRendering(const VkRenderer* rn);
+    void EndRendering(const VkRenderer* rn);
 
     void BeginCommandBuffer(VkRenderer* rn, VkCommandBuffer buffer);
     void EndCommandBuffer(VkRenderer* rn);
@@ -67,14 +71,12 @@ namespace hf
 
     void UploadViewportAndScissor(const VkRenderer* rn);
 
-    bool GetReadyForRendering(VkRenderer* rn);
+    uvec2 GetReadyForRendering(VkRenderer* rn, VkRenderTexture** pTextures, uint32_t textureCount);
     void StartFrame(VkRenderer* rn);
     void EndFrame(VkRenderer* rn);
     void Draw(const VkDrawInfo& info);
 
     void RegisterFrameBufferChange(VkRenderer* rn, uvec2 newSize);
-    void AttachRenderTexture(VkRenderer* rn, VkRenderTexture* tex);
-
     void SetVSync(VkRenderer* rn, VsyncMode mode);
 
     void UploadBuffers(const VkRenderer* rn, const inter::rendering::BufferUploadInfo& info);

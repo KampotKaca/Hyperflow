@@ -44,7 +44,7 @@ int main()
 			.iconFolderPath		 = "app/icons",
 			.state				 = hf::WindowState::Restored,
 			.eventFlags			 = hf::WindowEventFlags::Default,
-			.pointerState		 = hf::WindowPointerState::Disabled,
+			.pointerState		 = hf::WindowPointerState::Normal,
 			.style        		 = hf::WindowStyle::Default,
 			.position     		 = { 200, 200 },
 			.size         		 = { 920, 480 },

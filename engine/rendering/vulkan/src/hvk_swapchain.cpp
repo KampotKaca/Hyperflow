@@ -149,7 +149,6 @@ namespace hf
 
         CreateSwapchain(rn->swapchain.surface, rn->targetSize, rn->vSyncMode, rn->swapchain);
         SetupViewportAndScissor(rn);
-        if (rn->renderTex) ResizeRenderTexture(rn->renderTex, rn->targetSize);
     }
 
     void TryRecreateSwapchain(VkRenderer* rn)
@@ -179,16 +178,14 @@ namespace hf
         };
 
         auto result = vkQueuePresentKHR(GRAPHICS_DATA.device.logicalDevice.presentQueue, &presentInfo);
-        if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR)
-            LockedRecreateSwapchain(rn);
-        else if (result != VK_SUCCESS)
+        if (result != VK_SUCCESS && result != VK_ERROR_OUT_OF_DATE_KHR && result != VK_SUBOPTIMAL_KHR)
         {
             LOG_ERROR("Failed to present swapchain %i", rn->currentFrame);
             VK_HANDLE_EXCEPT(result);
         }
     }
 
-    bool AcquireNextImage(VkRenderer* rn)
+    uvec2 AcquireNextImage(VkRenderer* rn, VkRenderTexture** pTextures, uint32_t textureCount)
     {
         auto& device = GRAPHICS_DATA.device.logicalDevice.device;
         SubmitAllOperations();
@@ -201,18 +198,18 @@ namespace hf
                             rn->frames[rn->currentFrame].isImageAvailable, VK_NULL_HANDLE, &rn->imageIndex);
         if (result == VK_ERROR_OUT_OF_DATE_KHR)
         {
-            if (rn->targetSize.x == 0 || rn->targetSize.y == 0) return false;
+            if (rn->targetSize.x == 0 || rn->targetSize.y == 0) return { 0, 0 };
             LockedRecreateSwapchain(rn);
             tryCount++;
             if (tryCount < 144) goto tryAgain;
-            LOG_WARN("Recreating swapchain failed 144 times");
-            return false;
+            throw GENERIC_EXCEPT("[Vulkan]", "Unable to acquire image from swapchain!");
         }
 
         if (result != VK_SUCCESS && result != VK_SUBOPTIMAL_KHR)
             throw GENERIC_EXCEPT("[Vulkan]", "Unable to acquire image from swapchain!");
 
-        return true;
+        for (uint32_t i = 0; i < textureCount; i++) ResizeRenderTexture(pTextures[i], rn->targetSize);
+        return rn->targetSize;
     }
 
     void DelayUntilPreviousFrameFinish(VkRenderer* rn)

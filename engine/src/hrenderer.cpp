@@ -41,7 +41,6 @@ namespace hf
         if (rn->window != nullptr) throw GENERIC_EXCEPT("[Hyperflow]", "Cannot resize renderer connected to the window");
         rn->threadInfo.size = size;
         inter::HF.renderingApi.api.RegisterFrameBufferChange(rn->handle, size);
-        rn->attachedTexture->createInfo.size = size;
     }
 
     RenderingApiType GetApiType()     { return inter::HF.renderingApi.type; }
@@ -63,13 +62,6 @@ namespace hf
     {
         if (targetApi == RenderingApiType::None || targetApi == inter::HF.renderingApi.type) return false;
         return inter::platform::IsValidRenderingApi(targetApi);
-    }
-
-    void Attach(const Ref<Renderer>& rn, const Ref<RenderTexture>& texture)
-    {
-        rn->attachedTexture = texture;
-        texture->createInfo.size = rn->threadInfo.size;
-        inter::HF.renderingApi.api.AttachRenderTextureToRenderer(rn->handle, texture->handle);
     }
 
     namespace inter::rendering

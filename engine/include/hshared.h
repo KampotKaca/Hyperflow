@@ -640,7 +640,7 @@ namespace hf
 		LoadAndDontCare = 3, ClearAndDontCare = 4, DontCareAndDontCare = 5,
 	};
 
-	struct RenderSubpassColorAttachmentInfo
+	struct RenderTextureColorAttachmentInfo
 	{
 		//type of attachment layout color, depth, stencil etc.
 		TextureResultLayoutType layout = TextureResultLayoutType::Color;
@@ -650,7 +650,7 @@ namespace hf
 		vec4 clearColor = vec4(0.0f, 0.0f, 0.0f, 1.0f);
 	};
 
-	struct RenderSubpassDepthAttachmentInfo
+	struct RenderTextureDepthAttachmentInfo
 	{
 		//type of attachment layout color, depth, stencil etc.
 		TextureResultLayoutType layout = TextureResultLayoutType::DepthStencil;
@@ -661,7 +661,7 @@ namespace hf
 		uint8_t clearStencil = 0;
 	};
 
-	struct RenderSubpassPresentationAttachmentInfo
+	struct RenderTexturePresentationAttachmentInfo
 	{
 		LoadStoreOperationType lsOperation = LoadStoreOperationType::ClearAndStore;
 		LoadStoreOperationType lsStencilOperation = LoadStoreOperationType::DontCareAndDontCare;
@@ -701,13 +701,10 @@ namespace hf
     //So when passing dependencies use attachment indexes according to that rule.
     struct RenderTextureCreationInfo
     {
-        RenderSubpassColorAttachmentInfo pColorAttachments[MAX_COLOR_ATTACHMENTS - 1]{};
+        RenderTextureColorAttachmentInfo pColorAttachments[MAX_COLOR_ATTACHMENTS]{};
         uint32_t colorAttachmentCount = 0;
 
-        //Presentation attachment is just last color attachment, but to avoid boilerplate code it is another variable here
-        //since you probably need a color attachment in all the applications.
-        RenderSubpassPresentationAttachmentInfo presentationAttachment{};
-        std::optional<RenderSubpassDepthAttachmentInfo> depthAttachment{};
+        std::optional<RenderTextureDepthAttachmentInfo> depthAttachment{};
 
         MultisampleMode multisampleMode = MultisampleMode::MSAA_1X;
         uvec2 size{};

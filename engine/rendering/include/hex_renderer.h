@@ -225,7 +225,6 @@ namespace hf::inter::rendering
         //render texture
         void* (*CreateRenderTexture)(const RenderTextureCreationInfo& info);
         void (*DestroyRenderTexture)(void* tex);
-        void (*AttachRenderTextureToRenderer)(void* rn, void* tex);
 
         //texture pack
         void* (*CreateTexturePack)(const TexturePackCreationInfo& info);
@@ -272,14 +271,14 @@ namespace hf::inter::rendering
 
         //RenderingOperations
         void (*WaitForPreviousFrame)(void* rn);
-        bool (*GetReadyForRendering)(void* rn);
-        void (*StartFrame)(void* rn);
+        uvec2 (*GetReadyForRendering)(void* rn, void** pTextures, uint32_t textureCount);
+        void (*StartFrame)(void* rn, uint32_t renderTextureCount);
         void (*EndFrame)(void* rn);
         void (*Draw)(void* rn, const DrawCallInfo& info);
         void (*ApplyRenderAttachmentDependencies)(void* rn, RenderAttachmentDependencyInfo* pInfos, uint32_t count);
         void (*WaitForDevice)();
 
-        void (*BeginRendering)(void* rn);
+        void (*BeginRendering)(void* rn, void* tex);
         void (*EndRendering)(void* rn);
 
         void (*RegisterFrameBufferChange)(void* rn, uvec2 newSize);

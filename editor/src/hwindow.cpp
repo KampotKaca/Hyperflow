@@ -1,31 +1,12 @@
 #include "hyperfloweditor.h"
 #include "heditorinternal.h"
+#include "hwindow.h"
 
 namespace hf::editor
 {
-    bool StartWindow(const char* name, const WindowCreationInfo& info)
-    {
-        auto result = ImGui::Begin(name, info.pOpen, (ImGuiWindowFlags)info.flags);
-        if (result)
-        {
-            if (info.size.has_value())
-            {
-                auto size = info.size.value();
-                ImGui::SetWindowSize(ImVec2(size.x, size.y));
-            }
+    bool StartWindow(const char* name, bool* isOpen, WindowFlags flags) { return ImGui::Begin(name, isOpen, (ImGuiWindowFlags)flags | ImGuiWindowFlags_DockNodeHost); }
+    void EndWindow() { ImGui::End(); }
 
-            if (info.position.has_value())
-            {
-                auto pos = info.position.value();
-                ImGui::SetWindowPos(ImVec2(pos.x, pos.y));
-            }
-        }
-
-        return result;
-    }
-
-    void EndWindow()
-    {
-        ImGui::End();
-    }
+    void SetNextWindowSize(vec2 size, Condition cond) { ImGui::SetNextWindowSize({ size.x, size.y }, (ImGuiCond)cond); }
+    void SetNextWindowPos(vec2 pos, Condition cond) { ImGui::SetNextWindowPos({ pos.x, pos.y }, (ImGuiCond)cond); }
 }

@@ -18,10 +18,8 @@ namespace hf
     inline bool CheckFormatSupport(VkFormat format, VkImageTiling tiling, VkFormatFeatureFlags features);
 
     VkRenderTexture::VkRenderTexture(const RenderTextureCreationInfo& info)
-    : offset(info.offset.x, info.offset.y), multisampleMode(info.multisampleMode)
+    : colorAttachmentCount(info.colorAttachmentCount), offset(info.offset.x, info.offset.y), multisampleMode(info.multisampleMode)
     {
-        colorAttachmentCount = info.colorAttachmentCount + 1;
-
         for (uint32_t i = 0; i < info.colorAttachmentCount; i++)
         {
             auto& attachmentInfo = info.pColorAttachments[i];
@@ -46,56 +44,29 @@ namespace hf
             colorFormats[i] = (VkFormat)attachmentInfo.format;
         }
 
-        //Presentation Attachment
+        if (info.depthAttachment.has_value())
         {
-            auto& attachmentInfo = info.presentationAttachment;
-            auto& attachment = colorAttachments[info.colorAttachmentCount];
-
-            attachment =
+            hasDepthAttachment = true;
+            auto& attachmentInfo = info.depthAttachment.value();
+            VkRenderingAttachmentInfoKHR attachment
             {
                 .sType = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO_KHR,
                 .pNext = nullptr,
                 .imageView = nullptr,
-                .imageLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+                .imageLayout = (VkImageLayout)attachmentInfo.layout,
                 .clearValue =
                 {
-                    attachmentInfo.clearColor.x,
-                    attachmentInfo.clearColor.y,
-                    attachmentInfo.clearColor.z,
-                    attachmentInfo.clearColor.w
+                    .depthStencil = { attachmentInfo.clearDepth, attachmentInfo.clearStencil }
                 }
             };
 
             SetOperations(attachment.loadOp, attachment.storeOp, attachmentInfo.lsOperation);
-            colorFormats[info.colorAttachmentCount] = (VkFormat)VULKAN_API_COLOR_FORMAT;
-        }
-
-        //Depth Attachment
-        {
-            if (info.depthAttachment.has_value())
-            {
-                hasDepthAttachment = true;
-                auto& attachmentInfo = info.depthAttachment.value();
-                VkRenderingAttachmentInfoKHR attachment
-                {
-                    .sType = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO_KHR,
-                    .pNext = nullptr,
-                    .imageView = nullptr,
-                    .imageLayout = (VkImageLayout)attachmentInfo.layout,
-                    .clearValue =
-                    {
-                        .depthStencil = { attachmentInfo.clearDepth, attachmentInfo.clearStencil }
-                    }
-                };
-
-                SetOperations(attachment.loadOp, attachment.storeOp, attachmentInfo.lsOperation);
-                depthStencilAttachment = attachment;
-                auto formatInfo = ChooseDepthStencilFormat(attachmentInfo.lsOperation, attachmentInfo.lsStencilOperation,
-                        VK_IMAGE_TILING_OPTIMAL, VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT);
-                depthStencilFormat = formatInfo.format;
-                hasDepthAttachment = formatInfo.hasDepth;
-                hasStencilAttachment = formatInfo.hasStencil;
-            }
+            depthStencilAttachment = attachment;
+            auto formatInfo = ChooseDepthStencilFormat(attachmentInfo.lsOperation, attachmentInfo.lsStencilOperation,
+                    VK_IMAGE_TILING_OPTIMAL, VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT);
+            depthStencilFormat = formatInfo.format;
+            hasDepthAttachment = formatInfo.hasDepth;
+            hasStencilAttachment = formatInfo.hasStencil;
         }
 
         ResizeRenderTexture(this, info.size);
@@ -106,39 +77,43 @@ namespace hf
         ClearRenderTexture(this);
     }
 
-    void BeginRendering(const VkRenderer* rn, VkRenderTexture* tex)
+    void BeginRendering(const VkRenderer* rn)
     {
-        VkImageMemoryBarrier2 preBarrier =
+        if (rn->currentRenderTextureCount == 0)
         {
-            .sType            = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER_2,
-            .srcStageMask     = 0,
-            .srcAccessMask    = 0,
-            .dstStageMask     = VK_PIPELINE_STAGE_2_COLOR_ATTACHMENT_OUTPUT_BIT,
-            .dstAccessMask    = VK_ACCESS_2_COLOR_ATTACHMENT_WRITE_BIT,
-            .oldLayout        = VK_IMAGE_LAYOUT_UNDEFINED,
-            .newLayout        = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
-            .srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
-            .dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
-            .image = rn->swapchain.images[rn->imageIndex].image,
-            .subresourceRange =
+            VkImageMemoryBarrier2 preBarrier =
             {
-                .aspectMask = VK_IMAGE_ASPECT_COLOR_BIT,
-                .baseMipLevel = 0,
-                .levelCount = 1,
-                .baseArrayLayer = 0,
-                .layerCount = 1,
-            }
-        };
+                .sType            = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER_2,
+                .srcStageMask     = 0,
+                .srcAccessMask    = 0,
+                .dstStageMask     = VK_PIPELINE_STAGE_2_COLOR_ATTACHMENT_OUTPUT_BIT,
+                .dstAccessMask    = VK_ACCESS_2_COLOR_ATTACHMENT_WRITE_BIT,
+                .oldLayout        = VK_IMAGE_LAYOUT_UNDEFINED,
+                .newLayout        = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+                .srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
+                .dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
+                .image = rn->swapchain.images[rn->imageIndex].image,
+                .subresourceRange =
+                {
+                    .aspectMask = VK_IMAGE_ASPECT_COLOR_BIT,
+                    .baseMipLevel = 0,
+                    .levelCount = 1,
+                    .baseArrayLayer = 0,
+                    .layerCount = 1,
+                }
+            };
 
-        VkDependencyInfo depInfo
-        {
-            .sType = VK_STRUCTURE_TYPE_DEPENDENCY_INFO,
-            .imageMemoryBarrierCount = 1,
-            .pImageMemoryBarriers = &preBarrier,
-        };
+            VkDependencyInfo depInfo
+            {
+                .sType = VK_STRUCTURE_TYPE_DEPENDENCY_INFO,
+                .imageMemoryBarrierCount = 1,
+                .pImageMemoryBarriers = &preBarrier,
+            };
 
-        GRAPHICS_DATA.extensionFunctions.vkCmdPipelineBarrier2KHR(rn->currentCommand, &depInfo);
+            GRAPHICS_DATA.extensionFunctions.vkCmdPipelineBarrier2KHR(rn->currentCommand, &depInfo);
+        }
 
+        auto tex = rn->currentRenderTexture;
         auto offset = tex->offset;
         auto extent = tex->extent;
 
@@ -170,40 +145,43 @@ namespace hf
         UploadViewportAndScissor(rn);
     }
 
-    void EndRendering(VkRenderer* rn, VkRenderTexture* tex)
+    void EndRendering(const VkRenderer* rn)
     {
         GRAPHICS_DATA.extensionFunctions.vkCmdEndRenderingKHR(rn->currentCommand);
 
-        VkImageMemoryBarrier2 postBarrier =
+        if (rn->currentRenderTextureCount == rn->targetRenderTextureCount)
         {
-            .sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER_2,
-            .srcStageMask = VK_PIPELINE_STAGE_2_COLOR_ATTACHMENT_OUTPUT_BIT,
-            .srcAccessMask = VK_ACCESS_2_COLOR_ATTACHMENT_WRITE_BIT,
-            .dstStageMask = 0,
-            .dstAccessMask = 0,
-            .oldLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
-            .newLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR,
-            .srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
-            .dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
-            .image = rn->swapchain.images[rn->imageIndex].image,
-            .subresourceRange =
+            VkImageMemoryBarrier2 postBarrier =
             {
-                .aspectMask = VK_IMAGE_ASPECT_COLOR_BIT,
-                .baseMipLevel = 0,
-                .levelCount = 1,
-                .baseArrayLayer = 0,
-                .layerCount = 1,
-            }
-        };
+                .sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER_2,
+                .srcStageMask = VK_PIPELINE_STAGE_2_COLOR_ATTACHMENT_OUTPUT_BIT,
+                .srcAccessMask = VK_ACCESS_2_COLOR_ATTACHMENT_WRITE_BIT,
+                .dstStageMask = 0,
+                .dstAccessMask = 0,
+                .oldLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+                .newLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR,
+                .srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
+                .dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
+                .image = rn->swapchain.images[rn->imageIndex].image,
+                .subresourceRange =
+                {
+                    .aspectMask = VK_IMAGE_ASPECT_COLOR_BIT,
+                    .baseMipLevel = 0,
+                    .levelCount = 1,
+                    .baseArrayLayer = 0,
+                    .layerCount = 1,
+                }
+            };
 
-        VkDependencyInfo depInfo
-        {
-            .sType = VK_STRUCTURE_TYPE_DEPENDENCY_INFO,
-            .imageMemoryBarrierCount = 1,
-            .pImageMemoryBarriers = &postBarrier,
-        };
+            VkDependencyInfo depInfo
+            {
+                .sType = VK_STRUCTURE_TYPE_DEPENDENCY_INFO,
+                .imageMemoryBarrierCount = 1,
+                .pImageMemoryBarriers = &postBarrier,
+            };
 
-        GRAPHICS_DATA.extensionFunctions.vkCmdPipelineBarrier2KHR(rn->currentCommand, &depInfo);
+            GRAPHICS_DATA.extensionFunctions.vkCmdPipelineBarrier2KHR(rn->currentCommand, &depInfo);
+        }
     }
 
     void SetOperations(VkAttachmentLoadOp& loadOp, VkAttachmentStoreOp& storeOp, LoadStoreOperationType type)

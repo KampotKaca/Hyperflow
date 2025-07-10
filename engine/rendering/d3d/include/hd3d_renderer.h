@@ -15,7 +15,7 @@ namespace hf
     D3DRenderer* CreateRenderer(HWND window, uvec2 size, VsyncMode vsyncMode);
     void DestroyRenderer(D3DRenderer* instance);
 
-    bool GetReadyForRendering(D3DRenderer* rn);
+    uvec2 GetReadyForRendering(D3DRenderer* rn);
     void StartFrame(D3DRenderer* rn);
     void EndFrame(D3DRenderer* rn);
     void RegisterFrameBufferChange(D3DRenderer* rn, uvec2 newSize);

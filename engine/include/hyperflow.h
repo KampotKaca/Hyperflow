@@ -19,8 +19,6 @@ namespace hf
 	const std::string& GetApplicationTitle();
 	void Terminate();
 
-    void Attach(const Ref<Renderer>& rn, const Ref<RenderTexture>& tex);
-
 	ShaderSetup DefineShaderSetup(const ShaderSetupDefinitionInfo& info);
 	TextureSampler DefineTextureSampler(const TextureSamplerDefinitionInfo& info);
 	TextureLayout DefineTextureLayout(const TextureLayoutDefinitionInfo& info);
@@ -125,7 +123,7 @@ namespace hf
 
     //region Draw Process
 #if DEBUG
-    void Push_EditorDrawCallback(const Ref<Renderer>& rn, void (*callback)(const Ref<Renderer>&, void*));
+    void Set_DrawCallback(const Ref<Renderer>& rn, void (*callback)(const Ref<Renderer>&, void*));
 #else
     inline void Push_EditorDrawCallback(const Ref<Renderer>& rn, void (*callback)(const Ref<Renderer>&, void*)){}
 #endif
@@ -139,7 +137,10 @@ namespace hf
 	template<typename T>
 	void UploadAdd_TexturePackBinding(const Ref<Renderer>& rn, const TexturePackBindingUploadInfo<T>& info);
 
-    void Push_RenderAttachmentDependency(const Ref<Renderer>& rn, const RenderAttachmentDependencyInfo& info);
+    void Add_RenderTextureDependency(const Ref<Renderer>& rn, const RenderAttachmentDependencyInfo& info);
+
+    void Start_RenderTexture(const Ref<Renderer>& rn, const Ref<RenderTexture>& rt);
+    void End_RenderTexture(const Ref<Renderer>& rn);
 
 	void Start_ShaderSetup(const Ref<Renderer>& rn, ShaderSetup shaderSetup);
 	void End_ShaderSetup(const Ref<Renderer>& rn);

@@ -88,9 +88,19 @@ namespace hf
         AssetRange<uint32_t> bufferRange{};
     };
 
+    struct RenderTexturePacketInfo
+    {
+        Ref<RenderTexture> texture{};
+        AssetRange<uint16_t> shaderSetupRange{};
+        AssetRange<uint8_t> dependencyRange{};
+
+        void (*drawCallback)(const Ref<Renderer>& rn, void* cmd){};
+    };
+
     struct RenderPacket
     {
-        StaticVector<RenderAttachmentDependencyInfo, RENDERING_MAX_NUM_RENDER_ATTACHMENT_DEPENDENCIES> attachmentDependencies{};
+        StaticVector<RenderAttachmentDependencyInfo, RENDERING_MAX_NUM_RENDER_ATTACHMENT_DEPENDENCIES> dependencies{};
+        StaticVector<RenderTexturePacketInfo, RENDERING_MAX_NUM_RENDER_TEXTURES> renderTextures{};
         StaticVector<ShaderSetupPacketInfo, RENDERING_MAX_NUM_SHADER_SETUPS> shaderSetups{};
         StaticVector<ShaderPacketInfo, RENDERING_MAX_NUM_SHADERS> shaders{};
         StaticVector<MaterialPacketInfo, RENDERING_MAX_NUM_MATERIALS> materials{};
@@ -108,14 +118,11 @@ namespace hf
         StaticVector<uint8_t, RENDERING_MAX_UNIFORM_UPLOAD_BUFFER_SIZE> bufferUploads{};
         StaticVector<uint8_t, RENDERING_MAX_PUSH_CONSTANT_UPLOAD_BUFFER_SIZE> pushConstantUploads{};
         StaticVector<BufferUploadPacketInfo, RENDERING_MAX_UNIFORM_UPLOAD_COUNT> bufferUploadPackets{};
-
-#if DEBUG
-        void (*onEditorDrawCallback)(const Ref<Renderer>& rn, void* cmd){};
-#endif
     };
 
     struct RenderPacketDrawProcess
     {
+        RenderTexturePacketInfo* currentRenderTexture{};
         ShaderSetupPacketInfo* currentShaderSetup{};
         ShaderPacketInfo* currentShader{};
         MaterialPacketInfo* currentMaterial{};

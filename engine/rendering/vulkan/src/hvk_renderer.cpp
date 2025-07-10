@@ -9,10 +9,10 @@ namespace hf
         rn->swapchain.surface = VK_NULL_HANDLE;
     }
 
-    bool GetReadyForRendering(VkRenderer* rn)
+    uvec2 GetReadyForRendering(VkRenderer* rn, VkRenderTexture** pTextures, uint32_t textureCount)
     {
-        if (rn->targetSize.x == 0 || rn->targetSize.y == 0) return false;
-        return AcquireNextImage(rn);
+        if (rn->targetSize.x == 0 || rn->targetSize.y == 0) return {};
+        return AcquireNextImage(rn, pTextures, textureCount);
     }
 
     void StartFrame(VkRenderer* rn)
@@ -36,12 +36,6 @@ namespace hf
         std::lock_guard lock(rn->frameSync);
         rn->targetSize = newSize;
         rn->frameBufferChanged = true;
-    }
-
-    void AttachRenderTexture(VkRenderer* rn, VkRenderTexture* tex)
-    {
-        rn->renderTex = tex;
-        ResizeRenderTexture(tex, rn->targetSize);
     }
 
     void SetVSync(VkRenderer* rn, VsyncMode mode)

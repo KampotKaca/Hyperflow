@@ -68,11 +68,6 @@ namespace hf::inter::rendering
         delete (VkRenderTexture*)tex;
     }
 
-    void AttachRenderTextureToRenderer(void* rn, void* tex)
-    {
-        AttachRenderTexture((VkRenderer*)rn, (VkRenderTexture*)tex);
-    }
-
     void* CreateTexturePack(const TexturePackCreationInfo& info)
     {
         return new VkTexturePack(info);
@@ -226,10 +221,10 @@ namespace hf::inter::rendering
         SubmitBufferToImageCopyOperations();
     }
 
-    bool GetReadyForRendering(void* rn)
+    uvec2 GetReadyForRendering(void* rn, void** pTextures, uint32_t textureCount)
     {
         auto renderer = (VkRenderer*)rn;
-        return GetReadyForRendering(renderer);
+        return GetReadyForRendering(renderer, (VkRenderTexture**)pTextures, textureCount);
     }
 
     void WaitForPreviousFrame(void* rn)
@@ -237,15 +232,21 @@ namespace hf::inter::rendering
         DelayUntilPreviousFrameFinish((VkRenderer*)rn);
     }
 
-    void StartFrame(void* rn)
+    void StartFrame(void* rn, uint32_t renderTextureCount)
     {
         auto renderer = (VkRenderer*)rn;
+        renderer->currentRenderTextureCount = 0;
+        renderer->targetRenderTextureCount = renderTextureCount;
         StartFrame(renderer);
     }
 
     void EndFrame(void* rn)
     {
         auto renderer = (VkRenderer*)rn;
+        renderer->prevRenderTexture = nullptr;
+        renderer->currentRenderTexture = nullptr;
+        renderer->currentRenderTextureCount = 0;
+        renderer->targetRenderTextureCount = 0;
         EndFrame(renderer);
     }
 
@@ -304,7 +305,7 @@ namespace hf::inter::rendering
                 .newLayout = (VkImageLayout)info.dst.targetLayout,
                 .srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
                 .dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
-                .image = GetRenderTextureImage(vrn->renderTex, info.attachmentIndex),
+                .image = GetRenderTextureImage(vrn->currentRenderTexture, info.attachmentIndex),
                 .subresourceRange =
                 {
                     .aspectMask = (VkImageAspectFlags)info.aspectFlags,
@@ -331,16 +332,28 @@ namespace hf::inter::rendering
         hf::WaitForDevice();
     }
 
-    void BeginRendering(void* rn)
+    void BeginRendering(void* rn, void* tex)
     {
         auto vrn = (VkRenderer*)rn;
-        hf::BeginRendering(vrn, vrn->renderTex);
+
+        if (vrn->currentRenderTexture)
+            throw GENERIC_EXCEPT("[Hyperflow]", "Cannot begin rendering while rendering is in progress");
+
+        vrn->currentRenderTexture = (VkRenderTexture*)tex;
+        hf::BeginRendering(vrn);
+        vrn->currentRenderTextureCount++;
     }
 
     void EndRendering(void* rn)
     {
         auto vrn = (VkRenderer*)rn;
-        hf::EndRendering(vrn, vrn->renderTex);
+
+        if (!vrn->currentRenderTexture)
+            throw GENERIC_EXCEPT("[Hyperflow]", "Cannot end rendering if rendering is not in progress");
+
+        vrn->prevRenderTexture = vrn->currentRenderTexture;
+        vrn->currentRenderTexture = nullptr;
+        hf::EndRendering(vrn);
     }
 
     void RegisterFrameBufferChange(void* rn, uvec2 newSize)
@@ -391,7 +404,6 @@ namespace hf::inter::rendering
             //render texture
             .CreateRenderTexture        = CreateRenderTexture,
             .DestroyRenderTexture       = DestroyRenderTexture,
-            .AttachRenderTextureToRenderer = AttachRenderTextureToRenderer,
 
             //texture pack
             .CreateTexturePack          = CreateTexturePack,

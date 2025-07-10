@@ -15,6 +15,8 @@ namespace app
         uint32_t reqCount = 0;
         int32_t lastReq = -1;
         hf::Ref<hf::Window> wn{};
+
+        hf::Ref<hf::RenderTexture> imguiDrawTexture{};
     };
 
     static DebugInfo DEBUG_INFO{};
@@ -167,7 +169,7 @@ namespace app
 
     void GuiDraw(const hf::Ref<hf::Renderer>& rn, void* cmd)
     {
-        void EditorDraw(void* cmd);
+        hf::editor::Draw(cmd);
     }
 
     void DebugRender(const hf::Ref<hf::Renderer>& rn)
@@ -176,18 +178,15 @@ namespace app
 
         hf::editor::StartFrame();
 
-        if (hf::editor::StartWindow("Transformer", hf::editor::WindowCreationInfo
-            {
-                .size = hf::ivec2{ 200, 200 },
-                .position = hf::ivec2 { 0, 0 }
-            }))
+        hf::editor::SetNextWindowSize({ 300, 300 }, hf::editor::Condition::FirstUseEver);
+        hf::editor::SetNextWindowPos({ 300, 300 }, hf::editor::Condition::FirstUseEver);
+        if (hf::editor::StartWindow("Transformer"))
         {
             hf::editor::EndWindow();
         }
 
-
         hf::editor::EndFrame();
 
-        hf::Push_EditorDrawCallback(rn, GuiDraw);
+        hf::Set_DrawCallback(rn, GuiDraw);
     }
 }

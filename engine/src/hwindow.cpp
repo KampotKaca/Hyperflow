@@ -25,7 +25,7 @@ namespace hf
 		inter::window::Focus(this);
 		inter::window::SetTitle(this, info.title);
 		inter::window::SetTitle(this, info.title);
-		inter::window::SetPointerState(this, info.pointerState);
+	    inter::window::SetPointerState(this, info.pointerState);
 
 		if (info.iconFolderPath) inter::rendering::SetWindowIcons_i(this, info.iconFolderPath);
 	}

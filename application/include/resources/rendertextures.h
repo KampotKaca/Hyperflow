@@ -7,7 +7,8 @@ namespace app
 {
     struct AppRenderTextures
     {
-        hf::Ref<hf::RenderTexture> mainRenderTexture{};
+        hf::Ref<hf::RenderTexture> mainDrawRenderTexture{};
+        // hf::Ref<hf::RenderTexture> presentationRenderTexture{};
     };
 
     extern AppRenderTextures APP_RENDER_TEXTURES;

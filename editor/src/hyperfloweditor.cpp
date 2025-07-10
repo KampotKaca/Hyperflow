@@ -116,7 +116,7 @@ namespace hf::editor
             ImDrawData* drawData = ImGui::GetDrawData();
 
             std::lock_guard lock(EDITOR_RENDERER.bufferMutex);
-            std::lock_guard lockGuard(GetRenderer(hf::GetMainWindow())->threadInfo.drawLock);
+            std::lock_guard lockGuard(GetRenderer(GetMainWindow())->threadInfo.drawLock);
 
             ImGui::UpdatePlatformWindows();
             ImGui::RenderPlatformWindowsDefault();
