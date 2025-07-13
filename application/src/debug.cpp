@@ -15,8 +15,6 @@ namespace app
         uint32_t reqCount = 0;
         int32_t lastReq = -1;
         hf::Ref<hf::Window> wn{};
-
-        hf::Ref<hf::RenderTexture> imguiDrawTexture{};
     };
 
     static DebugInfo DEBUG_INFO{};
@@ -34,6 +32,9 @@ namespace app
         hf::editor::LoadInfo editorInfo
         {
             .windowHandle = GetHandle(hf::GetMainWindow()),
+            .multisampleMode = MSAA_MODE,
+            .depthFormat = DEPTH_STENCIL_MODE,
+            // .stencilFormat = DEPTH_STENCIL_MODE
         };
         editorInfo.renderApiHandles = hf::GetEditorApiHandles();
         hf::editor::Load(editorInfo);
@@ -51,7 +52,7 @@ namespace app
 
     void DebugLoad()
     {
-        
+
     }
 
     void DebugStart()
@@ -85,7 +86,7 @@ namespace app
 
         if (hf::IsKeyDown(hf::Key::V))
         {
-        	hf::WindowCreationInfo data =
+        	const hf::WindowCreationInfo data =
         	{
         		.title = DEBUG_WINDOW_NAMES[DEBUG_INFO.count % 5],
         		.style = hf::WindowStyle::Default,
@@ -138,7 +139,9 @@ namespace app
             }
         }
 
-        APP_DEBUG.camera.Update(hf::GetMainWindow(), (float)hf::GetDeltaTime());
+        if (hf::IsButtonDownContinues(hf::Button::Right))
+            APP_DEBUG.camera.Update(hf::GetMainWindow(), (float)hf::GetDeltaTime());
+
         if (hf::IsKeyDown(hf::Key::N)) APP_DEBUG.drawGridLines = !APP_DEBUG.drawGridLines;
 
         APP_DEBUG.camera.camera3D.core.SetFov(
@@ -160,6 +163,26 @@ namespace app
     void DebugPreRender(const hf::Ref<hf::Renderer>& rn)
     {
         APP_UNIFORMS.globalUniformInfo.camera = APP_DEBUG.camera.camera3D.GetUniformInfo(rn);
+
+        hf::editor::StartFrame();
+
+        hf::editor::SetNextWindowSize({ 300, 300 }, hf::editor::Condition::FirstUseEver);
+        hf::editor::SetNextWindowPos({ 300, 300 }, hf::editor::Condition::FirstUseEver);
+        if (hf::editor::StartWindow("Transformer"))
+        {
+
+        }
+        hf::editor::EndWindow();
+
+        hf::editor::SetNextWindowSize({ 300, 300 }, hf::editor::Condition::FirstUseEver);
+        hf::editor::SetNextWindowPos({ 100, 100 }, hf::editor::Condition::FirstUseEver);
+        if (hf::editor::StartWindow("Inspector"))
+        {
+
+        }
+        hf::editor::EndWindow();
+
+        hf::editor::EndFrame();
     }
 
     void DebugPrepass(const hf::Ref<hf::Renderer>& rn)
@@ -174,19 +197,6 @@ namespace app
 
     void DebugRender(const hf::Ref<hf::Renderer>& rn)
     {
-        if (APP_DEBUG.drawGridLines) hf::gridlines::Draw(rn, APP_DEBUG.gridLinesInfo);
-
-        hf::editor::StartFrame();
-
-        hf::editor::SetNextWindowSize({ 300, 300 }, hf::editor::Condition::FirstUseEver);
-        hf::editor::SetNextWindowPos({ 300, 300 }, hf::editor::Condition::FirstUseEver);
-        if (hf::editor::StartWindow("Transformer"))
-        {
-            hf::editor::EndWindow();
-        }
-
-        hf::editor::EndFrame();
-
         hf::Set_DrawCallback(rn, GuiDraw);
     }
 }

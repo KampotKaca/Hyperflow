@@ -8,8 +8,10 @@ namespace hf
 {
     struct VkTextureBinding
     {
+        TexturePackBindingType bindingType{};
+        uint32_t bindingId = 0;
         TextureSampler sampler{};
-        std::vector<VkTexture*> textures{};
+        StaticVector<VkImageView, MAX_TEXTURES_IN_TEXTURE_PACK> views{};
     };
 
     struct VkTexturePack
@@ -17,11 +19,9 @@ namespace hf
         explicit VkTexturePack(const inter::rendering::TexturePackCreationInfo& info);
         ~VkTexturePack();
 
-        RenderBindingType bindingType = RenderBindingType::Graphics;
-        std::vector<VkTextureBinding> bindings{};
+        unordered_map<uint32_t, VkTextureBinding> bindings{};
         VkDescriptorSet descriptors[FRAMES_IN_FLIGHT]{};
         TextureLayout layout = 0;
-        uint32_t bindingId = 0;
     };
 
     struct VkTextureWriteOperation

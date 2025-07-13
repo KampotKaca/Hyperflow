@@ -21,7 +21,7 @@ namespace hf
         {
             auto* texPack = (VkTexturePack*)info.pTexturePacks[i];
             for (auto& binding : texPack->bindings)
-                totalTextureDescriptors += binding.textures.size() * FRAMES_IN_FLIGHT;
+                totalTextureDescriptors += binding.second.views.size() * FRAMES_IN_FLIGHT;
         }
 
         poolSize.descriptorCount = totalTextureDescriptors;

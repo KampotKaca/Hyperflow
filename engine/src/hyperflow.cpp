@@ -76,7 +76,10 @@ namespace hf
 						auto& cInfo = rn->eventInfo;
 						if (cInfo.onPreRenderCallback) cInfo.onPreRenderCallback(rn);
 						inter::rendering::PreDraw_i(rn);
-						if (cInfo.onRenderCallback) cInfo.onRenderCallback(rn);
+						{
+						    if (cInfo.onRenderCallback) cInfo.onRenderCallback(rn);
+						    inter::rendering::DebugDraw_i(rn);
+						}
 						inter::rendering::EndRenderPacket_i(rn);
 					}
 				}

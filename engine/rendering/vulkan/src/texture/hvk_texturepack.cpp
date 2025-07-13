@@ -6,22 +6,47 @@
 namespace hf
 {
     VkTexturePack::VkTexturePack(const inter::rendering::TexturePackCreationInfo& info)
-        : bindingType(info.bindingType), layout(info.layout)
+        : layout(info.layout)
     {
-        bindings = std::vector<VkTextureBinding>(info.bindingCount);
-        bindingType = info.bindingType;
-
         for (uint32_t i = 0; i < info.bindingCount; i++)
         {
             auto& bInfo = info.pBindings[i];
-            auto& binding = bindings[i];
-            binding =
+            VkTextureBinding binding
             {
+                .bindingType = binding.bindingType,
+                .bindingId = bInfo.bindingIndex,
                 .sampler = bInfo.sampler,
+                .views = {}
             };
 
-            binding.textures = std::vector<VkTexture*>(bInfo.count);
-            memcpy(binding.textures.data(), bInfo.pTextures, bInfo.count * sizeof(VkTexture*));
+            for (uint32_t j = 0; j < bInfo.arraySize; j++)
+            {
+                auto& tInfo = bInfo.textures[j];
+
+                switch (tInfo.type)
+                {
+                    case TexturePackBindingType::Texture2D:
+                    case TexturePackBindingType::Cubemap:
+                    {
+                        auto* tex = (VkTexture*)tInfo.texture;
+                        binding.views.push_back(tex->view);
+                    }
+                    break;
+                    break;
+                    case TexturePackBindingType::RenderTexture:
+                    {
+                        auto* tex = (VkRenderTexture*)tInfo.texture;
+                        if (tInfo.index >= tex->colorAttachmentCount)
+                        {
+                            if (!tex->depthTexture) throw GENERIC_EXCEPT("[Hyperflow]", "Render texture invalid attachment index!");
+                            binding.views.push_back(tex->depthTexture->view);
+                        }
+                        else binding.views.push_back(tex->colorTextures[tInfo.index]->view);
+                    }
+                    break;
+                }
+            }
+            bindings[bInfo.bindingIndex] = binding;
         }
     }
 
@@ -30,7 +55,7 @@ namespace hf
         bindings.clear();
     }
 
-    void UpdateTexturePack(const VkTexturePack* pack, const uint32_t* bindingIndices, uint32_t bindingCount)
+    void UpdateTexturePack(VkTexturePack* pack, const uint32_t* bindingIndices, uint32_t bindingCount)
     {
         uint32_t writeCount = 0;
         for (uint32_t i = 0; i < bindingCount; i++)
@@ -38,14 +63,14 @@ namespace hf
             auto& binding = pack->bindings[bindingIndices[i]];
             auto& texSampler = GetSampler(binding.sampler);
 
-            for (uint32_t j = 0; j < binding.textures.size(); j++)
+            for (uint32_t j = 0; j < binding.views.size(); j++)
             {
                 for (auto descriptor : pack->descriptors)
                 {
                     GRAPHICS_DATA.preAllocBuffers.descImageBindings[writeCount] =
                     {
                         .sampler = texSampler->sampler,
-                        .imageView = binding.textures[j]->view,
+                        .imageView = binding.views.atC(j),
                         .imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL
                     };
 
@@ -53,7 +78,7 @@ namespace hf
                     {
                         .sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
                         .dstSet = descriptor,
-                        .dstBinding = pack->bindingId + i,
+                        .dstBinding = binding.bindingId,
                         .dstArrayElement = j,
                         .descriptorCount = 1,
                         .descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
@@ -86,7 +111,33 @@ namespace hf
 
             if (current.texInfo.has_value() && current.texInfo->count > 0)
             {
-                memcpy(&binding.textures[current.texInfo->offset], current.texInfo->pTextures, current.texInfo->count * sizeof(VkTexture*));
+                for (uint32_t j = current.texInfo->offset; j < current.texInfo->count; j++)
+                {
+                    auto texInfo = current.texInfo->pTextures[j];
+
+                    switch (binding.bindingType)
+                    {
+                        case TexturePackBindingType::Texture2D:
+                        case TexturePackBindingType::Cubemap:
+                        {
+                            auto* tex = (VkTexture*)texInfo.texture;
+                            binding.views.at(j) = tex->view;
+                        }
+                        break;
+                        case TexturePackBindingType::RenderTexture:
+                        {
+                            auto* tex = (VkRenderTexture*)texInfo.texture;
+                            if (texInfo.index >= tex->colorAttachmentCount)
+                            {
+                                if (!tex->depthTexture) throw GENERIC_EXCEPT("[Hyperflow]", "Render texture invalid attachment index!");
+                                binding.views.at(j) = tex->depthTexture->view;
+                            }
+                            else binding.views.at(j) = tex->colorTextures[texInfo.index]->view;
+                        }
+                        break;
+                    }
+                }
+
                 wasModified = true;
             }
 
@@ -104,11 +155,12 @@ namespace hf
         else LOG_WARN("Unnecessary set binding call, noting changed");
     }
 
-    void BindTexturePack(const VkRenderer* rn, const VkTexturePack* pack, uint32_t setBindingIndex)
+    void BindTexturePack(const VkRenderer* rn, const VkTexturePack* pack, uint32_t setBindingIndex,
+                         RenderBindingType bindingType)
     {
         const auto currentFrame = rn->currentFrame;
 
-        vkCmdBindDescriptorSets(rn->currentCommand, (VkPipelineBindPoint)pack->bindingType, rn->currentLayout,
+        vkCmdBindDescriptorSets(rn->currentCommand, (VkPipelineBindPoint)bindingType, rn->currentLayout,
         setBindingIndex, 1, &pack->descriptors[currentFrame],
         0, nullptr);
     }

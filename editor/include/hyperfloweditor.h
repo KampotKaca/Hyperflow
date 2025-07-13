@@ -10,6 +10,8 @@ namespace hf::editor
         void* windowHandle{};
         void* renderApiHandles{};
         MultisampleMode multisampleMode = MultisampleMode::MSAA_1X;
+        TextureFormat depthFormat = TextureFormat::D32_Sfloat;
+        TextureFormat stencilFormat = TextureFormat::Undefined;
     };
 
     enum class WindowFlags
@@ -49,11 +51,11 @@ namespace hf::editor
     inline void EndFrame(){}
     inline void Draw(void* cmd){}
 
-    bool Start(const WindowInfo& info){}
-    void End(){}
+    bool StartWindow(const char* name = "New Window", bool* isOpen = nullptr, WindowFlags flags = WindowFlags::None){}
+    void EndWindow(){}
 
     void SetNextWindowSize(vec2 size, Condition cond = Condition::None){}
-    void SetNextWindowPosition(vec2 pos, Condition cond = Condition::None){}
+    void SetNextWindowPos(vec2 pos, Condition cond = Condition::None){}
 
 #endif
 }

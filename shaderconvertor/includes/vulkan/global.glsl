@@ -57,9 +57,3 @@ layout(set = 0, binding = 0) uniform Global
 } GLOBAL;
 
 const uint MAX_MATERIAL_SIZE = 1024;
-
-vec4 FinalizeColor(vec4 color)
-{
-    return pow(color, vec4(1.0/2.2));
-//    return color;
-}

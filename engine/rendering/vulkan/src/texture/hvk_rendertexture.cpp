@@ -9,12 +9,11 @@ namespace hf
     struct DepthStencilFormatInfo
     {
         VkFormat format{};
-        bool hasStencil{};
-        bool hasDepth{};
+        DepthStencilMode mode = DepthStencilMode::None;
     };
 
     static void SetOperations(VkAttachmentLoadOp& loadOp, VkAttachmentStoreOp& storeOp, LoadStoreOperationType type);
-    static DepthStencilFormatInfo ChooseDepthStencilFormat(LoadStoreOperationType op, LoadStoreOperationType stencilOp, VkImageTiling tiling, VkFormatFeatureFlags features);
+    static DepthStencilFormatInfo ChooseDepthStencilFormat(DepthStencilMode mode, VkImageTiling tiling, VkFormatFeatureFlags features);
     inline bool CheckFormatSupport(VkFormat format, VkImageTiling tiling, VkFormatFeatureFlags features);
 
     VkRenderTexture::VkRenderTexture(const RenderTextureCreationInfo& info)
@@ -31,6 +30,7 @@ namespace hf
                 .pNext = nullptr,
                 .imageView = nullptr,
                 .imageLayout = (VkImageLayout)attachmentInfo.layout,
+                .resolveMode = VK_RESOLVE_MODE_NONE,
                 .clearValue =
                 {
                     attachmentInfo.clearColor.x,
@@ -42,12 +42,19 @@ namespace hf
 
             SetOperations(attachment.loadOp, attachment.storeOp, attachmentInfo.lsOperation);
             colorFormats[i] = (VkFormat)attachmentInfo.format;
+
+            if (attachmentInfo.isUsedForPresentation)
+            {
+                if (presentationAttachmentIndex != -1)
+                    throw GENERIC_EXCEPT("[Hyperflow]", "Only one color attachment can be used for presentation");
+                presentationAttachmentIndex = i;
+            }
         }
 
         if (info.depthAttachment.has_value())
         {
-            hasDepthAttachment = true;
             auto& attachmentInfo = info.depthAttachment.value();
+
             VkRenderingAttachmentInfoKHR attachment
             {
                 .sType = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO_KHR,
@@ -62,11 +69,10 @@ namespace hf
 
             SetOperations(attachment.loadOp, attachment.storeOp, attachmentInfo.lsOperation);
             depthStencilAttachment = attachment;
-            auto formatInfo = ChooseDepthStencilFormat(attachmentInfo.lsOperation, attachmentInfo.lsStencilOperation,
+            auto formatInfo = ChooseDepthStencilFormat(attachmentInfo.mode,
                     VK_IMAGE_TILING_OPTIMAL, VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT);
             depthStencilFormat = formatInfo.format;
-            hasDepthAttachment = formatInfo.hasDepth;
-            hasStencilAttachment = formatInfo.hasStencil;
+            mode = formatInfo.mode;
         }
 
         ResizeRenderTexture(this, info.size);
@@ -79,7 +85,7 @@ namespace hf
 
     void BeginRendering(const VkRenderer* rn)
     {
-        if (rn->currentRenderTextureCount == 0)
+        if (rn->currentRenderTexture->presentationAttachmentIndex != -1)
         {
             VkImageMemoryBarrier2 preBarrier =
             {
@@ -134,12 +140,15 @@ namespace hf
             .pColorAttachments = tex->colorAttachments
         };
 
-        if (tex->hasDepthAttachment) renderingInfo.pDepthAttachment = &tex->depthStencilAttachment;
-        if (tex->hasStencilAttachment) renderingInfo.pStencilAttachment = &tex->depthStencilAttachment;
+        if ((uint32_t)(tex->mode & DepthStencilMode::Depth) > 0) renderingInfo.pDepthAttachment = &tex->depthStencilAttachment;
+        if ((uint32_t)(tex->mode & DepthStencilMode::Stencil) > 0) renderingInfo.pStencilAttachment = &tex->depthStencilAttachment;
 
-        if (tex->multisampleMode != MultisampleMode::MSAA_1X)
-            tex->colorAttachments[tex->colorAttachmentCount - 1].resolveImageView = currentView;
-        else tex->colorAttachments[tex->colorAttachmentCount - 1].imageView = currentView;
+        if (tex->presentationAttachmentIndex != -1)
+        {
+            if (tex->multisampleMode != MultisampleMode::MSAA_1X)
+                tex->colorAttachments[tex->presentationAttachmentIndex].resolveImageView = currentView;
+            else tex->colorAttachments[tex->presentationAttachmentIndex].imageView = currentView;
+        }
 
         GRAPHICS_DATA.extensionFunctions.vkCmdBeginRenderingKHR(rn->currentCommand, &renderingInfo);
         UploadViewportAndScissor(rn);
@@ -149,7 +158,7 @@ namespace hf
     {
         GRAPHICS_DATA.extensionFunctions.vkCmdEndRenderingKHR(rn->currentCommand);
 
-        if (rn->currentRenderTextureCount == rn->targetRenderTextureCount)
+        if (rn->prevRenderTexture->presentationAttachmentIndex != -1)
         {
             VkImageMemoryBarrier2 postBarrier =
             {
@@ -215,25 +224,28 @@ namespace hf
         }
     }
 
-    DepthStencilFormatInfo ChooseDepthStencilFormat(LoadStoreOperationType op, LoadStoreOperationType stencilOp,
+    DepthStencilFormatInfo ChooseDepthStencilFormat(DepthStencilMode mode,
         VkImageTiling tiling, VkFormatFeatureFlags features)
     {
-        uint32_t stScore = (op != LoadStoreOperationType::DontCareAndDontCare) << 0;
-        stScore |= (stencilOp != LoadStoreOperationType::DontCareAndDontCare) << 1;
-
-        switch (stScore)
+        switch ((int)mode)
         {
         case 1:
 
             for (auto i : inter::rendering::DEPTH_FORMATS)
             {
                 auto format = (VkFormat)i;
-                if (CheckFormatSupport(format, tiling, features)) return
+                if (CheckFormatSupport(format, tiling, features))
                 {
-                    .format = format,
-                    .hasStencil = format != VK_FORMAT_D32_SFLOAT && format != VK_FORMAT_D16_UNORM,
-                    .hasDepth = true
-                };
+                    DepthStencilFormatInfo info
+                    {
+                        .format = format,
+                        .mode = DepthStencilMode::Depth
+                    };
+
+                    if (format != VK_FORMAT_D32_SFLOAT && format != VK_FORMAT_D16_UNORM)
+                        info.mode |= DepthStencilMode::Stencil;
+                    return info;
+                }
             }
 
             throw GENERIC_EXCEPT("[Hyperflow]", "No suitable depth format found");
@@ -242,12 +254,17 @@ namespace hf
             for (auto i : inter::rendering::STENCIL_FORMATS)
             {
                 auto format = (VkFormat)i;
-                if (CheckFormatSupport(format, tiling, features)) return
+                if (CheckFormatSupport(format, tiling, features))
                 {
-                    .format = format,
-                    .hasStencil = true,
-                    .hasDepth = format != VK_FORMAT_S8_UINT
-                };
+                    DepthStencilFormatInfo info
+                    {
+                        .format = format,
+                        .mode = DepthStencilMode::Stencil
+                    };
+
+                    if (format != VK_FORMAT_S8_UINT) info.mode |= DepthStencilMode::Depth;
+                    return info;
+                }
             }
 
             throw GENERIC_EXCEPT("[Hyperflow]", "No suitable stencil format found");
@@ -256,12 +273,14 @@ namespace hf
             for (auto i : inter::rendering::DEPTH_STENCIL_FORMATS)
             {
                 auto format = (VkFormat)i;
-                if (CheckFormatSupport(format, tiling, features)) return
+                if (CheckFormatSupport(format, tiling, features))
                 {
-                    .format = format,
-                    .hasStencil = true,
-                    .hasDepth = true
-                };
+                    return
+                    {
+                        .format = format,
+                        .mode = DepthStencilMode::Stencil | DepthStencilMode::Depth
+                    };
+                }
             }
 
             throw GENERIC_EXCEPT("[Hyperflow]", "No suitable depthStencil format found");
@@ -303,7 +322,40 @@ namespace hf
             (newSize.x == tex->extent.width && newSize.y == tex->extent.height)) return;
         ClearRenderTexture(tex);
 
-        if (tex->hasDepthAttachment || tex->hasStencilAttachment)
+        for (uint32_t i = 0; i < tex->colorAttachmentCount; i++)
+        {
+            if (i == tex->presentationAttachmentIndex) continue;
+
+            auto& attachment = tex->colorAttachments[i];
+            inter::rendering::TextureCreationInfo textureInfo
+            {
+                .type = inter::rendering::TextureType::Tex2D,
+                .viewType = inter::rendering::TextureViewType::Tex2D,
+                .size = uvec3(newSize, 1),
+                .channel = TextureChannel::RGBA,
+                .mipLevels = 1,
+                .samples = tex->multisampleMode,
+                .pTextures = nullptr,
+                .textureCount = 1,
+                .details
+                {
+                    .format = (TextureFormat)tex->colorFormats[i],
+                    .aspectFlags = TextureAspectFlags::Color,
+                    .tiling = TextureTiling::Optimal,
+                    .usageFlags = TextureUsageFlags::Color,
+                    .memoryType = BufferMemoryType::Static,
+                    .finalLayout = (TextureResultLayoutType)attachment.imageLayout,
+                }
+            };
+
+            auto* texture = new VkTexture(textureInfo);
+            tex->colorTextures.push_back(texture);
+
+            attachment.imageLayout = (VkImageLayout)texture->details.finalLayout;
+            attachment.imageView = texture->view;
+        }
+
+        if (tex->mode != DepthStencilMode::None)
         {
             auto& attachment = tex->depthStencilAttachment;
 
@@ -328,12 +380,11 @@ namespace hf
             };
 
             textureInfo.details.aspectFlags = TextureAspectFlags::None;
-            if (tex->hasDepthAttachment) textureInfo.details.aspectFlags |= TextureAspectFlags::Depth;
-            if (tex->hasStencilAttachment) textureInfo.details.aspectFlags |= TextureAspectFlags::Stencil;
+            if ((uint32_t)(tex->mode & DepthStencilMode::Depth) > 0) textureInfo.details.aspectFlags |= TextureAspectFlags::Depth;
+            if ((uint32_t)(tex->mode & DepthStencilMode::Stencil) > 0) textureInfo.details.aspectFlags |= TextureAspectFlags::Stencil;
 
             auto* texture = new VkTexture(textureInfo);
             tex->depthTexture = texture;
-
             attachment.imageView = texture->view;
         }
 
@@ -370,7 +421,7 @@ namespace hf
                 auto& attachment = tex->colorAttachments[i];
                 attachment.resolveImageLayout = (VkImageLayout)texture->details.finalLayout;
 
-                if (i == tex->colorAttachmentCount - 1)
+                if (i == tex->presentationAttachmentIndex)
                 {
                     attachment.resolveMode = VK_RESOLVE_MODE_AVERAGE_BIT;
                     attachment.imageView = texture->view;

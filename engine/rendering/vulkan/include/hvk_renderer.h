@@ -36,8 +36,6 @@ namespace hf
 
         VkRenderTexture* prevRenderTexture{};
         VkRenderTexture* currentRenderTexture{};
-        uint32_t targetRenderTextureCount = 0;
-        uint32_t currentRenderTextureCount = 0;
     };
 
     struct VkDrawInfo
@@ -81,7 +79,7 @@ namespace hf
 
     void UploadBuffers(const VkRenderer* rn, const inter::rendering::BufferUploadInfo& info);
     void BindBuffers(const VkRenderer* rn, const inter::rendering::BufferBindInfo& info);
-    void BindTexturePack(const VkRenderer* rn, const VkTexturePack* pack, uint32_t setBindingIndex);
+    void BindTexturePack(const VkRenderer* rn, const VkTexturePack* pack, uint32_t setBindingIndex, RenderBindingType bindingType);
     void BindShaderSetup(VkRenderer* rn, ShaderSetup setup);
     void UploadPushConstants(const VkRenderer* rn, const PushConstantUploadInfo& info);
 }

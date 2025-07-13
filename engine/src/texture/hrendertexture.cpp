@@ -6,6 +6,12 @@ namespace hf
 {
     RenderTexture::RenderTexture(const RenderTextureCreationInfo& info) : createInfo(info)
     {
+        if (inter::HF.graphicsResources.activePresentationLock)
+        {
+            for (uint32_t i = 0; i < createInfo.colorAttachmentCount; i++)
+                createInfo.pColorAttachments[i].isUsedForPresentation = false;
+        }
+
         inter::rendering::CreateRenderTexture_i(this);
     }
 

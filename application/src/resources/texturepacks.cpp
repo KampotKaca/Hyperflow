@@ -11,17 +11,22 @@ namespace app
     {
         //viking_room_pack
         {
-            hf::TexturePackTextureBindingInfo viking_room_binding
+            hf::TexturePackBindingInfo<hf::Texture>::TextureInfo viking_texture_info
+            {
+                .texture = APP_TEXTURES.viking_room,
+                .index = 0
+            };
+
+            hf::TexturePackBindingInfo<hf::Texture> viking_room_binding
             {
                 .sampler = APP_TEXTURE_SAMPLERS.defaultSampler,
-                .pTextures = &APP_TEXTURES.viking_room,
-                .arraySize = 1
+                .textures = &viking_texture_info,
+                .arraySize = 1,
+                .bindingIndex = 0
             };
 
             const hf::TexturePackCreationInfo texPackInfo
             {
-                .bindingType = hf::RenderBindingType::Graphics,
-                .bindingId = 0,
                 .pTextureBindings = &viking_room_binding,
                 .textureBindingCount = 1,
                 .layout = APP_TEXTURE_LAYOUTS.viking_room,

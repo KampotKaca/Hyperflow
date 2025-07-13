@@ -131,15 +131,14 @@ namespace hf::inter::rendering
 
     struct TexturePackTextureUploadInfo
     {
-        void** pTextures{};
-        uint32_t offset = 0;
-        uint32_t count = 0;
-    };
+        struct TextureInfo
+        {
+            void* texture{};
+            uint32_t index{};
+        };
 
-    struct TexturePackBindingCreationInfo
-    {
-        TextureSampler sampler{};
-        void** pTextures{};
+        TextureInfo* pTextures{};
+        uint32_t offset = 0;
         uint32_t count = 0;
     };
 
@@ -156,13 +155,26 @@ namespace hf::inter::rendering
         uint32_t bindingCount = 0;
     };
 
+    struct TexturePackBindInfo
+    {
+        struct TextureInfo
+        {
+            TexturePackBindingType type{};
+            void* texture{};
+            uint32_t index{};
+        };
+
+        TextureSampler sampler{};
+        TextureInfo* textures{};
+        uint32_t arraySize{};
+        uint32_t bindingIndex{};
+    };
+
     struct TexturePackCreationInfo
     {
-        RenderBindingType bindingType = RenderBindingType::Graphics;
-        uint32_t bindingId = 0;
-        TexturePackBindingCreationInfo* pBindings{};
-        uint32_t bindingCount = 0;
         TextureLayout layout = 0;
+        uint32_t bindingCount = 0;
+        TexturePackBindInfo* pBindings{};
     };
 
     struct TexturePackAllocatorCreationInfo
@@ -175,6 +187,7 @@ namespace hf::inter::rendering
     {
         const void* texturePack{};
         uint32_t setBindingIndex = 0;
+        RenderBindingType bindingType = RenderBindingType::Graphics;
     };
 
     struct StorageBufferBindingInfo
@@ -272,7 +285,7 @@ namespace hf::inter::rendering
         //RenderingOperations
         void (*WaitForPreviousFrame)(void* rn);
         uvec2 (*GetReadyForRendering)(void* rn, void** pTextures, uint32_t textureCount);
-        void (*StartFrame)(void* rn, uint32_t renderTextureCount);
+        void (*StartFrame)(void* rn);
         void (*EndFrame)(void* rn);
         void (*Draw)(void* rn, const DrawCallInfo& info);
         void (*ApplyRenderAttachmentDependencies)(void* rn, RenderAttachmentDependencyInfo* pInfos, uint32_t count);

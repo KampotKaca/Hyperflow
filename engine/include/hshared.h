@@ -129,7 +129,7 @@ namespace hf
 	typedef uint32_t TextureSampler;
 	typedef uint32_t ShaderSetup;
 
-    enum class TexturePackBindingType { Texture2D, Cubemap };
+    enum class TexturePackBindingType { Texture2D, Cubemap, RenderTexture };
 	enum class CubemapTextureType { Left, Right, Down, Up, Back, Front };
 
 	enum class BufferDataType { U8, I8, U16, I16, U32, I32, U64, I64, F16, F32, F64, Count };
@@ -587,41 +587,42 @@ namespace hf
 		TextureDetails details{};
 	};
 
-	struct TexturePackTextureBindingInfo
-	{
-		//optional but, must be set until you try to render anything
-		TextureSampler sampler{};
-		//optional but, must be set until you try to render anything
-		Ref<Texture>* pTextures{};
-		//optional but, must be set until you try to render anything
-		uint32_t arraySize = 0;
-	};
+    template<typename T>
+    struct TexturePackBindingInfo
+    {
+        struct TextureInfo
+        {
+            Ref<T> texture{};
+            uint32_t index{};
+        };
 
-	struct TexturePackCubemapBindingInfo
-	{
-		//optional but, must be set until you try to render anything
-		TextureSampler sampler{};
-		//optional but, must be set until you try to render anything
-		Ref<Cubemap>* pCubemaps{};
-		//optional but, must be set until you try to render anything
-		uint32_t arraySize = 0;
-	};
+        TextureSampler sampler{};
+        TextureInfo* textures{};
+        uint32_t arraySize{};
+        uint32_t bindingIndex{};
+    };
 
 	struct TexturePackCreationInfo
 	{
-		RenderBindingType bindingType = RenderBindingType::Graphics;
-		uint32_t bindingId = 0;
-		TexturePackTextureBindingInfo* pTextureBindings{};
+		TexturePackBindingInfo<Texture>* pTextureBindings{};
 		uint32_t textureBindingCount = 0;
-		TexturePackCubemapBindingInfo* pCubemapeBindings{};
+		TexturePackBindingInfo<Cubemap>* pCubemapBindings{};
 		uint32_t cubemapBindingCount = 0;
+	    TexturePackBindingInfo<RenderTexture>* pRenderTextureBindings{};
+	    uint32_t renderTextureBindingCount = 0;
 		TextureLayout layout = 0;
 	};
 
 	template<typename T>
 	struct TexturePackTextureUploadInfo
 	{
-		const Ref<T>* pTextures{};
+        struct TextureInfo
+        {
+            Ref<T> texture{};
+            uint32_t index{};
+        };
+
+		const TextureInfo* pTextures{};
 		uint32_t count = 0;
 		uint32_t offset = 0;
 	};
@@ -646,29 +647,24 @@ namespace hf
 		TextureResultLayoutType layout = TextureResultLayoutType::Color;
 		TextureFormat format = TextureFormat::R8G8B8A8_Snorm;
 		LoadStoreOperationType lsOperation = LoadStoreOperationType::ClearAndStore;
-		LoadStoreOperationType lsStencilOperation = LoadStoreOperationType::DontCareAndDontCare;
+	    //If used render texture will not create view for the attachment,
+	    //this is fine when you are using it for presentation, but will cause problems if you use for any other purpouse
+	    bool isUsedForPresentation = false;
 		vec4 clearColor = vec4(0.0f, 0.0f, 0.0f, 1.0f);
 	};
+
+    enum class DepthStencilMode { None = 0, Depth = 1 << 0, Stencil = 1 << 1 };
+    DEFINE_ENUM_FLAGS(DepthStencilMode)
 
 	struct RenderTextureDepthAttachmentInfo
 	{
 		//type of attachment layout color, depth, stencil etc.
 		TextureResultLayoutType layout = TextureResultLayoutType::DepthStencil;
 		LoadStoreOperationType lsOperation = LoadStoreOperationType::ClearAndStore;
-		LoadStoreOperationType lsStencilOperation = LoadStoreOperationType::DontCareAndDontCare;
+	    DepthStencilMode mode = DepthStencilMode::Depth;
 
 		float clearDepth = 1.0f;
 		uint8_t clearStencil = 0;
-	};
-
-	struct RenderTexturePresentationAttachmentInfo
-	{
-		LoadStoreOperationType lsOperation = LoadStoreOperationType::ClearAndStore;
-		LoadStoreOperationType lsStencilOperation = LoadStoreOperationType::DontCareAndDontCare;
-
-		//initial layout type of the attachment
-		TextureResultLayoutType initialLayout = TextureResultLayoutType::Undefined;
-		vec4 clearColor = vec4(0.0f, 0.0f, 0.0f, 1.0f);
 	};
 
 	struct RenderAttachmentDependencyTarget
@@ -806,7 +802,6 @@ namespace hf
 	{
 		std::string title = "Untitled";
 		const char* iconFolderPath{};
-		WindowState state = WindowState::Restored;
 		WindowEventFlags eventFlags = WindowEventFlags::All;
 		WindowPointerState pointerState = WindowPointerState::Normal;
 		WindowStyle style = WindowStyle::Default;

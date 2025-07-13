@@ -18,8 +18,8 @@ namespace hf
         VkFormat depthStencilFormat{};
 
         uint32_t colorAttachmentCount = 0;
-        bool hasDepthAttachment = false;
-        bool hasStencilAttachment = false;
+        int32_t presentationAttachmentIndex = -1;
+        DepthStencilMode mode = DepthStencilMode::None;
 
         std::vector<VkTexture*> colorTextures{};
         std::vector<VkTexture*> msaaTextures{};

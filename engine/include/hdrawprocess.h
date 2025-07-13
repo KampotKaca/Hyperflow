@@ -24,7 +24,7 @@ namespace hf
     struct AssetRange
     {
         T start{}, size{};
-        T end() const { return start + size; }
+        [[nodiscard]] T end() const { return start + size; }
     };
 
     struct BufferSetPacketInfo
@@ -97,6 +97,12 @@ namespace hf
         void (*drawCallback)(const Ref<Renderer>& rn, void* cmd){};
     };
 
+    struct TextureInfo
+    {
+        void* texture{};
+        uint32_t index{};
+    };
+
     struct RenderPacket
     {
         StaticVector<RenderAttachmentDependencyInfo, RENDERING_MAX_NUM_RENDER_ATTACHMENT_DEPENDENCIES> dependencies{};
@@ -109,7 +115,7 @@ namespace hf
 
         StaticVector<TexturePackRebindingGroupPacketInfo, RENDERING_MAX_NUM_TEXPACK_REBINDING> textureGroupRebindings{};
         StaticVector<TexturePackRebindingPacketInfo, RENDERING_MAX_NUM_TEXPACK_REBINDING> textureRebindings{};
-        StaticVector<void*, RENDERING_MAX_NUM_TEXTURES> textures{};
+        StaticVector<TextureInfo, RENDERING_MAX_NUM_TEXTURES> textures{};
 
         StaticVector<BufferSetPacketInfo, RENDERING_MAX_NUM_UNIFORMS> bufferSets{};
         StaticVector<Buffer, RENDERING_MAX_NUM_UNIFORMS> buffers{};

@@ -11,19 +11,25 @@ namespace hf
         explicit TexturePack(const TexturePackCreationInfo& info);
         ~TexturePack();
 
+        template<typename T>
         struct Binding
         {
+            struct TextureInfo
+            {
+                Ref<T> texture{};
+                uint32_t index{};
+            };
+
             TextureSampler sampler{};
-            std::vector<void*> textures{};
+            StaticVector<TextureInfo, MAX_TEXTURES_IN_TEXTURE_ARRAY> textures{};
+            uint32_t bindingIndex{};
         };
 
-        RenderBindingType bindingType = RenderBindingType::Graphics;
-        std::vector<Binding> bindings{};
-        std::vector<inter::rendering::TexturePackBindingCreationInfo> bindingsBuffer{};
-        uint32_t textureBindingCount = 0;
-        uint32_t cubemapBindingCount = 0;
-        TextureLayout layout{};
-        uint32_t bindingId = 0;
+        StaticVector<Binding<Texture>, MAX_TEXTURES_IN_TEXTURE_PACK> textureBindings{};
+        StaticVector<Binding<Cubemap>, MAX_TEXTURES_IN_TEXTURE_PACK> cubemapBindings{};
+        StaticVector<Binding<RenderTexture>, MAX_TEXTURES_IN_TEXTURE_PACK> renderTextureBindings{};
+        TextureLayout layout = 0;
+
         void* handle{};
     };
 }

@@ -1,6 +1,7 @@
 #include "heditorinternal.h"
 #include "hyperfloweditor.h"
 #include "hyperflow.h"
+#include "imgui_internal.h"
 
 namespace hf::editor
 {
@@ -18,17 +19,7 @@ namespace hf::editor
 
     struct EditorRenderer
     {
-        struct CommandBuffer
-        {
-            std::vector<ImDrawVert> vertices;
-            std::vector<ImDrawIdx> indices;
-            std::vector<ImDrawCmd> commands;
-            ImDrawData drawData;
-        };
-
-        std::array<CommandBuffer, 2> commandBuffers;
-        std::atomic<size_t> currentBuffer{0};
-        std::mutex bufferMutex;
+        std::mutex contextLock;
         ImGuiContext* context;
     };
 
@@ -36,7 +27,6 @@ namespace hf::editor
 
     static void SetStyle();
     static void SetDarkThemeColors();
-    static void CaptureDrawData(ImDrawData* source, EditorRenderer::CommandBuffer& target);
 
     static RenderApiInfo API_INFO;
 
@@ -71,8 +61,8 @@ namespace hf::editor
             .QueueFamily = API_INFO.queueFamily,
             .Queue = API_INFO.queue,
             .DescriptorPool = API_INFO.descriptorPool,
-            .MinImageCount = 2,
-            .ImageCount = 2,
+            .MinImageCount = 3,
+            .ImageCount = 3,
             .MSAASamples = (VkSampleCountFlagBits)info.multisampleMode,
             .PipelineCache = VK_NULL_HANDLE,
             .UseDynamicRendering = true,
@@ -82,8 +72,8 @@ namespace hf::editor
                 .pNext = nullptr,
                 .colorAttachmentCount = 1,
                 .pColorAttachmentFormats = &format,
-                .depthAttachmentFormat = VK_FORMAT_UNDEFINED,
-                .stencilAttachmentFormat = VK_FORMAT_UNDEFINED
+                .depthAttachmentFormat = (VkFormat)info.depthFormat,
+                .stencilAttachmentFormat = (VkFormat)info.stencilFormat,
             },
             .CheckVkResultFn = API_INFO.CheckVkResultFn,
             .MinAllocationSize = 1024 * 1024,
@@ -100,44 +90,36 @@ namespace hf::editor
 
     void StartFrame()
     {
+        EDITOR_RENDERER.contextLock.lock();
+
         ImGui::SetCurrentContext(EDITOR_RENDERER.context);
         ImGui_ImplVulkan_NewFrame();
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
+
+        auto viewport = ImGui::GetMainViewport();
+        ImGui::DockSpaceOverViewport(viewport->ID, viewport, ImGuiDockNodeFlags_PassthruCentralNode);
     }
 
     void EndFrame()
     {
         ImGui::Render();
-        size_t currentIdx = EDITOR_RENDERER.currentBuffer.load();
+        ImGui::UpdatePlatformWindows();
 
-        {
-            auto& buffer = EDITOR_RENDERER.commandBuffers[currentIdx];
-            ImDrawData* drawData = ImGui::GetDrawData();
-
-            std::lock_guard lock(EDITOR_RENDERER.bufferMutex);
-            std::lock_guard lockGuard(GetRenderer(GetMainWindow())->threadInfo.drawLock);
-
-            ImGui::UpdatePlatformWindows();
-            ImGui::RenderPlatformWindowsDefault();
-
-            CaptureDrawData(drawData, buffer);
-        }
-
-        EDITOR_RENDERER.currentBuffer.store((currentIdx + 1) % 2);
+        EDITOR_RENDERER.contextLock.unlock();
     }
 
     void Draw(void* cmd)
     {
-        size_t renderIdx = (EDITOR_RENDERER.currentBuffer.load() + 1) % 2;
-        auto& buffer = EDITOR_RENDERER.commandBuffers[renderIdx];
+        std::unique_lock lock(EDITOR_RENDERER.contextLock);
 
-        std::lock_guard lock(EDITOR_RENDERER.bufferMutex);
-        const bool main_is_minimized = (buffer.drawData.DisplaySize.x <= 0.0f ||
-                                        buffer.drawData.DisplaySize.y <= 0.0f);
+        auto* drawData = ImGui::GetDrawData();
+        const bool main_is_minimized = (drawData->DisplaySize.x <= 0.0f ||
+                                        drawData->DisplaySize.y <= 0.0f);
 
         if (!main_is_minimized)
-            ImGui_ImplVulkan_RenderDrawData(&buffer.drawData, (VkCommandBuffer)cmd);
+            ImGui_ImplVulkan_RenderDrawData(drawData, (VkCommandBuffer)cmd);
+        ImGui::RenderPlatformWindowsDefault();
     }
 
     void SetStyle()
@@ -188,39 +170,5 @@ namespace hf::editor
         colors[ImGuiCol_TitleBg] = ImVec4{ 0.15f, 0.1505f, 0.151f, 1.0f };
         colors[ImGuiCol_TitleBgActive] = ImVec4{ 0.15f, 0.1505f, 0.151f, 1.0f };
         colors[ImGuiCol_TitleBgCollapsed] = ImVec4{ 0.15f, 0.1505f, 0.151f, 1.0f };
-    }
-
-    void CaptureDrawData(ImDrawData* source, EditorRenderer::CommandBuffer& target)
-    {
-        target.vertices.clear();
-        target.indices.clear();
-        target.commands.clear();
-
-        for (int n = 0; n < source->CmdListsCount; n++)
-        {
-            const ImDrawList* cmdList = source->CmdLists[n];
-
-            size_t vertexOffset = target.vertices.size();
-            size_t indexOffset = target.indices.size();
-
-            target.vertices.insert(
-                target.vertices.end(),
-                cmdList->VtxBuffer.Data,
-                cmdList->VtxBuffer.Data + cmdList->VtxBuffer.Size
-            );
-
-            target.indices.insert(
-                target.indices.end(),
-                cmdList->IdxBuffer.Data,
-                cmdList->IdxBuffer.Data + cmdList->IdxBuffer.Size
-            );
-
-            for (const ImDrawCmd& cmd : cmdList->CmdBuffer)
-            {
-                target.commands.push_back(cmd);
-                target.commands.back().IdxOffset += indexOffset;
-                target.commands.back().VtxOffset += vertexOffset;
-            }
-        }
     }
 }

@@ -4,7 +4,14 @@
 
 namespace hf::editor
 {
-    bool StartWindow(const char* name, bool* isOpen, WindowFlags flags) { return ImGui::Begin(name, isOpen, (ImGuiWindowFlags)flags | ImGuiWindowFlags_DockNodeHost); }
+    bool StartWindow(const char* name, bool* isOpen, WindowFlags flags)
+    {
+        ImGuiWindowClass window_class;
+        window_class.ViewportFlagsOverrideSet = ImGuiViewportFlags_NoAutoMerge;
+        ImGui::SetNextWindowClass(&window_class);
+
+        return ImGui::Begin(name, isOpen, (ImGuiWindowFlags)flags);
+    }
     void EndWindow() { ImGui::End(); }
 
     void SetNextWindowSize(vec2 size, Condition cond) { ImGui::SetNextWindowSize({ size.x, size.y }, (ImGuiCond)cond); }

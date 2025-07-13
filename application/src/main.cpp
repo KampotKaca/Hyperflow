@@ -42,7 +42,6 @@ int main()
 		{
 			.title        		 = "Hyperflow",
 			.iconFolderPath		 = "app/icons",
-			.state				 = hf::WindowState::Restored,
 			.eventFlags			 = hf::WindowEventFlags::Default,
 			.pointerState		 = hf::WindowPointerState::Normal,
 			.style        		 = hf::WindowStyle::Default,

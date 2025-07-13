@@ -125,7 +125,7 @@ namespace hf
 #if DEBUG
     void Set_DrawCallback(const Ref<Renderer>& rn, void (*callback)(const Ref<Renderer>&, void*));
 #else
-    inline void Push_EditorDrawCallback(const Ref<Renderer>& rn, void (*callback)(const Ref<Renderer>&, void*)){}
+    inline void Set_DrawCallback(const Ref<Renderer>& rn, void (*callback)(const Ref<Renderer>&, void*)){}
 #endif
 
     void Upload_Buffer(const Ref<Renderer>& rn, const BufferUploadInfo& info);
@@ -134,8 +134,9 @@ namespace hf
 	void UploadStart_TexturePack(const Ref<Renderer>& rn, const Ref<TexturePack>& texPack);
 	void UploadEnd_TexturePack(const Ref<Renderer>& rn);
 
-	template<typename T>
-	void UploadAdd_TexturePackBinding(const Ref<Renderer>& rn, const TexturePackBindingUploadInfo<T>& info);
+    void UploadAdd_TexturePackBinding(const Ref<Renderer>& rn, const TexturePackBindingUploadInfo<Texture>& info);
+    void UploadAdd_TexturePackBinding(const Ref<Renderer>& rn, const TexturePackBindingUploadInfo<Cubemap>& info);
+    void UploadAdd_TexturePackBinding(const Ref<Renderer>& rn, const TexturePackBindingUploadInfo<RenderTexture>& info);
 
     void Add_RenderTextureDependency(const Ref<Renderer>& rn, const RenderAttachmentDependencyInfo& info);
 

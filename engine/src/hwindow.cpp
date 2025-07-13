@@ -21,7 +21,7 @@ namespace hf
 		eventData.pointerPosition = inter::platform::GetPointerPosition(this);
 
 		inter::window::SetEventFlags(this, info.eventFlags);
-		inter::window::SetState(this, info.state);
+		inter::window::SetState(this, WindowState::Restored);
 		inter::window::Focus(this);
 		inter::window::SetTitle(this, info.title);
 		inter::window::SetTitle(this, info.title);

@@ -122,6 +122,7 @@ namespace app
 
             VoxelTerrainDraw(rn);
             hf::skybox::Draw(rn, APP_OBJECTS.skybox);
+            if (APP_DEBUG.drawGridLines) hf::gridlines::Draw(rn, APP_DEBUG.gridLinesInfo);
             DebugRender(rn);
         }
         hf::End_RenderTexture(rn);

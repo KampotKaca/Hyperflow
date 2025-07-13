@@ -189,7 +189,7 @@ namespace hf::inter::rendering
         return GetReadyForRendering(renderer);
     }
 
-    void StartFrame(void* rn, uint32_t renderTextureCount)
+    void StartFrame(void* rn)
     {
         auto renderer = (D3DRenderer*)rn;
         StartFrame(renderer);

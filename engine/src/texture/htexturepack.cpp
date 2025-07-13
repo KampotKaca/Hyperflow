@@ -5,41 +5,46 @@
 
 namespace hf
 {
-    TexturePack::TexturePack(const TexturePackCreationInfo& info)
-        : bindingType(info.bindingType), textureBindingCount(info.textureBindingCount),
-          cubemapBindingCount(info.cubemapBindingCount),
-          layout(info.layout), bindingId(info.bindingId)
+    template<typename T>
+    static void InitTextures(StaticVector<TexturePack::Binding<T>, MAX_TEXTURES_IN_TEXTURE_PACK>& resultSet,
+                             TexturePackBindingInfo<T>* pTextureBindings, uint32_t count)
     {
-        bindings = std::vector<Binding>(info.textureBindingCount + info.cubemapBindingCount);
-        for (uint32_t i = 0; i < info.textureBindingCount; i++)
+        for (uint32_t i = 0; i < count; i++)
         {
-            auto& bInfo = info.pTextureBindings[i];
-            auto& binding = bindings[i];
+            auto& bInfo = pTextureBindings[i];
+            TexturePack::Binding<T> binding
+            {
+                .sampler = bInfo.sampler,
+                .bindingIndex = bInfo.bindingIndex
+            };
 
-            binding.sampler = bInfo.sampler;
-            binding.textures = std::vector<void*>(bInfo.arraySize);
             for (uint32_t j = 0; j < bInfo.arraySize; j++)
-                binding.textures[j] = bInfo.pTextures[j]->handle;
+            {
+                auto& tex = bInfo.textures[j];
+                binding.textures.push_back({
+                    .texture = tex.texture,
+                    .index = tex.index
+                });
+            }
+
+            resultSet.push_back(binding);
         }
+    }
 
-        for (uint32_t i = 0; i < info.cubemapBindingCount; i++)
-        {
-            auto& bInfo = info.pCubemapeBindings[i];
-            auto& binding = bindings[info.textureBindingCount + i];
+    TexturePack::TexturePack(const TexturePackCreationInfo& info) : layout(info.layout)
+    {
+        InitTextures(textureBindings, info.pTextureBindings, info.textureBindingCount);
+        InitTextures(cubemapBindings, info.pCubemapBindings, info.cubemapBindingCount);
+        InitTextures(renderTextureBindings, info.pRenderTextureBindings, info.renderTextureBindingCount);
 
-            binding.sampler = bInfo.sampler;
-            binding.textures = std::vector<void*>(bInfo.arraySize);
-            for (uint32_t j = 0; j < bInfo.arraySize; j++)
-                binding.textures[j] = bInfo.pCubemaps[j]->handle;
-        }
-
-        bindingsBuffer = std::vector<inter::rendering::TexturePackBindingCreationInfo>(bindings.size());
         inter::rendering::CreateTexturePack_i(this);
     }
 
     TexturePack::~TexturePack()
     {
-        bindings.clear();
+        textureBindings.clear();
+        cubemapBindings.clear();
+        renderTextureBindings.clear();
         inter::rendering::DestroyTexturePack_i(this);
     }
 
@@ -71,29 +76,55 @@ namespace hf
 
     namespace inter::rendering
     {
+        template<typename T>
+        static void PassTextures(StaticVector<TexturePack::Binding<T>, 8>& src,
+            StaticVector<TexturePackBindInfo::TextureInfo, MAX_TEXTURES_IN_TEXTURE_PACK * MAX_TEXTURES_IN_TEXTURE_PACK * 3>& texInfos,
+            StaticVector<TexturePackBindInfo, MAX_TEXTURES_IN_TEXTURE_PACK * 3>& texPackBindInfos,
+            TexturePackBindingType type)
+        {
+            for (uint32_t i = 0; i < src.size(); i++)
+            {
+                auto& binding = src.at(i);
+                uint32_t from = texInfos.size();
+                for (uint32_t j = 0; j < binding.textures.size(); j++)
+                {
+                    auto& bi = binding.textures.atC(j);
+                    texInfos.push_back({
+                        .type = type,
+                        .texture = bi.texture->handle,
+                        .index = bi.index
+                    });
+                }
+
+                texPackBindInfos.push_back({
+                    .sampler = binding.sampler,
+                    .textures = texInfos.atP(from),
+                    .arraySize = (uint32_t)(texInfos.size() - from),
+                    .bindingIndex = binding.bindingIndex
+                });
+            }
+        }
+
         bool CreateTexturePack_i(TexturePack* texPack)
         {
             if (texPack->handle) return false;
 
-            for (uint32_t i = 0; i < texPack->bindings.size(); i++)
-            {
-                auto& binding = texPack->bindings[i];
-                auto& bindingBuffer = texPack->bindingsBuffer[i];
-                bindingBuffer.sampler = binding.sampler;
-                bindingBuffer.pTextures = binding.textures.data();
-                bindingBuffer.count = binding.textures.size();
-            }
+            StaticVector<TexturePackBindInfo::TextureInfo, MAX_TEXTURES_IN_TEXTURE_PACK * MAX_TEXTURES_IN_TEXTURE_PACK * 3> texInfos{};
+            StaticVector<TexturePackBindInfo, MAX_TEXTURES_IN_TEXTURE_PACK * 3> texPackBindInfos{};
 
-            const TexturePackCreationInfo creationInfo
+            PassTextures(texPack->textureBindings, texInfos, texPackBindInfos, TexturePackBindingType::Texture2D);
+            PassTextures(texPack->cubemapBindings, texInfos, texPackBindInfos, TexturePackBindingType::Cubemap);
+            PassTextures(texPack->renderTextureBindings, texInfos, texPackBindInfos, TexturePackBindingType::RenderTexture);
+
+
+            const TexturePackCreationInfo info
             {
-                .bindingType = texPack->bindingType,
-                .bindingId = texPack->bindingId,
-                .pBindings = texPack->bindingsBuffer.data(),
-                .bindingCount = (uint32_t)texPack->bindingsBuffer.size(),
-                .layout = texPack->layout
+                .layout = texPack->layout,
+                .bindingCount = (uint32_t)texPackBindInfos.size(),
+                .pBindings = texPackBindInfos.atP(0),
             };
 
-            texPack->handle = HF.renderingApi.api.CreateTexturePack(creationInfo);
+            texPack->handle = HF.renderingApi.api.CreateTexturePack(info);
             return true;
         }
 

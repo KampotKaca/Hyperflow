@@ -115,10 +115,66 @@ namespace hf
         rn->currentDraw.currentTexturePackBinding = nullptr;
     }
 
-    template void UploadAdd_TexturePackBinding(const Ref<Renderer>& rn, const TexturePackBindingUploadInfo<Texture>& info);
-    template void UploadAdd_TexturePackBinding(const Ref<Renderer>& rn, const TexturePackBindingUploadInfo<Cubemap>& info);
     template<typename T>
-    void UploadAdd_TexturePackBinding(const Ref<Renderer>& rn, const TexturePackBindingUploadInfo<T>& info)
+    static void UploadTexture(const Ref<Renderer>& rn, StaticVector<TexturePack::Binding<T>, MAX_TEXTURES_IN_TEXTURE_PACK>& bindings,
+                              const TexturePackBindingUploadInfo<T>& info, TexturePackBindingType type)
+    {
+        auto& packet = rn->currentDraw.packet;
+        auto& b = bindings.at(info.bindingIndex);
+
+        bool wasModified = false;
+        auto binding = (TexturePackRebindingPacketInfo)
+        {
+            .bindingIndex = info.bindingIndex,
+            .sampler = info.sampler,
+        };
+
+        if (info.sampler.has_value())
+        {
+            b.sampler = info.sampler.value();
+            wasModified = true;
+        }
+
+        if (info.texInfo.has_value())
+        {
+            auto textures = info.texInfo.value();
+            for (uint32_t i = 0; i < textures.count; i++)
+            {
+                auto texInfo = textures.pTextures[i];
+                b.textures.at(textures.offset + i) =
+                {
+                    .texture = texInfo.texture,
+                    .index = texInfo.index
+                };
+            }
+
+            binding.textures = (TexturePackRebindingPacketInfo::TextureBinding)
+            {
+                .offset = textures.offset,
+                .type = type,
+                .range = (AssetRange<uint16_t>){ .start = (uint16_t)packet.textures.size(), .size = (uint16_t)textures.count }
+            };
+
+            for (uint32_t i = 0; i < textures.count; i++)
+            {
+                auto texture = textures.pTextures[i];
+                packet.textures.push_back({
+                    .texture = texture.texture->handle,
+                    .index = texture.index
+                });
+            }
+            if (textures.count > 0) wasModified = true;
+        }
+
+        if (wasModified)
+        {
+            packet.textureRebindings.push_back(binding);
+            rn->currentDraw.currentTexturePackBinding->bindingPacketRange.size++;
+        }
+        else LOG_WARN("Unnecessary binding upload! nothing changed");
+    }
+
+    void UploadAdd_TexturePackBinding(const Ref<Renderer>& rn, const TexturePackBindingUploadInfo<Texture>& info)
     {
         try
         {
@@ -126,50 +182,54 @@ namespace hf
             if (!rn->currentDraw.currentTexturePackBinding)
                 throw GENERIC_EXCEPT("[Hyperflow]", "Cannot add binding packet without starting texture pack upload");
 #endif
-            auto& packet = rn->currentDraw.packet;
-            auto& b = rn->currentDraw.currentTexturePackBinding->texturePack->bindings[info.bindingIndex];
 
-            bool wasModified = false;
-            auto binding = (TexturePackRebindingPacketInfo)
-            {
-                .bindingIndex = info.bindingIndex,
-                .sampler = info.sampler,
-            };
+            UploadTexture(rn, rn->currentDraw.currentTexturePackBinding->texturePack->textureBindings,
+                info, TexturePackBindingType::Texture2D);
 
-            if (info.sampler.has_value())
-            {
-                b.sampler = info.sampler.value();
-                wasModified = true;
-            }
-
-            if (info.texInfo.has_value())
-            {
-                auto textures = info.texInfo.value();
-                for (uint32_t i = 0; i < textures.count; i++)
-                    b.textures[textures.offset + i] = textures.pTextures[i]->handle;
-
-                binding.textures = (TexturePackRebindingPacketInfo::TextureBinding)
-                {
-                    .offset = textures.offset,
-                    .type = TexturePackBindingType::Texture2D,
-                    .range = (AssetRange<uint16_t>){ .start = (uint16_t)packet.textures.size(), .size = (uint16_t)textures.count }
-                };
-
-                for (uint32_t i = 0; i < textures.count; i++)
-                    packet.textures.push_back(textures.pTextures[i]->handle);
-                if (textures.count > 0) wasModified = true;
-            }
-
-            if (wasModified)
-            {
-                packet.textureRebindings.push_back(binding);
-                rn->currentDraw.currentTexturePackBinding->bindingPacketRange.size++;
-            }
-            else LOG_WARN("Unnecessary binding upload! nothing changed");
         }
         catch (...)
         {
-            LOG_ERROR("%s", "Unable to add texture pack binding!");
+            LOG_ERROR("%s", "Unable to add texture pack texture2d binding!");
+            throw;
+        }
+    }
+
+    void UploadAdd_TexturePackBinding(const Ref<Renderer>& rn, const TexturePackBindingUploadInfo<Cubemap>& info)
+    {
+        try
+        {
+#if DEBUG
+            if (!rn->currentDraw.currentTexturePackBinding)
+                throw GENERIC_EXCEPT("[Hyperflow]", "Cannot add binding packet without starting texture pack upload");
+#endif
+
+            UploadTexture(rn, rn->currentDraw.currentTexturePackBinding->texturePack->cubemapBindings,
+                info, TexturePackBindingType::Cubemap);
+
+        }
+        catch (...)
+        {
+            LOG_ERROR("%s", "Unable to add texture pack cubemap binding!");
+            throw;
+        }
+    }
+
+    void UploadAdd_TexturePackBinding(const Ref<Renderer>& rn, const TexturePackBindingUploadInfo<RenderTexture>& info)
+    {
+        try
+        {
+#if DEBUG
+            if (!rn->currentDraw.currentTexturePackBinding)
+                throw GENERIC_EXCEPT("[Hyperflow]", "Cannot add binding packet without starting texture pack upload");
+#endif
+
+            UploadTexture(rn, rn->currentDraw.currentTexturePackBinding->texturePack->renderTextureBindings,
+                info, TexturePackBindingType::RenderTexture);
+
+        }
+        catch (...)
+        {
+            LOG_ERROR("%s", "Unable to add texture pack render texture binding!");
             throw;
         }
     }
@@ -644,10 +704,12 @@ namespace hf
             {
                 for (uint8_t rtIndex = 0; rtIndex < (uint8_t)packet.renderTextures.size(); rtIndex++)
                     packet.renderTextures.atC(rtIndex).texture->createInfo.size = size;
-#if DEBUG
-                std::lock_guard lock(tInfo.drawLock);
-#endif
-                HF.renderingApi.api.StartFrame(rn->handle, packet.renderTextures.size());
+
+// #if DEBUG
+                HF.staticResources.debugRenderTexture->createInfo.size = size;
+// #endif
+
+                HF.renderingApi.api.StartFrame(rn->handle);
                 RendererDraw_i(rn, packet);
                 HF.renderingApi.api.EndFrame(rn->handle);
             }
@@ -663,16 +725,9 @@ namespace hf
             const auto handle = rn->handle;
             RendererDrawUploads(handle, packet);
 
-            if (packet.dependencies.size() > 0)
-            {
-                HF.renderingApi.api.ApplyRenderAttachmentDependencies(handle,
-                packet.dependencies.atP(0), packet.dependencies.size());
-            }
-
             for (uint8_t rtIndex = 0; rtIndex < (uint8_t)packet.renderTextures.size(); rtIndex++)
             {
                 auto& rt = packet.renderTextures.atC(rtIndex);
-
                 if (rt.dependencyRange.size > 0)
                 {
                     HF.renderingApi.api.ApplyRenderAttachmentDependencies(handle,
@@ -878,11 +933,13 @@ namespace hf
                         if (p.textures.has_value())
                         {
                             auto& textures = p.textures.value();
+                            packet.textures.atC(textures.range.start);
+
                             binding.texInfo = (TexturePackTextureUploadInfo)
                             {
-                                .pTextures = packet.textures.atP(textures.range.start),
+                                .pTextures = (TexturePackTextureUploadInfo::TextureInfo*)packet.textures.atP(textures.range.start),
                                 .offset = textures.offset,
-                                .count = textures.range.size
+                                .count = textures.range.size,
                             };
                         }
 
@@ -893,6 +950,51 @@ namespace hf
                     HF.renderingApi.api.UploadTexturePackBinding(group.texturePack->handle, uploadInfo);
                 }
             }
+        }
+
+        void DebugDraw_i(const Ref<Renderer>& rn)
+        {
+            // UploadStart_TexturePack(rn, HF.staticResources.gammaTexturePack);
+            // {
+            //     // UploadAdd_TexturePackBinding()
+            // }
+            // UploadEnd_TexturePack(rn);
+            //
+            // Start_RenderTexture(rn, HF.staticResources.debugRenderTexture);
+            // {
+            //     Start_ShaderSetup(rn, HF.staticResources.gammaCorrectionShaderSetup);
+            //     {
+            //         const hf::ShaderBindingInfo shaderInfo
+            //         {
+            //             .shader = HF.staticResources.gammaCorrectionShader,
+            //             .attrib = HF.staticResources.quadAttrib,
+            //             .bindingPoint = RenderBindingType::Graphics
+            //         };
+            //         Start_Shader(rn, shaderInfo);
+            //         {
+            //             Start_Material(rn, hf::primitives::GetEmptyMaterial());
+            //             {
+            //                 MaterialAdd_TexturePackBinding(rn, HF.staticResources.gammaTexturePack, 0);
+            //                 Start_Draw(rn);
+            //                 {
+            //                     hf::DrawCallInfo drawInfo
+            //                     {
+            //                         .pVertBuffers = &HF.staticResources.quadBuffer,
+            //                         .bufferCount = 1,
+            //                         .instanceCount = 1
+            //                     };
+            //
+            //                     DrawAdd_DrawCall(rn, drawInfo);
+            //                 }
+            //                 End_Draw(rn);
+            //             }
+            //             End_Material(rn);
+            //         }
+            //         End_Shader(rn);
+            //     }
+            //     End_ShaderSetup(rn);
+            // }
+            // End_RenderTexture(rn);
         }
     }
 }

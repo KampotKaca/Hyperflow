@@ -85,7 +85,7 @@ namespace hf::inter::rendering
 
     void BindTexturePack(void* rn, const TexturePackBindingInfo& info)
     {
-        hf::BindTexturePack((VkRenderer*)rn, (VkTexturePack*)info.texturePack, info.setBindingIndex);
+        hf::BindTexturePack((VkRenderer*)rn, (VkTexturePack*)info.texturePack, info.setBindingIndex, info.bindingType);
     }
 
     void* CreateTexturePackAllocator(const TexturePackAllocatorCreationInfo& info)
@@ -232,11 +232,9 @@ namespace hf::inter::rendering
         DelayUntilPreviousFrameFinish((VkRenderer*)rn);
     }
 
-    void StartFrame(void* rn, uint32_t renderTextureCount)
+    void StartFrame(void* rn)
     {
         auto renderer = (VkRenderer*)rn;
-        renderer->currentRenderTextureCount = 0;
-        renderer->targetRenderTextureCount = renderTextureCount;
         StartFrame(renderer);
     }
 
@@ -245,8 +243,6 @@ namespace hf::inter::rendering
         auto renderer = (VkRenderer*)rn;
         renderer->prevRenderTexture = nullptr;
         renderer->currentRenderTexture = nullptr;
-        renderer->currentRenderTextureCount = 0;
-        renderer->targetRenderTextureCount = 0;
         EndFrame(renderer);
     }
 
@@ -341,7 +337,6 @@ namespace hf::inter::rendering
 
         vrn->currentRenderTexture = (VkRenderTexture*)tex;
         hf::BeginRendering(vrn);
-        vrn->currentRenderTextureCount++;
     }
 
     void EndRendering(void* rn)

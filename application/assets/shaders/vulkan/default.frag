@@ -26,5 +26,5 @@ void main()
     lightInfo.smoothness = PUSH_CONSTANT.phongData.w;
     lightInfo.specularColor = PUSH_CONSTANT.phongData.xyz;
 
-    outColor = FinalizeColor(vec4(GetPhongLighting(color.xyz, o_ViewPosition.xyz, o_ViewNormal, lightInfo), color.w));
+    outColor = vec4(GetPhongLighting(color.xyz, o_ViewPosition.xyz, o_ViewNormal, lightInfo), color.w);
 }
