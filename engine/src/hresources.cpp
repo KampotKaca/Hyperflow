@@ -53,7 +53,7 @@ namespace hf
             DefineTextureSamplers();
             DefineBuffers();
             DefineShaderSetups();
-            // DefineDebugResources();
+            DefineDebugResources();
         }
 
         void LoadStaticResources_i()
@@ -66,7 +66,7 @@ namespace hf
 
             LoadTexturePacks();
             LoadMaterials();
-            // LoadDebugResources();
+            LoadDebugResources();
         }
 
         void DefineBufferAttribs()
@@ -291,8 +291,41 @@ namespace hf
                 HF.staticResources.skyboxTexturePack = Create(info);
             }
 
+#if DEBUG
+            //gamma handling texturepack
             {
-                std::array texPacks = { HF.staticResources.skyboxTexturePack };
+                TexturePackBindingInfo<RenderTexture>::TextureInfo ti
+                {
+                    .texture = nullptr,
+                    .index = 0
+                };
+
+                TexturePackBindingInfo<RenderTexture> binding
+                {
+                    .sampler = HF.staticResources.pointSampler,
+                    .textures = &ti,
+                    .arraySize = 1,
+                    .bindingIndex = 0
+                };
+
+                const TexturePackCreationInfo info
+                {
+                    .pRenderTextureBindings = &binding,
+                    .renderTextureBindingCount = 1,
+                    .layout = HF.staticResources.skyboxLayout,
+                };
+                HF.staticResources.gammaTexturePack = Create(info);
+            }
+#endif
+
+            {
+                std::array texPacks =
+                {
+                    HF.staticResources.skyboxTexturePack,
+#if DEBUG
+                    HF.staticResources.gammaTexturePack,
+#endif
+                };
                 TexturePackAllocatorCreationInfo info
                 {
                     .pTexturePacks = texPacks.data(),
@@ -446,13 +479,13 @@ namespace hf
 
         void DefineDebugResources()
         {
-// #if DEBUG
+#if DEBUG
             //Gamma Texture Layout
             {
                 TextureLayoutBindingInfo sourceTextureBinding
                 {
                     .bindingId = 0,
-                    .usageFlags = ShaderUsageStage::Fragment | ShaderUsageStage::Vertex,
+                    .usageFlags = ShaderUsageStage::Vertex | ShaderUsageStage::Fragment,
                     .arraySize = 1
                 };
 
@@ -489,12 +522,12 @@ namespace hf
 
                 HF.staticResources.gammaCorrectionShaderSetup = DefineShaderSetup(info);
             }
-// #endif
+#endif
         }
 
         void LoadDebugResources()
         {
-// #if DEBUG
+#if DEBUG
             //Gamma Shader
             {
                 const ShaderCreationInfo shaderInfo
@@ -549,7 +582,7 @@ namespace hf
                 HF.staticResources.debugRenderTexture = Create(info);
                 HF.graphicsResources.activePresentationLock = true;
             }
-// #endif
+#endif
         }
     }
 }

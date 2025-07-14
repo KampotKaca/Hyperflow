@@ -420,17 +420,10 @@ namespace hf
 
                 auto& attachment = tex->colorAttachments[i];
                 attachment.resolveImageLayout = (VkImageLayout)texture->details.finalLayout;
+                attachment.resolveMode = VK_RESOLVE_MODE_AVERAGE_BIT;
 
-                if (i == tex->presentationAttachmentIndex)
-                {
-                    attachment.resolveMode = VK_RESOLVE_MODE_AVERAGE_BIT;
-                    attachment.imageView = texture->view;
-                }
-                else
-                {
-                    attachment.resolveMode = VK_RESOLVE_MODE_SAMPLE_ZERO_BIT;
-                    attachment.resolveImageView = texture->view;
-                }
+                if (i == tex->presentationAttachmentIndex) attachment.imageView = texture->view;
+                else attachment.resolveImageView = texture->view;
             }
         }
 

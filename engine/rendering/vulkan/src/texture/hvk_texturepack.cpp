@@ -105,9 +105,12 @@ namespace hf
             }
         }
 
-        vkUpdateDescriptorSets(GRAPHICS_DATA.device.logicalDevice.device,
+        if (writeCount > 0)
+        {
+            vkUpdateDescriptorSets(GRAPHICS_DATA.device.logicalDevice.device,
                 writeCount, GRAPHICS_DATA.preAllocBuffers.descWrites,
                 0, nullptr);
+        }
     }
 
     void SetTextureBinding(VkTexturePack* pack, const inter::rendering::TexturePackBindingUploadInfo* bindings, uint32_t bindingCount)

@@ -31,7 +31,7 @@ namespace hf::inter
     struct GraphicsResources
     {
 #if DEBUG
-        bool activePresentationLock = false;
+        bool activePresentationLock = true;
 #else
         bool activePresentationLock = false;
 #endif
@@ -106,7 +106,7 @@ namespace hf::inter
 
         Ref<VertBuffer> quadBuffer{};
 
-// #if DEBUG
+#if DEBUG
         TextureSampler pointSampler{};
         ShaderSetup gammaCorrectionShaderSetup{};
         TextureLayout gammaCorrectionLayout{};
@@ -114,7 +114,7 @@ namespace hf::inter
         Ref<TexturePack> gammaTexturePack{};
         Ref<Shader> gammaCorrectionShader{};
         Ref<RenderTexture> debugRenderTexture{};
-// #endif
+#endif
     };
 
     struct Hyperflow

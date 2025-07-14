@@ -13,6 +13,13 @@ namespace hf
 {
 #if DEBUG
 
+    void Set_DebugDrawCallback(const Ref<Renderer>& rn, void (*callback)(const Ref<Renderer>&, void*))
+    {
+        rn->debugDrawCallback = callback;
+    }
+
+#endif
+
     void Set_DrawCallback(const Ref<Renderer>& rn, void (*callback)(const Ref<Renderer>&, void*))
     {
         try
@@ -30,8 +37,6 @@ namespace hf
             throw;
         }
     }
-
-#endif
 
     void Upload_Buffer(const Ref<Renderer>& rn, const BufferUploadInfo& info)
     {
@@ -705,9 +710,9 @@ namespace hf
                 for (uint8_t rtIndex = 0; rtIndex < (uint8_t)packet.renderTextures.size(); rtIndex++)
                     packet.renderTextures.atC(rtIndex).texture->createInfo.size = size;
 
-// #if DEBUG
-                // HF.staticResources.debugRenderTexture->createInfo.size = size;
-// #endif
+#if DEBUG
+                HF.staticResources.debugRenderTexture->createInfo.size = size;
+#endif
 
                 HF.renderingApi.api.StartFrame(rn->handle);
                 RendererDraw_i(rn, packet);
@@ -954,47 +959,66 @@ namespace hf
 
         void DebugDraw_i(const Ref<Renderer>& rn)
         {
-            // UploadStart_TexturePack(rn, HF.staticResources.gammaTexturePack);
-            // {
-            //     // UploadAdd_TexturePackBinding()
-            // }
-            // UploadEnd_TexturePack(rn);
-            //
-            // Start_RenderTexture(rn, HF.staticResources.debugRenderTexture);
-            // {
-            //     Start_ShaderSetup(rn, HF.staticResources.gammaCorrectionShaderSetup);
-            //     {
-            //         const hf::ShaderBindingInfo shaderInfo
-            //         {
-            //             .shader = HF.staticResources.gammaCorrectionShader,
-            //             .attrib = HF.staticResources.quadAttrib,
-            //             .bindingPoint = RenderBindingType::Graphics
-            //         };
-            //         Start_Shader(rn, shaderInfo);
-            //         {
-            //             Start_Material(rn, hf::primitives::GetEmptyMaterial());
-            //             {
-            //                 MaterialAdd_TexturePackBinding(rn, HF.staticResources.gammaTexturePack, 0);
-            //                 Start_Draw(rn);
-            //                 {
-            //                     hf::DrawCallInfo drawInfo
-            //                     {
-            //                         .pVertBuffers = &HF.staticResources.quadBuffer,
-            //                         .bufferCount = 1,
-            //                         .instanceCount = 1
-            //                     };
-            //
-            //                     DrawAdd_DrawCall(rn, drawInfo);
-            //                 }
-            //                 End_Draw(rn);
-            //             }
-            //             End_Material(rn);
-            //         }
-            //         End_Shader(rn);
-            //     }
-            //     End_ShaderSetup(rn);
-            // }
-            // End_RenderTexture(rn);
+            auto& prevRt = rn->currentDraw.packet.renderTextures.atC(rn->currentDraw.packet.renderTextures.size() - 1);
+            UploadStart_TexturePack(rn, HF.staticResources.gammaTexturePack);
+            {
+                hf::TexturePackTextureUploadInfo<RenderTexture>::TextureInfo ti
+                {
+                    .texture = prevRt.texture,
+                    .index = 0
+                };
+
+                hf::TexturePackBindingUploadInfo<RenderTexture> binding
+                {
+                    .bindingIndex = 0,
+                    .texInfo =
+                    (hf::TexturePackTextureUploadInfo<RenderTexture>){
+                        .pTextures = &ti,
+                        .count = 1,
+                        .offset = 0
+                    },
+                };
+
+                UploadAdd_TexturePackBinding(rn, binding);
+            }
+            UploadEnd_TexturePack(rn);
+
+            Start_RenderTexture(rn, HF.staticResources.debugRenderTexture);
+            {
+                Set_DebugDrawCallback(rn, rn->debugDrawCallback);
+                Start_ShaderSetup(rn, HF.staticResources.gammaCorrectionShaderSetup);
+                {
+                    const hf::ShaderBindingInfo shaderInfo
+                    {
+                        .shader = HF.staticResources.gammaCorrectionShader,
+                        .attrib = HF.staticResources.quadAttrib,
+                        .bindingPoint = RenderBindingType::Graphics
+                    };
+                    Start_Shader(rn, shaderInfo);
+                    {
+                        Start_Material(rn, hf::primitives::GetEmptyMaterial());
+                        {
+                            MaterialAdd_TexturePackBinding(rn, HF.staticResources.gammaTexturePack, 0);
+                            Start_Draw(rn);
+                            {
+                                hf::DrawCallInfo drawInfo
+                                {
+                                    .pVertBuffers = &HF.staticResources.quadBuffer,
+                                    .bufferCount = 1,
+                                    .instanceCount = 1
+                                };
+
+                                DrawAdd_DrawCall(rn, drawInfo);
+                            }
+                            End_Draw(rn);
+                        }
+                        End_Material(rn);
+                    }
+                    End_Shader(rn);
+                }
+                End_ShaderSetup(rn);
+            }
+            End_RenderTexture(rn);
         }
     }
 }

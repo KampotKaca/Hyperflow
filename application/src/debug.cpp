@@ -34,8 +34,6 @@ namespace app
         {
             .windowHandle = GetHandle(hf::GetMainWindow()),
             .multisampleMode = MSAA_MODE,
-            .depthFormat = DEPTH_STENCIL_MODE,
-            // .stencilFormat = DEPTH_STENCIL_MODE
         };
         editorInfo.renderApiHandles = hf::GetEditorApiHandles();
         hf::editor::Load(editorInfo);
@@ -198,6 +196,6 @@ namespace app
 
     void DebugRender(const hf::Ref<hf::Renderer>& rn)
     {
-        hf::Set_DrawCallback(rn, GuiDraw);
+        hf::Set_DebugDrawCallback(rn, GuiDraw);
     }
 }

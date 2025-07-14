@@ -24,7 +24,10 @@ namespace hf
 			RenderPacket drawPacket{};
 		};
 
-		RenderPacketDrawProcess currentDraw{};
+#if DEBUG
+	    void (*debugDrawCallback)(const Ref<Renderer>&, void*);
+#endif
+	    RenderPacketDrawProcess currentDraw{};
 		bool isDrawing = false;
 		ThreadInfo threadInfo{};
 		const Window* window{};

@@ -90,10 +90,20 @@ namespace hf
                 for (uint32_t j = 0; j < binding.textures.size(); j++)
                 {
                     auto& bi = binding.textures.atC(j);
-                    texInfos.push_back({
-                        .texture = bi.texture->handle,
+                    if (bi.texture)
+                    {
+                        texInfos.push_back({
+                            .texture = bi.texture->handle,
+                            .index = bi.index
+                        });
+                    }
+                    else
+                    {
+                        texInfos.push_back({
+                        .texture = nullptr,
                         .index = bi.index
                     });
+                    }
                 }
 
                 texPackBindInfos.push_back({
