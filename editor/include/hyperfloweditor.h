@@ -10,6 +10,8 @@ namespace hf::editor
         void* windowHandle{};
         void* renderApiHandles{};
         MultisampleMode multisampleMode = MultisampleMode::MSAA_1X;
+        TextureFormat* pColorFormats{};
+        uint8_t colorFormatCount = 0;
         TextureFormat depthFormat = TextureFormat::D32_Sfloat;
         TextureFormat stencilFormat = TextureFormat::Undefined;
     };

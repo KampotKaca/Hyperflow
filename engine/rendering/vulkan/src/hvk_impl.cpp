@@ -301,7 +301,7 @@ namespace hf::inter::rendering
                 .newLayout = (VkImageLayout)info.dst.targetLayout,
                 .srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
                 .dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
-                .image = GetRenderTextureImage(vrn->currentRenderTexture, info.attachmentIndex),
+                .image = GetRenderTextureImage(vrn->prevRenderTexture, info.attachmentIndex),
                 .subresourceRange =
                 {
                     .aspectMask = (VkImageAspectFlags)info.aspectFlags,

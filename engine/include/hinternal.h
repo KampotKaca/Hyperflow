@@ -30,11 +30,6 @@ namespace hf::inter
 
     struct GraphicsResources
     {
-#if DEBUG
-        bool activePresentationLock = true;
-#else
-        bool activePresentationLock = false;
-#endif
         unordered_map<uint64_t, Ref<Shader>> shaders{};
         unordered_map<uint64_t, Ref<RuntimeBufferBase>> buffers{};
         unordered_map<uint64_t, Ref<RenderTexture>> renderTextures{};
@@ -105,16 +100,6 @@ namespace hf::inter
         Ref<Material> emptyMaterial{};
 
         Ref<VertBuffer> quadBuffer{};
-
-#if DEBUG
-        TextureSampler pointSampler{};
-        ShaderSetup gammaCorrectionShaderSetup{};
-        TextureLayout gammaCorrectionLayout{};
-
-        Ref<TexturePack> gammaTexturePack{};
-        Ref<Shader> gammaCorrectionShader{};
-        Ref<RenderTexture> debugRenderTexture{};
-#endif
     };
 
     struct Hyperflow
@@ -189,7 +174,6 @@ namespace hf::inter
 
         void RendererUpdate_i(const Ref<Renderer>& rn);
         void RendererDraw_i(const Ref<Renderer>& rn, RenderPacket& packet);
-        void DebugDraw_i(const Ref<Renderer>& rn);
 
         bool CreateShader_i(Shader* shader);
         bool DestroyShader_i(Shader* shader);

@@ -30,10 +30,14 @@ namespace app
 
     void DebugRendererInit()
     {
+        std::array formats = { hf::TextureFormat::R8G8B8A8_Unorm };
         hf::editor::LoadInfo editorInfo
         {
             .windowHandle = GetHandle(hf::GetMainWindow()),
             .multisampleMode = MSAA_MODE,
+            .pColorFormats = formats.data(),
+            .colorFormatCount = formats.size(),
+            .depthFormat = DEPTH_STENCIL_MODE
         };
         editorInfo.renderApiHandles = hf::GetEditorApiHandles();
         hf::editor::Load(editorInfo);
@@ -196,6 +200,6 @@ namespace app
 
     void DebugRender(const hf::Ref<hf::Renderer>& rn)
     {
-        hf::Set_DebugDrawCallback(rn, GuiDraw);
+        hf::Set_DrawCallback(rn, GuiDraw);
     }
 }

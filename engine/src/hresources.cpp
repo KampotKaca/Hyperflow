@@ -37,14 +37,12 @@ namespace hf
         static void DefineTextureSamplers();
         static void DefineBuffers();
         static void DefineShaderSetups();
-        static void DefineDebugResources();
 
         static void LoadCubemaps();
         static void LoadTexturePacks();
         static void LoadMeshes();
         static void LoadShaders();
         static void LoadMaterials();
-        static void LoadDebugResources();
 
         void DefineStaticResources_i()
         {
@@ -53,7 +51,6 @@ namespace hf
             DefineTextureSamplers();
             DefineBuffers();
             DefineShaderSetups();
-            DefineDebugResources();
         }
 
         void LoadStaticResources_i()
@@ -66,7 +63,6 @@ namespace hf
 
             LoadTexturePacks();
             LoadMaterials();
-            LoadDebugResources();
         }
 
         void DefineBufferAttribs()
@@ -291,40 +287,10 @@ namespace hf
                 HF.staticResources.skyboxTexturePack = Create(info);
             }
 
-#if DEBUG
-            //gamma handling texturepack
-            {
-                TexturePackBindingInfo<RenderTexture>::TextureInfo ti
-                {
-                    .texture = nullptr,
-                    .index = 0
-                };
-
-                TexturePackBindingInfo<RenderTexture> binding
-                {
-                    .sampler = HF.staticResources.pointSampler,
-                    .textures = &ti,
-                    .arraySize = 1,
-                    .bindingIndex = 0
-                };
-
-                const TexturePackCreationInfo info
-                {
-                    .pRenderTextureBindings = &binding,
-                    .renderTextureBindingCount = 1,
-                    .layout = HF.staticResources.skyboxLayout,
-                };
-                HF.staticResources.gammaTexturePack = Create(info);
-            }
-#endif
-
             {
                 std::array texPacks =
                 {
                     HF.staticResources.skyboxTexturePack,
-#if DEBUG
-                    HF.staticResources.gammaTexturePack,
-#endif
                 };
                 TexturePackAllocatorCreationInfo info
                 {
@@ -475,114 +441,6 @@ namespace hf
                 .sizeInBytes = 0
             };
             HF.staticResources.emptyMaterial = Create(materialInfo);
-        }
-
-        void DefineDebugResources()
-        {
-#if DEBUG
-            //Gamma Texture Layout
-            {
-                TextureLayoutBindingInfo sourceTextureBinding
-                {
-                    .bindingId = 0,
-                    .usageFlags = ShaderUsageStage::Vertex | ShaderUsageStage::Fragment,
-                    .arraySize = 1
-                };
-
-                const TextureLayoutDefinitionInfo layoutInfo
-                {
-                    .pBindings = &sourceTextureBinding,
-                    .bindingCount = 1
-                };
-
-                HF.staticResources.gammaCorrectionLayout = DefineTextureLayout(layoutInfo);
-            }
-
-            //Point Sampler
-            {
-                constexpr TextureSamplerDefinitionInfo samplerInfo
-                {
-                    .filter = TextureFilter::Point,
-                    .anisotropicFilter = TextureAnisotropicFilter::None,
-                    .repeatMode = TextureRepeatMode::ClampToEdge,
-                    .useNormalizedCoordinates = true,
-                    .comparison = ComparisonOperation::None,
-                };
-
-                HF.staticResources.pointSampler = DefineTextureSampler(samplerInfo);
-            }
-
-            //Shader Setup
-            {
-                const ShaderSetupDefinitionInfo info
-                {
-                    .pTextureLayouts = &HF.staticResources.gammaCorrectionLayout,
-                    .textureLayoutCount = 1
-                };
-
-                HF.staticResources.gammaCorrectionShaderSetup = DefineShaderSetup(info);
-            }
-#endif
-        }
-
-        void LoadDebugResources()
-        {
-#if DEBUG
-            //Gamma Shader
-            {
-                const ShaderCreationInfo shaderInfo
-                {
-                    .setup = HF.staticResources.gammaCorrectionShaderSetup,
-                    .supportedAttribCount = 1,
-                    .pSupportedAttribs = &HF.staticResources.quadAttrib,
-                    .vertexShaderLoc = "__gammacorrection",
-                    .fragmentShaderLoc = "__gammacorrection",
-                    .drawOutputFormats = HF.internalResourcesFormat.drawOutputFormats,
-                    .rasterizerOptions =
-                    {
-                        .cullMode = ShaderCullMode::None,
-                    },
-                    .alphaTestOptions =
-                    {
-                        .blendMode = ShaderBlendMode::None,
-                        .blendOp = ShaderBlendOp::XOr
-                    },
-                    .depthStencilOptions =
-                    {
-                        .enableDepth = false,
-                        .writeDepth = false,
-                        .comparisonFunc = DepthComparisonFunction::GreaterOrEqual,
-                        .enableDepthBounds = false,
-                        .enableStencil = false,
-                    }
-                };
-                HF.staticResources.gammaCorrectionShader = Create(shaderInfo);
-            }
-
-            {
-                RenderTextureColorAttachmentInfo colorAttachment
-                {
-                    .layout = TextureResultLayoutType::Color,
-                    .format = TextureFormat::R8G8B8A8_Unorm,
-                    .lsOperation = LoadStoreOperationType::ClearAndStore,
-                    .isUsedForPresentation = true,
-                    .clearColor = { 0.0f, 0.0f, 0.0f, 1.0f },
-                };
-
-                const RenderTextureCreationInfo info
-                {
-                    .pColorAttachments = { colorAttachment },
-                    .colorAttachmentCount = 1,
-                    .multisampleMode = HF.internalResourcesFormat.drawOutputFormats.sampleMode,
-                    .size = GetSize(GetMainWindow()),
-                    .offset = { 0, 0 }
-                };
-
-                HF.graphicsResources.activePresentationLock = false;
-                HF.staticResources.debugRenderTexture = Create(info);
-                HF.graphicsResources.activePresentationLock = true;
-            }
-#endif
         }
     }
 }

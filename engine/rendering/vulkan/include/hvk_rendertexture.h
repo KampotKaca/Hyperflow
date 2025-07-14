@@ -6,6 +6,12 @@
 
 namespace hf
 {
+    struct ImageInfo
+    {
+        VkFormat format{};
+        VkImageUsageFlags usage{};
+    };
+
     struct VkRenderTexture
     {
         explicit VkRenderTexture(const RenderTextureCreationInfo& info);
@@ -14,8 +20,8 @@ namespace hf
         VkRenderingAttachmentInfoKHR colorAttachments[MAX_COLOR_ATTACHMENTS]{};
         VkRenderingAttachmentInfoKHR depthStencilAttachment{};
 
-        VkFormat colorFormats[MAX_COLOR_ATTACHMENTS];
-        VkFormat depthStencilFormat{};
+        ImageInfo colorInfos[MAX_COLOR_ATTACHMENTS];
+        ImageInfo depthStencilInfo{};
 
         uint32_t colorAttachmentCount = 0;
         int32_t presentationAttachmentIndex = -1;

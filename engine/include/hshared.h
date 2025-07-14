@@ -647,6 +647,7 @@ namespace hf
 		TextureResultLayoutType layout = TextureResultLayoutType::Color;
 		TextureFormat format = TextureFormat::R8G8B8A8_Snorm;
 		LoadStoreOperationType lsOperation = LoadStoreOperationType::ClearAndStore;
+	    TextureUsageFlags usageFlags = TextureUsageFlags::None;
 	    //If used render texture will not create view for the attachment,
 	    //this is fine when you are using it for presentation, but will cause problems if you use for any other purpouse
 	    bool isUsedForPresentation = false;
@@ -662,6 +663,7 @@ namespace hf
 		TextureResultLayoutType layout = TextureResultLayoutType::DepthStencil;
 		LoadStoreOperationType lsOperation = LoadStoreOperationType::ClearAndStore;
 	    DepthStencilMode mode = DepthStencilMode::Depth;
+        TextureUsageFlags usageFlags = TextureUsageFlags::None;
 
 		float clearDepth = 1.0f;
 		uint8_t clearStencil = 0;

@@ -51,7 +51,6 @@ namespace hf::editor
         ImGui_ImplGlfw_InitForVulkan((GLFWwindow*)info.windowHandle, true);
 
         API_INFO = *(RenderApiInfo*)info.renderApiHandles;
-        auto format = VK_FORMAT_R8G8B8A8_UNORM;
         ImGui_ImplVulkan_InitInfo initInfo
         {
             .ApiVersion = API_INFO.version,
@@ -70,8 +69,8 @@ namespace hf::editor
             {
                 .sType = VK_STRUCTURE_TYPE_PIPELINE_RENDERING_CREATE_INFO_KHR,
                 .pNext = nullptr,
-                .colorAttachmentCount = 1,
-                .pColorAttachmentFormats = &format,
+                .colorAttachmentCount = info.colorFormatCount,
+                .pColorAttachmentFormats = (VkFormat*)info.pColorFormats,
                 .depthAttachmentFormat = (VkFormat)info.depthFormat,
                 .stencilAttachmentFormat = (VkFormat)info.stencilFormat,
             },

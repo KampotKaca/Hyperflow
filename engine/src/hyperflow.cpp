@@ -54,13 +54,14 @@ namespace hf
 			{
 				inter::HF.time.StartFrame();
 				inter::platform::HandleEvents(inter::HF.updateType);
-				if (!IsRunning()) break;
+				if (!IsRunning()) continue;
 				if(inter::HF.lifecycleCallbacks.onUpdateCallback) inter::HF.lifecycleCallbacks.onUpdateCallback();
-
+			    if (!IsRunning()) continue;
 				if(IsKeyDown(Key::Escape))
 				{
 					inter::alloc::LogThreadMemoryStats_i();
 					Terminate();
+				    continue;
 				}
 
 				inter::HF.tempWindows.clear();
@@ -78,7 +79,6 @@ namespace hf
 						inter::rendering::PreDraw_i(rn);
 						{
 						    if (cInfo.onRenderCallback) cInfo.onRenderCallback(rn);
-						    inter::rendering::DebugDraw_i(rn);
 						}
 						inter::rendering::EndRenderPacket_i(rn);
 					}

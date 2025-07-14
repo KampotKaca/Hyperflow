@@ -41,7 +41,11 @@ namespace hf
             };
 
             SetOperations(attachment.loadOp, attachment.storeOp, attachmentInfo.lsOperation);
-            colorFormats[i] = (VkFormat)attachmentInfo.format;
+            colorInfos[i] =
+            {
+                .format = (VkFormat)attachmentInfo.format,
+                .usage = (VkImageUsageFlags)attachmentInfo.usageFlags
+            };
 
             if (attachmentInfo.isUsedForPresentation)
             {
@@ -71,7 +75,11 @@ namespace hf
             depthStencilAttachment = attachment;
             auto formatInfo = ChooseDepthStencilFormat(attachmentInfo.mode,
                     VK_IMAGE_TILING_OPTIMAL, VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT);
-            depthStencilFormat = formatInfo.format;
+            depthStencilInfo =
+            {
+                .format = formatInfo.format,
+                .usage = (VkImageUsageFlags)attachmentInfo.usageFlags
+            };
             mode = formatInfo.mode;
         }
 
@@ -327,6 +335,8 @@ namespace hf
             if (i == tex->presentationAttachmentIndex) continue;
 
             auto& attachment = tex->colorAttachments[i];
+            auto& info = tex->colorInfos[i];
+
             inter::rendering::TextureCreationInfo textureInfo
             {
                 .type = inter::rendering::TextureType::Tex2D,
@@ -339,7 +349,7 @@ namespace hf
                 .textureCount = 1,
                 .details
                 {
-                    .format = (TextureFormat)tex->colorFormats[i],
+                    .format = (TextureFormat)info.format,
                     .aspectFlags = TextureAspectFlags::Color,
                     .tiling = TextureTiling::Optimal,
                     .usageFlags = TextureUsageFlags::Color,
@@ -348,16 +358,23 @@ namespace hf
                 }
             };
 
+            if (tex->multisampleMode == MultisampleMode::MSAA_1X)
+                textureInfo.details.usageFlags |= (TextureUsageFlags)info.usage;
+            else textureInfo.details.usageFlags |= TextureUsageFlags::Transient;
+
             auto* texture = new VkTexture(textureInfo);
             tex->colorTextures.push_back(texture);
 
             attachment.imageLayout = (VkImageLayout)texture->details.finalLayout;
-            attachment.imageView = texture->view;
+
+            if (tex->multisampleMode == MultisampleMode::MSAA_1X) attachment.imageView = texture->view;
+            else attachment.resolveImageView = texture->view;
         }
 
         if (tex->mode != DepthStencilMode::None)
         {
             auto& attachment = tex->depthStencilAttachment;
+            auto& info = tex->depthStencilInfo;
 
             inter::rendering::TextureCreationInfo textureInfo
             {
@@ -371,9 +388,9 @@ namespace hf
                 .textureCount = 1,
                 .details
                 {
-                    .format = (TextureFormat)tex->depthStencilFormat,
+                    .format = (TextureFormat)info.format,
                     .tiling = TextureTiling::Optimal,
-                    .usageFlags = TextureUsageFlags::DepthStencil,
+                    .usageFlags = TextureUsageFlags::DepthStencil | (TextureUsageFlags)info.usage,
                     .memoryType = BufferMemoryType::Static,
                     .finalLayout = (TextureResultLayoutType)attachment.imageLayout,
                 }
@@ -405,7 +422,6 @@ namespace hf
                     .format = TextureFormat::Undefined,
                     .aspectFlags = TextureAspectFlags::Color,
                     .tiling = TextureTiling::Optimal,
-                    .usageFlags = (TextureUsageFlags::Color | TextureUsageFlags::Transient),
                     .memoryType = BufferMemoryType::Static,
                     .finalLayout = TextureResultLayoutType::Color,
                 }
@@ -414,7 +430,13 @@ namespace hf
             tex->msaaTextures = std::vector<VkTexture*>(tex->colorAttachmentCount);
             for (uint32_t i = 0; i < tex->colorAttachmentCount; i++)
             {
-                textureInfo.details.format = (TextureFormat)tex->colorFormats[i];
+                auto& info = tex->colorInfos[i];
+
+                textureInfo.details.format = (TextureFormat)info.format;
+                textureInfo.details.usageFlags = TextureUsageFlags::Color |
+                                                 // TextureUsageFlags::Transient |
+                                                 (TextureUsageFlags)info.usage;
+
                 auto* texture = new VkTexture(textureInfo);
                 tex->msaaTextures[i] = texture;
 

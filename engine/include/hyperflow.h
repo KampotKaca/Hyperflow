@@ -122,12 +122,6 @@ namespace hf
 	void Resize(const Ref<Renderer>& rn, uvec2 size);
 
     //region Draw Process
-#if DEBUG
-    void Set_DebugDrawCallback(const Ref<Renderer>& rn, void (*callback)(const Ref<Renderer>&, void*));
-#else
-    inline void Set_DebugDrawCallback(const Ref<Renderer>& rn, void (*callback)(const Ref<Renderer>&, void*)){}
-#endif
-
     void Set_DrawCallback(const Ref<Renderer>& rn, void (*callback)(const Ref<Renderer>&, void*));
     void Upload_Buffer(const Ref<Renderer>& rn, const BufferUploadInfo& info);
 	void Upload_Material(const Ref<Renderer>& rn, const Ref<Material>& material);
