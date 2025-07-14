@@ -108,7 +108,7 @@ namespace hf::editor
         EDITOR_RENDERER.contextLock.unlock();
     }
 
-    void Draw(void* cmd)
+    void DrawFrame(void* cmd)
     {
         std::unique_lock lock(EDITOR_RENDERER.contextLock);
 

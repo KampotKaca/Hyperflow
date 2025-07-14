@@ -176,7 +176,6 @@ target_include_directories(${PROJECT_NAME}
         PRIVATE
         platforms/include
         rendering/include
-        components/include
         ../meshconvertor/include
 )
 

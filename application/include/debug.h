@@ -22,6 +22,7 @@ namespace app
     void DebugStart();
     void DebugUpdate();
     void DebugQuit();
+
     void DebugPreRender(const hf::Ref<hf::Renderer>& rn);
     void DebugPrepass(const hf::Ref<hf::Renderer>& rn);
     void DebugRender(const hf::Ref<hf::Renderer>& rn);

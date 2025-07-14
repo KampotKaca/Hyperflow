@@ -7,17 +7,17 @@ file(GLOB_RECURSE EDITOR_SRC CONFIGURE_DEPENDS src/*.cpp)
 
 add_subdirectory(external/ImGui)
 
-add_library(${PROJECT_NAME} ${EDITOR_SRC})
+add_library(Hyperflow_Editor ${EDITOR_SRC})
 
-target_precompile_headers(${PROJECT_NAME}
+target_precompile_headers(Hyperflow_Editor
         PRIVATE
         include/heditorinternal.h
 )
-set_target_properties(${PROJECT_NAME} PROPERTIES UNITY_BUILD ON)
+set_target_properties(Hyperflow_Editor PROPERTIES UNITY_BUILD ON)
 
 find_package(Vulkan REQUIRED)
 
-target_link_libraries(${PROJECT_NAME}
+target_link_libraries(Hyperflow_Editor
         PUBLIC
         Hyperflow_Engine
         glm
@@ -32,7 +32,7 @@ target_link_libraries(${PROJECT_NAME}
         glfw
 )
 
-target_include_directories(${PROJECT_NAME}
+target_include_directories(Hyperflow_Editor
         PUBLIC
         src/
         include/

@@ -146,16 +146,6 @@ namespace app
             APP_DEBUG.camera.Update(hf::GetMainWindow(), (float)hf::GetDeltaTime());
 
         if (hf::IsKeyDown(hf::Key::N)) APP_DEBUG.drawGridLines = !APP_DEBUG.drawGridLines;
-
-        APP_DEBUG.camera.camera3D.core.SetFov(
-            APP_DEBUG.camera.camera3D.core.fov -
-            hf::GetScrollDelta().y * (float)hf::GetDeltaTime() * 1000.0f);
-
-        if (hf::IsKeyDownContinues(hf::Key::Z))
-            APP_OBJECTS.mainLight.direction = glm::rotateX(APP_OBJECTS.mainLight.direction, glm::radians((float)hf::GetDeltaTime() * 25.0f));
-
-        if (hf::IsKeyDownContinues(hf::Key::X))
-            APP_OBJECTS.mainLight.direction = glm::rotateX(APP_OBJECTS.mainLight.direction, -glm::radians((float)hf::GetDeltaTime() * 25.0f));
     }
 
     void DebugQuit()
@@ -173,7 +163,12 @@ namespace app
         hf::editor::SetNextWindowPos({ 300, 300 }, hf::editor::Condition::FirstUseEver);
         if (hf::editor::StartWindow("Transformer"))
         {
-
+            if (hf::editor::DrawComponent("Viking Room"))
+            {
+                hf::editor::Draw("_viking_room_", APP_OBJECTS.vikingRoomTransform);
+                hf::editor::Draw("_directional_", APP_OBJECTS.mainLight);
+                hf::editor::Draw("_camera_", APP_DEBUG.camera.camera3D.core);
+            }
         }
         hf::editor::EndWindow();
 
@@ -195,7 +190,7 @@ namespace app
 
     void GuiDraw(const hf::Ref<hf::Renderer>& rn, void* cmd)
     {
-        hf::editor::Draw(cmd);
+        hf::editor::DrawFrame(cmd);
     }
 
     void DebugRender(const hf::Ref<hf::Renderer>& rn)

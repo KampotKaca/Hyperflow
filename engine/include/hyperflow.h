@@ -1,16 +1,11 @@
 #ifndef HYPERFLOW_H
 #define HYPERFLOW_H
 
-#include "hshared.h"
-#include "hexception.h"
-#include "hgenericexception.h"
 #include "../components/include/hcomponents.h"
+#include "hshared.h"
 
 namespace hf
 {
-	template <BS::opt_t OptFlags = BS::tp::none>
-	using ThreadPool = BS::thread_pool<OptFlags>;
-
 	void Preload();
 	void Shutdown();
 
