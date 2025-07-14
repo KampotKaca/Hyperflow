@@ -203,6 +203,11 @@ namespace hf
         }
     }
 
+    void StageCopyOperation(const VkCopyBufferToImageOperation& operation)
+    {
+        GRAPHICS_DATA.bufferToImageCopyOperations.push_back(operation);
+    }
+
     inline void CopyBufferToImage(VkCommandBuffer command)
     {
         for (auto& operation : GRAPHICS_DATA.bufferToImageCopyOperations)

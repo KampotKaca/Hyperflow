@@ -4,6 +4,7 @@
 #include <hyaml.h>
 
 #include "hyperfloweditor.h"
+#include "../appconfig.h"
 
 namespace app
 {

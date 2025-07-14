@@ -53,7 +53,7 @@ namespace hf
             DefineTextureSamplers();
             DefineBuffers();
             DefineShaderSetups();
-            DefineDebugResources();
+            // DefineDebugResources();
         }
 
         void LoadStaticResources_i()
@@ -61,9 +61,12 @@ namespace hf
             LoadShaders();
             LoadMeshes();
             LoadCubemaps();
+
+            SubmitAllTextures();
+
             LoadTexturePacks();
             LoadMaterials();
-            LoadDebugResources();
+            // LoadDebugResources();
         }
 
         void DefineBufferAttribs()
@@ -288,8 +291,6 @@ namespace hf
                 HF.staticResources.skyboxTexturePack = Create(info);
             }
 
-            SubmitAllTexturePacks();
-
             {
                 std::array texPacks = { HF.staticResources.skyboxTexturePack };
                 TexturePackAllocatorCreationInfo info
@@ -451,7 +452,7 @@ namespace hf
                 TextureLayoutBindingInfo sourceTextureBinding
                 {
                     .bindingId = 0,
-                    .usageFlags = ShaderUsageStage::Fragment,
+                    .usageFlags = ShaderUsageStage::Fragment | ShaderUsageStage::Vertex,
                     .arraySize = 1
                 };
 

@@ -21,14 +21,16 @@ namespace app
 	{
 		TextureLoadAll();
 		CubemapLoadAll();
+	    CreateRenderTextures();
+
+        hf::SubmitAllTextures();
+
 		MeshLoadAll();
 		TexturePackLoadAll();
 		ShaderLoadAll();
 		MaterialLoadAll();
 		AudioLoadAll();
 		DebugLoad();
-
-	    CreateRenderTextures();
 	}
 
 	void AppStart()

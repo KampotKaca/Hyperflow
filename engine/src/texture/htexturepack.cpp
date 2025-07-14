@@ -2,6 +2,8 @@
 #include "hinternal.h"
 #include "hyperflow.h"
 #include "htexture.h"
+#include "hrendertexture.h"
+#include "hcubemap.h"
 
 namespace hf
 {
@@ -56,7 +58,6 @@ namespace hf
             inter::HF.graphicsResources.texturePacks.erase((uint64_t)texPack.get());
     }
 
-    void SubmitAllTexturePacks() { inter::HF.renderingApi.api.SubmitTextureCopyOperations(); }
     Ref<TexturePack> Create(const TexturePackCreationInfo& info)
     {
         Ref<TexturePack> texPack = MakeRef<TexturePack>(info);
@@ -90,13 +91,13 @@ namespace hf
                 {
                     auto& bi = binding.textures.atC(j);
                     texInfos.push_back({
-                        .type = type,
                         .texture = bi.texture->handle,
                         .index = bi.index
                     });
                 }
 
                 texPackBindInfos.push_back({
+                    .type = type,
                     .sampler = binding.sampler,
                     .textures = texInfos.atP(from),
                     .arraySize = (uint32_t)(texInfos.size() - from),

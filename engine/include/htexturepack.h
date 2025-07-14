@@ -14,14 +14,14 @@ namespace hf
         template<typename T>
         struct Binding
         {
-            struct TextureInfo
+            struct Info
             {
                 Ref<T> texture{};
                 uint32_t index{};
             };
 
             TextureSampler sampler{};
-            StaticVector<TextureInfo, MAX_TEXTURES_IN_TEXTURE_ARRAY> textures{};
+            StaticVector<Info, MAX_TEXTURES_IN_TEXTURE_ARRAY> textures{};
             uint32_t bindingIndex{};
         };
 

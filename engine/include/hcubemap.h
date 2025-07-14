@@ -16,7 +16,7 @@ namespace hf
         uint32_t mipLevels = 1;
         TextureDetails details{};
 
-        void* handle;
+        void* handle{};
     };
 }
 

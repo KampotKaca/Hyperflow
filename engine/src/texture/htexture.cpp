@@ -89,6 +89,8 @@ namespace hf
         }
     }
 
+    void SubmitAllTextures() { inter::HF.renderingApi.api.SubmitTextureCopyOperations(); }
+
     namespace inter::rendering
     {
         bool CreateTexture_i(Texture* tex)

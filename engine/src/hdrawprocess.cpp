@@ -706,7 +706,7 @@ namespace hf
                     packet.renderTextures.atC(rtIndex).texture->createInfo.size = size;
 
 // #if DEBUG
-                HF.staticResources.debugRenderTexture->createInfo.size = size;
+                // HF.staticResources.debugRenderTexture->createInfo.size = size;
 // #endif
 
                 HF.renderingApi.api.StartFrame(rn->handle);

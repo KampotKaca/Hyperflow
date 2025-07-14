@@ -334,11 +334,6 @@ namespace hf
         GRAPHICS_DATA.bufferToBufferCopyOperations.push_back(operation);
     }
 
-    void StageCopyOperation(const VkCopyBufferToImageOperation& operation)
-    {
-        GRAPHICS_DATA.bufferToImageCopyOperations.push_back(operation);
-    }
-
     inline void CopyBufferToBuffer(VkCommandBuffer command)
     {
         for (auto& operation : GRAPHICS_DATA.bufferToBufferCopyOperations)

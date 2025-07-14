@@ -159,11 +159,11 @@ namespace hf::inter::rendering
     {
         struct TextureInfo
         {
-            TexturePackBindingType type{};
             void* texture{};
             uint32_t index{};
         };
 
+        TexturePackBindingType type{};
         TextureSampler sampler{};
         TextureInfo* textures{};
         uint32_t arraySize{};

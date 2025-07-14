@@ -30,7 +30,7 @@ namespace hf
         VkWriteDescriptorSet writes[FRAMES_IN_FLIGHT]{};
     };
 
-    void UpdateTexturePack(const VkTexturePack* pack, const uint32_t* bindingIndices, uint32_t bindingCount);
+    void UpdateTexturePack(VkTexturePack* pack, const uint32_t* bindingIndices, uint32_t bindingCount);
     void SetTextureBinding(VkTexturePack* pack, const inter::rendering::TexturePackBindingUploadInfo* bindings, uint32_t bindingCount);
 }
 

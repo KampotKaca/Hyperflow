@@ -34,9 +34,7 @@ namespace app
 
             APP_TEXTURE_PACKS.viking_room_pack = hf::Create(texPackInfo);
         }
-
-        hf::SubmitAllTexturePacks();
-
+        
         //allocator
         {
             std::array packs { APP_TEXTURE_PACKS.viking_room_pack };

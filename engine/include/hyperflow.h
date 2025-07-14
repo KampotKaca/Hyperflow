@@ -179,7 +179,7 @@ namespace hf
 
 	MeshStats GetStats(const Ref<Mesh>& mesh);
 
-	void SubmitAllTexturePacks();
+	void SubmitAllTextures();
 
 	void SubmitAllBuffers();
 

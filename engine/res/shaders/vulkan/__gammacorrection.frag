@@ -9,5 +9,5 @@ layout(location = 0) out vec4 outColor;
 
 void main()
 {
-    outColor = pow(texture(fullscreenTexture, outTexcoord), GAMMA_CORRECTION);
+    outColor = vec4(pow(texture(fullscreenTexture, outTexcoord).rgb, GAMMA_CORRECTION), 1.0);
 }
