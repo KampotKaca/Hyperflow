@@ -124,7 +124,8 @@ namespace hf::editor
     void SetStyle()
     {
         ImGuiStyle &style = ImGui::GetStyle();
-        if (ImGui::GetIO().ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
+        auto& io = ImGui::GetIO();
+        if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
         {
             style.WindowRounding = 0.0f;
             style.Colors[ImGuiCol_WindowBg].w = 1.0f;
@@ -132,6 +133,7 @@ namespace hf::editor
 
         //		style.ItemSpacing = ImVec2(10, 10);
         //		style.ItemInnerSpacing = ImVec2(10, 10);
+        style.IndentSpacing = 7;
         style.PopupBorderSize = 2;
         style.SelectableTextAlign = ImVec2(0.5f, 0);
         style.SeparatorTextAlign = ImVec2(0.5f, 0.5f);

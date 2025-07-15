@@ -953,7 +953,6 @@ namespace hf
 		float volume = 1.0f;
 		float pitch = 1.0f;
 		bool loopingEnabled = false;
-		uint64_t frame = 0;
 	};
 
 	struct AudioPlayerCreationInfo

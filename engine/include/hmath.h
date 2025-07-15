@@ -23,9 +23,21 @@
 
 namespace hf
 {
-    typedef glm::vec2 vec2;
-    typedef glm::vec3 vec3;
-    typedef glm::vec4 vec4;
+    typedef glm::i8vec2 i8vec2;
+    typedef glm::i8vec3 i8vec3;
+    typedef glm::i8vec4 i8vec4;
+
+    typedef glm::u8vec2 u8vec2;
+    typedef glm::u8vec3 u8vec3;
+    typedef glm::u8vec4 u8vec4;
+
+    typedef glm::i16vec2 i16vec2;
+    typedef glm::i16vec3 i16vec3;
+    typedef glm::i16vec4 i16vec4;
+
+    typedef glm::u16vec2 u16vec2;
+    typedef glm::u16vec3 u16vec3;
+    typedef glm::u16vec4 u16vec4;
 
     typedef glm::ivec2 ivec2;
     typedef glm::ivec3 ivec3;
@@ -34,6 +46,22 @@ namespace hf
     typedef glm::uvec2 uvec2;
     typedef glm::uvec3 uvec3;
     typedef glm::uvec4 uvec4;
+
+    typedef glm::i64vec2 i64vec2;
+    typedef glm::i64vec3 i64vec3;
+    typedef glm::i64vec4 i64vec4;
+
+    typedef glm::u64vec2 u64vec2;
+    typedef glm::u64vec3 u64vec3;
+    typedef glm::u64vec4 u64vec4;
+
+    typedef glm::vec2 vec2;
+    typedef glm::vec3 vec3;
+    typedef glm::vec4 vec4;
+
+    typedef glm::dvec2 dvec2;
+    typedef glm::dvec3 dvec3;
+    typedef glm::dvec4 dvec4;
 
     typedef glm::quat quat;
 

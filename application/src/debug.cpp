@@ -163,22 +163,22 @@ namespace app
         hf::editor::SetNextWindowPos({ 300, 300 }, hf::editor::Condition::FirstUseEver);
         if (hf::editor::StartWindow("Transformer"))
         {
-            if (hf::editor::DrawComponent("Viking Room"))
+            if (hf::editor::StartComponent("Viking Room"))
             {
-                hf::editor::Draw("_viking_room_", APP_OBJECTS.vikingRoomTransform);
-                hf::editor::Draw("_directional_", APP_OBJECTS.mainLight);
-                hf::editor::Draw("_camera_", APP_DEBUG.camera.camera3D.core);
+                hf::editor::Draw("Transform", APP_OBJECTS.vikingRoomTransform);
+                hf::editor::Draw("Light", APP_OBJECTS.mainLight);
+                hf::editor::Draw("Camera", APP_DEBUG.camera.camera3D.core);
+                hf::editor::Draw("Audio", APP_AUDIOS.background_music);
             }
+            hf::editor::EndWindow();
         }
-        hf::editor::EndWindow();
 
         hf::editor::SetNextWindowSize({ 300, 300 }, hf::editor::Condition::FirstUseEver);
         hf::editor::SetNextWindowPos({ 100, 100 }, hf::editor::Condition::FirstUseEver);
         if (hf::editor::StartWindow("Inspector"))
         {
-
+            hf::editor::EndWindow();
         }
-        hf::editor::EndWindow();
 
         hf::editor::EndFrame();
     }

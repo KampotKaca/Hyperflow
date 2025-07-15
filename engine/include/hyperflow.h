@@ -87,7 +87,7 @@ namespace hf
 	void ChangeClip(const Ref<AudioPlayer>& player, const Ref<AudioClip>& clip, int64_t startingFrame = -1);
 
 	void Play(const Ref<AudioPlayer>& player);
-	void Stop(const Ref<AudioPlayer>& player);
+	void Pause(const Ref<AudioPlayer>& player);
 
 	void SetVolume(float volume);
 	void EnableAudio(bool isEnabled);
@@ -95,14 +95,17 @@ namespace hf
 	void SetVolume(const Ref<AudioPlayer>& player, float volume);
 	void SetPitch(const Ref<AudioPlayer>& player, float pitch);
 	void SetLoopingMode(const Ref<AudioPlayer>& player, bool enableLoop);
-	void Seek(const Ref<AudioPlayer>& player, uint64_t frame);
+	void Seek(const Ref<AudioPlayer>& player, double positionInSeconds);
+	void SeekPercent(const Ref<AudioPlayer>& player, double position);
 	void SetConfig(const Ref<AudioPlayer>& player, const AudioPlayerConfig& config);
 
 	const AudioPlayerConfig& GetConfig(const Ref<AudioPlayer>& player);
 	float GetPitch(const Ref<AudioPlayer>& player);
 	float GetVolume(const Ref<AudioPlayer>& player);
-	float GetDuration(const Ref<AudioPlayer>& player);
+    double GetPositionInSeconds(const Ref<AudioPlayer>& player);
+    double GetPositionPercent(const Ref<AudioPlayer>& player);
 	bool IsLoopingEnabled(const Ref<AudioPlayer>& player);
+    bool IsPlaying(const Ref<AudioPlayer>& player);
 
 	uint64_t GetFrameCount(const Ref<AudioClip>& clip);
 	uint32_t GetChannels(const Ref<AudioClip>& clip);

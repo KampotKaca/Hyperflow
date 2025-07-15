@@ -9,7 +9,9 @@ namespace hf::editor
         window_class.ViewportFlagsOverrideSet = ImGuiViewportFlags_NoAutoMerge;
         ImGui::SetNextWindowClass(&window_class);
 
-        return ImGui::Begin(name, isOpen, (ImGuiWindowFlags)flags);
+        bool result = ImGui::Begin(name, isOpen, (ImGuiWindowFlags)flags);
+        if (!result) EndWindow();
+        return result;
     }
     void EndWindow() { ImGui::End(); }
 

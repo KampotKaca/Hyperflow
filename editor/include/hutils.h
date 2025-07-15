@@ -3,6 +3,7 @@
 
 #include "heditorinternal.h"
 #include "imgui_internal.h"
+#include "hyperfloweditor.h"
 
 namespace hf::editor
 {
@@ -50,9 +51,13 @@ namespace hf::editor
     static const std::string VECTOR_COLUMN_IDS[] = { "##col_vX", "##col_vY", "##col_vZ", "##col_vW" };
 
     const char* DrawKeyGen(const char* label);
-    bool DrawScalar(const char* label, ImGuiDataType data_type, void* v, float speed = 0.1f, void* from = nullptr, void* to = nullptr);
-    bool DrawNoNameScalar(const char* label, ImGuiDataType data_type, void* v, float speed = 0.1f, void* from = nullptr, void* to = nullptr);
-    bool DrawVectorN(const char* label, ImGuiDataType data_type, int size, void* vec, float speed = 0.1f, void* from = nullptr, void* to = nullptr, void* resetValue = nullptr);
+    bool DrawScalar(const char* label, ImGuiDataType data_type, void* v, float speed = 0.1f, const void* from = nullptr, const void* to = nullptr, DrawStateFlag flags = DrawStateFlag::None);
+    bool DrawNoNameScalar(const char* label, ImGuiDataType data_type, void* v, float speed = 0.1f, const void* from = nullptr, const void* to = nullptr, DrawStateFlag flags = DrawStateFlag::None);
+    bool DrawVectorN(const char* label, ImGuiDataType data_type, int size, void* vec, float speed = 0.1f, void* from = nullptr, void* to = nullptr, const void* resetValue = nullptr, DrawStateFlag flags = DrawStateFlag::None);
+
+    bool DrawScalarSlider(const char* label, ImGuiDataType data_type, void* v, const void* from = nullptr, const void* to = nullptr, DrawStateFlag flags = DrawStateFlag::None);
+    bool DrawNoNameScalarSlider(const char* label, ImGuiDataType data_type, void* v, const void* from = nullptr, const void* to = nullptr, DrawStateFlag flags = DrawStateFlag::None);
+    bool DrawVectorNSlider(const char* label, ImGuiDataType data_type, int size, void* vec, void* from = nullptr, void* to = nullptr, const void* resetValue = nullptr, DrawStateFlag flags = DrawStateFlag::None);
 
 #define VAR_NAME ImGui::TableNextRow();\
                  ImGui::TableSetColumnIndex(0);\
