@@ -13,6 +13,7 @@ namespace hf
         AudioPlayerConfig config{};
         Ref<AudioClip> clip{};
         void* handle{};
+        void* buffer{};
         bool isPlaying = false;
         bool isLoaded = false;
     };

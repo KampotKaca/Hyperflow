@@ -9,6 +9,7 @@ namespace app
     {
         hf::Ref<hf::AudioClip> cartoon_comedy;
         hf::Ref<hf::AudioPlayer> background_music;
+        hf::Ref<hf::AudioPlayer> background_music2;
     };
 
     extern AppAudios APP_AUDIOS;

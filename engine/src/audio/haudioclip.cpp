@@ -27,7 +27,7 @@ namespace hf
         inter::audio::DestroyClip_i(this);
     }
 
-    bool IsLoaded(const Ref<AudioClip>& clip) { return clip->buffer; }
+    bool IsLoaded(const Ref<AudioClip>& clip) { return clip->pcmData; }
 
     Ref<AudioClip> Create(const AudioClipCreationInfo& info)
     {
@@ -60,7 +60,7 @@ namespace hf
     {
         bool CreateClip_i(AudioClip* clip)
         {
-            if (clip->buffer) return false;
+            if (clip->pcmData) return false;
 
             std::string audioLoc{};
 
@@ -90,6 +90,7 @@ namespace hf
 
             clip->channels = decoder.outputChannels;
             clip->sampleRate = decoder.outputSampleRate;
+            clip->format = decoder.outputFormat;
 
             clip->pcmData = utils::Allocate(clip->frameCount * decoder.outputChannels * sizeof(float));
 
@@ -97,32 +98,31 @@ namespace hf
             CHECK(ma_decoder_read_pcm_frames(&decoder, clip->pcmData, clip->frameCount, &framesRead), clip->filePath.c_str())
             ma_decoder_uninit(&decoder);
 
-            auto bufferConfig = ma_audio_buffer_config_init(decoder.outputFormat, clip->channels, framesRead, clip->pcmData, nullptr);
-            clip->buffer = new ma_audio_buffer();
-            CHECK(ma_audio_buffer_init(&bufferConfig, (ma_audio_buffer*)clip->buffer), clip->filePath.c_str())
-
+            clip->framesRead = framesRead;
             return true;
         }
 
         bool DestroyClip_i(AudioClip* clip)
         {
-            bool changed = false;
-            if (clip->buffer)
-            {
-                ma_audio_buffer_uninit((ma_audio_buffer*)clip->buffer);
-                delete (ma_audio_buffer*)clip->buffer;
-                clip->buffer = nullptr;
-                changed = true;
-            }
-
             if (clip->pcmData)
             {
                 utils::Deallocate(clip->pcmData);
                 clip->pcmData = nullptr;
-                changed = true;
+                return true;
             }
+            return false;
+        }
 
-            return changed;
+        void* GenerateClipBuffer_i(AudioClip* clip)
+        {
+            const auto bufferConfig = ma_audio_buffer_config_init((ma_format)clip->format, clip->channels, clip->framesRead, clip->pcmData, nullptr);
+            auto buffer = new ma_audio_buffer();
+            if (ma_audio_buffer_init(&bufferConfig, buffer) != MA_SUCCESS)
+            {
+                LOG_ERROR("[Hyperflow] Unable to generate audio buffer");
+                return nullptr;
+            }
+            return buffer;
         }
     }
 }

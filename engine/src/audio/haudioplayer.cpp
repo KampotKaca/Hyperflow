@@ -8,9 +8,9 @@ namespace hf
     static void ChangeClip(AudioPlayer* player, const Ref<AudioClip>& clip, double startingDuration = -1);
 
     AudioPlayer::AudioPlayer(const AudioPlayerCreationInfo& info)
-        : config(info.config), clip(info.clip)
+        : config(info.config)
     {
-        if (clip) ChangeClip(this, clip);
+        ChangeClip(this, info.clip);
     }
 
     AudioPlayer::~AudioPlayer()
@@ -160,22 +160,35 @@ namespace hf
             player->handle = nullptr;
             player->clip = nullptr;
         }
+
+        if (player->buffer)
+        {
+            auto buffer = (ma_audio_buffer*)player->buffer;
+            delete buffer;
+            player->buffer = nullptr;
+        }
     }
 
     void ChangeClip(AudioPlayer* player, const Ref<AudioClip>& clip, double startingDuration)
     {
         FreeHandle(player);
 
-        player->handle = new ma_sound();
-        auto handle = (ma_sound*)player->handle;
-        auto result = ma_sound_init_from_data_source(&inter::AUDIO_DATA.engine,
-            (ma_data_source*)clip->buffer, 0, nullptr, handle);
-        if (result != MA_SUCCESS)
+        if (!clip) return;
+
+        auto buffer = (ma_audio_buffer*)inter::audio::GenerateClipBuffer_i(clip.get());
+        auto handle = new ma_sound();
+        if (ma_sound_init_from_data_source(&inter::AUDIO_DATA.engine, buffer,
+            0, nullptr, handle) != MA_SUCCESS)
         {
-            delete handle;
-            player->handle = nullptr;
+            if (handle) delete handle;
+            if (buffer) delete buffer;
             LOG_ERROR("Unable create player for the Audio clip -> %s", clip->filePath.c_str());
+            return;
         }
+
+        player->buffer = buffer;
+        player->handle = handle;
+        player->clip = clip;
 
         auto& config = player->config;
         if (startingDuration >= 0)

@@ -152,6 +152,7 @@ namespace hf::inter
 
         bool CreateClip_i(AudioClip* clip);
         bool DestroyClip_i(AudioClip* clip);
+        void* GenerateClipBuffer_i(AudioClip* clip);
     }
 
     namespace rendering

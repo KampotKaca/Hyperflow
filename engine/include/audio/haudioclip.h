@@ -15,10 +15,11 @@ namespace hf
         AudioClipConfig config{};
 
         void* pcmData{};
-        void* buffer{};
 
         uint64_t frameCount{};
+        uint64_t framesRead{};
         uint32_t channels{};
+        uint32_t format{};
         uint32_t sampleRate{};
     };
 }
