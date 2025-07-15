@@ -12,36 +12,36 @@ namespace hf::editor
         return key;
     }
 
-    bool DrawScalar(const char* label, ImGuiDataType data_type, void* v, float speed, const void* from, const void* to, DrawStateFlag flags)
+    void DrawLabel(const char* label)
+    {
+        ImGui::TableNextRow();
+        ImGui::TableSetColumnIndex(0);
+        ImGui::Text("%s", label);
+        ImGui::TableNextColumn();
+    }
+
+    static bool DrawResetButton(uint32_t size);
+
+    bool DrawScalar(const char* label, ImGuiDataType data_type, void* v, float speed, const void* from, const void* to, const char* format, DrawStateFlag flags)
     {
         bool valueChanged = false;
         ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, { 0, 0 });
-        VAR_NAME
+
+        if (!(uint32_t)(flags & DrawStateFlag::Nameless)) DrawLabel(label);
 
         ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x);
-        valueChanged = ImGui::DragScalar(DrawKeyGen(label), data_type, v, speed, from, to, nullptr, (ImGuiSliderFlags)flags);
+        valueChanged = ImGui::DragScalar(DrawKeyGen(label), data_type, v, speed, from, to, format, (ImGuiSliderFlags)flags);
 
         ImGui::PopStyleVar();
         return valueChanged;
     }
 
-    bool DrawNoNameScalar(const char* label, ImGuiDataType data_type, void* v, float speed, const void* from, const void* to, DrawStateFlag flags)
+    bool DrawVectorN(const char* label, ImGuiDataType data_type, int size, void* vec, float speed, void* from, void* to, const void* resetValue, const char* format, DrawStateFlag flags)
     {
         bool valueChanged = false;
         ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, { 0, 0 });
 
-        ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x);
-        if(ImGui::DragScalar(label, data_type, v, speed, from, to, nullptr, (ImGuiSliderFlags)flags)) valueChanged = true;
-
-        ImGui::PopStyleVar();
-        return valueChanged;
-    }
-
-    bool DrawVectorN(const char* label, ImGuiDataType data_type, int size, void* vec, float speed, void* from, void* to, const void* resetValue, DrawStateFlag flags)
-    {
-        bool valueChanged = false;
-        ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, { 0, 0 });
-        VAR_NAME
+        if (!(uint32_t)(flags & DrawStateFlag::Nameless)) DrawLabel(label);
 
         if(ImGui::BeginTable(label, size))
         {
@@ -52,25 +52,21 @@ namespace hf::editor
             ImGui::TableNextRow();
             ImGui::TableSetColumnIndex(0);
 
-            float lineHeight = 18 + GImGui->Style.FramePadding.y * 2.0f;
-            ImVec2 buttonSize = { lineHeight + 3.0f, lineHeight };
-
             size_t type_size = GDataTypeInfo[data_type].Size;
             void* ptr = vec;
             for (int i = 0; i < size; ++i)
             {
-                ImGui::PushStyleColor(ImGuiCol_Button, VECTOR_STYLES[i * 3]);
-                ImGui::PushStyleColor(ImGuiCol_ButtonHovered, VECTOR_STYLES[i * 3 + 1]);
-                ImGui::PushStyleColor(ImGuiCol_ButtonActive, VECTOR_STYLES[i * 3 + 2]);
-                if (ImGui::Button(VECTOR_NAMES[i].c_str(), buttonSize))
+                if (!(uint32_t)(flags & DrawStateFlag::ButtonLess))
                 {
-                    std::memcpy(ptr, resetValue, type_size);
-                    valueChanged = true;
+                    if (DrawResetButton(i))
+                    {
+                        std::memcpy(ptr, resetValue, type_size);
+                        valueChanged = true;
+                    }
                 }
-                ImGui::PopStyleColor(3);
-                ImGui::SameLine();
+
                 ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x);
-                valueChanged |= DrawNoNameScalar(VECTOR_IDS[i].c_str(), data_type, ptr, speed, from, to, flags);
+                valueChanged |= DrawScalar(VECTOR_IDS[i].c_str(), data_type, ptr, speed, from, to, format, DrawStateFlag::Nameless);
                 ptr = (void*)((char*)ptr + type_size);
 
                 if(i + 1 < size) ImGui::TableNextColumn();
@@ -84,36 +80,25 @@ namespace hf::editor
         return valueChanged;
     }
 
-    bool DrawScalarSlider(const char* label, ImGuiDataType data_type, void* v, const void* from, const void* to, DrawStateFlag flags)
+    bool DrawScalarSlider(const char* label, ImGuiDataType data_type, void* v, const void* from, const void* to, const char* format, DrawStateFlag flags)
     {
         bool valueChanged = false;
         ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, { 0, 0 });
-        VAR_NAME
+
+        if (!(uint32_t)(flags & DrawStateFlag::Nameless)) DrawLabel(label);
 
         ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x);
-        valueChanged = ImGui::SliderScalar(DrawKeyGen(label), data_type, v, from, to, nullptr, (ImGuiSliderFlags)flags);
+        valueChanged = ImGui::SliderScalar(DrawKeyGen(label), data_type, v, from, to, format, (ImGuiSliderFlags)flags);
 
         ImGui::PopStyleVar();
         return valueChanged;
     }
 
-    bool DrawNoNameScalarSlider(const char* label, ImGuiDataType data_type, void* v, const void* from, const void* to, DrawStateFlag flags)
+    bool DrawVectorNSlider(const char* label, ImGuiDataType data_type, int size, void* vec, void* from, void* to, const void* resetValue, const char* format, DrawStateFlag flags)
     {
         bool valueChanged = false;
         ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, { 0, 0 });
-
-        ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x);
-        if(ImGui::SliderScalar(label, data_type, v, from, to, nullptr, (ImGuiSliderFlags)flags)) valueChanged = true;
-
-        ImGui::PopStyleVar();
-        return valueChanged;
-    }
-
-    bool DrawVectorNSlider(const char* label, ImGuiDataType data_type, int size, void* vec, void* from, void* to, const void* resetValue, DrawStateFlag flags)
-    {
-        bool valueChanged = false;
-        ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, { 0, 0 });
-        VAR_NAME
+        if (!(uint32_t)(flags & DrawStateFlag::Nameless)) DrawLabel(label);
 
         if(ImGui::BeginTable(label, size))
         {
@@ -124,25 +109,21 @@ namespace hf::editor
             ImGui::TableNextRow();
             ImGui::TableSetColumnIndex(0);
 
-            float lineHeight = 18 + GImGui->Style.FramePadding.y * 2.0f;
-            ImVec2 buttonSize = { lineHeight + 3.0f, lineHeight };
-
             size_t type_size = GDataTypeInfo[data_type].Size;
             void* ptr = vec;
             for (int i = 0; i < size; ++i)
             {
-                ImGui::PushStyleColor(ImGuiCol_Button, VECTOR_STYLES[i * 3]);
-                ImGui::PushStyleColor(ImGuiCol_ButtonHovered, VECTOR_STYLES[i * 3 + 1]);
-                ImGui::PushStyleColor(ImGuiCol_ButtonActive, VECTOR_STYLES[i * 3 + 2]);
-                if (ImGui::Button(VECTOR_NAMES[i].c_str(), buttonSize))
+                if (!(uint32_t)(flags & DrawStateFlag::ButtonLess))
                 {
-                    std::memcpy(ptr, resetValue, type_size);
-                    valueChanged = true;
+                    if (DrawResetButton(i))
+                    {
+                        std::memcpy(ptr, resetValue, type_size);
+                        valueChanged = true;
+                    }
                 }
-                ImGui::PopStyleColor(3);
-                ImGui::SameLine();
+
                 ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x);
-                valueChanged |= DrawNoNameScalarSlider(VECTOR_IDS[i].c_str(), data_type, ptr, from, to, flags);
+                valueChanged |= DrawScalarSlider(VECTOR_IDS[i].c_str(), data_type, ptr, from, to, format, DrawStateFlag::Nameless);
                 ptr = (void*)((char*)ptr + type_size);
 
                 if(i + 1 < size) ImGui::TableNextColumn();
@@ -154,5 +135,17 @@ namespace hf::editor
 
         ImGui::Spacing();
         return valueChanged;
+    }
+
+    bool DrawResetButton(uint32_t size)
+    {
+        ImVec2 buttonSize = { 19, 19 };
+        ImGui::PushStyleColor(ImGuiCol_Button, VECTOR_STYLES[size * 3]);
+        ImGui::PushStyleColor(ImGuiCol_ButtonHovered, VECTOR_STYLES[size * 3 + 1]);
+        ImGui::PushStyleColor(ImGuiCol_ButtonActive, VECTOR_STYLES[size * 3 + 2]);
+        bool result = ImGui::Button(VECTOR_NAMES[size].c_str(), buttonSize);
+        ImGui::PopStyleColor(3);
+        ImGui::SameLine();
+        return result;
     }
 }

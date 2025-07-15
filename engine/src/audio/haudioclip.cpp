@@ -112,17 +112,5 @@ namespace hf
             }
             return false;
         }
-
-        void* GenerateClipBuffer_i(AudioClip* clip)
-        {
-            const auto bufferConfig = ma_audio_buffer_config_init((ma_format)clip->format, clip->channels, clip->framesRead, clip->pcmData, nullptr);
-            auto buffer = new ma_audio_buffer();
-            if (ma_audio_buffer_init(&bufferConfig, buffer) != MA_SUCCESS)
-            {
-                LOG_ERROR("[Hyperflow] Unable to generate audio buffer");
-                return nullptr;
-            }
-            return buffer;
-        }
     }
 }

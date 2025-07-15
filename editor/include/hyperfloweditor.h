@@ -29,11 +29,9 @@ namespace hf::editor
     };
 
     enum class Condition { None = 0, Always = 1 << 0, Once = 1 << 1, FirstUseEver = 1 << 2, Appearing = 1 << 3 };
-    enum class DrawStateFlag { None = 0, ReadOnly = 1 << 21 };
-    enum class DrawColorFlag { None = 0 };
+    enum class DrawStateFlag { None = 0, Nameless = 1 << 0, ButtonLess = 1 << 1 };
     DEFINE_ENUM_FLAGS(Condition)
     DEFINE_ENUM_FLAGS(DrawStateFlag)
-    DEFINE_ENUM_FLAGS(DrawColorFlag)
 
 #if DEBUG
 
@@ -63,16 +61,16 @@ namespace hf::editor
     bool DrawString(const char* label, std::string& v, DrawStateFlag flags = DrawStateFlag::None);
     bool DrawStringBox(const char* label, std::string& v, DrawStateFlag flags = DrawStateFlag::None);
 
-    bool Draw(const char* label, bool& v, DrawStateFlag flags = DrawStateFlag::None);
-    bool Draw(const char* label, int8_t& v, DrawStateFlag flags = DrawStateFlag::None);
-    bool Draw(const char* label, uint8_t& v, DrawStateFlag flags = DrawStateFlag::None);
-    bool Draw(const char* label, int16_t& v, DrawStateFlag flags = DrawStateFlag::None);
+    bool Draw(const char* label, bool& v,     DrawStateFlag flags = DrawStateFlag::None);
+    bool Draw(const char* label, int8_t& v,   DrawStateFlag flags = DrawStateFlag::None);
+    bool Draw(const char* label, uint8_t& v,  DrawStateFlag flags = DrawStateFlag::None);
+    bool Draw(const char* label, int16_t& v,  DrawStateFlag flags = DrawStateFlag::None);
     bool Draw(const char* label, uint16_t& v, DrawStateFlag flags = DrawStateFlag::None);
-    bool Draw(const char* label, int32_t& v, DrawStateFlag flags = DrawStateFlag::None);
+    bool Draw(const char* label, int32_t& v,  DrawStateFlag flags = DrawStateFlag::None);
     bool Draw(const char* label, uint32_t& v, DrawStateFlag flags = DrawStateFlag::None);
-    bool Draw(const char* label, int64_t& v, DrawStateFlag flags = DrawStateFlag::None);
+    bool Draw(const char* label, int64_t& v,  DrawStateFlag flags = DrawStateFlag::None);
     bool Draw(const char* label, uint64_t& v, DrawStateFlag flags = DrawStateFlag::None);
-    bool Draw(const char* label, float_t& v, DrawStateFlag flags = DrawStateFlag::None);
+    bool Draw(const char* label, float_t& v,  DrawStateFlag flags = DrawStateFlag::None);
     bool Draw(const char* label, double_t& v, DrawStateFlag flags = DrawStateFlag::None);
 
     bool Draw(const char* label, i8vec2& vec, int8_t resetValue = 0.0f, DrawStateFlag flags = DrawStateFlag::None);
@@ -115,8 +113,8 @@ namespace hf::editor
     bool Draw(const char* label, dvec3& vec, double_t resetValue = 0.0f, DrawStateFlag flags = DrawStateFlag::None);
     bool Draw(const char* label, dvec4& vec, double_t resetValue = 0.0f, DrawStateFlag flags = DrawStateFlag::None);
 
-    bool DrawColor(const char* label, vec4& vec, DrawColorFlag flags = DrawColorFlag::None);
-    bool DrawColor(const char* label, vec3& vec, DrawColorFlag flags = DrawColorFlag::None);
+    bool DrawColor(const char* label, vec4& vec, DrawStateFlag flags = DrawStateFlag::None);
+    bool DrawColor(const char* label, vec3& vec, DrawStateFlag flags = DrawStateFlag::None);
 
     bool Draw(const char* label, int8_t& v,   int8_t from,   DrawStateFlag flags = DrawStateFlag::None);
     bool Draw(const char* label, uint8_t& v,  uint8_t from,  DrawStateFlag flags = DrawStateFlag::None);
@@ -169,107 +167,107 @@ namespace hf::editor
     bool Draw(const char* label, dvec3& vec, dvec3 from, double_t resetValue = 0.0, DrawStateFlag flags = DrawStateFlag::None);
     bool Draw(const char* label, dvec4& vec, dvec4 from, double_t resetValue = 0.0, DrawStateFlag flags = DrawStateFlag::None);
 
-    bool Draw(const char* label, int8_t& v,   int8_t from,   int8_t to,   DrawStateFlag flags = DrawStateFlag::None);
-    bool Draw(const char* label, uint8_t& v,  uint8_t from,  uint8_t to,  DrawStateFlag flags = DrawStateFlag::None);
-    bool Draw(const char* label, int16_t& v,  int16_t from,  int16_t to,  DrawStateFlag flags = DrawStateFlag::None);
-    bool Draw(const char* label, uint16_t& v, uint16_t from, uint16_t to, DrawStateFlag flags = DrawStateFlag::None);
-    bool Draw(const char* label, int32_t& v,  int32_t from,  int32_t to,  DrawStateFlag flags = DrawStateFlag::None);
-    bool Draw(const char* label, uint32_t& v, uint32_t from, uint32_t to, DrawStateFlag flags = DrawStateFlag::None);
-    bool Draw(const char* label, int64_t& v,  int64_t from,  int64_t to,  DrawStateFlag flags = DrawStateFlag::None);
-    bool Draw(const char* label, uint64_t& v, uint64_t from, uint64_t to, DrawStateFlag flags = DrawStateFlag::None);
-    bool Draw(const char* label, float_t& v,  float_t from,  float_t to,  DrawStateFlag flags = DrawStateFlag::None);
-    bool Draw(const char* label, double_t& v, double_t from, double_t to, DrawStateFlag flags = DrawStateFlag::None);
+    bool Draw(const char* label, int8_t& v,   int8_t from,   int8_t to,   const char* format = "%.i",   DrawStateFlag flags = DrawStateFlag::None);
+    bool Draw(const char* label, uint8_t& v,  uint8_t from,  uint8_t to,  const char* format = "%.u",   DrawStateFlag flags = DrawStateFlag::None);
+    bool Draw(const char* label, int16_t& v,  int16_t from,  int16_t to,  const char* format = "%.i",   DrawStateFlag flags = DrawStateFlag::None);
+    bool Draw(const char* label, uint16_t& v, uint16_t from, uint16_t to, const char* format = "%.u",   DrawStateFlag flags = DrawStateFlag::None);
+    bool Draw(const char* label, int32_t& v,  int32_t from,  int32_t to,  const char* format = "%.i",   DrawStateFlag flags = DrawStateFlag::None);
+    bool Draw(const char* label, uint32_t& v, uint32_t from, uint32_t to, const char* format = "%.u",   DrawStateFlag flags = DrawStateFlag::None);
+    bool Draw(const char* label, int64_t& v,  int64_t from,  int64_t to,  const char* format = "%.ill", DrawStateFlag flags = DrawStateFlag::None);
+    bool Draw(const char* label, uint64_t& v, uint64_t from, uint64_t to, const char* format = "%.ull", DrawStateFlag flags = DrawStateFlag::None);
+    bool Draw(const char* label, float_t& v,  float_t from,  float_t to,  const char* format = "%.2f",  DrawStateFlag flags = DrawStateFlag::None);
+    bool Draw(const char* label, double_t& v, double_t from, double_t to, const char* format = "%.3d",  DrawStateFlag flags = DrawStateFlag::None);
 
-    bool Draw(const char* label, i8vec2& vec, i8vec2 from, i8vec2 to, int8_t resetValue = 0, DrawStateFlag flags = DrawStateFlag::None);
-    bool Draw(const char* label, i8vec3& vec, i8vec3 from, i8vec3 to, int8_t resetValue = 0, DrawStateFlag flags = DrawStateFlag::None);
-    bool Draw(const char* label, i8vec4& vec, i8vec4 from, i8vec4 to, int8_t resetValue = 0, DrawStateFlag flags = DrawStateFlag::None);
+    bool Draw(const char* label, i8vec2& vec, i8vec2 from, i8vec2 to, int8_t resetValue = 0, const char* format = "%.i", DrawStateFlag flags = DrawStateFlag::None);
+    bool Draw(const char* label, i8vec3& vec, i8vec3 from, i8vec3 to, int8_t resetValue = 0, const char* format = "%.i", DrawStateFlag flags = DrawStateFlag::None);
+    bool Draw(const char* label, i8vec4& vec, i8vec4 from, i8vec4 to, int8_t resetValue = 0, const char* format = "%.i", DrawStateFlag flags = DrawStateFlag::None);
 
-    bool Draw(const char* label, u8vec2& vec, u8vec2 from, u8vec2 to, uint8_t resetValue = 0, DrawStateFlag flags = DrawStateFlag::None);
-    bool Draw(const char* label, u8vec3& vec, u8vec3 from, u8vec3 to, uint8_t resetValue = 0, DrawStateFlag flags = DrawStateFlag::None);
-    bool Draw(const char* label, u8vec4& vec, u8vec4 from, u8vec4 to, uint8_t resetValue = 0, DrawStateFlag flags = DrawStateFlag::None);
+    bool Draw(const char* label, u8vec2& vec, u8vec2 from, u8vec2 to, uint8_t resetValue = 0, const char* format = "%.u", DrawStateFlag flags = DrawStateFlag::None);
+    bool Draw(const char* label, u8vec3& vec, u8vec3 from, u8vec3 to, uint8_t resetValue = 0, const char* format = "%.u", DrawStateFlag flags = DrawStateFlag::None);
+    bool Draw(const char* label, u8vec4& vec, u8vec4 from, u8vec4 to, uint8_t resetValue = 0, const char* format = "%.u", DrawStateFlag flags = DrawStateFlag::None);
 
-    bool Draw(const char* label, i16vec2& vec, i16vec2 from, i16vec2 to, int16_t resetValue = 0, DrawStateFlag flags = DrawStateFlag::None);
-    bool Draw(const char* label, i16vec3& vec, i16vec3 from, i16vec3 to, int16_t resetValue = 0, DrawStateFlag flags = DrawStateFlag::None);
-    bool Draw(const char* label, i16vec4& vec, i16vec4 from, i16vec4 to, int16_t resetValue = 0, DrawStateFlag flags = DrawStateFlag::None);
+    bool Draw(const char* label, i16vec2& vec, i16vec2 from, i16vec2 to, int16_t resetValue = 0, const char* format = "%.i", DrawStateFlag flags = DrawStateFlag::None);
+    bool Draw(const char* label, i16vec3& vec, i16vec3 from, i16vec3 to, int16_t resetValue = 0, const char* format = "%.i", DrawStateFlag flags = DrawStateFlag::None);
+    bool Draw(const char* label, i16vec4& vec, i16vec4 from, i16vec4 to, int16_t resetValue = 0, const char* format = "%.i", DrawStateFlag flags = DrawStateFlag::None);
 
-    bool Draw(const char* label, u16vec2& vec, u16vec2 from, u16vec2 to, uint16_t resetValue = 0, DrawStateFlag flags = DrawStateFlag::None);
-    bool Draw(const char* label, u16vec3& vec, u16vec3 from, u16vec3 to, uint16_t resetValue = 0, DrawStateFlag flags = DrawStateFlag::None);
-    bool Draw(const char* label, u16vec4& vec, u16vec4 from, u16vec4 to, uint16_t resetValue = 0, DrawStateFlag flags = DrawStateFlag::None);
+    bool Draw(const char* label, u16vec2& vec, u16vec2 from, u16vec2 to, uint16_t resetValue = 0, const char* format = "%.u", DrawStateFlag flags = DrawStateFlag::None);
+    bool Draw(const char* label, u16vec3& vec, u16vec3 from, u16vec3 to, uint16_t resetValue = 0, const char* format = "%.u", DrawStateFlag flags = DrawStateFlag::None);
+    bool Draw(const char* label, u16vec4& vec, u16vec4 from, u16vec4 to, uint16_t resetValue = 0, const char* format = "%.u", DrawStateFlag flags = DrawStateFlag::None);
 
-    bool Draw(const char* label, ivec2& vec, ivec2 from, ivec2 to, int32_t resetValue = 0, DrawStateFlag flags = DrawStateFlag::None);
-    bool Draw(const char* label, ivec3& vec, ivec3 from, ivec3 to, int32_t resetValue = 0, DrawStateFlag flags = DrawStateFlag::None);
-    bool Draw(const char* label, ivec4& vec, ivec4 from, ivec4 to, int32_t resetValue = 0, DrawStateFlag flags = DrawStateFlag::None);
+    bool Draw(const char* label, ivec2& vec, ivec2 from, ivec2 to, int32_t resetValue = 0, const char* format = "%.i", DrawStateFlag flags = DrawStateFlag::None);
+    bool Draw(const char* label, ivec3& vec, ivec3 from, ivec3 to, int32_t resetValue = 0, const char* format = "%.i", DrawStateFlag flags = DrawStateFlag::None);
+    bool Draw(const char* label, ivec4& vec, ivec4 from, ivec4 to, int32_t resetValue = 0, const char* format = "%.i", DrawStateFlag flags = DrawStateFlag::None);
 
-    bool Draw(const char* label, uvec2& vec, uvec2 from, uvec2 to, uint32_t resetValue = 0, DrawStateFlag flags = DrawStateFlag::None);
-    bool Draw(const char* label, uvec3& vec, uvec3 from, uvec3 to, uint32_t resetValue = 0, DrawStateFlag flags = DrawStateFlag::None);
-    bool Draw(const char* label, uvec4& vec, uvec4 from, uvec4 to, uint32_t resetValue = 0, DrawStateFlag flags = DrawStateFlag::None);
+    bool Draw(const char* label, uvec2& vec, uvec2 from, uvec2 to, uint32_t resetValue = 0, const char* format = "%.u", DrawStateFlag flags = DrawStateFlag::None);
+    bool Draw(const char* label, uvec3& vec, uvec3 from, uvec3 to, uint32_t resetValue = 0, const char* format = "%.u", DrawStateFlag flags = DrawStateFlag::None);
+    bool Draw(const char* label, uvec4& vec, uvec4 from, uvec4 to, uint32_t resetValue = 0, const char* format = "%.u", DrawStateFlag flags = DrawStateFlag::None);
 
-    bool Draw(const char* label, i64vec2& vec, i64vec2 from, i64vec2 to, int64_t resetValue = 0, DrawStateFlag flags = DrawStateFlag::None);
-    bool Draw(const char* label, i64vec3& vec, i64vec3 from, i64vec3 to, int64_t resetValue = 0, DrawStateFlag flags = DrawStateFlag::None);
-    bool Draw(const char* label, i64vec4& vec, i64vec4 from, i64vec4 to, int64_t resetValue = 0, DrawStateFlag flags = DrawStateFlag::None);
+    bool Draw(const char* label, i64vec2& vec, i64vec2 from, i64vec2 to, int64_t resetValue = 0, const char* format = "%.ill", DrawStateFlag flags = DrawStateFlag::None);
+    bool Draw(const char* label, i64vec3& vec, i64vec3 from, i64vec3 to, int64_t resetValue = 0, const char* format = "%.ill", DrawStateFlag flags = DrawStateFlag::None);
+    bool Draw(const char* label, i64vec4& vec, i64vec4 from, i64vec4 to, int64_t resetValue = 0, const char* format = "%.ill", DrawStateFlag flags = DrawStateFlag::None);
 
-    bool Draw(const char* label, u64vec2& vec, u64vec2 from, u64vec2 to, uint64_t resetValue = 0, DrawStateFlag flags = DrawStateFlag::None);
-    bool Draw(const char* label, u64vec3& vec, u64vec3 from, u64vec3 to, uint64_t resetValue = 0, DrawStateFlag flags = DrawStateFlag::None);
-    bool Draw(const char* label, u64vec4& vec, u64vec4 from, u64vec4 to, uint64_t resetValue = 0, DrawStateFlag flags = DrawStateFlag::None);
+    bool Draw(const char* label, u64vec2& vec, u64vec2 from, u64vec2 to, uint64_t resetValue = 0, const char* format = "%.ull", DrawStateFlag flags = DrawStateFlag::None);
+    bool Draw(const char* label, u64vec3& vec, u64vec3 from, u64vec3 to, uint64_t resetValue = 0, const char* format = "%.ull", DrawStateFlag flags = DrawStateFlag::None);
+    bool Draw(const char* label, u64vec4& vec, u64vec4 from, u64vec4 to, uint64_t resetValue = 0, const char* format = "%.ull", DrawStateFlag flags = DrawStateFlag::None);
 
-    bool Draw(const char* label, vec2& vec, vec2 from, vec2 to, float_t resetValue = 0.0f, DrawStateFlag flags = DrawStateFlag::None);
-    bool Draw(const char* label, vec3& vec, vec3 from, vec3 to, float_t resetValue = 0.0f, DrawStateFlag flags = DrawStateFlag::None);
-    bool Draw(const char* label, vec4& vec, vec4 from, vec4 to, float_t resetValue = 0.0f, DrawStateFlag flags = DrawStateFlag::None);
+    bool Draw(const char* label, vec2& vec, vec2 from, vec2 to, float_t resetValue = 0.0f, const char* format = "%.2f", DrawStateFlag flags = DrawStateFlag::None);
+    bool Draw(const char* label, vec3& vec, vec3 from, vec3 to, float_t resetValue = 0.0f, const char* format = "%.2f", DrawStateFlag flags = DrawStateFlag::None);
+    bool Draw(const char* label, vec4& vec, vec4 from, vec4 to, float_t resetValue = 0.0f, const char* format = "%.2f", DrawStateFlag flags = DrawStateFlag::None);
 
-    bool Draw(const char* label, dvec2& vec, dvec2 from, dvec2 to, double_t resetValue = 0.0, DrawStateFlag flags = DrawStateFlag::None);
-    bool Draw(const char* label, dvec3& vec, dvec3 from, dvec3 to, double_t resetValue = 0.0, DrawStateFlag flags = DrawStateFlag::None);
-    bool Draw(const char* label, dvec4& vec, dvec4 from, dvec4 to, double_t resetValue = 0.0, DrawStateFlag flags = DrawStateFlag::None);
+    bool Draw(const char* label, dvec2& vec, dvec2 from, dvec2 to, double_t resetValue = 0.0, const char* format = "%.3d", DrawStateFlag flags = DrawStateFlag::None);
+    bool Draw(const char* label, dvec3& vec, dvec3 from, dvec3 to, double_t resetValue = 0.0, const char* format = "%.3d", DrawStateFlag flags = DrawStateFlag::None);
+    bool Draw(const char* label, dvec4& vec, dvec4 from, dvec4 to, double_t resetValue = 0.0, const char* format = "%.3d", DrawStateFlag flags = DrawStateFlag::None);
 
-    bool DrawSlider(const char* label, int8_t& v,   int8_t from,   int8_t to,   DrawStateFlag flags = DrawStateFlag::None);
-    bool DrawSlider(const char* label, uint8_t& v,  uint8_t from,  uint8_t to,  DrawStateFlag flags = DrawStateFlag::None);
-    bool DrawSlider(const char* label, int16_t& v,  int16_t from,  int16_t to,  DrawStateFlag flags = DrawStateFlag::None);
-    bool DrawSlider(const char* label, uint16_t& v, uint16_t from, uint16_t to, DrawStateFlag flags = DrawStateFlag::None);
-    bool DrawSlider(const char* label, int32_t& v,  int32_t from,  int32_t to,  DrawStateFlag flags = DrawStateFlag::None);
-    bool DrawSlider(const char* label, uint32_t& v, uint32_t from, uint32_t to, DrawStateFlag flags = DrawStateFlag::None);
-    bool DrawSlider(const char* label, int64_t& v,  int64_t from,  int64_t to,  DrawStateFlag flags = DrawStateFlag::None);
-    bool DrawSlider(const char* label, uint64_t& v, uint64_t from, uint64_t to, DrawStateFlag flags = DrawStateFlag::None);
-    bool DrawSlider(const char* label, float_t& v,  float_t from,  float_t to,  DrawStateFlag flags = DrawStateFlag::None);
-    bool DrawSlider(const char* label, double_t& v, double_t from, double_t to, DrawStateFlag flags = DrawStateFlag::None);
+    bool DrawSlider(const char* label, int8_t& v,   int8_t from,   int8_t to,   const char* format = "%.i",   DrawStateFlag flags = DrawStateFlag::None);
+    bool DrawSlider(const char* label, uint8_t& v,  uint8_t from,  uint8_t to,  const char* format = "%.u",   DrawStateFlag flags = DrawStateFlag::None);
+    bool DrawSlider(const char* label, int16_t& v,  int16_t from,  int16_t to,  const char* format = "%.i",   DrawStateFlag flags = DrawStateFlag::None);
+    bool DrawSlider(const char* label, uint16_t& v, uint16_t from, uint16_t to, const char* format = "%.u",   DrawStateFlag flags = DrawStateFlag::None);
+    bool DrawSlider(const char* label, int32_t& v,  int32_t from,  int32_t to,  const char* format = "%.i",   DrawStateFlag flags = DrawStateFlag::None);
+    bool DrawSlider(const char* label, uint32_t& v, uint32_t from, uint32_t to, const char* format = "%.u",   DrawStateFlag flags = DrawStateFlag::None);
+    bool DrawSlider(const char* label, int64_t& v,  int64_t from,  int64_t to,  const char* format = "%.ill", DrawStateFlag flags = DrawStateFlag::None);
+    bool DrawSlider(const char* label, uint64_t& v, uint64_t from, uint64_t to, const char* format = "%.ull", DrawStateFlag flags = DrawStateFlag::None);
+    bool DrawSlider(const char* label, float_t& v,  float_t from,  float_t to,  const char* format = "%.2f",  DrawStateFlag flags = DrawStateFlag::None);
+    bool DrawSlider(const char* label, double_t& v, double_t from, double_t to, const char* format = "%.3d",  DrawStateFlag flags = DrawStateFlag::None);
 
-    bool DrawSlider(const char* label, i8vec2& vec, i8vec2 from, i8vec2 to, int8_t resetValue = 0, DrawStateFlag flags = DrawStateFlag::None);
-    bool DrawSlider(const char* label, i8vec3& vec, i8vec3 from, i8vec3 to, int8_t resetValue = 0, DrawStateFlag flags = DrawStateFlag::None);
-    bool DrawSlider(const char* label, i8vec4& vec, i8vec4 from, i8vec4 to, int8_t resetValue = 0, DrawStateFlag flags = DrawStateFlag::None);
+    bool DrawSlider(const char* label, i8vec2& vec, i8vec2 from, i8vec2 to, int8_t resetValue = 0, const char* format = "%.i", DrawStateFlag flags = DrawStateFlag::None);
+    bool DrawSlider(const char* label, i8vec3& vec, i8vec3 from, i8vec3 to, int8_t resetValue = 0, const char* format = "%.i", DrawStateFlag flags = DrawStateFlag::None);
+    bool DrawSlider(const char* label, i8vec4& vec, i8vec4 from, i8vec4 to, int8_t resetValue = 0, const char* format = "%.i", DrawStateFlag flags = DrawStateFlag::None);
 
-    bool DrawSlider(const char* label, u8vec2& vec, u8vec2 from, u8vec2 to, uint8_t resetValue = 0, DrawStateFlag flags = DrawStateFlag::None);
-    bool DrawSlider(const char* label, u8vec3& vec, u8vec3 from, u8vec3 to, uint8_t resetValue = 0, DrawStateFlag flags = DrawStateFlag::None);
-    bool DrawSlider(const char* label, u8vec4& vec, u8vec4 from, u8vec4 to, uint8_t resetValue = 0, DrawStateFlag flags = DrawStateFlag::None);
+    bool DrawSlider(const char* label, u8vec2& vec, u8vec2 from, u8vec2 to, uint8_t resetValue = 0, const char* format = "%.u", DrawStateFlag flags = DrawStateFlag::None);
+    bool DrawSlider(const char* label, u8vec3& vec, u8vec3 from, u8vec3 to, uint8_t resetValue = 0, const char* format = "%.u", DrawStateFlag flags = DrawStateFlag::None);
+    bool DrawSlider(const char* label, u8vec4& vec, u8vec4 from, u8vec4 to, uint8_t resetValue = 0, const char* format = "%.u", DrawStateFlag flags = DrawStateFlag::None);
 
-    bool DrawSlider(const char* label, i16vec2& vec, i16vec2 from, i16vec2 to, int16_t resetValue = 0, DrawStateFlag flags = DrawStateFlag::None);
-    bool DrawSlider(const char* label, i16vec3& vec, i16vec3 from, i16vec3 to, int16_t resetValue = 0, DrawStateFlag flags = DrawStateFlag::None);
-    bool DrawSlider(const char* label, i16vec4& vec, i16vec4 from, i16vec4 to, int16_t resetValue = 0, DrawStateFlag flags = DrawStateFlag::None);
+    bool DrawSlider(const char* label, i16vec2& vec, i16vec2 from, i16vec2 to, int16_t resetValue = 0, const char* format = "%.i", DrawStateFlag flags = DrawStateFlag::None);
+    bool DrawSlider(const char* label, i16vec3& vec, i16vec3 from, i16vec3 to, int16_t resetValue = 0, const char* format = "%.i", DrawStateFlag flags = DrawStateFlag::None);
+    bool DrawSlider(const char* label, i16vec4& vec, i16vec4 from, i16vec4 to, int16_t resetValue = 0, const char* format = "%.i", DrawStateFlag flags = DrawStateFlag::None);
 
-    bool DrawSlider(const char* label, u16vec2& vec, u16vec2 from, u16vec2 to, uint16_t resetValue = 0, DrawStateFlag flags = DrawStateFlag::None);
-    bool DrawSlider(const char* label, u16vec3& vec, u16vec3 from, u16vec3 to, uint16_t resetValue = 0, DrawStateFlag flags = DrawStateFlag::None);
-    bool DrawSlider(const char* label, u16vec4& vec, u16vec4 from, u16vec4 to, uint16_t resetValue = 0, DrawStateFlag flags = DrawStateFlag::None);
+    bool DrawSlider(const char* label, u16vec2& vec, u16vec2 from, u16vec2 to, uint16_t resetValue = 0, const char* format = "%.u", DrawStateFlag flags = DrawStateFlag::None);
+    bool DrawSlider(const char* label, u16vec3& vec, u16vec3 from, u16vec3 to, uint16_t resetValue = 0, const char* format = "%.u", DrawStateFlag flags = DrawStateFlag::None);
+    bool DrawSlider(const char* label, u16vec4& vec, u16vec4 from, u16vec4 to, uint16_t resetValue = 0, const char* format = "%.u", DrawStateFlag flags = DrawStateFlag::None);
 
-    bool DrawSlider(const char* label, ivec2& vec, ivec2 from, ivec2 to, int32_t resetValue = 0, DrawStateFlag flags = DrawStateFlag::None);
-    bool DrawSlider(const char* label, ivec3& vec, ivec3 from, ivec3 to, int32_t resetValue = 0, DrawStateFlag flags = DrawStateFlag::None);
-    bool DrawSlider(const char* label, ivec4& vec, ivec4 from, ivec4 to, int32_t resetValue = 0, DrawStateFlag flags = DrawStateFlag::None);
+    bool DrawSlider(const char* label, ivec2& vec, ivec2 from, ivec2 to, int32_t resetValue = 0, const char* format = "%.i", DrawStateFlag flags = DrawStateFlag::None);
+    bool DrawSlider(const char* label, ivec3& vec, ivec3 from, ivec3 to, int32_t resetValue = 0, const char* format = "%.i", DrawStateFlag flags = DrawStateFlag::None);
+    bool DrawSlider(const char* label, ivec4& vec, ivec4 from, ivec4 to, int32_t resetValue = 0, const char* format = "%.i", DrawStateFlag flags = DrawStateFlag::None);
 
-    bool DrawSlider(const char* label, uvec2& vec, uvec2 from, uvec2 to, uint32_t resetValue = 0, DrawStateFlag flags = DrawStateFlag::None);
-    bool DrawSlider(const char* label, uvec3& vec, uvec3 from, uvec3 to, uint32_t resetValue = 0, DrawStateFlag flags = DrawStateFlag::None);
-    bool DrawSlider(const char* label, uvec4& vec, uvec4 from, uvec4 to, uint32_t resetValue = 0, DrawStateFlag flags = DrawStateFlag::None);
+    bool DrawSlider(const char* label, uvec2& vec, uvec2 from, uvec2 to, uint32_t resetValue = 0, const char* format = "%.u", DrawStateFlag flags = DrawStateFlag::None);
+    bool DrawSlider(const char* label, uvec3& vec, uvec3 from, uvec3 to, uint32_t resetValue = 0, const char* format = "%.u", DrawStateFlag flags = DrawStateFlag::None);
+    bool DrawSlider(const char* label, uvec4& vec, uvec4 from, uvec4 to, uint32_t resetValue = 0, const char* format = "%.u", DrawStateFlag flags = DrawStateFlag::None);
 
-    bool DrawSlider(const char* label, i64vec2& vec, i64vec2 from, i64vec2 to, int64_t resetValue = 0, DrawStateFlag flags = DrawStateFlag::None);
-    bool DrawSlider(const char* label, i64vec3& vec, i64vec3 from, i64vec3 to, int64_t resetValue = 0, DrawStateFlag flags = DrawStateFlag::None);
-    bool DrawSlider(const char* label, i64vec4& vec, i64vec4 from, i64vec4 to, int64_t resetValue = 0, DrawStateFlag flags = DrawStateFlag::None);
+    bool DrawSlider(const char* label, i64vec2& vec, i64vec2 from, i64vec2 to, int64_t resetValue = 0, const char* format = "%.ill", DrawStateFlag flags = DrawStateFlag::None);
+    bool DrawSlider(const char* label, i64vec3& vec, i64vec3 from, i64vec3 to, int64_t resetValue = 0, const char* format = "%.ill", DrawStateFlag flags = DrawStateFlag::None);
+    bool DrawSlider(const char* label, i64vec4& vec, i64vec4 from, i64vec4 to, int64_t resetValue = 0, const char* format = "%.ill", DrawStateFlag flags = DrawStateFlag::None);
 
-    bool DrawSlider(const char* label, u64vec2& vec, u64vec2 from, u64vec2 to, uint64_t resetValue = 0, DrawStateFlag flags = DrawStateFlag::None);
-    bool DrawSlider(const char* label, u64vec3& vec, u64vec3 from, u64vec3 to, uint64_t resetValue = 0, DrawStateFlag flags = DrawStateFlag::None);
-    bool DrawSlider(const char* label, u64vec4& vec, u64vec4 from, u64vec4 to, uint64_t resetValue = 0, DrawStateFlag flags = DrawStateFlag::None);
+    bool DrawSlider(const char* label, u64vec2& vec, u64vec2 from, u64vec2 to, uint64_t resetValue = 0, const char* format = "%.ull", DrawStateFlag flags = DrawStateFlag::None);
+    bool DrawSlider(const char* label, u64vec3& vec, u64vec3 from, u64vec3 to, uint64_t resetValue = 0, const char* format = "%.ull", DrawStateFlag flags = DrawStateFlag::None);
+    bool DrawSlider(const char* label, u64vec4& vec, u64vec4 from, u64vec4 to, uint64_t resetValue = 0, const char* format = "%.ull", DrawStateFlag flags = DrawStateFlag::None);
 
-    bool DrawSlider(const char* label, vec2& vec, vec2 from, vec2 to, float_t resetValue = 0.0f, DrawStateFlag flags = DrawStateFlag::None);
-    bool DrawSlider(const char* label, vec3& vec, vec3 from, vec3 to, float_t resetValue = 0.0f, DrawStateFlag flags = DrawStateFlag::None);
-    bool DrawSlider(const char* label, vec4& vec, vec4 from, vec4 to, float_t resetValue = 0.0f, DrawStateFlag flags = DrawStateFlag::None);
+    bool DrawSlider(const char* label, vec2& vec, vec2 from, vec2 to, float_t resetValue = 0.0f, const char* format = "%.2f", DrawStateFlag flags = DrawStateFlag::None);
+    bool DrawSlider(const char* label, vec3& vec, vec3 from, vec3 to, float_t resetValue = 0.0f, const char* format = "%.2f", DrawStateFlag flags = DrawStateFlag::None);
+    bool DrawSlider(const char* label, vec4& vec, vec4 from, vec4 to, float_t resetValue = 0.0f, const char* format = "%.2f", DrawStateFlag flags = DrawStateFlag::None);
 
-    bool DrawSlider(const char* label, dvec2& vec, dvec2 from, dvec2 to, double_t resetValue = 0.0, DrawStateFlag flags = DrawStateFlag::None);
-    bool DrawSlider(const char* label, dvec3& vec, dvec3 from, dvec3 to, double_t resetValue = 0.0, DrawStateFlag flags = DrawStateFlag::None);
-    bool DrawSlider(const char* label, dvec4& vec, dvec4 from, dvec4 to, double_t resetValue = 0.0, DrawStateFlag flags = DrawStateFlag::None);
+    bool DrawSlider(const char* label, dvec2& vec, dvec2 from, dvec2 to, double_t resetValue = 0.0, const char* format = "%.3d", DrawStateFlag flags = DrawStateFlag::None);
+    bool DrawSlider(const char* label, dvec3& vec, dvec3 from, dvec3 to, double_t resetValue = 0.0, const char* format = "%.3d", DrawStateFlag flags = DrawStateFlag::None);
+    bool DrawSlider(const char* label, dvec4& vec, dvec4 from, dvec4 to, double_t resetValue = 0.0, const char* format = "%.3d", DrawStateFlag flags = DrawStateFlag::None);
 
 #else
 
@@ -280,8 +278,8 @@ namespace hf::editor
     inline void EndFrame(){}
     inline void DrawFrame(void* cmd){}
 
-    bool StartComponent(const char* label = "Component") { return false; }
-    void EndComponent(){}
+    inline bool StartComponent(const char* label = "Component") { return false; }
+    inline void EndComponent(){}
 
     inline bool StartWindow(const char* name = "New Window", bool* isOpen = nullptr, WindowFlags flags = WindowFlags::None) { return false; }
     inline void EndWindow(){}
@@ -404,107 +402,107 @@ namespace hf::editor
     inline bool Draw(const char* label, dvec3& vec, dvec3 from, double_t resetValue = 0.0, DrawStateFlag flags = DrawStateFlag::None) { return false; }
     inline bool Draw(const char* label, dvec4& vec, dvec4 from, double_t resetValue = 0.0, DrawStateFlag flags = DrawStateFlag::None) { return false; }
 
-    inline bool Draw(const char* label, int8_t& v,   int8_t from,   int8_t to,   DrawStateFlag flags = DrawStateFlag::None) { return false; }
-    inline bool Draw(const char* label, uint8_t& v,  uint8_t from,  uint8_t to,  DrawStateFlag flags = DrawStateFlag::None) { return false; }
-    inline bool Draw(const char* label, int16_t& v,  int16_t from,  int16_t to,  DrawStateFlag flags = DrawStateFlag::None) { return false; }
-    inline bool Draw(const char* label, uint16_t& v, uint16_t from, uint16_t to, DrawStateFlag flags = DrawStateFlag::None) { return false; }
-    inline bool Draw(const char* label, int32_t& v,  int32_t from,  int32_t to,  DrawStateFlag flags = DrawStateFlag::None) { return false; }
-    inline bool Draw(const char* label, uint32_t& v, uint32_t from, uint32_t to, DrawStateFlag flags = DrawStateFlag::None) { return false; }
-    inline bool Draw(const char* label, int64_t& v,  int64_t from,  int64_t to,  DrawStateFlag flags = DrawStateFlag::None) { return false; }
-    inline bool Draw(const char* label, uint64_t& v, uint64_t from, uint64_t to, DrawStateFlag flags = DrawStateFlag::None) { return false; }
-    inline bool Draw(const char* label, float_t& v,  float_t from,  float_t to,  DrawStateFlag flags = DrawStateFlag::None) { return false; }
-    inline bool Draw(const char* label, double_t& v, double_t from, double_t to, DrawStateFlag flags = DrawStateFlag::None) { return false; }
+    inline bool Draw(const char* label, int8_t& v,   int8_t from,   int8_t to,   const char* format = "%.i",   DrawStateFlag flags = DrawStateFlag::None) { return false; }
+    inline bool Draw(const char* label, uint8_t& v,  uint8_t from,  uint8_t to,  const char* format = "%.u",   DrawStateFlag flags = DrawStateFlag::None) { return false; }
+    inline bool Draw(const char* label, int16_t& v,  int16_t from,  int16_t to,  const char* format = "%.i",   DrawStateFlag flags = DrawStateFlag::None) { return false; }
+    inline bool Draw(const char* label, uint16_t& v, uint16_t from, uint16_t to, const char* format = "%.u",   DrawStateFlag flags = DrawStateFlag::None) { return false; }
+    inline bool Draw(const char* label, int32_t& v,  int32_t from,  int32_t to,  const char* format = "%.i",   DrawStateFlag flags = DrawStateFlag::None) { return false; }
+    inline bool Draw(const char* label, uint32_t& v, uint32_t from, uint32_t to, const char* format = "%.u",   DrawStateFlag flags = DrawStateFlag::None) { return false; }
+    inline bool Draw(const char* label, int64_t& v,  int64_t from,  int64_t to,  const char* format = "%.ill", DrawStateFlag flags = DrawStateFlag::None) { return false; }
+    inline bool Draw(const char* label, uint64_t& v, uint64_t from, uint64_t to, const char* format = "%.ull", DrawStateFlag flags = DrawStateFlag::None) { return false; }
+    inline bool Draw(const char* label, float_t& v,  float_t from,  float_t to,  const char* format = "%.2f",  DrawStateFlag flags = DrawStateFlag::None) { return false; }
+    inline bool Draw(const char* label, double_t& v, double_t from, double_t to, const char* format = "%.3d",  DrawStateFlag flags = DrawStateFlag::None) { return false; }
 
-    inline bool Draw(const char* label, i8vec2& vec, i8vec2 from, i8vec2 to, int8_t resetValue = 0, DrawStateFlag flags = DrawStateFlag::None) { return false; }
-    inline bool Draw(const char* label, i8vec3& vec, i8vec3 from, i8vec3 to, int8_t resetValue = 0, DrawStateFlag flags = DrawStateFlag::None) { return false; }
-    inline bool Draw(const char* label, i8vec4& vec, i8vec4 from, i8vec4 to, int8_t resetValue = 0, DrawStateFlag flags = DrawStateFlag::None) { return false; }
+    inline bool Draw(const char* label, i8vec2& vec, i8vec2 from, i8vec2 to, int8_t resetValue = 0, const char* format = "%.i", DrawStateFlag flags = DrawStateFlag::None) { return false; }
+    inline bool Draw(const char* label, i8vec3& vec, i8vec3 from, i8vec3 to, int8_t resetValue = 0, const char* format = "%.i", DrawStateFlag flags = DrawStateFlag::None) { return false; }
+    inline bool Draw(const char* label, i8vec4& vec, i8vec4 from, i8vec4 to, int8_t resetValue = 0, const char* format = "%.i", DrawStateFlag flags = DrawStateFlag::None) { return false; }
 
-    inline bool Draw(const char* label, u8vec2& vec, u8vec2 from, u8vec2 to, uint8_t resetValue = 0, DrawStateFlag flags = DrawStateFlag::None) { return false; }
-    inline bool Draw(const char* label, u8vec3& vec, u8vec3 from, u8vec3 to, uint8_t resetValue = 0, DrawStateFlag flags = DrawStateFlag::None) { return false; }
-    inline bool Draw(const char* label, u8vec4& vec, u8vec4 from, u8vec4 to, uint8_t resetValue = 0, DrawStateFlag flags = DrawStateFlag::None) { return false; }
+    inline bool Draw(const char* label, u8vec2& vec, u8vec2 from, u8vec2 to, uint8_t resetValue = 0, const char* format = "%.u", DrawStateFlag flags = DrawStateFlag::None) { return false; }
+    inline bool Draw(const char* label, u8vec3& vec, u8vec3 from, u8vec3 to, uint8_t resetValue = 0, const char* format = "%.u", DrawStateFlag flags = DrawStateFlag::None) { return false; }
+    inline bool Draw(const char* label, u8vec4& vec, u8vec4 from, u8vec4 to, uint8_t resetValue = 0, const char* format = "%.u", DrawStateFlag flags = DrawStateFlag::None) { return false; }
 
-    inline bool Draw(const char* label, i16vec2& vec, i16vec2 from, i16vec2 to, int16_t resetValue = 0, DrawStateFlag flags = DrawStateFlag::None) { return false; }
-    inline bool Draw(const char* label, i16vec3& vec, i16vec3 from, i16vec3 to, int16_t resetValue = 0, DrawStateFlag flags = DrawStateFlag::None) { return false; }
-    inline bool Draw(const char* label, i16vec4& vec, i16vec4 from, i16vec4 to, int16_t resetValue = 0, DrawStateFlag flags = DrawStateFlag::None) { return false; }
+    inline bool Draw(const char* label, i16vec2& vec, i16vec2 from, i16vec2 to, int16_t resetValue = 0, const char* format = "%.i", DrawStateFlag flags = DrawStateFlag::None) { return false; }
+    inline bool Draw(const char* label, i16vec3& vec, i16vec3 from, i16vec3 to, int16_t resetValue = 0, const char* format = "%.i", DrawStateFlag flags = DrawStateFlag::None) { return false; }
+    inline bool Draw(const char* label, i16vec4& vec, i16vec4 from, i16vec4 to, int16_t resetValue = 0, const char* format = "%.i", DrawStateFlag flags = DrawStateFlag::None) { return false; }
 
-    inline bool Draw(const char* label, u16vec2& vec, u16vec2 from, u16vec2 to, uint16_t resetValue = 0, DrawStateFlag flags = DrawStateFlag::None) { return false; }
-    inline bool Draw(const char* label, u16vec3& vec, u16vec3 from, u16vec3 to, uint16_t resetValue = 0, DrawStateFlag flags = DrawStateFlag::None) { return false; }
-    inline bool Draw(const char* label, u16vec4& vec, u16vec4 from, u16vec4 to, uint16_t resetValue = 0, DrawStateFlag flags = DrawStateFlag::None) { return false; }
+    inline bool Draw(const char* label, u16vec2& vec, u16vec2 from, u16vec2 to, uint16_t resetValue = 0, const char* format = "%.u", DrawStateFlag flags = DrawStateFlag::None) { return false; }
+    inline bool Draw(const char* label, u16vec3& vec, u16vec3 from, u16vec3 to, uint16_t resetValue = 0, const char* format = "%.u", DrawStateFlag flags = DrawStateFlag::None) { return false; }
+    inline bool Draw(const char* label, u16vec4& vec, u16vec4 from, u16vec4 to, uint16_t resetValue = 0, const char* format = "%.u", DrawStateFlag flags = DrawStateFlag::None) { return false; }
 
-    inline bool Draw(const char* label, ivec2& vec, ivec2 from, ivec2 to, int32_t resetValue = 0, DrawStateFlag flags = DrawStateFlag::None) { return false; }
-    inline bool Draw(const char* label, ivec3& vec, ivec3 from, ivec3 to, int32_t resetValue = 0, DrawStateFlag flags = DrawStateFlag::None) { return false; }
-    inline bool Draw(const char* label, ivec4& vec, ivec4 from, ivec4 to, int32_t resetValue = 0, DrawStateFlag flags = DrawStateFlag::None) { return false; }
+    inline bool Draw(const char* label, ivec2& vec, ivec2 from, ivec2 to, int32_t resetValue = 0, const char* format = "%.i", DrawStateFlag flags = DrawStateFlag::None) { return false; }
+    inline bool Draw(const char* label, ivec3& vec, ivec3 from, ivec3 to, int32_t resetValue = 0, const char* format = "%.i", DrawStateFlag flags = DrawStateFlag::None) { return false; }
+    inline bool Draw(const char* label, ivec4& vec, ivec4 from, ivec4 to, int32_t resetValue = 0, const char* format = "%.i", DrawStateFlag flags = DrawStateFlag::None) { return false; }
 
-    inline bool Draw(const char* label, uvec2& vec, uvec2 from, uvec2 to, uint32_t resetValue = 0, DrawStateFlag flags = DrawStateFlag::None) { return false; }
-    inline bool Draw(const char* label, uvec3& vec, uvec3 from, uvec3 to, uint32_t resetValue = 0, DrawStateFlag flags = DrawStateFlag::None) { return false; }
-    inline bool Draw(const char* label, uvec4& vec, uvec4 from, uvec4 to, uint32_t resetValue = 0, DrawStateFlag flags = DrawStateFlag::None) { return false; }
+    inline bool Draw(const char* label, uvec2& vec, uvec2 from, uvec2 to, uint32_t resetValue = 0, const char* format = "%.u", DrawStateFlag flags = DrawStateFlag::None) { return false; }
+    inline bool Draw(const char* label, uvec3& vec, uvec3 from, uvec3 to, uint32_t resetValue = 0, const char* format = "%.u", DrawStateFlag flags = DrawStateFlag::None) { return false; }
+    inline bool Draw(const char* label, uvec4& vec, uvec4 from, uvec4 to, uint32_t resetValue = 0, const char* format = "%.u", DrawStateFlag flags = DrawStateFlag::None) { return false; }
 
-    inline bool Draw(const char* label, i64vec2& vec, i64vec2 from, i64vec2 to, int64_t resetValue = 0, DrawStateFlag flags = DrawStateFlag::None) { return false; }
-    inline bool Draw(const char* label, i64vec3& vec, i64vec3 from, i64vec3 to, int64_t resetValue = 0, DrawStateFlag flags = DrawStateFlag::None) { return false; }
-    inline bool Draw(const char* label, i64vec4& vec, i64vec4 from, i64vec4 to, int64_t resetValue = 0, DrawStateFlag flags = DrawStateFlag::None) { return false; }
+    inline bool Draw(const char* label, i64vec2& vec, i64vec2 from, i64vec2 to, int64_t resetValue = 0, const char* format = "%.ill", DrawStateFlag flags = DrawStateFlag::None) { return false; }
+    inline bool Draw(const char* label, i64vec3& vec, i64vec3 from, i64vec3 to, int64_t resetValue = 0, const char* format = "%.ill", DrawStateFlag flags = DrawStateFlag::None) { return false; }
+    inline bool Draw(const char* label, i64vec4& vec, i64vec4 from, i64vec4 to, int64_t resetValue = 0, const char* format = "%.ill", DrawStateFlag flags = DrawStateFlag::None) { return false; }
 
-    inline bool Draw(const char* label, u64vec2& vec, u64vec2 from, u64vec2 to, uint64_t resetValue = 0, DrawStateFlag flags = DrawStateFlag::None) { return false; }
-    inline bool Draw(const char* label, u64vec3& vec, u64vec3 from, u64vec3 to, uint64_t resetValue = 0, DrawStateFlag flags = DrawStateFlag::None) { return false; }
-    inline bool Draw(const char* label, u64vec4& vec, u64vec4 from, u64vec4 to, uint64_t resetValue = 0, DrawStateFlag flags = DrawStateFlag::None) { return false; }
+    inline bool Draw(const char* label, u64vec2& vec, u64vec2 from, u64vec2 to, uint64_t resetValue = 0, const char* format = "%.ull", DrawStateFlag flags = DrawStateFlag::None) { return false; }
+    inline bool Draw(const char* label, u64vec3& vec, u64vec3 from, u64vec3 to, uint64_t resetValue = 0, const char* format = "%.ull", DrawStateFlag flags = DrawStateFlag::None) { return false; }
+    inline bool Draw(const char* label, u64vec4& vec, u64vec4 from, u64vec4 to, uint64_t resetValue = 0, const char* format = "%.ull", DrawStateFlag flags = DrawStateFlag::None) { return false; }
 
-    inline bool Draw(const char* label, vec2& vec, vec2 from, vec2 to, float_t resetValue = 0.0f, DrawStateFlag flags = DrawStateFlag::None) { return false; }
-    inline bool Draw(const char* label, vec3& vec, vec3 from, vec3 to, float_t resetValue = 0.0f, DrawStateFlag flags = DrawStateFlag::None) { return false; }
-    inline bool Draw(const char* label, vec4& vec, vec4 from, vec4 to, float_t resetValue = 0.0f, DrawStateFlag flags = DrawStateFlag::None) { return false; }
+    inline bool Draw(const char* label, vec2& vec, vec2 from, vec2 to, float_t resetValue = 0.0f, const char* format = "%.2f", DrawStateFlag flags = DrawStateFlag::None) { return false; }
+    inline bool Draw(const char* label, vec3& vec, vec3 from, vec3 to, float_t resetValue = 0.0f, const char* format = "%.2f", DrawStateFlag flags = DrawStateFlag::None) { return false; }
+    inline bool Draw(const char* label, vec4& vec, vec4 from, vec4 to, float_t resetValue = 0.0f, const char* format = "%.2f", DrawStateFlag flags = DrawStateFlag::None) { return false; }
 
-    inline bool Draw(const char* label, dvec2& vec, dvec2 from, dvec2 to, double_t resetValue = 0.0, DrawStateFlag flags = DrawStateFlag::None) { return false; }
-    inline bool Draw(const char* label, dvec3& vec, dvec3 from, dvec3 to, double_t resetValue = 0.0, DrawStateFlag flags = DrawStateFlag::None) { return false; }
-    inline bool Draw(const char* label, dvec4& vec, dvec4 from, dvec4 to, double_t resetValue = 0.0, DrawStateFlag flags = DrawStateFlag::None) { return false; }
+    inline bool Draw(const char* label, dvec2& vec, dvec2 from, dvec2 to, double_t resetValue = 0.0, const char* format = "%.3d", DrawStateFlag flags = DrawStateFlag::None) { return false; }
+    inline bool Draw(const char* label, dvec3& vec, dvec3 from, dvec3 to, double_t resetValue = 0.0, const char* format = "%.3d", DrawStateFlag flags = DrawStateFlag::None) { return false; }
+    inline bool Draw(const char* label, dvec4& vec, dvec4 from, dvec4 to, double_t resetValue = 0.0, const char* format = "%.3d", DrawStateFlag flags = DrawStateFlag::None) { return false; }
 
-    inline bool DrawSlider(const char* label, int8_t& v,   int8_t from,   int8_t to,   DrawStateFlag flags = DrawStateFlag::None) { return false; }
-    inline bool DrawSlider(const char* label, uint8_t& v,  uint8_t from,  uint8_t to,  DrawStateFlag flags = DrawStateFlag::None) { return false; }
-    inline bool DrawSlider(const char* label, int16_t& v,  int16_t from,  int16_t to,  DrawStateFlag flags = DrawStateFlag::None) { return false; }
-    inline bool DrawSlider(const char* label, uint16_t& v, uint16_t from, uint16_t to, DrawStateFlag flags = DrawStateFlag::None) { return false; }
-    inline bool DrawSlider(const char* label, int32_t& v,  int32_t from,  int32_t to,  DrawStateFlag flags = DrawStateFlag::None) { return false; }
-    inline bool DrawSlider(const char* label, uint32_t& v, uint32_t from, uint32_t to, DrawStateFlag flags = DrawStateFlag::None) { return false; }
-    inline bool DrawSlider(const char* label, int64_t& v,  int64_t from,  int64_t to,  DrawStateFlag flags = DrawStateFlag::None) { return false; }
-    inline bool DrawSlider(const char* label, uint64_t& v, uint64_t from, uint64_t to, DrawStateFlag flags = DrawStateFlag::None) { return false; }
-    inline bool DrawSlider(const char* label, float_t& v,  float_t from,  float_t to,  DrawStateFlag flags = DrawStateFlag::None) { return false; }
-    inline bool DrawSlider(const char* label, double_t& v, double_t from, double_t to, DrawStateFlag flags = DrawStateFlag::None) { return false; }
+    inline bool DrawSlider(const char* label, int8_t& v,   int8_t from,   int8_t to,   const char* format = "%.f",  DrawStateFlag flags = DrawStateFlag::None) { return false; }
+    inline bool DrawSlider(const char* label, uint8_t& v,  uint8_t from,  uint8_t to,  const char* format = "%.f",  DrawStateFlag flags = DrawStateFlag::None) { return false; }
+    inline bool DrawSlider(const char* label, int16_t& v,  int16_t from,  int16_t to,  const char* format = "%.f",  DrawStateFlag flags = DrawStateFlag::None) { return false; }
+    inline bool DrawSlider(const char* label, uint16_t& v, uint16_t from, uint16_t to, const char* format = "%.f",  DrawStateFlag flags = DrawStateFlag::None) { return false; }
+    inline bool DrawSlider(const char* label, int32_t& v,  int32_t from,  int32_t to,  const char* format = "%.f",  DrawStateFlag flags = DrawStateFlag::None) { return false; }
+    inline bool DrawSlider(const char* label, uint32_t& v, uint32_t from, uint32_t to, const char* format = "%.f",  DrawStateFlag flags = DrawStateFlag::None) { return false; }
+    inline bool DrawSlider(const char* label, int64_t& v,  int64_t from,  int64_t to,  const char* format = "%.f",  DrawStateFlag flags = DrawStateFlag::None) { return false; }
+    inline bool DrawSlider(const char* label, uint64_t& v, uint64_t from, uint64_t to, const char* format = "%.f",  DrawStateFlag flags = DrawStateFlag::None) { return false; }
+    inline bool DrawSlider(const char* label, float_t& v,  float_t from,  float_t to,  const char* format = "%.2f", DrawStateFlag flags = DrawStateFlag::None) { return false; }
+    inline bool DrawSlider(const char* label, double_t& v, double_t from, double_t to, const char* format = "%.3f", DrawStateFlag flags = DrawStateFlag::None) { return false; }
 
-    inline bool DrawSlider(const char* label, i8vec2& vec, i8vec2 from, i8vec2 to, int8_t resetValue = 0, DrawStateFlag flags = DrawStateFlag::None) { return false; }
-    inline bool DrawSlider(const char* label, i8vec3& vec, i8vec3 from, i8vec3 to, int8_t resetValue = 0, DrawStateFlag flags = DrawStateFlag::None) { return false; }
-    inline bool DrawSlider(const char* label, i8vec4& vec, i8vec4 from, i8vec4 to, int8_t resetValue = 0, DrawStateFlag flags = DrawStateFlag::None) { return false; }
+    inline bool DrawSlider(const char* label, i8vec2& vec, i8vec2 from, i8vec2 to, int8_t resetValue = 0, const char* format = "%.f", DrawStateFlag flags = DrawStateFlag::None) { return false; }
+    inline bool DrawSlider(const char* label, i8vec3& vec, i8vec3 from, i8vec3 to, int8_t resetValue = 0, const char* format = "%.f", DrawStateFlag flags = DrawStateFlag::None) { return false; }
+    inline bool DrawSlider(const char* label, i8vec4& vec, i8vec4 from, i8vec4 to, int8_t resetValue = 0, const char* format = "%.f", DrawStateFlag flags = DrawStateFlag::None) { return false; }
 
-    inline bool DrawSlider(const char* label, u8vec2& vec, u8vec2 from, u8vec2 to, uint8_t resetValue = 0, DrawStateFlag flags = DrawStateFlag::None) { return false; }
-    inline bool DrawSlider(const char* label, u8vec3& vec, u8vec3 from, u8vec3 to, uint8_t resetValue = 0, DrawStateFlag flags = DrawStateFlag::None) { return false; }
-    inline bool DrawSlider(const char* label, u8vec4& vec, u8vec4 from, u8vec4 to, uint8_t resetValue = 0, DrawStateFlag flags = DrawStateFlag::None) { return false; }
+    inline bool DrawSlider(const char* label, u8vec2& vec, u8vec2 from, u8vec2 to, uint8_t resetValue = 0, const char* format = "%.f", DrawStateFlag flags = DrawStateFlag::None) { return false; }
+    inline bool DrawSlider(const char* label, u8vec3& vec, u8vec3 from, u8vec3 to, uint8_t resetValue = 0, const char* format = "%.f", DrawStateFlag flags = DrawStateFlag::None) { return false; }
+    inline bool DrawSlider(const char* label, u8vec4& vec, u8vec4 from, u8vec4 to, uint8_t resetValue = 0, const char* format = "%.f", DrawStateFlag flags = DrawStateFlag::None) { return false; }
 
-    inline bool DrawSlider(const char* label, i16vec2& vec, i16vec2 from, i16vec2 to, int16_t resetValue = 0, DrawStateFlag flags = DrawStateFlag::None) { return false; }
-    inline bool DrawSlider(const char* label, i16vec3& vec, i16vec3 from, i16vec3 to, int16_t resetValue = 0, DrawStateFlag flags = DrawStateFlag::None) { return false; }
-    inline bool DrawSlider(const char* label, i16vec4& vec, i16vec4 from, i16vec4 to, int16_t resetValue = 0, DrawStateFlag flags = DrawStateFlag::None) { return false; }
+    inline bool DrawSlider(const char* label, i16vec2& vec, i16vec2 from, i16vec2 to, int16_t resetValue = 0, const char* format = "%.f", DrawStateFlag flags = DrawStateFlag::None) { return false; }
+    inline bool DrawSlider(const char* label, i16vec3& vec, i16vec3 from, i16vec3 to, int16_t resetValue = 0, const char* format = "%.f", DrawStateFlag flags = DrawStateFlag::None) { return false; }
+    inline bool DrawSlider(const char* label, i16vec4& vec, i16vec4 from, i16vec4 to, int16_t resetValue = 0, const char* format = "%.f", DrawStateFlag flags = DrawStateFlag::None) { return false; }
 
-    inline bool DrawSlider(const char* label, u16vec2& vec, u16vec2 from, u16vec2 to, uint16_t resetValue = 0, DrawStateFlag flags = DrawStateFlag::None) { return false; }
-    inline bool DrawSlider(const char* label, u16vec3& vec, u16vec3 from, u16vec3 to, uint16_t resetValue = 0, DrawStateFlag flags = DrawStateFlag::None) { return false; }
-    inline bool DrawSlider(const char* label, u16vec4& vec, u16vec4 from, u16vec4 to, uint16_t resetValue = 0, DrawStateFlag flags = DrawStateFlag::None) { return false; }
+    inline bool DrawSlider(const char* label, u16vec2& vec, u16vec2 from, u16vec2 to, uint16_t resetValue = 0, const char* format = "%.f", DrawStateFlag flags = DrawStateFlag::None) { return false; }
+    inline bool DrawSlider(const char* label, u16vec3& vec, u16vec3 from, u16vec3 to, uint16_t resetValue = 0, const char* format = "%.f", DrawStateFlag flags = DrawStateFlag::None) { return false; }
+    inline bool DrawSlider(const char* label, u16vec4& vec, u16vec4 from, u16vec4 to, uint16_t resetValue = 0, const char* format = "%.f", DrawStateFlag flags = DrawStateFlag::None) { return false; }
 
-    inline bool DrawSlider(const char* label, ivec2& vec, ivec2 from, ivec2 to, int32_t resetValue = 0, DrawStateFlag flags = DrawStateFlag::None) { return false; }
-    inline bool DrawSlider(const char* label, ivec3& vec, ivec3 from, ivec3 to, int32_t resetValue = 0, DrawStateFlag flags = DrawStateFlag::None) { return false; }
-    inline bool DrawSlider(const char* label, ivec4& vec, ivec4 from, ivec4 to, int32_t resetValue = 0, DrawStateFlag flags = DrawStateFlag::None) { return false; }
+    inline bool DrawSlider(const char* label, ivec2& vec, ivec2 from, ivec2 to, int32_t resetValue = 0, const char* format = "%.f", DrawStateFlag flags = DrawStateFlag::None) { return false; }
+    inline bool DrawSlider(const char* label, ivec3& vec, ivec3 from, ivec3 to, int32_t resetValue = 0, const char* format = "%.f", DrawStateFlag flags = DrawStateFlag::None) { return false; }
+    inline bool DrawSlider(const char* label, ivec4& vec, ivec4 from, ivec4 to, int32_t resetValue = 0, const char* format = "%.f", DrawStateFlag flags = DrawStateFlag::None) { return false; }
 
-    inline bool DrawSlider(const char* label, uvec2& vec, uvec2 from, uvec2 to, uint32_t resetValue = 0, DrawStateFlag flags = DrawStateFlag::None) { return false; }
-    inline bool DrawSlider(const char* label, uvec3& vec, uvec3 from, uvec3 to, uint32_t resetValue = 0, DrawStateFlag flags = DrawStateFlag::None) { return false; }
-    inline bool DrawSlider(const char* label, uvec4& vec, uvec4 from, uvec4 to, uint32_t resetValue = 0, DrawStateFlag flags = DrawStateFlag::None) { return false; }
+    inline bool DrawSlider(const char* label, uvec2& vec, uvec2 from, uvec2 to, uint32_t resetValue = 0, const char* format = "%.f", DrawStateFlag flags = DrawStateFlag::None) { return false; }
+    inline bool DrawSlider(const char* label, uvec3& vec, uvec3 from, uvec3 to, uint32_t resetValue = 0, const char* format = "%.f", DrawStateFlag flags = DrawStateFlag::None) { return false; }
+    inline bool DrawSlider(const char* label, uvec4& vec, uvec4 from, uvec4 to, uint32_t resetValue = 0, const char* format = "%.f", DrawStateFlag flags = DrawStateFlag::None) { return false; }
 
-    inline bool DrawSlider(const char* label, i64vec2& vec, i64vec2 from, i64vec2 to, int64_t resetValue = 0, DrawStateFlag flags = DrawStateFlag::None) { return false; }
-    inline bool DrawSlider(const char* label, i64vec3& vec, i64vec3 from, i64vec3 to, int64_t resetValue = 0, DrawStateFlag flags = DrawStateFlag::None) { return false; }
-    inline bool DrawSlider(const char* label, i64vec4& vec, i64vec4 from, i64vec4 to, int64_t resetValue = 0, DrawStateFlag flags = DrawStateFlag::None) { return false; }
+    inline bool DrawSlider(const char* label, i64vec2& vec, i64vec2 from, i64vec2 to, int64_t resetValue = 0, const char* format = "%.f", DrawStateFlag flags = DrawStateFlag::None) { return false; }
+    inline bool DrawSlider(const char* label, i64vec3& vec, i64vec3 from, i64vec3 to, int64_t resetValue = 0, const char* format = "%.f", DrawStateFlag flags = DrawStateFlag::None) { return false; }
+    inline bool DrawSlider(const char* label, i64vec4& vec, i64vec4 from, i64vec4 to, int64_t resetValue = 0, const char* format = "%.f", DrawStateFlag flags = DrawStateFlag::None) { return false; }
 
-    inline bool DrawSlider(const char* label, u64vec2& vec, u64vec2 from, u64vec2 to, uint64_t resetValue = 0, DrawStateFlag flags = DrawStateFlag::None) { return false; }
-    inline bool DrawSlider(const char* label, u64vec3& vec, u64vec3 from, u64vec3 to, uint64_t resetValue = 0, DrawStateFlag flags = DrawStateFlag::None) { return false; }
-    inline bool DrawSlider(const char* label, u64vec4& vec, u64vec4 from, u64vec4 to, uint64_t resetValue = 0, DrawStateFlag flags = DrawStateFlag::None) { return false; }
+    inline bool DrawSlider(const char* label, u64vec2& vec, u64vec2 from, u64vec2 to, uint64_t resetValue = 0, const char* format = "%.f", DrawStateFlag flags = DrawStateFlag::None) { return false; }
+    inline bool DrawSlider(const char* label, u64vec3& vec, u64vec3 from, u64vec3 to, uint64_t resetValue = 0, const char* format = "%.f", DrawStateFlag flags = DrawStateFlag::None) { return false; }
+    inline bool DrawSlider(const char* label, u64vec4& vec, u64vec4 from, u64vec4 to, uint64_t resetValue = 0, const char* format = "%.f", DrawStateFlag flags = DrawStateFlag::None) { return false; }
 
-    inline bool DrawSlider(const char* label, vec2& vec, vec2 from, vec2 to, float_t resetValue = 0.0f, DrawStateFlag flags = DrawStateFlag::None) { return false; }
-    inline bool DrawSlider(const char* label, vec3& vec, vec3 from, vec3 to, float_t resetValue = 0.0f, DrawStateFlag flags = DrawStateFlag::None) { return false; }
-    inline bool DrawSlider(const char* label, vec4& vec, vec4 from, vec4 to, float_t resetValue = 0.0f, DrawStateFlag flags = DrawStateFlag::None) { return false; }
+    inline bool DrawSlider(const char* label, vec2& vec, vec2 from, vec2 to, float_t resetValue = 0.0f, const char* format = "%.2f", DrawStateFlag flags = DrawStateFlag::None) { return false; }
+    inline bool DrawSlider(const char* label, vec3& vec, vec3 from, vec3 to, float_t resetValue = 0.0f, const char* format = "%.2f", DrawStateFlag flags = DrawStateFlag::None) { return false; }
+    inline bool DrawSlider(const char* label, vec4& vec, vec4 from, vec4 to, float_t resetValue = 0.0f, const char* format = "%.2f", DrawStateFlag flags = DrawStateFlag::None) { return false; }
 
-    inline bool DrawSlider(const char* label, dvec2& vec, dvec2 from, dvec2 to, double_t resetValue = 0.0, DrawStateFlag flags = DrawStateFlag::None) { return false; }
-    inline bool DrawSlider(const char* label, dvec3& vec, dvec3 from, dvec3 to, double_t resetValue = 0.0, DrawStateFlag flags = DrawStateFlag::None) { return false; }
-    inline bool DrawSlider(const char* label, dvec4& vec, dvec4 from, dvec4 to, double_t resetValue = 0.0, DrawStateFlag flags = DrawStateFlag::None) { return false; }
+    inline bool DrawSlider(const char* label, dvec2& vec, dvec2 from, dvec2 to, double_t resetValue = 0.0, const char* format = "%.3f", DrawStateFlag flags = DrawStateFlag::None) { return false; }
+    inline bool DrawSlider(const char* label, dvec3& vec, dvec3 from, dvec3 to, double_t resetValue = 0.0, const char* format = "%.3f", DrawStateFlag flags = DrawStateFlag::None) { return false; }
+    inline bool DrawSlider(const char* label, dvec4& vec, dvec4 from, dvec4 to, double_t resetValue = 0.0, const char* format = "%.3f", DrawStateFlag flags = DrawStateFlag::None) { return false; }
 
 #endif
 }

@@ -20,20 +20,20 @@ namespace hf::editor
 
     bool Draw(const char* label, Transform& trs, DrawStateFlag flags)
     {
-        return DrawComponent(label, [&trs]
+        return DrawComponent(label, [&]
         {
-            Draw("Position", trs.position);
-            Draw("Rotation", trs.euler);
-            Draw("Scale", trs.scale, 1);
+            Draw("Position", trs.position, 0, flags);
+            Draw("Rotation", trs.euler, 0, flags);
+            Draw("Scale", trs.scale, 1, flags);
         });
     }
 
     bool Draw(const char* label, DirectionalLight& dl, DrawStateFlag flags)
     {
-        return DrawComponent(label, [&dl]
+        return DrawComponent(label, [&]
         {
-            DrawColor("Color", dl.color);
-            Draw("Rotation", dl.euler);
+            DrawColor("Color", dl.color, flags);
+            Draw("Rotation", dl.euler, 0, flags | DrawStateFlag::ButtonLess);
         });
     }
 
@@ -41,9 +41,9 @@ namespace hf::editor
     {
         return DrawComponent(label, [&]
         {
-            DrawSlider("Fov", cam.fov, 1.0f, 179.0f, flags);
-            Draw("Near", cam.nearPlane, 0.01f, 1000.0f, flags);
-            Draw("Far", cam.farPlane, cam.nearPlane, 10000.0f, flags);
+            DrawSlider("Fov", cam.fov, 1.0f, 179.0f, "%.1f", flags);
+            Draw("Near", cam.nearPlane, 0.01f, 1000.0f, "%.1f", flags);
+            Draw("Far", cam.farPlane, cam.nearPlane, 10000.0f, "%.1f", flags);
         });
     }
 
@@ -51,8 +51,8 @@ namespace hf::editor
     {
         return DrawComponent(label, [&]
         {
-            DrawSlider("Volume", plc.volume, 0.0f, 1.0f, flags);
-            DrawSlider("Pitch", plc.pitch, 0.0f, 3.0f, flags);
+            DrawSlider("Volume", plc.volume, 0.0f, 1.0f, "%.2f", flags);
+            DrawSlider("Pitch", plc.pitch, 0.0f, 3.0f, "%.2f", flags);
             Draw("Loop", plc.loopingEnabled, flags);
         });
     }
@@ -65,8 +65,8 @@ namespace hf::editor
             float pitch = GetPitch(pl);
             bool loop = IsLoopingEnabled(pl);
 
-            if (DrawSlider("Volume", volume, 0.0f, 1.0f, flags)) SetVolume(pl, volume);
-            if (DrawSlider("Pitch", pitch, 0.0f, 3.0f, flags)) SetPitch(pl, pitch);
+            if (DrawSlider("Volume", volume, 0.0f, 1.0f, "%.2f", flags)) SetVolume(pl, volume);
+            if (DrawSlider("Pitch", pitch, 0.0f, 3.0f, "%.2f", flags)) SetPitch(pl, pitch);
             if (Draw("Loop", loop, flags)) SetLoopingMode(pl, loop);
 
             ImGui::SameLine();
@@ -80,11 +80,9 @@ namespace hf::editor
             }
 
             ImGui::SameLine();
-            if (ImGui::Button("Reset")) Seek(pl, 0);
-            ImGui::SameLine();
-
-            double audioProgress = GetPositionPercent(pl);
-            ImGui::ProgressBar(audioProgress, ImVec2(-1, 0));
+            uint32_t audioProgress = (uint32_t)(GetPositionPercent(pl) * 100.0f);
+            if(DrawSlider("Progress", audioProgress, 0u, 100u, "%.u%%", DrawStateFlag::Nameless))
+                SeekPercent(pl, audioProgress * 0.01f);
         });
     }
 

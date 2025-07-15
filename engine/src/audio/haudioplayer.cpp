@@ -116,10 +116,9 @@ namespace hf
     {
         if (!player->isLoaded) throw GENERIC_EXCEPT("[Hyperflow]", "Trying to access destroyed audio player");
         if (!player->clip) throw GENERIC_EXCEPT("[Hyperflow]", "Cannot seek the player without clip.");
-        double length = player->clip->frameCount / (double)player->clip->sampleRate;
-        double positionInSeconds = position * length;
-        if (ma_sound_seek_to_second((ma_sound*)player->handle, positionInSeconds) != MA_SUCCESS)
-            LOG_ERROR("Unable to seek audio to position %f", positionInSeconds);
+        uint64_t p = (uint64_t)(player->clip->frameCount * position);
+        if (ma_sound_seek_to_pcm_frame((ma_sound*)player->handle, p) != MA_SUCCESS)
+            LOG_ERROR("Unable to seek audio to position %f", p);
     }
 
     void SetConfig(const Ref<AudioPlayer>& player, const AudioPlayerConfig& config)
@@ -175,13 +174,20 @@ namespace hf
 
         if (!clip) return;
 
-        auto buffer = (ma_audio_buffer*)inter::audio::GenerateClipBuffer_i(clip.get());
+        const auto bufferConfig = ma_audio_buffer_config_init((ma_format)clip->format, clip->channels, clip->framesRead, clip->pcmData, nullptr);
+        auto buffer = new ma_audio_buffer();
+        if (ma_audio_buffer_init(&bufferConfig, buffer) != MA_SUCCESS)
+        {
+            if (buffer) delete buffer;
+            LOG_ERROR("Unable create player for the Audio clip -> %s", clip->filePath.c_str());
+            return;
+        }
+
         auto handle = new ma_sound();
         if (ma_sound_init_from_data_source(&inter::AUDIO_DATA.engine, buffer,
             0, nullptr, handle) != MA_SUCCESS)
         {
             if (handle) delete handle;
-            if (buffer) delete buffer;
             LOG_ERROR("Unable create player for the Audio clip -> %s", clip->filePath.c_str());
             return;
         }
