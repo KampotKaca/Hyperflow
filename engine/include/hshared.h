@@ -493,9 +493,9 @@ namespace hf
 	struct TextureMipMapInfo
 	{
 		MipMapMode mode = MipMapMode::Linear;
-		float minLod = 0.0f;
-		float maxLod = 4.0f;
-		float lodBias = 0.0f;
+		float_t minLod = 0.0f;
+		float_t maxLod = 4.0f;
+		float_t lodBias = 0.0f;
 	};
 
 	struct TextureSamplerDefinitionInfo
@@ -665,7 +665,7 @@ namespace hf
 	    DepthStencilMode mode = DepthStencilMode::Depth;
         TextureUsageFlags usageFlags = TextureUsageFlags::None;
 
-		float clearDepth = 1.0f;
+		float_t clearDepth = 1.0f;
 		uint8_t clearStencil = 0;
 	};
 
@@ -872,8 +872,8 @@ namespace hf
 
 	struct TimeUniformInfo
 	{
-		alignas(8) double deltaTime;
-		alignas(8) double timeSinceStartup;
+		alignas(8) double_t deltaTime;
+		alignas(8) double_t timeSinceStartup;
 	};
 
 	struct LightUniformInfo
@@ -911,7 +911,7 @@ namespace hf
 
 	struct GridLinesInfo
 	{
-		alignas(16) float lineThickness = 3.0f;
+		alignas(16) float_t lineThickness = 3.0f;
 		alignas(16) vec4 color{ 0.2f, 0.2f, 0.2f, 0.4f };
 	};
 
@@ -926,11 +926,15 @@ namespace hf
 
 	struct AudioClip;
 	struct AudioPlayer;
+	struct AudioPlayer3D;
 
 	enum class AudioClipFormat { Default = 0, U8 = 1, S16 = 2, S24 = 3, S32 = 4, F32 };
 	enum class AudioClipChannelMixMode { Rectangular = 0, Simple = 1, CustomWeights = 2 };
 	enum class AudioClipDitherMode { None = 0, Rectangle = 1, Triangle = 2 };
 	enum class AudioClipEncodingFormat { Unknown = 0, Wav = 1, Flac = 2, Mp3 = 3, Vorbis = 4 };
+	enum class Audio3DAttenuationModel { None = 0, Inverse = 1, Linear = 2, Exponential = 3 };
+	enum class AudioPlayerStateFlags { None = 0, Loaded = 1 << 0, Playing = 1 << 1 };
+    DEFINE_ENUM_FLAGS(AudioPlayerStateFlags)
 
 	struct AudioClipConfig
 	{
@@ -950,16 +954,36 @@ namespace hf
 
 	struct AudioPlayerConfig
 	{
-		float volume = 1.0f;
-		float pitch = 1.0f;
+		float_t volume = 1.0f;
+		float_t pitch = 1.0f;
 		bool loopingEnabled = false;
 	};
+
+    struct AudioPlayer3DConfig
+    {
+        float_t volume = 1.0f;
+        float_t pitch = 1.0f;
+        bool loopingEnabled = false;
+
+        float minDistance = 1.0f;
+        float maxDistance = 100.0f;
+        Audio3DAttenuationModel attenuationModel = Audio3DAttenuationModel::Inverse;
+
+        vec3 position{};
+        vec3 direction = { 0, 0, 1 };
+    };
 
 	struct AudioPlayerCreationInfo
 	{
 		Ref<AudioClip> clip{};
 		AudioPlayerConfig config{};
 	};
+
+    struct AudioPlayer3DCreationInfo
+    {
+        Ref<AudioClip> clip{};
+        AudioPlayer3DConfig config{};
+    };
 
 	//endregion
 
@@ -970,9 +994,9 @@ namespace hf
 
 		constexpr vec3 ColorFromHash(const uint32_t colorHash)
 		{
-			const float r = (float)((colorHash >> 16) & 0xFF) / 255.0f;
-			const float g = (float)((colorHash >> 8) & 0xFF) / 255.0f;
-			const float b = (float)(colorHash & 0xFF) / 255.0f;
+			const float_t r = (float_t)((colorHash >> 16) & 0xFF) / 255.0f;
+			const float_t g = (float_t)((colorHash >> 8) & 0xFF) / 255.0f;
+			const float_t b = (float_t)(colorHash & 0xFF) / 255.0f;
 			return { r, g, b };
 		}
 	}

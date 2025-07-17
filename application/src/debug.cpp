@@ -169,7 +169,7 @@ namespace app
                 hf::editor::Draw("Light", APP_OBJECTS.mainLight);
                 hf::editor::Draw("Camera", APP_DEBUG.camera.camera3D.core);
                 hf::editor::Draw("Audio", APP_AUDIOS.background_music);
-                hf::editor::Draw("Audio2", APP_AUDIOS.background_music2);
+                hf::editor::Draw("Audio3D", APP_AUDIOS.background_music3D);
             }
             hf::editor::EndWindow();
         }

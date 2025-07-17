@@ -12,7 +12,7 @@ namespace hf
         this->transferType = transferType;
         if (transferType == DataTransferType::CopyData)
         {
-            uint64_t bufferSize = info.vertexCount * inter::HF.renderingApi.api.GetVertBufferAttribSize(info.bufferAttrib);
+            const auto bufferSize = info.vertexCount * inter::HF.renderingApi.api.GetVertBufferAttribSize(info.bufferAttrib);
             buffer = utils::Allocate(bufferSize);
             memcpy(buffer, info.pVertices, bufferSize);
         }

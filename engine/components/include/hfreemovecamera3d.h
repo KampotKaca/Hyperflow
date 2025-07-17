@@ -29,13 +29,13 @@ namespace hf
         FreeMoveCamera3D() = default;
         ~FreeMoveCamera3D() = default;
 
-        void Update(const Ref<Window>& window, float deltaTime);
+        void Update(const Ref<Window>& window, float_t deltaTime);
 
         Camera3DFreeLook camera3D{};
         FreeMoveCameraDirection moveFlags = FreeMoveCameraDirection::All;
         FreeMoveCameraLookAxis lookFlags = FreeMoveCameraLookAxis::All;
-        float lookSpeed = 12.0f;
-        float moveSpeed = 20.0f;
+        float_t lookSpeed = 12.0f;
+        float_t moveSpeed = 20.0f;
 
         vec2 zoomLimits = { 2, 1000 };
         vec2 pitchLimits = { -89, 89 };

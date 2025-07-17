@@ -11,7 +11,7 @@ namespace hf
     mat4 Camera3DCore::ToProjectionMat4(const Ref<Renderer>& rn) const
     {
         const auto& size = rn->threadInfo.size;
-        const float aspect = (float)size.x / (float)size.y;
+        const float_t aspect = (float_t)size.x / (float_t)size.y;
         return glm::perspective(glm::radians(fov), aspect, nearPlane, farPlane);
     }
 

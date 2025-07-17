@@ -20,7 +20,7 @@ namespace hf
 
     BufferAttrib DefineBufferAttrib(const char* assetPath)
     {
-        std::string assetLoc = TO_RES_PATH(std::string("bufferattribs/") + assetPath) + ".meta";
+        const auto assetLoc = TO_RES_PATH(std::string("bufferattribs/") + assetPath) + ".meta";
         if (!utils::FileExists(assetLoc.c_str()))
         {
             LOG_ERROR("[Hyperflow] Unable to find buffer attrib meta file: %s", assetPath);
@@ -59,7 +59,7 @@ namespace hf
             info.formatCount = (uint32_t)formatList.size();
             info.pFormats = formatList.data();
 
-            auto attrib = DefineBufferAttrib(info);
+            const auto attrib = DefineBufferAttrib(info);
             inter::HF.graphicsResources.bufferAttribs[assetPath] = attrib;
             return attrib;
         }catch (...)

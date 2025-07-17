@@ -42,8 +42,10 @@ namespace hf::editor
         return DrawComponent(label, [&]
         {
             DrawSlider("Fov", cam.fov, 1.0f, 179.0f, "%.1f", flags);
-            Draw("Near", cam.nearPlane, 0.01f, 1000.0f, "%.1f", flags);
-            Draw("Far", cam.farPlane, cam.nearPlane, 10000.0f, "%.1f", flags);
+            Draw("Near", cam.nearPlane, 0.01f, 100000.0f, "%.1f", flags);
+            Draw("Far", cam.farPlane, 0.01f, 100000.0f, "%.1f", flags);
+
+            cam.farPlane = glm::max(cam.nearPlane, cam.farPlane);
         });
     }
 
@@ -61,8 +63,8 @@ namespace hf::editor
     {
         return DrawComponent(label, [&]
         {
-            float volume = GetVolume(pl);
-            float pitch = GetPitch(pl);
+            float_t volume = GetVolume(pl);
+            float_t pitch = GetPitch(pl);
             bool loop = IsLoopingEnabled(pl);
 
             if (DrawSlider("Volume", volume, 0.0f, 1.0f, "%.2f", flags)) SetVolume(pl, volume);
@@ -80,7 +82,51 @@ namespace hf::editor
             }
 
             ImGui::SameLine();
-            uint32_t audioProgress = (uint32_t)(GetPositionPercent(pl) * 100.0f);
+            uint32_t audioProgress = (uint32_t)(GetPlayedPercent(pl) * 100.0f);
+            if(DrawSlider("Progress", audioProgress, 0u, 100u, "%.u%%", DrawStateFlag::Nameless))
+                SeekPercent(pl, audioProgress * 0.01f);
+        });
+    }
+
+    bool Draw(const char* label, Ref<AudioPlayer3D>& pl, DrawStateFlag flags)
+    {
+        return DrawComponent(label, [&]
+        {
+            vec3 position = GetPosition(pl);
+            vec3 direction = GetDirection(pl);
+            float_t minDistance = GetMinDistance(pl);
+            float_t maxDistance = GetMaxDistance(pl);
+            float_t volume = GetVolume(pl);
+            float_t pitch = GetPitch(pl);
+            bool loop = IsLoopingEnabled(pl);
+
+            if (Draw("Position", position, 0, flags | DrawStateFlag::ButtonLess)) SetPosition(pl, position);
+            if (Draw("Direction", direction, 0, flags | DrawStateFlag::ButtonLess)) SetDirection(pl, direction);
+
+            float_t oldMinDistance = minDistance, oldMaxDistance = maxDistance;
+            DrawSlider("Min Distance", minDistance, 0.001f, 100000.0f, "%.2f", flags);
+            DrawSlider("Max Distance", maxDistance, 0.001f, 100000.0f, "%.2f", flags);
+
+            maxDistance = glm::max(minDistance, maxDistance);
+            if (minDistance != oldMinDistance) SetMinDistance(pl, minDistance);
+            if (maxDistance != oldMaxDistance) SetMaxDistance(pl, maxDistance);
+
+            if (DrawSlider("Volume", volume, 0.0f, 1.0f, "%.2f", flags)) SetVolume(pl, volume);
+            if (DrawSlider("Pitch", pitch, 0.0f, 3.0f, "%.2f", flags)) SetPitch(pl, pitch);
+            if (Draw("Loop", loop, flags)) SetLoopingMode(pl, loop);
+
+            ImGui::SameLine();
+            if (IsPlaying(pl))
+            {
+                if (ImGui::Button("Pause")) Pause(pl);
+            }
+            else
+            {
+                if(ImGui::Button("Play")) Play(pl);
+            }
+
+            ImGui::SameLine();
+            uint32_t audioProgress = (uint32_t)(GetPlayedPercent(pl) * 100.0f);
             if(DrawSlider("Progress", audioProgress, 0u, 100u, "%.u%%", DrawStateFlag::Nameless))
                 SeekPercent(pl, audioProgress * 0.01f);
         });

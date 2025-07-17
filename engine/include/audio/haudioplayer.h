@@ -14,8 +14,7 @@ namespace hf
         Ref<AudioClip> clip{};
         void* handle{};
         void* buffer{};
-        bool isPlaying = false;
-        bool isLoaded = false;
+        AudioPlayerStateFlags stateFlags{};
     };
 }
 

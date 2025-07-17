@@ -3,9 +3,9 @@
 
 namespace hf
 {
-    void FreeMoveCamera3D::Update(const Ref<Window>& window, float deltaTime)
+    void FreeMoveCamera3D::Update(const Ref<Window>& window, const float_t deltaTime)
     {
-        vec3 motion = vec3(0.0f);
+        auto motion = vec3(0.0f);
         if ((uint32_t)(moveFlags & FreeMoveCameraDirection::Forward) > 0  && IsKeyDownContinues(window, Key::W))         motion.z += 1.0f;
         if ((uint32_t)(moveFlags & FreeMoveCameraDirection::Backward) > 0 && IsKeyDownContinues(window, Key::S))         motion.z -= 1.0f;
         if ((uint32_t)(moveFlags & FreeMoveCameraDirection::Right) > 0    && IsKeyDownContinues(window, Key::D))         motion.x += 1.0f;
@@ -13,25 +13,25 @@ namespace hf
         if ((uint32_t)(moveFlags & FreeMoveCameraDirection::Up) > 0       && IsKeyDownContinues(window, Key::Space))     motion.y += 1.0f;
         if ((uint32_t)(moveFlags & FreeMoveCameraDirection::Down) > 0     && IsKeyDownContinues(window, Key::LeftShift)) motion.y -= 1.0f;
 
-        vec2 lookAmount = vec2((bool)(lookFlags & FreeMoveCameraLookAxis::Horizontal), (bool)(lookFlags & FreeMoveCameraLookAxis::Vertical));
-        auto delta = GetPointerDelta(window);
-        auto windowSize = GetSize(window);
-        lookAmount.x *= delta.x / (float)windowSize.x;
-        lookAmount.y *= delta.y / (float)windowSize.y;
+        auto lookAmount = vec2((bool)(lookFlags & FreeMoveCameraLookAxis::Horizontal), (bool)(lookFlags & FreeMoveCameraLookAxis::Vertical));
+        const auto delta = GetPointerDelta(window);
+        const auto windowSize = GetSize(window);
+        lookAmount.x *= delta.x / (float_t)windowSize.x;
+        lookAmount.y *= delta.y / (float_t)windowSize.y;
 
         motion *= moveSpeed * deltaTime;
         lookAmount *= lookSpeed;
 
-        float pitch = glm::asin(camera3D.direction.y) - lookAmount.y;
-        float yaw = glm::atan(camera3D.direction.x, camera3D.direction.z) + lookAmount.x;
+        float_t pitch = glm::asin(camera3D.direction.y) - lookAmount.y;
+        const float_t yaw = glm::atan(camera3D.direction.x, camera3D.direction.z) + lookAmount.x;
 
-        float maxPitch = glm::radians(pitchLimits.y);
-        float minPitch = glm::radians(pitchLimits.x);
+        const float_t maxPitch = glm::radians(pitchLimits.y);
+        const float_t minPitch = glm::radians(pitchLimits.x);
         pitch = glm::clamp(pitch, minPitch, maxPitch);
 
-        glm::quat yawQuat = glm::angleAxis(yaw, glm::vec3(0, 1, 0));
-        glm::quat pitchQuat = glm::angleAxis(-pitch, glm::vec3(1, 0, 0));
-        glm::quat rotation = yawQuat * pitchQuat;
+        const auto yawQuat = glm::angleAxis(yaw, glm::vec3(0, 1, 0));
+        const auto pitchQuat = glm::angleAxis(-pitch, glm::vec3(1, 0, 0));
+        const auto rotation = yawQuat * pitchQuat;
 
         camera3D.direction = glm::normalize(rotation * glm::vec3(0, 0, 1));
 

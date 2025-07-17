@@ -9,7 +9,7 @@ namespace hf
     {
         vec3 position { 0, 5, 0 };
         vec3 color { 1, 1, 1 };
-        float range = 10;
+        float_t range = 10;
     };
 }
 

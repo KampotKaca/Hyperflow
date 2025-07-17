@@ -7,11 +7,11 @@ namespace hf
 {
     struct Camera3DCore
     {
-        float fov = 60.0f;
-        float nearPlane = 0.1f;
-        float farPlane = 1000.0f;
+        float_t fov = 60.0f;
+        float_t nearPlane = 0.1f;
+        float_t farPlane = 1000.0f;
 
-        void SetFov(const float newValue) { fov = glm::clamp(newValue, 1.0f, 179.0f); }
+        void SetFov(const float_t newValue) { fov = glm::clamp(newValue, 1.0f, 179.0f); }
         [[nodiscard]] mat4 ToProjectionMat4(const Ref<Renderer>& rn) const;
     };
 }

@@ -35,7 +35,7 @@ namespace hf
 
     Ref<Texture> CreateTextureAsset(const char* assetPath)
     {
-        std::string assetLoc = TO_RES_PATH(std::string("textures/") + assetPath) + ".meta";
+        const auto assetLoc = TO_RES_PATH(std::string("textures/") + assetPath) + ".meta";
         if (!utils::FileExists(assetLoc.c_str()))
         {
             LOG_ERROR("[Hyperflow] Unable to find texture meta file: %s", assetPath);
@@ -108,8 +108,7 @@ namespace hf
                 return false;
             }
 
-            if (HF.renderingApi.type == RenderingApiType::Vulkan)
-                stbi_set_flip_vertically_on_load(false);
+            if (HF.renderingApi.type == RenderingApiType::Vulkan) stbi_set_flip_vertically_on_load(false);
 
             ivec3 size{};
             int32_t texChannels{};
@@ -194,7 +193,7 @@ namespace hf
                     }
                 }
 
-                inter::window::SetIcons(win, images.data(), images.size());
+                window::SetIcons(win, images.data(), images.size());
                 for (auto& image : images) stbi_image_free(image.data);
                 images.clear();
 

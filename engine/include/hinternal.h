@@ -50,6 +50,7 @@ namespace hf::inter
     {
         unordered_map<std::string, Ref<AudioClip>> clips{};
         unordered_map<uint64_t, Ref<AudioPlayer>> players{};
+        unordered_map<uint64_t, Ref<AudioPlayer3D>> player3Ds{};
     };
 
     struct ResourcesMarkedForDeletion
@@ -147,11 +148,20 @@ namespace hf::inter
 
     namespace audio
     {
-        void Load_i(bool isEnabled = true, float volume = 1.0f);
+        void Load_i(float_t volume = 1.0f);
         void Unload_i();
 
         bool CreateClip_i(AudioClip* clip);
         bool DestroyClip_i(AudioClip* clip);
+
+#define SET_AUDIO_STAT(pl, d, f)\
+        if (!IsLoaded(pl)) throw GENERIC_EXCEPT("[Hyperflow]", "Trying to access destroyed audio player");\
+        auto& config = pl->config;\
+        if (config.d != d)\
+        {\
+            config.d = d;\
+            f((ma_sound*)pl->handle, d);\
+        }
     }
 
     namespace rendering

@@ -30,7 +30,7 @@ namespace app
         }
 
         {
-            const hf::AudioPlayerCreationInfo info
+            const hf::AudioPlayer3DCreationInfo info
             {
                 .clip = APP_AUDIOS.cartoon_comedy,
                 .config =
@@ -38,7 +38,7 @@ namespace app
                     .loopingEnabled = true
                 }
             };
-            APP_AUDIOS.background_music2 = hf::Create(info);
+            APP_AUDIOS.background_music3D = hf::Create(info);
         }
     }
 }

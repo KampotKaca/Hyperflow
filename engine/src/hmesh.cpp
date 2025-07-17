@@ -22,16 +22,16 @@ namespace hf
     uint32_t ComputeVertexStride(MeshDataType dataType)
     {
         uint32_t vertexSize = 0;
-        if ((dataType & MeshDataType::Position) != MeshDataType::None) vertexSize += 3 * sizeof(float);
-        if ((dataType & MeshDataType::Normal) != MeshDataType::None)   vertexSize += 3 * sizeof(float);
-        if ((dataType & MeshDataType::Color) != MeshDataType::None)    vertexSize += 3 * sizeof(float);
-        if ((dataType & MeshDataType::TexCoord) != MeshDataType::None) vertexSize += 2 * sizeof(float);
+        if ((dataType & MeshDataType::Position) != MeshDataType::None) vertexSize += 3 * sizeof(float_t);
+        if ((dataType & MeshDataType::Normal) != MeshDataType::None)   vertexSize += 3 * sizeof(float_t);
+        if ((dataType & MeshDataType::Color) != MeshDataType::None)    vertexSize += 3 * sizeof(float_t);
+        if ((dataType & MeshDataType::TexCoord) != MeshDataType::None) vertexSize += 2 * sizeof(float_t);
         return vertexSize;
     }
 
     Mesh::Mesh(const MeshCreationInfo& info) : filePath(info.filePath), stats(info.stats)
     {
-        std::string meshLoc = TO_RES_PATH(std::string("meshes/") + filePath) + ".mesh";
+        const auto meshLoc = TO_RES_PATH(std::string("meshes/") + filePath) + ".mesh";
 
         if (!utils::FileExists(meshLoc.c_str()))
         {
@@ -65,7 +65,7 @@ namespace hf
         for (auto& header : headers) meshSize += header.GetDataSize();
 
         std::vector<char> meshData(meshSize);
-        auto maxSize = LZ4_decompress_safe(&compressedData[offset], meshData.data(), (int32_t)compressedData.size() - (int32_t)offset, (int32_t)meshSize);
+        const auto maxSize = LZ4_decompress_safe(&compressedData[offset], meshData.data(), (int32_t)compressedData.size() - (int32_t)offset, (int32_t)meshSize);
         offset = 0;
 
         if (maxSize < 0)
@@ -74,11 +74,11 @@ namespace hf
             return;
         }
 
-        uint32_t vertexStride = ComputeVertexStride(stats.typeFlags);
+        const uint32_t vertexStride = ComputeVertexStride(stats.typeFlags);
         subMeshes.reserve(submeshCount);
 
-        constexpr uint32_t pncStep = sizeof(float) * 3;
-        constexpr uint32_t tStep = sizeof(float) * 2;
+        constexpr uint32_t pncStep = sizeof(float_t) * 3;
+        constexpr uint32_t tStep = sizeof(float_t) * 2;
 
         for (uint32_t i = 0; i < submeshCount; i++)
         {

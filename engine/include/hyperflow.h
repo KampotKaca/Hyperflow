@@ -38,6 +38,7 @@ namespace hf
 	Ref<IndexBuffer> Create(const IndexBufferCreationInfo& info);
 	Ref<AudioClip> Create(const AudioClipCreationInfo& info);
 	Ref<AudioPlayer> Create(const AudioPlayerCreationInfo& info);
+	Ref<AudioPlayer3D> Create(const AudioPlayer3DCreationInfo& info);
 
 	void Destroy(const Ref<Mesh>& mesh);
 	void Destroy(const Ref<Shader>& shader);
@@ -50,6 +51,7 @@ namespace hf
 	void Destroy(const Ref<Window>& win);
 	void Destroy(const Ref<AudioClip>& clip);
 	void Destroy(const Ref<AudioPlayer>& player);
+	void Destroy(const Ref<AudioPlayer3D>& player);
 
 	void DestroyAllWindows();
 	void Destroy(const Ref<Cubemap>* pCubemaps, uint32_t count);
@@ -62,6 +64,7 @@ namespace hf
 	void Destroy(const Ref<Shader>* pShaders, uint32_t count);
 	void Destroy(const Ref<AudioClip>* pClips, uint32_t count);
 	void Destroy(const Ref<AudioPlayer>* pPlayers, uint32_t count);
+	void Destroy(const Ref<AudioPlayer3D>* pPlayers, uint32_t count);
 
 	Ref<Mesh> CreateMeshAsset(const char* assetPath);
 	Ref<Texture> CreateTextureAsset(const char* assetPath);
@@ -79,33 +82,65 @@ namespace hf
 	bool IsLoaded(const Ref<Cubemap>& cb);
 	bool IsLoaded(const Ref<AudioClip>& clip);
 	bool IsLoaded(const Ref<AudioPlayer>& player);
+	bool IsLoaded(const Ref<AudioPlayer3D>& player);
 
 	void Upload(const Ref<Material>& mat, const void* data);
 	void Upload(const Ref<VertBuffer>& vb, const VertBufferUploadInfo& info);
 	void Upload(const Ref<IndexBuffer>& ib, const IndexBufferUploadInfo& info);
 
-	void ChangeClip(const Ref<AudioPlayer>& player, const Ref<AudioClip>& clip, int64_t startingFrame = -1);
+	void ChangeClip(const Ref<AudioPlayer>& player, const Ref<AudioClip>& clip, double_t startingDuration = -1);
+	void ChangeClip(const Ref<AudioPlayer3D>& player, const Ref<AudioClip>& clip, double_t startingDuration = -1);
 
 	void Play(const Ref<AudioPlayer>& player);
+	void Play(const Ref<AudioPlayer3D>& player);
+
 	void Pause(const Ref<AudioPlayer>& player);
+	void Pause(const Ref<AudioPlayer3D>& player);
 
-	void SetVolume(float volume);
-	void EnableAudio(bool isEnabled);
+	void SetVolume(const Ref<AudioPlayer>& player, float_t volume);
+	void SetVolume(const Ref<AudioPlayer3D>& player, float_t volume);
 
-	void SetVolume(const Ref<AudioPlayer>& player, float volume);
-	void SetPitch(const Ref<AudioPlayer>& player, float pitch);
-	void SetLoopingMode(const Ref<AudioPlayer>& player, bool enableLoop);
-	void Seek(const Ref<AudioPlayer>& player, double positionInSeconds);
-	void SeekPercent(const Ref<AudioPlayer>& player, double position);
-	void SetConfig(const Ref<AudioPlayer>& player, const AudioPlayerConfig& config);
+	void SetPitch(const Ref<AudioPlayer>& player, float_t pitch);
+	void SetPitch(const Ref<AudioPlayer3D>& player, float_t pitch);
 
-	const AudioPlayerConfig& GetConfig(const Ref<AudioPlayer>& player);
-	float GetPitch(const Ref<AudioPlayer>& player);
-	float GetVolume(const Ref<AudioPlayer>& player);
-    double GetPositionInSeconds(const Ref<AudioPlayer>& player);
-    double GetPositionPercent(const Ref<AudioPlayer>& player);
+	void SetLoopingMode(const Ref<AudioPlayer>& player, bool loopingEnabled);
+	void SetLoopingMode(const Ref<AudioPlayer3D>& player, bool loopingEnabled);
+
+	void Seek(const Ref<AudioPlayer>& player, double_t positionInSeconds);
+	void Seek(const Ref<AudioPlayer3D>& player, double_t positionInSeconds);
+
+	void SeekPercent(const Ref<AudioPlayer>& player, double_t position);
+	void SeekPercent(const Ref<AudioPlayer3D>& player, double_t position);
+
+	float_t GetPitch(const Ref<AudioPlayer>& player);
+	float_t GetPitch(const Ref<AudioPlayer3D>& player);
+
+	float_t GetVolume(const Ref<AudioPlayer>& player);
+	float_t GetVolume(const Ref<AudioPlayer3D>& player);
+
+    double_t GetPlayedInSeconds(const Ref<AudioPlayer>& player);
+    double_t GetPlayedInSeconds(const Ref<AudioPlayer3D>& player);
+
+    double_t GetPlayedPercent(const Ref<AudioPlayer>& player);
+    double_t GetPlayedPercent(const Ref<AudioPlayer3D>& player);
+
 	bool IsLoopingEnabled(const Ref<AudioPlayer>& player);
+	bool IsLoopingEnabled(const Ref<AudioPlayer3D>& player);
+
     bool IsPlaying(const Ref<AudioPlayer>& player);
+    bool IsPlaying(const Ref<AudioPlayer3D>& player);
+
+    void SetMinDistance(const Ref<AudioPlayer3D>& player, float_t minDistance);
+    void SetMaxDistance(const Ref<AudioPlayer3D>& player, float_t maxDistance);
+    void SetAttenuationModel(const Ref<AudioPlayer3D>& player, Audio3DAttenuationModel atten);
+    void SetPosition(const Ref<AudioPlayer3D>& player, vec3 position);
+    void SetDirection(const Ref<AudioPlayer3D>& player, vec3 direction);
+
+    float_t GetMinDistance(const Ref<AudioPlayer3D>& player);
+    float_t GetMaxDistance(const Ref<AudioPlayer3D>& player);
+    Audio3DAttenuationModel GetAttenuationModel(const Ref<AudioPlayer3D>& player);
+    vec3 GetPosition(const Ref<AudioPlayer3D>& player);
+    vec3 GetDirection(const Ref<AudioPlayer3D>& player);
 
 	uint64_t GetFrameCount(const Ref<AudioClip>& clip);
 	uint32_t GetChannels(const Ref<AudioClip>& clip);

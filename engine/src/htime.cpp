@@ -16,7 +16,7 @@ namespace hf
 
 	void Time::StartFrame()
 	{
-		double cTime = GetSystemTime();
+		double_t cTime = GetSystemTime();
 
 		if(targetFrameRate > 0)
 		{
@@ -32,12 +32,12 @@ namespace hf
 		currentTime = cTime;
 		frameCount++;
 
-		double current = 1.0 / deltaTime;
+		const double_t current = 1.0 / deltaTime;
 		frameRate = std::lerp(frameRate, current, 5 * deltaTime);
 	}
 
-	double Time::GetTimePassed() const { return currentTime - creationTime; }
-	double Time::GetAbsoluteTimePassed() const { return GetSystemTime() - creationTime; }
+	double_t Time::GetTimePassed() const { return currentTime - creationTime; }
+	double_t Time::GetAbsoluteTimePassed() const { return GetSystemTime() - creationTime; }
 
 	void Time::SetTargetFrameRate(int16_t targetFrameRate)
 	{
@@ -48,9 +48,9 @@ namespace hf
 	int32_t Time::GetFrameRate() const { return (int32_t)glm::round(frameRate); }
 
 	uint64_t GetFrameCount() { return inter::HF.time.frameCount; }
-	double GetDeltaTime(){ return inter::HF.time.deltaTime; }
-	double GetTimePassed() { return inter::HF.time.GetTimePassed(); }
-	double GetAbsoluteTimePassed() { return inter::HF.time.GetAbsoluteTimePassed(); }
+	double_t GetDeltaTime(){ return inter::HF.time.deltaTime; }
+	double_t GetTimePassed() { return inter::HF.time.GetTimePassed(); }
+	double_t GetAbsoluteTimePassed() { return inter::HF.time.GetAbsoluteTimePassed(); }
 	int16_t GetTargetFrameRate() { return inter::HF.time.targetFrameRate; }
 	int32_t GetFrameRate() { return inter::HF.time.GetFrameRate(); }
 	void SetTargetFrameRate(int16_t targetFrameRate) { return inter::HF.time.SetTargetFrameRate(targetFrameRate); }
@@ -64,10 +64,10 @@ namespace hf
 		};
 	}
 
-	double GetSystemTime()
+	double_t GetSystemTime()
 	{
 		using namespace std::chrono;
 		const auto time = high_resolution_clock::now().time_since_epoch();
-		return duration<double>(time).count();
+		return duration<double_t>(time).count();
 	}
 }

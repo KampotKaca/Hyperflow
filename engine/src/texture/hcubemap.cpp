@@ -8,8 +8,8 @@
 namespace hf
 {
     Cubemap::Cubemap(const CubemapCreationInfo& info) :
-        folderPath(info.folderPath), desiredChannel(info.desiredChannel), details(info.details),
-        mipLevels(info.mipLevels)
+        folderPath(info.folderPath), desiredChannel(info.desiredChannel), mipLevels(info.mipLevels),
+        details(info.details)
     {
         switch (inter::HF.renderingApi.type)
         {
@@ -60,7 +60,7 @@ namespace hf
 
     Ref<Cubemap> CreateCubemapAsset(const char* assetPath)
     {
-        std::string assetLoc = TO_RES_PATH(std::string("cubemaps/") + assetPath) + ".meta";
+        auto assetLoc = TO_RES_PATH(std::string("cubemaps/") + assetPath) + ".meta";
         if (!utils::FileExists(assetLoc.c_str()))
         {
             LOG_ERROR("[Hyperflow] Unable to find cubemap meta file: %s", assetPath);
@@ -181,7 +181,7 @@ namespace hf
 
             if (cubemap->handle) return false;
 
-            std::string fullCubemapFolderPath = TO_RES_PATH(std::string("cubemaps/") + cubemap->folderPath + "/");
+            const auto fullCubemapFolderPath = TO_RES_PATH(std::string("cubemaps/") + cubemap->folderPath + "/");
             TexData textures[6]{};
             bool validLoading = true;
 
@@ -196,8 +196,7 @@ namespace hf
                     break;
                 }
 
-                if (HF.renderingApi.type == RenderingApiType::Vulkan)
-                    stbi_set_flip_vertically_on_load(false);
+                if (HF.renderingApi.type == RenderingApiType::Vulkan) stbi_set_flip_vertically_on_load(false);
 
                 ivec3 size{};
                 int32_t texChannels{};
@@ -229,7 +228,7 @@ namespace hf
 
             const auto size = textures[0].size;
             const auto texSize = size.x * size.y * size.z * 4;
-            auto allPixels = (uint8_t*)utils::Allocate(6 * texSize);
+            const auto allPixels = (uint8_t*)utils::Allocate(6 * texSize);
             for (uint32_t i = 0; i < 6; i++) memcpy(allPixels + i * texSize, textures[i].pixels, texSize);
 
             const TextureCreationInfo info

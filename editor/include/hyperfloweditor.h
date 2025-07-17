@@ -57,6 +57,7 @@ namespace hf::editor
     
     bool Draw(const char* label, AudioPlayerConfig& plc, DrawStateFlag flags = DrawStateFlag::None);
     bool Draw(const char* label, Ref<AudioPlayer>& pl, DrawStateFlag flags = DrawStateFlag::None);
+    bool Draw(const char* label, Ref<AudioPlayer3D>& pl, DrawStateFlag flags = DrawStateFlag::None);
 
     bool DrawString(const char* label, std::string& v, DrawStateFlag flags = DrawStateFlag::None);
     bool DrawStringBox(const char* label, std::string& v, DrawStateFlag flags = DrawStateFlag::None);
@@ -292,6 +293,7 @@ namespace hf::editor
     inline bool Draw(const char* label, Camera3DCore& cam,      DrawStateFlag flags = DrawStateFlag::None) { return false; }
     inline bool Draw(const char* label, AudioPlayerConfig& plc, DrawStateFlag flags = DrawStateFlag::None) { return false; }
     inline bool Draw(const char* label, Ref<AudioPlayer>& pl,   DrawStateFlag flags = DrawStateFlag::None) { return false; }
+    inline bool Draw(const char* label, Ref<AudioPlayer3D>& pl, DrawStateFlag flags = DrawStateFlag::None) { return false; }
 
     inline bool DrawString   (const char* label, std::string& v, DrawStateFlag flags = DrawStateFlag::None) { return false; }
     inline bool DrawStringBox(const char* label, std::string& v, DrawStateFlag flags = DrawStateFlag::None) { return false; }

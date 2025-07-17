@@ -21,7 +21,7 @@ namespace hf::inter
     {
         std::lock_guard lock(HF.deletedResources.syncLock);
 
-        for (auto shader : HF.deletedResources.shaders)
+        for (const auto shader : HF.deletedResources.shaders)
             HF.renderingApi.api.DestroyShader(shader);
         for (auto buffer : HF.deletedResources.buffers)
         {
@@ -31,13 +31,13 @@ namespace hf::inter
                 case RuntimeBufferType::Index: HF.renderingApi.api.DestroyIndexBuffer(buffer.buffer); break;
             }
         }
-        for (auto texPack : HF.deletedResources.texturePacks)
+        for (const auto texPack : HF.deletedResources.texturePacks)
             HF.renderingApi.api.DestroyTexturePack(texPack);
-        for (auto allocator : HF.deletedResources.texturePackAllocators)
+        for (const auto allocator : HF.deletedResources.texturePackAllocators)
             HF.renderingApi.api.DestroyTexturePackAllocator(allocator);
-        for (auto tex : HF.deletedResources.textures)
+        for (const auto tex : HF.deletedResources.textures)
             HF.renderingApi.api.DestroyTexture(tex);
-        for (auto tex : HF.deletedResources.renderTextures)
+        for (const auto tex : HF.deletedResources.renderTextures)
             HF.renderingApi.api.DestroyRenderTexture(tex);
 
         HF.deletedResources.shaders.clear();

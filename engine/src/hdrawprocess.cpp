@@ -439,7 +439,7 @@ namespace hf
         catch (...)
         {
             LOG_ERROR("Unable to start draw! Draw packet buffer usage: %f",
-                rn->currentDraw.packet.drawPackets.size() / (float)RENDERING_MAX_NUM_DRAWPACKETS);
+                rn->currentDraw.packet.drawPackets.size() / (float_t)RENDERING_MAX_NUM_DRAWPACKETS);
             throw;
         }
     }

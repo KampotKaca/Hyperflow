@@ -14,7 +14,7 @@ namespace hf
           rasterizerOptions(info.rasterizerOptions),
           depthStencilOptions(info.depthStencilOptions), blendingOptions(info.alphaTestOptions)
     {
-        uint32_t bufferSize = sizeof(BufferAttrib) * info.supportedAttribCount;
+        const uint32_t bufferSize = sizeof(BufferAttrib) * info.supportedAttribCount;
         pSupportedAttribs = (BufferAttrib*)utils::Allocate(bufferSize);
         memcpy(pSupportedAttribs, info.pSupportedAttribs, bufferSize);
         inter::rendering::CreateShader_i(this);
@@ -62,8 +62,8 @@ namespace hf
                 case RenderingApiType::Vulkan:
                 {
                     std::vector<char> vertexCode{}, fragmentCode{};
-                    std::string vLoc = TO_RES_PATH(std::string("shaders/vulkan/") + shader->vertLoc) + ".vert.spv",
-                                fLoc = TO_RES_PATH(std::string("shaders/vulkan/") + shader->fragLoc) + ".frag.spv";
+                    const auto vLoc = TO_RES_PATH(std::string("shaders/vulkan/") + shader->vertLoc) + ".vert.spv",
+                               fLoc = TO_RES_PATH(std::string("shaders/vulkan/") + shader->fragLoc) + ".frag.spv";
 
                     if (!utils::FileExists(vLoc.c_str()))
                     {
@@ -80,7 +80,7 @@ namespace hf
                     utils::ReadFile(vLoc, false, vertexCode);
                     utils::ReadFile(fLoc, false, fragmentCode);
 
-                    ShaderCreationInfo creationInfo
+                    const ShaderCreationInfo creationInfo
                     {
                         .shaderSetup = shader->shaderSetup,
                         .supportedAttribCount = shader->supportedAttribCount,
