@@ -18,11 +18,16 @@ namespace hf
         template void SeekPercent_i(AudioPlayer3D* player, double_t positionInSeconds);
         template void Play_i(AudioPlayer3D* player);
         template void Pause_i(AudioPlayer3D* player);
+
+        template void SetVolume_i(AudioPlayer3D* player, float_t volume);
+        template void SetPitch_i(AudioPlayer3D* player, float_t pitch);
+        template void SetLoopingMode_i(AudioPlayer3D* player, bool loopingEnabled);
     }
 
     static void ChangeClip(AudioPlayer3D* player, const Ref<AudioClip>& clip, double_t startingDuration);
 
-    AudioPlayer3D::AudioPlayer3D(const AudioPlayer3DCreationInfo& info) : config(info.config)
+    AudioPlayer3D::AudioPlayer3D(const AudioPlayer3DCreationInfo& info)
+    : settings(info.settings), settings3d(info.settings3d), cone(info.cone)
     {
         ChangeClip(this, info.clip, -1);
     }
@@ -74,20 +79,28 @@ namespace hf
     void Play(const Ref<AudioPlayer3D>& player) { inter::Play_i(player.get()); }
     void Pause(const Ref<AudioPlayer3D>& player) { inter::Pause_i(player.get()); }
 
-    void SetMinDistance(const Ref<AudioPlayer3D>& player, float_t minDistance)
+    void SetDistance(const Ref<AudioPlayer3D>& player, float_t maxDistance, float_t falloff)
     {
-        SET_AUDIO_STAT(player, minDistance, ma_sound_set_min_distance)
-    }
+        if (!IsLoaded(player)) throw GENERIC_EXCEPT("[Hyperflow]", "Trying to access destroyed audio player");
+        auto& settings = player->settings3d;
+        if (settings.maxDistance != maxDistance)
+        {
+            settings.maxDistance = maxDistance;
+            ma_sound_set_max_distance((ma_sound*)player->handle, maxDistance);
+        }
 
-    void SetMaxDistance(const Ref<AudioPlayer3D>& player, float_t maxDistance)
-    {
-        SET_AUDIO_STAT(player, maxDistance, ma_sound_set_max_distance)
+        if (settings.falloff != falloff)
+        {
+            settings.falloff = falloff;
+            float_t minDistance = glm::max(0.001f, maxDistance - falloff);
+            ma_sound_set_min_distance((ma_sound*)player->handle, minDistance);
+        }
     }
 
     void SetAttenuationModel(const Ref<AudioPlayer3D>& player, Audio3DAttenuationModel atten)
     {
         if (!IsLoaded(player)) throw GENERIC_EXCEPT("[Hyperflow]", "Trying to access destroyed audio player");
-        auto& config = player->config;
+        auto& config = player->settings3d;
         if (config.attenuationModel != atten)
         {
             config.attenuationModel = atten;
@@ -95,52 +108,19 @@ namespace hf
         }
     }
 
-#define SET_V3_STAT(pl, d, f)\
-    if (!IsLoaded(pl)) throw GENERIC_EXCEPT("[Hyperflow]", "Trying to access destroyed audio player");\
-    auto& config = pl->config;\
-    if (config.d != d)\
-    {\
-        config.d = d;\
-        f((ma_sound*)pl->handle, d.x, d.y, d.z);\
-    }
+    void SetVolume(const Ref<AudioPlayer3D>& player, float_t volume) { inter::SetVolume_i(player.get(), volume); }
+    void SetPitch(const Ref<AudioPlayer3D>& player, float_t pitch) { inter::SetPitch_i(player.get(), pitch); }
+    void SetLoopingMode(const Ref<AudioPlayer3D>& player, bool loopingEnabled) { inter::SetLoopingMode_i(player.get(), loopingEnabled); }
 
-    void SetPosition(const Ref<AudioPlayer3D>& player, vec3 position)
-    {
-        SET_V3_STAT(player, position, ma_sound_set_position)
-    }
-
-    void SetDirection(const Ref<AudioPlayer3D>& player, vec3 direction)
-    {
-        SET_V3_STAT(player, direction, ma_sound_set_direction)
-    }
-
-    void SetVolume(const Ref<AudioPlayer3D>& player, float_t volume)
-    {
-        SET_AUDIO_STAT(player, volume, ma_sound_set_volume)
-    }
-
-    void SetPitch(const Ref<AudioPlayer3D>& player, float_t pitch)
-    {
-        SET_AUDIO_STAT(player, pitch, ma_sound_set_pitch)
-    }
-
-    void SetLoopingMode(const Ref<AudioPlayer3D>& player, bool loopingEnabled)
-    {
-        SET_AUDIO_STAT(player, loopingEnabled, ma_sound_set_looping)
-    }
-
-    float_t GetMinDistance(const Ref<AudioPlayer3D>& player) { return player->config.minDistance; }
-    float_t GetMaxDistance(const Ref<AudioPlayer3D>& player) { return player->config.maxDistance; }
-    Audio3DAttenuationModel GetAttenuationModel(const Ref<AudioPlayer3D>& player) { return player->config.attenuationModel; }
-    vec3 GetPosition(const Ref<AudioPlayer3D>& player) { return player->config.position; }
-    vec3 GetDirection(const Ref<AudioPlayer3D>& player) { return player->config.direction; }
+    vec2 GetDistance(const Ref<AudioPlayer3D>& player) { return vec2(player->settings3d.maxDistance, player->settings3d.falloff); }
+    Audio3DAttenuationModel GetAttenuationModel(const Ref<AudioPlayer3D>& player) { return player->settings3d.attenuationModel; }
 
     void Seek(const Ref<AudioPlayer3D>& player, double_t positionInSeconds) { inter::Seek_i(player.get(), positionInSeconds); }
     void SeekPercent(const Ref<AudioPlayer3D>& player, double_t position) { inter::SeekPercent_i(player.get(), position); }
 
-    float_t GetPitch(const Ref<AudioPlayer3D>& player) { return player->config.pitch; }
-    float_t GetVolume(const Ref<AudioPlayer3D>& player) { return player->config.volume; }
-    bool IsLoopingEnabled(const Ref<AudioPlayer3D>& player) { return player->config.loopingEnabled; }
+    float_t GetPitch(const Ref<AudioPlayer3D>& player) { return player->settings.pitch; }
+    float_t GetVolume(const Ref<AudioPlayer3D>& player) { return player->settings.volume; }
+    bool IsLoopingEnabled(const Ref<AudioPlayer3D>& player) { return player->settings.loopingEnabled; }
 
     double_t GetPlayedInSeconds(const Ref<AudioPlayer3D>& player) { return inter::GetPlayedInSeconds_i(player.get()); }
     double_t GetPlayedPercent(const Ref<AudioPlayer3D>& player) { return inter::GetPlayedPercent_i(player.get()); }
@@ -149,12 +129,9 @@ namespace hf
     {
         if(!inter::ChangeClip_i(player, clip, startingDuration)) return;
 
-        auto& config = player->config;
+        auto& settings3d = player->settings3d;
         auto handle = (ma_sound*)player->handle;
-        ma_sound_set_min_distance(handle, config.minDistance);
-        ma_sound_set_max_distance(handle, config.maxDistance);
-        ma_sound_set_attenuation_model(handle, (ma_attenuation_model)config.attenuationModel);
-        ma_sound_set_position(handle, config.position.x, config.position.y, config.position.z);
-        ma_sound_set_direction(handle, config.direction.x, config.direction.y, config.direction.z);
+        ma_sound_set_max_distance(handle, settings3d.maxDistance);
+        ma_sound_set_attenuation_model(handle, (ma_attenuation_model)settings3d.attenuationModel);
     }
 }

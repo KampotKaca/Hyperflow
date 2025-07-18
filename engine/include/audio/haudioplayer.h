@@ -10,7 +10,7 @@ namespace hf
         explicit AudioPlayer(const AudioPlayerCreationInfo& info);
         ~AudioPlayer();
 
-        AudioPlayerConfig config{};
+        AudioPlayerSettings settings{};
         Ref<AudioClip> clip{};
         void* handle{};
         void* buffer{};

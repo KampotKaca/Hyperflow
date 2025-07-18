@@ -17,7 +17,7 @@ namespace hf
     }
 
     AudioClip::AudioClip(const AudioClipCreationInfo& info)
-    : filePath(info.filePath), useAbsolutePath(info.useAbsolutePath), config(info.config)
+    : filePath(info.filePath), useAbsolutePath(info.useAbsolutePath), settings(info.settings)
     {
         if(!inter::audio::CreateClip_i(this)) inter::audio::DestroyClip_i(this);
     }
@@ -73,14 +73,14 @@ namespace hf
                 return false;
             }
 
-            auto config = clip->config;
+            auto settings = clip->settings;
             const ma_decoder_config decoderConfig
             {
-                .format = (ma_format)config.format,
-                .sampleRate = config.sampleRate,
-                .channelMixMode = (ma_channel_mix_mode)config.channelMixMode,
-                .ditherMode = (ma_dither_mode)config.ditherMode,
-                .encodingFormat = (ma_encoding_format)config.encodingFormat,
+                .format = (ma_format)settings.format,
+                .sampleRate = settings.sampleRate,
+                .channelMixMode = (ma_channel_mix_mode)settings.channelMixMode,
+                .ditherMode = (ma_dither_mode)settings.ditherMode,
+                .encodingFormat = (ma_encoding_format)settings.encodingFormat,
             };
 
             ma_decoder decoder;

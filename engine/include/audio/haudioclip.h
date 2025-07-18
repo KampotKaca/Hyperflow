@@ -12,7 +12,7 @@ namespace hf
 
         std::string filePath{};
         bool useAbsolutePath{};
-        AudioClipConfig config{};
+        AudioClipSettings settings{};
 
         void* pcmData{};
 

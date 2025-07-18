@@ -10,7 +10,9 @@ namespace hf
         explicit AudioPlayer3D(const AudioPlayer3DCreationInfo& info);
         ~AudioPlayer3D();
 
-        AudioPlayer3DConfig config{};
+        AudioPlayerSettings settings{};
+        AudioPlayer3DSettings settings3d{};
+        AudioCone cone{};
         void* handle{};
         void* buffer{};
         Ref<AudioClip> clip{};

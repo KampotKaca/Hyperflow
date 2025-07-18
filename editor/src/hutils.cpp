@@ -28,9 +28,9 @@ namespace hf::editor
         ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, { 0, 0 });
 
         if (!(uint32_t)(flags & DrawStateFlag::Nameless)) DrawLabel(label);
-
-        ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x);
-        valueChanged = ImGui::DragScalar(DrawKeyGen(label), data_type, v, speed, from, to, format, (ImGuiSliderFlags)flags);
+        if (!(uint32_t)(flags & DrawStateFlag::DontStretchWidth)) ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x);
+        else ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x * .6f);
+        valueChanged = ImGui::DragScalar(DrawKeyGen(label), data_type, v, speed, from, to, format);
 
         ImGui::PopStyleVar();
         return valueChanged;
@@ -65,7 +65,9 @@ namespace hf::editor
                     }
                 }
 
-                ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x);
+                if (!(uint32_t)(flags & DrawStateFlag::DontStretchWidth)) ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x);
+                else ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x * .6f);
+
                 valueChanged |= DrawScalar(VECTOR_IDS[i].c_str(), data_type, ptr, speed, from, to, format, DrawStateFlag::Nameless);
                 ptr = (void*)((char*)ptr + type_size);
 
@@ -87,8 +89,10 @@ namespace hf::editor
 
         if (!(uint32_t)(flags & DrawStateFlag::Nameless)) DrawLabel(label);
 
-        ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x);
-        valueChanged = ImGui::SliderScalar(DrawKeyGen(label), data_type, v, from, to, format, (ImGuiSliderFlags)flags);
+        if (!(uint32_t)(flags & DrawStateFlag::DontStretchWidth)) ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x);
+        else ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x * .6f);
+
+        valueChanged = ImGui::SliderScalar(DrawKeyGen(label), data_type, v, from, to, format);
 
         ImGui::PopStyleVar();
         return valueChanged;
@@ -122,7 +126,9 @@ namespace hf::editor
                     }
                 }
 
-                ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x);
+                if (!(uint32_t)(flags & DrawStateFlag::DontStretchWidth)) ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x);
+                else ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x * .6f);
+
                 valueChanged |= DrawScalarSlider(VECTOR_IDS[i].c_str(), data_type, ptr, from, to, format, DrawStateFlag::Nameless);
                 ptr = (void*)((char*)ptr + type_size);
 

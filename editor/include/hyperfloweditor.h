@@ -29,7 +29,7 @@ namespace hf::editor
     };
 
     enum class Condition { None = 0, Always = 1 << 0, Once = 1 << 1, FirstUseEver = 1 << 2, Appearing = 1 << 3 };
-    enum class DrawStateFlag { None = 0, Nameless = 1 << 0, ButtonLess = 1 << 1 };
+    enum class DrawStateFlag { None = 0, Nameless = 1 << 0, ButtonLess = 1 << 1, DontStretchWidth = 1 << 2, };
     DEFINE_ENUM_FLAGS(Condition)
     DEFINE_ENUM_FLAGS(DrawStateFlag)
 
@@ -55,7 +55,6 @@ namespace hf::editor
     bool Draw(const char* label, DirectionalLight& dl, DrawStateFlag flags = DrawStateFlag::None);
     bool Draw(const char* label, Camera3DCore& cam, DrawStateFlag flags = DrawStateFlag::None);
     
-    bool Draw(const char* label, AudioPlayerConfig& plc, DrawStateFlag flags = DrawStateFlag::None);
     bool Draw(const char* label, Ref<AudioPlayer>& pl, DrawStateFlag flags = DrawStateFlag::None);
     bool Draw(const char* label, Ref<AudioPlayer3D>& pl, DrawStateFlag flags = DrawStateFlag::None);
 
@@ -291,7 +290,6 @@ namespace hf::editor
     inline bool Draw(const char* label, Transform& trs,         DrawStateFlag flags = DrawStateFlag::None) { return false; }
     inline bool Draw(const char* label, DirectionalLight& dl,   DrawStateFlag flags = DrawStateFlag::None) { return false; }
     inline bool Draw(const char* label, Camera3DCore& cam,      DrawStateFlag flags = DrawStateFlag::None) { return false; }
-    inline bool Draw(const char* label, AudioPlayerConfig& plc, DrawStateFlag flags = DrawStateFlag::None) { return false; }
     inline bool Draw(const char* label, Ref<AudioPlayer>& pl,   DrawStateFlag flags = DrawStateFlag::None) { return false; }
     inline bool Draw(const char* label, Ref<AudioPlayer3D>& pl, DrawStateFlag flags = DrawStateFlag::None) { return false; }
 

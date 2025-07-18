@@ -59,16 +59,16 @@ namespace hf::inter
         player->handle = handle;
         player->clip = clip;
 
-        auto& config = player->config;
+        auto& settings = player->settings;
         if (startingDuration >= 0)
         {
             const auto frame = (uint64_t)((double_t)clip->sampleRate * startingDuration);
             ma_sound_seek_to_pcm_frame(handle, frame);
         }
 
-        ma_sound_set_volume(handle, config.volume);
-        ma_sound_set_pitch(handle, config.pitch);
-        ma_sound_set_looping(handle, config.loopingEnabled);
+        ma_sound_set_volume(handle, settings.volume);
+        ma_sound_set_pitch(handle, settings.pitch);
+        ma_sound_set_looping(handle, settings.loopingEnabled);
         return true;
     }
 
@@ -147,6 +147,42 @@ namespace hf::inter
         player->stateFlags &= (AudioPlayerStateFlags)~(uint32_t)AudioPlayerStateFlags::Playing;
         if (ma_sound_stop((ma_sound*)player->handle) != MA_SUCCESS)
             LOG_ERROR("Unable to pause audio player");
+    }
+
+    template<typename T>
+    void SetVolume_i(T* player, float_t volume)
+    {
+        if (!IsLoaded_i(player)) throw GENERIC_EXCEPT("[Hyperflow]", "Trying to access destroyed audio player");
+        auto& settings = player->settings;
+        if (settings.volume != volume)
+        {
+            settings.volume = volume;
+            ma_sound_set_volume((ma_sound*)player->handle, volume);
+        }
+    }
+
+    template<typename T>
+    void SetPitch_i(T* player, float_t pitch)
+    {
+        if (!IsLoaded_i(player)) throw GENERIC_EXCEPT("[Hyperflow]", "Trying to access destroyed audio player");
+        auto& settings = player->settings;
+        if (settings.pitch != pitch)
+        {
+            settings.pitch = pitch;
+            ma_sound_set_pitch((ma_sound*)player->handle, pitch);
+        }
+    }
+
+    template<typename T>
+    void SetLoopingMode_i(T* player, bool loopingEnabled)
+    {
+        if (!IsLoaded_i(player)) throw GENERIC_EXCEPT("[Hyperflow]", "Trying to access destroyed audio player");
+        auto& settings = player->settings;
+        if (settings.loopingEnabled != loopingEnabled)
+        {
+            settings.loopingEnabled = loopingEnabled;
+            ma_sound_set_looping((ma_sound*)player->handle, loopingEnabled);
+        }
     }
 }
 

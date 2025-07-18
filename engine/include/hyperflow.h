@@ -130,17 +130,12 @@ namespace hf
     bool IsPlaying(const Ref<AudioPlayer>& player);
     bool IsPlaying(const Ref<AudioPlayer3D>& player);
 
-    void SetMinDistance(const Ref<AudioPlayer3D>& player, float_t minDistance);
-    void SetMaxDistance(const Ref<AudioPlayer3D>& player, float_t maxDistance);
+    void SetDistance(const Ref<AudioPlayer3D>& player, float_t maxDistance, float_t falloff);
     void SetAttenuationModel(const Ref<AudioPlayer3D>& player, Audio3DAttenuationModel atten);
-    void SetPosition(const Ref<AudioPlayer3D>& player, vec3 position);
-    void SetDirection(const Ref<AudioPlayer3D>& player, vec3 direction);
 
-    float_t GetMinDistance(const Ref<AudioPlayer3D>& player);
-    float_t GetMaxDistance(const Ref<AudioPlayer3D>& player);
+    //X -> maxDistance, Y -> falloff
+    vec2 GetDistance(const Ref<AudioPlayer3D>& player);
     Audio3DAttenuationModel GetAttenuationModel(const Ref<AudioPlayer3D>& player);
-    vec3 GetPosition(const Ref<AudioPlayer3D>& player);
-    vec3 GetDirection(const Ref<AudioPlayer3D>& player);
 
 	uint64_t GetFrameCount(const Ref<AudioClip>& clip);
 	uint32_t GetChannels(const Ref<AudioClip>& clip);

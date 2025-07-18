@@ -936,7 +936,18 @@ namespace hf
 	enum class AudioPlayerStateFlags { None = 0, Loaded = 1 << 0, Playing = 1 << 1 };
     DEFINE_ENUM_FLAGS(AudioPlayerStateFlags)
 
-	struct AudioClipConfig
+    struct AudioCone
+    {
+        float_t innerAngle = 360.0f;
+        float_t outerAngle = 360.0f;
+        float_t outerGain = 0.0f;
+
+        vec3 position{};
+        vec3 euler{};
+        vec3 velocity{};
+    };
+
+	struct AudioClipSettings
 	{
 		AudioClipFormat format = AudioClipFormat::Default;
 		uint32_t sampleRate = 0;
@@ -949,40 +960,40 @@ namespace hf
 	{
 		const char* filePath{};
 		bool useAbsolutePath = false;
-		AudioClipConfig config{};
+		AudioClipSettings settings{};
 	};
 
-	struct AudioPlayerConfig
+	struct AudioPlayerSettings
 	{
 		float_t volume = 1.0f;
 		float_t pitch = 1.0f;
 		bool loopingEnabled = false;
 	};
 
-    struct AudioPlayer3DConfig
+    struct AudioPlayer3DSettings
     {
-        float_t volume = 1.0f;
-        float_t pitch = 1.0f;
-        bool loopingEnabled = false;
-
-        float minDistance = 1.0f;
-        float maxDistance = 100.0f;
+        float_t maxDistance = 100.0f;
+        float_t falloff = 1.0f;
         Audio3DAttenuationModel attenuationModel = Audio3DAttenuationModel::Inverse;
-
-        vec3 position{};
-        vec3 direction = { 0, 0, 1 };
     };
 
 	struct AudioPlayerCreationInfo
 	{
 		Ref<AudioClip> clip{};
-		AudioPlayerConfig config{};
+		AudioPlayerSettings settings{};
 	};
 
     struct AudioPlayer3DCreationInfo
     {
         Ref<AudioClip> clip{};
-        AudioPlayer3DConfig config{};
+        AudioPlayerSettings settings{};
+        AudioPlayer3DSettings settings3d{};
+        AudioCone cone{};
+    };
+
+    struct AudioListenerCreationInfo
+    {
+        AudioCone cone{};
     };
 
 	//endregion

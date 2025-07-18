@@ -153,15 +153,6 @@ namespace hf::inter
 
         bool CreateClip_i(AudioClip* clip);
         bool DestroyClip_i(AudioClip* clip);
-
-#define SET_AUDIO_STAT(pl, d, f)\
-        if (!IsLoaded(pl)) throw GENERIC_EXCEPT("[Hyperflow]", "Trying to access destroyed audio player");\
-        auto& config = pl->config;\
-        if (config.d != d)\
-        {\
-            config.d = d;\
-            f((ma_sound*)pl->handle, d);\
-        }
     }
 
     namespace rendering

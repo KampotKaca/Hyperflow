@@ -11,7 +11,7 @@ namespace app
             {
                 .filePath = "cartoon_comedy.mp3",
                 .useAbsolutePath = false,
-                .config = {}
+                .settings = {}
             };
             APP_AUDIOS.cartoon_comedy = hf::Create(info);
         }
@@ -20,22 +20,21 @@ namespace app
             const hf::AudioPlayerCreationInfo info
             {
                 .clip = APP_AUDIOS.cartoon_comedy,
-                .config =
+                .settings =
                 {
                     .loopingEnabled = true
                 }
             };
             APP_AUDIOS.background_music = hf::Create(info);
-            // hf::Play(APP_AUDIOS.background_music);
         }
 
         {
             const hf::AudioPlayer3DCreationInfo info
             {
                 .clip = APP_AUDIOS.cartoon_comedy,
-                .config =
+                .settings =
                 {
-                    .loopingEnabled = true
+
                 }
             };
             APP_AUDIOS.background_music3D = hf::Create(info);

@@ -18,9 +18,13 @@ namespace hf
         template void SeekPercent_i(AudioPlayer* player, double_t positionInSeconds);
         template void Play_i(AudioPlayer* player);
         template void Pause_i(AudioPlayer* player);
+
+        template void SetVolume_i(AudioPlayer* player, float_t volume);
+        template void SetPitch_i(AudioPlayer* player, float_t pitch);
+        template void SetLoopingMode_i(AudioPlayer* player, bool loopingEnabled);
     }
 
-    AudioPlayer::AudioPlayer(const AudioPlayerCreationInfo& info) : config(info.config)
+    AudioPlayer::AudioPlayer(const AudioPlayerCreationInfo& info) : settings(info.settings)
     {
         inter::ChangeClip_i(this, info.clip);
     }
@@ -71,28 +75,16 @@ namespace hf
     void Play(const Ref<AudioPlayer>& player) { inter::Play_i(player.get()); }
     void Pause(const Ref<AudioPlayer>& player) { inter::Pause_i(player.get()); }
 
-    void SetVolume(const Ref<AudioPlayer>& player, float_t volume)
-    {
-        SET_AUDIO_STAT(player, volume, ma_sound_set_volume)
-    }
-
-    void SetPitch(const Ref<AudioPlayer>& player, float_t pitch)
-    {
-        SET_AUDIO_STAT(player, pitch, ma_sound_set_pitch)
-    }
-
-    void SetLoopingMode(const Ref<AudioPlayer>& player, bool loopingEnabled)
-    {
-        SET_AUDIO_STAT(player, loopingEnabled, ma_sound_set_looping)
-    }
+    void SetVolume(const Ref<AudioPlayer>& player, float_t volume) { inter::SetVolume_i(player.get(), volume); }
+    void SetPitch(const Ref<AudioPlayer>& player, float_t pitch) { inter::SetPitch_i(player.get(), pitch); }
+    void SetLoopingMode(const Ref<AudioPlayer>& player, bool loopingEnabled) { inter::SetLoopingMode_i(player.get(), loopingEnabled); }
 
     void Seek(const Ref<AudioPlayer>& player, double_t positionInSeconds) { inter::Seek_i(player.get(), positionInSeconds); }
     void SeekPercent(const Ref<AudioPlayer>& player, double_t position) { inter::SeekPercent_i(player.get(), position); }
 
-    const AudioPlayerConfig& GetConfig(const Ref<AudioPlayer>& player) { return player->config; }
-    float GetPitch(const Ref<AudioPlayer>& player) { return player->config.pitch; }
-    float GetVolume(const Ref<AudioPlayer>& player) { return player->config.volume; }
+    float GetPitch(const Ref<AudioPlayer>& player) { return player->settings.pitch; }
+    float GetVolume(const Ref<AudioPlayer>& player) { return player->settings.volume; }
     double GetPlayedInSeconds(const Ref<AudioPlayer>& player) { return inter::GetPlayedInSeconds_i(player.get()); }
     double GetPlayedPercent(const Ref<AudioPlayer>& player) { return inter::GetPlayedPercent_i(player.get()); }
-    bool IsLoopingEnabled(const Ref<AudioPlayer>& player) { return player->config.loopingEnabled; }
+    bool IsLoopingEnabled(const Ref<AudioPlayer>& player) { return player->settings.loopingEnabled; }
 }

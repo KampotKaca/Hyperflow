@@ -4,6 +4,62 @@
 
 namespace hf::editor
 {
+    template<typename T>
+    bool DrawAudioSettings(const Ref<T>& pl, DrawStateFlag flags)
+    {
+        float_t volume = GetVolume(pl);
+        float_t pitch = GetPitch(pl);
+        bool loop = IsLoopingEnabled(pl);
+        bool modified = false;
+
+        if (DrawSlider("Volume", volume, 0.0f, 1.0f, "%.2f", flags))
+        {
+            SetVolume(pl, volume);
+            modified = true;
+        }
+        if (DrawSlider("Pitch", pitch, 0.0f, 3.0f, "%.2f", flags))
+        {
+            SetPitch(pl, pitch);
+            modified = true;
+        }
+        if (Draw("Loop", loop, flags))
+        {
+            SetLoopingMode(pl, loop);
+            modified = true;
+        }
+
+        ImGui::SameLine();
+        if (IsPlaying(pl))
+        {
+            if (ImGui::Button("Pause"))
+            {
+                modified = true;
+                Pause(pl);
+            }
+        }
+        else
+        {
+            if(ImGui::Button("Play"))
+            {
+                modified = true;
+                Play(pl);
+            }
+        }
+
+        ImGui::SameLine();
+        uint32_t audioProgress = (uint32_t)(GetPlayedPercent(pl) * 100.0f);
+        if(DrawSlider("Progress", audioProgress, 0u, 100u, "%.u%%", DrawStateFlag::Nameless))
+        {
+            modified = true;
+            SeekPercent(pl, audioProgress * 0.01f);
+        }
+
+        return modified;
+    }
+
+    template bool DrawAudioSettings(const Ref<AudioPlayer>& pl, DrawStateFlag flags);
+    template bool DrawAudioSettings(const Ref<AudioPlayer3D>& pl, DrawStateFlag flags);
+
     static bool DrawComponent(const char* label, const std::function<void()>& func);
 
     bool StartComponent(const char* label)
@@ -49,27 +105,11 @@ namespace hf::editor
         });
     }
 
-    bool Draw(const char* label, AudioPlayerConfig& plc, DrawStateFlag flags)
-    {
-        return DrawComponent(label, [&]
-        {
-            DrawSlider("Volume", plc.volume, 0.0f, 1.0f, "%.2f", flags);
-            DrawSlider("Pitch", plc.pitch, 0.0f, 3.0f, "%.2f", flags);
-            Draw("Loop", plc.loopingEnabled, flags);
-        });
-    }
-
     bool Draw(const char* label, Ref<AudioPlayer>& pl, DrawStateFlag flags)
     {
         return DrawComponent(label, [&]
         {
-            float_t volume = GetVolume(pl);
-            float_t pitch = GetPitch(pl);
-            bool loop = IsLoopingEnabled(pl);
-
-            if (DrawSlider("Volume", volume, 0.0f, 1.0f, "%.2f", flags)) SetVolume(pl, volume);
-            if (DrawSlider("Pitch", pitch, 0.0f, 3.0f, "%.2f", flags)) SetPitch(pl, pitch);
-            if (Draw("Loop", loop, flags)) SetLoopingMode(pl, loop);
+            DrawAudioSettings(pl, flags);
 
             ImGui::SameLine();
             if (IsPlaying(pl))
@@ -92,43 +132,16 @@ namespace hf::editor
     {
         return DrawComponent(label, [&]
         {
-            vec3 position = GetPosition(pl);
-            vec3 direction = GetDirection(pl);
-            float_t minDistance = GetMinDistance(pl);
-            float_t maxDistance = GetMaxDistance(pl);
-            float_t volume = GetVolume(pl);
-            float_t pitch = GetPitch(pl);
-            bool loop = IsLoopingEnabled(pl);
-
-            if (Draw("Position", position, 0, flags | DrawStateFlag::ButtonLess)) SetPosition(pl, position);
-            if (Draw("Direction", direction, 0, flags | DrawStateFlag::ButtonLess)) SetDirection(pl, direction);
-
-            float_t oldMinDistance = minDistance, oldMaxDistance = maxDistance;
-            DrawSlider("Min Distance", minDistance, 0.001f, 100000.0f, "%.2f", flags);
-            DrawSlider("Max Distance", maxDistance, 0.001f, 100000.0f, "%.2f", flags);
-
-            maxDistance = glm::max(minDistance, maxDistance);
-            if (minDistance != oldMinDistance) SetMinDistance(pl, minDistance);
-            if (maxDistance != oldMaxDistance) SetMaxDistance(pl, maxDistance);
-
-            if (DrawSlider("Volume", volume, 0.0f, 1.0f, "%.2f", flags)) SetVolume(pl, volume);
-            if (DrawSlider("Pitch", pitch, 0.0f, 3.0f, "%.2f", flags)) SetPitch(pl, pitch);
-            if (Draw("Loop", loop, flags)) SetLoopingMode(pl, loop);
-
+            vec2 distance = GetDistance(pl);
+            vec2 oldDistance = distance;
+            Draw("Distance", distance.x, 0.001f, 100000.0f, "%.2f", flags | DrawStateFlag::DontStretchWidth);
             ImGui::SameLine();
-            if (IsPlaying(pl))
-            {
-                if (ImGui::Button("Pause")) Pause(pl);
-            }
-            else
-            {
-                if(ImGui::Button("Play")) Play(pl);
-            }
+            DrawSlider("Falloff", distance.y, 0.0f, distance.x, "%.2f", flags | DrawStateFlag::Nameless);
+            distance.y = glm::min(distance.x, distance.y);
 
-            ImGui::SameLine();
-            uint32_t audioProgress = (uint32_t)(GetPlayedPercent(pl) * 100.0f);
-            if(DrawSlider("Progress", audioProgress, 0u, 100u, "%.u%%", DrawStateFlag::Nameless))
-                SeekPercent(pl, audioProgress * 0.01f);
+            if (distance != oldDistance) SetDistance(pl, distance.x, distance.y);
+
+            DrawAudioSettings(pl, flags);
         });
     }
 
