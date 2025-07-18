@@ -1,6 +1,7 @@
 #include "audio/haudioplayer3d.h"
-#include "haudiointernal.h"
 #include "hinternal.h"
+#include "audio/haudioimpl.h"
+#include "hyperflow.h"
 
 namespace hf
 {
@@ -112,7 +113,7 @@ namespace hf
     void SetPitch(const Ref<AudioPlayer3D>& player, float_t pitch) { inter::SetPitch_i(player.get(), pitch); }
     void SetLoopingMode(const Ref<AudioPlayer3D>& player, bool loopingEnabled) { inter::SetLoopingMode_i(player.get(), loopingEnabled); }
 
-    vec2 GetDistance(const Ref<AudioPlayer3D>& player) { return vec2(player->settings3d.maxDistance, player->settings3d.falloff); }
+    vec2 GetDistance(const Ref<AudioPlayer3D>& player) { return {player->settings3d.maxDistance, player->settings3d.falloff}; }
     Audio3DAttenuationModel GetAttenuationModel(const Ref<AudioPlayer3D>& player) { return player->settings3d.attenuationModel; }
 
     void Seek(const Ref<AudioPlayer3D>& player, double_t positionInSeconds) { inter::Seek_i(player.get(), positionInSeconds); }

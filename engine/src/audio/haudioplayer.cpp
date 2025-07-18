@@ -1,6 +1,7 @@
 #include "audio/haudioplayer.h"
-#include "haudiointernal.h"
 #include "hinternal.h"
+#include "audio/haudioimpl.h"
+#include "hyperflow.h"
 
 namespace hf
 {
