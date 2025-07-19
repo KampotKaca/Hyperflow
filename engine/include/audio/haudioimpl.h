@@ -1,7 +1,6 @@
 #ifndef HAUDIOIMPL_H
 #define HAUDIOIMPL_H
 
-#include "miniaudio.h"
 #include "audio/haudioclip.h"
 #include "haudiointernal.h"
 
@@ -25,7 +24,7 @@ namespace hf::inter
     }
 
     template<typename T>
-    bool ChangeClip_i(T* player, const Ref<AudioClip>& clip, double_t startingDuration = -1)
+    bool ChangeClip_i(T* player, const Ref<AudioClip>& clip, float_t startingDuration = -1)
     {
         FreeHandle_i(player);
         if (!clip) return false;
@@ -106,7 +105,7 @@ namespace hf::inter
     }
 
     template<typename T>
-    void Seek_i(T* player, double_t positionInSeconds)
+    void Seek_i(T* player, float_t positionInSeconds)
     {
         if (!IsLoaded_i(player)) throw GENERIC_EXCEPT("[Hyperflow]", "Trying to access destroyed audio player");
         if (!player->clip) throw GENERIC_EXCEPT("[Hyperflow]", "Cannot seek the player without clip.");
@@ -116,7 +115,7 @@ namespace hf::inter
     }
 
     template<typename T>
-    void SeekPercent_i(T* player, double_t position)
+    void SeekPercent_i(T* player, float_t position)
     {
         if (!IsLoaded_i(player)) throw GENERIC_EXCEPT("[Hyperflow]", "Trying to access destroyed audio player");
         if (!player->clip) throw GENERIC_EXCEPT("[Hyperflow]", "Cannot seek the player without clip.");

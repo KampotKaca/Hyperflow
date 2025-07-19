@@ -13,6 +13,8 @@ namespace hf
         AudioPlayerSettings settings{};
         AudioPlayer3DSettings settings3d{};
         AudioCone cone{};
+        vec3 velocity{};
+
         void* handle{};
         void* buffer{};
         Ref<AudioClip> clip{};

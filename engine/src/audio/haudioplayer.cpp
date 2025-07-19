@@ -11,12 +11,12 @@ namespace hf
         template bool IsPlaying_i(AudioPlayer* player);
 
         template void FreeHandle_i(AudioPlayer* player);
-        template bool ChangeClip_i(AudioPlayer* player, const Ref<AudioClip>& clip, double_t startingDuration);
+        template bool ChangeClip_i(AudioPlayer* player, const Ref<AudioClip>& clip, float_t startingDuration);
         template void Destructor_i(AudioPlayer* player);
         template double_t GetPlayedInSeconds_i(AudioPlayer* player);
         template double_t GetPlayedPercent_i(AudioPlayer* player);
-        template void Seek_i(AudioPlayer* player, double_t positionInSeconds);
-        template void SeekPercent_i(AudioPlayer* player, double_t positionInSeconds);
+        template void Seek_i(AudioPlayer* player, float_t positionInSeconds);
+        template void SeekPercent_i(AudioPlayer* player, float_t positionInSeconds);
         template void Play_i(AudioPlayer* player);
         template void Pause_i(AudioPlayer* player);
 
@@ -65,7 +65,7 @@ namespace hf
     bool IsLoaded(const Ref<AudioPlayer>& player) { return inter::IsLoaded_i(player.get()); }
     bool IsPlaying(const Ref<AudioPlayer>& player) { return inter::IsPlaying_i(player.get()); }
 
-    void ChangeClip(const Ref<AudioPlayer>& player, const Ref<AudioClip>& clip, double_t startingDuration)
+    void ChangeClip(const Ref<AudioPlayer>& player, const Ref<AudioClip>& clip, float_t startingDuration)
     {
         if (!IsLoaded(player)) throw GENERIC_EXCEPT("[Hyperflow]", "Trying to access destroyed audio player");
         inter::ChangeClip_i(player.get(), clip, startingDuration);
@@ -80,8 +80,8 @@ namespace hf
     void SetPitch(const Ref<AudioPlayer>& player, float_t pitch) { inter::SetPitch_i(player.get(), pitch); }
     void SetLoopingMode(const Ref<AudioPlayer>& player, bool loopingEnabled) { inter::SetLoopingMode_i(player.get(), loopingEnabled); }
 
-    void Seek(const Ref<AudioPlayer>& player, double_t positionInSeconds) { inter::Seek_i(player.get(), positionInSeconds); }
-    void SeekPercent(const Ref<AudioPlayer>& player, double_t position) { inter::SeekPercent_i(player.get(), position); }
+    void Seek(const Ref<AudioPlayer>& player, float_t positionInSeconds) { inter::Seek_i(player.get(), positionInSeconds); }
+    void SeekPercent(const Ref<AudioPlayer>& player, float_t position) { inter::SeekPercent_i(player.get(), position); }
 
     float GetPitch(const Ref<AudioPlayer>& player) { return player->settings.pitch; }
     float GetVolume(const Ref<AudioPlayer>& player) { return player->settings.volume; }

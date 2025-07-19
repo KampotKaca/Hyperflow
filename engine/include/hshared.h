@@ -928,6 +928,8 @@ namespace hf
 	struct AudioPlayer;
 	struct AudioPlayer3D;
 
+    typedef uint32_t AudioListener;
+
 	enum class AudioClipFormat { Default = 0, U8 = 1, S16 = 2, S24 = 3, S32 = 4, F32 };
 	enum class AudioClipChannelMixMode { Rectangular = 0, Simple = 1, CustomWeights = 2 };
 	enum class AudioClipDitherMode { None = 0, Rectangle = 1, Triangle = 2 };
@@ -944,7 +946,6 @@ namespace hf
 
         vec3 position{};
         vec3 euler{};
-        vec3 velocity{};
     };
 
 	struct AudioClipSettings
@@ -991,8 +992,9 @@ namespace hf
         AudioCone cone{};
     };
 
-    struct AudioListenerCreationInfo
+    struct AudioListenerDefinitionInfo
     {
+        bool isEnabled = true;
         AudioCone cone{};
     };
 

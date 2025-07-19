@@ -5,7 +5,7 @@
 
 namespace hf
 {
-    BufferAttrib DefineBufferAttrib(const BufferAttribDefinitionInfo& info)
+    BufferAttrib Define(const BufferAttribDefinitionInfo& info)
     {
         uint32_t fullStride = 0;
         for (uint32_t i = 0; i < info.formatCount; i++)
@@ -59,7 +59,7 @@ namespace hf
             info.formatCount = (uint32_t)formatList.size();
             info.pFormats = formatList.data();
 
-            const auto attrib = DefineBufferAttrib(info);
+            const auto attrib = Define(info);
             inter::HF.graphicsResources.bufferAttribs[assetPath] = attrib;
             return attrib;
         }catch (...)

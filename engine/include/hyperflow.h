@@ -14,15 +14,16 @@ namespace hf
 	const std::string& GetApplicationTitle();
 	void Terminate();
 
-	ShaderSetup DefineShaderSetup(const ShaderSetupDefinitionInfo& info);
-	TextureSampler DefineTextureSampler(const TextureSamplerDefinitionInfo& info);
-	TextureLayout DefineTextureLayout(const TextureLayoutDefinitionInfo& info);
+	ShaderSetup Define(const ShaderSetupDefinitionInfo& info);
+	TextureSampler Define(const TextureSamplerDefinitionInfo& info);
+	TextureLayout Define(const TextureLayoutDefinitionInfo& info);
+	BufferAttrib Define(const BufferAttribDefinitionInfo& info);
+	Buffer Define(const BufferDefinitionInfo& info);
+	Buffer Define(const StorageBufferDefinitionInfo& info);
+	BufferAllocator Define(const BufferAllocatorDefinitionInfo& info);
+	AudioListener Define(const AudioListenerDefinitionInfo& info);
 
-	BufferAttrib DefineBufferAttrib(const BufferAttribDefinitionInfo& info);
 	BufferAttrib DefineBufferAttrib(const char* assetPath);
-	Buffer DefineUniformBuffer(const BufferDefinitionInfo& info);
-	Buffer DefineStorageBuffer(const StorageBufferDefinitionInfo& info);
-	BufferAllocator DefineBufferAllocator(const BufferAllocatorDefinitionInfo& info);
 
 	Ref<Window> Create(const WindowCreationInfo &data, const Ref<Window> &parent);
 	//No need to destroy the material, if it goes out of scope it is automatically freed!
@@ -88,8 +89,8 @@ namespace hf
 	void Upload(const Ref<VertBuffer>& vb, const VertBufferUploadInfo& info);
 	void Upload(const Ref<IndexBuffer>& ib, const IndexBufferUploadInfo& info);
 
-	void ChangeClip(const Ref<AudioPlayer>& player, const Ref<AudioClip>& clip, double_t startingDuration = -1);
-	void ChangeClip(const Ref<AudioPlayer3D>& player, const Ref<AudioClip>& clip, double_t startingDuration = -1);
+	void ChangeClip(const Ref<AudioPlayer>& player, const Ref<AudioClip>& clip, float_t startingDuration = -1);
+	void ChangeClip(const Ref<AudioPlayer3D>& player, const Ref<AudioClip>& clip, float_t startingDuration = -1);
 
 	void Play(const Ref<AudioPlayer>& player);
 	void Play(const Ref<AudioPlayer3D>& player);
@@ -106,11 +107,11 @@ namespace hf
 	void SetLoopingMode(const Ref<AudioPlayer>& player, bool loopingEnabled);
 	void SetLoopingMode(const Ref<AudioPlayer3D>& player, bool loopingEnabled);
 
-	void Seek(const Ref<AudioPlayer>& player, double_t positionInSeconds);
-	void Seek(const Ref<AudioPlayer3D>& player, double_t positionInSeconds);
+	void Seek(const Ref<AudioPlayer>& player, float_t positionInSeconds);
+	void Seek(const Ref<AudioPlayer3D>& player, float_t positionInSeconds);
 
-	void SeekPercent(const Ref<AudioPlayer>& player, double_t position);
-	void SeekPercent(const Ref<AudioPlayer3D>& player, double_t position);
+	void SeekPercent(const Ref<AudioPlayer>& player, float_t position);
+	void SeekPercent(const Ref<AudioPlayer3D>& player, float_t position);
 
 	float_t GetPitch(const Ref<AudioPlayer>& player);
 	float_t GetPitch(const Ref<AudioPlayer3D>& player);
@@ -132,6 +133,20 @@ namespace hf
 
     void SetDistance(const Ref<AudioPlayer3D>& player, float_t maxDistance, float_t falloff);
     void SetAttenuationModel(const Ref<AudioPlayer3D>& player, Audio3DAttenuationModel atten);
+
+    void Enable(AudioListener listener, bool enable);
+
+    void SetVelocity(AudioListener listener, vec3 velocity);
+    void SetVelocity(const Ref<AudioPlayer3D>& pl, vec3 velocity);
+
+    void Set(AudioListener listener, const AudioCone& cone);
+    void Set(const Ref<AudioPlayer3D>& pl, const AudioCone& cone);
+
+    vec3 GetVelocity(AudioListener listener);
+    vec3 GetVelocity(const Ref<AudioPlayer3D>& pl);
+
+    AudioCone GetCone(AudioListener listener);
+    AudioCone GetCone(const Ref<AudioPlayer3D>& pl);
 
     //X -> maxDistance, Y -> falloff
     vec2 GetDistance(const Ref<AudioPlayer3D>& player);

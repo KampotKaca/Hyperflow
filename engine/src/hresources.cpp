@@ -79,7 +79,7 @@ namespace hf
                     .pFormats = formats.data()
                 };
 
-                HF.staticResources.quadAttrib = DefineBufferAttrib(attribInfo);
+                HF.staticResources.quadAttrib = Define(attribInfo);
             }
 
             //Cube Attrib
@@ -96,7 +96,7 @@ namespace hf
                     .pFormats = formats.data()
                 };
 
-                HF.staticResources.defaultAttrib = DefineBufferAttrib(attribInfo);
+                HF.staticResources.defaultAttrib = Define(attribInfo);
             }
         }
 
@@ -117,7 +117,7 @@ namespace hf
                     .bindingCount = 1
                 };
 
-                HF.staticResources.skyboxLayout = DefineTextureLayout(layoutInfo);
+                HF.staticResources.skyboxLayout = Define(layoutInfo);
             }
         }
 
@@ -134,7 +134,7 @@ namespace hf
                     .comparison = ComparisonOperation::Never,
                 };
 
-                HF.staticResources.cubemapSampler = DefineTextureSampler(samplerInfo);
+                HF.staticResources.cubemapSampler = Define(samplerInfo);
             }
         }
 
@@ -148,7 +148,7 @@ namespace hf
                     .bindingCount = 1
                 };
 
-                HF.staticResources.globalUniform = DefineUniformBuffer(uniform);
+                HF.staticResources.globalUniform = Define(uniform);
             }
 
             {
@@ -170,7 +170,7 @@ namespace hf
                     .data = nullptr
                 };
 
-                HF.graphicsResources.materialDataStorageBuffer = DefineStorageBuffer(info);
+                HF.graphicsResources.materialDataStorageBuffer = Define(info);
             }
 
             //allocator
@@ -183,7 +183,7 @@ namespace hf
                     .bufferCount = buffers.size(),
                 };
 
-                HF.staticResources.bufferAllocator = DefineBufferAllocator(info);
+                HF.staticResources.bufferAllocator = Define(info);
             }
         }
 
@@ -204,7 +204,7 @@ namespace hf
                     .textureLayoutCount = 0
                 };
 
-                HF.staticResources.axisLinesShaderSetup = DefineShaderSetup(info);
+                HF.staticResources.axisLinesShaderSetup = Define(info);
             }
 
             //Skybox Shader Setup
@@ -222,7 +222,7 @@ namespace hf
                     .textureLayoutCount = 1
                 };
 
-                HF.staticResources.skyboxShaderSetup = DefineShaderSetup(info);
+                HF.staticResources.skyboxShaderSetup = Define(info);
             }
         }
 

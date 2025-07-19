@@ -2,7 +2,6 @@
 #include "hinternal.h"
 #include "hyperflow.h"
 #include "haudiointernal.h"
-#include "miniaudio.h"
 
 namespace hf
 {

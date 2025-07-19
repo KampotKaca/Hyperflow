@@ -98,8 +98,10 @@ namespace hf::editor
         return DrawComponent(label, [&]
         {
             DrawSlider("Fov", cam.fov, 1.0f, 179.0f, "%.1f", flags);
-            Draw("Near", cam.nearPlane, 0.01f, 100000.0f, "%.1f", flags);
-            Draw("Far", cam.farPlane, 0.01f, 100000.0f, "%.1f", flags);
+            Draw("Distance", cam.farPlane, 0.01f, 100000.0f, "%.1f", flags | DrawStateFlag::DontStretchWidth);
+            ImGui::SameLine();
+            DrawSlider("Near", cam.nearPlane, 0.1f, cam.farPlane, "%.2f", flags | DrawStateFlag::Nameless);
+            cam.nearPlane = glm::min(cam.nearPlane, cam.farPlane);
 
             cam.farPlane = glm::max(cam.nearPlane, cam.farPlane);
         });
@@ -110,21 +112,6 @@ namespace hf::editor
         return DrawComponent(label, [&]
         {
             DrawAudioSettings(pl, flags);
-
-            ImGui::SameLine();
-            if (IsPlaying(pl))
-            {
-                if (ImGui::Button("Pause")) Pause(pl);
-            }
-            else
-            {
-                if(ImGui::Button("Play")) Play(pl);
-            }
-
-            ImGui::SameLine();
-            uint32_t audioProgress = (uint32_t)(GetPlayedPercent(pl) * 100.0f);
-            if(DrawSlider("Progress", audioProgress, 0u, 100u, "%.u%%", DrawStateFlag::Nameless))
-                SeekPercent(pl, audioProgress * 0.01f);
         });
     }
 
