@@ -39,5 +39,10 @@ namespace app
             };
             APP_AUDIOS.background_music3D = hf::Create(info);
         }
+
+        {
+            const hf::AudioListenerCreationInfo info{};
+            APP_AUDIOS.main_listener = hf::Create(info);
+        }
     }
 }

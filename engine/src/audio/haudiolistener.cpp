@@ -1,70 +1,87 @@
 #include "haudiointernal.h"
 #include "hyperflow.h"
-#include "../../external/miniaudio/miniaudio.h"
+#include "audio/haudiolistener.h"
+#include "miniaudio.h"
 
 namespace hf
 {
-    AudioListener Define(const AudioListenerDefinitionInfo& info)
+    AudioListener::AudioListener(const AudioListenerCreationInfo& info)
+    {
+    }
+
+    AudioListener::~AudioListener()
+    {
+
+    }
+
+    Ref<AudioListener> Create(const AudioListenerCreationInfo& info)
     {
         try
         {
-            auto newListener = inter::AUDIO_DATA.definedListenersCount + 1;
+            auto newId = inter::AUDIO_DATA.definedListenersCount + 1;
             inter::AUDIO_DATA.definedListenersCount++;
 
-            ma_engine_listener_set_world_up(&inter::AUDIO_DATA.engine, (ma_uint32)newListener, 0.0f, 1.0f, 0.0f);
-            Set(newListener, info.cone);
-            Enable(newListener, info.isEnabled);
-            return newListener;
+            ma_engine_listener_set_world_up(&inter::AUDIO_DATA.engine, (ma_uint32)newId, 0.0f, 1.0f, 0.0f);
+            auto listener = MakeRef<AudioListener>(info);
+            listener->handle = newId;
+
+            Set(listener, info.cone);
+            Enable(listener, info.isEnabled);
+            return listener;
         }
         catch (const HyperException& e)
         {
             LOG_ERROR("Unable to define audio listener\n%s", e.what());
-            return 0;
+            return nullptr;
         }
         catch (...)
         {
             LOG_ERROR("Unable to define audio listener!");
-            return 0;
+            return nullptr;
         }
     }
 
-    void Set(AudioListener listener, const AudioCone& cone)
+    void Set(const Ref<AudioListener>& ls, const AudioCone& cone)
     {
-        ma_engine_listener_set_cone(&inter::AUDIO_DATA.engine, (ma_uint32)listener, cone.innerAngle, cone.outerAngle, cone.outerGain);
-        ma_engine_listener_set_position(&inter::AUDIO_DATA.engine, (ma_uint32)listener, cone.position.x, cone.position.y, cone.position.z);
+        auto oldCone = ls->cone;
+        auto handle = (ma_uint32)ls->handle;
+        if (oldCone.innerAngle != cone.innerAngle ||
+            oldCone.outerAngle != cone.outerAngle ||
+            oldCone.outerGain != cone.outerGain)
+            ma_engine_listener_set_cone(&inter::AUDIO_DATA.engine, handle, glm::radians(cone.innerAngle), glm::radians(cone.outerAngle), cone.outerGain);
 
-        vec3 direction = vec3(glm::eulerAngleXYZ(cone.euler.x, cone.euler.y, cone.euler.z) * vec4(0, 0, 1, 0));
-        ma_engine_listener_set_direction(&inter::AUDIO_DATA.engine, (ma_uint32)listener, direction.x, direction.y, direction.z);
+        if (oldCone.position != cone.position)
+            ma_engine_listener_set_position(&inter::AUDIO_DATA.engine, handle, cone.position.x, cone.position.y, cone.position.z);
+
+        if (oldCone.euler != cone.euler)
+        {
+            const auto direction = vec3(glm::eulerAngleXYZ(cone.euler.x, cone.euler.y, cone.euler.z) * vec4(0, 0, 1, 0));
+            ma_engine_listener_set_direction(&inter::AUDIO_DATA.engine, handle, direction.x, direction.y, direction.z);
+        }
+
+        ls->cone = cone;
     }
 
-    void Enable(AudioListener listener, bool enable)
+    void Enable(const Ref<AudioListener>& ls, bool enable)
     {
-        ma_engine_listener_set_enabled(&inter::AUDIO_DATA.engine, (ma_uint32)listener, enable);
+        if (ls->isEnabled != enable)
+        {
+            ls->isEnabled = enable;
+            ma_engine_listener_set_enabled(&inter::AUDIO_DATA.engine, (ma_uint32)ls->handle, enable);
+        }
     }
 
-    void SetVelocity(AudioListener listener, vec3 velocity)
+    void SetVelocity(const Ref<AudioListener>& ls, vec3 velocity)
     {
-        ma_engine_listener_set_velocity(&inter::AUDIO_DATA.engine, (ma_uint32)listener, velocity.x, velocity.y, velocity.z);
+        if (ls->velocity != velocity)
+        {
+            ls->velocity = velocity;
+            ma_engine_listener_set_velocity(&inter::AUDIO_DATA.engine, (ma_uint32)ls->handle, velocity.x, velocity.y, velocity.z);
+        }
     }
 
-    vec3 GetVelocity(AudioListener listener)
-    {
-        auto vel = ma_engine_listener_get_velocity(&inter::AUDIO_DATA.engine, (ma_uint32)listener);
-        return { vel.x, vel.y, vel.z };
-    }
+    vec3 GetVelocity(const Ref<AudioListener>& ls) { return ls->velocity; }
+    AudioCone GetCone(const Ref<AudioListener>& ls) { return ls->cone; }
 
-    AudioCone GetCone(AudioListener listener)
-    {
-        AudioCone cone{};
-        auto pos = ma_engine_listener_get_position(&inter::AUDIO_DATA.engine, (ma_uint32)listener);
-        auto dir = ma_engine_listener_get_direction(&inter::AUDIO_DATA.engine, (ma_uint32)listener);
-        auto up = ma_engine_listener_get_world_up(&inter::AUDIO_DATA.engine, (ma_uint32)listener);
-
-        ma_engine_listener_get_cone(&inter::AUDIO_DATA.engine, (ma_uint32)listener, &cone.innerAngle, &cone.outerAngle, &cone.outerGain);
-        cone.innerAngle = glm::degrees(cone.innerAngle);
-        cone.outerAngle = glm::degrees(cone.outerAngle);
-        cone.position = { pos.x, pos.y, pos.z };
-
-        return cone;
-    }
+    bool IsEnabled(const Ref<AudioListener>& ls) { return ls->isEnabled; }
 }

@@ -11,7 +11,7 @@ namespace hf
         template bool IsPlaying_i(AudioPlayer* player);
 
         template void FreeHandle_i(AudioPlayer* player);
-        template bool ChangeClip_i(AudioPlayer* player, const Ref<AudioClip>& clip, float_t startingDuration);
+        template bool ChangeClip_i(AudioPlayer* player, const Ref<AudioClip>& clip, uint32_t flags, float_t startingDuration);
         template void Destructor_i(AudioPlayer* player);
         template double_t GetPlayedInSeconds_i(AudioPlayer* player);
         template double_t GetPlayedPercent_i(AudioPlayer* player);
@@ -68,7 +68,7 @@ namespace hf
     void ChangeClip(const Ref<AudioPlayer>& player, const Ref<AudioClip>& clip, float_t startingDuration)
     {
         if (!IsLoaded(player)) throw GENERIC_EXCEPT("[Hyperflow]", "Trying to access destroyed audio player");
-        inter::ChangeClip_i(player.get(), clip, startingDuration);
+        inter::ChangeClip_i(player.get(), clip, 0, startingDuration);
 
         if (IsPlaying(player) && ma_sound_start((ma_sound*)player->handle) != MA_SUCCESS)
             LOG_ERROR("Unable to play audio player");

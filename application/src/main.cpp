@@ -38,6 +38,11 @@ int main()
 			.onUpdateCallback    	 = app::AppUpdate,
 			.onQuitCallback      	 = app::AppQuit,
 		},
+	    .audioInfo =
+	    {
+		    .volume = 1.0f,
+		    .usedListenersCount = 1
+	    },
 		.windowData =
 		{
 			.title        		 = "Hyperflow",

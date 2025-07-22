@@ -845,6 +845,12 @@ namespace hf
         ShaderDrawOutputFormats drawOutputFormats{}; //this is general outline of the render texture you are going to draw on with the shaders.
     };
 
+    struct EngineInternalAudioInfo
+    {
+        float_t volume = 1.0f;
+        uint32_t usedListenersCount = 1;
+    };
+
 	struct EngineData
 	{
 		std::string appTitle = "Hyperflow";
@@ -852,7 +858,8 @@ namespace hf
 		EngineUpdateType updateType = EngineUpdateType::EventRaised; // type of application updates
 	    EngineInternalResourceFormatInfo internalResourcesFormat{}; //fromat of internal resources which are used by the engine
 	    EngineLifecycleCallbacks lifecycleCallbacks{}; //passed engine callbacks to interact with the engine
-		WindowCreationInfo windowData{}; //properties of the initial window
+	    EngineInternalAudioInfo audioInfo{}; //audio info which is used by the engine
+	    WindowCreationInfo windowData{}; //properties of the initial window
 	};
 
 	//endregion
@@ -927,8 +934,7 @@ namespace hf
 	struct AudioClip;
 	struct AudioPlayer;
 	struct AudioPlayer3D;
-
-    typedef uint32_t AudioListener;
+	struct AudioListener;
 
 	enum class AudioClipFormat { Default = 0, U8 = 1, S16 = 2, S24 = 3, S32 = 4, F32 };
 	enum class AudioClipChannelMixMode { Rectangular = 0, Simple = 1, CustomWeights = 2 };
@@ -942,7 +948,7 @@ namespace hf
     {
         float_t innerAngle = 360.0f;
         float_t outerAngle = 360.0f;
-        float_t outerGain = 0.0f;
+        float_t outerGain = 0.1f;
 
         vec3 position{};
         vec3 euler{};
@@ -973,9 +979,9 @@ namespace hf
 
     struct AudioPlayer3DSettings
     {
-        float_t maxDistance = 100.0f;
-        float_t falloff = 1.0f;
-        Audio3DAttenuationModel attenuationModel = Audio3DAttenuationModel::Inverse;
+        float_t maxRange = 100.0f;
+        float_t falloff = 10.0f;
+        Audio3DAttenuationModel attenuationModel = Audio3DAttenuationModel::Linear;
     };
 
 	struct AudioPlayerCreationInfo
@@ -992,7 +998,7 @@ namespace hf
         AudioCone cone{};
     };
 
-    struct AudioListenerDefinitionInfo
+    struct AudioListenerCreationInfo
     {
         bool isEnabled = true;
         AudioCone cone{};

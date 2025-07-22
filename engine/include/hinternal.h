@@ -108,6 +108,7 @@ namespace hf::inter
         EngineLifecycleCallbacks lifecycleCallbacks{};
         EngineUpdateType updateType = EngineUpdateType::Continues;
         EngineInternalResourceFormatInfo internalResourcesFormat{};
+        EngineInternalAudioInfo internalAudioInfo{};
         std::atomic_bool isRunning{};
         std::string appTitle{};
         Time time{};
@@ -148,7 +149,7 @@ namespace hf::inter
 
     namespace audio
     {
-        void Load_i(float_t volume = 1.0f);
+        void Load_i();
         void Unload_i();
 
         bool CreateClip_i(AudioClip* clip);

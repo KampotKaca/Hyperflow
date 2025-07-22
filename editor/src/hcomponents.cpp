@@ -61,6 +61,7 @@ namespace hf::editor
     template bool DrawAudioSettings(const Ref<AudioPlayer3D>& pl, DrawStateFlag flags);
 
     static bool DrawComponent(const char* label, const std::function<void()>& func);
+    static bool DrawCone(AudioCone& cone, DrawStateFlag flags);
 
     bool StartComponent(const char* label)
     {
@@ -107,7 +108,7 @@ namespace hf::editor
         });
     }
 
-    bool Draw(const char* label, Ref<AudioPlayer>& pl, DrawStateFlag flags)
+    bool Draw(const char* label, const Ref<AudioPlayer>& pl, DrawStateFlag flags)
     {
         return DrawComponent(label, [&]
         {
@@ -115,21 +116,48 @@ namespace hf::editor
         });
     }
 
-    bool Draw(const char* label, Ref<AudioPlayer3D>& pl, DrawStateFlag flags)
+    bool Draw(const char* label, const Ref<AudioPlayer3D>& pl, DrawStateFlag flags)
     {
         return DrawComponent(label, [&]
         {
-            vec2 distance = GetDistance(pl);
-            vec2 oldDistance = distance;
-            Draw("Distance", distance.x, 0.001f, 100000.0f, "%.2f", flags | DrawStateFlag::DontStretchWidth);
+            vec2 range = GetRange(pl);
+            vec2 oldDistance = range;
+            Draw("Range", range.x, 0.01f, 100000.0f, "%.2f", flags | DrawStateFlag::DontStretchWidth);
             ImGui::SameLine();
-            DrawSlider("Falloff", distance.y, 0.0f, distance.x, "%.2f", flags | DrawStateFlag::Nameless);
-            distance.y = glm::min(distance.x, distance.y);
+            DrawSlider("Falloff", range.y, 0.0f, range.x, "%.2f", flags | DrawStateFlag::Nameless);
 
-            if (distance != oldDistance) SetDistance(pl, distance.x, distance.y);
+            if (range != oldDistance) SetRange(pl, range.x, range.y);
 
             DrawAudioSettings(pl, flags);
+            auto cone = GetCone(pl);
+            if(DrawCone(cone, flags)) Set(pl, cone);
+            auto velocity = GetVelocity(pl);
+            if (Draw("Velocity", velocity, 0, flags | DrawStateFlag::ButtonLess)) SetVelocity(pl, velocity);
         });
+    }
+
+    bool Draw(const char* label, const Ref<AudioListener>& ls, DrawStateFlag flags)
+    {
+        return DrawComponent(label, [&]
+        {
+            auto isEnabled = IsEnabled(ls);
+            if (Draw("Enabled", isEnabled, flags)) Enable(ls, isEnabled);
+            auto cone = GetCone(ls);
+            if(DrawCone(cone, flags)) Set(ls, cone);
+            auto velocity = GetVelocity(ls);
+            if (Draw("Velocity", velocity, 0, flags | DrawStateFlag::ButtonLess)) SetVelocity(ls, velocity);
+        });
+    }
+
+    bool DrawCone(AudioCone& cone, DrawStateFlag flags)
+    {
+        bool result = false;
+        result = DrawSlider("Inner Angle", cone.innerAngle, 0.0f, 360.0f, "%.1f", flags) || result;
+        result = DrawSlider("Outer Angle", cone.outerAngle, 0.0f, 360.0f, "%.1f", flags) || result;
+        result = DrawSlider("Outer Gain", cone.outerGain, 0.0f, 1.0f, "%.1f", flags) || result;
+        result = Draw("Position", cone.position, 0, flags | DrawStateFlag::ButtonLess) || result;
+        result = Draw("Rotation", cone.euler, 0, flags | DrawStateFlag::ButtonLess) || result;
+        return result;
     }
 
     bool DrawComponent(const char* label, const std::function<void()>& func)

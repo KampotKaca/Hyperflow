@@ -21,7 +21,6 @@ namespace hf
 	Buffer Define(const BufferDefinitionInfo& info);
 	Buffer Define(const StorageBufferDefinitionInfo& info);
 	BufferAllocator Define(const BufferAllocatorDefinitionInfo& info);
-	AudioListener Define(const AudioListenerDefinitionInfo& info);
 
 	BufferAttrib DefineBufferAttrib(const char* assetPath);
 
@@ -40,6 +39,7 @@ namespace hf
 	Ref<AudioClip> Create(const AudioClipCreationInfo& info);
 	Ref<AudioPlayer> Create(const AudioPlayerCreationInfo& info);
 	Ref<AudioPlayer3D> Create(const AudioPlayer3DCreationInfo& info);
+    Ref<AudioListener> Create(const AudioListenerCreationInfo& info);
 
 	void Destroy(const Ref<Mesh>& mesh);
 	void Destroy(const Ref<Shader>& shader);
@@ -131,25 +131,30 @@ namespace hf
     bool IsPlaying(const Ref<AudioPlayer>& player);
     bool IsPlaying(const Ref<AudioPlayer3D>& player);
 
-    void SetDistance(const Ref<AudioPlayer3D>& player, float_t maxDistance, float_t falloff);
+    void SetRange(const Ref<AudioPlayer3D>& player, float_t maxRange, float_t falloff);
     void SetAttenuationModel(const Ref<AudioPlayer3D>& player, Audio3DAttenuationModel atten);
 
-    void Enable(AudioListener listener, bool enable);
+	void SetAudioVolume(float_t volume);
+	float_t GetAudioVolume();
 
-    void SetVelocity(AudioListener listener, vec3 velocity);
+    void Enable(const Ref<AudioListener>& ls, bool enable);
+
+    void SetVelocity(const Ref<AudioListener>& ls, vec3 velocity);
     void SetVelocity(const Ref<AudioPlayer3D>& pl, vec3 velocity);
 
-    void Set(AudioListener listener, const AudioCone& cone);
+    void Set(const Ref<AudioListener>& ls, const AudioCone& cone);
     void Set(const Ref<AudioPlayer3D>& pl, const AudioCone& cone);
 
-    vec3 GetVelocity(AudioListener listener);
+    bool IsEnabled(const Ref<AudioListener>& ls);
+
+    vec3 GetVelocity(const Ref<AudioListener>& ls);
     vec3 GetVelocity(const Ref<AudioPlayer3D>& pl);
 
-    AudioCone GetCone(AudioListener listener);
+    AudioCone GetCone(const Ref<AudioListener>& ls);
     AudioCone GetCone(const Ref<AudioPlayer3D>& pl);
 
-    //X -> maxDistance, Y -> falloff
-    vec2 GetDistance(const Ref<AudioPlayer3D>& player);
+    //X -> near, Y -> far
+    vec2 GetRange(const Ref<AudioPlayer3D>& player);
     Audio3DAttenuationModel GetAttenuationModel(const Ref<AudioPlayer3D>& player);
 
 	uint64_t GetFrameCount(const Ref<AudioClip>& clip);

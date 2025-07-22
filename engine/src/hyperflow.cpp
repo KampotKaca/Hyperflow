@@ -35,6 +35,7 @@ namespace hf
 			}
 
 			inter::HF.lifecycleCallbacks = engineData.lifecycleCallbacks;
+			inter::HF.internalAudioInfo = engineData.audioInfo;
 			inter::HF.updateType = engineData.updateType;
 			inter::HF.internalResourcesFormat = engineData.internalResourcesFormat;
 			inter::HF.appTitle = engineData.appTitle;

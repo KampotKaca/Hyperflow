@@ -24,7 +24,7 @@ namespace hf::inter
     }
 
     template<typename T>
-    bool ChangeClip_i(T* player, const Ref<AudioClip>& clip, float_t startingDuration = -1)
+    bool ChangeClip_i(T* player, const Ref<AudioClip>& clip, uint32_t flags = 0, float_t startingDuration = -1)
     {
         FreeHandle_i(player);
         if (!clip) return false;
@@ -42,7 +42,7 @@ namespace hf::inter
         auto handle = (ma_sound*)player->buffer;
         if (!handle) handle = new ma_sound();
         if (ma_sound_init_from_data_source(&AUDIO_DATA.engine, buffer,
-            0, nullptr, handle) != MA_SUCCESS)
+            flags, nullptr, handle) != MA_SUCCESS)
         {
             LOG_ERROR("Unable create player for the Audio clip -> %s", clip->filePath.c_str());
             return false;

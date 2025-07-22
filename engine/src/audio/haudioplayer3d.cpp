@@ -11,7 +11,7 @@ namespace hf
         template bool IsPlaying_i(AudioPlayer3D* player);
 
         template void FreeHandle_i(AudioPlayer3D* player);
-        template bool ChangeClip_i(AudioPlayer3D* player, const Ref<AudioClip>& clip, float_t startingDuration);
+        template bool ChangeClip_i(AudioPlayer3D* player, const Ref<AudioClip>& clip, uint32_t flags, float_t startingDuration);
         template void Destructor_i(AudioPlayer3D* player);
         template double_t GetPlayedInSeconds_i(AudioPlayer3D* player);
         template double_t GetPlayedPercent_i(AudioPlayer3D* player);
@@ -80,20 +80,21 @@ namespace hf
     void Play(const Ref<AudioPlayer3D>& player) { inter::Play_i(player.get()); }
     void Pause(const Ref<AudioPlayer3D>& player) { inter::Pause_i(player.get()); }
 
-    void SetDistance(const Ref<AudioPlayer3D>& player, float_t maxDistance, float_t falloff)
+    void SetRange(const Ref<AudioPlayer3D>& player, float_t maxRange, float_t falloff)
     {
         if (!IsLoaded(player)) throw GENERIC_EXCEPT("[Hyperflow]", "Trying to access destroyed audio player");
         auto& settings = player->settings3d;
-        if (settings.maxDistance != maxDistance)
+        falloff = glm::min(maxRange, falloff);
+        if (settings.maxRange != maxRange)
         {
-            settings.maxDistance = maxDistance;
-            ma_sound_set_max_distance((ma_sound*)player->handle, maxDistance);
+            settings.maxRange = maxRange;
+            ma_sound_set_max_distance((ma_sound*)player->handle, maxRange);
         }
 
         if (settings.falloff != falloff)
         {
             settings.falloff = falloff;
-            float_t minDistance = glm::max(0.001f, maxDistance - falloff);
+            float_t minDistance = glm::max(0.001f, maxRange - falloff);
             ma_sound_set_min_distance((ma_sound*)player->handle, minDistance);
         }
     }
@@ -113,7 +114,7 @@ namespace hf
     void SetPitch(const Ref<AudioPlayer3D>& player, float_t pitch) { inter::SetPitch_i(player.get(), pitch); }
     void SetLoopingMode(const Ref<AudioPlayer3D>& player, bool loopingEnabled) { inter::SetLoopingMode_i(player.get(), loopingEnabled); }
 
-    vec2 GetDistance(const Ref<AudioPlayer3D>& player) { return {player->settings3d.maxDistance, player->settings3d.falloff}; }
+    vec2 GetRange(const Ref<AudioPlayer3D>& player) { return {player->settings3d.maxRange, player->settings3d.falloff}; }
     Audio3DAttenuationModel GetAttenuationModel(const Ref<AudioPlayer3D>& player) { return player->settings3d.attenuationModel; }
 
     void Seek(const Ref<AudioPlayer3D>& player, float_t positionInSeconds) { inter::Seek_i(player.get(), positionInSeconds); }
@@ -128,12 +129,14 @@ namespace hf
 
     void ChangeClip(AudioPlayer3D* player, const Ref<AudioClip>& clip, float_t startingDuration)
     {
-        if(!inter::ChangeClip_i(player, clip, startingDuration)) return;
+        if(!inter::ChangeClip_i(player, clip, MA_SOUND_FLAG_DECODE, startingDuration)) return;
 
         auto& settings3d = player->settings3d;
         auto handle = (ma_sound*)player->handle;
-        ma_sound_set_max_distance(handle, settings3d.maxDistance);
+        ma_sound_set_max_distance(handle, settings3d.maxRange);
+        ma_sound_set_min_distance(handle, settings3d.maxRange - settings3d.falloff);
         ma_sound_set_attenuation_model(handle, (ma_attenuation_model)settings3d.attenuationModel);
+        ma_sound_set_spatialization_enabled(handle, true);
     }
 
     void Set(const Ref<AudioPlayer3D>& pl, const AudioCone& cone)
@@ -166,4 +169,7 @@ namespace hf
             ma_sound_set_velocity((ma_sound*)pl->handle, velocity.x, velocity.y, velocity.z);
         }
     }
+
+    vec3 GetVelocity(const Ref<AudioPlayer3D>& pl) { return pl->velocity; }
+    AudioCone GetCone(const Ref<AudioPlayer3D>& pl) { return pl->cone; }
 }
