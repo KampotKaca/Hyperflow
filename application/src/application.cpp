@@ -40,7 +40,7 @@ namespace app
 		DebugStart();
 
 		VoxelTerrainGenerate();
-		hf::SetTargetFrameRate(120);
+		hf::SetTargetFrameRate(170);
 	    SetState(hf::GetMainWindow(), hf::WindowState::Maximized);
 	}
 

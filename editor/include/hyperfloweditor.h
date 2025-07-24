@@ -282,8 +282,11 @@ namespace hf::editor
     inline void EndFrame(){}
     inline void DrawFrame(void* cmd){}
 
-    inline bool StartComponent(const char* label = "Component") { return false; }
-    inline void EndComponent(){}
+    inline bool StartDropdown(const char* label = "Dropdown") { return false; }
+    inline void EndDropdown() {}
+
+    inline bool StartComponent(const char* label = "Component", DrawStateFlag flags = DrawStateFlag::None) { return false; }
+    inline void EndComponent() {}
 
     inline bool StartWindow(const char* name = "New Window", bool* isOpen = nullptr, WindowFlags flags = WindowFlags::None) { return false; }
     inline void EndWindow(){}
