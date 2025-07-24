@@ -13,7 +13,7 @@ namespace hf::inter
         {
             const ma_engine_config config
             {
-                .listenerCount = HF.internalAudioInfo.usedListenersCount
+                .listenerCount = HF.internalAudioInfo.usedListenersCount,
             };
             auto result = ma_engine_init(&config, &AUDIO_DATA.engine);
 

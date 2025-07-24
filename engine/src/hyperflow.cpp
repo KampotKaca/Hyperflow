@@ -42,7 +42,8 @@ namespace hf
 
 			inter::HF.mainWindow = Create(engineData.windowData, nullptr);
 
-			inter::audio::Load_i();
+			if (inter::HF.internalAudioInfo.usedListenersCount > 0) inter::audio::Load_i();
+
 			inter::rendering::LoadApi_i(engineData.renderingApi);
 			inter::primitives::LoadStaticResources_i();
 			if(inter::HF.lifecycleCallbacks.onResourcesLoad) inter::HF.lifecycleCallbacks.onResourcesLoad();

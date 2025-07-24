@@ -161,16 +161,31 @@ namespace app
 
         hf::editor::SetNextWindowSize({ 300, 300 }, hf::editor::Condition::FirstUseEver);
         hf::editor::SetNextWindowPos({ 300, 300 }, hf::editor::Condition::FirstUseEver);
-        if (hf::editor::StartWindow("Transformer"))
+        if (hf::editor::StartWindow("Project Settings"))
         {
-            if (hf::editor::StartComponent("Viking Room"))
+            if (hf::editor::StartDropdown("Lights"))
             {
-                hf::editor::Draw("Transform", APP_OBJECTS.vikingRoomTransform);
-                hf::editor::Draw("Light", APP_OBJECTS.mainLight);
-                hf::editor::Draw("Camera", APP_DEBUG.camera.camera3D.core);
-                hf::editor::Draw("Audio", APP_AUDIOS.background_music);
-                hf::editor::Draw("Audio3D", APP_AUDIOS.background_music3D);
-                hf::editor::Draw("Listener", APP_AUDIOS.main_listener);
+                hf::editor::Draw("Directional", APP_OBJECTS.mainLight);
+                hf::editor::EndDropdown();
+            }
+
+            if (hf::editor::StartDropdown("Cameras"))
+            {
+                hf::editor::Draw("Editor Camera", APP_DEBUG.camera.camera3D.core);
+                hf::editor::EndDropdown();
+            }
+
+            if (hf::editor::StartDropdown("Audios"))
+            {
+                if (hf::editor::StartComponent("Global Audio", hf::editor::DrawStateFlag::DontUseDropdown))
+                {
+                    float audioVolume = hf::GetAudioVolume();
+                    if(hf::editor::DrawSlider("Global Volume", audioVolume, 0.0f, 1.0f))
+                        hf::SetAudioVolume(audioVolume);
+                    hf::editor::EndComponent();
+                }
+
+                hf::editor::EndDropdown();
             }
             hf::editor::EndWindow();
         }
@@ -179,6 +194,15 @@ namespace app
         hf::editor::SetNextWindowPos({ 100, 100 }, hf::editor::Condition::FirstUseEver);
         if (hf::editor::StartWindow("Inspector"))
         {
+            if (hf::editor::StartDropdown("Viking Room"))
+            {
+                hf::editor::Draw("Transform", APP_OBJECTS.vikingRoomTransform);
+                hf::editor::Draw("Audio", APP_AUDIOS.background_music);
+                hf::editor::Draw("Audio3D", APP_AUDIOS.background_music3D);
+                hf::editor::Draw("Listener", APP_AUDIOS.main_listener);
+                hf::editor::EndDropdown();
+            }
+
             hf::editor::EndWindow();
         }
 

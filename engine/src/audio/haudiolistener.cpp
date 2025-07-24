@@ -18,7 +18,7 @@ namespace hf
     {
         try
         {
-            auto newId = inter::AUDIO_DATA.definedListenersCount + 1;
+            auto newId = inter::AUDIO_DATA.definedListenersCount;
             inter::AUDIO_DATA.definedListenersCount++;
 
             ma_engine_listener_set_world_up(&inter::AUDIO_DATA.engine, (ma_uint32)newId, 0.0f, 1.0f, 0.0f);

@@ -847,8 +847,8 @@ namespace hf
 
     struct EngineInternalAudioInfo
     {
-        float_t volume = 1.0f;
-        uint32_t usedListenersCount = 1;
+        float_t volume = 1.0f; //Initial global audio volume multiplier
+        uint32_t usedListenersCount = 1; //Set this to 0 and audio system will not be initialized.
     };
 
 	struct EngineData
@@ -856,7 +856,7 @@ namespace hf
 		std::string appTitle = "Hyperflow";
 		RenderingApiType renderingApi = RenderingApiType::Vulkan; // type of initial api, can be changed later
 		EngineUpdateType updateType = EngineUpdateType::EventRaised; // type of application updates
-	    EngineInternalResourceFormatInfo internalResourcesFormat{}; //fromat of internal resources which are used by the engine
+	    EngineInternalResourceFormatInfo internalResourcesFormat{}; //format of internal resources which are used by the engine
 	    EngineLifecycleCallbacks lifecycleCallbacks{}; //passed engine callbacks to interact with the engine
 	    EngineInternalAudioInfo audioInfo{}; //audio info which is used by the engine
 	    WindowCreationInfo windowData{}; //properties of the initial window

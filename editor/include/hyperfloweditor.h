@@ -29,7 +29,7 @@ namespace hf::editor
     };
 
     enum class Condition { None = 0, Always = 1 << 0, Once = 1 << 1, FirstUseEver = 1 << 2, Appearing = 1 << 3 };
-    enum class DrawStateFlag { None = 0, Nameless = 1 << 0, ButtonLess = 1 << 1, DontStretchWidth = 1 << 2, };
+    enum class DrawStateFlag { None = 0, Nameless = 1 << 0, ButtonLess = 1 << 1, DontStretchWidth = 1 << 2, DontUseDropdown = 1 << 3 };
     DEFINE_ENUM_FLAGS(Condition)
     DEFINE_ENUM_FLAGS(DrawStateFlag)
 
@@ -45,7 +45,10 @@ namespace hf::editor
     bool StartWindow(const char* name = "New Window", bool* isOpen = nullptr, WindowFlags flags = WindowFlags::None);
     void EndWindow();
 
-    bool StartComponent(const char* label = "Component");
+    bool StartDropdown(const char* label = "Dropdown");
+    void EndDropdown();
+
+    bool StartComponent(const char* label = "Component", DrawStateFlag flags = DrawStateFlag::None);
     void EndComponent();
 
     void SetNextWindowSize(vec2 size, Condition cond = Condition::None);

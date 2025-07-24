@@ -27,7 +27,7 @@ namespace hf
 
     AudioPlayer::AudioPlayer(const AudioPlayerCreationInfo& info) : settings(info.settings)
     {
-        inter::ChangeClip_i(this, info.clip);
+        inter::ChangeClip_i(this, info.clip, MA_SOUND_FLAG_NO_SPATIALIZATION);
     }
 
     AudioPlayer::~AudioPlayer()
@@ -68,7 +68,7 @@ namespace hf
     void ChangeClip(const Ref<AudioPlayer>& player, const Ref<AudioClip>& clip, float_t startingDuration)
     {
         if (!IsLoaded(player)) throw GENERIC_EXCEPT("[Hyperflow]", "Trying to access destroyed audio player");
-        inter::ChangeClip_i(player.get(), clip, 0, startingDuration);
+        inter::ChangeClip_i(player.get(), clip, MA_SOUND_FLAG_NO_SPATIALIZATION, startingDuration);
 
         if (IsPlaying(player) && ma_sound_start((ma_sound*)player->handle) != MA_SUCCESS)
             LOG_ERROR("Unable to play audio player");

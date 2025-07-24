@@ -47,11 +47,11 @@ namespace hf::editor
         }
 
         ImGui::SameLine();
-        uint32_t audioProgress = (uint32_t)(GetPlayedPercent(pl) * 100.0f);
+        auto audioProgress = (uint32_t)(GetPlayedPercent(pl) * 100.0f);
         if(DrawSlider("Progress", audioProgress, 0u, 100u, "%.u%%", DrawStateFlag::Nameless))
         {
             modified = true;
-            SeekPercent(pl, audioProgress * 0.01f);
+            SeekPercent(pl, (float)audioProgress * 0.01f);
         }
 
         return modified;
@@ -60,43 +60,66 @@ namespace hf::editor
     template bool DrawAudioSettings(const Ref<AudioPlayer>& pl, DrawStateFlag flags);
     template bool DrawAudioSettings(const Ref<AudioPlayer3D>& pl, DrawStateFlag flags);
 
-    static bool DrawComponent(const char* label, const std::function<void()>& func);
     static bool DrawCone(AudioCone& cone, DrawStateFlag flags);
+    static bool DrawTable(const char* label);
 
-    bool StartComponent(const char* label)
+    bool StartDropdown(const char* label)
     {
         bool result = ImGui::CollapsingHeader(label);
         if (result) ImGui::Indent();
         return result;
     }
 
-    void EndComponent()
+    void EndDropdown()
     {
         ImGui::Unindent();
     }
 
+    bool StartComponent(const char* label, DrawStateFlag flags)
+    {
+        if (!(uint32_t)(flags & DrawStateFlag::DontUseDropdown))
+        {
+            if (ImGui::CollapsingHeader(label)) return DrawTable(label);
+            return false;
+        }
+        return DrawTable(label);
+    }
+
+    void EndComponent()
+    {
+        ImGui::EndTable();
+    }
+
     bool Draw(const char* label, Transform& trs, DrawStateFlag flags)
     {
-        return DrawComponent(label, [&]
+        if(StartComponent(label, flags))
         {
             Draw("Position", trs.position, 0, flags);
             Draw("Rotation", trs.euler, 0, flags);
             Draw("Scale", trs.scale, 1, flags);
-        });
+
+            EndComponent();
+            return true;
+        }
+        return false;
     }
 
     bool Draw(const char* label, DirectionalLight& dl, DrawStateFlag flags)
     {
-        return DrawComponent(label, [&]
+        if(StartComponent(label, flags))
         {
             DrawColor("Color", dl.color, flags);
             Draw("Rotation", dl.euler, 0, flags | DrawStateFlag::ButtonLess);
-        });
+
+            EndComponent();
+            return true;
+        }
+        return false;
     }
 
     bool Draw(const char* label, Camera3DCore& cam, DrawStateFlag flags)
     {
-        return DrawComponent(label, [&]
+        if(StartComponent(label, flags))
         {
             DrawSlider("Fov", cam.fov, 1.0f, 179.0f, "%.1f", flags);
             Draw("Distance", cam.farPlane, 0.01f, 100000.0f, "%.1f", flags | DrawStateFlag::DontStretchWidth);
@@ -105,20 +128,28 @@ namespace hf::editor
             cam.nearPlane = glm::min(cam.nearPlane, cam.farPlane);
 
             cam.farPlane = glm::max(cam.nearPlane, cam.farPlane);
-        });
+
+            EndComponent();
+            return true;
+        }
+        return false;
     }
 
     bool Draw(const char* label, const Ref<AudioPlayer>& pl, DrawStateFlag flags)
     {
-        return DrawComponent(label, [&]
+        if(StartComponent(label, flags))
         {
             DrawAudioSettings(pl, flags);
-        });
+
+            EndComponent();
+            return true;
+        }
+        return false;
     }
 
     bool Draw(const char* label, const Ref<AudioPlayer3D>& pl, DrawStateFlag flags)
     {
-        return DrawComponent(label, [&]
+        if(StartComponent(label, flags))
         {
             vec2 range = GetRange(pl);
             vec2 oldDistance = range;
@@ -133,12 +164,16 @@ namespace hf::editor
             if(DrawCone(cone, flags)) Set(pl, cone);
             auto velocity = GetVelocity(pl);
             if (Draw("Velocity", velocity, 0, flags | DrawStateFlag::ButtonLess)) SetVelocity(pl, velocity);
-        });
+
+            EndComponent();
+            return true;
+        }
+        return false;
     }
 
     bool Draw(const char* label, const Ref<AudioListener>& ls, DrawStateFlag flags)
     {
-        return DrawComponent(label, [&]
+        if(StartComponent(label, flags))
         {
             auto isEnabled = IsEnabled(ls);
             if (Draw("Enabled", isEnabled, flags)) Enable(ls, isEnabled);
@@ -146,7 +181,11 @@ namespace hf::editor
             if(DrawCone(cone, flags)) Set(ls, cone);
             auto velocity = GetVelocity(ls);
             if (Draw("Velocity", velocity, 0, flags | DrawStateFlag::ButtonLess)) SetVelocity(ls, velocity);
-        });
+
+            EndComponent();
+            return true;
+        }
+        return false;
     }
 
     bool DrawCone(AudioCone& cone, DrawStateFlag flags)
@@ -160,20 +199,13 @@ namespace hf::editor
         return result;
     }
 
-    bool DrawComponent(const char* label, const std::function<void()>& func)
+    bool DrawTable(const char* label)
     {
-        if (ImGui::CollapsingHeader(label))
+        if(ImGui::BeginTable(DrawKeyGen(label), 2))
         {
-            if(ImGui::BeginTable(DrawKeyGen(label), 2))
-            {
-                ImGui::TableSetupColumn("##col_1", ImGuiTableColumnFlags_WidthFixed, 80.0f);
-                ImGui::TableSetupColumn("##col_2", ImGuiTableColumnFlags_WidthStretch, 70.0f);
-
-                func();
-
-                ImGui::EndTable();
-                return true;
-            }
+            ImGui::TableSetupColumn("##col_1", ImGuiTableColumnFlags_WidthFixed, 80.0f);
+            ImGui::TableSetupColumn("##col_2", ImGuiTableColumnFlags_WidthStretch, 70.0f);
+            return true;
         }
         return false;
     }
