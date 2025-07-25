@@ -14,7 +14,7 @@ namespace hf
 	const std::string& GetApplicationTitle();
 	void Terminate();
 
-	ShaderSetup Define(const ShaderSetupDefinitionInfo& info);
+	ShaderLayout Define(const ShaderLayoutDefinitionInfo& info);
 	TextureSampler Define(const TextureSamplerDefinitionInfo& info);
 	TextureLayout Define(const TextureLayoutDefinitionInfo& info);
 	BufferAttrib Define(const BufferAttribDefinitionInfo& info);
@@ -186,8 +186,8 @@ namespace hf
     void Start_RenderTexture(const Ref<Renderer>& rn, const Ref<RenderTexture>& rt);
     void End_RenderTexture(const Ref<Renderer>& rn);
 
-	void Start_ShaderSetup(const Ref<Renderer>& rn, ShaderSetup shaderSetup);
-	void End_ShaderSetup(const Ref<Renderer>& rn);
+	void Start_ShaderLayout(const Ref<Renderer>& rn, ShaderLayout layout);
+	void End_ShaderLayout(const Ref<Renderer>& rn);
 
 	void Start_Shader(const Ref<Renderer>& rn, const ShaderBindingInfo& shaderBindingInfo);
 	void End_Shader(const Ref<Renderer>& rn);

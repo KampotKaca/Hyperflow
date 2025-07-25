@@ -20,8 +20,8 @@ namespace hf
         for (uint32_t i = 0; i < info.texturePackCount; i++)
         {
             auto* texPack = (VkTexturePack*)info.pTexturePacks[i];
-            for (auto& binding : texPack->bindings)
-                totalTextureDescriptors += binding.second.views.size() * FRAMES_IN_FLIGHT;
+            for (auto& val : texPack->bindings | std::views::values)
+                totalTextureDescriptors += val.views.size() * FRAMES_IN_FLIGHT;
         }
 
         poolSize.descriptorCount = totalTextureDescriptors;

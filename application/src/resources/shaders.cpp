@@ -1,6 +1,6 @@
 #include "resources/shaders.h"
 #include "resources/bufferattributes.h"
-#include "resources/shadersetups.h"
+#include "resources/shaderlayouts.h"
 #include "resources/rendertextures.h"
 #include "../appconfig.h"
 
@@ -20,7 +20,7 @@ namespace app
         {
             hf::ShaderCreationInfo shaderInfo
             {
-                .setup = APP_SHADER_SETUPS.viking_room,
+                .setup = APP_SHADER_LAYOUTS.viking_room,
                 .supportedAttribCount = 1,
                 .pSupportedAttribs = &APP_BUFFER_ATTRIBUTES.pos_nor_tex,
                 .vertexShaderLoc = "default",
@@ -35,7 +35,7 @@ namespace app
         {
             hf::ShaderCreationInfo shaderInfo
             {
-                .setup = APP_SHADER_SETUPS.unlit_color,
+                .setup = APP_SHADER_LAYOUTS.unlit_color,
                 .supportedAttribCount = 1,
                 .pSupportedAttribs = &APP_BUFFER_ATTRIBUTES.pos_nor_tex,
                 .vertexShaderLoc = "unlit_color",

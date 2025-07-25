@@ -127,7 +127,7 @@ namespace hf
 	typedef uint32_t BufferAllocator;
 	typedef uint32_t TextureLayout;
 	typedef uint32_t TextureSampler;
-	typedef uint32_t ShaderSetup;
+	typedef uint32_t ShaderLayout;
 
     enum class TexturePackBindingType { Texture2D, Cubemap, RenderTexture };
 	enum class CubemapTextureType { Left, Right, Down, Up, Back, Front };
@@ -372,7 +372,7 @@ namespace hf
 
 	struct ShaderCreationInfo
 	{
-		ShaderSetup setup{};
+		ShaderLayout setup{};
 		uint32_t supportedAttribCount{};
 		const BufferAttrib* pSupportedAttribs{};
 		const char* vertexShaderLoc{};
@@ -462,11 +462,11 @@ namespace hf
 
 	struct PushConstantUploadInfo
 	{
-		ShaderSetup shaderSetup{};
+		ShaderLayout layout{};
 		const void* data{};
 	};
 
-	struct ShaderSetupDefinitionInfo
+	struct ShaderLayoutDefinitionInfo
 	{
 		PushConstantInfo pushConstant{};
 

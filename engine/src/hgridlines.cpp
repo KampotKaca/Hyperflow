@@ -5,7 +5,7 @@ namespace hf::gridlines
 {
     void Draw(const Ref<Renderer>& rn, const GridLinesInfo& info)
     {
-        Start_ShaderSetup(rn, inter::HF.staticResources.axisLinesShaderSetup);
+        Start_ShaderLayout(rn, inter::HF.staticResources.axisLinesShaderLayout);
         {
             primitives::BindGlobalUniformBuffer(rn);
 
@@ -40,6 +40,6 @@ namespace hf::gridlines
             }
             End_Shader(rn);
         }
-        End_ShaderSetup(rn);
+        End_ShaderLayout(rn);
     }
 }

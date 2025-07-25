@@ -262,7 +262,7 @@ namespace hf
             auto& packet = rn->currentDraw.packet;
             packet.renderTextures.push_back({
                 .texture = rt,
-                .shaderSetupRange = (AssetRange<uint16_t>){ .start = (uint16_t)packet.shaderSetups.size(), .size = 0 },
+                .shaderLayoutRange = (AssetRange<uint16_t>){ .start = (uint16_t)packet.shaderLayouts.size(), .size = 0 },
                 .dependencyRange = (AssetRange<uint8_t>){ .start = (uint8_t)packet.dependencies.size(), .size = 0 }
             });
 
@@ -293,7 +293,7 @@ namespace hf
         }
     }
 
-    void Start_ShaderSetup(const Ref<Renderer>& rn, ShaderSetup shaderSetup)
+    void Start_ShaderLayout(const Ref<Renderer>& rn, ShaderLayout layout)
     {
         try
         {
@@ -301,19 +301,19 @@ namespace hf
             if (!rn->currentDraw.currentRenderTexture)
                 throw GENERIC_EXCEPT("[Hyperflow]", "Cannot draw anything without starting render texture!");
 
-            if (rn->currentDraw.currentShaderSetup)
-                throw GENERIC_EXCEPT("[Hyperflow]", "Cannot start ShaderSetup without ending previous one!");
+            if (rn->currentDraw.currentShaderLayout)
+                throw GENERIC_EXCEPT("[Hyperflow]", "Cannot start ShaderLayout without ending previous one!");
 #endif
 
             auto& packet = rn->currentDraw.packet;
-            packet.shaderSetups.push_back({
-                .shaderSetup = shaderSetup,
+            packet.shaderLayouts.push_back({
+                .layout = layout,
                 .shaderPacketRange = (AssetRange<uint16_t>){ .start = (uint16_t)packet.shaders.size(), .size = 0 },
                 .bufferSetRange = (AssetRange<uint32_t>){ .start = (uint32_t)packet.bufferSets.size(), .size = 0 },
             });
 
-            rn->currentDraw.currentShaderSetup = packet.shaderSetups.atP(packet.shaderSetups.size() - 1);
-            rn->currentDraw.currentRenderTexture->shaderSetupRange.size++;
+            rn->currentDraw.currentShaderLayout = packet.shaderLayouts.atP(packet.shaderLayouts.size() - 1);
+            rn->currentDraw.currentRenderTexture->shaderLayoutRange.size++;
         }
         catch (...)
         {
@@ -322,14 +322,14 @@ namespace hf
         }
     }
 
-    void End_ShaderSetup(const Ref<Renderer>& rn)
+    void End_ShaderLayout(const Ref<Renderer>& rn)
     {
 #if DEBUG
-        if (!rn->currentDraw.currentShaderSetup)
-            throw GENERIC_EXCEPT("[Hyperflow]", "Cannot end ShaderSetup without starting it!");
+        if (!rn->currentDraw.currentShaderLayout)
+            throw GENERIC_EXCEPT("[Hyperflow]", "Cannot end ShaderLayout without starting it!");
 #endif
 
-        rn->currentDraw.currentShaderSetup = nullptr;
+        rn->currentDraw.currentShaderLayout = nullptr;
     }
 
     void Start_Shader(const Ref<Renderer>& rn, const ShaderBindingInfo& shaderBindingInfo)
@@ -337,8 +337,8 @@ namespace hf
         try
         {
 #if DEBUG
-            if (!rn->currentDraw.currentShaderSetup)
-                throw GENERIC_EXCEPT("[Hyperflow]", "ShaderSetup must be set!");
+            if (!rn->currentDraw.currentShaderLayout)
+                throw GENERIC_EXCEPT("[Hyperflow]", "ShaderLayout must be set!");
 
             if (rn->currentDraw.currentShader)
                 throw GENERIC_EXCEPT("[Hyperflow]", "Cannot start Shader without ending previous one!");
@@ -351,7 +351,7 @@ namespace hf
             });
 
             rn->currentDraw.currentShader = packet.shaders.atP(packet.shaders.size() - 1);
-            rn->currentDraw.currentShaderSetup->shaderPacketRange.size++;
+            rn->currentDraw.currentShaderLayout->shaderPacketRange.size++;
         }
         catch (...)
         {
@@ -363,8 +363,8 @@ namespace hf
     void End_Shader(const Ref<Renderer>& rn)
     {
 #if DEBUG
-        if (!rn->currentDraw.currentShaderSetup)
-            throw GENERIC_EXCEPT("[Hyperflow]", "ShaderSetup must be set!");
+        if (!rn->currentDraw.currentShaderLayout)
+            throw GENERIC_EXCEPT("[Hyperflow]", "ShaderLayout must be set!");
 
         if (!rn->currentDraw.currentShader)
             throw GENERIC_EXCEPT("[Hyperflow]", "Cannot end Shader without starting it!");
@@ -462,7 +462,7 @@ namespace hf
         try
         {
 #if DEBUG
-            if (!rn->currentDraw.currentShaderSetup)
+            if (!rn->currentDraw.currentShaderLayout)
                 throw GENERIC_EXCEPT("[Hyperflow]", "Shader Setup must be set until you set uniform set");
             if (rn->currentDraw.currentUniformSet)
                 throw GENERIC_EXCEPT("[Hyperflow]", "Cannot start uniform set without ending previous one!");
@@ -476,7 +476,7 @@ namespace hf
                 .bufferRange = (AssetRange<uint16_t>){ .start = (uint16_t)packet.buffers.size(), .size = 0 },
             });
             rn->currentDraw.currentUniformSet = packet.bufferSets.atP(packet.bufferSets.size() - 1);
-            rn->currentDraw.currentShaderSetup->bufferSetRange.size++;
+            rn->currentDraw.currentShaderLayout->bufferSetRange.size++;
         }
         catch (...)
         {
@@ -728,18 +728,18 @@ namespace hf
 
                 HF.renderingApi.api.BeginRendering(handle, rt.texture->handle);
 
-                uint16_t shaderSetupEnd = rt.shaderSetupRange.end();
-                for (uint16_t shaderSetupIndex = rt.shaderSetupRange.start; shaderSetupIndex < shaderSetupEnd; shaderSetupIndex++)
+                uint16_t shaderLayoutEnd = rt.shaderLayoutRange.end();
+                for (uint16_t shaderLayoutIndex = rt.shaderLayoutRange.start; shaderLayoutIndex < shaderLayoutEnd; shaderLayoutIndex++)
                 {
                     DescriptorBindingInfo descBindings[MAX_NUM_BOUND_DESCRIPTORS]{};
 
-                    const auto& shaderSetup = packet.shaderSetups.atC(shaderSetupIndex);
-                    HF.renderingApi.api.BindShaderSetup(handle, shaderSetup.shaderSetup);
+                    const auto& shaderLayout = packet.shaderLayouts.atC(shaderLayoutIndex);
+                    HF.renderingApi.api.BindShaderLayout(handle, shaderLayout.layout);
 
-                    BindBuffers(handle, packet, shaderSetup.bufferSetRange, descBindings);
+                    BindBuffers(handle, packet, shaderLayout.bufferSetRange, descBindings);
 
-                    uint16_t shaderEnd = shaderSetup.shaderPacketRange.end();
-                    for (uint16_t shaderIndex = shaderSetup.shaderPacketRange.start; shaderIndex < shaderEnd; shaderIndex++)
+                    uint16_t shaderEnd = shaderLayout.shaderPacketRange.end();
+                    for (uint16_t shaderIndex = shaderLayout.shaderPacketRange.start; shaderIndex < shaderEnd; shaderIndex++)
                     {
                         const auto& shader = packet.shaders.atC(shaderIndex);
                         auto* shaderHandle = shader.bindingInfo.shader->handle;
@@ -781,7 +781,7 @@ namespace hf
                                     {
                                         PushConstantUploadInfo uploadInfo
                                         {
-                                            .shaderSetup = shaderSetup.shaderSetup,
+                                            .layout = shaderLayout.layout,
                                             .data = &packet.pushConstantUploads.atC(drawPacket.pushConstantRange.start),
                                         };
 

@@ -150,15 +150,15 @@ namespace hf::inter::rendering
         return GRAPHICS_DATA.bufferAllocators.size();
     }
 
-    ShaderSetup DefineShaderSetup(const ShaderSetupDefinitionInfo& info)
+    ShaderLayout DefineShaderLayout(const ShaderLayoutDefinitionInfo& info)
     {
-        GRAPHICS_DATA.shaderSetups.emplace_back(MakeURef<VkShaderSetup>(info));
-        return GRAPHICS_DATA.shaderSetups.size();
+        GRAPHICS_DATA.shaderLayouts.emplace_back(MakeURef<VkShaderLayout>(info));
+        return GRAPHICS_DATA.shaderLayouts.size();
     }
 
-    void BindShaderSetup(void* rn, ShaderSetup setup)
+    void BindShaderLayout(void* rn, ShaderLayout setup)
     {
-        hf::BindShaderSetup((VkRenderer*)rn, setup);
+        hf::BindShaderLayout((VkRenderer*)rn, setup);
     }
 
     void UploadPushConstants(void* rn, const PushConstantUploadInfo& info)
@@ -388,8 +388,8 @@ namespace hf::inter::rendering
             .BindShader                 = BindShader,
 
             //uniform storage
-            .DefineShaderSetup          = DefineShaderSetup,
-            .BindShaderSetup            = BindShaderSetup,
+            .DefineShaderLayout          = DefineShaderLayout,
+            .BindShaderLayout            = BindShaderLayout,
             .UploadPushConstants        = UploadPushConstants,
 
             //texture

@@ -5,7 +5,7 @@
 #include "hvk_bufferattrib.h"
 #include "hvk_vertbuffer.h"
 #include "hvk_uniformbuffer.h"
-#include "hvk_shadersetup.h"
+#include "hvk_shaderlayout.h"
 #include "hvk_texturelayout.h"
 #include "hvk_texturepack.h"
 #include "hvk_texturepackallocator.h"
@@ -191,7 +191,7 @@ namespace hf
         std::vector<URef<VkBufferAllocator>> bufferAllocators{};
         std::vector<URef<VkTextureSampler>> textureSamplers{};
         std::vector<URef<VkTextureLayout>> textureLayouts{};
-        std::vector<URef<VkShaderSetup>> shaderSetups{};
+        std::vector<URef<VkShaderLayout>> shaderLayouts{};
 
         std::vector<VkCopyBufferToBufferOperation> bufferToBufferCopyOperations{};
         std::vector<VkCopyBufferToImageOperation> bufferToImageCopyOperations{};

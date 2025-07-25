@@ -36,7 +36,7 @@ namespace hf
         static void DefineBufferAttribs();
         static void DefineTextureSamplers();
         static void DefineBuffers();
-        static void DefineShaderSetups();
+        static void DefineShaderLayouts();
 
         static void LoadCubemaps();
         static void LoadTexturePacks();
@@ -50,7 +50,7 @@ namespace hf
             DefineBufferAttribs();
             DefineTextureSamplers();
             DefineBuffers();
-            DefineShaderSetups();
+            DefineShaderLayouts();
         }
 
         void LoadStaticResources_i()
@@ -187,11 +187,11 @@ namespace hf
             }
         }
 
-        void DefineShaderSetups()
+        void DefineShaderLayouts()
         {
             //Axis Lines Shader Setup
             {
-                const ShaderSetupDefinitionInfo info
+                const ShaderLayoutDefinitionInfo info
                 {
                     .pushConstant =
                     {
@@ -204,12 +204,12 @@ namespace hf
                     .textureLayoutCount = 0
                 };
 
-                HF.staticResources.axisLinesShaderSetup = Define(info);
+                HF.staticResources.axisLinesShaderLayout = Define(info);
             }
 
             //Skybox Shader Setup
             {
-                const ShaderSetupDefinitionInfo info
+                const ShaderLayoutDefinitionInfo info
                 {
                     .pushConstant =
                     {
@@ -222,7 +222,7 @@ namespace hf
                     .textureLayoutCount = 1
                 };
 
-                HF.staticResources.skyboxShaderSetup = Define(info);
+                HF.staticResources.skyboxShaderLayout = Define(info);
             }
         }
 
@@ -375,7 +375,7 @@ namespace hf
             {
                 const ShaderCreationInfo shaderInfo
                 {
-                    .setup = HF.staticResources.axisLinesShaderSetup,
+                    .setup = HF.staticResources.axisLinesShaderLayout,
                     .supportedAttribCount = 1,
                     .pSupportedAttribs = &HF.staticResources.quadAttrib,
                     .vertexShaderLoc = "__axislines",
@@ -406,7 +406,7 @@ namespace hf
             {
                 const ShaderCreationInfo shaderInfo
                 {
-                    .setup = HF.staticResources.skyboxShaderSetup,
+                    .setup = HF.staticResources.skyboxShaderLayout,
                     .supportedAttribCount = 1,
                     .pSupportedAttribs = &HF.staticResources.defaultAttrib,
                     .vertexShaderLoc = "__skybox",

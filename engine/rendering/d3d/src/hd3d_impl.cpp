@@ -123,12 +123,12 @@ namespace hf::inter::rendering
         return 1;
     }
 
-    uint32_t DefineShaderSetup(const ShaderSetupDefinitionInfo& info)
+    uint32_t DefineShaderLayout(const ShaderLayoutDefinitionInfo& info)
     {
         return 1;
     }
 
-    void BindShaderSetup(void* rn, ShaderSetup)
+    void BindShaderLayout(void* rn, ShaderLayout layout)
     {
 
     }
@@ -249,8 +249,8 @@ namespace hf::inter::rendering
             .BindShader                 = BindShader,
 
             //uniform storage
-            .DefineShaderSetup          = DefineShaderSetup,
-            .BindShaderSetup            = BindShaderSetup,
+            .DefineShaderLayout         = DefineShaderLayout,
+            .BindShaderLayout           = BindShaderLayout,
             .UploadPushConstants        = UploadPushConstants,
 
             //texture

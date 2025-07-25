@@ -74,9 +74,9 @@ namespace hf
         AssetRange<uint16_t> materialPacketRange{};
     };
 
-    struct ShaderSetupPacketInfo
+    struct ShaderLayoutPacketInfo
     {
-        ShaderSetup shaderSetup{};
+        ShaderLayout layout{};
         AssetRange<uint16_t> shaderPacketRange{};
         AssetRange<uint32_t> bufferSetRange{};
     };
@@ -91,7 +91,7 @@ namespace hf
     struct RenderTexturePacketInfo
     {
         Ref<RenderTexture> texture{};
-        AssetRange<uint16_t> shaderSetupRange{};
+        AssetRange<uint16_t> shaderLayoutRange{};
         AssetRange<uint8_t> dependencyRange{};
 
         void (*drawCallback)(const Ref<Renderer>& rn, void* cmd){};
@@ -107,7 +107,7 @@ namespace hf
     {
         StaticVector<RenderAttachmentDependencyInfo, RENDERING_MAX_NUM_RENDER_ATTACHMENT_DEPENDENCIES> dependencies{};
         StaticVector<RenderTexturePacketInfo, RENDERING_MAX_NUM_RENDER_TEXTURES> renderTextures{};
-        StaticVector<ShaderSetupPacketInfo, RENDERING_MAX_NUM_SHADER_SETUPS> shaderSetups{};
+        StaticVector<ShaderLayoutPacketInfo, RENDERING_MAX_NUM_SHADER_LAYOUTS> shaderLayouts{};
         StaticVector<ShaderPacketInfo, RENDERING_MAX_NUM_SHADERS> shaders{};
         StaticVector<MaterialPacketInfo, RENDERING_MAX_NUM_MATERIALS> materials{};
         StaticVector<DrawPacketInfo, RENDERING_MAX_NUM_DRAWPACKETS> drawPackets{};
@@ -129,7 +129,7 @@ namespace hf
     struct RenderPacketDrawProcess
     {
         RenderTexturePacketInfo* currentRenderTexture{};
-        ShaderSetupPacketInfo* currentShaderSetup{};
+        ShaderLayoutPacketInfo* currentShaderLayout{};
         ShaderPacketInfo* currentShader{};
         MaterialPacketInfo* currentMaterial{};
         BufferSetPacketInfo* currentUniformSet{};

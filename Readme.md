@@ -53,7 +53,7 @@ The renderer runs on a seperate thread, so the rendering process consists of fil
 
         hf::Start_RenderPass(rn, APP_RENDER_PASSES.mainPresentPass);
         {
-            hf::Start_ShaderSetup(rn, APP_SHADER_SETUPS.viking_room); //Viking room setup
+            hf::Start_ShaderLayout(rn, APP_SHADER_SETUPS.viking_room); //Viking room setup
             {
                 hf::primitives::BindGlobalUniformBuffer(rn);
 
@@ -96,7 +96,7 @@ The renderer runs on a seperate thread, so the rendering process consists of fil
                 }
                 hf::End_Shader(rn);
             }
-            hf::End_ShaderSetup(rn);
+            hf::End_ShaderLayout(rn);
             hf::skybox::Draw(rn, APP_OBJECTS.skybox);
         }
         hf::End_RenderPass(rn);

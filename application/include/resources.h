@@ -11,7 +11,7 @@
 #include "resources/texturesamplers.h"
 #include "resources/texturelayouts.h"
 #include "resources/texturepacks.h"
-#include "resources/shadersetups.h"
+#include "resources/shaderlayouts.h"
 #include "resources/cubemaps.h"
 #include "resources/audios.h"
 

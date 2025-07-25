@@ -36,7 +36,7 @@ namespace hf::skybox
 
     void Draw(const Ref<Renderer>& rn, const SkyboxInfo& info)
     {
-        Start_ShaderSetup(rn, inter::HF.staticResources.skyboxShaderSetup);
+        Start_ShaderLayout(rn, inter::HF.staticResources.skyboxShaderLayout);
         {
             primitives::BindGlobalUniformBuffer(rn);
 
@@ -61,7 +61,7 @@ namespace hf::skybox
             }
             End_Shader(rn);
         }
-        End_ShaderSetup(rn);
+        End_ShaderLayout(rn);
     }
 
     bool IsDefaultCubemapBound() { return inter::HF.staticResources.boundCubemap == inter::HF.staticResources.defaultSkyboxCubemap; }

@@ -3,7 +3,7 @@
 
 namespace hf
 {
-    ShaderSetup Define(const ShaderSetupDefinitionInfo& info) { return inter::HF.renderingApi.api.DefineShaderSetup(info); }
+    ShaderLayout Define(const ShaderLayoutDefinitionInfo& info) { return inter::HF.renderingApi.api.DefineShaderLayout(info); }
 
     Buffer Define(const BufferDefinitionInfo& info) { return inter::HF.renderingApi.api.DefineUniformBuffer(info); }
     Buffer Define(const StorageBufferDefinitionInfo& info) { return inter::HF.renderingApi.api.DefineStorageBuffer(info); }

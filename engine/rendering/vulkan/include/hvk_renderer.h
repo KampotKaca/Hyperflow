@@ -80,7 +80,7 @@ namespace hf
     void UploadBuffers(const VkRenderer* rn, const inter::rendering::BufferUploadInfo& info);
     void BindBuffers(const VkRenderer* rn, const inter::rendering::BufferBindInfo& info);
     void BindTexturePack(const VkRenderer* rn, const VkTexturePack* pack, uint32_t setBindingIndex, RenderBindingType bindingType);
-    void BindShaderSetup(VkRenderer* rn, ShaderSetup setup);
+    void BindShaderLayout(VkRenderer* rn, ShaderLayout setup);
     void UploadPushConstants(const VkRenderer* rn, const PushConstantUploadInfo& info);
 }
 

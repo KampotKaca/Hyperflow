@@ -58,7 +58,7 @@ namespace hf::inter::rendering
 
     struct ShaderCreationInfo
     {
-        ShaderSetup shaderSetup{};
+        ShaderLayout layout{};
         uint32_t supportedAttribCount{};
         const BufferAttrib* pSupportedAttribs{};
 
@@ -227,8 +227,8 @@ namespace hf::inter::rendering
         void (*BindShader)(const void* rn, const ShaderBindingInfo& info);
 
         //shader setup
-        ShaderSetup (*DefineShaderSetup)(const ShaderSetupDefinitionInfo& info);
-        void (*BindShaderSetup)(void* rn, ShaderSetup setup);
+        ShaderLayout (*DefineShaderLayout)(const ShaderLayoutDefinitionInfo& info);
+        void (*BindShaderLayout)(void* rn, ShaderLayout setup);
         void (*UploadPushConstants)(void* rn, const PushConstantUploadInfo& info);
 
         //texture

@@ -1,10 +1,10 @@
-#include "hvk_shadersetup.h"
+#include "hvk_shaderlayout.h"
 #include "hvk_graphics.h"
 #include "hvk_renderer.h"
 
 namespace hf
 {
-    VkShaderSetup::VkShaderSetup(const ShaderSetupDefinitionInfo& info)
+    VkShaderLayout::VkShaderLayout(const ShaderLayoutDefinitionInfo& info)
         : pushConstantInfo(info.pushConstant)
     {
         VkPipelineLayoutCreateInfo pipelineLayoutInfo
@@ -56,31 +56,31 @@ namespace hf
                          &pipelineLayoutInfo, nullptr, &layout));
     }
 
-    VkShaderSetup::~VkShaderSetup()
+    VkShaderLayout::~VkShaderLayout()
     {
         if (layout) vkDestroyPipelineLayout(GRAPHICS_DATA.device.logicalDevice.device, layout, nullptr);
     }
 
-    bool IsValidShaderSetup(ShaderSetup setup)
+    bool IsValidShaderLayout(ShaderLayout setup)
     {
-        return setup > 0 && setup <= GRAPHICS_DATA.shaderSetups.size();
+        return setup > 0 && setup <= GRAPHICS_DATA.shaderLayouts.size();
     }
 
-    URef<VkShaderSetup>& GetShaderSetup(ShaderSetup setup)
+    URef<VkShaderLayout>& GetShaderLayout(ShaderLayout setup)
     {
-        if (!IsValidShaderSetup(setup)) throw GENERIC_EXCEPT("[Hyperflow]", "Invalid shader setup");
-        return GRAPHICS_DATA.shaderSetups[setup - 1];
+        if (!IsValidShaderLayout(setup)) throw GENERIC_EXCEPT("[Hyperflow]", "Invalid shader setup");
+        return GRAPHICS_DATA.shaderLayouts[setup - 1];
     }
 
-    void BindShaderSetup(VkRenderer* rn, ShaderSetup setup)
+    void BindShaderLayout(VkRenderer* rn, ShaderLayout setup)
     {
-        rn->currentLayout = GetShaderSetup(setup)->layout;
+        rn->currentLayout = GetShaderLayout(setup)->layout;
     }
 
     void UploadPushConstants(const VkRenderer* rn, const PushConstantUploadInfo& info)
     {
-        const auto& shaderSetup = GetShaderSetup(info.shaderSetup);
-        vkCmdPushConstants(rn->currentCommand, rn->currentLayout, (VkShaderStageFlags)shaderSetup->pushConstantInfo.usageFlags,
-            0, shaderSetup->pushConstantInfo.sizeInBytes, info.data);
+        const auto& shaderLayout = GetShaderLayout(info.layout);
+        vkCmdPushConstants(rn->currentCommand, rn->currentLayout, (VkShaderStageFlags)shaderLayout->pushConstantInfo.usageFlags,
+            0, shaderLayout->pushConstantInfo.sizeInBytes, info.data);
     }
 }

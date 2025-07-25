@@ -40,7 +40,7 @@ namespace app
         DebugPrepass(rn);
         hf::Start_RenderTexture(rn, APP_RENDER_TEXTURES.mainDrawRenderTexture);
         {
-            hf::Start_ShaderSetup(rn, APP_SHADER_SETUPS.viking_room); //Viking room setup
+            hf::Start_ShaderLayout(rn, APP_SHADER_LAYOUTS.viking_room); //Viking room setup
             {
                 hf::primitives::BindGlobalUniformBuffer(rn);
 
@@ -86,9 +86,9 @@ namespace app
                 }
                 hf::End_Shader(rn);
             }
-            hf::End_ShaderSetup(rn);
+            hf::End_ShaderLayout(rn);
 
-            hf::Start_ShaderSetup(rn, APP_SHADER_SETUPS.unlit_color); //Ground setup
+            hf::Start_ShaderLayout(rn, APP_SHADER_LAYOUTS.unlit_color); //Ground setup
             {
                 hf::primitives::BindGlobalUniformBuffer(rn);
                 hf::ShaderBindingInfo shaderInfo
@@ -118,7 +118,7 @@ namespace app
                 }
                 hf::End_Shader(rn);
             }
-            hf::End_ShaderSetup(rn);
+            hf::End_ShaderLayout(rn);
 
             VoxelTerrainDraw(rn);
             hf::skybox::Draw(rn, APP_OBJECTS.skybox);

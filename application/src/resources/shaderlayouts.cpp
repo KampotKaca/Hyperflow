@@ -1,18 +1,18 @@
 #include "resources/uniforms.h"
 #include "resources/texturelayouts.h"
-#include "resources/shadersetups.h"
+#include "resources/shaderlayouts.h"
 #include "resources/materials.h"
 
 namespace app
 {
-    AppShaderSetups APP_SHADER_SETUPS;
+    AppShaderLayouts APP_SHADER_LAYOUTS;
 
-    void ShaderSetupDefineAll()
+    void ShaderLayoutDefineAll()
     {
         //viking_room
         {
             std::array buffers { hf::primitives::GetGlobalUniformBuffer() };
-            const hf::ShaderSetupDefinitionInfo info
+            const hf::ShaderLayoutDefinitionInfo info
             {
                 .pushConstant =
                 {
@@ -25,13 +25,13 @@ namespace app
                 .textureLayoutCount = 1
             };
 
-            APP_SHADER_SETUPS.viking_room = hf::Define(info);
+            APP_SHADER_LAYOUTS.viking_room = hf::Define(info);
         }
 
         //color
         {
             std::array buffers { hf::primitives::GetGlobalUniformBuffer() };
-            const hf::ShaderSetupDefinitionInfo info
+            const hf::ShaderLayoutDefinitionInfo info
             {
                 .pushConstant =
                 {
@@ -44,7 +44,7 @@ namespace app
                 .textureLayoutCount = 0
             };
 
-            APP_SHADER_SETUPS.unlit_color = hf::Define(info);
+            APP_SHADER_LAYOUTS.unlit_color = hf::Define(info);
         }
     }
 }

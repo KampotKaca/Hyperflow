@@ -11,7 +11,7 @@ namespace hf
         ~Shader();
 
         std::string vertLoc{}, fragLoc{};
-        ShaderSetup shaderSetup{};
+        ShaderLayout layout{};
 
         BufferAttrib* pSupportedAttribs{};
         uint32_t supportedAttribCount{};

@@ -12,7 +12,7 @@ namespace hf
         explicit VkShader(const inter::rendering::ShaderCreationInfo& info);
         ~VkShader();
 
-        ShaderSetup shaderSetup{};
+        ShaderLayout layout{};
         unordered_map<BufferAttrib, VkPipeline> pipelines{};
     };
 

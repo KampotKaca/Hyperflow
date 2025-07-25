@@ -13,7 +13,7 @@ namespace app
 		TextureLayoutDefineAll();
 		BufferAttributeDefineAll();
 		UniformDefineAll();
-		ShaderSetupDefineAll();
+		ShaderLayoutDefineAll();
 		DebugDefine();
 	}
 

@@ -81,8 +81,8 @@ namespace hf::inter
         Buffer globalUniform = 0;
         BufferAllocator bufferAllocator = 0;
 
-        ShaderSetup axisLinesShaderSetup{};
-        ShaderSetup skyboxShaderSetup{};
+        ShaderLayout axisLinesShaderLayout{};
+        ShaderLayout skyboxShaderLayout{};
 
         Ref<Shader> axisLinesShader{};
         Ref<Shader> skyboxShader{};

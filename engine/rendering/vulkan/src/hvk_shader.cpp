@@ -20,7 +20,7 @@ namespace hf
     static void CreatePipeline(const VkPipelineInfo& info, VkPipeline* pipeline);
 
     VkShader::VkShader(const inter::rendering::ShaderCreationInfo& info)
-        : shaderSetup(info.shaderSetup)
+        : layout(info.layout)
     {
         VkShaderModule vertModule{}, fragModule{};
         CreateShaderModule(info.vCode, info.vCodeSize, &vertModule);
@@ -42,12 +42,12 @@ namespace hf
             }
         };
 
-        auto& shaderSetup = GetShaderSetup(info.shaderSetup);
+        auto& shaderLayout = GetShaderLayout(info.layout);
         VkPipelineInfo pipelineCreationInfo
         {
             .stageCount = 2,
             .pStages = shaderStages,
-            .layout = shaderSetup->layout,
+            .layout = shaderLayout->layout,
             .drawOutputFormats = info.drawOutputFormats,
             .rasterizerOptions = info.rasterizerOptions,
             .blendingOptions = info.blendingOptions,
@@ -258,7 +258,7 @@ namespace hf
     void BindShader(VkRenderer* rn, VkShader* shader, BufferAttrib attrib, RenderBindingType bindingType)
     {
 #if DEBUG
-        if (rn->currentLayout != GetShaderSetup(shader->shaderSetup)->layout)
+        if (rn->currentLayout != GetShaderLayout(shader->layout)->layout)
             throw GENERIC_EXCEPT("[Hyperflow]", "Bind correct shader setup first");
 #endif
 
