@@ -2,14 +2,7 @@
 
 namespace hf
 {
-#if DEBUG
-#define NUM_REQUIRED_EXTENSIONS 4
-#else
-#define NUM_REQUIRED_EXTENSIONS 3
-#endif
-#define NUM_DEVICE_EXTENSIONS 7
-
-    const char* REQUIRED_EXTENSIONS[]
+    std::array REQUIRED_EXTENSIONS
     {
         VK_KHR_SURFACE_EXTENSION_NAME,
         "VK_KHR_wayland_surface",
@@ -19,7 +12,7 @@ namespace hf
 #endif
     };
 
-    const char* DEVICE_EXTENSIONS[]
+    std::array DEVICE_EXTENSIONS
     {
         VK_KHR_SWAPCHAIN_EXTENSION_NAME,
         VK_EXT_DESCRIPTOR_INDEXING_EXTENSION_NAME,
@@ -34,12 +27,12 @@ namespace hf
     {
         static VulkanPlatformAPI api =
         {
-            .requiredExtensionCount = NUM_REQUIRED_EXTENSIONS,
-            .deviceExtensionCount = NUM_DEVICE_EXTENSIONS
+            .requiredExtensionCount = REQUIRED_EXTENSIONS.size(),
+            .deviceExtensionCount = DEVICE_EXTENSIONS.size()
         };
 
-        for (uint32_t i = 0; i < NUM_REQUIRED_EXTENSIONS; i++) api.requiredExtension[i] = REQUIRED_EXTENSIONS[i];
-        for (uint32_t i = 0; i < NUM_DEVICE_EXTENSIONS; i++) api.deviceExtension[i] = DEVICE_EXTENSIONS[i];
+        for (uint32_t i = 0; i < REQUIRED_EXTENSIONS.size(); i++) api.requiredExtension[i] = REQUIRED_EXTENSIONS[i];
+        for (uint32_t i = 0; i < DEVICE_EXTENSIONS.size(); i++) api.deviceExtension[i] = DEVICE_EXTENSIONS[i];
 
         return &api;
     }
