@@ -300,9 +300,13 @@ namespace hf
         GRAPHICS_DATA.extensionFunctions.vkCmdPipelineBarrier2KHR = (PFN_vkCmdPipelineBarrier2KHR)
         vkGetDeviceProcAddr(device, "vkCmdPipelineBarrier2KHR");
 
+        GRAPHICS_DATA.extensionFunctions.vkGetDescriptorSetLayoutSupportKHR = (PFN_vkGetDescriptorSetLayoutSupportKHR)
+        vkGetDeviceProcAddr(device, "vkGetDescriptorSetLayoutSupportKHR");
+
         if (!GRAPHICS_DATA.extensionFunctions.vkCmdBeginRenderingKHR ||
             !GRAPHICS_DATA.extensionFunctions.vkCmdEndRenderingKHR ||
-            !GRAPHICS_DATA.extensionFunctions.vkCmdPipelineBarrier2KHR)
+            !GRAPHICS_DATA.extensionFunctions.vkCmdPipelineBarrier2KHR ||
+            !GRAPHICS_DATA.extensionFunctions.vkGetDescriptorSetLayoutSupportKHR)
             throw GENERIC_EXCEPT("[Vulkan]", "Failed to load extension functions");
     }
 }

@@ -90,6 +90,7 @@ namespace hf
         PFN_vkCmdBeginRenderingKHR vkCmdBeginRenderingKHR{};
         PFN_vkCmdEndRenderingKHR vkCmdEndRenderingKHR{};
         PFN_vkCmdPipelineBarrier2KHR vkCmdPipelineBarrier2KHR{};
+        PFN_vkGetDescriptorSetLayoutSupportKHR vkGetDescriptorSetLayoutSupportKHR{};
     };
 
     struct VkCopyBufferToBufferOperation

@@ -29,6 +29,14 @@ namespace hf
             .pBindings = GRAPHICS_DATA.preAllocBuffers.descLayoutBindings,
         };
 
+        VkDescriptorSetLayoutSupportKHR supportInfo
+        {
+            .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_SUPPORT
+        };
+        GRAPHICS_DATA.extensionFunctions.vkGetDescriptorSetLayoutSupportKHR(GRAPHICS_DATA.device.logicalDevice.device, &layoutInfo, &supportInfo);
+
+        if (supportInfo.supported == VK_FALSE) throw GENERIC_EXCEPT("[Hyperflow]", "Texture layout not supported");
+
         VK_HANDLE_EXCEPT(vkCreateDescriptorSetLayout(GRAPHICS_DATA.device.logicalDevice.device,
             &layoutInfo, nullptr, &layout));
     }
