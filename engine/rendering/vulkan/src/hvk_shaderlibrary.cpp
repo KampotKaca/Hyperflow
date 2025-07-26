@@ -38,7 +38,7 @@ namespace hf
                 .flags = VK_GRAPHICS_PIPELINE_LIBRARY_VERTEX_INPUT_INTERFACE_BIT_EXT
             };
 
-            static constexpr  VkPipelineInputAssemblyStateCreateInfo inputAssembly
+            static constexpr VkPipelineInputAssemblyStateCreateInfo inputAssembly
             {
                 .sType = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO,
                 .topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST,
@@ -112,6 +112,19 @@ namespace hf
                 .pScissors = &dummyScissor,
             };
 
+            static constexpr std::array dynamicStates =
+            {
+                VK_DYNAMIC_STATE_VIEWPORT,
+                VK_DYNAMIC_STATE_SCISSOR
+            };
+
+            static constexpr VkPipelineDynamicStateCreateInfo dynamicState
+            {
+                .sType = VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO,
+                .dynamicStateCount = dynamicStates.size(),
+                .pDynamicStates = dynamicStates.data()
+            };
+
             uint32_t stageCount = 0;
             ADD_MODULE(AddShaderStage(moduleInfo.vertexShaderCode, moduleInfo.vertexShaderCodeSize, VK_SHADER_STAGE_VERTEX_BIT, &stageCreateInfos[stageInfoIndex + stageCount]))
             ADD_MODULE(AddShaderStage(moduleInfo.tessellationControlShaderCode, moduleInfo.tessellationControlShaderCodeSize, VK_SHADER_STAGE_TESSELLATION_CONTROL_BIT, &stageCreateInfos[stageInfoIndex + stageCount]));
@@ -142,6 +155,7 @@ namespace hf
                 .pStages = &stageCreateInfos[stageInfoIndex],
                 .pViewportState = &viewportState,
                 .pRasterizationState = &rasterizers[i],
+                .pDynamicState = &dynamicState,
                 .layout = GetShaderLayout(moduleInfo.layout)->layout,
             };
 

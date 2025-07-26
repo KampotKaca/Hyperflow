@@ -10,6 +10,11 @@ static void __attribute__((constructor)) global_init()
 
 int main()
 {
+#if !DEBUG
+	freopen("log.txt", "w", stdout);
+	freopen("log.txt", "w", stderr);
+#endif
+
 	hf::EngineData engineData =
 	{
 		.appTitle = "Hyperflow",

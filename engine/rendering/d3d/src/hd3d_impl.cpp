@@ -3,7 +3,7 @@
 
 namespace hf::inter::rendering
 {
-    void Load(const RendererLoadInfo& info)
+    void Load(const RendererLoadInfo_i& info)
     {
         Direct3DLoad();
     }
@@ -14,7 +14,7 @@ namespace hf::inter::rendering
         GRAPHICS_DATA = {};
     }
 
-    void* CreateInstance(const RendererInstanceCreationInfo& info)
+    void* CreateInstance(const RendererInstanceCreationInfo_i& info)
     {
         return hf::CreateRenderer((HWND)info.handle, info.size, info.vSyncMode);
     }
@@ -24,7 +24,7 @@ namespace hf::inter::rendering
         hf::DestroyRenderer((D3DRenderer*)rnInstance);
     }
 
-    void* CreateShader(const ShaderCreationInfo& info)
+    void* CreateShader(const ShaderCreationInfo_i& info)
     {
         return nullptr;
     }
@@ -33,12 +33,12 @@ namespace hf::inter::rendering
     {
     }
 
-    void BindShader(const void* renderer, const ShaderBindingInfo& info)
+    void BindShader(const void* renderer, const void* shader)
     {
 
     }
 
-    void* CreateTexture(const TextureCreationInfo& info)
+    void* CreateTexture(const TextureCreationInfo_i& info)
     {
         return nullptr;
     }
@@ -48,7 +48,7 @@ namespace hf::inter::rendering
 
     }
 
-    void* CreateTexturePack(const TexturePackCreationInfo& info)
+    void* CreateTexturePack(const TexturePackCreationInfo_i& info)
     {
         return nullptr;
     }
@@ -58,17 +58,17 @@ namespace hf::inter::rendering
 
     }
 
-    void UploadTexturePackBinding(void* texPack, const TexturePackBindingUploadGroupInfo& info)
+    void UploadTexturePackBinding(void* texPack, const TexturePackBindingUploadGroupInfo_i& info)
     {
 
     }
 
-    void BindTexturePack(void* rn, const TexturePackBindingInfo& info)
+    void BindTexturePack(void* rn, const TexturePackBindingInfo_i& info)
     {
 
     }
 
-    void* CreateTexturePackAllocator(const TexturePackAllocatorCreationInfo& info)
+    void* CreateTexturePackAllocator(const TexturePackAllocatorCreationInfo_i& info)
     {
         return nullptr;
     }
@@ -108,12 +108,12 @@ namespace hf::inter::rendering
         return 1;
     }
 
-    void UploadBuffer(const void* rn, const BufferUploadInfo& info)
+    void UploadBuffer(const void* rn, const BufferUploadInfo_i& info)
     {
 
     }
 
-    void BindBuffer(const void* rn, const BufferBindInfo& info)
+    void BindBuffer(const void* rn, const BufferBindInfo_i& info)
     {
 
     }
@@ -148,7 +148,7 @@ namespace hf::inter::rendering
 
     }
 
-    void UploadVertBuffer(const VertBufferUploadInfo& info)
+    void UploadVertBuffer(const VertBufferUploadInfo_i& info)
     {
 
     }
@@ -163,7 +163,7 @@ namespace hf::inter::rendering
 
     }
 
-    void UploadIndexBuffer(const IndexBufferUploadInfo& info)
+    void UploadIndexBuffer(const IndexBufferUploadInfo_i& info)
     {
 
     }
@@ -217,7 +217,7 @@ namespace hf::inter::rendering
         return nullptr;
     }
 
-    void Draw(void* rn, const DrawCallInfo& info)
+    void Draw(void* rn, const DrawCallInfo_i& info)
     {
         auto renderer = (D3DRenderer*)rn;
         Draw(renderer);
