@@ -10,16 +10,9 @@ namespace hf
         explicit Shader(const ShaderCreationInfo& info);
         ~Shader();
 
-        std::string vertLoc{}, fragLoc{};
         ShaderLayout layout{};
-
-        BufferAttrib* pSupportedAttribs{};
-        uint32_t supportedAttribCount{};
-
-        ShaderDrawOutputFormats drawOutputFormats{};
-        ShaderRasterizerOptions rasterizerOptions{};
-        ShaderDepthStencilOptions depthStencilOptions{};
-        ShaderBlendingOptions blendingOptions{};
+        Ref<ShaderLibrary> library{};
+        ShaderModulesInfo modules{};
         void* handle{};
     };
 }

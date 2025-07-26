@@ -9,7 +9,7 @@ namespace hf
 {
     struct VkRenderer
     {
-        explicit VkRenderer(const inter::rendering::RendererInstanceCreationInfo& info);
+        explicit VkRenderer(const inter::rendering::RendererInstanceCreationInfo_i& info);
         ~VkRenderer();
 
         void (*shutdownCallback)();
@@ -77,8 +77,8 @@ namespace hf
     void RegisterFrameBufferChange(VkRenderer* rn, uvec2 newSize);
     void SetVSync(VkRenderer* rn, VsyncMode mode);
 
-    void UploadBuffers(const VkRenderer* rn, const inter::rendering::BufferUploadInfo& info);
-    void BindBuffers(const VkRenderer* rn, const inter::rendering::BufferBindInfo& info);
+    void UploadBuffers(const VkRenderer* rn, const inter::rendering::BufferUploadInfo_i& info);
+    void BindBuffers(const VkRenderer* rn, const inter::rendering::BufferBindInfo_i& info);
     void BindTexturePack(const VkRenderer* rn, const VkTexturePack* pack, uint32_t setBindingIndex, RenderBindingType bindingType);
     void BindShaderLayout(VkRenderer* rn, ShaderLayout setup);
     void UploadPushConstants(const VkRenderer* rn, const PushConstantUploadInfo& info);

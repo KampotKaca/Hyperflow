@@ -5,7 +5,7 @@
 
 namespace hf
 {
-    VkTexturePack::VkTexturePack(const inter::rendering::TexturePackCreationInfo& info)
+    VkTexturePack::VkTexturePack(const inter::rendering::TexturePackCreationInfo_i& info)
         : layout(info.layout)
     {
         for (uint32_t i = 0; i < info.bindingCount; i++)
@@ -113,7 +113,7 @@ namespace hf
         }
     }
 
-    void SetTextureBinding(VkTexturePack* pack, const inter::rendering::TexturePackBindingUploadInfo* bindings, uint32_t bindingCount)
+    void SetTextureBinding(VkTexturePack* pack, const inter::rendering::TexturePackBindingUploadInfo_i* bindings, uint32_t bindingCount)
     {
         uint32_t count = 0;
         for (uint32_t i = 0; i < bindingCount; i++)

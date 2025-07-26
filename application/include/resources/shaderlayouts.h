@@ -7,8 +7,8 @@ namespace app
 {
     struct AppShaderLayouts
     {
-        hf::ShaderLayout viking_room{};
-        hf::ShaderLayout unlit_color{};
+        hf::ShaderLayout default_lit{};
+        hf::ShaderLayout default_unlit{};
     };
 
     extern AppShaderLayouts APP_SHADER_LAYOUTS;

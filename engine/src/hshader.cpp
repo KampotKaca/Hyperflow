@@ -8,21 +8,13 @@
 namespace hf
 {
     Shader::Shader(const ShaderCreationInfo& info)
-        : vertLoc(info.vertexShaderLoc), fragLoc(info.fragmentShaderLoc),
-          drawOutputFormats(info.drawOutputFormats), layout(info.setup),
-          supportedAttribCount(info.supportedAttribCount),
-          rasterizerOptions(info.rasterizerOptions),
-          depthStencilOptions(info.depthStencilOptions), blendingOptions(info.alphaTestOptions)
+    : layout(info.layout), library(info.library), modules(info.modules)
     {
-        const uint32_t bufferSize = sizeof(BufferAttrib) * info.supportedAttribCount;
-        pSupportedAttribs = (BufferAttrib*)utils::Allocate(bufferSize);
-        memcpy(pSupportedAttribs, info.pSupportedAttribs, bufferSize);
         inter::rendering::CreateShader_i(this);
     }
 
     Shader::~Shader()
     {
-        utils::Deallocate(pSupportedAttribs);
         inter::rendering::DestroyShader_i(this);
     }
 
@@ -57,52 +49,14 @@ namespace hf
         {
             if (shader->handle) return false;
 
-            switch (HF.renderingApi.type)
+            const ShaderCreationInfo_i creationInfo
             {
-                case RenderingApiType::Vulkan:
-                {
-                    std::vector<char> vertexCode{}, fragmentCode{};
-                    const auto vLoc = TO_RES_PATH(std::string("shaders/vulkan/") + shader->vertLoc) + ".vert.spv",
-                               fLoc = TO_RES_PATH(std::string("shaders/vulkan/") + shader->fragLoc) + ".frag.spv";
+                .layout = shader->layout,
+                .library = shader->library->handle,
+                .modules = shader->modules
+            };
 
-                    if (!utils::FileExists(vLoc.c_str()))
-                    {
-                        LOG_ERROR("[Hyperflow] Unable to find vertex shader: %s", shader->vertLoc.c_str());
-                        return false;
-                    }
-
-                    if (!utils::FileExists(fLoc.c_str()))
-                    {
-                        LOG_ERROR("[Hyperflow] Unable to find fragment shader: %s", shader->fragLoc.c_str());
-                        return false;
-                    }
-
-                    utils::ReadFile(vLoc, false, vertexCode);
-                    utils::ReadFile(fLoc, false, fragmentCode);
-
-                    const ShaderCreationInfo creationInfo
-                    {
-                        .layout = shader->layout,
-                        .supportedAttribCount = shader->supportedAttribCount,
-                        .pSupportedAttribs = shader->pSupportedAttribs,
-                        .vCode = vertexCode.data(),
-                        .vCodeSize = (uint32_t)vertexCode.size(),
-                        .fCode = fragmentCode.data(),
-                        .fCodeSize = (uint32_t)fragmentCode.size(),
-                        .drawOutputFormats = shader->drawOutputFormats,
-                        .rasterizerOptions = shader->rasterizerOptions,
-                        .depthStencilOptions = shader->depthStencilOptions,
-                        .blendingOptions = shader->blendingOptions
-                    };
-
-                    shader->handle = HF.renderingApi.api.CreateShader(creationInfo);
-                }
-                    break;
-                case RenderingApiType::Direct3D:
-                    break;
-                case RenderingApiType::None:
-                    throw GENERIC_EXCEPT("[Hyperflow]", "Cannot create shader without loading renderer");
-            }
+            shader->handle = HF.renderingApi.api.CreateShader(creationInfo);
 
             return true;
         }

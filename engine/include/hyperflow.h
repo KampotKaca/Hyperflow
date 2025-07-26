@@ -28,6 +28,7 @@ namespace hf
 	//No need to destroy the material, if it goes out of scope it is automatically freed!
 	Ref<Material> Create(const MaterialCreationInfo& info);
 	Ref<Mesh> Create(const MeshCreationInfo& info);
+	Ref<ShaderLibrary> Create(const ShaderLibraryCreationInfo& info);
 	Ref<Shader> Create(const ShaderCreationInfo& info);
 	Ref<Texture> Create(const TextureCreationInfo& info);
 	Ref<RenderTexture> Create(const RenderTextureCreationInfo& info);
@@ -42,6 +43,7 @@ namespace hf
     Ref<AudioListener> Create(const AudioListenerCreationInfo& info);
 
 	void Destroy(const Ref<Mesh>& mesh);
+	void Destroy(const Ref<ShaderLibrary>& lib);
 	void Destroy(const Ref<Shader>& shader);
 	void Destroy(const Ref<Texture>& tex);
 	void Destroy(const Ref<RenderTexture>& tex);
@@ -62,6 +64,7 @@ namespace hf
 	void Destroy(const Ref<Texture>* pTextures, uint32_t count);
 	void Destroy(const Ref<RenderTexture>* pTextures, uint32_t count);
 	void Destroy(const Ref<Mesh>* pMeshes, uint32_t count);
+	void Destroy(const Ref<ShaderLibrary>* pLibraries, uint32_t count);
 	void Destroy(const Ref<Shader>* pShaders, uint32_t count);
 	void Destroy(const Ref<AudioClip>* pClips, uint32_t count);
 	void Destroy(const Ref<AudioPlayer>* pPlayers, uint32_t count);
@@ -74,6 +77,7 @@ namespace hf
 	bool IsRunning();
 	bool IsLoaded(const Ref<Renderer>& rn);
 	bool IsLoaded(const Ref<Mesh>& mesh);
+	bool IsLoaded(const Ref<ShaderLibrary>& lib);
 	bool IsLoaded(const Ref<Shader>& shader);
 	bool IsLoaded(const Ref<Texture>& tex);
 	bool IsLoaded(const Ref<RenderTexture>& tex);
@@ -189,7 +193,7 @@ namespace hf
 	void Start_ShaderLayout(const Ref<Renderer>& rn, ShaderLayout layout);
 	void End_ShaderLayout(const Ref<Renderer>& rn);
 
-	void Start_Shader(const Ref<Renderer>& rn, const ShaderBindingInfo& shaderBindingInfo);
+	void Start_Shader(const Ref<Renderer>& rn, const Ref<Shader>& shader);
 	void End_Shader(const Ref<Renderer>& rn);
 
 	void Start_Material(const Ref<Renderer>& rn, const Ref<Material>& material);

@@ -231,7 +231,7 @@ namespace hf
             const auto allPixels = (uint8_t*)utils::Allocate(6 * texSize);
             for (uint32_t i = 0; i < 6; i++) memcpy(allPixels + i * texSize, textures[i].pixels, texSize);
 
-            const TextureCreationInfo info
+            const TextureCreationInfo_i info
             {
                 .type = TextureType::Tex2D,
                 .viewType = TextureViewType::TexCube,

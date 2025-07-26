@@ -79,8 +79,8 @@ namespace hf
     {
         template<typename T>
         static void PassTextures(StaticVector<TexturePack::Binding<T>, 8>& src,
-            StaticVector<TexturePackBindInfo::TextureInfo, MAX_TEXTURES_IN_TEXTURE_PACK * MAX_TEXTURES_IN_TEXTURE_PACK * 3>& texInfos,
-            StaticVector<TexturePackBindInfo, MAX_TEXTURES_IN_TEXTURE_PACK * 3>& texPackBindInfos,
+            StaticVector<TexturePackBindInfo_i::TextureInfo, MAX_TEXTURES_IN_TEXTURE_PACK * MAX_TEXTURES_IN_TEXTURE_PACK * 3>& texInfos,
+            StaticVector<TexturePackBindInfo_i, MAX_TEXTURES_IN_TEXTURE_PACK * 3>& texPackBindInfos,
             TexturePackBindingType type)
         {
             for (uint32_t i = 0; i < src.size(); i++)
@@ -120,15 +120,15 @@ namespace hf
         {
             if (texPack->handle) return false;
 
-            StaticVector<TexturePackBindInfo::TextureInfo, MAX_TEXTURES_IN_TEXTURE_PACK * MAX_TEXTURES_IN_TEXTURE_PACK * 3> texInfos{};
-            StaticVector<TexturePackBindInfo, MAX_TEXTURES_IN_TEXTURE_PACK * 3> texPackBindInfos{};
+            StaticVector<TexturePackBindInfo_i::TextureInfo, MAX_TEXTURES_IN_TEXTURE_PACK * MAX_TEXTURES_IN_TEXTURE_PACK * 3> texInfos{};
+            StaticVector<TexturePackBindInfo_i, MAX_TEXTURES_IN_TEXTURE_PACK * 3> texPackBindInfos{};
 
             PassTextures(texPack->textureBindings, texInfos, texPackBindInfos, TexturePackBindingType::Texture2D);
             PassTextures(texPack->cubemapBindings, texInfos, texPackBindInfos, TexturePackBindingType::Cubemap);
             PassTextures(texPack->renderTextureBindings, texInfos, texPackBindInfos, TexturePackBindingType::RenderTexture);
 
 
-            const TexturePackCreationInfo info
+            const TexturePackCreationInfo_i info
             {
                 .layout = texPack->layout,
                 .bindingCount = (uint32_t)texPackBindInfos.size(),

@@ -9,14 +9,7 @@ namespace hf::gridlines
         {
             primitives::BindGlobalUniformBuffer(rn);
 
-            const ShaderBindingInfo shaderInfo
-            {
-                .shader = inter::HF.staticResources.axisLinesShader,
-                .attrib = inter::HF.staticResources.quadAttrib,
-                .bindingPoint = RenderBindingType::Graphics
-            };
-
-            Start_Shader(rn, shaderInfo);
+            Start_Shader(rn, inter::HF.staticResources.axisLinesShader);
             {
                 Start_Material(rn, inter::HF.staticResources.emptyMaterial);
                 {

@@ -50,7 +50,7 @@ namespace hf
             for (uint32_t i = 0; i < packAllocator->texturePacks.size(); i++)
                 texPackHandles[i] = packAllocator->texturePacks[i]->handle;
 
-            const TexturePackAllocatorCreationInfo creationInfo
+            const TexturePackAllocatorCreationInfo_i creationInfo
             {
                 .pTexturePacks = texPackHandles.data(),
                 .texturePackCount = (uint32_t)texPackHandles.size()

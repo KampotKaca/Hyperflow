@@ -49,38 +49,61 @@ namespace hf::inter::rendering
 	    TexCube = 3, Tex1DArray = 4, Tex2DArray = 5, TexCubeArray = 6
 	};
 
-    struct BufferUploadInfo
+    struct BufferUploadInfo_i
     {
         const BufferUploadPacketInfo* pUploadPackets{};
         uint32_t uploadPacketCount{};
         const uint8_t* pUniformDataBuffer{};
     };
 
-    struct ShaderCreationInfo
+    struct ShaderLibraryPreRasterModuleInfo_i
+    {
+        const char* vertexShaderCode{};
+        uint32_t vertexShaderCodeSize{};
+
+        const char* tessellationControlShaderCode{};
+        uint32_t tessellationControlShaderCodeSize{};
+
+        const char* tessellationEvaluationShaderCode{};
+        uint32_t tessellationEvaluationShaderCodeSize{};
+
+        const char* geometryShaderCode{};
+        uint32_t geometryShaderCodeSize{};
+
+        ShaderRasterizerOptions options{};
+        ShaderLayout layout{};
+    };
+
+    struct ShaderLibraryFragmentModuleInfo_i
+    {
+        const char* fragmentShaderCode{};
+        uint32_t fragmentShaderCodeSize{};
+        ShaderDepthStencilOptions depthStencilOptions{};
+        ShaderLayout layout{};
+    };
+
+    struct ShaderLibraryCreationInfo_i
+    {
+        MultisampleMode sampleMode = MultisampleMode::MSAA_1X;
+
+        ShaderLibraryVertexInputModuleInfo* pVertexInputModules{};
+        uint32_t vertexInputModuleCount{};
+        ShaderLibraryPreRasterModuleInfo_i* pPreRasterModules{};
+        uint32_t preRasterModuleCount{};
+        ShaderLibraryFragmentModuleInfo_i* pFragmentModules{};
+        uint32_t fragmentModuleCount{};
+        ShaderLibraryFragmentOutputModuleInfo* pFragmentOutputModules{};
+        uint32_t fragmentOutputModuleCount{};
+    };
+
+    struct ShaderCreationInfo_i
     {
         ShaderLayout layout{};
-        uint32_t supportedAttribCount{};
-        const BufferAttrib* pSupportedAttribs{};
-
-        const char* vCode{};
-        uint32_t vCodeSize = 0;
-        const char* fCode{};
-        uint32_t fCodeSize = 0;
-
-        ShaderDrawOutputFormats drawOutputFormats{};
-        ShaderRasterizerOptions rasterizerOptions{};
-        ShaderDepthStencilOptions depthStencilOptions{};
-        ShaderBlendingOptions blendingOptions{};
+        const void* library{};
+        ShaderModulesInfo modules{};
     };
 
-    struct ShaderBindingInfo
-    {
-        void* shader{};
-        BufferAttrib attrib{};
-        RenderBindingType bindingPoint{};
-    };
-
-    struct RendererLoadInfo
+    struct RendererLoadInfo_i
     {
         uvec3 appVersion{};
         uvec3 engineVersion{};
@@ -90,7 +113,7 @@ namespace hf::inter::rendering
         void* (*getFuncFromDll)(void* dll, const char* funcName){};
     };
 
-    struct VertBufferUploadInfo
+    struct VertBufferUploadInfo_i
     {
         const void* buffer{};
         const void* data{};
@@ -98,7 +121,7 @@ namespace hf::inter::rendering
         uint32_t vertexCount{};
     };
 
-    struct IndexBufferUploadInfo
+    struct IndexBufferUploadInfo_i
     {
         const void* buffer{};
         const void* data{};
@@ -106,7 +129,7 @@ namespace hf::inter::rendering
         uint32_t indexCount{};
     };
 
-    struct RendererInstanceCreationInfo
+    struct RendererInstanceCreationInfo_i
     {
         void* handle{};
         uvec2 size{};
@@ -115,7 +138,7 @@ namespace hf::inter::rendering
         void (*shutdownCallback)();
     };
 
-    struct TextureCreationInfo
+    struct TextureCreationInfo_i
     {
 		TextureType type = TextureType::Tex2D;
 		TextureViewType viewType = TextureViewType::Tex2D;
@@ -129,7 +152,7 @@ namespace hf::inter::rendering
         TextureDetails details{};
     };
 
-    struct TexturePackTextureUploadInfo
+    struct TexturePackTextureUploadInfo_i
     {
         struct TextureInfo
         {
@@ -142,20 +165,20 @@ namespace hf::inter::rendering
         uint32_t count = 0;
     };
 
-    struct TexturePackBindingUploadInfo
+    struct TexturePackBindingUploadInfo_i
     {
         uint32_t bindingIndex = 0;
         std::optional<TextureSampler> sampler{};
-        std::optional<TexturePackTextureUploadInfo> texInfo{};
+        std::optional<TexturePackTextureUploadInfo_i> texInfo{};
     };
 
-    struct TexturePackBindingUploadGroupInfo
+    struct TexturePackBindingUploadGroupInfo_i
     {
-        TexturePackBindingUploadInfo* bindings{};
+        TexturePackBindingUploadInfo_i* bindings{};
         uint32_t bindingCount = 0;
     };
 
-    struct TexturePackBindInfo
+    struct TexturePackBindInfo_i
     {
         struct TextureInfo
         {
@@ -170,33 +193,33 @@ namespace hf::inter::rendering
         uint32_t bindingIndex{};
     };
 
-    struct TexturePackCreationInfo
+    struct TexturePackCreationInfo_i
     {
         TextureLayout layout = 0;
         uint32_t bindingCount = 0;
-        TexturePackBindInfo* pBindings{};
+        TexturePackBindInfo_i* pBindings{};
     };
 
-    struct TexturePackAllocatorCreationInfo
+    struct TexturePackAllocatorCreationInfo_i
     {
         void** pTexturePacks{};
         uint32_t texturePackCount = 0;
     };
 
-    struct TexturePackBindingInfo
+    struct TexturePackBindingInfo_i
     {
         const void* texturePack{};
         uint32_t setBindingIndex = 0;
         RenderBindingType bindingType = RenderBindingType::Graphics;
     };
 
-    struct StorageBufferBindingInfo
+    struct StorageBufferBindingInfo_i
     {
         const void* storageBuffer{};
         uint32_t setBindingIndex = 0;
     };
 
-    struct BufferBindInfo
+    struct BufferBindInfo_i
     {
         RenderBindingType bindingType = RenderBindingType::Graphics;
         uint32_t setBindingIndex = 0;
@@ -204,7 +227,7 @@ namespace hf::inter::rendering
         uint32_t bufferCount = 0;
     };
 
-    struct DrawCallInfo
+    struct DrawCallInfo_i
     {
         void** pVertBuffers{};
         uint32_t bufferCount{};
@@ -216,15 +239,19 @@ namespace hf::inter::rendering
     struct RendererAPI
     {
         //Creation
-        void (*Load)(const RendererLoadInfo& info);
+        void (*Load)(const RendererLoadInfo_i& info);
         void (*Unload)();
-        void* (*CreateInstance)(const RendererInstanceCreationInfo& info);
+        void* (*CreateInstance)(const RendererInstanceCreationInfo_i& info);
         void (*DestroyInstance)(void* rn);
 
+        //Shader Library
+        void* (*CreateShaderLibrary)(const ShaderLibraryCreationInfo_i& info);
+        void (*DestroyShaderLibrary)(void* library);
+
         //Shaders
-        void* (*CreateShader)(const ShaderCreationInfo& info);
+        void* (*CreateShader)(const ShaderCreationInfo_i& info);
         void (*DestroyShader)(void* shader);
-        void (*BindShader)(const void* rn, const ShaderBindingInfo& info);
+        void (*BindShader)(const void* rn, const void* shader);
 
         //shader setup
         ShaderLayout (*DefineShaderLayout)(const ShaderLayoutDefinitionInfo& info);
@@ -232,7 +259,7 @@ namespace hf::inter::rendering
         void (*UploadPushConstants)(void* rn, const PushConstantUploadInfo& info);
 
         //texture
-        void* (*CreateTexture)(const TextureCreationInfo& info);
+        void* (*CreateTexture)(const TextureCreationInfo_i& info);
         void (*DestroyTexture)(void* tex);
 
         //render texture
@@ -240,13 +267,13 @@ namespace hf::inter::rendering
         void (*DestroyRenderTexture)(void* tex);
 
         //texture pack
-        void* (*CreateTexturePack)(const TexturePackCreationInfo& info);
+        void* (*CreateTexturePack)(const TexturePackCreationInfo_i& info);
         void (*DestroyTexturePack)(void* texPack);
-        void (*UploadTexturePackBinding)(void* texPack, const TexturePackBindingUploadGroupInfo& info);
-        void (*BindTexturePack)(void* rn, const TexturePackBindingInfo& info);
+        void (*UploadTexturePackBinding)(void* texPack, const TexturePackBindingUploadGroupInfo_i& info);
+        void (*BindTexturePack)(void* rn, const TexturePackBindingInfo_i& info);
 
         //texture pack allocator
-        void* (*CreateTexturePackAllocator)(const TexturePackAllocatorCreationInfo& info);
+        void* (*CreateTexturePackAllocator)(const TexturePackAllocatorCreationInfo_i& info);
         void (*DestroyTexturePackAllocator)(void* texPackAllocator);
 
         //texture sampler
@@ -262,8 +289,8 @@ namespace hf::inter::rendering
         //buffers
         Buffer (*DefineUniformBuffer)(const BufferDefinitionInfo& info);
         Buffer (*DefineStorageBuffer)(const StorageBufferDefinitionInfo& info);
-        void (*UploadBuffer)(const void* rn, const BufferUploadInfo& info);
-        void (*BindBuffer)(const void* rn, const BufferBindInfo& info);
+        void (*UploadBuffer)(const void* rn, const BufferUploadInfo_i& info);
+        void (*BindBuffer)(const void* rn, const BufferBindInfo_i& info);
 
         //uniform allocator
         BufferAllocator (*DefineBufferAllocator)(const BufferAllocatorDefinitionInfo& info);
@@ -271,12 +298,12 @@ namespace hf::inter::rendering
         //vertex buffer
         void* (*CreateVertBuffer)(const VertBufferCreationInfo& info);
         void (*DestroyVertBuffer)(void* handle);
-        void (*UploadVertBuffer)(const VertBufferUploadInfo& info);
+        void (*UploadVertBuffer)(const VertBufferUploadInfo_i& info);
 
         //index buffer
         void* (*CreateIndexBuffer)(const IndexBufferCreationInfo& info);
         void (*DestroyIndexBuffer)(void* handle);
-        void (*UploadIndexBuffer)(const IndexBufferUploadInfo& info);
+        void (*UploadIndexBuffer)(const IndexBufferUploadInfo_i& info);
 
         //copy operations
         void (*SubmitBufferCopyOperations)();
@@ -287,7 +314,7 @@ namespace hf::inter::rendering
         uvec2 (*GetReadyForRendering)(void* rn, void** pTextures, uint32_t textureCount);
         void (*StartFrame)(void* rn);
         void (*EndFrame)(void* rn);
-        void (*Draw)(void* rn, const DrawCallInfo& info);
+        void (*Draw)(void* rn, const DrawCallInfo_i& info);
         void (*ApplyRenderAttachmentDependencies)(void* rn, RenderAttachmentDependencyInfo* pInfos, uint32_t count);
         void (*WaitForDevice)();
 

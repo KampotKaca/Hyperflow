@@ -70,7 +70,7 @@ namespace hf
 
     struct ShaderPacketInfo
     {
-        ShaderBindingInfo bindingInfo{};
+        Ref<Shader> shader{};
         AssetRange<uint16_t> materialPacketRange{};
     };
 

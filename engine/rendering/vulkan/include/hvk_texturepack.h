@@ -16,7 +16,7 @@ namespace hf
 
     struct VkTexturePack
     {
-        explicit VkTexturePack(const inter::rendering::TexturePackCreationInfo& info);
+        explicit VkTexturePack(const inter::rendering::TexturePackCreationInfo_i& info);
         ~VkTexturePack();
 
         unordered_map<uint32_t, VkTextureBinding> bindings{};
@@ -31,7 +31,7 @@ namespace hf
     };
 
     void UpdateTexturePack(VkTexturePack* pack, const uint32_t* bindingIndices, uint32_t bindingCount);
-    void SetTextureBinding(VkTexturePack* pack, const inter::rendering::TexturePackBindingUploadInfo* bindings, uint32_t bindingCount);
+    void SetTextureBinding(VkTexturePack* pack, const inter::rendering::TexturePackBindingUploadInfo_i* bindings, uint32_t bindingCount);
 }
 
 #endif //HVK_TEXTUREPACK_H

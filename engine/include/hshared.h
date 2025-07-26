@@ -103,12 +103,18 @@ namespace hf
 	//region Definitions
 
 	enum class DataTransferType { DoNotOwn, TransferOwnership, CopyData };
+    struct FilePath
+    {
+        std::string path{};
+        bool isAbsolute = false;
+    };
 
 	//endregion
 
 	//region Rendering
 
 	struct Renderer;
+	struct ShaderLibrary;
 	struct Shader;
 	struct Texture;
 	struct Cubemap;
@@ -210,55 +216,6 @@ namespace hf
 		Invert, IncrementAndWrap, DecrementAndWrap,
 	};
 
-	struct BufferAttribFormat
-	{
-		BufferDataType type = BufferDataType::F32;
-		uint32_t size = 1;
-		//Do not implement lSize
-		uint32_t lSize = 1;
-	};
-
-	struct BufferAttribDefinitionInfo
-	{
-		uint32_t bindingId = 0;
-		uint32_t formatCount = 0;
-		BufferAttribFormat* pFormats = nullptr;
-	};
-
-	struct VertBufferCreationInfo
-	{
-		BufferAttrib bufferAttrib = 0;
-		BufferMemoryType memoryType = BufferMemoryType::Static;
-		BufferUsageType usageFlags = BufferUsageType::Vertex;
-		uint32_t vertexCount = 0;
-		void* pVertices = nullptr;
-	};
-
-	struct IndexBufferCreationInfo
-	{
-		BufferDataType indexFormat = BufferDataType::U16;
-		BufferMemoryType memoryType = BufferMemoryType::Static;
-		BufferUsageType usageFlags = BufferUsageType::Index;
-		uint32_t indexCount = 0;
-		void* pIndices = nullptr;
-	};
-
-	struct VertBufferUploadInfo
-	{
-		const void* data{};
-
-		//data alignment will be size of the vertex, so offset should be set as how many vertices should be skipped.
-		uint32_t offset{};
-		uint32_t vertCount{};
-	};
-
-	struct IndexBufferUploadInfo
-	{
-		const void* data{};
-		uint32_t offset{};
-		uint32_t indexCount{};
-	};
-
     enum class TextureFormat
 	{
 	    Undefined = 0,
@@ -333,6 +290,131 @@ namespace hf
 	 //    ASTC_12x12_Sfloat_Block = 1000066013, A1B5G5R5_Unorm_Pack16 = 1000470000, A8_Unorm = 1000470001,
 	};
 
+    enum class MultisampleMode { MSAA_1X = 1, MSAA_2X = 2, MSAA_4X = 4, MSAA_8X = 8 };
+
+    enum class TextureChannel           { Default = 0, Gray = 1, GrayAlpha = 2, RGB = 3, RGBA = 4 };
+    enum class TextureFilter			{ Point = 0, Bilinear = 1 };
+    enum class TextureAnisotropicFilter	{ None, X2 = 2, X4 = 4, X8 = 8, X16 = 16, X32 = 32 };
+    enum class TextureRepeatMode		{ Repeat = 0, MirroredRepeat = 1, ClampToEdge = 2, ClampToBorder = 3, MirrorClampToEdge = 4 };
+    enum class ComparisonOperation		{ None = 0, Never = 1, Less = 2, Equal = 3, LessOrEqual = 4, Greater = 5, NotEqual = 6, GreaterOrEqual = 7, Always = 8 };
+    enum class MipMapMode				{ Nearest = 0, Linear = 1 };
+
+    enum class TextureAspectFlags
+    {
+        None = 0, Color = 1 << 0, Depth = 1 << 1, Stencil = 1 << 2, MetaData = 1 << 3,
+        Plane0 = 1 << 4, Plane1 = 1 << 5, Plane2 = 1 << 6,
+    };
+    DEFINE_ENUM_FLAGS(TextureAspectFlags)
+
+    enum class TextureResultLayoutType
+    {
+        Undefined = 0, General = 1,
+        Color = 2, DepthStencil = 3, DepthStencilReadOnly = 4,
+        //Generally used in post processing
+        ShaderReadOnly = 5,
+        //Used for images which are copied from
+        TransferSrc = 6,
+        //Used for images which are copied to
+        TransferDst = 7,
+        Preinitialized = 8,
+        DepthReadOnly_Stencil = 1000117000,
+        Depth_StencilReadOnly = 1000117001,
+        Depth = 1000241000,
+        DepthReadOnly = 1000241001,
+        Stencil = 1000241002,
+        StencilReadOnly = 1000241003,
+        ReadOnly = 1000314000,
+        Attachment = 1000314001,
+        RenderingLocalRead = 1000232000,
+    };
+
+    enum class TextureTiling
+    {
+        Optimal = 0, Linear = 1
+    };
+
+    enum class TextureUsageFlags
+    {
+        None = 0, TransferSrc = 1 << 0, TransferDst = 1 << 1, Sampled = 1 << 2, Storage = 1 << 3,
+        Color = 1 << 4, DepthStencil = 1 << 5, Transient = 1 << 6, Input = 1 << 7, Host = 1 << 22,
+    };
+    DEFINE_ENUM_FLAGS(TextureUsageFlags)
+
+    enum class DepthStencilMode { None = 0, Depth = 1 << 0, Stencil = 1 << 1 };
+    DEFINE_ENUM_FLAGS(DepthStencilMode)
+
+    enum class MeshDataType
+    {
+        None = 0,
+        Position = 1 << 0, Normal = 1 << 1, Color = 1 << 2, TexCoord = 1 << 3,
+        Default = Position | TexCoord,
+        All = Position | Normal | TexCoord | Color,
+    };
+    DEFINE_ENUM_FLAGS(MeshDataType)
+
+    enum class MeshIndexFormat
+    {
+        U16 = (uint32_t)BufferDataType::U16,
+        U32 = (uint32_t)BufferDataType::U32,
+    };
+
+    enum class LoadStoreOperationType
+    {
+        LoadAndStore = 0, ClearAndStore = 1, DontCareAndStore = 2,
+        LoadAndDontCare = 3, ClearAndDontCare = 4, DontCareAndDontCare = 5,
+    };
+
+	enum class RenderingApiType { None, Vulkan, Direct3D };
+
+	struct BufferAttribFormat
+	{
+		BufferDataType type = BufferDataType::F32;
+		uint32_t size = 1;
+		//Do not implement lSize
+		uint32_t lSize = 1;
+	};
+
+	struct BufferAttribDefinitionInfo
+	{
+		uint32_t bindingId = 0;
+		uint32_t formatCount = 0;
+		BufferAttribFormat* pFormats = nullptr;
+	};
+
+	struct VertBufferCreationInfo
+	{
+		BufferAttrib bufferAttrib = 0;
+		BufferMemoryType memoryType = BufferMemoryType::Static;
+		BufferUsageType usageFlags = BufferUsageType::Vertex;
+		uint32_t vertexCount = 0;
+		void* pVertices = nullptr;
+	};
+
+	struct IndexBufferCreationInfo
+	{
+		BufferDataType indexFormat = BufferDataType::U16;
+		BufferMemoryType memoryType = BufferMemoryType::Static;
+		BufferUsageType usageFlags = BufferUsageType::Index;
+		uint32_t indexCount = 0;
+		void* pIndices = nullptr;
+	};
+
+	struct VertBufferUploadInfo
+	{
+		const void* data{};
+
+		//data alignment will be size of the vertex, so offset should be set as how many vertices should be skipped.
+		uint32_t offset{};
+		uint32_t vertCount{};
+	};
+
+	struct IndexBufferUploadInfo
+	{
+		const void* data{};
+		uint32_t offset{};
+		uint32_t indexCount{};
+	};
+
 	struct ShaderBlendingOptions
 	{
 		ShaderBlendMode blendMode = ShaderBlendMode::Alpha;
@@ -359,36 +441,76 @@ namespace hf
 		vec2 depthBounds = { 0, 1 };
 	};
 
-    enum class MultisampleMode { MSAA_1X = 1, MSAA_2X = 2, MSAA_4X = 4, MSAA_8X = 8 };
-
     struct ShaderDrawOutputFormats
     {
-        MultisampleMode sampleMode = MultisampleMode::MSAA_1X;
         uint32_t colorFormatCount = 1;
         TextureFormat colorFormats[MAX_COLOR_ATTACHMENTS] = { VULKAN_API_COLOR_FORMAT };
         TextureFormat depthFormat = TextureFormat::D32_Sfloat;
         TextureFormat stencilFormat = TextureFormat::Undefined;
     };
 
+    template<typename T>
+    struct ShaderLibraryModule
+    {
+        uint32_t* resultId{};
+        T module{};
+    };
+
+    struct ShaderLibraryVertexInputModuleInfo
+    {
+        BufferAttrib attribute{};
+    };
+
+    struct ShaderLibraryPreRasterModuleInfo
+    {
+        FilePath vertexShaderPath{};
+        std::optional<FilePath> tessellationControlShaderPath{};
+        std::optional<FilePath> tessellationEvaluationShaderPath{};
+        std::optional<FilePath> geometryShaderPath{};
+        ShaderRasterizerOptions options{};
+        ShaderLayout layout{};
+    };
+
+    struct ShaderLibraryFragmentModuleInfo
+    {
+        FilePath fragmentShaderPath{};
+        ShaderDepthStencilOptions depthStencilOptions{};
+        ShaderLayout layout{};
+    };
+
+    struct ShaderLibraryFragmentOutputModuleInfo
+    {
+        ShaderDrawOutputFormats drawOutputFormats{};
+        ShaderBlendingOptions blendingOptions{};
+    };
+
+    struct ShaderLibraryCreationInfo
+    {
+        MultisampleMode sampleMode = MultisampleMode::MSAA_1X;
+
+        ShaderLibraryModule<ShaderLibraryVertexInputModuleInfo>* pVertexInputModules{};
+        uint32_t vertexInputModuleCount{};
+        ShaderLibraryModule<ShaderLibraryPreRasterModuleInfo>* pPreRasterModules{};
+        uint32_t preRasterModuleCount{};
+        ShaderLibraryModule<ShaderLibraryFragmentModuleInfo>* pFragmentModules{};
+        uint32_t fragmentModuleCount{};
+        ShaderLibraryModule<ShaderLibraryFragmentOutputModuleInfo>* pFragmentOutputModules{};
+        uint32_t fragmentOutputModuleCount{};
+    };
+
+    struct ShaderModulesInfo
+    {
+        uint32_t vertexInputModuleId{};
+        uint32_t preRasterModuleId{};
+        uint32_t fragmentModuleId{};
+        uint32_t fragmentOutputModuleId{};
+    };
+
 	struct ShaderCreationInfo
 	{
-		ShaderLayout setup{};
-		uint32_t supportedAttribCount{};
-		const BufferAttrib* pSupportedAttribs{};
-		const char* vertexShaderLoc{};
-		const char* fragmentShaderLoc{};
-
-	    ShaderDrawOutputFormats drawOutputFormats{};
-		ShaderRasterizerOptions rasterizerOptions{};
-		ShaderBlendingOptions alphaTestOptions{};
-		ShaderDepthStencilOptions depthStencilOptions{};
-	};
-
-	struct ShaderBindingInfo
-	{
-		Ref<Shader> shader{};
-		BufferAttrib attrib{};
-		RenderBindingType bindingPoint = RenderBindingType::Graphics;
+		ShaderLayout layout{};
+	    Ref<ShaderLibrary> library{};
+	    ShaderModulesInfo modules{};
 	};
 
 	struct BufferBindingInfo
@@ -483,13 +605,6 @@ namespace hf
 		uint32_t bufferCount{};
 	};
 
-	enum class TextureChannel   { Default = 0, Gray = 1, GrayAlpha = 2, RGB = 3, RGBA = 4 };
-	enum class TextureFilter			{ Point = 0, Bilinear = 1 };
-	enum class TextureAnisotropicFilter	{ None, X2 = 2, X4 = 4, X8 = 8, X16 = 16, X32 = 32 };
-	enum class TextureRepeatMode		{ Repeat = 0, MirroredRepeat = 1, ClampToEdge = 2, ClampToBorder = 3, MirrorClampToEdge = 4 };
-	enum class ComparisonOperation		{ None = 0, Never = 1, Less = 2, Equal = 3, LessOrEqual = 4, Greater = 5, NotEqual = 6, GreaterOrEqual = 7, Always = 8 };
-	enum class MipMapMode				{ Nearest = 0, Linear = 1 };
-
 	struct TextureMipMapInfo
 	{
 		MipMapMode mode = MipMapMode::Linear;
@@ -507,47 +622,6 @@ namespace hf
 		ComparisonOperation comparison = ComparisonOperation::None;
 		TextureMipMapInfo mipMaps{};
 	};
-
-	enum class TextureAspectFlags
-	{
-		None = 0, Color = 1 << 0, Depth = 1 << 1, Stencil = 1 << 2, MetaData = 1 << 3,
-		Plane0 = 1 << 4, Plane1 = 1 << 5, Plane2 = 1 << 6,
-	};
-	DEFINE_ENUM_FLAGS(TextureAspectFlags)
-
-	enum class TextureResultLayoutType
-	{
-		Undefined = 0, General = 1,
-		Color = 2, DepthStencil = 3, DepthStencilReadOnly = 4,
-		//Generally used in post processing
-		ShaderReadOnly = 5,
-		//Used for images which are copied from
-		TransferSrc = 6,
-		//Used for images which are copied to
-		TransferDst = 7,
-		Preinitialized = 8,
-		DepthReadOnly_Stencil = 1000117000,
-		Depth_StencilReadOnly = 1000117001,
-		Depth = 1000241000,
-		DepthReadOnly = 1000241001,
-		Stencil = 1000241002,
-		StencilReadOnly = 1000241003,
-		ReadOnly = 1000314000,
-		Attachment = 1000314001,
-		RenderingLocalRead = 1000232000,
-	};
-
-	enum class TextureTiling
-	{
-		Optimal = 0, Linear = 1
-	};
-
-	enum class TextureUsageFlags
-	{
-		None = 0, TransferSrc = 1 << 0, TransferDst = 1 << 1, Sampled = 1 << 2, Storage = 1 << 3,
-		Color = 1 << 4, DepthStencil = 1 << 5, Transient = 1 << 6, Input = 1 << 7, Host = 1 << 22,
-	};
-	DEFINE_ENUM_FLAGS(TextureUsageFlags)
 
 	struct TextureDetails
 	{
@@ -635,12 +709,6 @@ namespace hf
 		std::optional<TexturePackTextureUploadInfo<T>> texInfo{};
 	};
 
-	enum class LoadStoreOperationType
-	{
-		LoadAndStore = 0, ClearAndStore = 1, DontCareAndStore = 2,
-		LoadAndDontCare = 3, ClearAndDontCare = 4, DontCareAndDontCare = 5,
-	};
-
 	struct RenderTextureColorAttachmentInfo
 	{
 		//type of attachment layout color, depth, stencil etc.
@@ -653,9 +721,6 @@ namespace hf
 	    bool isUsedForPresentation = false;
 		vec4 clearColor = vec4(0.0f, 0.0f, 0.0f, 1.0f);
 	};
-
-    enum class DepthStencilMode { None = 0, Depth = 1 << 0, Stencil = 1 << 1 };
-    DEFINE_ENUM_FLAGS(DepthStencilMode)
 
 	struct RenderTextureDepthAttachmentInfo
 	{
@@ -714,21 +779,6 @@ namespace hf
 		uint32_t sizeInBytes{};
 	};
 
-	enum class MeshDataType
-	{
-		None = 0,
-		Position = 1 << 0, Normal = 1 << 1, Color = 1 << 2, TexCoord = 1 << 3,
-		Default = Position | TexCoord,
-		All = Position | Normal | TexCoord | Color,
-	};
-	DEFINE_ENUM_FLAGS(MeshDataType)
-
-	enum class MeshIndexFormat
-	{
-		U16 = (uint32_t)BufferDataType::U16,
-		U32 = (uint32_t)BufferDataType::U32,
-	};
-
 	struct MeshStats
 	{
 		MeshDataType typeFlags = MeshDataType::Default;
@@ -741,8 +791,6 @@ namespace hf
 		const char* filePath{};
 		MeshStats stats{};
 	};
-
-	enum class RenderingApiType { None, Vulkan, Direct3D };
 
 	struct DrawCallInfo
 	{
@@ -843,6 +891,7 @@ namespace hf
     {
 		BufferBindingInfo globalUniformBindingInfo{}; //this is binding for global uniform which should contain at least Camera and Time uniforms
         ShaderDrawOutputFormats drawOutputFormats{}; //this is general outline of the render texture you are going to draw on with the shaders.
+        MultisampleMode samplingMode{}; //current multisampling mode.
     };
 
     struct EngineInternalAudioInfo

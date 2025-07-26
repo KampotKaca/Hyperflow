@@ -154,7 +154,7 @@ namespace hf
                 const auto engineV = utils::ConvertVersion(VERSION);
                 const auto appV = utils::ConvertVersion(APP_VERSION);
 
-                RendererLoadInfo loadInfo
+                RendererLoadInfo_i loadInfo
                 {
                     .appVersion = appV,
                     .engineVersion = engineV,
@@ -169,7 +169,7 @@ namespace hf
                 HF.renderingApi.isLoaded = true;
             }
             HF.rendererCount++;
-            RendererInstanceCreationInfo createInfo
+            RendererInstanceCreationInfo_i createInfo
             {
                 .size = rn->threadInfo.size,
             };

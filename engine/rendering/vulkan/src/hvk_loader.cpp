@@ -57,7 +57,7 @@ namespace hf
     static void CreateInstance(VkApplicationInfo& appInfo);
     static void DestroyInstance();
 
-    void LoadVulkan(const inter::rendering::RendererLoadInfo& info)
+    void LoadVulkan(const inter::rendering::RendererLoadInfo_i& info)
     {
         VkApplicationInfo appInfo{};
         appInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;

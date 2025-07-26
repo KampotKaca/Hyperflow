@@ -29,7 +29,7 @@ namespace hf
 
     void Upload(const Ref<VertBuffer>& vb, const VertBufferUploadInfo& info)
     {
-        const inter::rendering::VertBufferUploadInfo uploadInfo
+        const inter::rendering::VertBufferUploadInfo_i uploadInfo
         {
             .buffer = vb->handle,
             .data = vb->buffer,

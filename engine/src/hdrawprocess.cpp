@@ -332,7 +332,7 @@ namespace hf
         rn->currentDraw.currentShaderLayout = nullptr;
     }
 
-    void Start_Shader(const Ref<Renderer>& rn, const ShaderBindingInfo& shaderBindingInfo)
+    void Start_Shader(const Ref<Renderer>& rn, const Ref<Shader>& shader)
     {
         try
         {
@@ -346,7 +346,7 @@ namespace hf
 
             auto& packet = rn->currentDraw.packet;
             packet.shaders.push_back({
-                .bindingInfo = shaderBindingInfo,
+                .shader = shader,
                 .materialPacketRange = (AssetRange<uint16_t>){ .start = (uint16_t)packet.materials.size(), .size = 0 }
             });
 
@@ -742,17 +742,11 @@ namespace hf
                     for (uint16_t shaderIndex = shaderLayout.shaderPacketRange.start; shaderIndex < shaderEnd; shaderIndex++)
                     {
                         const auto& shader = packet.shaders.atC(shaderIndex);
-                        auto* shaderHandle = shader.bindingInfo.shader->handle;
+                        const auto& shaderHandle = shader.shader->handle;
 
                         if (shaderHandle)
                         {
-                            ShaderBindingInfo shaderInfo
-                            {
-                                .shader = shaderHandle,
-                                .attrib = shader.bindingInfo.attrib,
-                                .bindingPoint = shader.bindingInfo.bindingPoint
-                            };
-                            HF.renderingApi.api.BindShader(handle, shaderInfo);
+                            HF.renderingApi.api.BindShader(handle, shaderHandle);
 
                             const uint16_t materialEnd = shader.materialPacketRange.end();
                             for (uint16_t materialIndex = shader.materialPacketRange.start; materialIndex < materialEnd; materialIndex++)
@@ -761,7 +755,7 @@ namespace hf
 
                                 if (material.material->sizeInBytes > 0)
                                 {
-                                    BufferBindInfo info
+                                    BufferBindInfo_i info
                                     {
                                         .bindingType = RenderBindingType::Graphics,
                                         .setBindingIndex = 1,
@@ -803,7 +797,7 @@ namespace hf
                                                     case BUFFER: throw GENERIC_EXCEPT("[Hyperflow]", "Cannot bind buffer here!");
                                                     case TEXPACK:
                                                         {
-                                                            TexturePackBindingInfo info
+                                                            TexturePackBindingInfo_i info
                                                             {
                                                                 .texturePack = cPack.object,
                                                                 .setBindingIndex = i
@@ -830,7 +824,7 @@ namespace hf
                                         for (uint32_t i = 0; i < drawCall.bufferCount; i++)
                                             vBufferCache[i] = drawCall.pVertBuffers[i]->handle;
 
-                                        DrawCallInfo drawInfo
+                                        DrawCallInfo_i drawInfo
                                         {
                                             .pVertBuffers = vBufferCache,
                                             .bufferCount = drawCall.bufferCount,
@@ -857,7 +851,7 @@ namespace hf
             for (uint32_t bufferIndex = range.start; bufferIndex < bufferEnd; bufferIndex++)
             {
                 const auto& bufferSet = packet.bufferSets.atC(bufferIndex);
-                BufferBindInfo info
+                BufferBindInfo_i info
                 {
                     .bindingType = bufferSet.bindingType,
                     .setBindingIndex = bufferSet.setBindingIndex,
@@ -891,7 +885,7 @@ namespace hf
         {
             //Uniform Buffer Uploads
             {
-                const BufferUploadInfo uploadInfo
+                const BufferUploadInfo_i uploadInfo
                 {
                     .pUploadPackets = packet.bufferUploadPackets.begin(),
                     .uploadPacketCount = (uint16_t)packet.bufferUploadPackets.size(),
@@ -901,11 +895,11 @@ namespace hf
             }
             //Texture Pack Uploads.
             {
-                static TexturePackBindingUploadInfo uploads[128];
+                static TexturePackBindingUploadInfo_i uploads[128];
                 for (uint32_t i = 0; i < packet.textureGroupRebindings.size(); i++)
                 {
                     const auto& group = packet.textureGroupRebindings.atC(i);
-                    TexturePackBindingUploadGroupInfo uploadInfo
+                    TexturePackBindingUploadGroupInfo_i uploadInfo
                     {
                         .bindings = uploads,
                         .bindingCount = group.bindingPacketRange.size
@@ -916,7 +910,7 @@ namespace hf
                     for (uint32_t j = group.bindingPacketRange.start; j < end; j++)
                     {
                         auto& p = packet.textureRebindings.atC(j);
-                        TexturePackBindingUploadInfo binding
+                        TexturePackBindingUploadInfo_i binding
                         {
                             .bindingIndex = p.bindingIndex,
                             .sampler = p.sampler,
@@ -927,9 +921,9 @@ namespace hf
                             auto& textures = p.textures.value();
                             packet.textures.atC(textures.range.start);
 
-                            binding.texInfo = (TexturePackTextureUploadInfo)
+                            binding.texInfo = (TexturePackTextureUploadInfo_i)
                             {
-                                .pTextures = (TexturePackTextureUploadInfo::TextureInfo*)packet.textures.atP(textures.range.start),
+                                .pTextures = (TexturePackTextureUploadInfo_i::TextureInfo*)packet.textures.atP(textures.range.start),
                                 .offset = textures.offset,
                                 .count = textures.range.size,
                             };

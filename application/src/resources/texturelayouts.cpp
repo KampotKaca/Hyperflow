@@ -13,12 +13,12 @@ namespace app
             .arraySize = 1,
         };
 
-        const hf::TextureLayoutDefinitionInfo vikingRoomLayoutInfo
+        const hf::TextureLayoutDefinitionInfo defaultLitLayoutInfo
         {
             .pBindings = &vrMainTexBinding,
             .bindingCount = 1
         };
 
-        APP_TEXTURE_LAYOUTS.viking_room = hf::Define(vikingRoomLayoutInfo);
+        APP_TEXTURE_LAYOUTS.default_lit = hf::Define(defaultLitLayoutInfo);
     }
 }

@@ -6,10 +6,11 @@
 #include "hvk_vertbuffer.h"
 #include "hvk_storagebuffer.h"
 #include "hvk_rendertexture.h"
+#include "hvk_shaderlibrary.h"
 
 namespace hf::inter::rendering
 {
-    void Load(const RendererLoadInfo& info)
+    void Load(const RendererLoadInfo_i& info)
     {
         GRAPHICS_DATA.platform.createVulkanSurfaceFunc = info.createVulkanSurfaceFunc;
         GRAPHICS_DATA.platform.platformDll = info.platformDll;
@@ -23,7 +24,7 @@ namespace hf::inter::rendering
         GRAPHICS_DATA = {};
     }
 
-    void* CreateInstance(const RendererInstanceCreationInfo& info)
+    void* CreateInstance(const RendererInstanceCreationInfo_i& info)
     {
         return new VkRenderer(info);
     }
@@ -33,7 +34,17 @@ namespace hf::inter::rendering
         delete (VkRenderer*)rn;
     }
 
-    void* CreateShader(const ShaderCreationInfo& info)
+    void* CreateShaderLibrary(const ShaderLibraryCreationInfo_i& info)
+    {
+        return new VkShaderLibrary(info);
+    }
+
+    void DestroyShaderLibrary(void* library)
+    {
+        delete (VkShaderLibrary*)library;
+    }
+
+    void* CreateShader(const ShaderCreationInfo_i& info)
     {
         return new VkShader(info);
     }
@@ -43,12 +54,12 @@ namespace hf::inter::rendering
         delete (VkShader*)shader;
     }
 
-    void BindShader(const void* rn, const ShaderBindingInfo& info)
+    void BindShader(const void* rn, const void* shader)
     {
-        BindShader((VkRenderer*)rn, (VkShader*)info.shader, info.attrib, info.bindingPoint);
+        BindShader((VkRenderer*)rn, (VkShader*)shader);
     }
 
-    void* CreateTexture(const TextureCreationInfo& info)
+    void* CreateTexture(const TextureCreationInfo_i& info)
     {
         return new VkTexture(info);
     }
@@ -68,7 +79,7 @@ namespace hf::inter::rendering
         delete (VkRenderTexture*)tex;
     }
 
-    void* CreateTexturePack(const TexturePackCreationInfo& info)
+    void* CreateTexturePack(const TexturePackCreationInfo_i& info)
     {
         return new VkTexturePack(info);
     }
@@ -78,17 +89,17 @@ namespace hf::inter::rendering
         delete (VkTexturePack*)txPack;
     }
 
-    void UploadTexturePackBinding(void* texPack, const TexturePackBindingUploadGroupInfo& info)
+    void UploadTexturePackBinding(void* texPack, const TexturePackBindingUploadGroupInfo_i& info)
     {
         SetTextureBinding((VkTexturePack*)texPack, info.bindings, info.bindingCount);
     }
 
-    void BindTexturePack(void* rn, const TexturePackBindingInfo& info)
+    void BindTexturePack(void* rn, const TexturePackBindingInfo_i& info)
     {
         hf::BindTexturePack((VkRenderer*)rn, (VkTexturePack*)info.texturePack, info.setBindingIndex, info.bindingType);
     }
 
-    void* CreateTexturePackAllocator(const TexturePackAllocatorCreationInfo& info)
+    void* CreateTexturePackAllocator(const TexturePackAllocatorCreationInfo_i& info)
     {
         return new VkTexturePackAllocator(info);
     }
@@ -134,12 +145,12 @@ namespace hf::inter::rendering
         return GRAPHICS_DATA.buffers.size();
     }
 
-    void UploadBuffer(const void* rn, const BufferUploadInfo& info)
+    void UploadBuffer(const void* rn, const BufferUploadInfo_i& info)
     {
         UploadBuffers((VkRenderer*)rn, info);
     }
 
-    void BindBuffer(const void* rn, const BufferBindInfo& info)
+    void BindBuffer(const void* rn, const BufferBindInfo_i& info)
     {
         BindBuffers((VkRenderer*)rn, info);
     }
@@ -176,7 +187,7 @@ namespace hf::inter::rendering
         delete (VkVertBuffer*)handle;
     }
 
-    void UploadVertBuffer(const VertBufferUploadInfo& info)
+    void UploadVertBuffer(const VertBufferUploadInfo_i& info)
     {
         auto buffer = (VkVertBuffer*)info.buffer;
         if (buffer->memoryType == BufferMemoryType::Static)
@@ -199,7 +210,7 @@ namespace hf::inter::rendering
         delete (VkIndexBuffer*)handle;
     }
 
-    void UploadIndexBuffer(const IndexBufferUploadInfo& info)
+    void UploadIndexBuffer(const IndexBufferUploadInfo_i& info)
     {
         auto buffer = (VkIndexBuffer*)info.buffer;
         if (buffer->memoryType == BufferMemoryType::Static)
@@ -246,7 +257,7 @@ namespace hf::inter::rendering
         EndFrame(renderer);
     }
 
-    void Draw(void* rn, const DrawCallInfo& info)
+    void Draw(void* rn, const DrawCallInfo_i& info)
     {
         auto* vrn = (VkRenderer*)rn;
 
@@ -382,14 +393,17 @@ namespace hf::inter::rendering
             .CreateInstance             = CreateInstance,
             .DestroyInstance            = DestroyInstance,
 
+            .CreateShaderLibrary        = CreateShaderLibrary,
+            .DestroyShaderLibrary       = DestroyShaderLibrary,
+
             //shader
             .CreateShader               = CreateShader,
             .DestroyShader              = DestroyShader,
             .BindShader                 = BindShader,
 
             //uniform storage
-            .DefineShaderLayout          = DefineShaderLayout,
-            .BindShaderLayout            = BindShaderLayout,
+            .DefineShaderLayout         = DefineShaderLayout,
+            .BindShaderLayout           = BindShaderLayout,
             .UploadPushConstants        = UploadPushConstants,
 
             //texture

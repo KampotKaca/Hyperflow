@@ -40,13 +40,7 @@ namespace hf::skybox
         {
             primitives::BindGlobalUniformBuffer(rn);
 
-            const ShaderBindingInfo shaderInfo
-            {
-                .shader = inter::HF.staticResources.skyboxShader,
-                .attrib = inter::HF.staticResources.defaultAttrib,
-                .bindingPoint = RenderBindingType::Graphics
-            };
-            Start_Shader(rn, shaderInfo);
+            Start_Shader(rn, inter::HF.staticResources.skyboxShader);
             {
                 Start_Material(rn, inter::HF.staticResources.emptyMaterial);
                 {

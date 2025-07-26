@@ -40,17 +40,11 @@ namespace app
         DebugPrepass(rn);
         hf::Start_RenderTexture(rn, APP_RENDER_TEXTURES.mainDrawRenderTexture);
         {
-            hf::Start_ShaderLayout(rn, APP_SHADER_LAYOUTS.viking_room); //Viking room setup
+            hf::Start_ShaderLayout(rn, APP_SHADER_LAYOUTS.default_lit); //Viking room setup
             {
                 hf::primitives::BindGlobalUniformBuffer(rn);
 
-                const hf::ShaderBindingInfo vikingRoomShaderInfo
-                {
-                    .shader = APP_SHADERS.viking_room,
-                    .attrib = APP_BUFFER_ATTRIBUTES.pos_nor_tex,
-                    .bindingPoint = hf::RenderBindingType::Graphics
-                };
-                hf::Start_Shader(rn, vikingRoomShaderInfo);
+                hf::Start_Shader(rn, APP_SHADERS.default_lit);
                 {
                     hf::Start_Material(rn, hf::primitives::GetEmptyMaterial());
                     {
@@ -88,17 +82,11 @@ namespace app
             }
             hf::End_ShaderLayout(rn);
 
-            hf::Start_ShaderLayout(rn, APP_SHADER_LAYOUTS.unlit_color); //Ground setup
+            hf::Start_ShaderLayout(rn, APP_SHADER_LAYOUTS.default_unlit); //Ground setup
             {
                 hf::primitives::BindGlobalUniformBuffer(rn);
-                hf::ShaderBindingInfo shaderInfo
-                {
-                    .shader = APP_SHADERS.unlit_color,
-                    .attrib = APP_BUFFER_ATTRIBUTES.pos_nor_tex,
-                    .bindingPoint = hf::RenderBindingType::Graphics
-                };
 
-                hf::Start_Shader(rn, shaderInfo);
+                hf::Start_Shader(rn, APP_SHADERS.default_unlit);
                 {
                     hf::Start_Material(rn, hf::primitives::GetEmptyMaterial());
                     {

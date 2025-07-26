@@ -117,7 +117,7 @@ namespace hf
             size.z = 1;
             if (tex->pixelCache)
             {
-                const TextureCreationInfo creationInfo =
+                const TextureCreationInfo_i creationInfo =
                 {
                     .type = TextureType::Tex2D,
                     .viewType = TextureViewType::Tex2D,

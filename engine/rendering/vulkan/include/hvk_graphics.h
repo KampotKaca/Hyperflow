@@ -262,7 +262,7 @@ namespace hf
 
     extern GraphicsData GRAPHICS_DATA;
 
-    void LoadVulkan(const inter::rendering::RendererLoadInfo& info);
+    void LoadVulkan(const inter::rendering::RendererLoadInfo_i& info);
     void UnloadVulkan();
 
     void* LoadEditorInfo();

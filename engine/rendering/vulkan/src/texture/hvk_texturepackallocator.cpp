@@ -6,7 +6,7 @@
 
 namespace hf
 {
-    VkTexturePackAllocator::VkTexturePackAllocator(const inter::rendering::TexturePackAllocatorCreationInfo& info)
+    VkTexturePackAllocator::VkTexturePackAllocator(const inter::rendering::TexturePackAllocatorCreationInfo_i& info)
     {
         VkDescriptorPoolSize poolSize =
         {

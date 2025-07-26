@@ -22,7 +22,7 @@ namespace hf
 
     void Upload(const Ref<IndexBuffer>& ib, const IndexBufferUploadInfo& info)
     {
-        inter::rendering::IndexBufferUploadInfo uploadInfo
+        inter::rendering::IndexBufferUploadInfo_i uploadInfo
         {
             .buffer = ib->handle,
             .data = ib->buffer,

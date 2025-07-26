@@ -6,6 +6,7 @@
 #include "hvertbuffer.h"
 #include "hindexbuffer.h"
 #include "hcubemap.h"
+#include "hshaderlibrary.h"
 #include "htime.h"
 #include "../rendering/include/hex_renderer.h"
 #include "../platforms/include/hex_platform.h"
@@ -30,6 +31,7 @@ namespace hf::inter
 
     struct GraphicsResources
     {
+        unordered_map<uint64_t, Ref<ShaderLibrary>> shaderLibraries{};
         unordered_map<uint64_t, Ref<Shader>> shaders{};
         unordered_map<uint64_t, Ref<RuntimeBufferBase>> buffers{};
         unordered_map<uint64_t, Ref<RenderTexture>> renderTextures{};
@@ -62,12 +64,28 @@ namespace hf::inter
         };
 
         std::mutex syncLock{};
+        std::vector<void*> shaderLibraries{};
         std::vector<void*> shaders{};
         std::vector<TypedBuffer> buffers{};
         std::vector<void*> texturePacks{};
         std::vector<void*> texturePackAllocators{};
         std::vector<void*> textures{};
         std::vector<void*> renderTextures{};
+    };
+
+    struct StaticResourcesLibraryModules
+    {
+        uint32_t quadVertexInput{};
+        uint32_t defaultVertexInput{};
+
+        uint32_t axisLinesPreRaster{};
+        uint32_t skyboxPreRaster{};
+
+        uint32_t axisLinesFragment{};
+        uint32_t skyboxFragment{};
+
+        uint32_t axisLinesFragmentOutput{};
+        uint32_t skyboxFragmentOutput{};
     };
 
     struct StaticResources
@@ -83,6 +101,9 @@ namespace hf::inter
 
         ShaderLayout axisLinesShaderLayout{};
         ShaderLayout skyboxShaderLayout{};
+
+        Ref<ShaderLibrary> engineShadersLib{};
+        StaticResourcesLibraryModules engineShadersLibModules{};
 
         Ref<Shader> axisLinesShader{};
         Ref<Shader> skyboxShader{};
@@ -177,6 +198,9 @@ namespace hf::inter
         void RendererUpdate_i(const Ref<Renderer>& rn);
         void RendererDraw_i(const Ref<Renderer>& rn, RenderPacket& packet);
 
+        bool CreateShaderLibrary_i(ShaderLibrary* lib);
+        bool DestroyShaderLibrary_i(ShaderLibrary* lib);
+
         bool CreateShader_i(Shader* shader);
         bool DestroyShader_i(Shader* shader);
 
@@ -208,6 +232,7 @@ namespace hf::inter
         void DestroyAllRenderTextures_i(bool internalOnly = false);
         void DestroyAllTexturePackAllocators_i(bool internalOnly = false);
         void DestroyAllShaders_i(bool internalOnly = false);
+        void DestroyAllShaderLibraries_i(bool internalOnly = false);
     }
 }
 

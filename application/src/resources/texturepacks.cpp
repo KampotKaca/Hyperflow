@@ -29,7 +29,7 @@ namespace app
             {
                 .pTextureBindings = &viking_room_binding,
                 .textureBindingCount = 1,
-                .layout = APP_TEXTURE_LAYOUTS.viking_room,
+                .layout = APP_TEXTURE_LAYOUTS.default_lit,
             };
 
             APP_TEXTURE_PACKS.viking_room_pack = hf::Create(texPackInfo);

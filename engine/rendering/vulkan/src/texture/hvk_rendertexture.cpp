@@ -17,7 +17,7 @@ namespace hf
     inline bool CheckFormatSupport(VkFormat format, VkImageTiling tiling, VkFormatFeatureFlags features);
 
     VkRenderTexture::VkRenderTexture(const RenderTextureCreationInfo& info)
-    : colorAttachmentCount(info.colorAttachmentCount), offset(info.offset.x, info.offset.y), multisampleMode(info.multisampleMode)
+    : colorAttachmentCount(info.colorAttachmentCount), offset((int32_t)info.offset.x, (int32_t)info.offset.y), multisampleMode(info.multisampleMode)
     {
         for (uint32_t i = 0; i < info.colorAttachmentCount; i++)
         {
@@ -73,7 +73,7 @@ namespace hf
 
             SetOperations(attachment.loadOp, attachment.storeOp, attachmentInfo.lsOperation);
             depthStencilAttachment = attachment;
-            auto formatInfo = ChooseDepthStencilFormat(attachmentInfo.mode,
+            const auto formatInfo = ChooseDepthStencilFormat(attachmentInfo.mode,
                     VK_IMAGE_TILING_OPTIMAL, VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT);
             depthStencilInfo =
             {
@@ -337,7 +337,7 @@ namespace hf
             auto& attachment = tex->colorAttachments[i];
             auto& info = tex->colorInfos[i];
 
-            inter::rendering::TextureCreationInfo textureInfo
+            inter::rendering::TextureCreationInfo_i textureInfo
             {
                 .type = inter::rendering::TextureType::Tex2D,
                 .viewType = inter::rendering::TextureViewType::Tex2D,
@@ -376,7 +376,7 @@ namespace hf
             auto& attachment = tex->depthStencilAttachment;
             auto& info = tex->depthStencilInfo;
 
-            inter::rendering::TextureCreationInfo textureInfo
+            inter::rendering::TextureCreationInfo_i textureInfo
             {
                 .type = inter::rendering::TextureType::Tex2D,
                 .viewType = inter::rendering::TextureViewType::Tex2D,
@@ -407,7 +407,7 @@ namespace hf
 
         if (tex->multisampleMode != MultisampleMode::MSAA_1X)
         {
-            inter::rendering::TextureCreationInfo textureInfo
+            inter::rendering::TextureCreationInfo_i textureInfo
             {
                 .type = inter::rendering::TextureType::Tex2D,
                 .viewType = inter::rendering::TextureViewType::Tex2D,

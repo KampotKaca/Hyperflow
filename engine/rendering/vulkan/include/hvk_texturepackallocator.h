@@ -7,7 +7,7 @@ namespace hf
 {
     struct VkTexturePackAllocator
     {
-        explicit VkTexturePackAllocator(const inter::rendering::TexturePackAllocatorCreationInfo& info);
+        explicit VkTexturePackAllocator(const inter::rendering::TexturePackAllocatorCreationInfo_i& info);
         ~VkTexturePackAllocator();
 
         VkDescriptorPool pool{};

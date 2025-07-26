@@ -177,7 +177,7 @@ namespace hf
                 totalWrites, GRAPHICS_DATA.preAllocBuffers.descWrites,
                 0, nullptr);
     }
-    void UploadBuffers(const VkRenderer* rn, const inter::rendering::BufferUploadInfo& info)
+    void UploadBuffers(const VkRenderer* rn, const inter::rendering::BufferUploadInfo_i& info)
     {
         auto currentFrame = rn->currentFrame;
 
@@ -189,7 +189,7 @@ namespace hf
                 &info.pUniformDataBuffer[packet.bufferRange.start], packet.bufferRange.size);
         }
     }
-    void BindBuffers(const VkRenderer* rn, const inter::rendering::BufferBindInfo& info)
+    void BindBuffers(const VkRenderer* rn, const inter::rendering::BufferBindInfo_i& info)
     {
         auto currentFrame = rn->currentFrame;
 

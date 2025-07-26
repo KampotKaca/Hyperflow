@@ -9,7 +9,7 @@ namespace app
 
     void ShaderLayoutDefineAll()
     {
-        //viking_room
+        //Default Lit
         {
             std::array buffers { hf::primitives::GetGlobalUniformBuffer() };
             const hf::ShaderLayoutDefinitionInfo info
@@ -21,14 +21,14 @@ namespace app
                 },
                 .pBuffers = buffers.data(),
                 .bufferCount = buffers.size(),
-                .pTextureLayouts = &APP_TEXTURE_LAYOUTS.viking_room,
+                .pTextureLayouts = &APP_TEXTURE_LAYOUTS.default_lit,
                 .textureLayoutCount = 1
             };
 
-            APP_SHADER_LAYOUTS.viking_room = hf::Define(info);
+            APP_SHADER_LAYOUTS.default_lit = hf::Define(info);
         }
 
-        //color
+        //Default Unlit
         {
             std::array buffers { hf::primitives::GetGlobalUniformBuffer() };
             const hf::ShaderLayoutDefinitionInfo info
@@ -44,7 +44,7 @@ namespace app
                 .textureLayoutCount = 0
             };
 
-            APP_SHADER_LAYOUTS.unlit_color = hf::Define(info);
+            APP_SHADER_LAYOUTS.default_unlit = hf::Define(info);
         }
     }
 }

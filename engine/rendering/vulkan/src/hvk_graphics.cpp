@@ -12,7 +12,7 @@ namespace hf
 
     //------------------------------------------------------------------------------------
 
-    VkRenderer::VkRenderer(const inter::rendering::RendererInstanceCreationInfo& info)
+    VkRenderer::VkRenderer(const inter::rendering::RendererInstanceCreationInfo_i& info)
         : shutdownCallback(info.shutdownCallback), windowHandle(info.handle), targetSize(info.size), vSyncMode(info.vSyncMode)
     {
         if (!GRAPHICS_DATA.deviceIsLoaded) LoadDevice(windowHandle, &swapchain.surface);
@@ -80,10 +80,17 @@ namespace hf
             queueCreateInfos.push_back(queueCreateInfo);
         }
 
-        VkPhysicalDeviceSynchronization2Features sync2Features =
+        VkPhysicalDeviceGraphicsPipelineLibraryFeaturesEXT graphicsPipelineLibraryFeatures
+        {
+            .sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_GRAPHICS_PIPELINE_LIBRARY_FEATURES_EXT,
+            .pNext = nullptr,
+            .graphicsPipelineLibrary = VK_TRUE
+        };
+
+        VkPhysicalDeviceSynchronization2Features sync2Features
         {
             .sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SYNCHRONIZATION_2_FEATURES,
-            .pNext = nullptr,
+            .pNext = &graphicsPipelineLibraryFeatures,
             .synchronization2 = VK_TRUE
         };
 
@@ -94,7 +101,7 @@ namespace hf
             .dynamicRendering = VK_TRUE
         };
 
-        VkPhysicalDeviceFeatures2 deviceFeatures2 =
+        VkPhysicalDeviceFeatures2 deviceFeatures2
         {
             .sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2,
             .pNext = &dynamicRenderingFeature,

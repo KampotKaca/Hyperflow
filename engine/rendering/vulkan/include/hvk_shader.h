@@ -9,14 +9,14 @@ namespace hf
 {
     struct VkShader
     {
-        explicit VkShader(const inter::rendering::ShaderCreationInfo& info);
+        explicit VkShader(const inter::rendering::ShaderCreationInfo_i& info);
         ~VkShader();
 
         ShaderLayout layout{};
-        unordered_map<BufferAttrib, VkPipeline> pipelines{};
+        VkPipeline pipeline{};
     };
 
-    void BindShader(VkRenderer* rn, VkShader* shader, BufferAttrib attrib, RenderBindingType bindingType);
+    void BindShader(const VkRenderer* rn, const VkShader* shader);
 }
 
 #endif //HVKSHADER_H

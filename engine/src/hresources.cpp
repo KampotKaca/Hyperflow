@@ -371,32 +371,141 @@ namespace hf
 
         void LoadShaders()
         {
+            //Shader Library!
+            {
+                std::array vertexInputModules
+                {
+                    (ShaderLibraryModule<ShaderLibraryVertexInputModuleInfo>)
+                    {
+                        .resultId = &HF.staticResources.engineShadersLibModules.quadVertexInput,
+                        .module = { .attribute = HF.staticResources.quadAttrib },
+                    },
+                    (ShaderLibraryModule<ShaderLibraryVertexInputModuleInfo>)
+                    {
+                        .resultId = &HF.staticResources.engineShadersLibModules.defaultVertexInput,
+                        .module = { .attribute = HF.staticResources.defaultAttrib },
+                    },
+                };
+
+                std::array preRasterModules
+                {
+                    (ShaderLibraryModule<ShaderLibraryPreRasterModuleInfo>) //Axis Lines Vertex Shader
+                    {
+                        .resultId = &HF.staticResources.engineShadersLibModules.axisLinesPreRaster,
+                        .module =
+                        {
+                            .vertexShaderPath = { .path = "__axislines" },
+                            .options = { .cullMode = ShaderCullMode::None, },
+                            .layout = HF.staticResources.axisLinesShaderLayout
+                        }
+                    },
+                    (ShaderLibraryModule<ShaderLibraryPreRasterModuleInfo>) //Skybox Vertex Shader
+                    {
+                        .resultId = &HF.staticResources.engineShadersLibModules.skyboxPreRaster,
+                        .module =
+                        {
+                            .vertexShaderPath = { .path = "__skybox" },
+                            .options = { .cullMode = ShaderCullMode::Front, },
+                            .layout = HF.staticResources.skyboxShaderLayout
+                        }
+                    },
+                };
+
+                std::array fragmentModules
+                {
+                    (ShaderLibraryModule<ShaderLibraryFragmentModuleInfo>)
+                    {
+                        .resultId = &HF.staticResources.engineShadersLibModules.axisLinesFragment,
+                        .module =
+                        {
+                            .fragmentShaderPath = { .path = "__axislines" },
+                            .depthStencilOptions =
+                            {
+                                .enableDepth = true,
+                                .writeDepth = true,
+                                .comparisonFunc = DepthComparisonFunction::Always,
+                                .enableDepthBounds = false,
+                                .enableStencil = false,
+                            },
+                            .layout = HF.staticResources.axisLinesShaderLayout,
+                        }
+                    },
+                    (ShaderLibraryModule<ShaderLibraryFragmentModuleInfo>)
+                    {
+                        .resultId = &HF.staticResources.engineShadersLibModules.skyboxFragment,
+                        .module =
+                        {
+                            .fragmentShaderPath = { .path = "__skybox" },
+                            .depthStencilOptions =
+                            {
+                                .enableDepth = true,
+                                .writeDepth = false,
+                                .comparisonFunc = DepthComparisonFunction::Less,
+                                .enableDepthBounds = false,
+                                .enableStencil = false,
+                            },
+                            .layout = HF.staticResources.skyboxShaderLayout
+                        }
+                    },
+                };
+
+                std::array fragmentOutputModules
+                {
+                    (ShaderLibraryModule<ShaderLibraryFragmentOutputModuleInfo>) //Axis lines
+                    {
+                        .resultId = &HF.staticResources.engineShadersLibModules.axisLinesFragmentOutput,
+                        .module =
+                        {
+                            // .drawOutputFormats = HF.internalResourcesFormat.drawOutputFormats,
+                            .blendingOptions =
+                            {
+                                .blendMode = ShaderBlendMode::Alpha,
+                                .blendOp = ShaderBlendOp::XOr
+                            },
+                        }
+                    },
+                    (ShaderLibraryModule<ShaderLibraryFragmentOutputModuleInfo>) //Skybox
+                    {
+                        .resultId = &HF.staticResources.engineShadersLibModules.skyboxFragmentOutput,
+                        .module =
+                        {
+                            // .drawOutputFormats = HF.internalResourcesFormat.drawOutputFormats,
+                            .blendingOptions =
+                            {
+                                .blendMode = ShaderBlendMode::Alpha,
+                                .blendOp = ShaderBlendOp::XOr
+                            },
+                        }
+                    },
+                };
+
+                const ShaderLibraryCreationInfo info
+                {
+                    .sampleMode = HF.internalResourcesFormat.samplingMode,
+                    .pVertexInputModules = vertexInputModules.data(),
+                    .vertexInputModuleCount = vertexInputModules.size(),
+                    .pPreRasterModules = preRasterModules.data(),
+                    .preRasterModuleCount = preRasterModules.size(),
+                    .pFragmentModules = fragmentModules.data(),
+                    .fragmentModuleCount = fragmentModules.size(),
+                    .pFragmentOutputModules = fragmentOutputModules.data(),
+                    .fragmentOutputModuleCount = fragmentOutputModules.size()
+                };
+                HF.staticResources.engineShadersLib = Create(info);
+            }
+
             //Axis Lines Shader
             {
                 const ShaderCreationInfo shaderInfo
                 {
-                    .setup = HF.staticResources.axisLinesShaderLayout,
-                    .supportedAttribCount = 1,
-                    .pSupportedAttribs = &HF.staticResources.quadAttrib,
-                    .vertexShaderLoc = "__axislines",
-                    .fragmentShaderLoc = "__axislines",
-                    .drawOutputFormats = HF.internalResourcesFormat.drawOutputFormats,
-                    .rasterizerOptions =
+                    .layout = HF.staticResources.axisLinesShaderLayout,
+                    .library = HF.staticResources.engineShadersLib,
+                    .modules =
                     {
-                        .cullMode = ShaderCullMode::None,
-                    },
-                    .alphaTestOptions =
-                    {
-                        .blendMode = ShaderBlendMode::Alpha,
-                        .blendOp = ShaderBlendOp::XOr
-                    },
-                    .depthStencilOptions =
-                    {
-                        .enableDepth = true,
-                        .writeDepth = true,
-                        .comparisonFunc = DepthComparisonFunction::Always,
-                        .enableDepthBounds = false,
-                        .enableStencil = false,
+                        .vertexInputModuleId = HF.staticResources.engineShadersLibModules.quadVertexInput,
+                        .preRasterModuleId = HF.staticResources.engineShadersLibModules.axisLinesPreRaster,
+                        .fragmentModuleId = HF.staticResources.engineShadersLibModules.axisLinesFragment,
+                        .fragmentOutputModuleId = HF.staticResources.engineShadersLibModules.axisLinesFragmentOutput
                     }
                 };
                 HF.staticResources.axisLinesShader = Create(shaderInfo);
@@ -406,28 +515,14 @@ namespace hf
             {
                 const ShaderCreationInfo shaderInfo
                 {
-                    .setup = HF.staticResources.skyboxShaderLayout,
-                    .supportedAttribCount = 1,
-                    .pSupportedAttribs = &HF.staticResources.defaultAttrib,
-                    .vertexShaderLoc = "__skybox",
-                    .fragmentShaderLoc = "__skybox",
-                    .drawOutputFormats = HF.internalResourcesFormat.drawOutputFormats,
-                    .rasterizerOptions =
+                    .layout = HF.staticResources.skyboxShaderLayout,
+                    .library = HF.staticResources.engineShadersLib,
+                    .modules =
                     {
-                        .cullMode = ShaderCullMode::Front,
-                    },
-                    .alphaTestOptions =
-                    {
-                        .blendMode = ShaderBlendMode::Alpha,
-                        .blendOp = ShaderBlendOp::XOr
-                    },
-                    .depthStencilOptions =
-                    {
-                        .enableDepth = true,
-                        .writeDepth = false,
-                        .comparisonFunc = DepthComparisonFunction::Less,
-                        .enableDepthBounds = false,
-                        .enableStencil = false,
+                        .vertexInputModuleId = HF.staticResources.engineShadersLibModules.defaultVertexInput,
+                        .preRasterModuleId = HF.staticResources.engineShadersLibModules.skyboxPreRaster,
+                        .fragmentModuleId = HF.staticResources.engineShadersLibModules.skyboxFragment,
+                        .fragmentOutputModuleId = HF.staticResources.engineShadersLibModules.skyboxFragmentOutput
                     }
                 };
                 HF.staticResources.skyboxShader = Create(shaderInfo);
