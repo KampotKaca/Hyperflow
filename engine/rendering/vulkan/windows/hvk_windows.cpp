@@ -6,7 +6,6 @@ namespace hf
     {
         VK_KHR_SURFACE_EXTENSION_NAME,
         "VK_KHR_win32_surface",
-        VK_KHR_GET_PHYSICAL_DEVICE_PROPERTIES_2_EXTENSION_NAME,
 #if DEBUG
         "VK_EXT_debug_utils"
 #endif

@@ -17,19 +17,16 @@ namespace hf
 
         auto device = GRAPHICS_DATA.device.logicalDevice.device;
 
-        VkImageCreateInfo imageInfo
-        {
-            .sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO,
-            .flags = (VkImageCreateFlags)info.flags,
-            .imageType = (VkImageType)info.type,
-            .format = (VkFormat)details.format,
-            .extent = { size.x, size.y, size.z },
-            .arrayLayers = info.textureCount,
-            .samples = (VkSampleCountFlagBits)info.samples,
-            .tiling = (VkImageTiling)details.tiling,
-            .sharingMode = VK_SHARING_MODE_EXCLUSIVE,
-            .initialLayout = VK_IMAGE_LAYOUT_UNDEFINED,
-        };
+        VkImageCreateInfo imageInfo{};
+        imageInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
+        imageInfo.flags = (VkImageCreateFlags)info.flags;
+        imageInfo.imageType = (VkImageType)info.type;
+        imageInfo.format = (VkFormat)details.format;
+        imageInfo.extent = { size.x, size.y, size.z };
+        imageInfo.arrayLayers = info.textureCount;
+        imageInfo.samples = (VkSampleCountFlagBits)info.samples;
+        imageInfo.tiling = (VkImageTiling)details.tiling;
+        imageInfo.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
 
         if (info.pTextures)
         {
@@ -46,9 +43,11 @@ namespace hf
             auto& transferData = GRAPHICS_DATA.device.transferData;
             imageInfo.queueFamilyIndexCount = (uint32_t)transferData.indices.size();
             imageInfo.pQueueFamilyIndices = transferData.indices.data();
+            imageInfo.sharingMode = VK_SHARING_MODE_CONCURRENT;
         }
         else
         {
+            imageInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
             imageInfo.usage = (VkImageUsageFlags)details.usageFlags;
             mipLevels = 1;
         }

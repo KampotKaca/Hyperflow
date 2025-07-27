@@ -5,7 +5,7 @@
 
 namespace hf
 {
-    ShaderLibrary::ShaderLibrary(const ShaderLibraryCreationInfo& info) : sampleMode(info.sampleMode)
+    ShaderLibrary::ShaderLibrary(const ShaderLibraryCreationInfo& info) : outputFormats(info.outputFormats)
     {
         vertexInputModules = std::vector<ShaderLibraryVertexInputModuleInfo>(info.vertexInputModuleCount);
         preRasterModules = std::vector<ShaderLibraryPreRasterModuleInfo>(info.preRasterModuleCount);
@@ -199,7 +199,7 @@ namespace hf
 
             ShaderLibraryCreationInfo_i info
             {
-                .sampleMode = lib->sampleMode,
+                .outputFormats = lib->outputFormats,
                 .pVertexInputModules = lib->vertexInputModules.data(),
                 .vertexInputModuleCount = (uint32_t)lib->vertexInputModules.size(),
                 .pPreRasterModules = preRasterModules.data(),

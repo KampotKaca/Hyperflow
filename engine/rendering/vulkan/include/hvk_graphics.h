@@ -26,19 +26,19 @@ namespace hf
         void* userData);
 #endif
 
-    static constexpr std::array SHADER_DYNAMIC_STATES =
+    constexpr VkDynamicState SHADER_DYNAMIC_STATES[] =
     {
         VK_DYNAMIC_STATE_VIEWPORT,
         VK_DYNAMIC_STATE_SCISSOR
     };
 
-    static constexpr VkPipelineDynamicStateCreateInfo SHADER_DYNAMIC
+    constexpr VkPipelineDynamicStateCreateInfo SHADER_DYNAMIC =
     {
         .sType = VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO,
         .pNext = nullptr,
         .flags = 0,
-        .dynamicStateCount = SHADER_DYNAMIC_STATES.size(),
-        .pDynamicStates = SHADER_DYNAMIC_STATES.data()
+        .dynamicStateCount = 2,
+        .pDynamicStates = SHADER_DYNAMIC_STATES
     };
 
     struct CommandPool
@@ -105,7 +105,6 @@ namespace hf
         PFN_vkCmdBeginRenderingKHR vkCmdBeginRenderingKHR{};
         PFN_vkCmdEndRenderingKHR vkCmdEndRenderingKHR{};
         PFN_vkCmdPipelineBarrier2KHR vkCmdPipelineBarrier2KHR{};
-        PFN_vkGetDescriptorSetLayoutSupportKHR vkGetDescriptorSetLayoutSupportKHR{};
     };
 
     struct VkCopyBufferToBufferOperation
@@ -216,16 +215,6 @@ namespace hf
         VkExtensionFunctions extensionFunctions{};
 
 #if DEBUG
-        VkDebugUtilsMessengerCreateInfoEXT debugCreateInfo
-        {
-            .sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT,
-            .pNext = nullptr,
-            .flags = 0,
-            .messageSeverity = VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT,
-            .messageType = VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT,
-            .pfnUserCallback = DebugCallback,
-            .pUserData = nullptr,
-        };
         VkDebugUtilsMessengerEXT debugMessenger{};
 #endif
     };

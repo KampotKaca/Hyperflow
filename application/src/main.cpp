@@ -31,9 +31,9 @@ int main()
             },
 		    .drawOutputFormats =
 		    {
+		        .sampleMode = MSAA_MODE,
 		        .depthFormat = DEPTH_STENCIL_MODE,
 		    },
-		    .samplingMode = MSAA_MODE
 	    },
 		.lifecycleCallbacks =
 		{

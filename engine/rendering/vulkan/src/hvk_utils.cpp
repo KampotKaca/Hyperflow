@@ -117,7 +117,7 @@ namespace hf
 
     void SetupViewportAndScissor(VkRenderer* rn)
     {
-        auto& extent = rn->swapchain.details.extent;
+        const auto& extent = rn->swapchain.details.extent;
         rn->viewport =
         {
             .x = 0.0f,

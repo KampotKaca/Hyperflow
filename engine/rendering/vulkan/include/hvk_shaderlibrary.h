@@ -10,11 +10,21 @@ namespace hf
         explicit VkShaderLibrary(const inter::rendering::ShaderLibraryCreationInfo_i& info);
         ~VkShaderLibrary();
 
-        unordered_map<uint32_t, ShaderDrawOutputFormats> outputFormats{};
+        ShaderDrawOutputFormats outputFormats{};
         std::vector<VkPipeline> modules{};
     };
 
     VkPipeline GetShaderLibraryModule(const VkShaderLibrary* lib, uint32_t moduleId);
+    inline void GetRenderingInfo(ShaderDrawOutputFormats outputFormat, VkPipelineRenderingCreateInfo& result)
+    {
+        VkPipelineRenderingCreateInfo renderingInfo{};
+        renderingInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_RENDERING_CREATE_INFO_KHR;
+        renderingInfo.colorAttachmentCount = outputFormat.colorFormatCount;
+        renderingInfo.pColorAttachmentFormats = (VkFormat*)outputFormat.colorFormats;
+        renderingInfo.depthAttachmentFormat = (VkFormat)outputFormat.depthFormat;
+        renderingInfo.stencilAttachmentFormat = (VkFormat)outputFormat.stencilFormat;
+        result = renderingInfo;
+    }
 }
 
 #endif //HVK_SHADERLIBRARY_H

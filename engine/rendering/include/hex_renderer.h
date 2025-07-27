@@ -84,7 +84,7 @@ namespace hf::inter::rendering
 
     struct ShaderLibraryCreationInfo_i
     {
-        MultisampleMode sampleMode = MultisampleMode::MSAA_1X;
+        ShaderDrawOutputFormats outputFormats{};
 
         ShaderLibraryVertexInputModuleInfo* pVertexInputModules{};
         uint32_t vertexInputModuleCount{};

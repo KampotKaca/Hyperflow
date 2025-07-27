@@ -10,7 +10,7 @@ namespace hf
         explicit ShaderLibrary(const ShaderLibraryCreationInfo& info);
         ~ShaderLibrary();
 
-        MultisampleMode sampleMode = MultisampleMode::MSAA_1X;
+        ShaderDrawOutputFormats outputFormats{};
         std::vector<ShaderLibraryVertexInputModuleInfo> vertexInputModules{};
         std::vector<ShaderLibraryPreRasterModuleInfo> preRasterModules{};
         std::vector<ShaderLibraryFragmentModuleInfo> fragmentModules{};

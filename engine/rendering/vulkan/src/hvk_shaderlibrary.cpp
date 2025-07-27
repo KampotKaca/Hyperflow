@@ -5,7 +5,7 @@ namespace hf
 {
     static VkShaderModule AddShaderStage(const void* code, uint32_t codeSize, VkShaderStageFlagBits stage, VkPipelineShaderStageCreateInfo* result);
 
-    VkShaderLibrary::VkShaderLibrary(const inter::rendering::ShaderLibraryCreationInfo_i& info)
+    VkShaderLibrary::VkShaderLibrary(const inter::rendering::ShaderLibraryCreationInfo_i& info) : outputFormats(info.outputFormats)
     {
         uint32_t moduleCount = info.vertexInputModuleCount + info.preRasterModuleCount + info.fragmentModuleCount + info.fragmentOutputModuleCount;
         uint32_t maxShadingModules = info.preRasterModuleCount * 4 + info.fragmentModuleCount;
@@ -18,7 +18,6 @@ namespace hf
         std::vector<VkPipelineRasterizationStateCreateInfo> rasterizers(info.preRasterModuleCount);
         std::vector<VkPipelineDepthStencilStateCreateInfo> depthStencilStates(info.fragmentModuleCount);
 
-        std::vector<VkPipelineRenderingCreateInfo> renderingInfos(info.fragmentOutputModuleCount);
         std::vector<VkPipelineColorBlendAttachmentState> colorBlendAttachments(info.fragmentOutputModuleCount);
         std::vector<VkPipelineColorBlendStateCreateInfo> colorBlendStateInfos(info.fragmentOutputModuleCount);
 
@@ -29,11 +28,11 @@ namespace hf
 
         VkPipelineMultisampleStateCreateInfo multisampling{};
         multisampling.sType = VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO;
-        multisampling.rasterizationSamples = (VkSampleCountFlagBits)info.sampleMode;
+        multisampling.rasterizationSamples = (VkSampleCountFlagBits)outputFormats.sampleMode;
         multisampling.alphaToCoverageEnable = VK_FALSE;
         multisampling.alphaToOneEnable = VK_FALSE;
 
-        if (info.sampleMode != MultisampleMode::MSAA_1X &&
+        if (outputFormats.sampleMode != MultisampleMode::MSAA_1X &&
             GRAPHICS_DATA.device.features.sampleRateShading)
         {
             multisampling.sampleShadingEnable = VK_TRUE;
@@ -45,24 +44,42 @@ namespace hf
             multisampling.minSampleShading = 1.0f;
         }
 
+        VkPipelineRenderingCreateInfo renderingInfo{};
+        GetRenderingInfo(outputFormats, renderingInfo);
+
+        VkGraphicsPipelineLibraryCreateInfoEXT vertexInputLibInfo{};
+        vertexInputLibInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_LIBRARY_CREATE_INFO_EXT;
+        vertexInputLibInfo.pNext = &renderingInfo;
+        vertexInputLibInfo.flags = VK_GRAPHICS_PIPELINE_LIBRARY_VERTEX_INPUT_INTERFACE_BIT_EXT;
+
+        VkPipelineInputAssemblyStateCreateInfo inputAssembly{};
+        inputAssembly.sType = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
+        inputAssembly.topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
+        inputAssembly.primitiveRestartEnable = VK_FALSE;
+
+        VkGraphicsPipelineLibraryCreateInfoEXT preRasterLibInfo{};
+        preRasterLibInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_LIBRARY_CREATE_INFO_EXT;
+        preRasterLibInfo.pNext = &renderingInfo;
+        preRasterLibInfo.flags = VK_GRAPHICS_PIPELINE_LIBRARY_PRE_RASTERIZATION_SHADERS_BIT_EXT;
+
+        VkPipelineViewportStateCreateInfo viewportState{};
+        viewportState.sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO;
+        viewportState.viewportCount = 1;
+        viewportState.scissorCount = 1;
+
+        VkGraphicsPipelineLibraryCreateInfoEXT fragmentLibInfo{};
+        fragmentLibInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_LIBRARY_CREATE_INFO_EXT;
+        fragmentLibInfo.pNext = &renderingInfo;
+        fragmentLibInfo.flags = VK_GRAPHICS_PIPELINE_LIBRARY_FRAGMENT_SHADER_BIT_EXT;
+
+        VkGraphicsPipelineLibraryCreateInfoEXT fragmentOutputLibInfo{};
+        fragmentOutputLibInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_LIBRARY_CREATE_INFO_EXT;
+        fragmentOutputLibInfo.pNext = &renderingInfo;
+        fragmentOutputLibInfo.flags = VK_GRAPHICS_PIPELINE_LIBRARY_FRAGMENT_OUTPUT_INTERFACE_BIT_EXT;
+
         for (uint32_t i = 0; i < info.vertexInputModuleCount; i++)
         {
             auto& moduleInfo = info.pVertexInputModules[i];
-            static constexpr VkGraphicsPipelineLibraryCreateInfoEXT vertexInputLibInfo
-            {
-                .sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_LIBRARY_CREATE_INFO_EXT,
-                .pNext = nullptr,
-                .flags = VK_GRAPHICS_PIPELINE_LIBRARY_VERTEX_INPUT_INTERFACE_BIT_EXT
-            };
-
-            static constexpr VkPipelineInputAssemblyStateCreateInfo inputAssembly
-            {
-                .sType = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO,
-                .pNext = nullptr,
-                .flags = 0,
-                .topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST,
-                .primitiveRestartEnable = VK_FALSE
-            };
 
             const auto& attribute = GetAttrib(moduleInfo.attribute);
             VkPipelineVertexInputStateCreateInfo vInfo{};
@@ -97,23 +114,6 @@ namespace hf
         for (uint32_t i = 0; i < info.preRasterModuleCount; i++)
         {
             const auto& moduleInfo = info.pPreRasterModules[i];
-            static constexpr VkGraphicsPipelineLibraryCreateInfoEXT preRasterLibInfo
-            {
-                .sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_LIBRARY_CREATE_INFO_EXT,
-                .pNext = nullptr,
-                .flags = VK_GRAPHICS_PIPELINE_LIBRARY_PRE_RASTERIZATION_SHADERS_BIT_EXT
-            };
-
-            static constexpr VkPipelineViewportStateCreateInfo viewportState
-            {
-                .sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO,
-                .pNext = nullptr,
-                .flags = 0,
-                .viewportCount = 1,
-                .pViewports = nullptr,
-                .scissorCount = 1,
-                .pScissors = nullptr,
-            };
 
             uint32_t stageCount = 0;
             ADD_MODULE(AddShaderStage(moduleInfo.vertexShaderCode, moduleInfo.vertexShaderCodeSize, VK_SHADER_STAGE_VERTEX_BIT, &stageCreateInfos[stageInfoCount + stageCount]))
@@ -154,12 +154,6 @@ namespace hf
         for (uint32_t i = 0; i < info.fragmentModuleCount; i++)
         {
             const auto& moduleInfo = info.pFragmentModules[i];
-            static constexpr VkGraphicsPipelineLibraryCreateInfoEXT fragmentLibInfo
-            {
-                .sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_LIBRARY_CREATE_INFO_EXT,
-                .pNext = nullptr,
-                .flags = VK_GRAPHICS_PIPELINE_LIBRARY_FRAGMENT_SHADER_BIT_EXT
-            };
 
             uint32_t stageCount = 0;
             ADD_MODULE(AddShaderStage(moduleInfo.fragmentShaderCode, moduleInfo.fragmentShaderCodeSize, VK_SHADER_STAGE_FRAGMENT_BIT, &stageCreateInfos[stageInfoCount + stageCount]));
@@ -198,24 +192,6 @@ namespace hf
         {
             const auto& moduleInfo = info.pFragmentOutputModules[i];
 
-            static constexpr VkGraphicsPipelineLibraryCreateInfoEXT fragmentOutputLibInfo
-            {
-                .sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_LIBRARY_CREATE_INFO_EXT,
-                .pNext = nullptr,
-                .flags = VK_GRAPHICS_PIPELINE_LIBRARY_FRAGMENT_OUTPUT_INTERFACE_BIT_EXT
-            };
-
-            VkPipelineRenderingCreateInfo renderingInfo{};
-            renderingInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_RENDERING_CREATE_INFO_KHR;
-            renderingInfo.pNext = &fragmentOutputLibInfo;
-            renderingInfo.colorAttachmentCount = moduleInfo.drawOutputFormats.colorFormatCount;
-            renderingInfo.pColorAttachmentFormats = (VkFormat*)moduleInfo.drawOutputFormats.colorFormats;
-            renderingInfo.depthAttachmentFormat = (VkFormat)moduleInfo.drawOutputFormats.depthFormat;
-            renderingInfo.stencilAttachmentFormat = (VkFormat)moduleInfo.drawOutputFormats.stencilFormat;
-            renderingInfos[i] = renderingInfo;
-
-            outputFormats[moduleIndex] = moduleInfo.drawOutputFormats;
-
             VkPipelineColorBlendAttachmentState colorBlendAttachment{};
             colorBlendAttachment.colorWriteMask = VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT;
 
@@ -251,7 +227,7 @@ namespace hf
 
             VkGraphicsPipelineCreateInfo fragmentOutputPipelineInfo{};
             fragmentOutputPipelineInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
-            fragmentOutputPipelineInfo.pNext = &renderingInfos[i];
+            fragmentOutputPipelineInfo.pNext = &fragmentOutputLibInfo;
             fragmentOutputPipelineInfo.flags = VK_PIPELINE_CREATE_LIBRARY_BIT_KHR;
             fragmentOutputPipelineInfo.pMultisampleState = &multisampling;
             fragmentOutputPipelineInfo.pColorBlendState = &colorBlendStateInfos[i];

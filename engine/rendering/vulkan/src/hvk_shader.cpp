@@ -10,7 +10,9 @@ namespace hf
     {
         const auto& shaderLayout = GetShaderLayout(info.layout);
         const auto library = (VkShaderLibrary*)info.library;
-        auto& outputFormat = library->outputFormats[info.modules.fragmentOutputModuleId];
+
+        VkPipelineRenderingCreateInfo renderingInfo{};
+        GetRenderingInfo(library->outputFormats, renderingInfo);
 
         const std::array libs
         {
@@ -19,13 +21,6 @@ namespace hf
             GetShaderLibraryModule(library, info.modules.fragmentModuleId),
             GetShaderLibraryModule(library, info.modules.fragmentOutputModuleId),
         };
-
-        VkPipelineRenderingCreateInfo renderingInfo{};
-        renderingInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_RENDERING_CREATE_INFO_KHR;
-        renderingInfo.colorAttachmentCount = outputFormat.colorFormatCount;
-        renderingInfo.pColorAttachmentFormats = (VkFormat*)outputFormat.colorFormats;
-        renderingInfo.depthAttachmentFormat = (VkFormat)outputFormat.depthFormat;
-        renderingInfo.stencilAttachmentFormat = (VkFormat)outputFormat.stencilFormat;
 
         VkPipelineLibraryCreateInfoKHR libraryInfo{};
         libraryInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LIBRARY_CREATE_INFO_KHR;

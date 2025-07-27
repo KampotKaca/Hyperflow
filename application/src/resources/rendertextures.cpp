@@ -21,7 +21,7 @@ namespace app
                 .format = hf::TextureFormat::R8G8B8A8_Unorm,
                 .lsOperation = hf::LoadStoreOperationType::ClearAndStore,
                 .isUsedForPresentation = true,
-                .clearColor = { 0.0f, 0.0f, 0.0f, 1.0f },
+                .clearColor = { 1.0f, 0.0f, 0.0f, 1.0f },
             };
 
             const hf::RenderTextureCreationInfo info

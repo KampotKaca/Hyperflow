@@ -153,14 +153,46 @@ namespace hf
         createInfo.ppEnabledExtensionNames = GRAPHICS_DATA.platform.api->requiredExtension;
 
 #if DEBUG
+        VkDebugUtilsMessengerCreateInfoEXT debugCreateInfo{};
+        debugCreateInfo.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT;
+
+// #define DEEP_RENDERING_VALIDATION
+#if defined(DEEP_RENDERING_VALIDATION)
+
+        constexpr VkValidationFeatureEnableEXT enables[] =
+        {
+            VK_VALIDATION_FEATURE_ENABLE_GPU_ASSISTED_EXT,
+            VK_VALIDATION_FEATURE_ENABLE_GPU_ASSISTED_RESERVE_BINDING_SLOT_EXT,
+            VK_VALIDATION_FEATURE_ENABLE_BEST_PRACTICES_EXT
+        };
+
+        constexpr VkValidationFeatureDisableEXT disables[] =
+        {
+            VK_VALIDATION_FEATURE_DISABLE_CORE_CHECKS_EXT
+        };
+
+        VkValidationFeaturesEXT features{};
+        features.sType = VK_STRUCTURE_TYPE_VALIDATION_FEATURES_EXT;
+        features.enabledValidationFeatureCount = 3;
+        features.pEnabledValidationFeatures = enables;
+        features.disabledValidationFeatureCount = 1;
+        features.pDisabledValidationFeatures = disables;
+        debugCreateInfo.pNext = &features;
+
+#endif
+
+        debugCreateInfo.messageSeverity = VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT;
+        debugCreateInfo.messageType = VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT;
+        debugCreateInfo.pfnUserCallback = DebugCallback;
+
         createInfo.ppEnabledLayerNames = DEBUG_VALIDATION_LAYERS;
         createInfo.enabledLayerCount = NUM_VK_VALIDATION_LAYERS;
-        createInfo.pNext = (VkDebugUtilsMessengerCreateInfoEXT*)&GRAPHICS_DATA.debugCreateInfo;
+        createInfo.pNext = &debugCreateInfo;
 #endif
         VK_HANDLE_EXCEPT(vkCreateInstance(&createInfo, nullptr, &GRAPHICS_DATA.instance));
 
 #if DEBUG
-        VK_HANDLE_EXCEPT(Debug_CreateUtilsMessengerEXT(GRAPHICS_DATA.instance, &GRAPHICS_DATA.debugCreateInfo,
+        VK_HANDLE_EXCEPT(Debug_CreateUtilsMessengerEXT(GRAPHICS_DATA.instance, &debugCreateInfo,
                             nullptr, &GRAPHICS_DATA.debugMessenger));
 #endif
     }

@@ -12,6 +12,7 @@ namespace app
     {
         hf::ShaderDrawOutputFormats shaderOutputFormats
         {
+            .sampleMode = MSAA_MODE,
             .depthFormat = DEPTH_STENCIL_MODE,
         };
 
@@ -75,16 +76,12 @@ namespace app
                 hf::ShaderLibraryModule<hf::ShaderLibraryFragmentOutputModuleInfo> //Default
                 {
                     .resultId = &APP_SHADERS.modules.defaultFragmentOutput,
-                    .module =
-                    {
-                        .drawOutputFormats = shaderOutputFormats
-                    }
                 },
             };
 
             const hf::ShaderLibraryCreationInfo info
             {
-                .sampleMode = MSAA_MODE,
+                .outputFormats = shaderOutputFormats,
                 .pVertexInputModules = vertexInputModules.data(),
                 .vertexInputModuleCount = vertexInputModules.size(),
                 .pPreRasterModules = preRasterModules.data(),

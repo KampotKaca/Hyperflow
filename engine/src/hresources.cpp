@@ -456,7 +456,6 @@ namespace hf
                         .resultId = &HF.staticResources.engineShadersLibModules.axisLinesFragmentOutput,
                         .module =
                         {
-                            // .drawOutputFormats = HF.internalResourcesFormat.drawOutputFormats,
                             .blendingOptions =
                             {
                                 .blendMode = ShaderBlendMode::Alpha,
@@ -469,7 +468,6 @@ namespace hf
                         .resultId = &HF.staticResources.engineShadersLibModules.skyboxFragmentOutput,
                         .module =
                         {
-                            // .drawOutputFormats = HF.internalResourcesFormat.drawOutputFormats,
                             .blendingOptions =
                             {
                                 .blendMode = ShaderBlendMode::Alpha,
@@ -481,7 +479,7 @@ namespace hf
 
                 const ShaderLibraryCreationInfo info
                 {
-                    .sampleMode = HF.internalResourcesFormat.samplingMode,
+                    .outputFormats = HF.internalResourcesFormat.drawOutputFormats,
                     .pVertexInputModules = vertexInputModules.data(),
                     .vertexInputModuleCount = vertexInputModules.size(),
                     .pPreRasterModules = preRasterModules.data(),

@@ -443,6 +443,7 @@ namespace hf
 
     struct ShaderDrawOutputFormats
     {
+        MultisampleMode sampleMode = MultisampleMode::MSAA_1X;
         uint32_t colorFormatCount = 1;
         TextureFormat colorFormats[MAX_COLOR_ATTACHMENTS] = { VULKAN_API_COLOR_FORMAT };
         TextureFormat depthFormat = TextureFormat::D32_Sfloat;
@@ -480,13 +481,12 @@ namespace hf
 
     struct ShaderLibraryFragmentOutputModuleInfo
     {
-        ShaderDrawOutputFormats drawOutputFormats{};
         ShaderBlendingOptions blendingOptions{};
     };
 
     struct ShaderLibraryCreationInfo
     {
-        MultisampleMode sampleMode = MultisampleMode::MSAA_1X;
+        ShaderDrawOutputFormats outputFormats{};
 
         ShaderLibraryModule<ShaderLibraryVertexInputModuleInfo>* pVertexInputModules{};
         uint32_t vertexInputModuleCount{};
@@ -891,7 +891,6 @@ namespace hf
     {
 		BufferBindingInfo globalUniformBindingInfo{}; //this is binding for global uniform which should contain at least Camera and Time uniforms
         ShaderDrawOutputFormats drawOutputFormats{}; //this is general outline of the render texture you are going to draw on with the shaders.
-        MultisampleMode samplingMode{}; //current multisampling mode.
     };
 
     struct EngineInternalAudioInfo
