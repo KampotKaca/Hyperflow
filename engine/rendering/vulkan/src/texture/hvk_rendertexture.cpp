@@ -64,27 +64,20 @@ namespace hf
         {
             auto& attachmentInfo = info.depthAttachment.value();
 
-            VkRenderingAttachmentInfoKHR attachment
-            {
-                .sType = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO_KHR,
-                .pNext = nullptr,
-                .imageView = nullptr,
-                .imageLayout = (VkImageLayout)attachmentInfo.layout,
-                .clearValue =
-                {
-                    .depthStencil = { attachmentInfo.clearDepth, attachmentInfo.clearStencil }
-                }
-            };
+            VkRenderingAttachmentInfoKHR attachment{};
+            attachment.sType = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO_KHR;
+            attachment.imageLayout = (VkImageLayout)attachmentInfo.layout;
+            attachment.clearValue.depthStencil.depth = attachmentInfo.clearDepth;
+            attachment.clearValue.depthStencil.stencil = attachmentInfo.clearStencil;
 
             SetOperations(attachment.loadOp, attachment.storeOp, attachmentInfo.lsOperation);
             depthStencilAttachment = attachment;
             const auto formatInfo = ChooseDepthStencilFormat(attachmentInfo.mode,
                     VK_IMAGE_TILING_OPTIMAL, VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT);
-            depthStencilInfo =
-            {
-                .format = formatInfo.format,
-                .usage = (VkImageUsageFlags)attachmentInfo.usageFlags
-            };
+
+            depthStencilInfo.format = formatInfo.format;
+            depthStencilInfo.usage = (VkImageUsageFlags)attachmentInfo.usageFlags;
+
             mode = formatInfo.mode;
         }
 
@@ -100,58 +93,46 @@ namespace hf
     {
         if (rn->currentRenderTexture->presentationAttachmentIndex != -1)
         {
-            VkImageMemoryBarrier2 preBarrier =
-            {
-                .sType            = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER_2,
-                .srcStageMask     = 0,
-                .srcAccessMask    = 0,
-                .dstStageMask     = VK_PIPELINE_STAGE_2_COLOR_ATTACHMENT_OUTPUT_BIT,
-                .dstAccessMask    = VK_ACCESS_2_COLOR_ATTACHMENT_WRITE_BIT,
-                .oldLayout        = VK_IMAGE_LAYOUT_UNDEFINED,
-                .newLayout        = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
-                .srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
-                .dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
-                .image = rn->swapchain.images[rn->imageIndex].image,
-                .subresourceRange =
-                {
-                    .aspectMask = VK_IMAGE_ASPECT_COLOR_BIT,
-                    .baseMipLevel = 0,
-                    .levelCount = 1,
-                    .baseArrayLayer = 0,
-                    .layerCount = 1,
-                }
-            };
+            VkImageMemoryBarrier2 preBarrier{};
+            preBarrier.sType            = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER_2;
+            preBarrier.srcStageMask     = 0;
+            preBarrier.srcAccessMask    = 0;
+            preBarrier.dstStageMask     = VK_PIPELINE_STAGE_2_COLOR_ATTACHMENT_OUTPUT_BIT;
+            preBarrier.dstAccessMask    = VK_ACCESS_2_COLOR_ATTACHMENT_WRITE_BIT;
+            preBarrier.oldLayout        = VK_IMAGE_LAYOUT_UNDEFINED;
+            preBarrier.newLayout        = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+            preBarrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+            preBarrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+            preBarrier.image = rn->swapchain.images[rn->imageIndex].image;
 
-            VkDependencyInfo depInfo
-            {
-                .sType = VK_STRUCTURE_TYPE_DEPENDENCY_INFO,
-                .imageMemoryBarrierCount = 1,
-                .pImageMemoryBarriers = &preBarrier,
-            };
+            preBarrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+            preBarrier.subresourceRange.baseMipLevel = 0;
+            preBarrier.subresourceRange.levelCount = 1;
+            preBarrier.subresourceRange.baseArrayLayer = 0;
+            preBarrier.subresourceRange.layerCount = 1;
+
+            VkDependencyInfo depInfo{};
+            depInfo.sType = VK_STRUCTURE_TYPE_DEPENDENCY_INFO;
+            depInfo.imageMemoryBarrierCount = 1;
+            depInfo.pImageMemoryBarriers = &preBarrier;
 
             GRAPHICS_DATA.extensionFunctions.vkCmdPipelineBarrier2KHR(rn->currentCommand, &depInfo);
         }
 
-        auto tex = rn->currentRenderTexture;
-        auto offset = tex->offset;
-        auto extent = tex->extent;
+        const auto tex = rn->currentRenderTexture;
+        const auto offset = tex->offset;
+        const auto extent = tex->extent;
 
-        auto currentView = rn->swapchain.images[rn->imageIndex].view;
+        const auto currentView = rn->swapchain.images[rn->imageIndex].view;
 
-        VkRenderingInfoKHR renderingInfo
-        {
-            .sType = VK_STRUCTURE_TYPE_RENDERING_INFO_KHR,
-            .pNext = nullptr,
-            .renderArea =
-            {
-                .offset = offset,
-                .extent = extent
-            },
-            .layerCount = 1,
-            .viewMask = 0,
-            .colorAttachmentCount = tex->colorAttachmentCount,
-            .pColorAttachments = tex->colorAttachments
-        };
+        VkRenderingInfoKHR renderingInfo{};
+        renderingInfo.sType = VK_STRUCTURE_TYPE_RENDERING_INFO_KHR;
+        renderingInfo.renderArea.offset = offset;
+        renderingInfo.renderArea.extent = extent;
+        renderingInfo.layerCount = 1;
+        renderingInfo.viewMask = 0;
+        renderingInfo.colorAttachmentCount = tex->colorAttachmentCount;
+        renderingInfo.pColorAttachments = tex->colorAttachments;
 
         if ((uint32_t)(tex->mode & DepthStencilMode::Depth) > 0) renderingInfo.pDepthAttachment = &tex->depthStencilAttachment;
         if ((uint32_t)(tex->mode & DepthStencilMode::Stencil) > 0) renderingInfo.pStencilAttachment = &tex->depthStencilAttachment;
@@ -173,34 +154,28 @@ namespace hf
 
         if (rn->prevRenderTexture->presentationAttachmentIndex != -1)
         {
-            VkImageMemoryBarrier2 postBarrier =
-            {
-                .sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER_2,
-                .srcStageMask = VK_PIPELINE_STAGE_2_COLOR_ATTACHMENT_OUTPUT_BIT,
-                .srcAccessMask = VK_ACCESS_2_COLOR_ATTACHMENT_WRITE_BIT,
-                .dstStageMask = 0,
-                .dstAccessMask = 0,
-                .oldLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
-                .newLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR,
-                .srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
-                .dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
-                .image = rn->swapchain.images[rn->imageIndex].image,
-                .subresourceRange =
-                {
-                    .aspectMask = VK_IMAGE_ASPECT_COLOR_BIT,
-                    .baseMipLevel = 0,
-                    .levelCount = 1,
-                    .baseArrayLayer = 0,
-                    .layerCount = 1,
-                }
-            };
+            VkImageMemoryBarrier2 postBarrier{};
+            postBarrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER_2;
+            postBarrier.srcStageMask = VK_PIPELINE_STAGE_2_COLOR_ATTACHMENT_OUTPUT_BIT;
+            postBarrier.srcAccessMask = VK_ACCESS_2_COLOR_ATTACHMENT_WRITE_BIT;
+            postBarrier.dstStageMask = 0;
+            postBarrier.dstAccessMask = 0;
+            postBarrier.oldLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+            postBarrier.newLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
+            postBarrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+            postBarrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+            postBarrier.image = rn->swapchain.images[rn->imageIndex].image;
 
-            VkDependencyInfo depInfo
-            {
-                .sType = VK_STRUCTURE_TYPE_DEPENDENCY_INFO,
-                .imageMemoryBarrierCount = 1,
-                .pImageMemoryBarriers = &postBarrier,
-            };
+            postBarrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+            postBarrier.subresourceRange.baseMipLevel = 0;
+            postBarrier.subresourceRange.levelCount = 1;
+            postBarrier.subresourceRange.baseArrayLayer = 0;
+            postBarrier.subresourceRange.layerCount = 1;
+
+            VkDependencyInfo depInfo{};
+            depInfo.sType = VK_STRUCTURE_TYPE_DEPENDENCY_INFO;
+            depInfo.imageMemoryBarrierCount = 1;
+            depInfo.pImageMemoryBarriers = &postBarrier;
 
             GRAPHICS_DATA.extensionFunctions.vkCmdPipelineBarrier2KHR(rn->currentCommand, &depInfo);
         }
@@ -240,20 +215,18 @@ namespace hf
     DepthStencilFormatInfo ChooseDepthStencilFormat(DepthStencilMode mode,
         VkImageTiling tiling, VkFormatFeatureFlags features)
     {
+        DepthStencilFormatInfo info{};
         switch ((int)mode)
         {
         case 1:
 
             for (auto i : inter::rendering::DEPTH_FORMATS)
             {
-                auto format = (VkFormat)i;
+                const auto format = (VkFormat)i;
                 if (CheckFormatSupport(format, tiling, features))
                 {
-                    DepthStencilFormatInfo info
-                    {
-                        .format = format,
-                        .mode = DepthStencilMode::Depth
-                    };
+                    info.format = format;
+                    info.mode = DepthStencilMode::Depth;
 
                     if (format != VK_FORMAT_D32_SFLOAT && format != VK_FORMAT_D16_UNORM)
                         info.mode |= DepthStencilMode::Stencil;
@@ -266,14 +239,11 @@ namespace hf
 
             for (auto i : inter::rendering::STENCIL_FORMATS)
             {
-                auto format = (VkFormat)i;
+                const auto format = (VkFormat)i;
                 if (CheckFormatSupport(format, tiling, features))
                 {
-                    DepthStencilFormatInfo info
-                    {
-                        .format = format,
-                        .mode = DepthStencilMode::Stencil
-                    };
+                    info.format = format;
+                    info.mode = DepthStencilMode::Stencil;
 
                     if (format != VK_FORMAT_S8_UINT) info.mode |= DepthStencilMode::Depth;
                     return info;
@@ -285,14 +255,13 @@ namespace hf
 
             for (auto i : inter::rendering::DEPTH_STENCIL_FORMATS)
             {
-                auto format = (VkFormat)i;
+                const auto format = (VkFormat)i;
                 if (CheckFormatSupport(format, tiling, features))
                 {
-                    return
-                    {
-                        .format = format,
-                        .mode = DepthStencilMode::Stencil | DepthStencilMode::Depth
-                    };
+                    info.format = format;
+                    info.mode = DepthStencilMode::Stencil | DepthStencilMode::Depth;
+
+                    return info;
                 }
             }
 
@@ -303,7 +272,7 @@ namespace hf
 
     bool CheckFormatSupport(VkFormat format, VkImageTiling tiling, VkFormatFeatureFlags features)
     {
-        auto& prop = GRAPHICS_DATA.device.formatProps[(uint32_t)format];
+        const auto& prop = GRAPHICS_DATA.device.formatProps[(uint32_t)format];
         switch (tiling)
         {
         case VK_IMAGE_TILING_LINEAR:
@@ -317,23 +286,34 @@ namespace hf
         return false;
     }
 
-    bool IsDepthFormat(VkFormat format)
+    bool IsDepthFormat(const VkFormat format)
     {
         return format == VK_FORMAT_D32_SFLOAT || format == VK_FORMAT_D32_SFLOAT_S8_UINT ||
-            format == VK_FORMAT_D24_UNORM_S8_UINT || format == VK_FORMAT_D16_UNORM_S8_UINT || format == VK_FORMAT_D16_UNORM;
+               format == VK_FORMAT_D24_UNORM_S8_UINT || format == VK_FORMAT_D16_UNORM_S8_UINT || format == VK_FORMAT_D16_UNORM;
     }
 
-    bool IsStencilFormat(VkFormat format)
+    bool IsStencilFormat(const VkFormat format)
     {
         return format == VK_FORMAT_S8_UINT || format == VK_FORMAT_D32_SFLOAT_S8_UINT ||
-            format == VK_FORMAT_D24_UNORM_S8_UINT || format == VK_FORMAT_D16_UNORM_S8_UINT;
+               format == VK_FORMAT_D24_UNORM_S8_UINT || format == VK_FORMAT_D16_UNORM_S8_UINT;
     }
 
-    void ResizeRenderTexture(VkRenderTexture* tex, ivec2 newSize)
+    void ResizeRenderTexture(VkRenderTexture* tex, const ivec2 newSize)
     {
         if (newSize.x <= 0 || newSize.y <= 0 ||
             (newSize.x == (int32_t)tex->extent.width && newSize.y == (int32_t)tex->extent.height)) return;
         ClearRenderTexture(tex);
+
+        inter::rendering::TextureCreationInfo_i textureInfo{};
+        textureInfo.type = inter::rendering::TextureType::Tex2D;
+        textureInfo.viewType = inter::rendering::TextureViewType::Tex2D;
+        textureInfo.size = uvec3(newSize, 1);
+        textureInfo.channel = TextureChannel::RGBA;
+        textureInfo.mipLevels = 1;
+        textureInfo.samples = tex->multisampleMode;
+        textureInfo.pTextures = nullptr;
+        textureInfo.textureCount = 1;
+        textureInfo.details.memoryType = BufferMemoryType::Static;
 
         for (uint32_t i = 0; i < tex->colorAttachmentCount; i++)
         {
@@ -342,26 +322,11 @@ namespace hf
             auto& attachment = tex->colorAttachments[i];
             auto& info = tex->colorInfos[i];
 
-            inter::rendering::TextureCreationInfo_i textureInfo
-            {
-                .type = inter::rendering::TextureType::Tex2D,
-                .viewType = inter::rendering::TextureViewType::Tex2D,
-                .size = uvec3(newSize, 1),
-                .channel = TextureChannel::RGBA,
-                .mipLevels = 1,
-                .samples = tex->multisampleMode,
-                .pTextures = nullptr,
-                .textureCount = 1,
-                .details
-                {
-                    .format = (TextureFormat)info.format,
-                    .aspectFlags = TextureAspectFlags::Color,
-                    .tiling = TextureTiling::Optimal,
-                    .usageFlags = TextureUsageFlags::Color,
-                    .memoryType = BufferMemoryType::Static,
-                    .finalLayout = (TextureResultLayoutType)attachment.imageLayout,
-                }
-            };
+            textureInfo.details.format = (TextureFormat)info.format;
+            textureInfo.details.aspectFlags = TextureAspectFlags::Color;
+            textureInfo.details.tiling = TextureTiling::Optimal;
+            textureInfo.details.usageFlags = TextureUsageFlags::Color;
+            textureInfo.details.finalLayout = (TextureResultLayoutType)attachment.imageLayout;
 
             if (tex->multisampleMode == MultisampleMode::MSAA_1X)
                 textureInfo.details.usageFlags |= (TextureUsageFlags)info.usage;
@@ -381,25 +346,10 @@ namespace hf
             auto& attachment = tex->depthStencilAttachment;
             auto& info = tex->depthStencilInfo;
 
-            inter::rendering::TextureCreationInfo_i textureInfo
-            {
-                .type = inter::rendering::TextureType::Tex2D,
-                .viewType = inter::rendering::TextureViewType::Tex2D,
-                .size = uvec3(newSize, 1),
-                .channel = TextureChannel::RGBA,
-                .mipLevels = 1,
-                .samples = tex->multisampleMode,
-                .pTextures = nullptr,
-                .textureCount = 1,
-                .details
-                {
-                    .format = (TextureFormat)info.format,
-                    .tiling = TextureTiling::Optimal,
-                    .usageFlags = TextureUsageFlags::DepthStencil | (TextureUsageFlags)info.usage,
-                    .memoryType = BufferMemoryType::Static,
-                    .finalLayout = (TextureResultLayoutType)attachment.imageLayout,
-                }
-            };
+            textureInfo.details.format = (TextureFormat)info.format;
+            textureInfo.details.tiling = TextureTiling::Optimal;
+            textureInfo.details.usageFlags = TextureUsageFlags::DepthStencil | (TextureUsageFlags)info.usage;
+            textureInfo.details.finalLayout = (TextureResultLayoutType)attachment.imageLayout;
 
             textureInfo.details.aspectFlags = TextureAspectFlags::None;
             if ((uint32_t)(tex->mode & DepthStencilMode::Depth) > 0) textureInfo.details.aspectFlags |= TextureAspectFlags::Depth;
@@ -412,25 +362,10 @@ namespace hf
 
         if (tex->multisampleMode != MultisampleMode::MSAA_1X)
         {
-            inter::rendering::TextureCreationInfo_i textureInfo
-            {
-                .type = inter::rendering::TextureType::Tex2D,
-                .viewType = inter::rendering::TextureViewType::Tex2D,
-                .size = uvec3(newSize, 1),
-                .channel = TextureChannel::RGBA,
-                .mipLevels = 1,
-                .samples = tex->multisampleMode,
-                .pTextures = nullptr,
-                .textureCount = 1,
-                .details
-                {
-                    .format = TextureFormat::Undefined,
-                    .aspectFlags = TextureAspectFlags::Color,
-                    .tiling = TextureTiling::Optimal,
-                    .memoryType = BufferMemoryType::Static,
-                    .finalLayout = TextureResultLayoutType::Color,
-                }
-            };
+            textureInfo.details.format = TextureFormat::Undefined;
+            textureInfo.details.tiling = TextureTiling::Optimal;
+            textureInfo.details.aspectFlags = TextureAspectFlags::Color;
+            textureInfo.details.finalLayout = TextureResultLayoutType::Color;
 
             tex->msaaTextures = std::vector<VkTexture*>(tex->colorAttachmentCount);
             for (uint32_t i = 0; i < tex->colorAttachmentCount; i++)
@@ -454,10 +389,11 @@ namespace hf
             }
         }
 
-        tex->extent = { (uint32_t)newSize.x, (uint32_t)newSize.y };
+        tex->extent.width = (uint32_t)newSize.x;
+        tex->extent.height = (uint32_t)newSize.y;
     }
 
-    VkImage GetRenderTextureImage(const VkRenderTexture* tex, uint32_t imageIndex)
+    VkImage GetRenderTextureImage(const VkRenderTexture* tex, const uint32_t imageIndex)
     {
         if (tex->colorTextures.size() > imageIndex) return tex->colorTextures[imageIndex]->image;
         return tex->depthTexture->image;
@@ -465,8 +401,8 @@ namespace hf
 
     void ClearRenderTexture(VkRenderTexture* tex)
     {
-        for (auto& t : tex->colorTextures) delete t;
-        for (auto& t : tex->msaaTextures) delete t;
+        for (const auto& t : tex->colorTextures) delete t;
+        for (const auto& t : tex->msaaTextures) delete t;
         tex->colorTextures.clear();
         tex->msaaTextures.clear();
 

@@ -3,9 +3,10 @@ project(Hyperflow)
 
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Og")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Wpedantic -Wshadow -Wconversion -Wnull-dereference")
 
     if(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Wpedantic -Wshadow -Wconversion -Wnull-dereference -Werror=vla -Werror=vla-cxx-extension")
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Werror=vla -Werror=vla-cxx-extension")
     elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
         set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Og -g -march=native -static -static-libgcc -static-libstdc++ -pthread")
     endif()

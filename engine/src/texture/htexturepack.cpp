@@ -86,27 +86,30 @@ namespace hf
             for (uint32_t i = 0; i < src.size(); i++)
             {
                 auto& binding = src.at(i);
-                uint32_t from = texInfos.size();
+                const uint32_t from = texInfos.size();
                 for (uint32_t j = 0; j < binding.textures.size(); j++)
                 {
                     auto& bi = binding.textures.atC(j);
                     if (bi.texture)
                     {
-                        texInfos.push_back({
+                        texInfos.push_back(TexturePackBindInfo_i::TextureInfo
+                        {
                             .texture = bi.texture->handle,
                             .index = bi.index
                         });
                     }
                     else
                     {
-                        texInfos.push_back({
-                        .texture = nullptr,
-                        .index = bi.index
-                    });
+                        texInfos.push_back(TexturePackBindInfo_i::TextureInfo
+                        {
+                            .texture = nullptr,
+                            .index = bi.index
+                        });
                     }
                 }
 
-                texPackBindInfos.push_back({
+                texPackBindInfos.push_back(TexturePackBindInfo_i
+                {
                     .type = type,
                     .sampler = binding.sampler,
                     .textures = texInfos.atP(from),

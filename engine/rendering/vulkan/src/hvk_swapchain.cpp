@@ -3,7 +3,7 @@
 
 namespace hf
 {
-    static void DestroyExistingViews(GraphicsSwapChain& swapchain);
+    static void DestroyExistingViews(const GraphicsSwapChain& swapchain);
 
     void CreateSwapchain(VkSurfaceKHR surface, uvec2 targetSize, VsyncMode vsyncMode, GraphicsSwapChain& result)
     {
@@ -50,25 +50,23 @@ namespace hf
             if (maxImageCount > 0 && imageCount > maxImageCount) imageCount = maxImageCount;
 
             auto& transferData = GRAPHICS_DATA.device.transferData;
-            const VkSwapchainCreateInfoKHR createInfo
-            {
-                .sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR,
-                .surface = surface,
-                .minImageCount = imageCount,
-                .imageFormat = details.format.format,
-                .imageColorSpace = details.format.colorSpace,
-                .imageExtent = details.extent,
-                .imageArrayLayers = 1,
-                .imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT,
-                .imageSharingMode = transferData.sharingMode,
-                .queueFamilyIndexCount = (uint32_t)transferData.indices.size(),
-                .pQueueFamilyIndices = transferData.indices.data(),
-                .preTransform = scs.capabilities.currentTransform,
-                .compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR,
-                .presentMode = details.presentMode,
-                .clipped = VK_TRUE,
-                .oldSwapchain = oldSwapchain
-            };
+            VkSwapchainCreateInfoKHR createInfo{};
+            createInfo.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
+            createInfo.surface = surface;
+            createInfo.minImageCount = imageCount;
+            createInfo.imageFormat = details.format.format;
+            createInfo.imageColorSpace = details.format.colorSpace;
+            createInfo.imageExtent = details.extent;
+            createInfo.imageArrayLayers = 1;
+            createInfo.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
+            createInfo.imageSharingMode = transferData.sharingMode;
+            createInfo.queueFamilyIndexCount = (uint32_t)transferData.indices.size();
+            createInfo.pQueueFamilyIndices = transferData.indices.data();
+            createInfo.preTransform = scs.capabilities.currentTransform;
+            createInfo.compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
+            createInfo.presentMode = details.presentMode;
+            createInfo.clipped = VK_TRUE;
+            createInfo.oldSwapchain = oldSwapchain;
 
             VK_HANDLE_EXCEPT(vkCreateSwapchainKHR(GRAPHICS_DATA.device.logicalDevice.device, &createInfo,
                 nullptr, &result.swapchain));
@@ -87,27 +85,25 @@ namespace hf
         auto imageViews = std::vector<VkImageView>(imageCount);
         for (uint32_t i = 0; i < imageCount; i++)
         {
-            VkImageViewCreateInfo createInfo
+            VkImageViewCreateInfo createInfo{};
+            createInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
+            createInfo.image = images[i];
+            createInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
+            createInfo.format = details.format.format;
+            createInfo.components =
             {
-                .sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO,
-                .image = images[i],
-                .viewType = VK_IMAGE_VIEW_TYPE_2D,
-                .format = details.format.format,
-                .components =
-                {
-                    .r = VK_COMPONENT_SWIZZLE_IDENTITY,
-                    .g = VK_COMPONENT_SWIZZLE_IDENTITY,
-                    .b = VK_COMPONENT_SWIZZLE_IDENTITY,
-                    .a = VK_COMPONENT_SWIZZLE_IDENTITY,
-                },
-                .subresourceRange =
-                {
-                    .aspectMask = VK_IMAGE_ASPECT_COLOR_BIT,
-                    .baseMipLevel = 0,
-                    .levelCount = 1,
-                    .baseArrayLayer = 0,
-                    .layerCount = 1,
-                }
+                .r = VK_COMPONENT_SWIZZLE_IDENTITY,
+                .g = VK_COMPONENT_SWIZZLE_IDENTITY,
+                .b = VK_COMPONENT_SWIZZLE_IDENTITY,
+                .a = VK_COMPONENT_SWIZZLE_IDENTITY,
+            };
+            createInfo.subresourceRange =
+            {
+                .aspectMask = VK_IMAGE_ASPECT_COLOR_BIT,
+                .baseMipLevel = 0,
+                .levelCount = 1,
+                .baseArrayLayer = 0,
+                .layerCount = 1,
             };
 
             VK_HANDLE_EXCEPT(vkCreateImageView(GRAPHICS_DATA.device.logicalDevice.device,
@@ -129,15 +125,15 @@ namespace hf
         if (*swapchain != VK_NULL_HANDLE)
         {
             DestroyExistingViews(gc);
-            auto& device = GRAPHICS_DATA.device.logicalDevice.device;
+            const auto& device = GRAPHICS_DATA.device.logicalDevice.device;
             vkDestroySwapchainKHR(device, *swapchain, nullptr);
             *swapchain = VK_NULL_HANDLE;
         }
     }
 
-    void DestroyExistingViews(GraphicsSwapChain& swapchain)
+    void DestroyExistingViews(const GraphicsSwapChain& swapchain)
     {
-        auto& device = GRAPHICS_DATA.device.logicalDevice.device;
+        const auto& device = GRAPHICS_DATA.device.logicalDevice.device;
         for (auto& image : swapchain.images)
             vkDestroyImageView(device, image.view, nullptr);
     }
@@ -163,21 +159,18 @@ namespace hf
         RecreateSwapchain(rn);
     }
 
-    void PresentSwapchain(VkRenderer* rn)
+    void PresentSwapchain(const VkRenderer* rn)
     {
-        auto& image = rn->swapchain.images[rn->imageIndex];
-        VkPresentInfoKHR presentInfo
-        {
-            .sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR,
-            .waitSemaphoreCount = 1,
-            .pWaitSemaphores = &image.isRenderingFinished,
-            .swapchainCount = 1,
-            .pSwapchains = &rn->swapchain.swapchain,
-            .pImageIndices = &rn->imageIndex,
-            .pResults = nullptr,
-        };
+        const auto& image = rn->swapchain.images[rn->imageIndex];
+        VkPresentInfoKHR presentInfo{};
+        presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
+        presentInfo.waitSemaphoreCount = 1;
+        presentInfo.pWaitSemaphores = &image.isRenderingFinished;
+        presentInfo.swapchainCount = 1;
+        presentInfo.pSwapchains = &rn->swapchain.swapchain;
+        presentInfo.pImageIndices = &rn->imageIndex;
 
-        auto result = vkQueuePresentKHR(GRAPHICS_DATA.device.logicalDevice.presentQueue, &presentInfo);
+        const auto result = vkQueuePresentKHR(GRAPHICS_DATA.device.logicalDevice.presentQueue, &presentInfo);
         if (result != VK_SUCCESS && result != VK_ERROR_OUT_OF_DATE_KHR && result != VK_SUBOPTIMAL_KHR)
         {
             LOG_ERROR("Failed to present swapchain %i", rn->currentFrame);
@@ -187,13 +180,13 @@ namespace hf
 
     uvec2 AcquireNextImage(VkRenderer* rn, VkRenderTexture** pTextures, uint32_t textureCount)
     {
-        auto& device = GRAPHICS_DATA.device.logicalDevice.device;
+        const auto& device = GRAPHICS_DATA.device.logicalDevice.device;
         SubmitAllOperations();
         TryRecreateSwapchain(rn);
 
         uint32_t tryCount = 0;
         tryAgain:
-        auto result = vkAcquireNextImageKHR(device,
+        const auto result = vkAcquireNextImageKHR(device,
                             rn->swapchain.swapchain, VULKAN_API_MAX_TIMEOUT,
                             rn->frames[rn->currentFrame].isImageAvailable, VK_NULL_HANDLE, &rn->imageIndex);
         if (result == VK_ERROR_OUT_OF_DATE_KHR)
@@ -216,8 +209,8 @@ namespace hf
     {
         if (rn->imageIndex != UINT32_MAX)
         {
-            auto& device = GRAPHICS_DATA.device.logicalDevice.device;
-            auto& previousImage = rn->swapchain.images[rn->imageIndex];
+            const auto& device = GRAPHICS_DATA.device.logicalDevice.device;
+            const auto& previousImage = rn->swapchain.images[rn->imageIndex];
             vkWaitForFences(device, 1, &previousImage.isInFlight, true, VULKAN_API_MAX_TIMEOUT);
             vkResetFences(device, 1, &previousImage.isInFlight);
         }

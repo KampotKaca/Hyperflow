@@ -35,6 +35,8 @@ namespace hf
     static constexpr VkPipelineDynamicStateCreateInfo SHADER_DYNAMIC
     {
         .sType = VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO,
+        .pNext = nullptr,
+        .flags = 0,
         .dynamicStateCount = SHADER_DYNAMIC_STATES.size(),
         .pDynamicStates = SHADER_DYNAMIC_STATES.data()
     };
@@ -217,9 +219,12 @@ namespace hf
         VkDebugUtilsMessengerCreateInfoEXT debugCreateInfo
         {
             .sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT,
+            .pNext = nullptr,
+            .flags = 0,
             .messageSeverity = VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT,
             .messageType = VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT,
-            .pfnUserCallback = DebugCallback
+            .pfnUserCallback = DebugCallback,
+            .pUserData = nullptr,
         };
         VkDebugUtilsMessengerEXT debugMessenger{};
 #endif

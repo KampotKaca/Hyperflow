@@ -54,7 +54,7 @@ namespace hf
     static void InitExtensions();
     static void InitInstanceVersion();
 
-    static void CreateInstance(VkApplicationInfo& appInfo);
+    static void CreateInstance(const VkApplicationInfo& appInfo);
     static void DestroyInstance();
 
     void LoadVulkan(const inter::rendering::RendererLoadInfo_i& info)
@@ -143,16 +143,14 @@ namespace hf
 
     //--------------------------------------------------------------------------
 
-    void CreateInstance(VkApplicationInfo& appInfo)
+    void CreateInstance(const VkApplicationInfo& appInfo)
     {
-        VkInstanceCreateInfo createInfo
-        {
-            .sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO,
-            .pApplicationInfo = &appInfo,
-            .enabledLayerCount = 0,
-            .enabledExtensionCount = GRAPHICS_DATA.platform.api->requiredExtensionCount,
-            .ppEnabledExtensionNames = GRAPHICS_DATA.platform.api->requiredExtension,
-        };
+        VkInstanceCreateInfo createInfo{};
+        createInfo.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
+        createInfo.pApplicationInfo = &appInfo;
+        createInfo.enabledLayerCount = 0;
+        createInfo.enabledExtensionCount = GRAPHICS_DATA.platform.api->requiredExtensionCount;
+        createInfo.ppEnabledExtensionNames = GRAPHICS_DATA.platform.api->requiredExtension;
 
 #if DEBUG
         createInfo.ppEnabledLayerNames = DEBUG_VALIDATION_LAYERS;

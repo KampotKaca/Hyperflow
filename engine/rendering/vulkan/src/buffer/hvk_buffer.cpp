@@ -16,14 +16,12 @@ namespace hf
         {
             auto bindingInfo = info.pBindings[i];
 
-            const VkDescriptorSetLayoutBinding layout
-            {
-                .binding = info.bindingId + i,
-                .descriptorType = descriptorType,
-                .descriptorCount = bindingInfo.arraySize,
-                .stageFlags = (uint32_t)bindingInfo.usageFlags,
-                .pImmutableSamplers = nullptr,
-            };
+            VkDescriptorSetLayoutBinding layout{};
+            layout.binding = info.bindingId + i;
+            layout.descriptorType = descriptorType;
+            layout.descriptorCount = bindingInfo.arraySize;
+            layout.stageFlags = (uint32_t)bindingInfo.usageFlags;
+            layout.pImmutableSamplers = nullptr;
             GRAPHICS_DATA.preAllocBuffers.descLayoutBindings[i] = layout;
 
             const auto offset = bindingInfo.elementSizeInBytes * bindingInfo.arraySize;
@@ -34,12 +32,10 @@ namespace hf
             bufferSize += offset;
         }
 
-        VkDescriptorSetLayoutCreateInfo layoutInfo
-        {
-            .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO,
-            .bindingCount = info.bindingCount,
-            .pBindings = GRAPHICS_DATA.preAllocBuffers.descLayoutBindings,
-        };
+        VkDescriptorSetLayoutCreateInfo layoutInfo{};
+        layoutInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
+        layoutInfo.bindingCount = info.bindingCount;
+        layoutInfo.pBindings = GRAPHICS_DATA.preAllocBuffers.descLayoutBindings;
 
         VK_HANDLE_EXCEPT(vkCreateDescriptorSetLayout(GRAPHICS_DATA.device.logicalDevice.device,
             &layoutInfo, nullptr, &layout));
@@ -50,12 +46,10 @@ namespace hf
                 {
                     if (!data) throw GENERIC_EXCEPT("[Hyperflow]", "Static buffer is without any data, this is not allowed");
 
-                    const VkStaticBufferInfo createInfo
-                    {
-                        .bufferSize = bufferSize,
-                        .data = data,
-                        .usage = usage,
-                    };
+                    VkStaticBufferInfo createInfo{};
+                    createInfo.bufferSize = bufferSize;
+                    createInfo.data = data;
+                    createInfo.usage = usage;
 
                     CreateStaticBuffer(createInfo, &buffers[0], &memoryRegions[0]);
                     for (uint32_t i = 1; i < FRAMES_IN_FLIGHT; i++) buffers[i] = buffers[0];
@@ -63,15 +57,14 @@ namespace hf
                 break;
             case BufferMemoryType::WriteOnly:
                 {
-                    const VkCreateBufferInfo bufferInfo
-                    {
-                        .size = bufferSize,
-                        .usage = usage,
-                        .sharingMode = VK_SHARING_MODE_EXCLUSIVE,
-                        .memoryType = memoryType,
-                        .pQueueFamilies = nullptr,
-                        .familyCount = 0,
-                    };
+                    VkCreateBufferInfo bufferInfo{};
+                    bufferInfo.size = bufferSize;
+                    bufferInfo.usage = usage;
+                    bufferInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+                    bufferInfo.memoryType = memoryType;
+                    bufferInfo.pQueueFamilies = nullptr;
+                    bufferInfo.familyCount = 0;
+
                     CreateBuffer(bufferInfo, &buffers[0], &memoryRegions[0]);
                     VK_HANDLE_EXCEPT(vmaMapMemory(GRAPHICS_DATA.allocator, memoryRegions[0], &memoryMappings[0]));
                     for (uint32_t i = 1; i < FRAMES_IN_FLIGHT; i++)
@@ -85,15 +78,14 @@ namespace hf
                 {
                     for (uint32_t i = 0; i < FRAMES_IN_FLIGHT; i++)
                     {
-                        VkCreateBufferInfo bufferInfo
-                        {
-                            .size = bufferSize,
-                            .usage = usage,
-                            .sharingMode = VK_SHARING_MODE_EXCLUSIVE,
-                            .memoryType = memoryType,
-                            .pQueueFamilies = nullptr,
-                            .familyCount = 0,
-                        };
+                        VkCreateBufferInfo bufferInfo{};
+                        bufferInfo.size = bufferSize;
+                        bufferInfo.usage = usage;
+                        bufferInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+                        bufferInfo.memoryType = memoryType;
+                        bufferInfo.pQueueFamilies = nullptr;
+                        bufferInfo.familyCount = 0;
+
                         CreateBuffer(bufferInfo, &buffers[i], &memoryRegions[i]);
                         VK_HANDLE_EXCEPT(vmaMapMemory(GRAPHICS_DATA.allocator, memoryRegions[i], &memoryMappings[i]));
                     }
@@ -109,7 +101,7 @@ namespace hf
     {
         if (isLoaded)
         {
-            uint32_t count = GetBufferCount(memoryType);
+            const uint32_t count = GetBufferCount(memoryType);
             for (uint32_t i = 0; i < count; i++)
             {
                 vmaUnmapMemory(GRAPHICS_DATA.allocator, memoryRegions[i]);
@@ -121,12 +113,12 @@ namespace hf
         }
     }
 
-    bool IsValidBuffer(Buffer buffer)
+    bool IsValidBuffer(const Buffer buffer)
     {
         return buffer > 0 && buffer <= GRAPHICS_DATA.buffers.size();
     }
 
-    URef<VkBufferBase>& GetBuffer(Buffer buffer)
+    URef<VkBufferBase>& GetBuffer(const Buffer buffer)
     {
         if (!IsValidBuffer(buffer)) throw GENERIC_EXCEPT("[Hyperflow]", "Invalid buffer");
         return GRAPHICS_DATA.buffers[buffer - 1];
@@ -134,34 +126,33 @@ namespace hf
 
     void SetupBuffer(const URef<VkBufferBase>& buffer)
     {
-        uint32_t totalWrites = 0, bufferOffset = 0, count = GetBufferCount(buffer->memoryType);
+        uint32_t totalWrites = 0, bufferOffset = 0;
+        const uint32_t count = GetBufferCount(buffer->memoryType);
 
         for (uint32_t i = 0; i < buffer->bindings.size(); i++)
         {
-            auto& binding = buffer->bindings[i];
+            const auto& binding = buffer->bindings[i];
             for (uint32_t j = 0; j < binding.arraySize; j++)
             {
                 for (uint32_t frame = 0; frame < count; frame++)
                 {
-                    GRAPHICS_DATA.preAllocBuffers.bufferInfos[totalWrites] =
-                    {
-                        .buffer = buffer->buffers[frame],
-                        .offset = bufferOffset,
-                        .range = binding.elementSizeInBytes * binding.arraySize,
-                    };
+                    VkDescriptorBufferInfo bufferInfo{};
+                    bufferInfo.buffer = buffer->buffers[frame];
+                    bufferInfo.offset = bufferOffset;
+                    bufferInfo.range = binding.elementSizeInBytes * binding.arraySize;
+                    GRAPHICS_DATA.preAllocBuffers.bufferInfos[totalWrites] = bufferInfo;
 
-                    GRAPHICS_DATA.preAllocBuffers.descWrites[totalWrites] =
-                    {
-                        .sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
-                        .dstSet = buffer->descriptorSets[frame],
-                        .dstBinding = buffer->bindingIndex + i,
-                        .dstArrayElement = j,
-                        .descriptorCount = 1,
-                        .descriptorType = buffer->descriptorType,
-                        .pImageInfo = nullptr,
-                        .pBufferInfo = &GRAPHICS_DATA.preAllocBuffers.bufferInfos[totalWrites],
-                        .pTexelBufferView = nullptr,
-                    };
+                    VkWriteDescriptorSet writeSet{};
+                    writeSet.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+                    writeSet.dstSet = buffer->descriptorSets[frame];
+                    writeSet.dstBinding = buffer->bindingIndex + i;
+                    writeSet.dstArrayElement = j;
+                    writeSet.descriptorCount = 1;
+                    writeSet.descriptorType = buffer->descriptorType;
+                    writeSet.pImageInfo = nullptr;
+                    writeSet.pBufferInfo = &GRAPHICS_DATA.preAllocBuffers.bufferInfos[totalWrites];
+                    writeSet.pTexelBufferView = nullptr;
+                    GRAPHICS_DATA.preAllocBuffers.descWrites[totalWrites] = writeSet;
 
                     totalWrites++;
                 }
@@ -179,19 +170,19 @@ namespace hf
     }
     void UploadBuffers(const VkRenderer* rn, const inter::rendering::BufferUploadInfo_i& info)
     {
-        auto currentFrame = rn->currentFrame;
+        const auto currentFrame = rn->currentFrame;
 
         for (uint32_t i = 0; i < info.uploadPacketCount; i++)
         {
             auto& packet = info.pUploadPackets[i];
-            auto& buffer = GetBuffer(packet.buffer);
+            const auto& buffer = GetBuffer(packet.buffer);
             memcpy((uint8_t*)buffer->memoryMappings[currentFrame] + packet.offsetInBytes,
                 &info.pUniformDataBuffer[packet.bufferRange.start], packet.bufferRange.size);
         }
     }
     void BindBuffers(const VkRenderer* rn, const inter::rendering::BufferBindInfo_i& info)
     {
-        auto currentFrame = rn->currentFrame;
+        const auto currentFrame = rn->currentFrame;
 
         for (uint32_t i = 0; i < info.bufferCount; i++)
         {
@@ -206,9 +197,9 @@ namespace hf
 
     static void SetMemoryTypeFlags(BufferMemoryType memoryType, VmaAllocationCreateInfo* result);
 
-    uint32_t GetMemoryType(uint32_t filter, VkMemoryPropertyFlags props)
+    uint32_t GetMemoryType(const uint32_t filter, const VkMemoryPropertyFlags props)
     {
-        auto& memProps = GRAPHICS_DATA.device.memProps;
+        const auto& memProps = GRAPHICS_DATA.device.memProps;
         for (uint32_t i = 0; i < memProps.memoryTypeCount; i++)
         {
             if ((filter & (1 << i)) && (memProps.memoryTypes[i].propertyFlags & props) == props) return i;
@@ -219,15 +210,13 @@ namespace hf
 
     void CreateBuffer(const VkCreateBufferInfo& info, VkBuffer* bufferResult, VmaAllocation* memResult)
     {
-        VkBufferCreateInfo bufferInfo
-        {
-            .sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO,
-            .size = info.size,
-            .usage = info.usage,
-            .sharingMode = info.sharingMode,
-            .queueFamilyIndexCount = info.familyCount,
-            .pQueueFamilyIndices = info.pQueueFamilies
-        };
+        VkBufferCreateInfo bufferInfo{};
+        bufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
+        bufferInfo.size = info.size;
+        bufferInfo.usage = info.usage;
+        bufferInfo.sharingMode = info.sharingMode;
+        bufferInfo.queueFamilyIndexCount = info.familyCount;
+        bufferInfo.pQueueFamilyIndices = info.pQueueFamilies;
 
         VmaAllocationCreateInfo vmaAllocInfo{};
         SetMemoryTypeFlags(info.memoryType, &vmaAllocInfo);
@@ -236,7 +225,7 @@ namespace hf
         VK_HANDLE_EXCEPT(vmaCreateBuffer(GRAPHICS_DATA.allocator, &bufferInfo, &vmaAllocInfo, bufferResult, memResult, &resultInfo));
     }
 
-    void AllocateImage(BufferMemoryType memoryType, VkImage image, VmaAllocation* memResult)
+    void AllocateImage(const BufferMemoryType memoryType, const VkImage image, VmaAllocation* memResult)
     {
         VmaAllocationCreateInfo vmaAllocInfo{};
         switch (memoryType)
@@ -272,18 +261,20 @@ namespace hf
 
     void CreateStagingBuffer(uint64_t bufferSize, const void* data, VkBuffer* bufferResult, VmaAllocation* memoryResult)
     {
-        QueueFamilyIndices& familyIndices = GRAPHICS_DATA.device.familyIndices;
-        std::array queus = { familyIndices.transferFamily.value(), familyIndices.graphicsFamily.value() };
-
-        const VkCreateBufferInfo createInfo
+        const QueueFamilyIndices& familyIndices = GRAPHICS_DATA.device.familyIndices;
+        std::array queus =
         {
-            .size = bufferSize,
-            .usage = VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
-            .sharingMode = VK_SHARING_MODE_CONCURRENT,
-            .memoryType = BufferMemoryType::WriteOnly,
-            .pQueueFamilies = queus.data(),
-            .familyCount = queus.size()
+            familyIndices.transferFamily.value(),
+            familyIndices.graphicsFamily.value()
         };
+
+        VkCreateBufferInfo createInfo{};
+        createInfo.size = bufferSize;
+        createInfo.usage = VK_BUFFER_USAGE_TRANSFER_SRC_BIT;
+        createInfo.sharingMode = VK_SHARING_MODE_CONCURRENT;
+        createInfo.memoryType = BufferMemoryType::WriteOnly;
+        createInfo.pQueueFamilies = queus.data();
+        createInfo.familyCount = queus.size();
 
         CreateBuffer(createInfo, bufferResult, memoryResult);
         UploadBufferMemory(*memoryResult, data, 0, bufferSize);
@@ -291,40 +282,39 @@ namespace hf
 
     void CreateStaticBuffer(const VkStaticBufferInfo& info, VkBuffer* bufferResult, VmaAllocation* memoryResult)
     {
-        VkBuffer stagingBuffer;
-        VmaAllocation stagingBufferMemory;
+        VkBuffer stagingBuffer{};
+        VmaAllocation stagingBufferMemory{};
         CreateStagingBuffer(info.bufferSize, info.data, &stagingBuffer, &stagingBufferMemory);
-        QueueFamilyIndices& familyIndices = GRAPHICS_DATA.device.familyIndices;
-        uint32_t queus[2] = { familyIndices.transferFamily.value(), familyIndices.graphicsFamily.value() };
-
-        VkCreateBufferInfo createInfo
+        const QueueFamilyIndices& familyIndices = GRAPHICS_DATA.device.familyIndices;
+        uint32_t queus[2]
         {
-            .size = info.bufferSize,
-            .usage = VK_BUFFER_USAGE_TRANSFER_DST_BIT | info.usage,
-            .sharingMode = VK_SHARING_MODE_CONCURRENT,
-            .memoryType = BufferMemoryType::Static,
-            .pQueueFamilies = queus,
-            .familyCount = 2
+            familyIndices.transferFamily.value(),
+            familyIndices.graphicsFamily.value()
         };
+
+        VkCreateBufferInfo createInfo{};
+        createInfo.size = info.bufferSize;
+        createInfo.usage = VK_BUFFER_USAGE_TRANSFER_DST_BIT | info.usage;
+        createInfo.sharingMode = VK_SHARING_MODE_CONCURRENT;
+        createInfo.memoryType = BufferMemoryType::Static;
+        createInfo.pQueueFamilies = queus;
+        createInfo.familyCount = 2;
 
         CreateBuffer(createInfo, bufferResult, memoryResult);
 
-        VkBufferCopy copyRegion
-        {
-            .srcOffset = 0,
-            .dstOffset = 0,
-            .size = info.bufferSize
-        };
+        VkBufferCopy copyRegion{};
+        copyRegion.srcOffset = 0;
+        copyRegion.dstOffset = 0;
+        copyRegion.size = info.bufferSize;
 
-        VkCopyBufferToBufferOperation copyOperation
-        {
-            .srcBuffer = stagingBuffer,
-            .srcMemory = stagingBufferMemory,
-            .dstBuffer = *bufferResult,
-            .dstMemory = *memoryResult,
-            .regionCount = 1,
-            .deleteSrcAfterCopy = true
-        };
+        VkCopyBufferToBufferOperation copyOperation{};
+        copyOperation.srcBuffer = stagingBuffer;
+        copyOperation.srcMemory = stagingBufferMemory;
+        copyOperation.dstBuffer = *bufferResult;
+        copyOperation.dstMemory = *memoryResult;
+        copyOperation.regionCount = 1;
+        copyOperation.deleteSrcAfterCopy = true;
+
         copyOperation.pRegions[0] = copyRegion;
         StageCopyOperation(copyOperation);
     }
@@ -336,7 +326,7 @@ namespace hf
 
     inline void CopyBufferToBuffer(VkCommandBuffer command)
     {
-        for (auto& operation : GRAPHICS_DATA.bufferToBufferCopyOperations)
+        for (const auto& operation : GRAPHICS_DATA.bufferToBufferCopyOperations)
         {
             vkCmdCopyBuffer(command, operation.srcBuffer, operation.dstBuffer,
                             operation.regionCount, operation.pRegions);
@@ -356,7 +346,7 @@ namespace hf
             BufferOperation(GRAPHICS_DATA.transferPool.buffers[0],
                 GRAPHICS_DATA.device.logicalDevice.transferQueue, CopyBufferToBuffer);
 
-            for (auto& operation : GRAPHICS_DATA.bufferToBufferCopyOperations)
+            for (const auto& operation : GRAPHICS_DATA.bufferToBufferCopyOperations)
             {
                 if (operation.deleteSrcAfterCopy)
                     vmaDestroyBuffer(GRAPHICS_DATA.allocator, operation.srcBuffer, operation.srcMemory);
@@ -380,12 +370,10 @@ namespace hf
         memcpy((uint8_t*)mapping + fullOffset, data, fullSize);
     }
 
-    void BufferOperation(VkCommandBuffer command, VkQueue queue, void (*CopyCallback)(VkCommandBuffer command))
+    void BufferOperation(const VkCommandBuffer command, const VkQueue queue, void (*CopyCallback)(VkCommandBuffer command))
     {
-        VkCommandBufferBeginInfo beginInfo
-        {
-            .sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO,
-        };
+        VkCommandBufferBeginInfo beginInfo{};
+        beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
 
         VK_HANDLE_EXCEPT(vkResetCommandBuffer(command, 0));
         VK_HANDLE_EXCEPT(vkBeginCommandBuffer(command, &beginInfo));
@@ -393,18 +381,16 @@ namespace hf
         CopyCallback(command);
 
         VK_HANDLE_EXCEPT(vkEndCommandBuffer(command));
-        VkSubmitInfo submitInfo
-        {
-            .sType = VK_STRUCTURE_TYPE_SUBMIT_INFO,
-            .commandBufferCount = 1,
-            .pCommandBuffers = &command
-        };
+        VkSubmitInfo submitInfo{};
+        submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+        submitInfo.commandBufferCount = 1;
+        submitInfo.pCommandBuffers = &command;
 
         VK_HANDLE_EXCEPT(vkQueueSubmit(queue, 1, &submitInfo, VK_NULL_HANDLE));
         VK_HANDLE_EXCEPT(vkQueueWaitIdle(queue));
     }
 
-    static void SetMemoryTypeFlags(BufferMemoryType memoryType, VmaAllocationCreateInfo* result)
+    static void SetMemoryTypeFlags(const BufferMemoryType memoryType, VmaAllocationCreateInfo* result)
     {
         switch (memoryType)
         {

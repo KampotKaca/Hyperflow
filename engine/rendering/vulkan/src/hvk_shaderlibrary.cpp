@@ -51,12 +51,15 @@ namespace hf
             static constexpr VkGraphicsPipelineLibraryCreateInfoEXT vertexInputLibInfo
             {
                 .sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_LIBRARY_CREATE_INFO_EXT,
+                .pNext = nullptr,
                 .flags = VK_GRAPHICS_PIPELINE_LIBRARY_VERTEX_INPUT_INTERFACE_BIT_EXT
             };
 
             static constexpr VkPipelineInputAssemblyStateCreateInfo inputAssembly
             {
                 .sType = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO,
+                .pNext = nullptr,
+                .flags = 0,
                 .topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST,
                 .primitiveRestartEnable = VK_FALSE
             };
@@ -97,12 +100,15 @@ namespace hf
             static constexpr VkGraphicsPipelineLibraryCreateInfoEXT preRasterLibInfo
             {
                 .sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_LIBRARY_CREATE_INFO_EXT,
+                .pNext = nullptr,
                 .flags = VK_GRAPHICS_PIPELINE_LIBRARY_PRE_RASTERIZATION_SHADERS_BIT_EXT
             };
 
             static constexpr VkPipelineViewportStateCreateInfo viewportState
             {
                 .sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO,
+                .pNext = nullptr,
+                .flags = 0,
                 .viewportCount = 1,
                 .pViewports = nullptr,
                 .scissorCount = 1,
@@ -151,6 +157,7 @@ namespace hf
             static constexpr VkGraphicsPipelineLibraryCreateInfoEXT fragmentLibInfo
             {
                 .sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_LIBRARY_CREATE_INFO_EXT,
+                .pNext = nullptr,
                 .flags = VK_GRAPHICS_PIPELINE_LIBRARY_FRAGMENT_SHADER_BIT_EXT
             };
 
@@ -194,25 +201,23 @@ namespace hf
             static constexpr VkGraphicsPipelineLibraryCreateInfoEXT fragmentOutputLibInfo
             {
                 .sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_LIBRARY_CREATE_INFO_EXT,
+                .pNext = nullptr,
                 .flags = VK_GRAPHICS_PIPELINE_LIBRARY_FRAGMENT_OUTPUT_INTERFACE_BIT_EXT
             };
 
-            renderingInfos[i] =
-            {
-                .sType = VK_STRUCTURE_TYPE_PIPELINE_RENDERING_CREATE_INFO_KHR,
-                .pNext = &fragmentOutputLibInfo,
-                .colorAttachmentCount = moduleInfo.drawOutputFormats.colorFormatCount,
-                .pColorAttachmentFormats = (VkFormat*)moduleInfo.drawOutputFormats.colorFormats,
-                .depthAttachmentFormat = (VkFormat)moduleInfo.drawOutputFormats.depthFormat,
-                .stencilAttachmentFormat = (VkFormat)moduleInfo.drawOutputFormats.stencilFormat
-            };
+            VkPipelineRenderingCreateInfo renderingInfo{};
+            renderingInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_RENDERING_CREATE_INFO_KHR;
+            renderingInfo.pNext = &fragmentOutputLibInfo;
+            renderingInfo.colorAttachmentCount = moduleInfo.drawOutputFormats.colorFormatCount;
+            renderingInfo.pColorAttachmentFormats = (VkFormat*)moduleInfo.drawOutputFormats.colorFormats;
+            renderingInfo.depthAttachmentFormat = (VkFormat)moduleInfo.drawOutputFormats.depthFormat;
+            renderingInfo.stencilAttachmentFormat = (VkFormat)moduleInfo.drawOutputFormats.stencilFormat;
+            renderingInfos[i] = renderingInfo;
 
             outputFormats[moduleIndex] = moduleInfo.drawOutputFormats;
 
-            VkPipelineColorBlendAttachmentState colorBlendAttachment
-            {
-                .colorWriteMask = VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT,
-            };
+            VkPipelineColorBlendAttachmentState colorBlendAttachment{};
+            colorBlendAttachment.colorWriteMask = VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT;
 
             if (moduleInfo.blendingOptions.blendMode == ShaderBlendMode::Alpha)
             {
@@ -234,27 +239,22 @@ namespace hf
                 colorBlendAttachment.dstAlphaBlendFactor = VK_BLEND_FACTOR_ZERO;
                 colorBlendAttachment.alphaBlendOp = VK_BLEND_OP_ADD;
             }
-
             colorBlendAttachments[i] = colorBlendAttachment;
 
-            colorBlendStateInfos[i] =
-            {
-                .sType = VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO,
-                .logicOpEnable = moduleInfo.blendingOptions.blendMode == ShaderBlendMode::Logical,
-                .logicOp = (VkLogicOp)moduleInfo.blendingOptions.blendOp,
-                .attachmentCount = 1,
-                .pAttachments = &colorBlendAttachments[i],
-                .blendConstants = { 0.0f, 0.0f, 0.0f, 0.0f },
-            };
+            VkPipelineColorBlendStateCreateInfo blendAttachmentInfo{};
+            blendAttachmentInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO;
+            blendAttachmentInfo.logicOpEnable = moduleInfo.blendingOptions.blendMode == ShaderBlendMode::Logical;
+            blendAttachmentInfo.logicOp = (VkLogicOp)moduleInfo.blendingOptions.blendOp;
+            blendAttachmentInfo.attachmentCount = 1;
+            blendAttachmentInfo.pAttachments = &colorBlendAttachments[i];
+            colorBlendStateInfos[i] = blendAttachmentInfo;
 
-            VkGraphicsPipelineCreateInfo fragmentOutputPipelineInfo
-            {
-                .sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO,
-                .pNext = &renderingInfos[i],
-                .flags = VK_PIPELINE_CREATE_LIBRARY_BIT_KHR,
-                .pMultisampleState = &multisampling,
-                .pColorBlendState = &colorBlendStateInfos[i],
-            };
+            VkGraphicsPipelineCreateInfo fragmentOutputPipelineInfo{};
+            fragmentOutputPipelineInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
+            fragmentOutputPipelineInfo.pNext = &renderingInfos[i];
+            fragmentOutputPipelineInfo.flags = VK_PIPELINE_CREATE_LIBRARY_BIT_KHR;
+            fragmentOutputPipelineInfo.pMultisampleState = &multisampling;
+            fragmentOutputPipelineInfo.pColorBlendState = &colorBlendStateInfos[i];
 
             pipelineCreateInfos[moduleIndex] = fragmentOutputPipelineInfo;
             moduleIndex++;

@@ -56,7 +56,7 @@ namespace hf
     void DestroySurface(VkRenderer* rn);
     void SetupViewportAndScissor(VkRenderer* rn);
 
-    void PresentSwapchain(VkRenderer* rn);
+    void PresentSwapchain(const VkRenderer* rn);
     uvec2 AcquireNextImage(VkRenderer* rn, VkRenderTexture** pTextures, uint32_t textureCount);
     void DelayUntilPreviousFrameFinish(VkRenderer* rn);
 
