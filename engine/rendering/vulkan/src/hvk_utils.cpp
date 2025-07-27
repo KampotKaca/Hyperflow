@@ -54,13 +54,12 @@ namespace hf
         std::vector<VkExtensionProperties> availableExtensions(extensionCount);
         VK_HANDLE_EXCEPT(vkEnumerateDeviceExtensionProperties(device, nullptr, &extensionCount, availableExtensions.data()));
 
-        for (uint32_t i = 0; i < GRAPHICS_DATA.platform.api->deviceExtensionCount; i++)
+        for (const auto ext : DEVICE_EXTENSIONS)
         {
-            auto& ext = GRAPHICS_DATA.platform.api->deviceExtension[i];
             bool found = false;
             for (const auto& extension : availableExtensions)
             {
-                if (strcmp(extension.extensionName, ext))
+                if (strcmp(extension.extensionName, ext) != 0)
                 {
                     found = true;
                     break;

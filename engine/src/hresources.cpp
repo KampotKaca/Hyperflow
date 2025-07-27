@@ -375,12 +375,12 @@ namespace hf
             {
                 std::array vertexInputModules
                 {
-                    (ShaderLibraryModule<ShaderLibraryVertexInputModuleInfo>)
+                    ShaderLibraryModule<ShaderLibraryVertexInputModuleInfo>
                     {
                         .resultId = &HF.staticResources.engineShadersLibModules.quadVertexInput,
                         .module = { .attribute = HF.staticResources.quadAttrib },
                     },
-                    (ShaderLibraryModule<ShaderLibraryVertexInputModuleInfo>)
+                    ShaderLibraryModule<ShaderLibraryVertexInputModuleInfo>
                     {
                         .resultId = &HF.staticResources.engineShadersLibModules.defaultVertexInput,
                         .module = { .attribute = HF.staticResources.defaultAttrib },
@@ -389,7 +389,7 @@ namespace hf
 
                 std::array preRasterModules
                 {
-                    (ShaderLibraryModule<ShaderLibraryPreRasterModuleInfo>) //Axis Lines Vertex Shader
+                    ShaderLibraryModule<ShaderLibraryPreRasterModuleInfo> //Axis Lines Vertex Shader
                     {
                         .resultId = &HF.staticResources.engineShadersLibModules.axisLinesPreRaster,
                         .module =
@@ -399,7 +399,7 @@ namespace hf
                             .layout = HF.staticResources.axisLinesShaderLayout
                         }
                     },
-                    (ShaderLibraryModule<ShaderLibraryPreRasterModuleInfo>) //Skybox Vertex Shader
+                    ShaderLibraryModule<ShaderLibraryPreRasterModuleInfo> //Skybox Vertex Shader
                     {
                         .resultId = &HF.staticResources.engineShadersLibModules.skyboxPreRaster,
                         .module =
@@ -413,7 +413,7 @@ namespace hf
 
                 std::array fragmentModules
                 {
-                    (ShaderLibraryModule<ShaderLibraryFragmentModuleInfo>)
+                    ShaderLibraryModule<ShaderLibraryFragmentModuleInfo>
                     {
                         .resultId = &HF.staticResources.engineShadersLibModules.axisLinesFragment,
                         .module =
@@ -430,7 +430,7 @@ namespace hf
                             .layout = HF.staticResources.axisLinesShaderLayout,
                         }
                     },
-                    (ShaderLibraryModule<ShaderLibraryFragmentModuleInfo>)
+                    ShaderLibraryModule<ShaderLibraryFragmentModuleInfo>
                     {
                         .resultId = &HF.staticResources.engineShadersLibModules.skyboxFragment,
                         .module =
@@ -451,7 +451,7 @@ namespace hf
 
                 std::array fragmentOutputModules
                 {
-                    (ShaderLibraryModule<ShaderLibraryFragmentOutputModuleInfo>) //Axis lines
+                    ShaderLibraryModule<ShaderLibraryFragmentOutputModuleInfo> //Axis lines
                     {
                         .resultId = &HF.staticResources.engineShadersLibModules.axisLinesFragmentOutput,
                         .module =
@@ -464,7 +464,7 @@ namespace hf
                             },
                         }
                     },
-                    (ShaderLibraryModule<ShaderLibraryFragmentOutputModuleInfo>) //Skybox
+                    ShaderLibraryModule<ShaderLibraryFragmentOutputModuleInfo> //Skybox
                     {
                         .resultId = &HF.staticResources.engineShadersLibModules.skyboxFragmentOutput,
                         .module =

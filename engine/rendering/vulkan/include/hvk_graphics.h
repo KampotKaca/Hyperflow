@@ -26,6 +26,19 @@ namespace hf
         void* userData);
 #endif
 
+    static constexpr std::array SHADER_DYNAMIC_STATES =
+    {
+        VK_DYNAMIC_STATE_VIEWPORT,
+        VK_DYNAMIC_STATE_SCISSOR
+    };
+
+    static constexpr VkPipelineDynamicStateCreateInfo SHADER_DYNAMIC
+    {
+        .sType = VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO,
+        .dynamicStateCount = SHADER_DYNAMIC_STATES.size(),
+        .pDynamicStates = SHADER_DYNAMIC_STATES.data()
+    };
+
     struct CommandPool
     {
         VkCommandPool pool{};

@@ -12,20 +12,7 @@ namespace hf
         const auto library = (VkShaderLibrary*)info.library;
         auto& outputFormat = library->outputFormats[info.modules.fragmentOutputModuleId];
 
-        static constexpr std::array dynamicStates =
-        {
-            VK_DYNAMIC_STATE_VIEWPORT,
-            VK_DYNAMIC_STATE_SCISSOR
-        };
-
-        static constexpr VkPipelineDynamicStateCreateInfo dynamicState
-        {
-            .sType = VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO,
-            .dynamicStateCount = dynamicStates.size(),
-            .pDynamicStates = dynamicStates.data()
-        };
-
-        std::array libs
+        const std::array libs
         {
             GetShaderLibraryModule(library, info.modules.vertexInputModuleId),
             GetShaderLibraryModule(library, info.modules.preRasterModuleId),
@@ -33,30 +20,24 @@ namespace hf
             GetShaderLibraryModule(library, info.modules.fragmentOutputModuleId),
         };
 
-        VkPipelineLibraryCreateInfoKHR libraryInfo
-        {
-            .sType = VK_STRUCTURE_TYPE_PIPELINE_LIBRARY_CREATE_INFO_KHR,
-            .libraryCount = libs.size(),
-            .pLibraries = libs.data()
-        };
+        VkPipelineRenderingCreateInfo renderingInfo{};
+        renderingInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_RENDERING_CREATE_INFO_KHR;
+        renderingInfo.colorAttachmentCount = outputFormat.colorFormatCount;
+        renderingInfo.pColorAttachmentFormats = (VkFormat*)outputFormat.colorFormats;
+        renderingInfo.depthAttachmentFormat = (VkFormat)outputFormat.depthFormat;
+        renderingInfo.stencilAttachmentFormat = (VkFormat)outputFormat.stencilFormat;
 
-        VkPipelineRenderingCreateInfo renderingInfo
-        {
-            .sType = VK_STRUCTURE_TYPE_PIPELINE_RENDERING_CREATE_INFO_KHR,
-            .pNext = &libraryInfo,
-            .colorAttachmentCount = outputFormat.colorFormatCount,
-            .pColorAttachmentFormats = (VkFormat*)outputFormat.colorFormats,
-            .depthAttachmentFormat = (VkFormat)outputFormat.depthFormat,
-            .stencilAttachmentFormat = (VkFormat)outputFormat.stencilFormat
-        };
+        VkPipelineLibraryCreateInfoKHR libraryInfo{};
+        libraryInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LIBRARY_CREATE_INFO_KHR;
+        libraryInfo.pNext = &renderingInfo;
+        libraryInfo.libraryCount = libs.size();
+        libraryInfo.pLibraries = libs.data();
 
-        const VkGraphicsPipelineCreateInfo pipelineInfo
-        {
-            .sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO,
-            .pNext = &renderingInfo,
-            .pDynamicState = &dynamicState,
-            .layout = shaderLayout->layout,
-        };
+        VkGraphicsPipelineCreateInfo pipelineInfo{};
+        pipelineInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
+        pipelineInfo.pNext = &libraryInfo;
+        pipelineInfo.pDynamicState = &SHADER_DYNAMIC;
+        pipelineInfo.layout = shaderLayout->layout;
 
         VK_HANDLE_EXCEPT(vkCreateGraphicsPipelines(GRAPHICS_DATA.device.logicalDevice.device,
             VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &pipeline));

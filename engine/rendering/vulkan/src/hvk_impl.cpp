@@ -112,19 +112,19 @@ namespace hf::inter::rendering
     TextureSampler DefineTextureSampler(const TextureSamplerDefinitionInfo& info)
     {
         GRAPHICS_DATA.textureSamplers.emplace_back(MakeURef<VkTextureSampler>(info));
-        return GRAPHICS_DATA.textureSamplers.size();
+        return (TextureSampler)GRAPHICS_DATA.textureSamplers.size();
     }
 
     TextureLayout DefineTextureLayout(const TextureLayoutDefinitionInfo& info)
     {
         GRAPHICS_DATA.textureLayouts.emplace_back(MakeURef<VkTextureLayout>(info));
-        return GRAPHICS_DATA.textureLayouts.size();
+        return (TextureLayout)GRAPHICS_DATA.textureLayouts.size();
     }
 
     BufferAttrib DefineVertBufferAttrib(const BufferAttribDefinitionInfo& info, uint32_t fullStride)
     {
         GRAPHICS_DATA.bufferAttribs.emplace_back(MakeURef<VkBufferAttrib>(info, fullStride));
-        return GRAPHICS_DATA.bufferAttribs.size();
+        return (BufferAttrib)GRAPHICS_DATA.bufferAttribs.size();
     }
 
     uint32_t GetVertBufferAttribSize(BufferAttrib attrib)
@@ -136,13 +136,13 @@ namespace hf::inter::rendering
     Buffer DefineUniformBuffer(const BufferDefinitionInfo& info)
     {
         GRAPHICS_DATA.buffers.emplace_back(MakeURef<VkUniformBuffer>(info));
-        return GRAPHICS_DATA.buffers.size();
+        return (Buffer)GRAPHICS_DATA.buffers.size();
     }
 
     Buffer DefineStorageBuffer(const StorageBufferDefinitionInfo& info)
     {
         GRAPHICS_DATA.buffers.emplace_back(MakeURef<VkStorageBuffer>(info));
-        return GRAPHICS_DATA.buffers.size();
+        return (Buffer)GRAPHICS_DATA.buffers.size();
     }
 
     void UploadBuffer(const void* rn, const BufferUploadInfo_i& info)
@@ -158,13 +158,13 @@ namespace hf::inter::rendering
     BufferAllocator DefineBufferAllocator(const BufferAllocatorDefinitionInfo& info)
     {
         GRAPHICS_DATA.bufferAllocators.emplace_back(MakeURef<VkBufferAllocator>(info));
-        return GRAPHICS_DATA.bufferAllocators.size();
+        return (BufferAllocator)GRAPHICS_DATA.bufferAllocators.size();
     }
 
     ShaderLayout DefineShaderLayout(const ShaderLayoutDefinitionInfo& info)
     {
         GRAPHICS_DATA.shaderLayouts.emplace_back(MakeURef<VkShaderLayout>(info));
-        return GRAPHICS_DATA.shaderLayouts.size();
+        return (ShaderLayout)GRAPHICS_DATA.shaderLayouts.size();
     }
 
     void BindShaderLayout(void* rn, ShaderLayout setup)
@@ -296,7 +296,7 @@ namespace hf::inter::rendering
     void ApplyRenderAttachmentDependencies(void* rn, RenderAttachmentDependencyInfo* pInfos, uint32_t count)
     {
         static VkImageMemoryBarrier2 barriers[RENDERING_MAX_NUM_RENDER_ATTACHMENT_DEPENDENCIES]{};
-        auto* vrn = (VkRenderer*)rn;
+        const auto* vrn = (VkRenderer*)rn;
 
         for (uint32_t i = 0; i < count; i++)
         {
@@ -324,7 +324,7 @@ namespace hf::inter::rendering
             };
         }
 
-        VkDependencyInfo depInfo
+        const VkDependencyInfo depInfo
         {
             .sType = VK_STRUCTURE_TYPE_DEPENDENCY_INFO,
             .imageMemoryBarrierCount = count,
@@ -341,7 +341,7 @@ namespace hf::inter::rendering
 
     void BeginRendering(void* rn, void* tex)
     {
-        auto vrn = (VkRenderer*)rn;
+        const auto vrn = (VkRenderer*)rn;
 
         if (vrn->currentRenderTexture)
             throw GENERIC_EXCEPT("[Hyperflow]", "Cannot begin rendering while rendering is in progress");
@@ -352,7 +352,7 @@ namespace hf::inter::rendering
 
     void EndRendering(void* rn)
     {
-        auto vrn = (VkRenderer*)rn;
+        const auto vrn = (VkRenderer*)rn;
 
         if (!vrn->currentRenderTexture)
             throw GENERIC_EXCEPT("[Hyperflow]", "Cannot end rendering if rendering is not in progress");

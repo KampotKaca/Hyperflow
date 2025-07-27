@@ -19,7 +19,7 @@ namespace app
         {
             std::array vertexInputModules
             {
-                (hf::ShaderLibraryModule<hf::ShaderLibraryVertexInputModuleInfo>) //Default
+                hf::ShaderLibraryModule<hf::ShaderLibraryVertexInputModuleInfo> //Default
                 {
                     .resultId = &APP_SHADERS.modules.defaultVertexInput,
                     .module = { .attribute = APP_BUFFER_ATTRIBUTES.pos_nor_tex },
@@ -28,7 +28,7 @@ namespace app
 
             std::array preRasterModules
             {
-                (hf::ShaderLibraryModule<hf::ShaderLibraryPreRasterModuleInfo>) //Default Lit Vertex Shader
+                hf::ShaderLibraryModule<hf::ShaderLibraryPreRasterModuleInfo> //Default Lit Vertex Shader
                 {
                     .resultId = &APP_SHADERS.modules.default_lit_preRaster,
                     .module =
@@ -37,7 +37,7 @@ namespace app
                         .layout = APP_SHADER_LAYOUTS.default_lit
                     }
                 },
-                (hf::ShaderLibraryModule<hf::ShaderLibraryPreRasterModuleInfo>) //Default Unlit Vertex Shader
+                hf::ShaderLibraryModule<hf::ShaderLibraryPreRasterModuleInfo> //Default Unlit Vertex Shader
                 {
                     .resultId = &APP_SHADERS.modules.default_unlit_preRaster,
                     .module =
@@ -50,7 +50,7 @@ namespace app
 
             std::array fragmentModules
             {
-                (hf::ShaderLibraryModule<hf::ShaderLibraryFragmentModuleInfo>) //Default Lit Fragment
+                hf::ShaderLibraryModule<hf::ShaderLibraryFragmentModuleInfo> //Default Lit Fragment
                 {
                     .resultId = &APP_SHADERS.modules.default_lit_fragment,
                     .module =
@@ -59,7 +59,7 @@ namespace app
                         .layout = APP_SHADER_LAYOUTS.default_lit
                     }
                 },
-                (hf::ShaderLibraryModule<hf::ShaderLibraryFragmentModuleInfo>) //Default Unlit Fragment
+                hf::ShaderLibraryModule<hf::ShaderLibraryFragmentModuleInfo> //Default Unlit Fragment
                 {
                     .resultId = &APP_SHADERS.modules.default_unlit_fragment,
                     .module =
@@ -72,7 +72,7 @@ namespace app
 
             std::array fragmentOutputModules
             {
-                (hf::ShaderLibraryModule<hf::ShaderLibraryFragmentOutputModuleInfo>) //Default
+                hf::ShaderLibraryModule<hf::ShaderLibraryFragmentOutputModuleInfo> //Default
                 {
                     .resultId = &APP_SHADERS.modules.defaultFragmentOutput,
                     .module =

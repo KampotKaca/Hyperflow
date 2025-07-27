@@ -93,7 +93,7 @@ namespace hf
             for (uint32_t i = 0; i < preRasterModules.size(); i++)
             {
                 auto& moduleInfo = lib->preRasterModules[i];
-                uint32_t vertexCodeIndex = -1, tesselationControlCodeIndex = -1,
+                int32_t vertexCodeIndex = -1, tesselationControlCodeIndex = -1,
                 tesselationEvaluationCodeIndex = -1, geometryCodeIndex = -1;
 
                 switch (HF.renderingApi.type)
@@ -101,24 +101,24 @@ namespace hf
                 case RenderingApiType::Vulkan:
                 {
                     HANDLE_FILE(moduleInfo.vertexShaderPath, ".vert.spv", "Vertex")
-                    vertexCodeIndex = moduleCodes.size() - 1;
+                    vertexCodeIndex = (int32_t)moduleCodes.size() - 1;
 
                     if (moduleInfo.tessellationControlShaderPath.has_value())
                     {
                         HANDLE_FILE(moduleInfo.tessellationControlShaderPath.value(), ".tesc.spv", "Tesselation Control")
-                        tesselationControlCodeIndex = moduleCodes.size() - 1;
+                        tesselationControlCodeIndex = (int32_t)moduleCodes.size() - 1;
                     }
 
                     if (moduleInfo.tessellationEvaluationShaderPath.has_value())
                     {
                         HANDLE_FILE(moduleInfo.tessellationEvaluationShaderPath.value(), ".tese.spv", "Tesselation Evaluation")
-                        tesselationEvaluationCodeIndex = moduleCodes.size() - 1;
+                        tesselationEvaluationCodeIndex = (int32_t)moduleCodes.size() - 1;
                     }
 
                     if (moduleInfo.geometryShaderPath.has_value())
                     {
                         HANDLE_FILE(moduleInfo.geometryShaderPath.value(), ".geom.spv", "Geometry")
-                        geometryCodeIndex = moduleCodes.size() - 1;
+                        geometryCodeIndex = (int32_t)moduleCodes.size() - 1;
                     }
                 }
                 break;
@@ -135,46 +135,46 @@ namespace hf
                 };
 
                 {
-                    auto& v = moduleCodes[vertexCodeIndex];
+                    auto& v = moduleCodes[(size_t)vertexCodeIndex];
                     info.vertexShaderCode = v.data();
                     info.vertexShaderCodeSize = (uint32_t)v.size();
                 }
 
                 if (tesselationControlCodeIndex != -1)
                 {
-                    auto& v = moduleCodes[tesselationControlCodeIndex];
+                    auto& v = moduleCodes[(size_t)tesselationControlCodeIndex];
                     info.tessellationControlShaderCode = v.data();
                     info.tessellationControlShaderCodeSize = (uint32_t)v.size();
                 }
 
                 if (tesselationEvaluationCodeIndex != -1)
                 {
-                    auto& v = moduleCodes[tesselationEvaluationCodeIndex];
+                    auto& v = moduleCodes[(size_t)tesselationEvaluationCodeIndex];
                     info.tessellationEvaluationShaderCode = v.data();
                     info.tessellationEvaluationShaderCodeSize = (uint32_t)v.size();
                 }
 
                 if (geometryCodeIndex != -1)
                 {
-                    auto& v = moduleCodes[geometryCodeIndex];
+                    auto& v = moduleCodes[(size_t)geometryCodeIndex];
                     info.geometryShaderCode = v.data();
                     info.geometryShaderCodeSize = (uint32_t)v.size();
                 }
 
-                preRasterModules[i] = std::move(info);
+                preRasterModules[i] = info;
             }
 
             for (uint32_t i = 0; i < fragmentModules.size(); i++)
             {
                 auto& moduleInfo = lib->fragmentModules[i];
-                uint32_t fragmentCodeIndex = -1;
+                int32_t fragmentCodeIndex = -1;
 
                 switch (HF.renderingApi.type)
                 {
                 case RenderingApiType::Vulkan:
                 {
                     HANDLE_FILE(moduleInfo.fragmentShaderPath, ".frag.spv", "Fragment")
-                    fragmentCodeIndex = moduleCodes.size() - 1;
+                    fragmentCodeIndex = (int32_t)moduleCodes.size() - 1;
                 }
                     break;
                 case RenderingApiType::Direct3D:
@@ -189,12 +189,12 @@ namespace hf
                 };
 
                 {
-                    auto& v = moduleCodes[fragmentCodeIndex];
+                    auto& v = moduleCodes[(size_t)fragmentCodeIndex];
                     info.fragmentShaderCode = v.data();
                     info.fragmentShaderCodeSize = (uint32_t)v.size();
                 }
 
-                fragmentModules[i] = std::move(info);
+                fragmentModules[i] = info;
             }
 
             ShaderLibraryCreationInfo_i info

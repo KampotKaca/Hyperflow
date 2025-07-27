@@ -15,7 +15,6 @@ namespace hf
             };
         }
 
-        uint32_t totalBufferDescriptors = 0;
         uint32_t totalDescriptorSets = 0;
 
         for (uint32_t i = 0; i < info.bufferCount; i++)
@@ -27,7 +26,6 @@ namespace hf
             descCount *= bufferCount;
             poolSizes[buffer->descriptorType].descriptorCount += descCount;
 
-            totalBufferDescriptors += descCount;
             totalDescriptorSets += bufferCount;
         }
 
@@ -87,7 +85,6 @@ namespace hf
         VK_HANDLE_EXCEPT(vkAllocateDescriptorSets(device, &allocInfo, GRAPHICS_DATA.preAllocBuffers.descriptors));
 
         {
-            uint32_t currentIndex = 0;
             std::array<uint32_t, VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT + 1> setIndices{};
             for (uint32_t i = 0; i < info.bufferCount; i++)
             {
@@ -98,7 +95,6 @@ namespace hf
                     const auto descType = buffer->descriptorType;
                     buffer->descriptorSets[k] = GRAPHICS_DATA.preAllocBuffers.descriptors[offsets[descType] + setIndices[descType]];
                     setIndices[descType]++;
-                    currentIndex++;
                 }
                 SetupBuffer(buffer);
             }

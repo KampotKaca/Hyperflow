@@ -33,10 +33,15 @@ namespace hf
                 .resolveMode = VK_RESOLVE_MODE_NONE,
                 .clearValue =
                 {
-                    attachmentInfo.clearColor.x,
-                    attachmentInfo.clearColor.y,
-                    attachmentInfo.clearColor.z,
-                    attachmentInfo.clearColor.w
+                    .color =
+                    {
+                        {
+                            attachmentInfo.clearColor.x,
+                            attachmentInfo.clearColor.y,
+                            attachmentInfo.clearColor.z,
+                            attachmentInfo.clearColor.w
+                        }
+                    }
                 }
             };
 
@@ -51,7 +56,7 @@ namespace hf
             {
                 if (presentationAttachmentIndex != -1)
                     throw GENERIC_EXCEPT("[Hyperflow]", "Only one color attachment can be used for presentation");
-                presentationAttachmentIndex = i;
+                presentationAttachmentIndex = (int32_t)i;
             }
         }
 
@@ -327,12 +332,12 @@ namespace hf
     void ResizeRenderTexture(VkRenderTexture* tex, ivec2 newSize)
     {
         if (newSize.x <= 0 || newSize.y <= 0 ||
-            (newSize.x == tex->extent.width && newSize.y == tex->extent.height)) return;
+            (newSize.x == (int32_t)tex->extent.width && newSize.y == (int32_t)tex->extent.height)) return;
         ClearRenderTexture(tex);
 
         for (uint32_t i = 0; i < tex->colorAttachmentCount; i++)
         {
-            if (i == tex->presentationAttachmentIndex) continue;
+            if ((int32_t)i == tex->presentationAttachmentIndex) continue;
 
             auto& attachment = tex->colorAttachments[i];
             auto& info = tex->colorInfos[i];
@@ -444,7 +449,7 @@ namespace hf
                 attachment.resolveImageLayout = (VkImageLayout)texture->details.finalLayout;
                 attachment.resolveMode = VK_RESOLVE_MODE_AVERAGE_BIT;
 
-                if (i == tex->presentationAttachmentIndex) attachment.imageView = texture->view;
+                if ((int32_t)i == tex->presentationAttachmentIndex) attachment.imageView = texture->view;
                 else attachment.resolveImageView = texture->view;
             }
         }

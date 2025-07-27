@@ -40,9 +40,8 @@ namespace hf
     {
         if (shutdownCallback) shutdownCallback();
 
-        for (uint32_t i = 0; i < swapchain.images.size(); ++i)
+        for (auto& image : swapchain.images)
         {
-            auto& image = swapchain.images[i];
             DestroySemaphore(GRAPHICS_DATA.device, image.isRenderingFinished);
             DestroyFence(GRAPHICS_DATA.device, image.isInFlight);
         }
@@ -115,8 +114,8 @@ namespace hf
             .queueCreateInfoCount = (uint32_t)queueCreateInfos.size(),
             .pQueueCreateInfos = queueCreateInfos.data(),
             .enabledLayerCount = 0,
-            .enabledExtensionCount = GRAPHICS_DATA.platform.api->deviceExtensionCount,
-            .ppEnabledExtensionNames = GRAPHICS_DATA.platform.api->deviceExtension,
+            .enabledExtensionCount = DEVICE_EXTENSIONS.size(),
+            .ppEnabledExtensionNames = DEVICE_EXTENSIONS.data(),
         };
 
 #if DEBUG

@@ -4,30 +4,46 @@
 namespace hf
 {
     static VkShaderModule AddShaderStage(const void* code, uint32_t codeSize, VkShaderStageFlagBits stage, VkPipelineShaderStageCreateInfo* result);
-    static void GetMultisampling(MultisampleMode mode, VkPipelineMultisampleStateCreateInfo& result);
 
     VkShaderLibrary::VkShaderLibrary(const inter::rendering::ShaderLibraryCreationInfo_i& info)
     {
         uint32_t moduleCount = info.vertexInputModuleCount + info.preRasterModuleCount + info.fragmentModuleCount + info.fragmentOutputModuleCount;
-        auto shaderModules = std::vector<VkShaderModule>();
-        auto stageCreateInfos = std::vector<VkPipelineShaderStageCreateInfo>(info.preRasterModuleCount * 4 + info.fragmentModuleCount);
+        uint32_t maxShadingModules = info.preRasterModuleCount * 4 + info.fragmentModuleCount;
 
-        VkGraphicsPipelineCreateInfo pipelineCreateInfos[moduleCount];
-        VkPipelineVertexInputStateCreateInfo vertexInputInfos[info.vertexInputModuleCount];
-        VkPipelineRasterizationStateCreateInfo rasterizers[info.preRasterModuleCount];
-        VkPipelineDepthStencilStateCreateInfo depthStencilStates[info.fragmentModuleCount];
+        std::vector<VkShaderModule> shaderModules(maxShadingModules);
+        std::vector<VkPipelineShaderStageCreateInfo> stageCreateInfos(maxShadingModules);
 
-        VkPipelineRenderingCreateInfo renderingInfos[info.fragmentOutputModuleCount];
-        VkPipelineColorBlendAttachmentState colorBlendAttachments[info.fragmentOutputModuleCount];
-        VkPipelineColorBlendStateCreateInfo colorBlendStateInfos[info.fragmentOutputModuleCount];
+        std::vector<VkGraphicsPipelineCreateInfo> pipelineCreateInfos(moduleCount);
+        std::vector<VkPipelineVertexInputStateCreateInfo> vertexInputInfos(info.vertexInputModuleCount);
+        std::vector<VkPipelineRasterizationStateCreateInfo> rasterizers(info.preRasterModuleCount);
+        std::vector<VkPipelineDepthStencilStateCreateInfo> depthStencilStates(info.fragmentModuleCount);
+
+        std::vector<VkPipelineRenderingCreateInfo> renderingInfos(info.fragmentOutputModuleCount);
+        std::vector<VkPipelineColorBlendAttachmentState> colorBlendAttachments(info.fragmentOutputModuleCount);
+        std::vector<VkPipelineColorBlendStateCreateInfo> colorBlendStateInfos(info.fragmentOutputModuleCount);
 
         modules = std::vector<VkPipeline>(moduleCount);
 
         uint32_t moduleIndex = 0;
-        uint32_t stageInfoIndex = 0;
+        uint32_t stageInfoCount = 0;
 
         VkPipelineMultisampleStateCreateInfo multisampling{};
-        GetMultisampling(info.sampleMode, multisampling);
+        multisampling.sType = VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO;
+        multisampling.rasterizationSamples = (VkSampleCountFlagBits)info.sampleMode;
+        multisampling.alphaToCoverageEnable = VK_FALSE;
+        multisampling.alphaToOneEnable = VK_FALSE;
+
+        if (info.sampleMode != MultisampleMode::MSAA_1X &&
+            GRAPHICS_DATA.device.features.sampleRateShading)
+        {
+            multisampling.sampleShadingEnable = VK_TRUE;
+            multisampling.minSampleShading = VK_MSAA_MIN_SAMPLE_SHADING;
+        }
+        else
+        {
+            multisampling.sampleShadingEnable = VK_FALSE;
+            multisampling.minSampleShading = 1.0f;
+        }
 
         for (uint32_t i = 0; i < info.vertexInputModuleCount; i++)
         {
@@ -46,23 +62,20 @@ namespace hf
             };
 
             const auto& attribute = GetAttrib(moduleInfo.attribute);
-            vertexInputInfos[i] =
-            {
-                .sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO,
-                .vertexBindingDescriptionCount = 1,
-                .pVertexBindingDescriptions = &attribute->bindingDescription,
-                .vertexAttributeDescriptionCount = (uint32_t)attribute->attribDescriptions.size(),
-                .pVertexAttributeDescriptions = attribute->attribDescriptions.data(),
-            };
+            VkPipelineVertexInputStateCreateInfo vInfo{};
+            vInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
+            vInfo.vertexBindingDescriptionCount = 1;
+            vInfo.pVertexBindingDescriptions = &attribute->bindingDescription;
+            vInfo.vertexAttributeDescriptionCount = (uint32_t)attribute->attribDescriptions.size();
+            vInfo.pVertexAttributeDescriptions = attribute->attribDescriptions.data();
+            vertexInputInfos[i] = vInfo;
 
-            VkGraphicsPipelineCreateInfo vertexInputPipelineInfo
-            {
-                .sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO,
-                .pNext = &vertexInputLibInfo,
-                .flags = VK_PIPELINE_CREATE_LIBRARY_BIT_KHR,
-                .pVertexInputState = &vertexInputInfos[i],
-                .pInputAssemblyState = &inputAssembly,
-            };
+            VkGraphicsPipelineCreateInfo vertexInputPipelineInfo{};
+            vertexInputPipelineInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
+            vertexInputPipelineInfo.pNext = &vertexInputLibInfo;
+            vertexInputPipelineInfo.flags = VK_PIPELINE_CREATE_LIBRARY_BIT_KHR;
+            vertexInputPipelineInfo.pVertexInputState = &vertexInputInfos[i];
+            vertexInputPipelineInfo.pInputAssemblyState = &inputAssembly;
 
             pipelineCreateInfos[moduleIndex] = vertexInputPipelineInfo;
             moduleIndex++;
@@ -73,8 +86,8 @@ namespace hf
             auto module = x;\
             if (module)\
             {\
+                shaderModules[stageInfoCount + stageCount] = module;\
                 stageCount++;\
-                shaderModules.push_back(module);\
             }\
         }
 
@@ -87,81 +100,49 @@ namespace hf
                 .flags = VK_GRAPHICS_PIPELINE_LIBRARY_PRE_RASTERIZATION_SHADERS_BIT_EXT
             };
 
-            static constexpr VkViewport dummyViewport
-            {
-                .x = 0.0f,
-                .y = 0.0f,
-                .width = 1.0f,
-                .height = 1.0f,
-                .minDepth = 0.0f,
-                .maxDepth = 1.0f
-            };
-
-            static constexpr VkRect2D dummyScissor
-            {
-                .offset = { 0, 0 },
-                .extent = { 1, 1 }
-            };
-
             static constexpr VkPipelineViewportStateCreateInfo viewportState
             {
                 .sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO,
                 .viewportCount = 1,
-                .pViewports = &dummyViewport,
+                .pViewports = nullptr,
                 .scissorCount = 1,
-                .pScissors = &dummyScissor,
-            };
-
-            static constexpr std::array dynamicStates =
-            {
-                VK_DYNAMIC_STATE_VIEWPORT,
-                VK_DYNAMIC_STATE_SCISSOR
-            };
-
-            static constexpr VkPipelineDynamicStateCreateInfo dynamicState
-            {
-                .sType = VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO,
-                .dynamicStateCount = dynamicStates.size(),
-                .pDynamicStates = dynamicStates.data()
+                .pScissors = nullptr,
             };
 
             uint32_t stageCount = 0;
-            ADD_MODULE(AddShaderStage(moduleInfo.vertexShaderCode, moduleInfo.vertexShaderCodeSize, VK_SHADER_STAGE_VERTEX_BIT, &stageCreateInfos[stageInfoIndex + stageCount]))
-            ADD_MODULE(AddShaderStage(moduleInfo.tessellationControlShaderCode, moduleInfo.tessellationControlShaderCodeSize, VK_SHADER_STAGE_TESSELLATION_CONTROL_BIT, &stageCreateInfos[stageInfoIndex + stageCount]));
-            ADD_MODULE(AddShaderStage(moduleInfo.tessellationEvaluationShaderCode, moduleInfo.tessellationEvaluationShaderCodeSize, VK_SHADER_STAGE_TESSELLATION_EVALUATION_BIT, &stageCreateInfos[stageInfoIndex + stageCount]));
-            ADD_MODULE(AddShaderStage(moduleInfo.geometryShaderCode, moduleInfo.geometryShaderCodeSize, VK_SHADER_STAGE_GEOMETRY_BIT, &stageCreateInfos[stageInfoIndex + stageCount]));
+            ADD_MODULE(AddShaderStage(moduleInfo.vertexShaderCode, moduleInfo.vertexShaderCodeSize, VK_SHADER_STAGE_VERTEX_BIT, &stageCreateInfos[stageInfoCount + stageCount]))
+            ADD_MODULE(AddShaderStage(moduleInfo.tessellationControlShaderCode, moduleInfo.tessellationControlShaderCodeSize, VK_SHADER_STAGE_TESSELLATION_CONTROL_BIT, &stageCreateInfos[stageInfoCount + stageCount]));
+            ADD_MODULE(AddShaderStage(moduleInfo.tessellationEvaluationShaderCode, moduleInfo.tessellationEvaluationShaderCodeSize, VK_SHADER_STAGE_TESSELLATION_EVALUATION_BIT, &stageCreateInfos[stageInfoCount + stageCount]));
+            ADD_MODULE(AddShaderStage(moduleInfo.geometryShaderCode, moduleInfo.geometryShaderCodeSize, VK_SHADER_STAGE_GEOMETRY_BIT, &stageCreateInfos[stageInfoCount + stageCount]));
 
-            rasterizers[i] =
-            {
-                .sType = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO,
-                .depthClampEnable = VK_FALSE,
-                .rasterizerDiscardEnable = VK_FALSE,
-                .polygonMode = VK_POLYGON_MODE_FILL,
-                .cullMode = (VkCullModeFlags)moduleInfo.options.cullMode,
-                .frontFace = (VkFrontFace)moduleInfo.options.faceDirection,
-                .depthBiasEnable = VK_FALSE,
-                .depthBiasConstantFactor = 0.0f,
-                .depthBiasClamp = 0.0f,
-                .depthBiasSlopeFactor = 0.0f,
-                .lineWidth = 1.0f,
-            };
+            VkPipelineRasterizationStateCreateInfo rasterInfo{};
+            rasterInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;
+            rasterInfo.depthClampEnable = VK_FALSE;
+            rasterInfo.rasterizerDiscardEnable = VK_FALSE;
+            rasterInfo.polygonMode = VK_POLYGON_MODE_FILL;
+            rasterInfo.cullMode = (VkCullModeFlags)moduleInfo.options.cullMode;
+            rasterInfo.frontFace = (VkFrontFace)moduleInfo.options.faceDirection;
+            rasterInfo.depthBiasEnable = VK_FALSE;
+            rasterInfo.depthBiasConstantFactor = 0.0f;
+            rasterInfo.depthBiasClamp = 0.0f;
+            rasterInfo.depthBiasSlopeFactor = 0.0f;
+            rasterInfo.lineWidth = 1.0f;
+            rasterizers[i] = rasterInfo;
 
-            VkGraphicsPipelineCreateInfo preRasterPipelineInfo
-            {
-                .sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO,
-                .pNext = &preRasterLibInfo,
-                .flags = VK_PIPELINE_CREATE_LIBRARY_BIT_KHR,
-                .stageCount = stageCount,
-                .pStages = &stageCreateInfos[stageInfoIndex],
-                .pViewportState = &viewportState,
-                .pRasterizationState = &rasterizers[i],
-                .pDynamicState = &dynamicState,
-                .layout = GetShaderLayout(moduleInfo.layout)->layout,
-            };
-
+            VkGraphicsPipelineCreateInfo preRasterPipelineInfo{};
+            preRasterPipelineInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
+            preRasterPipelineInfo.pNext = &preRasterLibInfo;
+            preRasterPipelineInfo.flags = VK_PIPELINE_CREATE_LIBRARY_BIT_KHR;
+            preRasterPipelineInfo.stageCount = stageCount;
+            preRasterPipelineInfo.pStages = &stageCreateInfos[stageInfoCount];
+            preRasterPipelineInfo.pViewportState = &viewportState;
+            preRasterPipelineInfo.pRasterizationState = &rasterizers[i];
+            preRasterPipelineInfo.pDynamicState = &SHADER_DYNAMIC;
+            preRasterPipelineInfo.layout = GetShaderLayout(moduleInfo.layout)->layout;
             pipelineCreateInfos[moduleIndex] = preRasterPipelineInfo;
+
             moduleIndex++;
-            stageInfoIndex += 4;
+            stageInfoCount += stageCount;
         }
 
         for (uint32_t i = 0; i < info.fragmentModuleCount; i++)
@@ -174,37 +155,34 @@ namespace hf
             };
 
             uint32_t stageCount = 0;
-            ADD_MODULE(AddShaderStage(moduleInfo.fragmentShaderCode, moduleInfo.fragmentShaderCodeSize, VK_SHADER_STAGE_FRAGMENT_BIT, &stageCreateInfos[stageInfoIndex + stageCount]));
+            ADD_MODULE(AddShaderStage(moduleInfo.fragmentShaderCode, moduleInfo.fragmentShaderCodeSize, VK_SHADER_STAGE_FRAGMENT_BIT, &stageCreateInfos[stageInfoCount + stageCount]));
 
-            depthStencilStates[i] =
-            {
-                .sType = VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO,
-                .depthTestEnable = moduleInfo.depthStencilOptions.enableDepth,
-                .depthWriteEnable = moduleInfo.depthStencilOptions.writeDepth,
-                .depthCompareOp = (VkCompareOp)moduleInfo.depthStencilOptions.comparisonFunc,
-                .depthBoundsTestEnable = moduleInfo.depthStencilOptions.enableDepthBounds,
-                .stencilTestEnable = moduleInfo.depthStencilOptions.enableStencil,
-                .front = (VkStencilOpState)(VkStencilOp)moduleInfo.depthStencilOptions.frontStencil,
-                .back = (VkStencilOpState)(VkStencilOp)moduleInfo.depthStencilOptions.backStencil,
-                .minDepthBounds = moduleInfo.depthStencilOptions.depthBounds.x,
-                .maxDepthBounds = moduleInfo.depthStencilOptions.depthBounds.y
-            };
+            VkPipelineDepthStencilStateCreateInfo depthStencilState{};
+            depthStencilState.sType = VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO;
+            depthStencilState.depthTestEnable = moduleInfo.depthStencilOptions.enableDepth;
+            depthStencilState.depthWriteEnable = moduleInfo.depthStencilOptions.writeDepth;
+            depthStencilState.depthCompareOp = (VkCompareOp)moduleInfo.depthStencilOptions.comparisonFunc;
+            depthStencilState.depthBoundsTestEnable = moduleInfo.depthStencilOptions.enableDepthBounds;
+            depthStencilState.stencilTestEnable = moduleInfo.depthStencilOptions.enableStencil;
+            depthStencilState.front = (VkStencilOpState)(VkStencilOp)moduleInfo.depthStencilOptions.frontStencil;
+            depthStencilState.back = (VkStencilOpState)(VkStencilOp)moduleInfo.depthStencilOptions.backStencil;
+            depthStencilState.minDepthBounds = moduleInfo.depthStencilOptions.depthBounds.x;
+            depthStencilState.maxDepthBounds = moduleInfo.depthStencilOptions.depthBounds.y;
+            depthStencilStates[i] = depthStencilState;
 
-            VkGraphicsPipelineCreateInfo fragmentPipelineInfo
-            {
-                .sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO,
-                .pNext = &fragmentLibInfo,
-                .flags = VK_PIPELINE_CREATE_LIBRARY_BIT_KHR,
-                .stageCount = stageCount,
-                .pStages = &stageCreateInfos[stageInfoIndex],
-                .pMultisampleState = &multisampling,
-                .pDepthStencilState = &depthStencilStates[i],
-                .layout = GetShaderLayout(moduleInfo.layout)->layout,
-            };
-
+            VkGraphicsPipelineCreateInfo fragmentPipelineInfo{};
+            fragmentPipelineInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
+            fragmentPipelineInfo.pNext = &fragmentLibInfo;
+            fragmentPipelineInfo.flags = VK_PIPELINE_CREATE_LIBRARY_BIT_KHR;
+            fragmentPipelineInfo.stageCount = stageCount;
+            fragmentPipelineInfo.pStages = &stageCreateInfos[stageInfoCount];
+            fragmentPipelineInfo.pMultisampleState = &multisampling;
+            fragmentPipelineInfo.pDepthStencilState = &depthStencilStates[i];
+            fragmentPipelineInfo.layout = GetShaderLayout(moduleInfo.layout)->layout;
             pipelineCreateInfos[moduleIndex] = fragmentPipelineInfo;
+
             moduleIndex++;
-            stageInfoIndex++;
+            stageInfoCount += stageCount;
         }
 
 #undef ADD_MODULE
@@ -283,16 +261,16 @@ namespace hf
         }
 
         VK_HANDLE_EXCEPT(vkCreateGraphicsPipelines(GRAPHICS_DATA.device.logicalDevice.device,
-            VK_NULL_HANDLE, moduleCount, pipelineCreateInfos, nullptr, modules.data()));
+            VK_NULL_HANDLE, (uint32_t)pipelineCreateInfos.size(), pipelineCreateInfos.data(), nullptr, modules.data()));
 
-        for (uint32_t i = 0; i < shaderModules.size(); i++)
+        for (uint32_t i = 0; i < stageInfoCount; i++)
             vkDestroyShaderModule(GRAPHICS_DATA.device.logicalDevice.device, shaderModules[i], nullptr);
     }
 
     VkShaderLibrary::~VkShaderLibrary()
     {
-        for (uint32_t i = 0; i < modules.size(); i++)
-            vkDestroyPipeline(GRAPHICS_DATA.device.logicalDevice.device, modules[i], nullptr);
+        for (const auto& module : modules)
+            vkDestroyPipeline(GRAPHICS_DATA.device.logicalDevice.device, module, nullptr);
         modules.clear();
     }
 
@@ -300,52 +278,24 @@ namespace hf
     {
         if (codeSize > 0 && code != nullptr)
         {
-            VkShaderModule module;
-
-            const VkShaderModuleCreateInfo createInfo
-            {
-                .sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO,
-                .codeSize = codeSize,
-                .pCode = (uint32_t*)code,
-            };
+            VkShaderModule module{};
+            VkShaderModuleCreateInfo createInfo{};
+            createInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
+            createInfo.codeSize = codeSize;
+            createInfo.pCode = (uint32_t*)code;
             VK_HANDLE_EXCEPT(vkCreateShaderModule(GRAPHICS_DATA.device.logicalDevice.device, &createInfo, nullptr, &module));
 
-            *result =
-            {
-                .sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO,
-                .stage = stage,
-                .module = module,
-                .pName = "main"
-            };
+            VkPipelineShaderStageCreateInfo stageInfo{};
+            stageInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
+            stageInfo.stage = stage;
+            stageInfo.module = module;
+            stageInfo.pName = "main";
+
+            *result = stageInfo;
             return module;
         }
 
         return nullptr;
-    }
-
-    void GetMultisampling(MultisampleMode mode, VkPipelineMultisampleStateCreateInfo& result)
-    {
-        VkPipelineMultisampleStateCreateInfo multisampling
-        {
-            .sType = VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO,
-            .rasterizationSamples = (VkSampleCountFlagBits)mode,
-            .alphaToCoverageEnable = VK_FALSE,
-            .alphaToOneEnable = VK_FALSE
-        };
-
-        if (mode != MultisampleMode::MSAA_1X &&
-            GRAPHICS_DATA.device.features.sampleRateShading)
-        {
-            multisampling.sampleShadingEnable = VK_TRUE;
-            multisampling.minSampleShading = VK_MSAA_MIN_SAMPLE_SHADING;
-        }
-        else
-        {
-            multisampling.sampleShadingEnable = VK_FALSE;
-            multisampling.minSampleShading = 1.0f;
-        }
-
-        result = std::move(multisampling);
     }
 
     VkPipeline GetShaderLibraryModule(const VkShaderLibrary* lib, uint32_t moduleId)

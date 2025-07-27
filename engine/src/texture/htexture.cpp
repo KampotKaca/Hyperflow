@@ -65,7 +65,7 @@ namespace hf
                 info.desiredChannel = STRING_TO_TEXTURE_CHANNEL(vView);
             }
 
-            info.mipLevels = std::stoi(root["mipLevels"].val().str);
+            info.mipLevels = (uint32_t)std::stoi(root["mipLevels"].val().str);
 
             utils::ReadTextureDetails(&tree, &root, info.details);
 
@@ -193,14 +193,13 @@ namespace hf
                     }
                 }
 
-                window::SetIcons(win, images.data(), images.size());
+                window::SetIcons(win, images.data(), (uint32_t)images.size());
                 for (auto& image : images) stbi_image_free(image.data);
                 images.clear();
 
                 return true;
             }
 
-            Fail:
             LOG_ERROR("[Hyperflow] Unable to load image at: %s", folderPath);
             return false;
         }
