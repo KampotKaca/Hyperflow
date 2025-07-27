@@ -28,11 +28,12 @@ namespace hf
         }
 
         std::vector<char> metadata{};
-        if (!utils::ReadFile(assetLoc, true, metadata))
+        if (!utils::ReadFile(assetLoc, metadata))
         {
             LOG_ERROR("[Hyperflow] Unable to read buffer attribute meta: %s", assetPath);
             return 0;
         }
+        metadata.push_back('\0');
 
         try
         {

@@ -95,7 +95,7 @@ namespace hf
 
     struct VkPlatform
     {
-        uint32_t (*createVulkanSurfaceFunc)(void* windowHandle, void* instance, void* surfaceResult);
+        inter::rendering::RendererInternalFunctions_i functions{};
         void* platformDll{};
         VulkanPlatformAPI* api{};
     };

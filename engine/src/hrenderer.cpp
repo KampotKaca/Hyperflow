@@ -159,11 +159,16 @@ namespace hf
                     .appVersion = appV,
                     .engineVersion = engineV,
                     .applicationTitle = HF.appTitle.c_str(),
-                    .getFuncFromDll = platform::GetFuncPtr,
+                    .functions =
+                    {
+                        .fileExistsFunc = utils::FileExists,
+                        .readFileFunc = utils::ReadFile,
+                        .writeFileFunc = utils::WriteFile
+                    }
                 };
 
                 if (HF.renderingApi.type == RenderingApiType::Vulkan)
-                    loadInfo.createVulkanSurfaceFunc = platform::CreateVulkanSurface;
+                    loadInfo.functions.createVulkanSurfaceFunc = platform::CreateVulkanSurface;
 
                 HF.renderingApi.api.Load(loadInfo);
                 HF.renderingApi.isLoaded = true;

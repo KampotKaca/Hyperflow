@@ -479,6 +479,7 @@ namespace hf
 
                 const ShaderLibraryCreationInfo info
                 {
+                    .uniqueLibraryName = "__engine_shader_lib_cache",
                     .outputFormats = HF.internalResourcesFormat.drawOutputFormats,
                     .pVertexInputModules = vertexInputModules.data(),
                     .vertexInputModuleCount = vertexInputModules.size(),

@@ -84,6 +84,7 @@ namespace hf::inter::rendering
 
     struct ShaderLibraryCreationInfo_i
     {
+        const char* uniqueLibraryName{};
         ShaderDrawOutputFormats outputFormats{};
 
         ShaderLibraryVertexInputModuleInfo* pVertexInputModules{};
@@ -103,14 +104,22 @@ namespace hf::inter::rendering
         ShaderModulesInfo modules{};
     };
 
+    struct RendererInternalFunctions_i
+    {
+        uint32_t (*createVulkanSurfaceFunc)(void* windowHandle, void* instance, void* surfaceResult){};
+
+        bool (*fileExistsFunc)(const char* path){};
+        bool (*readFileFunc)(const std::string& filename, std::vector<char>& result){};
+        bool (*writeFileFunc)(const std::string& filename, const std::vector<char>& result){};
+    };
+
     struct RendererLoadInfo_i
     {
         uvec3 appVersion{};
         uvec3 engineVersion{};
         const char* applicationTitle{};
-        uint32_t (*createVulkanSurfaceFunc)(void* windowHandle, void* instance, void* surfaceResult);
         void* platformDll{};
-        void* (*getFuncFromDll)(void* dll, const char* funcName){};
+        RendererInternalFunctions_i functions{};
     };
 
     struct VertBufferUploadInfo_i

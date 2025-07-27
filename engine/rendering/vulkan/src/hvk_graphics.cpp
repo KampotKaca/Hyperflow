@@ -16,7 +16,7 @@ namespace hf
         : shutdownCallback(info.shutdownCallback), windowHandle(info.handle), targetSize(info.size), vSyncMode(info.vSyncMode)
     {
         if (!GRAPHICS_DATA.deviceIsLoaded) LoadDevice(windowHandle, &swapchain.surface);
-        else VK_HANDLE_EXCEPT((VkResult)GRAPHICS_DATA.platform.createVulkanSurfaceFunc(windowHandle, GRAPHICS_DATA.instance, &swapchain.surface));
+        else VK_HANDLE_EXCEPT((VkResult)GRAPHICS_DATA.platform.functions.createVulkanSurfaceFunc(windowHandle, GRAPHICS_DATA.instance, &swapchain.surface));
 
         if (info.initCallback) info.initCallback();
         CreateSwapchain(swapchain.surface, targetSize, vSyncMode,  swapchain);
@@ -230,7 +230,7 @@ namespace hf
         VK_HANDLE_EXCEPT(vkEnumeratePhysicalDevices(GRAPHICS_DATA.instance,
                 &deviceCount, availableDevices.data()));
 
-        VK_HANDLE_EXCEPT((VkResult)GRAPHICS_DATA.platform.createVulkanSurfaceFunc(windowHandle, GRAPHICS_DATA.instance, resultSurface));
+        VK_HANDLE_EXCEPT((VkResult)GRAPHICS_DATA.platform.functions.createVulkanSurfaceFunc(windowHandle, GRAPHICS_DATA.instance, resultSurface));
 
         std::vector<GraphicsDevice> devices{};
 

@@ -68,11 +68,12 @@ namespace hf
         }
 
         std::vector<char> metadata{};
-        if (!utils::ReadFile(assetLoc, true, metadata))
+        if (!utils::ReadFile(assetLoc, metadata))
         {
             LOG_ERROR("[Hyperflow] Unable to read cubemap meta: %s", assetPath);
             return nullptr;
         }
+        metadata.push_back('\0');
 
         try
         {

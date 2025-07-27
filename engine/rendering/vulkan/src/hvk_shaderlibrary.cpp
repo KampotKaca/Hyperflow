@@ -1,5 +1,6 @@
 #include "hvk_shaderlibrary.h"
 #include "hvk_graphics.h"
+#include "hyperflow.h"
 
 namespace hf
 {
@@ -236,8 +237,67 @@ namespace hf
             moduleIndex++;
         }
 
+        VkPipelineCacheCreateInfo pipelineCacheCreateInfo{};
+        pipelineCacheCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_CACHE_CREATE_INFO;
+
+        std::string cachePath = TO_RES_PATH(std::string(info.uniqueLibraryName) + ".cache");
+        std::vector<char> initialCacheData{};
+
+        if (GRAPHICS_DATA.platform.functions.fileExistsFunc(cachePath.c_str()) &&
+            GRAPHICS_DATA.platform.functions.readFileFunc(cachePath, initialCacheData))
+        {
+            pipelineCacheCreateInfo.initialDataSize = initialCacheData.size();
+            pipelineCacheCreateInfo.pInitialData = initialCacheData.data();
+        }
+        else
+        {
+            pipelineCacheCreateInfo.initialDataSize = 0;
+            pipelineCacheCreateInfo.pInitialData = nullptr;
+        }
+
+        VkPipelineCache pipelineCache{};
+        {
+            auto result = vkCreatePipelineCache(GRAPHICS_DATA.device.logicalDevice.device,
+                                                    &pipelineCacheCreateInfo, nullptr, &pipelineCache);
+            if (result != VK_SUCCESS)
+            {
+                LOG_WARN("[Hyperflow] Failed to load pipeline cache, probably file was corrupted %s", info.uniqueLibraryName);
+                pipelineCache = VK_NULL_HANDLE;
+            }
+        }
+
         VK_HANDLE_EXCEPT(vkCreateGraphicsPipelines(GRAPHICS_DATA.device.logicalDevice.device,
-            VK_NULL_HANDLE, (uint32_t)pipelineCreateInfos.size(), pipelineCreateInfos.data(), nullptr, modules.data()));
+                         pipelineCache, (uint32_t)pipelineCreateInfos.size(), pipelineCreateInfos.data(),
+                         nullptr, modules.data()));
+
+        size_t cacheSize = 0;
+        {
+            auto result = vkGetPipelineCacheData(GRAPHICS_DATA.device.logicalDevice.device,
+                                                 pipelineCache, &cacheSize, nullptr);
+            if (result != VK_SUCCESS)
+            {
+                LOG_WARN("[Hyperflow] Failed to request cache size to store for future use! %s", info.uniqueLibraryName);
+                cacheSize = 0;
+            }
+        }
+
+        if (cacheSize > 0)
+        {
+            std::vector<char> cacheData(cacheSize);
+            auto result = vkGetPipelineCacheData(GRAPHICS_DATA.device.logicalDevice.device,
+                                                     pipelineCache, &cacheSize, cacheData.data());
+            if (result != VK_SUCCESS)
+                LOG_WARN("[Hyperflow] Failed to read cache to store for future use! %s", info.uniqueLibraryName);
+            else
+            {
+                if(!GRAPHICS_DATA.platform.functions.writeFileFunc(cachePath, cacheData))
+                    LOG_WARN("[Hyperflow] Failed to write cache to store for future use! %s", info.uniqueLibraryName);
+                else LOG_INFO("[Hyperflow] Successfully wrote cache which will speed up the next pipeline read. %s", info.uniqueLibraryName);
+            }
+        }
+
+        if (pipelineCache != VK_NULL_HANDLE)
+            vkDestroyPipelineCache(GRAPHICS_DATA.device.logicalDevice.device, pipelineCache, nullptr);
 
         for (uint32_t i = 0; i < stageInfoCount; i++)
             vkDestroyShaderModule(GRAPHICS_DATA.device.logicalDevice.device, shaderModules[i], nullptr);

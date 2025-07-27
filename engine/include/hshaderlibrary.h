@@ -10,6 +10,7 @@ namespace hf
         explicit ShaderLibrary(const ShaderLibraryCreationInfo& info);
         ~ShaderLibrary();
 
+        std::string name{};
         ShaderDrawOutputFormats outputFormats{};
         std::vector<ShaderLibraryVertexInputModuleInfo> vertexInputModules{};
         std::vector<ShaderLibraryPreRasterModuleInfo> preRasterModules{};

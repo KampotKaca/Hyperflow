@@ -5,7 +5,8 @@
 
 namespace hf
 {
-    ShaderLibrary::ShaderLibrary(const ShaderLibraryCreationInfo& info) : outputFormats(info.outputFormats)
+    ShaderLibrary::ShaderLibrary(const ShaderLibraryCreationInfo& info)
+    : name(std::move(info.uniqueLibraryName)), outputFormats(info.outputFormats)
     {
         vertexInputModules = std::vector<ShaderLibraryVertexInputModuleInfo>(info.vertexInputModuleCount);
         preRasterModules = std::vector<ShaderLibraryPreRasterModuleInfo>(info.preRasterModuleCount);
@@ -77,7 +78,7 @@ namespace hf
                 return false;\
             }\
             std::vector<char> code{};\
-            utils::ReadFile(loc, false, code);\
+            utils::ReadFile(loc, code);\
             moduleCodes.push_back(std::move(code));\
         }
 
@@ -199,6 +200,7 @@ namespace hf
 
             ShaderLibraryCreationInfo_i info
             {
+                .uniqueLibraryName = lib->name.c_str(),
                 .outputFormats = lib->outputFormats,
                 .pVertexInputModules = lib->vertexInputModules.data(),
                 .vertexInputModuleCount = (uint32_t)lib->vertexInputModules.size(),

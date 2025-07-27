@@ -12,7 +12,7 @@ namespace hf::inter::rendering
 {
     void Load(const RendererLoadInfo_i& info)
     {
-        GRAPHICS_DATA.platform.createVulkanSurfaceFunc = info.createVulkanSurfaceFunc;
+        GRAPHICS_DATA.platform.functions = info.functions;
         GRAPHICS_DATA.platform.platformDll = info.platformDll;
         GRAPHICS_DATA.platform.api = GetAPI();
         LoadVulkan(info);

@@ -310,7 +310,8 @@ namespace hf
 	namespace utils
 	{
 		ivec3 ConvertVersion(const char* version);
-		bool ReadFile(const std::string& filename, bool addNullTerminator, std::vector<char>& result);
+		bool ReadFile(const std::string& filename, std::vector<char>& result);
+		bool WriteFile(const std::string& filename, const std::vector<char>& result);
 		bool FileExists(const char* path);
 
 		[[nodiscard]] void* Allocate(std::size_t n);

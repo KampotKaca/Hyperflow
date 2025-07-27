@@ -81,6 +81,7 @@ namespace app
 
             const hf::ShaderLibraryCreationInfo info
             {
+                .uniqueLibraryName = "app_shader_lib_cache",
                 .outputFormats = shaderOutputFormats,
                 .pVertexInputModules = vertexInputModules.data(),
                 .vertexInputModuleCount = vertexInputModules.size(),

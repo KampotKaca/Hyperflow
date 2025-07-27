@@ -486,6 +486,7 @@ namespace hf
 
     struct ShaderLibraryCreationInfo
     {
+        std::string uniqueLibraryName{};
         ShaderDrawOutputFormats outputFormats{};
 
         ShaderLibraryModule<ShaderLibraryVertexInputModuleInfo>* pVertexInputModules{};
