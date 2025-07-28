@@ -6,7 +6,7 @@
 namespace hf
 {
     ShaderLibrary::ShaderLibrary(const ShaderLibraryCreationInfo& info)
-    : name(std::move(info.uniqueLibraryName)), outputFormats(info.outputFormats)
+    : name(info.uniqueLibraryName), outputFormats(info.outputFormats)
     {
         vertexInputModules = std::vector<ShaderLibraryVertexInputModuleInfo>(info.vertexInputModuleCount);
         preRasterModules = std::vector<ShaderLibraryPreRasterModuleInfo>(info.preRasterModuleCount);
@@ -187,6 +187,7 @@ namespace hf
                 ShaderLibraryFragmentModuleInfo_i info
                 {
                     .layout = moduleInfo.layout,
+                    .depthStencilOptions = moduleInfo.depthStencilOptions,
                 };
 
                 {
