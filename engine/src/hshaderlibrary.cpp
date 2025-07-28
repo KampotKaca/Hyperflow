@@ -186,8 +186,8 @@ namespace hf
 
                 ShaderLibraryFragmentModuleInfo_i info
                 {
-                    .layout = moduleInfo.layout,
                     .depthStencilOptions = moduleInfo.depthStencilOptions,
+                    .layout = moduleInfo.layout,
                 };
 
                 {

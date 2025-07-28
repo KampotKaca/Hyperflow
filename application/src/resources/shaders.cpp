@@ -23,7 +23,10 @@ namespace app
                 hf::ShaderLibraryModule<hf::ShaderLibraryVertexInputModuleInfo> //Default
                 {
                     .resultId = &APP_SHADERS.modules.defaultVertexInput,
-                    .module = { .attribute = APP_BUFFER_ATTRIBUTES.pos_nor_tex },
+                    .module =
+                    {
+                        .attribute = APP_BUFFER_ATTRIBUTES.pos_nor_tex,
+                    },
                 }
             };
 
@@ -35,6 +38,12 @@ namespace app
                     .module =
                     {
                         .vertexShaderPath = { .path = "default_lit" },
+                        .options = hf::ShaderRasterizerOptions
+                        {
+                            .cullMode = hf::ShaderCullMode::None,
+                            .polygonMode = hf::MeshPolygonMode::Line,
+                            .lineWidth = 1.0f
+                        },
                         .layout = APP_SHADER_LAYOUTS.default_lit
                     }
                 },

@@ -395,7 +395,16 @@ namespace hf
                         .module =
                         {
                             .vertexShaderPath = { .path = "__axislines" },
-                            .options = { .cullMode = ShaderCullMode::None, },
+                            .options = ShaderRasterizerOptions
+                            {
+                                .cullMode = ShaderCullMode::None,
+                                .biasOptions = ShaderDepthBiasOptions
+                                {
+                                    .constantFactor = 1.25f,
+                                    .clamp = 0.0f,
+                                    .slopeFactor = 1.75f
+                                }
+                            },
                             .layout = HF.staticResources.axisLinesShaderLayout
                         }
                     },
@@ -423,7 +432,7 @@ namespace hf
                             {
                                 .enableDepth = true,
                                 .writeDepth = true,
-                                .comparisonFunc = DepthComparisonFunction::Always,
+                                .comparisonFunc = DepthComparisonFunction::LessOrEqual,
                                 .enableDepthBounds = false,
                                 .enableStencil = false,
                             },
