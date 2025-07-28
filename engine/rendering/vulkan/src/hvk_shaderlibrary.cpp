@@ -15,17 +15,25 @@ namespace hf
         std::vector<VkPipelineShaderStageCreateInfo> stageCreateInfos(maxShadingModules);
 
         std::vector<VkGraphicsPipelineCreateInfo> pipelineCreateInfos(moduleCount);
+
         std::vector<VkPipelineVertexInputStateCreateInfo> vertexInputInfos(info.vertexInputModuleCount);
+        std::vector<VkPipelineInputAssemblyStateCreateInfo> inputAssemblies(info.vertexInputModuleCount);
+
         std::vector<VkPipelineRasterizationStateCreateInfo> rasterizers(info.preRasterModuleCount);
+
         std::vector<VkPipelineDepthStencilStateCreateInfo> depthStencilStates(info.fragmentModuleCount);
 
-        std::vector<VkPipelineColorBlendAttachmentState> colorBlendAttachments(info.fragmentOutputModuleCount);
+        uint32_t colorAttachmentCount = 0;
+        for (uint32_t i = 0; i < info.fragmentOutputModuleCount; i++)
+            colorAttachmentCount += info.pFragmentOutputModules[i].colorAttachmentCount;
+
+        std::vector<VkPipelineColorBlendAttachmentState> colorBlendAttachments(colorAttachmentCount);
         std::vector<VkPipelineColorBlendStateCreateInfo> colorBlendStateInfos(info.fragmentOutputModuleCount);
 
         modules = std::vector<VkPipeline>(moduleCount);
 
-        uint32_t moduleIndex = 0;
-        uint32_t stageInfoCount = 0;
+        uint32_t moduleIndex = 0, stageInfoCount = 0;
+        colorAttachmentCount = 0;
 
         VkPipelineMultisampleStateCreateInfo multisampling{};
         multisampling.sType = VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO;
@@ -52,11 +60,6 @@ namespace hf
         vertexInputLibInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_LIBRARY_CREATE_INFO_EXT;
         vertexInputLibInfo.pNext = &renderingInfo;
         vertexInputLibInfo.flags = VK_GRAPHICS_PIPELINE_LIBRARY_VERTEX_INPUT_INTERFACE_BIT_EXT;
-
-        VkPipelineInputAssemblyStateCreateInfo inputAssembly{};
-        inputAssembly.sType = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
-        inputAssembly.topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
-        inputAssembly.primitiveRestartEnable = VK_FALSE;
 
         VkGraphicsPipelineLibraryCreateInfoEXT preRasterLibInfo{};
         preRasterLibInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_LIBRARY_CREATE_INFO_EXT;
@@ -91,12 +94,18 @@ namespace hf
             vInfo.pVertexAttributeDescriptions = attribute->attribDescriptions.data();
             vertexInputInfos[i] = vInfo;
 
+            VkPipelineInputAssemblyStateCreateInfo inputAssembly{};
+            inputAssembly.sType = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
+            inputAssembly.topology = (VkPrimitiveTopology)moduleInfo.topology;
+            inputAssembly.primitiveRestartEnable = moduleInfo.enablePrimitiveRestart;
+            inputAssemblies[i] = inputAssembly;
+
             VkGraphicsPipelineCreateInfo vertexInputPipelineInfo{};
             vertexInputPipelineInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
             vertexInputPipelineInfo.pNext = &vertexInputLibInfo;
             vertexInputPipelineInfo.flags = VK_PIPELINE_CREATE_LIBRARY_BIT_KHR;
             vertexInputPipelineInfo.pVertexInputState = &vertexInputInfos[i];
-            vertexInputPipelineInfo.pInputAssemblyState = &inputAssembly;
+            vertexInputPipelineInfo.pInputAssemblyState = &inputAssemblies[i];
 
             pipelineCreateInfos[moduleIndex] = vertexInputPipelineInfo;
             moduleIndex++;
@@ -124,16 +133,23 @@ namespace hf
 
             VkPipelineRasterizationStateCreateInfo rasterInfo{};
             rasterInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;
-            rasterInfo.depthClampEnable = VK_FALSE;
-            rasterInfo.rasterizerDiscardEnable = VK_FALSE;
-            rasterInfo.polygonMode = VK_POLYGON_MODE_FILL;
+            rasterInfo.depthClampEnable = moduleInfo.options.enableDepthClamping;
+            rasterInfo.rasterizerDiscardEnable = moduleInfo.options.enableRasterizerDiscard;
+            rasterInfo.polygonMode = (VkPolygonMode)moduleInfo.options.polygonMode;
             rasterInfo.cullMode = (VkCullModeFlags)moduleInfo.options.cullMode;
             rasterInfo.frontFace = (VkFrontFace)moduleInfo.options.faceDirection;
-            rasterInfo.depthBiasEnable = VK_FALSE;
-            rasterInfo.depthBiasConstantFactor = 0.0f;
-            rasterInfo.depthBiasClamp = 0.0f;
-            rasterInfo.depthBiasSlopeFactor = 0.0f;
-            rasterInfo.lineWidth = 1.0f;
+            rasterInfo.lineWidth = moduleInfo.options.lineWidth;
+
+            if (moduleInfo.options.biasOptions.has_value())
+            {
+                auto options = moduleInfo.options.biasOptions.value();
+                rasterInfo.depthBiasEnable = VK_TRUE;
+                rasterInfo.depthBiasConstantFactor = options.constantFactor;
+                rasterInfo.depthBiasClamp = options.clamp;
+                rasterInfo.depthBiasSlopeFactor = options.slopeFactor;
+            }
+            else rasterInfo.depthBiasEnable = VK_FALSE;
+
             rasterizers[i] = rasterInfo;
 
             VkGraphicsPipelineCreateInfo preRasterPipelineInfo{};
@@ -193,37 +209,41 @@ namespace hf
         {
             const auto& moduleInfo = info.pFragmentOutputModules[i];
 
-            VkPipelineColorBlendAttachmentState colorBlendAttachment{};
-            colorBlendAttachment.colorWriteMask = VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT;
+            uint32_t colorAttachmentStart = colorAttachmentCount;
+            for (uint32_t j = 0; j < moduleInfo.colorAttachmentCount; j++)
+            {
+                auto& cInfo = moduleInfo.colorAttachmentsSettings[j];
+                VkPipelineColorBlendAttachmentState colorBlendAttachment{};
+                colorBlendAttachment.colorWriteMask = (VkColorComponentFlags)cInfo.colorWriteMask;
 
-            if (moduleInfo.blendingOptions.blendMode == ShaderBlendMode::Alpha)
-            {
-                colorBlendAttachment.blendEnable = VK_TRUE;
-                colorBlendAttachment.srcColorBlendFactor = VK_BLEND_FACTOR_SRC_ALPHA;
-                colorBlendAttachment.dstColorBlendFactor = VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA;
-                colorBlendAttachment.colorBlendOp = VK_BLEND_OP_ADD;
-                colorBlendAttachment.srcAlphaBlendFactor = VK_BLEND_FACTOR_ONE;
-                colorBlendAttachment.dstAlphaBlendFactor = VK_BLEND_FACTOR_ZERO;
-                colorBlendAttachment.alphaBlendOp = VK_BLEND_OP_ADD;
+                if (cInfo.blending.has_value())
+                {
+                    auto blending = cInfo.blending.value();
+                    colorBlendAttachment.blendEnable = VK_TRUE;
+                    colorBlendAttachment.srcColorBlendFactor = (VkBlendFactor)blending.colorBlendingOptions.srcFactor;
+                    colorBlendAttachment.dstColorBlendFactor = (VkBlendFactor)blending.colorBlendingOptions.dstFactor;
+                    colorBlendAttachment.colorBlendOp = (VkBlendOp)blending.colorBlendingOptions.op;
+                    colorBlendAttachment.srcAlphaBlendFactor = (VkBlendFactor)blending.alphaBlendingOptions.srcFactor;
+                    colorBlendAttachment.dstAlphaBlendFactor = (VkBlendFactor)blending.alphaBlendingOptions.dstFactor;
+                    colorBlendAttachment.alphaBlendOp = (VkBlendOp)blending.alphaBlendingOptions.op;
+                }
+                else colorBlendAttachment.blendEnable = VK_FALSE;
+                colorBlendAttachments[colorAttachmentCount] = colorBlendAttachment;
+                colorAttachmentCount++;
             }
-            else if (moduleInfo.blendingOptions.blendMode == ShaderBlendMode::None)
-            {
-                colorBlendAttachment.blendEnable = VK_FALSE;
-                colorBlendAttachment.srcColorBlendFactor = VK_BLEND_FACTOR_ONE;
-                colorBlendAttachment.dstColorBlendFactor = VK_BLEND_FACTOR_ZERO;
-                colorBlendAttachment.colorBlendOp = VK_BLEND_OP_ADD;
-                colorBlendAttachment.srcAlphaBlendFactor = VK_BLEND_FACTOR_ONE;
-                colorBlendAttachment.dstAlphaBlendFactor = VK_BLEND_FACTOR_ZERO;
-                colorBlendAttachment.alphaBlendOp = VK_BLEND_OP_ADD;
-            }
-            colorBlendAttachments[i] = colorBlendAttachment;
 
             VkPipelineColorBlendStateCreateInfo blendAttachmentInfo{};
             blendAttachmentInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO;
-            blendAttachmentInfo.logicOpEnable = moduleInfo.blendingOptions.blendMode == ShaderBlendMode::Logical;
-            blendAttachmentInfo.logicOp = (VkLogicOp)moduleInfo.blendingOptions.blendOp;
-            blendAttachmentInfo.attachmentCount = 1;
-            blendAttachmentInfo.pAttachments = &colorBlendAttachments[i];
+
+            if (moduleInfo.blendOp.has_value())
+            {
+                blendAttachmentInfo.logicOpEnable = VK_TRUE;
+                blendAttachmentInfo.logicOp = (VkLogicOp)moduleInfo.blendOp.value();
+            }
+            else blendAttachmentInfo.logicOpEnable = VK_FALSE;
+
+            blendAttachmentInfo.attachmentCount = moduleInfo.colorAttachmentCount;
+            blendAttachmentInfo.pAttachments = &colorBlendAttachments[colorAttachmentStart];
             colorBlendStateInfos[i] = blendAttachmentInfo;
 
             VkGraphicsPipelineCreateInfo fragmentOutputPipelineInfo{};

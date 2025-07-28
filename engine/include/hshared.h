@@ -194,7 +194,6 @@ namespace hf
 	};
 	DEFINE_ENUM_FLAGS(BufferUsageType)
 
-	enum class ShaderBlendMode { None = 0, Alpha = 1, Logical = 2 };
 	enum class ShaderCullMode { None = 0, Front = 1, Back = 2, Both = 3 };
 	enum class ShaderFaceDirection { CounterClockwise = 0, Clockwise = 1 };
 
@@ -203,6 +202,25 @@ namespace hf
 		Clear, And, AndReverse, Copy, AndInverted, NoOp, XOr, Or, Nor,
 		Equivalent, Invert, OrReverse, CopyInverted, OrInverted, Nand, Set
 	};
+
+    enum class ColorBlendOp
+    {
+        Add = 0, Subtract = 1, ReverseSubtract = 2, Min = 3, Max = 4,
+        Zero = 1000148000, Src = 1000148001, Dst = 1000148002,
+        SrcOver = 1000148003, DstOver = 1000148004, SrcIn = 1000148005, DstIn = 1000148006,
+        SrcOut = 1000148007, DstOut = 1000148008, SrcAtop = 1000148009, DstAtop = 1000148010,
+        Xor = 1000148011, Multiply = 1000148012, Screen = 1000148013, Overlay = 1000148014,
+        Darken = 1000148015, Lighten = 1000148016, ColorDodge = 1000148017, ColorBurn = 1000148018,
+        HardLight = 1000148019, SoftLight = 1000148020, Difference = 1000148021, Exclusion = 1000148022,
+        Invert = 1000148023, InvertRGB = 1000148024, LinearDodge = 1000148025,
+        LinearBurn = 1000148026, VividLight = 1000148027, LinearLight = 1000148028, PinLight = 1000148029, HardMix = 1000148030,
+        HslHue = 1000148031, HslSaturation = 1000148032,
+        HslColor = 1000148033, HslLuminosity = 1000148034,
+        Plus = 1000148035, PlusClamped = 1000148036, PlusClampedAlpha = 1000148037, PlusDarken = 1000148038,
+        Minus = 1000148039, MinusClamped = 1000148040,
+        Contrast = 1000148041, InvertOVG = 1000148042,
+        Red = 1000148043, Green = 1000148044, Blue = 1000148045
+    };
 
 	enum class DepthComparisonFunction
 	{
@@ -366,6 +384,39 @@ namespace hf
 
 	enum class RenderingApiType { None, Vulkan, Direct3D };
 
+    enum class MeshPrimitiveTopologyType
+    {
+        PointList = 0, LineList = 1, LineStrip = 2, TriangleList = 3, TriangleStrip = 4, TriangleFan = 5,
+        LineListWithAdjacency = 6,      //Used with geometry shaders only!
+        LineStripWithAdjacency = 7,     //Used with geometry shaders only!
+        TriangleListWithAdjacency = 8,  //Used with geometry shaders only!
+        TriangleStripWithAdjacency = 9, //Used with geometry shaders only!
+        PatchList = 10,                 //Used with tesselation shaders only!
+    };
+
+    enum class MeshPolygonMode
+    {
+        Fill = 0, Line = 1, Point = 2,
+        FillRectangleNV = 1000153000,
+    };
+
+    enum class ColorMaskingFlags
+    {
+        Red = 1 << 0, Green = 1 << 1, Blue = 1 << 2, Alpha = 1 << 3,
+        All = Red | Green | Blue | Alpha,
+    };
+    DEFINE_ENUM_FLAGS(ColorMaskingFlags)
+
+    enum class ColorBlendFactorType
+    {
+        Zero = 0, One = 1, SrcColor = 2, OneMinusSrcColor = 3,
+        DstColor = 4, OneMinusDstColor = 5, SrcAlpha = 6,
+        OneMinusSrcAlpha = 7, DstAlpha = 8, OneMinusDstAlpha = 9,
+        ConstantColor = 10, OneMinusConstantColor = 11, ConstantAlpha = 12,
+        OneMinusConstantAlpha = 13, SrcAlphaSaturate = 14, Src1Color = 15,
+        OneMinusSrc1Color = 16, Src1Alpha = 17, OneMinusSrc1Alpha = 18,
+    };
+
 	struct BufferAttribFormat
 	{
 		BufferDataType type = BufferDataType::F32;
@@ -415,16 +466,39 @@ namespace hf
 		uint32_t indexCount{};
 	};
 
+    struct BlendingOptions
+    {
+        ColorBlendFactorType srcFactor = ColorBlendFactorType::SrcAlpha;
+        ColorBlendFactorType dstFactor = ColorBlendFactorType::OneMinusSrcAlpha;
+        ColorBlendOp op = ColorBlendOp::Add;
+    };
+
 	struct ShaderBlendingOptions
 	{
-		ShaderBlendMode blendMode = ShaderBlendMode::Alpha;
-		ShaderBlendOp blendOp = ShaderBlendOp::XOr; //Setting will be used only if you use Logical Blending
+	    BlendingOptions colorBlendingOptions{};
+	    BlendingOptions alphaBlendingOptions
+	    {
+	        .srcFactor = ColorBlendFactorType::One,
+            .dstFactor = ColorBlendFactorType::Zero,
+	    };
 	};
+
+    struct ShaderDepthBiasOptions
+    {
+        float constantFactor = 0.0f;
+        float clamp = 0.0f;
+        float slopeFactor = 0.0f;
+    };
 
 	struct ShaderRasterizerOptions
 	{
 		ShaderCullMode cullMode = ShaderCullMode::Back;
 		ShaderFaceDirection faceDirection = ShaderFaceDirection::Clockwise;
+	    MeshPolygonMode polygonMode = MeshPolygonMode::Fill;
+	    bool enableRasterizerDiscard = false;
+	    bool enableDepthClamping = false;
+	    std::optional<ShaderDepthBiasOptions> biasOptions{};
+	    float lineWidth = 1.0f; //Width of the line in Topology Lines mode.
 	};
 
 	struct ShaderDepthStencilOptions
@@ -450,6 +524,12 @@ namespace hf
         TextureFormat stencilFormat = TextureFormat::Undefined;
     };
 
+    struct ColorAttachmentSettings
+    {
+        ColorMaskingFlags colorWriteMask = ColorMaskingFlags::All;
+        std::optional<ShaderBlendingOptions> blending{};
+    };
+
     template<typename T>
     struct ShaderLibraryModule
     {
@@ -460,6 +540,8 @@ namespace hf
     struct ShaderLibraryVertexInputModuleInfo
     {
         BufferAttrib attribute{};
+        MeshPrimitiveTopologyType topology = MeshPrimitiveTopologyType::TriangleList;
+        bool enablePrimitiveRestart = false;
     };
 
     struct ShaderLibraryPreRasterModuleInfo
@@ -481,7 +563,9 @@ namespace hf
 
     struct ShaderLibraryFragmentOutputModuleInfo
     {
-        ShaderBlendingOptions blendingOptions{};
+        ColorAttachmentSettings colorAttachmentsSettings[MAX_COLOR_ATTACHMENTS]{};
+        uint32_t colorAttachmentCount = 1;
+		std::optional<ShaderBlendOp> blendOp;
     };
 
     struct ShaderLibraryCreationInfo

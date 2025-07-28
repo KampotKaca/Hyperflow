@@ -454,26 +454,22 @@ namespace hf
                     ShaderLibraryModule<ShaderLibraryFragmentOutputModuleInfo> //Axis lines
                     {
                         .resultId = &HF.staticResources.engineShadersLibModules.axisLinesFragmentOutput,
-                        .module =
+                        .module
                         {
-                            .blendingOptions =
+                            .colorAttachmentsSettings =
                             {
-                                .blendMode = ShaderBlendMode::Alpha,
-                                .blendOp = ShaderBlendOp::XOr
+                                ColorAttachmentSettings
+                                {
+                                    .colorWriteMask = ColorMaskingFlags::All,
+                                    .blending = ShaderBlendingOptions{}
+                                }
                             },
+                            .colorAttachmentCount = 1
                         }
                     },
                     ShaderLibraryModule<ShaderLibraryFragmentOutputModuleInfo> //Skybox
                     {
                         .resultId = &HF.staticResources.engineShadersLibModules.skyboxFragmentOutput,
-                        .module =
-                        {
-                            .blendingOptions =
-                            {
-                                .blendMode = ShaderBlendMode::Alpha,
-                                .blendOp = ShaderBlendOp::XOr
-                            },
-                        }
                     },
                 };
 
