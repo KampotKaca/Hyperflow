@@ -4,42 +4,10 @@
 
 namespace hf
 {
-    VkBufferBase::VkBufferBase(const BufferDefinitionInfo& info, BufferMemoryType memoryType, const uint8_t* data,
-        VkDescriptorType descriptorType, VkBufferUsageFlags usage)
-    : memoryType(memoryType), bindingIndex(info.bindingId), descriptorType(descriptorType)
+    VkBufferBase::VkBufferBase(BufferMemoryType memoryType, const uint8_t* data,
+    VkMemoryPropertyFlags requiredFlags, VkBufferUsageFlags usage, uint64_t bufferSize)
+    : memoryType(memoryType), bufferSize(bufferSize)
     {
-        bindings = std::vector<BufferBindingInfo>(info.bindingCount);
-        memcpy(bindings.data(), info.pBindings, sizeof(BufferBindingInfo) * info.bindingCount);
-        bufferSize = 0;
-
-        for (uint32_t i = 0; i < info.bindingCount; i++)
-        {
-            auto bindingInfo = info.pBindings[i];
-
-            VkDescriptorSetLayoutBinding layout{};
-            layout.binding = info.bindingId + i;
-            layout.descriptorType = descriptorType;
-            layout.descriptorCount = bindingInfo.arraySize;
-            layout.stageFlags = (uint32_t)bindingInfo.usageFlags;
-            layout.pImmutableSamplers = nullptr;
-            GRAPHICS_DATA.preAllocBuffers.descLayoutBindings[i] = layout;
-
-            const auto offset = bindingInfo.elementSizeInBytes * bindingInfo.arraySize;
-            if (i != info.bindingCount - 1 && offset % 256 != 0)
-                LOG_ERROR("Invalid buffer alignment!!! "
-                          "Some devices only support alignment 256, this is not recommended. "
-                          "Alignment is only necessary when uniform has more than one binding");
-            bufferSize += offset;
-        }
-
-        VkDescriptorSetLayoutCreateInfo layoutInfo{};
-        layoutInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
-        layoutInfo.bindingCount = info.bindingCount;
-        layoutInfo.pBindings = GRAPHICS_DATA.preAllocBuffers.descLayoutBindings;
-
-        VK_HANDLE_EXCEPT(vkCreateDescriptorSetLayout(GRAPHICS_DATA.device.logicalDevice.device,
-            &layoutInfo, nullptr, &layout));
-
         switch (memoryType)
         {
             case BufferMemoryType::Static:
@@ -62,6 +30,7 @@ namespace hf
                     bufferInfo.usage = usage;
                     bufferInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
                     bufferInfo.memoryType = memoryType;
+                    bufferInfo.requiredFlags = requiredFlags;
                     bufferInfo.pQueueFamilies = nullptr;
                     bufferInfo.familyCount = 0;
 
@@ -83,6 +52,7 @@ namespace hf
                         bufferInfo.usage = usage;
                         bufferInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
                         bufferInfo.memoryType = memoryType;
+                        bufferInfo.requiredFlags = requiredFlags;
                         bufferInfo.pQueueFamilies = nullptr;
                         bufferInfo.familyCount = 0;
 
@@ -108,7 +78,6 @@ namespace hf
                 vmaDestroyBuffer(GRAPHICS_DATA.allocator, buffers[i], memoryRegions[i]);
             }
 
-            vkDestroyDescriptorSetLayout(GRAPHICS_DATA.device.logicalDevice.device, layout, nullptr);
             isLoaded = false;
         }
     }
@@ -124,50 +93,6 @@ namespace hf
         return GRAPHICS_DATA.buffers[buffer - 1];
     }
 
-    void SetupBuffer(const URef<VkBufferBase>& buffer)
-    {
-        uint32_t totalWrites = 0, bufferOffset = 0;
-        const uint32_t count = GetBufferCount(buffer->memoryType);
-
-        for (uint32_t i = 0; i < buffer->bindings.size(); i++)
-        {
-            const auto& binding = buffer->bindings[i];
-            for (uint32_t j = 0; j < binding.arraySize; j++)
-            {
-                for (uint32_t frame = 0; frame < count; frame++)
-                {
-                    VkDescriptorBufferInfo bufferInfo{};
-                    bufferInfo.buffer = buffer->buffers[frame];
-                    bufferInfo.offset = bufferOffset;
-                    bufferInfo.range = binding.elementSizeInBytes * binding.arraySize;
-                    GRAPHICS_DATA.preAllocBuffers.bufferInfos[totalWrites] = bufferInfo;
-
-                    VkWriteDescriptorSet writeSet{};
-                    writeSet.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-                    writeSet.dstSet = buffer->descriptorSets[frame];
-                    writeSet.dstBinding = buffer->bindingIndex + i;
-                    writeSet.dstArrayElement = j;
-                    writeSet.descriptorCount = 1;
-                    writeSet.descriptorType = buffer->descriptorType;
-                    writeSet.pImageInfo = nullptr;
-                    writeSet.pBufferInfo = &GRAPHICS_DATA.preAllocBuffers.bufferInfos[totalWrites];
-                    writeSet.pTexelBufferView = nullptr;
-                    GRAPHICS_DATA.preAllocBuffers.descWrites[totalWrites] = writeSet;
-
-                    totalWrites++;
-                }
-            }
-
-            bufferOffset += binding.elementSizeInBytes * binding.arraySize;
-        }
-
-        for (uint32_t i = count; i < FRAMES_IN_FLIGHT; i++)
-            buffer->descriptorSets[i] = buffer->descriptorSets[0];
-
-        vkUpdateDescriptorSets(GRAPHICS_DATA.device.logicalDevice.device,
-                totalWrites, GRAPHICS_DATA.preAllocBuffers.descWrites,
-                0, nullptr);
-    }
     void UploadBuffers(const VkRenderer* rn, const inter::rendering::BufferUploadInfo_i& info)
     {
         const auto currentFrame = rn->currentFrame;
@@ -183,16 +108,6 @@ namespace hf
     void BindBuffers(const VkRenderer* rn, const inter::rendering::BufferBindInfo_i& info)
     {
         const auto currentFrame = rn->currentFrame;
-
-        for (uint32_t i = 0; i < info.bufferCount; i++)
-        {
-            const auto& buffer = GetBuffer(info.pBuffers[i]);
-            GRAPHICS_DATA.preAllocBuffers.descriptors[i] = buffer->descriptorSets[currentFrame];
-        }
-
-        vkCmdBindDescriptorSets(rn->currentCommand, (VkPipelineBindPoint)info.bindingType, rn->currentLayout,
-        info.setBindingIndex, info.bufferCount, GRAPHICS_DATA.preAllocBuffers.descriptors,
-        0, nullptr);
     }
 
     static void SetMemoryTypeFlags(BufferMemoryType memoryType, VmaAllocationCreateInfo* result);
@@ -219,6 +134,7 @@ namespace hf
         bufferInfo.pQueueFamilyIndices = info.pQueueFamilies;
 
         VmaAllocationCreateInfo vmaAllocInfo{};
+        vmaAllocInfo.requiredFlags = info.requiredFlags;
         SetMemoryTypeFlags(info.memoryType, &vmaAllocInfo);
 
         VmaAllocationInfo resultInfo{};
@@ -401,12 +317,12 @@ namespace hf
             case BufferMemoryType::WriteOnly: case BufferMemoryType::PerFrameWriteOnly:
                 result->usage = VMA_MEMORY_USAGE_AUTO;
                 result->flags = VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT |
-                                     VMA_ALLOCATION_CREATE_MAPPED_BIT;
+                                VMA_ALLOCATION_CREATE_MAPPED_BIT;
                 break;
             case BufferMemoryType::ReadWrite: case BufferMemoryType::PerFrameReadWrite:
                 result->usage = VMA_MEMORY_USAGE_AUTO;
                 result->flags = VMA_ALLOCATION_CREATE_HOST_ACCESS_RANDOM_BIT |
-                                     VMA_ALLOCATION_CREATE_MAPPED_BIT;
+                                VMA_ALLOCATION_CREATE_MAPPED_BIT;
                 break;
             default: throw GENERIC_EXCEPT("[Hyperflow]", "Unknown memory type");
         }

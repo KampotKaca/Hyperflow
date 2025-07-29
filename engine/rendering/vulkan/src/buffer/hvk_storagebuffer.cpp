@@ -5,8 +5,8 @@
 namespace hf
 {
     VkStorageBuffer::VkStorageBuffer(const StorageBufferDefinitionInfo& info) :
-        VkBufferBase(info.bufferInfo, info.memoryType, info.data,
-        VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, VK_BUFFER_USAGE_STORAGE_BUFFER_BIT)
+        VkBufferBase(info.memoryType, info.data, 0,
+        VK_BUFFER_USAGE_STORAGE_BUFFER_BIT, ComputeBufferSize(info.bufferInfo))
     {
 
     }

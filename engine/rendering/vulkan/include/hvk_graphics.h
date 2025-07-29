@@ -8,8 +8,6 @@
 #include "hvk_shaderlayout.h"
 #include "hvk_texturelayout.h"
 #include "hvk_texturepack.h"
-#include "hvk_texturepackallocator.h"
-#include "hvk_bufferallocator.h"
 #include "hvk_texturesampler.h"
 #include "hvk_platform.h"
 
@@ -82,7 +80,8 @@ namespace hf
     struct GraphicsDevice
     {
         VkPhysicalDevice device{};
-        VkPhysicalDeviceProperties properties{};
+        VkPhysicalDeviceDescriptorBufferPropertiesEXT descBufferProperties{};
+        VkPhysicalDeviceProperties2 properties{};
         VkPhysicalDeviceFeatures features{};
         int32_t score{};
 
@@ -105,6 +104,10 @@ namespace hf
         PFN_vkCmdBeginRenderingKHR vkCmdBeginRenderingKHR{};
         PFN_vkCmdEndRenderingKHR vkCmdEndRenderingKHR{};
         PFN_vkCmdPipelineBarrier2KHR vkCmdPipelineBarrier2KHR{};
+        PFN_vkCmdBindDescriptorBuffersEXT vkCmdBindDescriptorBuffersEXT{};
+        PFN_vkCmdSetDescriptorBufferOffsetsEXT vkCmdSetDescriptorBufferOffsetsEXT{};
+        PFN_vkGetDescriptorEXT vkGetDescriptorEXT{};
+        PFN_vkGetDescriptorSetLayoutSizeEXT vkGetDescriptorSetLayoutSizeEXT{};
     };
 
     struct VkCopyBufferToBufferOperation
@@ -158,11 +161,7 @@ namespace hf
 
     struct PreAllocatedBuffers
     {
-        VkDescriptorSet descriptors[VK_MAX_UNIFORM_AND_TEXTURE_UPLOADS]{};
-        VkDescriptorSetLayoutBinding descLayoutBindings[VK_MAX_UNIFORM_AND_TEXTURE_BINDINGS]{};
-        VkDescriptorSetLayout descLayouts[VK_MAX_UNIFORM_AND_TEXTURE_BINDINGS * FRAMES_IN_FLIGHT]{};
         VkDescriptorBufferInfo bufferInfos[VK_MAX_UNIFORM_AND_TEXTURE_BINDINGS * FRAMES_IN_FLIGHT]{};
-        VkWriteDescriptorSet descWrites[VK_MAX_UNIFORM_AND_TEXTURE_BINDINGS * FRAMES_IN_FLIGHT]{};
         VkDescriptorImageInfo descImageBindings[VK_MAX_IMAGE_BINDINGS]{};
         VkImageMemoryBarrier imageBarriers[VK_MAX_IMAGE_BARRIERS]{};
         ImageTransitionArray imageTransitions[9]{};
@@ -202,7 +201,6 @@ namespace hf
 
         std::vector<URef<VkBufferAttrib>> bufferAttribs{};
         std::vector<URef<VkBufferBase>> buffers{};
-        std::vector<URef<VkBufferAllocator>> bufferAllocators{};
         std::vector<URef<VkTextureSampler>> textureSamplers{};
         std::vector<URef<VkTextureLayout>> textureLayouts{};
         std::vector<URef<VkShaderLayout>> shaderLayouts{};
@@ -256,6 +254,7 @@ namespace hf
         VkBufferUsageFlags usage{};
         VkSharingMode sharingMode{};
         BufferMemoryType memoryType{};
+        VkMemoryPropertyFlags requiredFlags{};
         uint32_t* pQueueFamilies{};
         uint32_t familyCount{};
     };

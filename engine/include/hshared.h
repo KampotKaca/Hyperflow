@@ -1141,8 +1141,8 @@ namespace hf
 
 	namespace utils
 	{
-		inline uint32_t GetFirstBitOne64(uint64_t n) { return n ? __builtin_ctzll(n) : 64u; }
-		inline uint32_t GetFirstBitZero64(uint64_t n) { return ~n ? __builtin_ctzll(~n) : 64u; }
+		inline uint32_t GetFirstBitOne64(const uint64_t n) { return n ? __builtin_ctzll(n) : 64u; }
+		inline uint32_t GetFirstBitZero64(const uint64_t n) { return ~n ? __builtin_ctzll(~n) : 64u; }
 
 		constexpr vec3 ColorFromHash(const uint32_t colorHash)
 		{

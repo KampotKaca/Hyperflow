@@ -79,31 +79,10 @@ namespace hf
             queueCreateInfos.push_back(queueCreateInfo);
         }
 
-        VkPhysicalDeviceGraphicsPipelineLibraryFeaturesEXT graphicsPipelineLibraryFeatures
-        {
-            .sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_GRAPHICS_PIPELINE_LIBRARY_FEATURES_EXT,
-            .pNext = nullptr,
-            .graphicsPipelineLibrary = VK_TRUE
-        };
-
-        VkPhysicalDeviceSynchronization2Features sync2Features
-        {
-            .sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SYNCHRONIZATION_2_FEATURES,
-            .pNext = &graphicsPipelineLibraryFeatures,
-            .synchronization2 = VK_TRUE
-        };
-
-        VkPhysicalDeviceDynamicRenderingFeaturesKHR dynamicRenderingFeature
-        {
-            .sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DYNAMIC_RENDERING_FEATURES_KHR,
-            .pNext = &sync2Features,
-            .dynamicRendering = VK_TRUE
-        };
-
         VkPhysicalDeviceFeatures2 deviceFeatures2
         {
             .sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2,
-            .pNext = &dynamicRenderingFeature,
+            .pNext = &DYNAMIC_RENDERING_FEATURES,
             .features = device.features
         };
 
@@ -149,7 +128,12 @@ namespace hf
     bool SetupPhysicalDevice(VkSurfaceKHR surface, VkPhysicalDevice device, GraphicsDevice& deviceData)
     {
         deviceData.device = device;
-        vkGetPhysicalDeviceProperties(device, &deviceData.properties);
+        deviceData.properties.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PROPERTIES_2;
+        deviceData.properties.pNext = &deviceData.descBufferProperties;
+
+        deviceData.descBufferProperties.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DESCRIPTOR_BUFFER_PROPERTIES_EXT;
+
+        vkGetPhysicalDeviceProperties2(device, &deviceData.properties);
         vkGetPhysicalDeviceFeatures(device, &deviceData.features);
 
         if (!deviceData.features.geometryShader) return false;
@@ -202,12 +186,12 @@ namespace hf
             .sharingMode = VK_SHARING_MODE_EXCLUSIVE
         };
 
-        const auto& limits = deviceData.properties.limits;
+        const auto& limits = deviceData.properties.properties.limits;
         const VkSampleCountFlags maxMsaa = limits.framebufferColorSampleCounts & limits.framebufferDepthSampleCounts;
 
         int32_t score = 0;
-        score += (deviceData.properties.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU) * 1000;
-        score += (int32_t)deviceData.properties.limits.maxImageDimension2D;
+        score += (deviceData.properties.properties.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU) * 1000;
+        score += (int32_t)deviceData.properties.properties.limits.maxImageDimension2D;
         score += (int32_t)maxMsaa;
         deviceData.score = score;
 
@@ -256,7 +240,7 @@ namespace hf
         CreateLogicalDevice(GRAPHICS_DATA.device);
         GRAPHICS_DATA.deviceIsLoaded = true;
 
-        LOG_LOG("Graphics device found [%s]", GRAPHICS_DATA.device.properties.deviceName);
+        LOG_LOG("Graphics device found [%s]", GRAPHICS_DATA.device.properties.properties.deviceName);
 
         VmaAllocatorCreateInfo allocatorInfo
         {
