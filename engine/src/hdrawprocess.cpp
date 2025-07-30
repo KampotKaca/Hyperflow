@@ -755,13 +755,13 @@ namespace hf
 
                                 if (material.material->sizeInBytes > 0)
                                 {
-                                    BufferBindInfo_i info
+                                    BindResourceInfo_i<Buffer> info
                                     {
                                         .bindingType = RenderBindingType::Graphics,
                                         .setBindingIndex = 1,
-                                        .pBuffers = &HF.graphicsResources.materialDataStorageBuffer,
-                                        .bufferCount = 1
+                                        .objectCount = 1
                                     };
+                                    info.objects[0] = HF.graphicsResources.materialDataStorageBuffer,
 
                                     HF.renderingApi.api.BindBuffer(handle, info);
                                 }
@@ -797,11 +797,13 @@ namespace hf
                                                     case BUFFER: throw GENERIC_EXCEPT("[Hyperflow]", "Cannot bind buffer here!");
                                                     case TEXPACK:
                                                         {
-                                                            TexturePackBindingInfo_i info
+                                                            BindResourceInfo_i<void*> info
                                                             {
-                                                                .texturePack = cPack.object,
-                                                                .setBindingIndex = i
+                                                                .bindingType = RenderBindingType::Graphics,
+                                                                .setBindingIndex = i,
+                                                                .objectCount = 1,
                                                             };
+                                                            info.objects[0] = cPack.object;
 
                                                             HF.renderingApi.api.BindTexturePack(handle, info);
                                                             descBindings[i] = cPack;
@@ -851,19 +853,28 @@ namespace hf
             for (uint32_t bufferIndex = range.start; bufferIndex < bufferEnd; bufferIndex++)
             {
                 const auto& bufferSet = packet.bufferSets.atC(bufferIndex);
-                BufferBindInfo_i info
+
+                BindResourceInfo_i<Buffer> info
                 {
                     .bindingType = bufferSet.bindingType,
                     .setBindingIndex = bufferSet.setBindingIndex,
-                    .pBuffers = packet.buffers.atP(bufferSet.bufferRange.start),
-                    .bufferCount = bufferSet.bufferRange.size
+                    .objectCount = bufferSet.bufferRange.size
                 };
-                HF.renderingApi.api.BindBuffer(handle, info);
-                descBindings[info.setBindingIndex] =
+
+                const auto end = bufferSet.bufferRange.end();
+                uint32_t index = 0;
+                for (uint32_t i = bufferSet.bufferRange.start; i < end; i++)
                 {
-                    .object = info.pBuffers,
-                    .type = BUFFER
-                };
+                    info.objects[index] = packet.buffers.at(i),
+                    descBindings[info.setBindingIndex] = DescriptorBindingInfo
+                    {
+                        .object = (void*)(uint64_t)info.objects[index],
+                        .type = BUFFER
+                    };
+                    index++;
+                }
+
+                HF.renderingApi.api.BindBuffer(handle, info);
             }
         }
 

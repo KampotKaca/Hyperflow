@@ -20,7 +20,6 @@ namespace hf
 	BufferAttrib Define(const BufferAttribDefinitionInfo& info);
 	Buffer Define(const BufferDefinitionInfo& info);
 	Buffer Define(const StorageBufferDefinitionInfo& info);
-	BufferAllocator Define(const BufferAllocatorDefinitionInfo& info);
 
 	BufferAttrib DefineBufferAttrib(const char* assetPath);
 
@@ -33,7 +32,6 @@ namespace hf
 	Ref<Texture> Create(const TextureCreationInfo& info);
 	Ref<RenderTexture> Create(const RenderTextureCreationInfo& info);
 	Ref<TexturePack> Create(const TexturePackCreationInfo& info);
-	Ref<TexturePackAllocator> Create(const TexturePackAllocatorCreationInfo& info);
 	Ref<VertBuffer> Create(const VertBufferCreationInfo& info);
 	Ref<Cubemap> Create(const CubemapCreationInfo& info);
 	Ref<IndexBuffer> Create(const IndexBufferCreationInfo& info);
@@ -48,7 +46,6 @@ namespace hf
 	void Destroy(const Ref<Texture>& tex);
 	void Destroy(const Ref<RenderTexture>& tex);
 	void Destroy(const Ref<TexturePack>& texPack);
-	void Destroy(const Ref<TexturePackAllocator>& tpa);
 	void Destroy(const Ref<RuntimeBufferBase>& rbb);
 	void Destroy(const Ref<Cubemap>& cb);
 	void Destroy(const Ref<Window>& win);
@@ -59,7 +56,6 @@ namespace hf
 	void DestroyAllWindows();
 	void Destroy(const Ref<Cubemap>* pCubemaps, uint32_t count);
 	void Destroy(const Ref<RuntimeBufferBase>* pBuffers, uint32_t count);
-	void Destroy(const Ref<TexturePackAllocator>* pTexPackAllocators, uint32_t count);
 	void Destroy(const Ref<TexturePack>* pPacks, uint32_t count);
 	void Destroy(const Ref<Texture>* pTextures, uint32_t count);
 	void Destroy(const Ref<RenderTexture>* pTextures, uint32_t count);
@@ -82,7 +78,6 @@ namespace hf
 	bool IsLoaded(const Ref<Texture>& tex);
 	bool IsLoaded(const Ref<RenderTexture>& tex);
 	bool IsLoaded(const Ref<TexturePack>& texPack);
-	bool IsLoaded(const Ref<TexturePackAllocator>& tpa);
 	bool IsLoaded(const Ref<RuntimeBufferBase>& rbb);
 	bool IsLoaded(const Ref<Cubemap>& cb);
 	bool IsLoaded(const Ref<AudioClip>& clip);
@@ -227,7 +222,6 @@ namespace hf
 	MeshStats GetStats(const Ref<Mesh>& mesh);
 
 	void SubmitAllTextures();
-
 	void SubmitAllBuffers();
 
 	bool IsKeyDown(Key key);

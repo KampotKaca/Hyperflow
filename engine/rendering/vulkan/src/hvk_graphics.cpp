@@ -176,7 +176,7 @@ namespace hf
         {
             deviceData.transferData =
             {
-                .indices = { indices.graphicsFamily.value(), indices.presentFamily.value() },
+                .indices = { indices.transferFamily.value(), indices.graphicsFamily.value(), indices.presentFamily.value() },
                 .sharingMode = VK_SHARING_MODE_CONCURRENT
             };
         }
@@ -242,13 +242,11 @@ namespace hf
 
         LOG_LOG("Graphics device found [%s]", GRAPHICS_DATA.device.properties.properties.deviceName);
 
-        VmaAllocatorCreateInfo allocatorInfo
-        {
-            .physicalDevice = GRAPHICS_DATA.device.device,
-            .device = GRAPHICS_DATA.device.logicalDevice.device,
-            .pAllocationCallbacks = nullptr,
-            .instance = GRAPHICS_DATA.instance,
-        };
+        VmaAllocatorCreateInfo allocatorInfo{};
+        allocatorInfo.physicalDevice = GRAPHICS_DATA.device.device;
+        allocatorInfo.device = GRAPHICS_DATA.device.logicalDevice.device;
+        allocatorInfo.instance = GRAPHICS_DATA.instance;
+        allocatorInfo.flags = VMA_ALLOCATOR_CREATE_BUFFER_DEVICE_ADDRESS_BIT;
 
         VK_HANDLE_EXCEPT(vmaCreateAllocator(&allocatorInfo, &GRAPHICS_DATA.allocator));
 
@@ -259,6 +257,23 @@ namespace hf
         CreateCommandBuffers(GRAPHICS_DATA.device, &GRAPHICS_DATA.graphicsPool, 1);
 
         LoadExtensionFunctions();
+
+        {
+            std::array types
+            {
+                VkDescriptorTypeCount{ .type = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,         .descriptorCount = VK_MAX_STORAGE_BUFFER_DESCRIPTORS },
+                VkDescriptorTypeCount{ .type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,         .descriptorCount = VK_MAX_UNIFORM_BUFFER_DESCRIPTORS },
+            };
+            GRAPHICS_DATA.bufferDescriptorBuffer = MakeURef<VkDescriptorBuffer>(types.data(), types.size(), VK_BUFFER_USAGE_RESOURCE_DESCRIPTOR_BUFFER_BIT_EXT);
+        }
+
+        {
+            std::array types
+            {
+                VkDescriptorTypeCount{ .type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, .descriptorCount = VK_MAX_COMBINED_IMAGE_SAMPLER_DESCRIPTORS },
+            };
+            GRAPHICS_DATA.imageDescriptorBuffer = MakeURef<VkDescriptorBuffer>(types.data(), types.size(), VK_BUFFER_USAGE_SAMPLER_DESCRIPTOR_BUFFER_BIT_EXT);
+        }
     }
 
     static void DestroyLogicalDevice(LogicalDevice& device)
@@ -280,19 +295,24 @@ namespace hf
 
     void LoadExtensionFunctions()
     {
-        auto device = GRAPHICS_DATA.device.logicalDevice.device;
-        GRAPHICS_DATA.extensionFunctions.vkCmdBeginRenderingKHR = (PFN_vkCmdBeginRenderingKHR)
-        vkGetDeviceProcAddr(device, "vkCmdBeginRenderingKHR");
+        const auto device = GRAPHICS_DATA.device.logicalDevice.device;
+        GRAPHICS_DATA.extensionFunctions.vkCmdBeginRenderingKHR             = (PFN_vkCmdBeginRenderingKHR)vkGetDeviceProcAddr(device, "vkCmdBeginRenderingKHR");
+        GRAPHICS_DATA.extensionFunctions.vkCmdEndRenderingKHR               = (PFN_vkCmdEndRenderingKHR)vkGetDeviceProcAddr(device, "vkCmdEndRenderingKHR");
+        GRAPHICS_DATA.extensionFunctions.vkCmdPipelineBarrier2KHR           = (PFN_vkCmdPipelineBarrier2KHR)vkGetDeviceProcAddr(device, "vkCmdPipelineBarrier2KHR");
+        GRAPHICS_DATA.extensionFunctions.vkCmdBindDescriptorBuffersEXT      = (PFN_vkCmdBindDescriptorBuffersEXT)vkGetDeviceProcAddr(device, "vkCmdBindDescriptorBuffersEXT");
+        GRAPHICS_DATA.extensionFunctions.vkCmdSetDescriptorBufferOffsetsEXT = (PFN_vkCmdSetDescriptorBufferOffsetsEXT)vkGetDeviceProcAddr(device, "vkCmdSetDescriptorBufferOffsetsEXT");
+        GRAPHICS_DATA.extensionFunctions.vkGetDescriptorEXT                 = (PFN_vkGetDescriptorEXT)vkGetDeviceProcAddr(device, "vkGetDescriptorEXT");
+        GRAPHICS_DATA.extensionFunctions.vkGetDescriptorSetLayoutSizeEXT    = (PFN_vkGetDescriptorSetLayoutSizeEXT)vkGetDeviceProcAddr(device, "vkGetDescriptorSetLayoutSizeEXT");
+        GRAPHICS_DATA.extensionFunctions.vkGetBufferDeviceAddressKHR        = (PFN_vkGetBufferDeviceAddressEXT)vkGetDeviceProcAddr(device, "vkGetBufferDeviceAddressKHR");
 
-        GRAPHICS_DATA.extensionFunctions.vkCmdEndRenderingKHR = (PFN_vkCmdEndRenderingKHR)
-        vkGetDeviceProcAddr(device, "vkCmdEndRenderingKHR");
-
-        GRAPHICS_DATA.extensionFunctions.vkCmdPipelineBarrier2KHR = (PFN_vkCmdPipelineBarrier2KHR)
-        vkGetDeviceProcAddr(device, "vkCmdPipelineBarrier2KHR");
-
-        if (!GRAPHICS_DATA.extensionFunctions.vkCmdBeginRenderingKHR ||
-            !GRAPHICS_DATA.extensionFunctions.vkCmdEndRenderingKHR ||
-            !GRAPHICS_DATA.extensionFunctions.vkCmdPipelineBarrier2KHR)
+        if (!GRAPHICS_DATA.extensionFunctions.vkCmdBeginRenderingKHR             ||
+            !GRAPHICS_DATA.extensionFunctions.vkCmdEndRenderingKHR               ||
+            !GRAPHICS_DATA.extensionFunctions.vkCmdPipelineBarrier2KHR           ||
+            !GRAPHICS_DATA.extensionFunctions.vkCmdBindDescriptorBuffersEXT      ||
+            !GRAPHICS_DATA.extensionFunctions.vkCmdSetDescriptorBufferOffsetsEXT ||
+            !GRAPHICS_DATA.extensionFunctions.vkGetDescriptorEXT                 ||
+            !GRAPHICS_DATA.extensionFunctions.vkGetDescriptorSetLayoutSizeEXT    ||
+            !GRAPHICS_DATA.extensionFunctions.vkGetBufferDeviceAddressKHR)
             throw GENERIC_EXCEPT("[Vulkan]", "Failed to load extension functions");
     }
 }

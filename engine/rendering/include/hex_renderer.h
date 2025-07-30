@@ -209,31 +209,19 @@ namespace hf::inter::rendering
         TexturePackBindInfo_i* pBindings{};
     };
 
-    struct TexturePackAllocatorCreationInfo_i
+    template<typename T>
+    struct BindResourceInfo_i
     {
-        void** pTexturePacks{};
-        uint32_t texturePackCount = 0;
-    };
-
-    struct TexturePackBindingInfo_i
-    {
-        const void* texturePack{};
-        uint32_t setBindingIndex = 0;
         RenderBindingType bindingType = RenderBindingType::Graphics;
+        uint32_t setBindingIndex = 0;
+        T objects[MAX_OBJECT_BINDINGS]{};
+        uint32_t objectCount = 0;
     };
 
     struct StorageBufferBindingInfo_i
     {
         const void* storageBuffer{};
         uint32_t setBindingIndex = 0;
-    };
-
-    struct BufferBindInfo_i
-    {
-        RenderBindingType bindingType = RenderBindingType::Graphics;
-        uint32_t setBindingIndex = 0;
-        Buffer* pBuffers{};
-        uint32_t bufferCount = 0;
     };
 
     struct DrawCallInfo_i
@@ -279,11 +267,7 @@ namespace hf::inter::rendering
         void* (*CreateTexturePack)(const TexturePackCreationInfo_i& info);
         void (*DestroyTexturePack)(void* texPack);
         void (*UploadTexturePackBinding)(void* texPack, const TexturePackBindingUploadGroupInfo_i& info);
-        void (*BindTexturePack)(void* rn, const TexturePackBindingInfo_i& info);
-
-        //texture pack allocator
-        void* (*CreateTexturePackAllocator)(const TexturePackAllocatorCreationInfo_i& info);
-        void (*DestroyTexturePackAllocator)(void* texPackAllocator);
+        void (*BindTexturePack)(void* rn, const BindResourceInfo_i<void*>& info);
 
         //texture sampler
         TextureSampler (*DefineTextureSampler)(const TextureSamplerDefinitionInfo& info);
@@ -299,10 +283,7 @@ namespace hf::inter::rendering
         Buffer (*DefineUniformBuffer)(const BufferDefinitionInfo& info);
         Buffer (*DefineStorageBuffer)(const StorageBufferDefinitionInfo& info);
         void (*UploadBuffer)(const void* rn, const BufferUploadInfo_i& info);
-        void (*BindBuffer)(const void* rn, const BufferBindInfo_i& info);
-
-        //uniform allocator
-        BufferAllocator (*DefineBufferAllocator)(const BufferAllocatorDefinitionInfo& info);
+        void (*BindBuffer)(const void* rn, const BindResourceInfo_i<Buffer>& info);
 
         //vertex buffer
         void* (*CreateVertBuffer)(const VertBufferCreationInfo& info);

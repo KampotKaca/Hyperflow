@@ -15,7 +15,7 @@ namespace hf
         uint32_t descriptorCount{};
         VkDeviceSize alignment{};  //not needed to set will be resolved inside the function call!
         VkDeviceSize bufferSize{}; //not needed to set will be resolved inside the function call!
-        VkDeviceSize typeSize{}; //not needed to set will be resolved inside the function call!
+        VkDeviceSize typeSize{};   //not needed to set will be resolved inside the function call!
     };
 
     struct VkDescriptorTypeData
@@ -52,17 +52,21 @@ namespace hf
         }
     };
 
-    struct VkLocatedDescriptor
+    struct VkDescriptorLocation
     {
         VkDescriptorType type{};
         uint32_t positionIndex{};
         uint8_t* descriptorMapping{};
+        VkDeviceSize offset{};
+        VkDeviceAddress address{};
+        VkBufferUsageFlags usageFlags{};
     };
 
     struct VkGetBufferDescriptorInfo
     {
         VkDescriptorBufferType type{};
         VkDeviceAddress address{};
+        VkDeviceSize size{};
     };
 
     struct VkGetImageDescriptorInfo
@@ -73,17 +77,16 @@ namespace hf
 
     struct VkDescriptorBuffer final : public VkBufferBase
     {
-        explicit VkDescriptorBuffer(VkDescriptorTypeCount* pTypes, uint32_t count);
+        explicit VkDescriptorBuffer(VkDescriptorTypeCount* pTypes, uint32_t count, VkBufferUsageFlagBits typeFlags);
         ~VkDescriptorBuffer() override = default;
 
         VkDescriptorTypeData typeDatas[VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT + 1];
+        VkDeviceAddress address{};
     };
 
-    VkResult GetBufferDescriptorFromBuffer(VkDescriptorBuffer* descBuffer, const VkGetBufferDescriptorInfo& info, VkLocatedDescriptor& descriptor);
-    VkResult GetImageDescriptorFromBuffer(VkDescriptorBuffer* descBuffer, const VkGetImageDescriptorInfo& info, VkLocatedDescriptor& descriptor);
-    bool FreeDescriptor(VkDescriptorBuffer* descBuffer, const VkLocatedDescriptor& descriptor);
-
-    void BindLayout(const VkDescriptorBuffer* descBuffer, VkDescriptorSetLayout layout, const VkLocatedDescriptor& descriptor);
+    VkResult GetBufferDescriptorFromBuffer(const URef<VkDescriptorBuffer>& descBuffer, const VkGetBufferDescriptorInfo& info, VkDescriptorLocation& descriptor);
+    VkResult GetImageDescriptorFromBuffer(const URef<VkDescriptorBuffer>& descBuffer, const VkGetImageDescriptorInfo& info, VkDescriptorLocation& descriptor);
+    bool FreeDescriptor(const URef<VkDescriptorBuffer>& descBuffer, const VkDescriptorLocation& descriptor);
 }
 
 #endif //HVK_DESCRIPTORBUFFER_H

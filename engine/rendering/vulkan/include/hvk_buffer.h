@@ -7,13 +7,13 @@ namespace hf
 {
     struct VkBufferBase
     {
-        explicit VkBufferBase(BufferMemoryType memoryType, const uint8_t* data,
-        VkMemoryPropertyFlags requiredFlags, VkBufferUsageFlags usage, uint64_t bufferSize);
+        VkBufferBase(BufferMemoryType memoryType, const uint8_t* data,
+        VkMemoryPropertyFlags requiredFlags, const VmaAllocationCreateFlags allocationFlags, VkBufferUsageFlags usage, uint64_t bufferSize);
         virtual ~VkBufferBase();
 
         bool isLoaded = false;
         BufferMemoryType memoryType{};
-        uint64_t bufferSize{};
+        VkDeviceSize bufferSize{};
         VkBuffer buffers[FRAMES_IN_FLIGHT]{};
         VmaAllocation memoryRegions[FRAMES_IN_FLIGHT]{};
         void* memoryMappings[FRAMES_IN_FLIGHT]{};

@@ -1,12 +1,12 @@
 #ifndef HVK_UNIFORMBUFFER_H
 #define HVK_UNIFORMBUFFER_H
 
-#include "hvk_buffer.h"
+#include "hvk_boundbuffer.h"
 #include "hvk_shared.h"
 
 namespace hf
 {
-    struct VkUniformBuffer : public VkBufferBase
+    struct VkUniformBuffer : public VkBoundBuffer
     {
         explicit VkUniformBuffer(const BufferDefinitionInfo& info);
         ~VkUniformBuffer() override = default;

@@ -119,7 +119,6 @@ namespace hf
 	struct Texture;
 	struct Cubemap;
 	struct TexturePack;
-	struct TexturePackAllocator;
 
 	struct RuntimeBufferBase;
 	struct VertBuffer;
@@ -130,7 +129,6 @@ namespace hf
 
 	typedef uint32_t BufferAttrib;
 	typedef uint32_t Buffer;
-	typedef uint32_t BufferAllocator;
 	typedef uint32_t TextureLayout;
 	typedef uint32_t TextureSampler;
 	typedef uint32_t ShaderLayout;
@@ -651,12 +649,6 @@ namespace hf
 		uint32_t bindingCount{};
 	};
 
-	struct TexturePackAllocatorCreationInfo
-	{
-		Ref<TexturePack>* pTexturePacks{};
-		uint32_t texturePackCount = 0;
-	};
-
 	//quick access and upload buffer.
 	//at minimum it's size should be 4 bytes.
 	//remember first 2 bytes are always occupied by material index, so you can use other 126 bytes freely
@@ -682,12 +674,6 @@ namespace hf
 
 		TextureLayout* pTextureLayouts{};
 		uint32_t textureLayoutCount{};
-	};
-
-	struct BufferAllocatorDefinitionInfo
-	{
-		Buffer* pBuffers{};
-		uint32_t bufferCount{};
 	};
 
 	struct TextureMipMapInfo

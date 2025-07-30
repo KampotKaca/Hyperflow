@@ -36,7 +36,6 @@ namespace hf::inter
         unordered_map<uint64_t, Ref<RuntimeBufferBase>> buffers{};
         unordered_map<uint64_t, Ref<RenderTexture>> renderTextures{};
         unordered_map<uint64_t, Ref<TexturePack>> texturePacks{};
-        unordered_map<uint64_t, Ref<TexturePackAllocator>> texturePackAllocators{};
 
         unordered_map<std::string, BufferAttrib> bufferAttribs{};
         unordered_map<std::string, Ref<Mesh>> meshes{};
@@ -68,7 +67,6 @@ namespace hf::inter
         std::vector<void*> shaders{};
         std::vector<TypedBuffer> buffers{};
         std::vector<void*> texturePacks{};
-        std::vector<void*> texturePackAllocators{};
         std::vector<void*> textures{};
         std::vector<void*> renderTextures{};
     };
@@ -97,7 +95,6 @@ namespace hf::inter
         TextureSampler cubemapSampler{};
 
         Buffer globalUniform = 0;
-        BufferAllocator bufferAllocator = 0;
 
         ShaderLayout axisLinesShaderLayout{};
         ShaderLayout skyboxShaderLayout{};
@@ -112,8 +109,6 @@ namespace hf::inter
         Ref<Cubemap> boundCubemap{};
 
         Ref<TexturePack> skyboxTexturePack{};
-
-        Ref<TexturePackAllocator> texPackAllocator{};
 
         Ref<Mesh> cube{};
         Ref<Mesh> plane{};
@@ -221,16 +216,12 @@ namespace hf::inter
         bool CreateTexturePack_i(TexturePack* texPack);
         bool DestroyTexturePack_i(TexturePack* texPack);
 
-        bool CreateTexturePackAllocator_i(TexturePackAllocator* packAllocator);
-        bool DestroyTexturePackAllocator_i(TexturePackAllocator* packAllocator);
-
         void DestroyAllBuffers_i(bool internalOnly = false);
         void DestroyAllMeshes_i(bool internalOnly = false);
         void DestroyAllTextures_i(bool internalOnly = false);
         void DestroyAllCubemaps_i(bool internalOnly = false);
         void DestroyAllTexturePacks_i(bool internalOnly = false);
         void DestroyAllRenderTextures_i(bool internalOnly = false);
-        void DestroyAllTexturePackAllocators_i(bool internalOnly = false);
         void DestroyAllShaders_i(bool internalOnly = false);
         void DestroyAllShaderLibraries_i(bool internalOnly = false);
     }

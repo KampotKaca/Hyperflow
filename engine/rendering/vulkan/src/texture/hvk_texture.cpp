@@ -14,6 +14,7 @@ namespace hf
           details(info.details), size(info.size), bufferCount(info.textureCount)
     {
         bufferSize = size.x * size.y * size.z * 4;
+        layout = (VkImageLayout)info.details.finalLayout;
 
         auto device = GRAPHICS_DATA.device.logicalDevice.device;
 
@@ -43,7 +44,7 @@ namespace hf
             auto& transferData = GRAPHICS_DATA.device.transferData;
             imageInfo.queueFamilyIndexCount = (uint32_t)transferData.indices.size();
             imageInfo.pQueueFamilyIndices = transferData.indices.data();
-            imageInfo.sharingMode = VK_SHARING_MODE_CONCURRENT;
+            imageInfo.sharingMode = transferData.sharingMode;
         }
         else
         {
@@ -150,9 +151,8 @@ namespace hf
         for (uint32_t i = 0; i < imageInfoCount; i++)
         {
             auto& imageInfo = pImageInfos[i];
-            auto& barrier = GRAPHICS_DATA.preAllocBuffers.imageBarriers[i];
 
-            barrier =
+            GRAPHICS_DATA.preAllocBuffers.imageBarriers[i] = VkImageMemoryBarrier
             {
                 .sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER,
                 .srcAccessMask = srcAccessMask,
@@ -209,7 +209,7 @@ namespace hf
 
     inline void CopyBufferToImage(VkCommandBuffer command)
     {
-        for (auto& operation : GRAPHICS_DATA.bufferToImageCopyOperations)
+        for (const auto& operation : GRAPHICS_DATA.bufferToImageCopyOperations)
         {
             vkCmdCopyBufferToImage(command, operation.srcBuffer, operation.imageInfo.image,
                 VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
@@ -226,7 +226,7 @@ namespace hf
             BufferOperation(GRAPHICS_DATA.transferPool.buffers[0], device.transferQueue, CopyBufferToImage);
             BufferOperation(GRAPHICS_DATA.graphicsPool.buffers[0], device.graphicsQueue, GenerateMimMaps);
 
-            for (auto& operation : GRAPHICS_DATA.bufferToImageCopyOperations)
+            for (const auto& operation : GRAPHICS_DATA.bufferToImageCopyOperations)
             {
                 if (operation.deleteSrcAfterCopy)
                     vmaDestroyBuffer(GRAPHICS_DATA.allocator, operation.srcBuffer, operation.srcMemory);
@@ -256,7 +256,7 @@ namespace hf
             }
         };
 
-        auto device = GRAPHICS_DATA.device.logicalDevice.device;
+        const auto device = GRAPHICS_DATA.device.logicalDevice.device;
         VK_HANDLE_EXCEPT(vkCreateImageView(device, &viewInfo, nullptr, &texture->view));
     }
 
@@ -352,7 +352,6 @@ namespace hf
                 VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT, 0,
                 0, nullptr,
                 0, nullptr,
-                1, &barrier);
-        }
+                1, &barrier);        }
     }
 }

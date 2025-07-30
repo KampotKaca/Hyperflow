@@ -26,7 +26,7 @@ namespace hf
         {
             samplerInfo.anisotropyEnable = true;
             samplerInfo.maxAnisotropy = glm::min(
-                GRAPHICS_DATA.device.properties.limits.maxSamplerAnisotropy,
+                GRAPHICS_DATA.device.properties.properties.limits.maxSamplerAnisotropy,
                 (float)info.anisotropicFilter);
         }
         else

@@ -12,9 +12,7 @@ namespace hf::inter
         rendering::DestroyAllTextures_i(internalOnly);
         rendering::DestroyAllCubemaps_i(internalOnly);
 
-        rendering::DestroyAllTexturePackAllocators_i(internalOnly);
         rendering::DestroyAllTexturePacks_i(internalOnly);
-
         rendering::DestroyAllRenderTextures_i(internalOnly);
     }
 
@@ -34,8 +32,6 @@ namespace hf::inter
         }
         for (const auto texPack : HF.deletedResources.texturePacks)
             HF.renderingApi.api.DestroyTexturePack(texPack);
-        for (const auto allocator : HF.deletedResources.texturePackAllocators)
-            HF.renderingApi.api.DestroyTexturePackAllocator(allocator);
         for (const auto tex : HF.deletedResources.textures)
             HF.renderingApi.api.DestroyTexture(tex);
         for (const auto tex : HF.deletedResources.renderTextures)
@@ -45,7 +41,6 @@ namespace hf::inter
         HF.deletedResources.shaders.clear();
         HF.deletedResources.buffers.clear();
         HF.deletedResources.texturePacks.clear();
-        HF.deletedResources.texturePackAllocators.clear();
         HF.deletedResources.textures.clear();
         HF.deletedResources.renderTextures.clear();
     }

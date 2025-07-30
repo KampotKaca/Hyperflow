@@ -108,6 +108,7 @@ namespace hf
         PFN_vkCmdSetDescriptorBufferOffsetsEXT vkCmdSetDescriptorBufferOffsetsEXT{};
         PFN_vkGetDescriptorEXT vkGetDescriptorEXT{};
         PFN_vkGetDescriptorSetLayoutSizeEXT vkGetDescriptorSetLayoutSizeEXT{};
+        PFN_vkGetBufferDeviceAddressKHR vkGetBufferDeviceAddressKHR{};
     };
 
     struct VkCopyBufferToBufferOperation
@@ -161,11 +162,15 @@ namespace hf
 
     struct PreAllocatedBuffers
     {
+        VkDescriptorSetLayout descLayouts[VK_MAX_UNIFORM_AND_TEXTURE_BINDINGS]{};
+        VkDescriptorSetLayoutBinding descLayoutBindings[VK_MAX_UNIFORM_AND_TEXTURE_BINDINGS]{};
+        VkDescriptorBufferBindingInfoEXT descBindingInfos[VK_MAX_UNIFORM_AND_TEXTURE_BINDINGS]{};
         VkDescriptorBufferInfo bufferInfos[VK_MAX_UNIFORM_AND_TEXTURE_BINDINGS * FRAMES_IN_FLIGHT]{};
         VkDescriptorImageInfo descImageBindings[VK_MAX_IMAGE_BINDINGS]{};
         VkImageMemoryBarrier imageBarriers[VK_MAX_IMAGE_BARRIERS]{};
         ImageTransitionArray imageTransitions[9]{};
         uint32_t indices[VK_MAX_INDICES]{};
+        VkDeviceSize sizes[VK_MAX_INDICES]{};
     };
 
     struct RenderApiEditorInfo
@@ -198,6 +203,8 @@ namespace hf
         CommandPool transferPool{};
         CommandPool graphicsPool{};
         VmaAllocator allocator{};
+        URef<VkDescriptorBuffer> bufferDescriptorBuffer{};
+        URef<VkDescriptorBuffer> imageDescriptorBuffer{};
 
         std::vector<URef<VkBufferAttrib>> bufferAttribs{};
         std::vector<URef<VkBufferBase>> buffers{};
@@ -255,6 +262,7 @@ namespace hf
         VkSharingMode sharingMode{};
         BufferMemoryType memoryType{};
         VkMemoryPropertyFlags requiredFlags{};
+        VmaAllocationCreateFlags allocationFlags{};
         uint32_t* pQueueFamilies{};
         uint32_t familyCount{};
     };

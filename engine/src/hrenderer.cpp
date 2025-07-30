@@ -120,7 +120,6 @@ namespace hf
             SubmitAllTextures();
 
             for (auto& texPack : std::ranges::views::values(HF.graphicsResources.texturePacks)) CreateTexturePack_i(texPack.get());
-            for (auto& texPackAllocator : std::ranges::views::values(HF.graphicsResources.texturePackAllocators)) CreateTexturePackAllocator_i(texPackAllocator.get());
         }
 
         void UnloadCurrentApi_i(bool retainReferences)

@@ -5,6 +5,8 @@
 
 namespace hf
 {
+    static void CreateDescriptorForBinding(VkTextureBinding& binding, uint32_t from, uint32_t size);
+
     VkTexturePack::VkTexturePack(const inter::rendering::TexturePackCreationInfo_i& info)
         : layout(info.layout)
     {
@@ -16,7 +18,7 @@ namespace hf
                 .bindingType = bInfo.type,
                 .bindingId = bInfo.bindingIndex,
                 .sampler = bInfo.sampler,
-                .views = {}
+                .bindingArray = {}
             };
 
             switch (bInfo.type)
@@ -30,10 +32,14 @@ namespace hf
 
                         if (tInfo.texture)
                         {
-                            auto* tex = (VkTexture*)tInfo.texture;
-                            binding.views.push_back(tex->view);
+                            const auto* tex = (VkTexture*)tInfo.texture;
+                            auto newBinding = VkTextureBindingViewData{};
+                            newBinding.view = tex->view;
+                            newBinding.layout = tex->layout;
+
+                            binding.bindingArray.push_back(newBinding);
                         }
-                        else binding.views.push_back(nullptr);
+                        else binding.bindingArray.push_back(VkTextureBindingViewData{});
                     }
                 }
                 break;
@@ -46,71 +52,56 @@ namespace hf
                         if (tInfo.texture)
                         {
                             auto* tex = (VkRenderTexture*)tInfo.texture;
+
                             if (tInfo.index >= tex->colorAttachmentCount)
                             {
                                 if (!tex->depthTexture) throw GENERIC_EXCEPT("[Hyperflow]", "Render texture invalid attachment index!");
-                                binding.views.push_back(tex->depthTexture->view);
+
+                                auto newBinding = VkTextureBindingViewData{};
+                                newBinding.view = tex->depthTexture->view;
+                                newBinding.layout = tex->depthTexture->layout;
+
+                                binding.bindingArray.push_back(newBinding);
                             }
-                            else binding.views.push_back(tex->colorTextures[tInfo.index]->view);
+                            else
+                            {
+                                const VkTexture* viewTex = tex->colorTextures[tInfo.index];
+                                auto newBinding = VkTextureBindingViewData{};
+                                newBinding.view = viewTex->view;
+                                newBinding.layout = viewTex->layout;
+
+                                binding.bindingArray.push_back(newBinding);
+                            }
                         }
-                        else binding.views.push_back(nullptr);
+                        else binding.bindingArray.push_back(VkTextureBindingViewData{});
                     }
                 }
                 break;
             }
 
             bindings[bInfo.bindingIndex] = binding;
+
+            for (auto& b : bindings | std::views::values)
+                CreateDescriptorForBinding(b, 0, b.bindingArray.size());
         }
     }
 
     VkTexturePack::~VkTexturePack()
     {
-        bindings.clear();
-    }
-
-    void UpdateTexturePack(VkTexturePack* pack, const uint32_t* bindingIndices, uint32_t bindingCount)
-    {
-        uint32_t writeCount = 0;
-        for (uint32_t i = 0; i < bindingCount; i++)
+        for (auto& binding : bindings | std::views::values)
         {
-            auto& binding = pack->bindings[bindingIndices[i]];
-            auto& texSampler = GetSampler(binding.sampler);
-
-            for (uint32_t j = 0; j < binding.views.size(); j++)
+            for (uint32_t i = 0; i < binding.bindingArray.size(); i++)
             {
-                for (auto descriptor : pack->descriptors)
+                auto& bRef = binding.bindingArray.at(i);
+                for (uint32_t k = 0; k < FRAMES_IN_FLIGHT; k++)
                 {
-                    if (binding.views.atC(j) == nullptr) continue;
-
-                    GRAPHICS_DATA.preAllocBuffers.descImageBindings[writeCount] =
-                    {
-                        .sampler = texSampler->sampler,
-                        .imageView = binding.views.atC(j),
-                        .imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL
-                    };
-
-                    GRAPHICS_DATA.preAllocBuffers.descWrites[writeCount] =
-                    {
-                        .sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
-                        .dstSet = descriptor,
-                        .dstBinding = binding.bindingId,
-                        .dstArrayElement = j,
-                        .descriptorCount = 1,
-                        .descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
-                        .pImageInfo = &GRAPHICS_DATA.preAllocBuffers.descImageBindings[writeCount],
-                    };
-
-                    writeCount++;
+                    if (bRef.descriptorBindings->descriptorMapping != nullptr)
+                        FreeDescriptor(GRAPHICS_DATA.imageDescriptorBuffer, bRef.descriptorBindings[k]);
                 }
             }
         }
 
-        if (writeCount > 0)
-        {
-            vkUpdateDescriptorSets(GRAPHICS_DATA.device.logicalDevice.device,
-                writeCount, GRAPHICS_DATA.preAllocBuffers.descWrites,
-                0, nullptr);
-        }
+        bindings.clear();
     }
 
     void SetTextureBinding(VkTexturePack* pack, const inter::rendering::TexturePackBindingUploadInfo_i* bindings, uint32_t bindingCount)
@@ -132,14 +123,16 @@ namespace hf
                 for (uint32_t j = current.texInfo->offset; j < current.texInfo->count; j++)
                 {
                     auto texInfo = current.texInfo->pTextures[j];
+                    auto& texBinding = binding.bindingArray.at(j);
 
                     switch (binding.bindingType)
                     {
                         case TexturePackBindingType::Texture2D:
                         case TexturePackBindingType::Cubemap:
                         {
-                            auto* tex = (VkTexture*)texInfo.texture;
-                            binding.views.at(j) = tex->view;
+                            const auto* tex = (VkTexture*)texInfo.texture;
+                            texBinding.view = tex->view;
+                            texBinding.layout = tex->layout;
                         }
                         break;
                         case TexturePackBindingType::RenderTexture:
@@ -148,12 +141,22 @@ namespace hf
                             if (texInfo.index >= tex->colorAttachmentCount)
                             {
                                 if (!tex->depthTexture) throw GENERIC_EXCEPT("[Hyperflow]", "Render texture invalid attachment index!");
-                                binding.views.at(j) = tex->depthTexture->view;
+
+                                const auto dt = tex->depthTexture;
+                                texBinding.view = dt->view;
+                                texBinding.layout = dt->layout;
                             }
-                            else binding.views.at(j) = tex->colorTextures[texInfo.index]->view;
+                            else
+                            {
+                                const auto ct = tex->colorTextures[texInfo.index];
+                                texBinding.view = ct->view;
+                                texBinding.layout = ct->layout;
+                            }
                         }
                         break;
                     }
+
+                    CreateDescriptorForBinding(binding, current.texInfo->offset, current.texInfo->count);
                 }
 
                 wasModified = true;
@@ -166,20 +169,65 @@ namespace hf
             }
         }
 
-        if (count > 0)
-        {
-            UpdateTexturePack(pack, GRAPHICS_DATA.preAllocBuffers.indices, count);
-        }
-        else LOG_WARN("Unnecessary set binding call, noting changed");
+        if (count == 0) LOG_WARN("Unnecessary set binding call, noting changed");
     }
 
-    void BindTexturePack(const VkRenderer* rn, const VkTexturePack* pack, uint32_t setBindingIndex,
-                         RenderBindingType bindingType)
+    void CreateDescriptorForBinding(VkTextureBinding& binding, uint32_t from, uint32_t size)
+    {
+        const auto sampler = GetSampler(binding.sampler)->sampler;
+        const uint32_t end = from + size;
+        for (uint32_t i = from; i < end; i++)
+        {
+            auto& bRef = binding.bindingArray.at(i);
+            if (bRef.view == nullptr) continue;
+
+            VkGetImageDescriptorInfo descInfo{};
+            descInfo.type = VkDescriptorImageType::CombinedImageSampler;
+            descInfo.imageInfo.imageLayout = bRef.layout;
+            descInfo.imageInfo.imageView = bRef.view;
+            descInfo.imageInfo.sampler = sampler;
+
+            for (uint32_t k = 0; k < FRAMES_IN_FLIGHT; k++)
+            {
+                if (bRef.descriptorBindings->descriptorMapping != nullptr)
+                {
+                    FreeDescriptor(GRAPHICS_DATA.imageDescriptorBuffer, bRef.descriptorBindings[k]);
+                    bRef.descriptorBindings[k] = VkDescriptorLocation{};
+                }
+                GetImageDescriptorFromBuffer(GRAPHICS_DATA.imageDescriptorBuffer, descInfo, bRef.descriptorBindings[k]);
+            }
+        }
+    }
+
+    void BindTexturePack(const VkRenderer* rn, const inter::rendering::BindResourceInfo_i<VkTexturePack*>& info)
     {
         const auto currentFrame = rn->currentFrame;
+        uint32_t bindingCount = 0;
 
-        vkCmdBindDescriptorSets(rn->currentCommand, (VkPipelineBindPoint)bindingType, rn->currentLayout,
-        setBindingIndex, 1, &pack->descriptors[currentFrame],
-        0, nullptr);
+        for (uint32_t i = 0; i < info.objectCount; i++)
+        {
+            const auto& obj = info.objects[i];
+            for (auto& binding : obj->bindings | std::views::values)
+            {
+                for (uint32_t j = 0; j < binding.bindingArray.size(); j++)
+                {
+                    const auto& viewData = binding.bindingArray.at(j);
+                    const auto& loc = viewData.descriptorBindings[currentFrame];
+
+                    GRAPHICS_DATA.preAllocBuffers.descBindingInfos[bindingCount] = VkDescriptorBufferBindingInfoEXT
+                    {
+                        .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_BUFFER_BINDING_INFO_EXT,
+                        .address = loc.address,
+                        .usage = loc.usageFlags,
+                    };
+
+                    GRAPHICS_DATA.preAllocBuffers.indices[bindingCount] = 0;
+                    GRAPHICS_DATA.preAllocBuffers.sizes[bindingCount] = loc.offset; //will be used as offsets.
+                    bindingCount++;
+                }
+            }
+        }
+
+        FinishObjectBinding(rn, bindingCount, (VkPipelineBindPoint)info.bindingType, info.setBindingIndex);
     }
 }

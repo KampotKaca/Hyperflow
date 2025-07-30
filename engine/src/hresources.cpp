@@ -173,18 +173,7 @@ namespace hf
                 HF.graphicsResources.materialDataStorageBuffer = Define(info);
             }
 
-            //allocator
-            {
-                std::array buffers = { HF.staticResources.globalUniform, HF.graphicsResources.materialDataStorageBuffer };
-
-                const BufferAllocatorDefinitionInfo info
-                {
-                    .pBuffers = buffers.data(),
-                    .bufferCount = buffers.size(),
-                };
-
-                HF.staticResources.bufferAllocator = Define(info);
-            }
+            SubmitAllBuffers();
         }
 
         void DefineShaderLayouts()
@@ -285,19 +274,6 @@ namespace hf
                     .layout = HF.staticResources.skyboxLayout,
                 };
                 HF.staticResources.skyboxTexturePack = Create(info);
-            }
-
-            {
-                std::array texPacks =
-                {
-                    HF.staticResources.skyboxTexturePack,
-                };
-                TexturePackAllocatorCreationInfo info
-                {
-                    .pTexturePacks = texPacks.data(),
-                    .texturePackCount = texPacks.size()
-                };
-                HF.staticResources.texPackAllocator = Create(info);
             }
         }
 

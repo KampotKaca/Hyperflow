@@ -42,11 +42,11 @@ namespace hf
         return totalSize;
     }
 
-    VkDescriptorBuffer::VkDescriptorBuffer(VkDescriptorTypeCount* pTypes, uint32_t count) :
+    VkDescriptorBuffer::VkDescriptorBuffer(VkDescriptorTypeCount* pTypes, uint32_t count, VkBufferUsageFlagBits typeFlags) :
         VkBufferBase(BufferMemoryType::WriteOnly, nullptr,
         VK_MEMORY_ALLOCATE_DEVICE_ADDRESS_BIT,
-        VK_BUFFER_USAGE_RESOURCE_DESCRIPTOR_BUFFER_BIT_EXT |
-        VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT,
+        0,
+        VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT | typeFlags,
         ComputeDescriptorBufferSize(pTypes, count))
     {
         VkDeviceSize size = 0;
@@ -58,13 +58,20 @@ namespace hf
                 .offset = size,
                 .size = type.bufferSize,
                 .alignment = type.alignment,
+                .typeSize = type.typeSize,
                 .usageMasks = std::vector<uint64_t>((uint32_t)glm::ceil((float_t)type.descriptorCount / 64.0f))
             };
             size += type.bufferSize;
         }
+
+        VkBufferDeviceAddressInfoEXT addressInfo{};
+        addressInfo.sType = VK_STRUCTURE_TYPE_BUFFER_DEVICE_ADDRESS_INFO_EXT;
+        addressInfo.buffer = buffers[0];
+
+        address = GRAPHICS_DATA.extensionFunctions.vkGetBufferDeviceAddressKHR(GRAPHICS_DATA.device.logicalDevice.device, &addressInfo);
     }
 
-    static VkResult AllocateAndGetLocation(VkDescriptorBuffer* descBuffer, const VkDescriptorGetInfoEXT* getInfo, VkLocatedDescriptor& descriptor)
+    static VkResult AllocateAndGetLocation(const URef<VkDescriptorBuffer>& descBuffer, const VkDescriptorGetInfoEXT* getInfo, VkDescriptorLocation& descriptor)
     {
         auto& typeInfo = descBuffer->typeDatas[getInfo->type];
         const auto location = typeInfo.Allocate();
@@ -72,19 +79,20 @@ namespace hf
 
         descriptor.type = getInfo->type;
         descriptor.positionIndex = location;
-        uint8_t* mapping = (uint8_t*)descBuffer->memoryMappings[0] + typeInfo.offset + location * typeInfo.alignment;
+        descriptor.offset = typeInfo.offset + location * typeInfo.alignment;
+        uint8_t* mapping = (uint8_t*)descBuffer->memoryMappings[0] + descriptor.offset;
         descriptor.descriptorMapping = mapping;
 
         GRAPHICS_DATA.extensionFunctions.vkGetDescriptorEXT(GRAPHICS_DATA.device.logicalDevice.device, getInfo, typeInfo.typeSize, mapping);
         return VK_SUCCESS;
     }
 
-    VkResult GetBufferDescriptorFromBuffer(VkDescriptorBuffer* descBuffer, const VkGetBufferDescriptorInfo& info, VkLocatedDescriptor& descriptor)
+    VkResult GetBufferDescriptorFromBuffer(const URef<VkDescriptorBuffer>& descBuffer, const VkGetBufferDescriptorInfo& info, VkDescriptorLocation& descriptor)
     {
         VkDescriptorAddressInfoEXT addressInfo{};
         addressInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_ADDRESS_INFO_EXT;
         addressInfo.address = info.address;
-        addressInfo.range = VK_WHOLE_SIZE;
+        addressInfo.range = info.size;
 
         VkDescriptorGetInfoEXT getInfo
         {
@@ -101,10 +109,12 @@ namespace hf
         default: throw GENERIC_EXCEPT("[Hyperflow]", "Unsupported descriptor buffer type %i", info.type);
         }
 
+        descriptor.usageFlags = VK_BUFFER_USAGE_RESOURCE_DESCRIPTOR_BUFFER_BIT_EXT;
+        descriptor.address = info.address;
         return AllocateAndGetLocation(descBuffer, &getInfo, descriptor);
     }
 
-    VkResult GetImageDescriptorFromBuffer(VkDescriptorBuffer* descBuffer, const VkGetImageDescriptorInfo& info, VkLocatedDescriptor& descriptor)
+    VkResult GetImageDescriptorFromBuffer(const URef<VkDescriptorBuffer>& descBuffer, const VkGetImageDescriptorInfo& info, VkDescriptorLocation& descriptor)
     {
         VkDescriptorGetInfoEXT getInfo
         {
@@ -120,17 +130,13 @@ namespace hf
         default: throw GENERIC_EXCEPT("[Hyperflow]", "Unsupported descriptor image type %i", info.type);
         }
 
+        descriptor.usageFlags = VK_BUFFER_USAGE_SAMPLER_DESCRIPTOR_BUFFER_BIT_EXT;
         return AllocateAndGetLocation(descBuffer, &getInfo, descriptor);
     }
 
-    bool FreeDescriptor(VkDescriptorBuffer* descBuffer, const VkLocatedDescriptor& descriptor)
+    bool FreeDescriptor(const URef<VkDescriptorBuffer>& descBuffer, const VkDescriptorLocation& descriptor)
     {
         auto& typeInfo = descBuffer->typeDatas[descriptor.type];
         return typeInfo.Free((int32_t)descriptor.positionIndex);
-    }
-
-    void BindLayout(const VkDescriptorBuffer* descBuffer, VkDescriptorSetLayout layout, const VkLocatedDescriptor& descriptor)
-    {
-
     }
 }

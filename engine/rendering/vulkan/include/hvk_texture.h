@@ -12,6 +12,7 @@ namespace hf
 
         VkImage image{};
         VkImageView view{};
+        VkImageLayout layout{};
         VmaAllocation imageMemory{};
 
         inter::rendering::TextureType type = inter::rendering::TextureType::Tex2D;

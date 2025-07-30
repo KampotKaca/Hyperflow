@@ -78,10 +78,13 @@ namespace hf
     void SetVSync(VkRenderer* rn, VsyncMode mode);
 
     void UploadBuffers(const VkRenderer* rn, const inter::rendering::BufferUploadInfo_i& info);
-    void BindBuffers(const VkRenderer* rn, const inter::rendering::BufferBindInfo_i& info);
-    void BindTexturePack(const VkRenderer* rn, const VkTexturePack* pack, uint32_t setBindingIndex, RenderBindingType bindingType);
+    void BindBuffer(const VkRenderer* rn, const inter::rendering::BindResourceInfo_i<VkBoundBuffer*>& info);
+    void BindTexturePack(const VkRenderer* rn, const inter::rendering::BindResourceInfo_i<VkTexturePack*>& info);
+
     void BindShaderLayout(VkRenderer* rn, ShaderLayout setup);
     void UploadPushConstants(const VkRenderer* rn, const PushConstantUploadInfo& info);
+
+    void FinishObjectBinding(const VkRenderer* rn, uint32_t objectCount, VkPipelineBindPoint bindPoint, uint32_t setBindingIndex);
 }
 
 #endif //HVK_RENDERER_H

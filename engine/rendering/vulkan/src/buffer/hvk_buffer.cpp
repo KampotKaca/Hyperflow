@@ -4,8 +4,8 @@
 
 namespace hf
 {
-    VkBufferBase::VkBufferBase(BufferMemoryType memoryType, const uint8_t* data,
-    VkMemoryPropertyFlags requiredFlags, VkBufferUsageFlags usage, uint64_t bufferSize)
+    VkBufferBase::VkBufferBase(const BufferMemoryType memoryType, const uint8_t* data,
+    const VkMemoryPropertyFlags requiredFlags, const VmaAllocationCreateFlags allocationFlags, const VkBufferUsageFlags usage, const uint64_t bufferSize)
     : memoryType(memoryType), bufferSize(bufferSize)
     {
         switch (memoryType)
@@ -31,6 +31,7 @@ namespace hf
                     bufferInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
                     bufferInfo.memoryType = memoryType;
                     bufferInfo.requiredFlags = requiredFlags;
+                    bufferInfo.allocationFlags = allocationFlags;
                     bufferInfo.pQueueFamilies = nullptr;
                     bufferInfo.familyCount = 0;
 
@@ -53,6 +54,7 @@ namespace hf
                         bufferInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
                         bufferInfo.memoryType = memoryType;
                         bufferInfo.requiredFlags = requiredFlags;
+                        bufferInfo.allocationFlags = allocationFlags;
                         bufferInfo.pQueueFamilies = nullptr;
                         bufferInfo.familyCount = 0;
 
@@ -105,10 +107,6 @@ namespace hf
                 &info.pUniformDataBuffer[packet.bufferRange.start], packet.bufferRange.size);
         }
     }
-    void BindBuffers(const VkRenderer* rn, const inter::rendering::BufferBindInfo_i& info)
-    {
-        const auto currentFrame = rn->currentFrame;
-    }
 
     static void SetMemoryTypeFlags(BufferMemoryType memoryType, VmaAllocationCreateInfo* result);
 
@@ -136,6 +134,7 @@ namespace hf
         VmaAllocationCreateInfo vmaAllocInfo{};
         vmaAllocInfo.requiredFlags = info.requiredFlags;
         SetMemoryTypeFlags(info.memoryType, &vmaAllocInfo);
+        vmaAllocInfo.flags |= info.allocationFlags;
 
         VmaAllocationInfo resultInfo{};
         VK_HANDLE_EXCEPT(vmaCreateBuffer(GRAPHICS_DATA.allocator, &bufferInfo, &vmaAllocInfo, bufferResult, memResult, &resultInfo));

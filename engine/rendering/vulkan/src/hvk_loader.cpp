@@ -86,7 +86,6 @@ namespace hf
     {
         SubmitAllOperations();
 
-        GRAPHICS_DATA.bufferAllocators.clear();
         GRAPHICS_DATA.shaderLayouts.clear();
         GRAPHICS_DATA.bufferAttribs.clear();
         GRAPHICS_DATA.buffers.clear();

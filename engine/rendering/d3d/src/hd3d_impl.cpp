@@ -63,17 +63,7 @@ namespace hf::inter::rendering
 
     }
 
-    void BindTexturePack(void* rn, const TexturePackBindingInfo_i& info)
-    {
-
-    }
-
-    void* CreateTexturePackAllocator(const TexturePackAllocatorCreationInfo_i& info)
-    {
-        return nullptr;
-    }
-
-    void DestroyTexturePackAllocator(void* texPackAllocator)
+    void BindTexturePack(void* rn, const BindResourceInfo_i<void*>& info)
     {
 
     }
@@ -113,14 +103,9 @@ namespace hf::inter::rendering
 
     }
 
-    void BindBuffer(const void* rn, const BufferBindInfo_i& info)
+    void BindBuffer(const void* rn, const BindResourceInfo_i<Buffer>& info)
     {
 
-    }
-
-    BufferAllocator DefineBufferAllocator(const BufferAllocatorDefinitionInfo& info)
-    {
-        return 1;
     }
 
     uint32_t DefineShaderLayout(const ShaderLayoutDefinitionInfo& info)
@@ -263,10 +248,6 @@ namespace hf::inter::rendering
             .UploadTexturePackBinding   = UploadTexturePackBinding,
             .BindTexturePack            = BindTexturePack,
 
-            //texture pack allocator
-            .CreateTexturePackAllocator     = CreateTexturePackAllocator,
-            .DestroyTexturePackAllocator    = DestroyTexturePackAllocator,
-
             //texture sampler
             .DefineTextureSampler       = DefineTextureSampler,
 
@@ -282,9 +263,6 @@ namespace hf::inter::rendering
             .DefineStorageBuffer        = DefineStorageBuffer,
             .UploadBuffer               = UploadBuffer,
             .BindBuffer                 = BindBuffer,
-
-            //uniform allocator
-            .DefineBufferAllocator     = DefineBufferAllocator,
 
             //vertex buffer
             .CreateVertBuffer           = CreateVertBuffer,

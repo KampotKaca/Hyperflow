@@ -26,9 +26,9 @@ namespace hf
         VK_EXT_DESCRIPTOR_BUFFER_EXTENSION_NAME,
     };
 
-    static VkPhysicalDeviceBufferDeviceAddressFeatures BUFFER_DEVICE_ADDRESS_FEATURES
+    static VkPhysicalDeviceBufferDeviceAddressFeaturesKHR BUFFER_DEVICE_ADDRESS_FEATURES
     {
-        .sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_BUFFER_DEVICE_ADDRESS_FEATURES,
+        .sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_BUFFER_DEVICE_ADDRESS_FEATURES_KHR,
         .bufferDeviceAddress = VK_TRUE,
     };
 

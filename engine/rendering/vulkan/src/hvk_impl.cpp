@@ -7,6 +7,7 @@
 #include "hvk_storagebuffer.h"
 #include "hvk_rendertexture.h"
 #include "hvk_shaderlibrary.h"
+#include "hvk_boundbuffer.h"
 
 namespace hf::inter::rendering
 {
@@ -94,19 +95,15 @@ namespace hf::inter::rendering
         SetTextureBinding((VkTexturePack*)texPack, info.bindings, info.bindingCount);
     }
 
-    void BindTexturePack(void* rn, const TexturePackBindingInfo_i& info)
+    void BindTexturePack(void* rn, const BindResourceInfo_i<void*>& info)
     {
-        hf::BindTexturePack((VkRenderer*)rn, (VkTexturePack*)info.texturePack, info.setBindingIndex, info.bindingType);
-    }
+        BindResourceInfo_i<VkTexturePack*> texPackInfo;
+        texPackInfo.bindingType = info.bindingType;
+        texPackInfo.setBindingIndex = info.setBindingIndex;
+        texPackInfo.objectCount = info.objectCount;
+        for (uint32_t i = 0; i < info.objectCount; ++i) texPackInfo.objects[i] = (VkTexturePack*)info.objects[i];
 
-    void* CreateTexturePackAllocator(const TexturePackAllocatorCreationInfo_i& info)
-    {
-        return new VkTexturePackAllocator(info);
-    }
-
-    void DestroyTexturePackAllocator(void* texPackAllocator)
-    {
-        delete (VkTexturePackAllocator*)texPackAllocator;
+        BindTexturePack((VkRenderer*)rn, texPackInfo);
     }
 
     TextureSampler DefineTextureSampler(const TextureSamplerDefinitionInfo& info)
@@ -150,15 +147,15 @@ namespace hf::inter::rendering
         UploadBuffers((VkRenderer*)rn, info);
     }
 
-    void BindBuffer(const void* rn, const BufferBindInfo_i& info)
+    void BindBuffer(const void* rn, const BindResourceInfo_i<Buffer>& info)
     {
-        BindBuffers((VkRenderer*)rn, info);
-    }
+        BindResourceInfo_i<VkBoundBuffer*> bufferInfo;
+        bufferInfo.bindingType = info.bindingType;
+        bufferInfo.setBindingIndex = info.setBindingIndex;
+        bufferInfo.objectCount = info.objectCount;
+        for (uint32_t i = 0; i < info.objectCount; ++i) bufferInfo.objects[i] = (VkBoundBuffer*)GetBuffer(info.objects[i]).get();
 
-    BufferAllocator DefineBufferAllocator(const BufferAllocatorDefinitionInfo& info)
-    {
-        GRAPHICS_DATA.bufferAllocators.emplace_back(MakeURef<VkBufferAllocator>(info));
-        return (BufferAllocator)GRAPHICS_DATA.bufferAllocators.size();
+        BindBuffer((VkRenderer*)rn, bufferInfo);
     }
 
     ShaderLayout DefineShaderLayout(const ShaderLayoutDefinitionInfo& info)
@@ -420,10 +417,6 @@ namespace hf::inter::rendering
             .UploadTexturePackBinding   = UploadTexturePackBinding,
             .BindTexturePack            = BindTexturePack,
 
-            //texture pack allocator
-            .CreateTexturePackAllocator     = CreateTexturePackAllocator,
-            .DestroyTexturePackAllocator    = DestroyTexturePackAllocator,
-
             //texture sampler
             .DefineTextureSampler       = DefineTextureSampler,
 
@@ -439,9 +432,6 @@ namespace hf::inter::rendering
             .DefineStorageBuffer        = DefineStorageBuffer,
             .UploadBuffer               = UploadBuffer,
             .BindBuffer                 = BindBuffer,
-
-            //uniform allocator
-            .DefineBufferAllocator     = DefineBufferAllocator,
 
             //vertex buffer
             .CreateVertBuffer           = CreateVertBuffer,
