@@ -26,6 +26,16 @@ namespace app
 
         UniformUploadAll(rn);
 
+        if (hf::IsKeyDown(hf::Key::P) || hf::IsKeyDown(hf::Key::O))
+        {
+            hf::UploadStart_TexturePack(rn, APP_TEXTURE_PACKS.viking_room_pack);
+            {
+                if (hf::IsKeyDown(hf::Key::P)) hf::UploadAdd_TexturePackBinding(rn, 0, APP_TEXTURES.viking_room);
+                if (hf::IsKeyDown(hf::Key::O)) hf::UploadAdd_TexturePackBinding(rn, 0, APP_TEXTURES.greek_head);
+            }
+            hf::UploadEnd_TexturePack(rn);
+        }
+
         if (hf::IsKeyDown(hf::Key::G))
         {
             if (hf::skybox::IsDefaultCubemapBound()) hf::skybox::BindCubemap(rn, APP_CUBEMAPS.cosmos);
@@ -55,8 +65,8 @@ namespace app
                             const DefaultPushConstant pc
                             {
                                 .modelMatrix = APP_OBJECTS.vikingRoomTransform.ToMat4(),
-                                .color = { hf::utils::ColorFromHash(0xFFFFFF), 1 },
-                                .phongData = { hf::utils::ColorFromHash(0x9B9B9B), 0.8 }
+                                .color = hf::vec4{ hf::utils::ColorFromHash(0xFFFFFF), 1 },
+                                .phongData = hf::vec4{ hf::utils::ColorFromHash(0x9B9B9B), 0.8 }
                             };
                             hf::DrawSet_PushConstant(rn, pc);
                             hf::DrawAdd_DrawCall(rn, APP_MESHES.viking_room);
@@ -65,14 +75,15 @@ namespace app
 
                         hf::Start_Draw(rn);
                         {
+                            hf::DrawAdd_TexturePackBinding(rn, APP_TEXTURE_PACKS.white_pack, 1);
                             const DefaultPushConstant pc
                             {
                                 .modelMatrix = APP_OBJECTS.sphereTransform.ToMat4(),
-                                .color = { hf::utils::ColorFromHash(0xFFFFFF), 1 },
-                                .phongData = { hf::utils::ColorFromHash(0x9B9B9B), 1.0 }
+                                .color = hf::vec4{ hf::utils::ColorFromHash(0x9E0505), 1 },
+                                .phongData = hf::vec4{ hf::utils::ColorFromHash(0x9B9B9B), 1.0 }
                             };
                             hf::DrawSet_PushConstant(rn, pc);
-                            hf::DrawAdd_DrawCall(rn, hf::primitives::GetSphere());
+                            hf::DrawAdd_DrawCall(rn, hf::primitives::GetIcoSphere());
                         }
                         hf::End_Draw(rn);
                     }
@@ -95,7 +106,7 @@ namespace app
                             const UnlitColorPushConstant pc
                             {
                                 .modelMatrix = APP_OBJECTS.groundTransform.ToMat4(),
-                                .color = { hf::utils::ColorFromHash(0x19CB1E), 1 }
+                                .color = hf::vec4{ hf::utils::ColorFromHash(0x19CB1E), 1 }
                             };
                             hf::DrawSet_PushConstant(rn, pc);
                             hf::DrawAdd_DrawCall(rn, hf::primitives::GetPlane());

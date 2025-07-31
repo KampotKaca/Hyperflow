@@ -170,7 +170,61 @@ namespace hf
         else LOG_WARN("Unnecessary binding upload! nothing changed");
     }
 
-    void UploadAdd_TexturePackBinding(const Ref<Renderer>& rn, const TexturePackBindingUploadInfo<Texture>& info)
+    void UploadAdd_TexturePackBinding(const Ref<Renderer>& rn, uint32_t bindingIndex, const Ref<Texture>& texture, uint32_t textureIndex)
+    {
+        TexturePackTextureUploadInfo<Texture>::TextureInfo texInfo{};
+        texInfo.index = textureIndex;
+        texInfo.texture = texture;
+
+        TexturePackTextureUploadInfo<Texture> bindingTextureInfo{};
+        bindingTextureInfo.offset = 0;
+        bindingTextureInfo.count = 1;
+        bindingTextureInfo.pTextures = &texInfo;
+
+        TexturePackBindingUploadInfo<Texture> bindingInfo{};
+        bindingInfo.bindingIndex = bindingIndex;
+        bindingInfo.texInfo = bindingTextureInfo;
+
+        UploadAdd_TexturePackBindings(rn, bindingInfo);
+    }
+
+    void UploadAdd_TexturePackBinding(const Ref<Renderer>& rn, uint32_t bindingIndex, const Ref<Cubemap>& cubemap, uint32_t textureIndex)
+    {
+        TexturePackTextureUploadInfo<Cubemap>::TextureInfo texInfo{};
+        texInfo.index = textureIndex;
+        texInfo.texture = cubemap;
+
+        TexturePackTextureUploadInfo<Cubemap> bindingTextureInfo{};
+        bindingTextureInfo.offset = 0;
+        bindingTextureInfo.count = 1;
+        bindingTextureInfo.pTextures = &texInfo;
+
+        TexturePackBindingUploadInfo<Cubemap> bindingInfo{};
+        bindingInfo.bindingIndex = bindingIndex;
+        bindingInfo.texInfo = bindingTextureInfo;
+
+        UploadAdd_TexturePackBindings(rn, bindingInfo);
+    }
+
+    void UploadAdd_TexturePackBinding(const Ref<Renderer>& rn, uint32_t bindingIndex, const Ref<RenderTexture>& rt, uint32_t attachmentIndex)
+    {
+        TexturePackTextureUploadInfo<RenderTexture>::TextureInfo texInfo{};
+        texInfo.index = attachmentIndex;
+        texInfo.texture = rt;
+
+        TexturePackTextureUploadInfo<RenderTexture> bindingTextureInfo{};
+        bindingTextureInfo.offset = 0;
+        bindingTextureInfo.count = 1;
+        bindingTextureInfo.pTextures = &texInfo;
+
+        TexturePackBindingUploadInfo<RenderTexture> bindingInfo{};
+        bindingInfo.bindingIndex = bindingIndex;
+        bindingInfo.texInfo = bindingTextureInfo;
+
+        UploadAdd_TexturePackBindings(rn, bindingInfo);
+    }
+
+    void UploadAdd_TexturePackBindings(const Ref<Renderer>& rn, const TexturePackBindingUploadInfo<Texture>& info)
     {
         try
         {
@@ -190,7 +244,7 @@ namespace hf
         }
     }
 
-    void UploadAdd_TexturePackBinding(const Ref<Renderer>& rn, const TexturePackBindingUploadInfo<Cubemap>& info)
+    void UploadAdd_TexturePackBindings(const Ref<Renderer>& rn, const TexturePackBindingUploadInfo<Cubemap>& info)
     {
         try
         {
@@ -210,7 +264,7 @@ namespace hf
         }
     }
 
-    void UploadAdd_TexturePackBinding(const Ref<Renderer>& rn, const TexturePackBindingUploadInfo<RenderTexture>& info)
+    void UploadAdd_TexturePackBindings(const Ref<Renderer>& rn, const TexturePackBindingUploadInfo<RenderTexture>& info)
     {
         try
         {

@@ -29,7 +29,7 @@ namespace hf::skybox
                     .offset = 0
                 }
             };
-            UploadAdd_TexturePackBinding(rn, bindingInfo);
+            UploadAdd_TexturePackBindings(rn, bindingInfo);
         }
         UploadEnd_TexturePack(rn);
     }

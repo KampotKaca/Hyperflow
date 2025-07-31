@@ -15,7 +15,7 @@ namespace hf
     };
 
     VkPipeline GetShaderLibraryModule(const VkShaderLibrary* lib, uint32_t moduleId);
-    inline void GetRenderingInfo(ShaderDrawOutputFormats outputFormat, VkPipelineRenderingCreateInfo& result)
+    inline void GetRenderingInfo(const ShaderDrawOutputFormats& outputFormat, VkPipelineRenderingCreateInfo& result)
     {
         VkPipelineRenderingCreateInfo renderingInfo{};
         renderingInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_RENDERING_CREATE_INFO_KHR;

@@ -241,7 +241,7 @@ namespace hf
         CreateLogicalDevice(GRAPHICS_DATA.device);
         GRAPHICS_DATA.deviceIsLoaded = true;
 
-        LOG_LOG("Graphics device found [%s]", GRAPHICS_DATA.device.properties.properties.deviceName);
+        LOG_LOG("[Vulkan] Graphics device found [%s]", GRAPHICS_DATA.device.properties.properties.deviceName);
 
         VmaAllocatorCreateInfo allocatorInfo{};
         allocatorInfo.physicalDevice = GRAPHICS_DATA.device.device;
@@ -275,6 +275,14 @@ namespace hf
             };
             GRAPHICS_DATA.imageDescriptorBuffer = MakeURef<VkDescriptorBuffer>(types.data(), types.size(), VK_BUFFER_USAGE_SAMPLER_DESCRIPTOR_BUFFER_BIT_EXT);
         }
+
+        LOG_LOG("[Vulkan] Max vertex attributes supported: %i", GRAPHICS_DATA.device.properties.properties.limits.maxVertexInputAttributes);
+        LOG_LOG("[Vulkan] Max image array layers: %i", GRAPHICS_DATA.device.properties.properties.limits.maxImageArrayLayers);
+        LOG_LOG("[Vulkan] Max texel buffer elements: %i", GRAPHICS_DATA.device.properties.properties.limits.maxTexelBufferElements);
+        LOG_LOG("[Vulkan] Max uniform buffer range: %i", GRAPHICS_DATA.device.properties.properties.limits.maxUniformBufferRange);
+        LOG_LOG("[Vulkan] Max storage buffer range: %i", GRAPHICS_DATA.device.properties.properties.limits.maxStorageBufferRange);
+        LOG_LOG("[Vulkan] Max push constant size: %i", GRAPHICS_DATA.device.properties.properties.limits.maxPushConstantsSize);
+        LOG_LOG("[Vulkan] Max color attachments: %i", GRAPHICS_DATA.device.properties.properties.limits.maxColorAttachments);
     }
 
     static void DestroyLogicalDevice(LogicalDevice& device)

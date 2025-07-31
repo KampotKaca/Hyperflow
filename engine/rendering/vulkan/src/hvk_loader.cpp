@@ -134,7 +134,7 @@ namespace hf
     void InitInstanceVersion()
     {
         VK_HANDLE_EXCEPT(vkEnumerateInstanceVersion(&GRAPHICS_DATA.supportedVersion));
-        LOG_LOG("Supported Vulkan API Version: (%i.%i.%i)",
+        LOG_LOG("[Vulkan] Supported Vulkan API Version: (%i.%i.%i)",
             VK_VERSION_MAJOR(GRAPHICS_DATA.supportedVersion),
             VK_VERSION_MINOR(GRAPHICS_DATA.supportedVersion),
             VK_VERSION_PATCH(GRAPHICS_DATA.supportedVersion));

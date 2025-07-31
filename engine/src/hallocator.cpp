@@ -87,13 +87,52 @@ namespace hf
             LOG_LOG("\n[Hyperflow] Thread Memory Stats in MB:\nCash Size: %0.2g\nCash Span: %0.2g\nThread To Global: %0.2g\nGlobal To Thread: %0.2g",
                 ToMB(sts.sizecache), ToMB(sts.spancache), ToMB(sts.thread_to_global), ToMB(sts.global_to_thread));
 
-            auto& sp = *sts.span_use;
+            const auto& sp = *sts.span_use;
             LOG_LOG("\n[Span Use]\nCurrent: %0.2g\nPeak: %0.2g\nTo Global: %0.2g\nFrom Global: %0.2g\nTo Cache: %0.2g\nFrom Cache: %0.2g\nTo Reserved: %0.2g\nFrom Reserved: %0.2g\nMap Calls: %i",
-                ToMB(sp.current), ToMB(sp.peak), ToMB(sp.to_global), ToMB(sp.from_global), ToMB(sp.to_cache), ToMB(sp.from_cache), ToMB(sp.to_reserved), ToMB(sp.from_reserved), sp.map_calls);
+                sp.current, sp.peak, sp.to_global, sp.from_global, sp.to_cache, sp.from_cache, sp.to_reserved, sp.from_reserved, sp.map_calls);
 
-            auto& su = *sts.size_use;
+            const auto& su = *sts.size_use;
             LOG_LOG("\n[Size Use]\nAlloc Current: %0.2g\nAlloc Peak: %0.2g\nAlloc Total: %0.2g\nFree Total: %0.2g\nSpans To Cache: %0.2g\nSpans From Cache: %0.2g\nSpans From Reserved: %0.2g\nMap Calls: %i",
-                ToMB(su.alloc_current), ToMB(su.alloc_peak), ToMB(su.alloc_total), ToMB(su.free_total), ToMB(su.spans_to_cache), ToMB(su.spans_from_cache), ToMB(su.spans_from_reserved), su.map_calls);
+                su.alloc_current, su.alloc_peak, su.alloc_total, su.free_total, su.spans_to_cache, su.spans_from_cache, su.spans_from_reserved, su.map_calls);
+        }
+
+        GlobalMemoryStatistics GetGlobalMemoryStatistics_i()
+        {
+            rpmalloc_global_statistics_t sts{};
+            rpmalloc_global_statistics(&sts);
+
+            GlobalMemoryStatistics stats{};
+            stats.mappedSizeMbs        = ToMB(sts.mapped);
+            stats.mappedPeakSizeMbs    = ToMB(sts.mapped_peak);
+            stats.cashedSizeMbs        = ToMB(sts.cached);
+            stats.hugeAllocSizeMbs     = ToMB(sts.huge_alloc);
+            stats.hugeAllocPeakSizeMbs = ToMB(sts.huge_alloc_peak);
+            stats.mappedTotalSizeMbs   = ToMB(sts.mapped_total);
+            stats.unmappedTotalSizeMbs = ToMB(sts.unmapped_total);
+            return stats;
+        }
+
+        ThreadMemoryStatistics GetThreadMemoryStatistics_i()
+        {
+            rpmalloc_thread_statistics_t sts{};
+            rpmalloc_thread_statistics(&sts);
+            const auto& sp = *sts.span_use;
+            const auto& su = *sts.size_use;
+
+            ThreadMemoryStatistics stats{};
+            stats.cacheSizeMbs      = ToMB(sts.sizecache);
+            stats.cacheSpanMbs      = ToMB(sts.spancache);
+            stats.threadToGlobalMbs = ToMB(sts.thread_to_global);
+            stats.globalToThreadMbs = ToMB(sts.global_to_thread);
+
+            stats.currentNumSpans = sp.current;
+            stats.peakNumSpans    = sp.peak;
+
+            stats.currentNumAllocations = su.alloc_current;
+            stats.peakNumAllocations    = su.alloc_peak;
+            stats.totalNumAllocations   = su.alloc_total;
+            stats.totalNumFrees         = su.free_total;
+            return stats;
         }
     }
 }

@@ -176,9 +176,13 @@ namespace hf
 	void UploadStart_TexturePack(const Ref<Renderer>& rn, const Ref<TexturePack>& texPack);
 	void UploadEnd_TexturePack(const Ref<Renderer>& rn);
 
-    void UploadAdd_TexturePackBinding(const Ref<Renderer>& rn, const TexturePackBindingUploadInfo<Texture>& info);
-    void UploadAdd_TexturePackBinding(const Ref<Renderer>& rn, const TexturePackBindingUploadInfo<Cubemap>& info);
-    void UploadAdd_TexturePackBinding(const Ref<Renderer>& rn, const TexturePackBindingUploadInfo<RenderTexture>& info);
+    void UploadAdd_TexturePackBinding(const Ref<Renderer>& rn, uint32_t bindingIndex, const Ref<Texture>& texture, uint32_t textureIndex = 0);
+    void UploadAdd_TexturePackBinding(const Ref<Renderer>& rn, uint32_t bindingIndex, const Ref<Cubemap>& cubemap, uint32_t textureIndex = 0);
+    void UploadAdd_TexturePackBinding(const Ref<Renderer>& rn, uint32_t bindingIndex, const Ref<RenderTexture>& rt, uint32_t attachmentIndex);
+
+    void UploadAdd_TexturePackBindings(const Ref<Renderer>& rn, const TexturePackBindingUploadInfo<Texture>& info);
+    void UploadAdd_TexturePackBindings(const Ref<Renderer>& rn, const TexturePackBindingUploadInfo<Cubemap>& info);
+    void UploadAdd_TexturePackBindings(const Ref<Renderer>& rn, const TexturePackBindingUploadInfo<RenderTexture>& info);
 
     void Add_RenderTextureDependency(const Ref<Renderer>& rn, const RenderAttachmentDependencyInfo& info);
 
@@ -332,7 +336,8 @@ namespace hf
 
 		Ref<Mesh> GetCube();
 		Ref<Mesh> GetPlane();
-		Ref<Mesh> GetSphere();
+	    Ref<Mesh> GetIcoSphere();
+	    Ref<Mesh> GetUvSphere();
 
 		Ref<Material> GetEmptyMaterial();
 	}

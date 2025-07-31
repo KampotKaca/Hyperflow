@@ -26,7 +26,8 @@ namespace hf
 
         Ref<Mesh> GetCube() { return inter::HF.staticResources.cube; }
         Ref<Mesh> GetPlane() { return inter::HF.staticResources.plane; }
-        Ref<Mesh> GetSphere() { return inter::HF.staticResources.sphere; }
+        Ref<Mesh> GetIcoSphere() { return inter::HF.staticResources.icoSphere; }
+        Ref<Mesh> GetUvSphere() { return inter::HF.staticResources.uvSphere; }
         Ref<Material> GetEmptyMaterial() { return inter::HF.staticResources.emptyMaterial; }
     }
 
@@ -329,11 +330,11 @@ namespace hf
                 HF.staticResources.plane = Create(info);
             }
 
-            //Sphere mesh
+            //Ico Sphere mesh
             {
                 const MeshCreationInfo info
                 {
-                    .filePath = "__sphere.obj",
+                    .filePath = "__ico_sphere.obj",
                     .stats =
                     {
                         .typeFlags = MeshDataType::Position | MeshDataType::Normal | MeshDataType::TexCoord,
@@ -341,7 +342,22 @@ namespace hf
                         .bufferAttrib = HF.staticResources.defaultAttrib,
                     }
                 };
-                HF.staticResources.sphere = Create(info);
+                HF.staticResources.icoSphere = Create(info);
+            }
+
+            //Uv Sphere mesh
+            {
+                const MeshCreationInfo info
+                {
+                    .filePath = "__uv_sphere.obj",
+                    .stats =
+                    {
+                        .typeFlags = MeshDataType::Position | MeshDataType::Normal | MeshDataType::TexCoord,
+                        .memoryType = BufferMemoryType::Static,
+                        .bufferAttrib = HF.staticResources.defaultAttrib,
+                    }
+                };
+                HF.staticResources.uvSphere = Create(info);
             }
         }
 

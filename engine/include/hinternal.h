@@ -112,7 +112,8 @@ namespace hf::inter
 
         Ref<Mesh> cube{};
         Ref<Mesh> plane{};
-        Ref<Mesh> sphere{};
+        Ref<Mesh> icoSphere{};
+        Ref<Mesh> uvSphere{};
 
         Ref<Material> emptyMaterial{};
 
@@ -155,6 +156,9 @@ namespace hf::inter
 
         void LogMemoryStats_i();
         void LogThreadMemoryStats_i();
+
+        GlobalMemoryStatistics GetGlobalMemoryStatistics_i();
+        ThreadMemoryStatistics GetThreadMemoryStatistics_i();
     }
 
     namespace primitives

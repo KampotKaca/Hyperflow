@@ -9,6 +9,7 @@ namespace app
     {
         hf::Ref<hf::Texture> viking_room;
         hf::Ref<hf::Texture> greek_head;
+        hf::Ref<hf::Texture> white;
     };
 
     extern AppTextures APP_TEXTURES;

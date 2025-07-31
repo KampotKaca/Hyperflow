@@ -40,7 +40,7 @@ namespace app
                         .vertexShaderPath = { .path = "default_lit" },
                         .options = hf::ShaderRasterizerOptions
                         {
-                            .cullMode = hf::ShaderCullMode::None,
+                            // .cullMode = hf::ShaderCullMode::None,
                             .polygonMode = hf::MeshPolygonMode::Fill,
                             .lineWidth = 1.0f
                         },

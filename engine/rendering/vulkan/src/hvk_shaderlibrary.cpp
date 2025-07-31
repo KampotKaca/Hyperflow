@@ -312,7 +312,7 @@ namespace hf
             {
                 if(!GRAPHICS_DATA.platform.functions.writeFileFunc(cachePath, cacheData))
                     LOG_WARN("[Hyperflow] Failed to write cache to store for future use! %s", info.uniqueLibraryName);
-                else LOG_INFO("[Hyperflow] Successfully wrote cache which will speed up the next pipeline read. %s", info.uniqueLibraryName);
+                else LOG_LOG("[Hyperflow] Successfully wrote cache which will speed up the next pipeline read. %s", info.uniqueLibraryName);
             }
         }
 
