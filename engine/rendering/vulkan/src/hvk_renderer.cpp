@@ -5,7 +5,7 @@ namespace hf
 {
     void DestroySurface(VkRenderer* rn)
     {
-        vkDestroySurfaceKHR(GRAPHICS_DATA.instance, rn->swapchain.surface, nullptr);
+        vkDestroySurfaceKHR(GRAPHICS_DATA.instance, rn->swapchain.surface, &GRAPHICS_DATA.platform.allocator);
         rn->swapchain.surface = VK_NULL_HANDLE;
     }
 

@@ -106,11 +106,17 @@ namespace hf::inter::rendering
 
     struct RendererInternalFunctions_i
     {
-        uint32_t (*createVulkanSurfaceFunc)(void* windowHandle, void* instance, void* surfaceResult){};
+        uint32_t (*createVulkanSurfaceFunc)(void* windowHandle, void* instance, const void* allocator, void* surfaceResult){};
 
         bool (*fileExistsFunc)(const char* path){};
         bool (*readFileFunc)(const std::string& filename, std::vector<char>& result){};
         bool (*writeFileFunc)(const std::string& filename, const std::vector<char>& result){};
+
+        void* (*allocateFunc)(std::size_t n);
+        void* (*allocateAlignedFunc)(std::size_t n, std::align_val_t align);
+        void (*deallocateFunc)(void* p);
+        void (*deallocateAlignedFunc)(void* p, std::align_val_t align);
+        void* (*reallocateFunc)(void* p, std::size_t n);
     };
 
     struct RendererLoadInfo_i

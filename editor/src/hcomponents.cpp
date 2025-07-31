@@ -135,6 +135,49 @@ namespace hf::editor
         return false;
     }
 
+    static void DrawThreadStats(const char* label, const ThreadMemoryStatistics& stats)
+    {
+        if (StartDropdown(label))
+        {
+            ImGui::Text("Cash Size:               %.1f Mbs", stats.cacheSizeMbs);
+            ImGui::Text("Cash Span:               %.1f Mbs", stats.cacheSpanMbs);
+            ImGui::Text("Thread To Global:        %.1f Mbs", stats.threadToGlobalMbs);
+            ImGui::Text("Global To Thread:        %.1f Mbs", stats.globalToThreadMbs);
+
+            ImGui::Text("Current Num Spans:       %llu", stats.currentNumSpans);
+            ImGui::Text("Peak Num Spans:          %llu", stats.peakNumSpans);
+
+            ImGui::Text("Current Num Allocations: %llu", stats.currentNumAllocations);
+            ImGui::Text("Peak Num Allocations:    %llu", stats.peakNumAllocations);
+            ImGui::Text("Total Num Allocations:   %llu", stats.totalNumAllocations);
+            ImGui::Text("Total Num Frees:         %llu", stats.totalNumFrees);
+
+            EndDropdown();
+        }
+    }
+
+    bool DrawMemoryStatisticsWindow(const char* label, bool* isOpen, const WindowFlags flags)
+    {
+        if(StartWindow(label, isOpen, flags))
+        {
+            const auto globalStats = utils::GetGlobalMemoryStatistics();
+            ImGui::Text("Mapped:          %.1f Mbs", globalStats.mappedSizeMbs);
+            ImGui::Text("Mapped Peak:     %.1f Mbs", globalStats.mappedPeakSizeMbs);
+            ImGui::Text("Cached:          %.1f Mbs", globalStats.cachedSizeMbs);
+            ImGui::Text("Huge Alloc:      %.1f Mbs", globalStats.hugeAllocSizeMbs);
+            ImGui::Text("Huge Alloc Peak: %.1f Mbs", globalStats.hugeAllocPeakSizeMbs);
+            ImGui::Text("Mapped Size:     %.1f Mbs", globalStats.mappedTotalSizeMbs);
+            ImGui::Text("Unmapped Size:   %.1f Mbs", globalStats.unmappedTotalSizeMbs);
+
+            DrawThreadStats("Update Thread Statistics", utils::GetThreadMemoryStatistics());
+            DrawThreadStats("Render Thread Statistics", GetMemoryStatistics(GetRenderer(GetMainWindow())));
+
+            EndWindow();
+            return true;
+        }
+        return false;
+    }
+
     bool Draw(const char* label, const Ref<AudioPlayer>& pl, DrawStateFlag flags)
     {
         if(StartComponent(label, flags))

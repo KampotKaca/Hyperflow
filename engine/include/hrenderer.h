@@ -13,8 +13,10 @@ namespace hf
 
 		struct ThreadInfo
 		{
+		    ThreadMemoryStatistics memoryStatistics{};
 			std::thread thread;
 			std::mutex threadLock{};
+			std::mutex statLock{};
 
 			std::condition_variable renderCondition;
 			uvec2 size{};
@@ -25,7 +27,7 @@ namespace hf
 		};
 
 #if DEBUG
-	    void (*debugDrawCallback)(const Ref<Renderer>&, void*);
+	    void (*debugDrawCallback)(const Ref<Renderer>&, void*){};
 #endif
 	    RenderPacketDrawProcess currentDraw{};
 		bool isDrawing = false;

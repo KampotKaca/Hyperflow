@@ -12,12 +12,12 @@ namespace hf
             .queueFamilyIndex = familyIndex
         };
 
-        VK_HANDLE_EXCEPT(vkCreateCommandPool(device.logicalDevice.device, &poolCreateInfo, nullptr, &result->pool));
+        VK_HANDLE_EXCEPT(vkCreateCommandPool(device.logicalDevice.device, &poolCreateInfo, &GRAPHICS_DATA.platform.allocator, &result->pool));
     }
 
     void DestroyCommandPool(const GraphicsDevice& device, CommandPool& pool)
     {
-        vkDestroyCommandPool(device.logicalDevice.device, pool.pool, nullptr);
+        vkDestroyCommandPool(device.logicalDevice.device, pool.pool, &GRAPHICS_DATA.platform.allocator);
         pool.pool = VK_NULL_HANDLE;
     }
 
@@ -82,9 +82,8 @@ namespace hf
             .pSignalSemaphores = &image.isRenderingFinished,
         };
 
-        auto& device = GRAPHICS_DATA.device.logicalDevice;
-        vkResetFences(device.device, 1, &image.isInFlight);
-        VK_HANDLE_EXCEPT(vkQueueSubmit(device.graphicsQueue,
-            1, &submitInfo, image.isInFlight));
+        const auto& device = GRAPHICS_DATA.device.logicalDevice;
+        VK_HANDLE_EXCEPT(vkResetFences(device.device, 1, &image.isInFlight));
+        VK_HANDLE_EXCEPT(vkQueueSubmit(device.graphicsQueue, 1, &submitInfo, image.isInFlight));
     }
 }

@@ -69,7 +69,7 @@ namespace hf
             createInfo.oldSwapchain = oldSwapchain;
 
             VK_HANDLE_EXCEPT(vkCreateSwapchainKHR(GRAPHICS_DATA.device.logicalDevice.device, &createInfo,
-                nullptr, &result.swapchain));
+                &GRAPHICS_DATA.platform.allocator, &result.swapchain));
             result.details = details;
         }
         else throw GENERIC_EXCEPT("[Vulkan]", "Unable to create swapchain");
@@ -107,7 +107,7 @@ namespace hf
             };
 
             VK_HANDLE_EXCEPT(vkCreateImageView(GRAPHICS_DATA.device.logicalDevice.device,
-                &createInfo, nullptr, &imageViews[i]));
+                &createInfo, &GRAPHICS_DATA.platform.allocator, &imageViews[i]));
         }
 
         DestroySwapchain(result, &oldSwapchain);
@@ -126,7 +126,7 @@ namespace hf
         {
             DestroyExistingViews(gc);
             const auto& device = GRAPHICS_DATA.device.logicalDevice.device;
-            vkDestroySwapchainKHR(device, *swapchain, nullptr);
+            vkDestroySwapchainKHR(device, *swapchain, &GRAPHICS_DATA.platform.allocator);
             *swapchain = VK_NULL_HANDLE;
         }
     }
@@ -135,7 +135,7 @@ namespace hf
     {
         const auto& device = GRAPHICS_DATA.device.logicalDevice.device;
         for (auto& image : swapchain.images)
-            vkDestroyImageView(device, image.view, nullptr);
+            vkDestroyImageView(device, image.view, &GRAPHICS_DATA.platform.allocator);
     }
 
     void RecreateSwapchain(VkRenderer* rn)
@@ -211,8 +211,8 @@ namespace hf
         {
             const auto& device = GRAPHICS_DATA.device.logicalDevice.device;
             const auto& previousImage = rn->swapchain.images[rn->imageIndex];
-            vkWaitForFences(device, 1, &previousImage.isInFlight, true, VULKAN_API_MAX_TIMEOUT);
-            vkResetFences(device, 1, &previousImage.isInFlight);
+            VK_HANDLE_EXCEPT(vkWaitForFences(device, 1, &previousImage.isInFlight, true, VULKAN_API_MAX_TIMEOUT));
+            VK_HANDLE_EXCEPT(vkResetFences(device, 1, &previousImage.isInFlight));
         }
         else rn->imageIndex = rn->swapchain.images.size() - 1;
     }

@@ -278,7 +278,7 @@ namespace hf
         VkPipelineCache pipelineCache{};
         {
             auto result = vkCreatePipelineCache(GRAPHICS_DATA.device.logicalDevice.device,
-                                                    &pipelineCacheCreateInfo, nullptr, &pipelineCache);
+                                                    &pipelineCacheCreateInfo, &GRAPHICS_DATA.platform.allocator, &pipelineCache);
             if (result != VK_SUCCESS)
             {
                 LOG_WARN("[Hyperflow] Failed to load pipeline cache, probably file was corrupted %s", info.uniqueLibraryName);
@@ -288,7 +288,7 @@ namespace hf
 
         VK_HANDLE_EXCEPT(vkCreateGraphicsPipelines(GRAPHICS_DATA.device.logicalDevice.device,
                          pipelineCache, (uint32_t)pipelineCreateInfos.size(), pipelineCreateInfos.data(),
-                         nullptr, modules.data()));
+                         &GRAPHICS_DATA.platform.allocator, modules.data()));
 
         size_t cacheSize = 0;
         {
@@ -317,16 +317,16 @@ namespace hf
         }
 
         if (pipelineCache != VK_NULL_HANDLE)
-            vkDestroyPipelineCache(GRAPHICS_DATA.device.logicalDevice.device, pipelineCache, nullptr);
+            vkDestroyPipelineCache(GRAPHICS_DATA.device.logicalDevice.device, pipelineCache, &GRAPHICS_DATA.platform.allocator);
 
         for (uint32_t i = 0; i < stageInfoCount; i++)
-            vkDestroyShaderModule(GRAPHICS_DATA.device.logicalDevice.device, shaderModules[i], nullptr);
+            vkDestroyShaderModule(GRAPHICS_DATA.device.logicalDevice.device, shaderModules[i], &GRAPHICS_DATA.platform.allocator);
     }
 
     VkShaderLibrary::~VkShaderLibrary()
     {
         for (const auto& module : modules)
-            vkDestroyPipeline(GRAPHICS_DATA.device.logicalDevice.device, module, nullptr);
+            vkDestroyPipeline(GRAPHICS_DATA.device.logicalDevice.device, module, &GRAPHICS_DATA.platform.allocator);
         modules.clear();
     }
 
@@ -339,7 +339,7 @@ namespace hf
             createInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
             createInfo.codeSize = codeSize;
             createInfo.pCode = (uint32_t*)code;
-            VK_HANDLE_EXCEPT(vkCreateShaderModule(GRAPHICS_DATA.device.logicalDevice.device, &createInfo, nullptr, &module));
+            VK_HANDLE_EXCEPT(vkCreateShaderModule(GRAPHICS_DATA.device.logicalDevice.device, &createInfo, &GRAPHICS_DATA.platform.allocator, &module));
 
             VkPipelineShaderStageCreateInfo stageInfo{};
             stageInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;

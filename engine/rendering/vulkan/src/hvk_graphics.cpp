@@ -16,7 +16,7 @@ namespace hf
         : shutdownCallback(info.shutdownCallback), windowHandle(info.handle), targetSize(info.size), vSyncMode(info.vSyncMode)
     {
         if (!GRAPHICS_DATA.deviceIsLoaded) LoadDevice(windowHandle, &swapchain.surface);
-        else VK_HANDLE_EXCEPT((VkResult)GRAPHICS_DATA.platform.functions.createVulkanSurfaceFunc(windowHandle, GRAPHICS_DATA.instance, &swapchain.surface));
+        else VK_HANDLE_EXCEPT((VkResult)GRAPHICS_DATA.platform.functions.createVulkanSurfaceFunc(windowHandle, GRAPHICS_DATA.instance, &GRAPHICS_DATA.platform.allocator, &swapchain.surface));
 
         if (info.initCallback) info.initCallback();
         CreateSwapchain(swapchain.surface, targetSize, vSyncMode,  swapchain);
@@ -102,7 +102,7 @@ namespace hf
         createInfo.enabledLayerCount = NUM_VK_VALIDATION_LAYERS;
 #endif
 
-        VK_HANDLE_EXCEPT(vkCreateDevice(device.device, &createInfo, nullptr, &device.logicalDevice.device));
+        VK_HANDLE_EXCEPT(vkCreateDevice(device.device, &createInfo, &GRAPHICS_DATA.platform.allocator, &device.logicalDevice.device));
 
         auto& indices = device.familyIndices;
         vkGetDeviceQueue(device.logicalDevice.device, indices.graphicsFamily.value(),
@@ -215,7 +215,7 @@ namespace hf
         VK_HANDLE_EXCEPT(vkEnumeratePhysicalDevices(GRAPHICS_DATA.instance,
                 &deviceCount, availableDevices.data()));
 
-        VK_HANDLE_EXCEPT((VkResult)GRAPHICS_DATA.platform.functions.createVulkanSurfaceFunc(windowHandle, GRAPHICS_DATA.instance, resultSurface));
+        VK_HANDLE_EXCEPT((VkResult)GRAPHICS_DATA.platform.functions.createVulkanSurfaceFunc(windowHandle, GRAPHICS_DATA.instance, &GRAPHICS_DATA.platform.allocator, resultSurface));
 
         std::vector<GraphicsDevice> devices{};
 
@@ -248,6 +248,7 @@ namespace hf
         allocatorInfo.device = GRAPHICS_DATA.device.logicalDevice.device;
         allocatorInfo.instance = GRAPHICS_DATA.instance;
         allocatorInfo.flags = VMA_ALLOCATOR_CREATE_BUFFER_DEVICE_ADDRESS_BIT;
+        allocatorInfo.pAllocationCallbacks = &GRAPHICS_DATA.platform.allocator;
 
         VK_HANDLE_EXCEPT(vmaCreateAllocator(&allocatorInfo, &GRAPHICS_DATA.allocator));
 
@@ -289,7 +290,7 @@ namespace hf
     {
         if (device.device != VK_NULL_HANDLE)
         {
-            vkDestroyDevice(device.device, nullptr);
+            vkDestroyDevice(device.device, &GRAPHICS_DATA.platform.allocator);
             device.device = VK_NULL_HANDLE;
         }
     }

@@ -788,21 +788,21 @@ namespace hf
 
     struct GlobalMemoryStatistics
     {
-        size_t mappedSizeMbs = 0;
-        size_t mappedPeakSizeMbs = 0;
-        size_t cashedSizeMbs = 0;
-        size_t hugeAllocSizeMbs = 0;
-        size_t hugeAllocPeakSizeMbs = 0;
-        size_t mappedTotalSizeMbs = 0;
-        size_t unmappedTotalSizeMbs = 0;
+        double mappedSizeMbs = 0;
+        double mappedPeakSizeMbs = 0;
+        double cachedSizeMbs = 0;
+        double hugeAllocSizeMbs = 0;
+        double hugeAllocPeakSizeMbs = 0;
+        double mappedTotalSizeMbs = 0;
+        double unmappedTotalSizeMbs = 0;
     };
 
     struct ThreadMemoryStatistics
     {
-        size_t cacheSizeMbs = 0;
-        size_t cacheSpanMbs = 0;
-        size_t threadToGlobalMbs = 0;
-        size_t globalToThreadMbs = 0;
+        double cacheSizeMbs = 0;
+        double cacheSpanMbs = 0;
+        double threadToGlobalMbs = 0;
+        double globalToThreadMbs = 0;
 
         size_t currentNumSpans = 0;
         size_t peakNumSpans = 0;

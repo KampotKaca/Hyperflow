@@ -187,6 +187,9 @@ namespace app
 
                 hf::editor::EndDropdown();
             }
+
+            hf::editor::DrawMemoryStatisticsWindow("Memory Statistics");
+
             hf::editor::EndWindow();
         }
 

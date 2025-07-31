@@ -97,6 +97,7 @@ namespace hf
         inter::rendering::RendererInternalFunctions_i functions{};
         void* platformDll{};
         VulkanPlatformAPI* api{};
+        VkAllocationCallbacks allocator{};
     };
 
     struct VkExtensionFunctions

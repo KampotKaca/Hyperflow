@@ -38,15 +38,10 @@ namespace hf
             return memory;
         }
 
-        void Deallocate(void* p)
-        {
-            rpfree(p);
-        }
-
-        void DeallocateAligned(void* p, std::align_val_t align)
-        {
-            rpfree(p);
-        }
+        void Deallocate(void* p) { rpfree(p); }
+        void DeallocateAligned(void* p, std::align_val_t align) { rpfree(p); }
+        void* Reallocate(void* p, std::size_t n) { return rprealloc(p, n); }
+        void CollectThreadMemoryCache() { rpmalloc_thread_collect(); }
     }
 
     namespace inter::alloc
@@ -95,24 +90,27 @@ namespace hf
             LOG_LOG("\n[Size Use]\nAlloc Current: %0.2g\nAlloc Peak: %0.2g\nAlloc Total: %0.2g\nFree Total: %0.2g\nSpans To Cache: %0.2g\nSpans From Cache: %0.2g\nSpans From Reserved: %0.2g\nMap Calls: %i",
                 su.alloc_current, su.alloc_peak, su.alloc_total, su.free_total, su.spans_to_cache, su.spans_from_cache, su.spans_from_reserved, su.map_calls);
         }
+    }
 
-        GlobalMemoryStatistics GetGlobalMemoryStatistics_i()
+    namespace utils
+    {
+        GlobalMemoryStatistics GetGlobalMemoryStatistics()
         {
             rpmalloc_global_statistics_t sts{};
             rpmalloc_global_statistics(&sts);
 
             GlobalMemoryStatistics stats{};
-            stats.mappedSizeMbs        = ToMB(sts.mapped);
-            stats.mappedPeakSizeMbs    = ToMB(sts.mapped_peak);
-            stats.cashedSizeMbs        = ToMB(sts.cached);
-            stats.hugeAllocSizeMbs     = ToMB(sts.huge_alloc);
-            stats.hugeAllocPeakSizeMbs = ToMB(sts.huge_alloc_peak);
-            stats.mappedTotalSizeMbs   = ToMB(sts.mapped_total);
-            stats.unmappedTotalSizeMbs = ToMB(sts.unmapped_total);
+            stats.mappedSizeMbs        = inter::alloc::ToMB(sts.mapped);
+            stats.mappedPeakSizeMbs    = inter::alloc::ToMB(sts.mapped_peak);
+            stats.cachedSizeMbs        = inter::alloc::ToMB(sts.cached);
+            stats.hugeAllocSizeMbs     = inter::alloc::ToMB(sts.huge_alloc);
+            stats.hugeAllocPeakSizeMbs = inter::alloc::ToMB(sts.huge_alloc_peak);
+            stats.mappedTotalSizeMbs   = inter::alloc::ToMB(sts.mapped_total);
+            stats.unmappedTotalSizeMbs = inter::alloc::ToMB(sts.unmapped_total);
             return stats;
         }
 
-        ThreadMemoryStatistics GetThreadMemoryStatistics_i()
+        ThreadMemoryStatistics GetThreadMemoryStatistics()
         {
             rpmalloc_thread_statistics_t sts{};
             rpmalloc_thread_statistics(&sts);
@@ -120,10 +118,10 @@ namespace hf
             const auto& su = *sts.size_use;
 
             ThreadMemoryStatistics stats{};
-            stats.cacheSizeMbs      = ToMB(sts.sizecache);
-            stats.cacheSpanMbs      = ToMB(sts.spancache);
-            stats.threadToGlobalMbs = ToMB(sts.thread_to_global);
-            stats.globalToThreadMbs = ToMB(sts.global_to_thread);
+            stats.cacheSizeMbs      = inter::alloc::ToMB(sts.sizecache);
+            stats.cacheSpanMbs      = inter::alloc::ToMB(sts.spancache);
+            stats.threadToGlobalMbs = inter::alloc::ToMB(sts.thread_to_global);
+            stats.globalToThreadMbs = inter::alloc::ToMB(sts.global_to_thread);
 
             stats.currentNumSpans = sp.current;
             stats.peakNumSpans    = sp.peak;

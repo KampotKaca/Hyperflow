@@ -14,6 +14,10 @@ namespace hf
         while (rn->threadInfo.isRunning)
         {
             inter::rendering::RendererUpdate_i(rn);
+            utils::CollectThreadMemoryCache();
+
+            std::lock_guard lock(rn->threadInfo.statLock);
+            rn->threadInfo.memoryStatistics = utils::GetThreadMemoryStatistics();
         }
         rn->threadInfo.isRunning = false;
 
@@ -41,6 +45,15 @@ namespace hf
         if (rn->window != nullptr) throw GENERIC_EXCEPT("[Hyperflow]", "Cannot resize renderer connected to the window");
         rn->threadInfo.size = size;
         inter::HF.renderingApi.api.RegisterFrameBufferChange(rn->handle, size);
+    }
+    ThreadMemoryStatistics GetMemoryStatistics(const Ref<Renderer>& rn)
+    {
+        ThreadMemoryStatistics stats{};
+        {
+            std::lock_guard lock(rn->threadInfo.statLock);
+            stats = rn->threadInfo.memoryStatistics;
+        }
+        return stats;
     }
 
     RenderingApiType GetApiType()     { return inter::HF.renderingApi.type; }
@@ -158,11 +171,17 @@ namespace hf
                     .appVersion = appV,
                     .engineVersion = engineV,
                     .applicationTitle = HF.appTitle.c_str(),
-                    .functions =
+                    .functions = RendererInternalFunctions_i
                     {
                         .fileExistsFunc = utils::FileExists,
                         .readFileFunc = utils::ReadFile,
-                        .writeFileFunc = utils::WriteFile
+                        .writeFileFunc = utils::WriteFile,
+
+                        .allocateFunc = utils::Allocate,
+                        .allocateAlignedFunc = utils::AllocateAligned,
+                        .deallocateFunc = utils::Deallocate,
+                        .deallocateAlignedFunc = utils::DeallocateAligned,
+                        .reallocateFunc = utils::Reallocate
                     }
                 };
 

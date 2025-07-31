@@ -47,12 +47,12 @@ namespace hf
         }
 
         VK_HANDLE_EXCEPT(vkCreateSampler(GRAPHICS_DATA.device.logicalDevice.device,
-            &samplerInfo, nullptr, &sampler));
+            &samplerInfo, &GRAPHICS_DATA.platform.allocator, &sampler));
     }
 
     VkTextureSampler::~VkTextureSampler()
     {
-        if (sampler) vkDestroySampler(GRAPHICS_DATA.device.logicalDevice.device, sampler, nullptr);
+        if (sampler) vkDestroySampler(GRAPHICS_DATA.device.logicalDevice.device, sampler, &GRAPHICS_DATA.platform.allocator);
     }
 
     bool IsValidSampler(TextureSampler sampler)

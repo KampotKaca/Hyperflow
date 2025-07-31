@@ -39,7 +39,7 @@ namespace hf
         layoutInfo.flags = VK_DESCRIPTOR_SET_LAYOUT_CREATE_DESCRIPTOR_BUFFER_BIT_EXT;
 
         VK_HANDLE_EXCEPT(vkCreateDescriptorSetLayout(GRAPHICS_DATA.device.logicalDevice.device,
-            &layoutInfo, nullptr, &layout));
+            &layoutInfo, &GRAPHICS_DATA.platform.allocator, &layout));
 
         VkBufferDeviceAddressInfoEXT addressInfo{};
         addressInfo.sType = VK_STRUCTURE_TYPE_BUFFER_DEVICE_ADDRESS_INFO_EXT;
@@ -76,7 +76,7 @@ namespace hf
     {
         if (isLoaded)
         {
-            vkDestroyDescriptorSetLayout(GRAPHICS_DATA.device.logicalDevice.device, layout, nullptr);
+            vkDestroyDescriptorSetLayout(GRAPHICS_DATA.device.logicalDevice.device, layout, &GRAPHICS_DATA.platform.allocator);
             for (uint32_t i = 0; i < FRAMES_IN_FLIGHT; i++) FreeDescriptor(GRAPHICS_DATA.bufferDescriptorBuffer, descriptorBindings[i]);
         }
     }

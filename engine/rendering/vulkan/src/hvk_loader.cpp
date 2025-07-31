@@ -57,8 +57,21 @@ namespace hf
     static void CreateInstance(const VkApplicationInfo& appInfo);
     static void DestroyInstance();
 
+    static void* VulkanAllocationCallback(void* pUserData, size_t size, size_t alignment, VkSystemAllocationScope scope)
+    { return GRAPHICS_DATA.platform.functions.allocateAlignedFunc(size, (std::align_val_t)alignment); }
+
+    static void VulkanDeallocationCallback(void* pUserData, void* pMemory) { GRAPHICS_DATA.platform.functions.deallocateFunc(pMemory); }
+
+    static void* VulkanReallocationCallback(void* pUserData, void* pOriginal, size_t size, size_t alignment, VkSystemAllocationScope allocationScope)
+    { return GRAPHICS_DATA.platform.functions.reallocateFunc(pOriginal, size); }
+
     void LoadVulkan(const inter::rendering::RendererLoadInfo_i& info)
     {
+        GRAPHICS_DATA.platform.allocator.pUserData = nullptr;
+        GRAPHICS_DATA.platform.allocator.pfnAllocation = VulkanAllocationCallback;
+        GRAPHICS_DATA.platform.allocator.pfnFree = VulkanDeallocationCallback;
+        GRAPHICS_DATA.platform.allocator.pfnReallocation = VulkanReallocationCallback;
+
         VkApplicationInfo appInfo{};
         appInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
         appInfo.pApplicationName = info.applicationTitle;
@@ -188,21 +201,21 @@ namespace hf
         createInfo.enabledLayerCount = NUM_VK_VALIDATION_LAYERS;
         createInfo.pNext = &debugCreateInfo;
 #endif
-        VK_HANDLE_EXCEPT(vkCreateInstance(&createInfo, nullptr, &GRAPHICS_DATA.instance));
+        VK_HANDLE_EXCEPT(vkCreateInstance(&createInfo, &GRAPHICS_DATA.platform.allocator, &GRAPHICS_DATA.instance));
 
 #if DEBUG
         VK_HANDLE_EXCEPT(Debug_CreateUtilsMessengerEXT(GRAPHICS_DATA.instance, &debugCreateInfo,
-                            nullptr, &GRAPHICS_DATA.debugMessenger));
+                            &GRAPHICS_DATA.platform.allocator, &GRAPHICS_DATA.debugMessenger));
 #endif
     }
 
     void DestroyInstance()
     {
 #if DEBUG
-        Debug_DestroyUtilsMessengerEXT(GRAPHICS_DATA.instance, GRAPHICS_DATA.debugMessenger, nullptr);
+        Debug_DestroyUtilsMessengerEXT(GRAPHICS_DATA.instance, GRAPHICS_DATA.debugMessenger, &GRAPHICS_DATA.platform.allocator);
 #endif
 
-        vkDestroyInstance(GRAPHICS_DATA.instance, nullptr);
+        vkDestroyInstance(GRAPHICS_DATA.instance, &GRAPHICS_DATA.platform.allocator);
     }
 
     void* LoadEditorInfo()
@@ -232,7 +245,7 @@ namespace hf
         pool_info.pPoolSizes = pool_sizes;
 
         VK_HANDLE_EXCEPT(vkCreateDescriptorPool(GRAPHICS_DATA.device.logicalDevice.device,
-            &pool_info, nullptr, &GRAPHICS_DATA.editorInfo->descriptorPool));
+            &pool_info, &GRAPHICS_DATA.platform.allocator, &GRAPHICS_DATA.editorInfo->descriptorPool));
 
         GRAPHICS_DATA.editorInfo->version = GRAPHICS_DATA.supportedVersion;
         GRAPHICS_DATA.editorInfo->instance = GRAPHICS_DATA.instance;
@@ -254,7 +267,7 @@ namespace hf
         if (GRAPHICS_DATA.editorInfo)
         {
             vkDestroyDescriptorPool(GRAPHICS_DATA.device.logicalDevice.device,
-                GRAPHICS_DATA.editorInfo->descriptorPool, nullptr);
+                GRAPHICS_DATA.editorInfo->descriptorPool, &GRAPHICS_DATA.platform.allocator);
             delete GRAPHICS_DATA.editorInfo;
             GRAPHICS_DATA.editorInfo = nullptr;
         }

@@ -30,12 +30,12 @@ namespace hf
         layoutInfo.flags = VK_DESCRIPTOR_SET_LAYOUT_CREATE_DESCRIPTOR_BUFFER_BIT_EXT;
 
         VK_HANDLE_EXCEPT(vkCreateDescriptorSetLayout(GRAPHICS_DATA.device.logicalDevice.device,
-            &layoutInfo, nullptr, &layout));
+            &layoutInfo, &GRAPHICS_DATA.platform.allocator, &layout));
     }
 
     VkTextureLayout::~VkTextureLayout()
     {
-        if (layout) vkDestroyDescriptorSetLayout(GRAPHICS_DATA.device.logicalDevice.device, layout, nullptr);
+        if (layout) vkDestroyDescriptorSetLayout(GRAPHICS_DATA.device.logicalDevice.device, layout, &GRAPHICS_DATA.platform.allocator);
     }
 
     bool IsValidLayout(TextureLayout layout)

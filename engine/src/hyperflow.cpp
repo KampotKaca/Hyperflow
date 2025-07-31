@@ -61,7 +61,6 @@ namespace hf
 			    if (!IsRunning()) continue;
 				if(IsKeyDown(Key::Escape))
 				{
-					inter::alloc::LogThreadMemoryStats_i();
 					Terminate();
 				    continue;
 				}

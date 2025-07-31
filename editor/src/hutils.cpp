@@ -12,10 +12,10 @@ namespace hf::editor
         return key;
     }
 
-    void DrawLabel(const char* label)
+    void DrawLabel(const char* label, uint32_t columnIndex)
     {
         ImGui::TableNextRow();
-        ImGui::TableSetColumnIndex(0);
+        ImGui::TableSetColumnIndex(columnIndex);
         ImGui::Text("%s", label);
         ImGui::TableNextColumn();
     }
@@ -27,7 +27,7 @@ namespace hf::editor
         bool valueChanged = false;
         ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, { 0, 0 });
 
-        if (!(uint32_t)(flags & DrawStateFlag::Nameless)) DrawLabel(label);
+        if (!(uint32_t)(flags & DrawStateFlag::Nameless)) DrawLabel(label, 0);
         if (!(uint32_t)(flags & DrawStateFlag::DontStretchWidth)) ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x);
         else ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x * .6f);
         valueChanged = ImGui::DragScalar(DrawKeyGen(label), data_type, v, speed, from, to, format);
@@ -41,7 +41,7 @@ namespace hf::editor
         bool valueChanged = false;
         ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, { 0, 0 });
 
-        if (!(uint32_t)(flags & DrawStateFlag::Nameless)) DrawLabel(label);
+        if (!(uint32_t)(flags & DrawStateFlag::Nameless)) DrawLabel(label, 0);
 
         if(ImGui::BeginTable(label, size))
         {
@@ -87,7 +87,7 @@ namespace hf::editor
         bool valueChanged = false;
         ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, { 0, 0 });
 
-        if (!(uint32_t)(flags & DrawStateFlag::Nameless)) DrawLabel(label);
+        if (!(uint32_t)(flags & DrawStateFlag::Nameless)) DrawLabel(label, 0);
 
         if (!(uint32_t)(flags & DrawStateFlag::DontStretchWidth)) ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x);
         else ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x * .6f);
@@ -102,7 +102,7 @@ namespace hf::editor
     {
         bool valueChanged = false;
         ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, { 0, 0 });
-        if (!(uint32_t)(flags & DrawStateFlag::Nameless)) DrawLabel(label);
+        if (!(uint32_t)(flags & DrawStateFlag::Nameless)) DrawLabel(label, 0);
 
         if(ImGui::BeginTable(label, size))
         {

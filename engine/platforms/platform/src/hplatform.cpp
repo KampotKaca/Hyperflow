@@ -100,11 +100,11 @@ namespace hf::inter
             return hf::platform::IsValidRenderingApi(api);
         }
 
-        uint32_t CreateVulkanSurface(void* windowHandle, void* instance, void* surfaceResult)
+        uint32_t CreateVulkanSurface(void* windowHandle, void* instance, const void* allocator, void* surfaceResult)
         {
 #if defined(VULKAN)
             auto* winHandle = (GLFWwindow*)windowHandle;
-            return glfwCreateWindowSurface((VkInstance)instance, winHandle, nullptr, (VkSurfaceKHR*)surfaceResult);
+            return glfwCreateWindowSurface((VkInstance)instance, winHandle, (VkAllocationCallbacks*)allocator, (VkSurfaceKHR*)surfaceResult);
 #else
             return -1;
 #endif

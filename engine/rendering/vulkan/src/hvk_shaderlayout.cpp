@@ -51,12 +51,12 @@ namespace hf
         }
 
         VK_HANDLE_EXCEPT(vkCreatePipelineLayout(GRAPHICS_DATA.device.logicalDevice.device,
-                         &pipelineLayoutInfo, nullptr, &layout));
+                         &pipelineLayoutInfo, &GRAPHICS_DATA.platform.allocator, &layout));
     }
 
     VkShaderLayout::~VkShaderLayout()
     {
-        if (layout) vkDestroyPipelineLayout(GRAPHICS_DATA.device.logicalDevice.device, layout, nullptr);
+        if (layout) vkDestroyPipelineLayout(GRAPHICS_DATA.device.logicalDevice.device, layout, &GRAPHICS_DATA.platform.allocator);
     }
 
     bool IsValidShaderLayout(ShaderLayout setup)

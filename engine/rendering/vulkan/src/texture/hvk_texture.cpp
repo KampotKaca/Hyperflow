@@ -55,7 +55,7 @@ namespace hf
 
         imageInfo.mipLevels = mipLevels;
 
-        VK_HANDLE_EXCEPT(vkCreateImage(device, &imageInfo, nullptr, &image));
+        VK_HANDLE_EXCEPT(vkCreateImage(device, &imageInfo, &GRAPHICS_DATA.platform.allocator, &image));
         AllocateImage(details.memoryType, image, &imageMemory);
 
         if (info.pTextures)
@@ -110,7 +110,7 @@ namespace hf
 
     VkTexture::~VkTexture()
     {
-        if (view) vkDestroyImageView(GRAPHICS_DATA.device.logicalDevice.device, view, nullptr);
+        if (view) vkDestroyImageView(GRAPHICS_DATA.device.logicalDevice.device, view, &GRAPHICS_DATA.platform.allocator);
         vmaDestroyImage(GRAPHICS_DATA.allocator, image, imageMemory);
     }
 
@@ -257,7 +257,7 @@ namespace hf
         };
 
         const auto device = GRAPHICS_DATA.device.logicalDevice.device;
-        VK_HANDLE_EXCEPT(vkCreateImageView(device, &viewInfo, nullptr, &texture->view));
+        VK_HANDLE_EXCEPT(vkCreateImageView(device, &viewInfo, &GRAPHICS_DATA.platform.allocator, &texture->view));
     }
 
     void GenerateMimMaps(VkCommandBuffer command)

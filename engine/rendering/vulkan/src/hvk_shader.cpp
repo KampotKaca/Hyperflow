@@ -36,14 +36,14 @@ namespace hf
         pipelineInfo.layout = shaderLayout->layout;
 
         VK_HANDLE_EXCEPT(vkCreateGraphicsPipelines(GRAPHICS_DATA.device.logicalDevice.device,
-            VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &pipeline));
+            VK_NULL_HANDLE, 1, &pipelineInfo, &GRAPHICS_DATA.platform.allocator, &pipeline));
     }
 
     VkShader::~VkShader()
     {
         if (pipeline)
         {
-            vkDestroyPipeline(GRAPHICS_DATA.device.logicalDevice.device, pipeline, nullptr);
+            vkDestroyPipeline(GRAPHICS_DATA.device.logicalDevice.device, pipeline, &GRAPHICS_DATA.platform.allocator);
             pipeline = VK_NULL_HANDLE;
         }
     }

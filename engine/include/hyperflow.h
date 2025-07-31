@@ -1,6 +1,7 @@
 #ifndef HYPERFLOW_H
 #define HYPERFLOW_H
 
+#include "hrenderer.h"
 #include "../components/include/hcomponents.h"
 #include "hshared.h"
 
@@ -167,6 +168,7 @@ namespace hf
 	bool IsValidApi(RenderingApiType targetApi);
 	uvec2 GetSize(const Ref<Renderer>& rn);
 	void Resize(const Ref<Renderer>& rn, uvec2 size);
+    ThreadMemoryStatistics GetMemoryStatistics(const Ref<Renderer>& rn);
 
     //region Draw Process
     void Set_DrawCallback(const Ref<Renderer>& rn, void (*callback)(const Ref<Renderer>&, void*));
@@ -316,6 +318,11 @@ namespace hf
 		[[nodiscard]] void* AllocateAligned(std::size_t n, std::align_val_t align);
 		void Deallocate(void* p);
 		void DeallocateAligned(void* p, std::align_val_t align);
+		void* Reallocate(void* p, std::size_t n);
+		void CollectThreadMemoryCache(); //Reduces fragmentation.
+
+	    GlobalMemoryStatistics GetGlobalMemoryStatistics();
+	    ThreadMemoryStatistics GetThreadMemoryStatistics();
 
 		void ReadTextureDetails(void* yamlTree, void* yamlRoot, TextureDetails& result);
 	}
