@@ -187,14 +187,14 @@ namespace hf
             descInfo.imageInfo.imageView = bRef.view;
             descInfo.imageInfo.sampler = sampler;
 
-            for (uint32_t k = 0; k < FRAMES_IN_FLIGHT; k++)
+            for (auto& descriptorBinding : bRef.descriptorBindings)
             {
                 if (bRef.descriptorBindings->descriptorMapping != nullptr)
                 {
-                    FreeDescriptor(GRAPHICS_DATA.imageDescriptorBuffer, bRef.descriptorBindings[k]);
-                    bRef.descriptorBindings[k] = VkDescriptorLocation{};
+                    FreeDescriptor(GRAPHICS_DATA.imageDescriptorBuffer, descriptorBinding);
+                    descriptorBinding = VkDescriptorLocation{};
                 }
-                GetImageDescriptorFromBuffer(GRAPHICS_DATA.imageDescriptorBuffer, descInfo, bRef.descriptorBindings[k]);
+                GetImageDescriptorFromBuffer(GRAPHICS_DATA.imageDescriptorBuffer, descInfo, descriptorBinding);
             }
         }
     }
@@ -209,15 +209,14 @@ namespace hf
             const auto& obj = info.objects[i];
             for (auto& binding : obj->bindings | std::views::values)
             {
-                for (uint32_t j = 0; j < binding.bindingArray.size(); j++)
+                for (const auto& viewData : binding.bindingArray)
                 {
-                    const auto& viewData = binding.bindingArray.at(j);
                     const auto& loc = viewData.descriptorBindings[currentFrame];
 
                     GRAPHICS_DATA.preAllocBuffers.descBindingInfos[bindingCount] = VkDescriptorBufferBindingInfoEXT
                     {
                         .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_BUFFER_BINDING_INFO_EXT,
-                        .address = loc.address,
+                        .address = GRAPHICS_DATA.imageDescriptorBuffer->address,
                         .usage = loc.usageFlags,
                     };
 

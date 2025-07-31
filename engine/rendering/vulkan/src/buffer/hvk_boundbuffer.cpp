@@ -36,6 +36,7 @@ namespace hf
         layoutInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
         layoutInfo.bindingCount = info.bindingCount;
         layoutInfo.pBindings = GRAPHICS_DATA.preAllocBuffers.descLayoutBindings;
+        layoutInfo.flags = VK_DESCRIPTOR_SET_LAYOUT_CREATE_DESCRIPTOR_BUFFER_BIT_EXT;
 
         VK_HANDLE_EXCEPT(vkCreateDescriptorSetLayout(GRAPHICS_DATA.device.logicalDevice.device,
             &layoutInfo, nullptr, &layout));

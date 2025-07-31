@@ -174,11 +174,12 @@ namespace hf
 
         if (indices.graphicsFamily != indices.presentFamily)
         {
-            deviceData.transferData =
-            {
-                .indices = { indices.transferFamily.value(), indices.graphicsFamily.value(), indices.presentFamily.value() },
-                .sharingMode = VK_SHARING_MODE_CONCURRENT
-            };
+            std::set uniqueIndices = { indices.transferFamily.value(), indices.graphicsFamily.value(), indices.presentFamily.value() };
+
+            deviceData.transferData.indices = std::vector(uniqueIndices.begin(), uniqueIndices.end());
+
+            if (deviceData.transferData.indices.size() > 1) deviceData.transferData.sharingMode = VK_SHARING_MODE_CONCURRENT;
+            else deviceData.transferData.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
         }
         else deviceData.transferData =
         {
@@ -287,6 +288,9 @@ namespace hf
 
     void UnloadDevice()
     {
+        GRAPHICS_DATA.bufferDescriptorBuffer = nullptr;
+        GRAPHICS_DATA.imageDescriptorBuffer = nullptr;
+
         vmaDestroyAllocator(GRAPHICS_DATA.allocator);
         DestroyCommandPool(GRAPHICS_DATA.device, GRAPHICS_DATA.transferPool);
         DestroyCommandPool(GRAPHICS_DATA.device, GRAPHICS_DATA.graphicsPool);

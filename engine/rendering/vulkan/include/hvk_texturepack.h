@@ -3,6 +3,7 @@
 
 #include "hvk_shared.h"
 #include "hvk_texture.h"
+#include "hvk_descriptorbuffer.h"
 
 namespace hf
 {

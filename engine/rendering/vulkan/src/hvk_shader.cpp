@@ -31,6 +31,7 @@ namespace hf
         VkGraphicsPipelineCreateInfo pipelineInfo{};
         pipelineInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
         pipelineInfo.pNext = &libraryInfo;
+        pipelineInfo.flags = VK_PIPELINE_CREATE_DESCRIPTOR_BUFFER_BIT_EXT;
         pipelineInfo.pDynamicState = &SHADER_DYNAMIC;
         pipelineInfo.layout = shaderLayout->layout;
 

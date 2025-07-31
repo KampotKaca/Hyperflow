@@ -41,7 +41,7 @@ namespace app
                         .options = hf::ShaderRasterizerOptions
                         {
                             .cullMode = hf::ShaderCullMode::None,
-                            .polygonMode = hf::MeshPolygonMode::Line,
+                            .polygonMode = hf::MeshPolygonMode::Fill,
                             .lineWidth = 1.0f
                         },
                         .layout = APP_SHADER_LAYOUTS.default_lit

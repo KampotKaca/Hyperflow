@@ -58,7 +58,6 @@ namespace hf
         uint32_t positionIndex{};
         uint8_t* descriptorMapping{};
         VkDeviceSize offset{};
-        VkDeviceAddress address{};
         VkBufferUsageFlags usageFlags{};
     };
 

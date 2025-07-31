@@ -110,7 +110,6 @@ namespace hf
         }
 
         descriptor.usageFlags = VK_BUFFER_USAGE_RESOURCE_DESCRIPTOR_BUFFER_BIT_EXT;
-        descriptor.address = info.address;
         return AllocateAndGetLocation(descBuffer, &getInfo, descriptor);
     }
 
