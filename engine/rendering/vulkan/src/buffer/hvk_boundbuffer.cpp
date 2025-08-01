@@ -81,13 +81,13 @@ namespace hf
         }
     }
 
-    void BindBuffer(const VkRenderer* rn, const inter::rendering::BindResourceInfo_i<VkBoundBuffer*>& info)
+    void BindBuffer(const VkRenderer* rn, const inter::rendering::BindResourceInfo_i<Buffer>& info)
     {
         const auto currentFrame = rn->currentFrame;
 
         for (uint32_t i = 0; i < info.objectCount; i++)
         {
-            const auto& binding = info.objects[i]->descriptorBindings[currentFrame];
+            const auto& binding = GetBuffer(info.objects[i])->descriptorBindings[currentFrame];
             GRAPHICS_DATA.preAllocBuffers.descBindingInfos[i] = VkDescriptorBufferBindingInfoEXT
             {
                 .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_BUFFER_BINDING_INFO_EXT,
@@ -110,5 +110,16 @@ namespace hf
         (rn->currentCommand, bindPoint, rn->currentLayout,
             setBindingIndex, objectCount,
             GRAPHICS_DATA.preAllocBuffers.indices, GRAPHICS_DATA.preAllocBuffers.sizes);
+    }
+
+    bool IsValidBuffer(const Buffer buffer)
+    {
+        return buffer > 0 && buffer <= GRAPHICS_DATA.boundBuffers.size();
+    }
+
+    URef<VkBoundBuffer>& GetBuffer(const Buffer buffer)
+    {
+        if (!IsValidBuffer(buffer)) throw GENERIC_EXCEPT("[Hyperflow]", "Invalid buffer");
+        return GRAPHICS_DATA.boundBuffers[buffer - 1];
     }
 }

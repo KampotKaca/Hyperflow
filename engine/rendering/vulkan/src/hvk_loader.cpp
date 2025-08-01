@@ -101,7 +101,7 @@ namespace hf
 
         GRAPHICS_DATA.shaderLayouts.clear();
         GRAPHICS_DATA.bufferAttribs.clear();
-        GRAPHICS_DATA.buffers.clear();
+        GRAPHICS_DATA.boundBuffers.clear();
         GRAPHICS_DATA.textureSamplers.clear();
         GRAPHICS_DATA.textureLayouts.clear();
 

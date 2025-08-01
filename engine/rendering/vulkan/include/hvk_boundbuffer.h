@@ -18,6 +18,9 @@ namespace hf
         std::vector<BufferBindingInfo> bindings{};
         VkDescriptorLocation descriptorBindings[FRAMES_IN_FLIGHT]{};
     };
+
+    bool IsValidBuffer(Buffer buffer);
+    URef<VkBoundBuffer>& GetBuffer(Buffer buffer);
 }
 
 #endif //HVK_BOUNDBUFFER_H

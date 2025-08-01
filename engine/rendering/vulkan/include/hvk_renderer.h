@@ -3,6 +3,7 @@
 
 #include "hvk_shared.h"
 #include "hvk_graphics.h"
+#include "hvk_indexbuffer.h"
 #include "hvk_rendertexture.h"
 
 namespace hf
@@ -69,6 +70,9 @@ namespace hf
 
     void UploadViewportAndScissor(const VkRenderer* rn);
 
+    void UploadBuffer(const VkRenderer* rn, const VkVertBuffer* buffer, const void* data, uint32_t offset, uint32_t vertexCount);
+    void UploadBuffer(const VkRenderer* rn, const VkIndexBuffer* buffer, const void* data, uint32_t offset, uint32_t indexCount);
+
     uvec2 GetReadyForRendering(VkRenderer* rn, VkRenderTexture** pTextures, uint32_t textureCount);
     void StartFrame(VkRenderer* rn);
     void EndFrame(VkRenderer* rn);
@@ -78,7 +82,7 @@ namespace hf
     void SetVSync(VkRenderer* rn, VsyncMode mode);
 
     void UploadBuffers(const VkRenderer* rn, const inter::rendering::BufferUploadInfo_i& info);
-    void BindBuffer(const VkRenderer* rn, const inter::rendering::BindResourceInfo_i<VkBoundBuffer*>& info);
+    void BindBuffer(const VkRenderer* rn, const inter::rendering::BindResourceInfo_i<Buffer>& info);
     void BindTexturePack(const VkRenderer* rn, const inter::rendering::BindResourceInfo_i<VkTexturePack*>& info);
 
     void BindShaderLayout(VkRenderer* rn, ShaderLayout setup);

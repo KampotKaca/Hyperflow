@@ -2,22 +2,17 @@
 #define HVK_VERTBUFFER_H
 
 #include "hvk_shared.h"
+#include "hvk_buffer.h"
 
 namespace hf
 {
-    struct VkVertBuffer
+    struct VkVertBuffer final : public VkBufferBase
     {
         explicit VkVertBuffer(const VertBufferCreationInfo& info);
-        ~VkVertBuffer();
+        ~VkVertBuffer() override = default;
 
         uint32_t vertCount = 0;
         BufferAttrib attrib{};
-        BufferMemoryType memoryType = BufferMemoryType::Static;
-
-        VkBuffer buffer{};
-        VmaAllocation bufferMemory{};
-
-        void* mapping{};
     };
 }
 

@@ -133,7 +133,7 @@ namespace hf::inter::rendering
 
     }
 
-    void UploadVertBuffer(const VertBufferUploadInfo_i& info)
+    void UploadVertBuffer(const void* rn, const VertBufferUploadInfo_i& info)
     {
 
     }
@@ -148,7 +148,7 @@ namespace hf::inter::rendering
 
     }
 
-    void UploadIndexBuffer(const IndexBufferUploadInfo_i& info)
+    void UploadIndexBuffer(const void* rn, const IndexBufferUploadInfo_i& info)
     {
 
     }

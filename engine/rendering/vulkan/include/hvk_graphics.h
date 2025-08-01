@@ -208,7 +208,7 @@ namespace hf
         URef<VkDescriptorBuffer> imageDescriptorBuffer{};
 
         std::vector<URef<VkBufferAttrib>> bufferAttribs{};
-        std::vector<URef<VkBufferBase>> buffers{};
+        std::vector<URef<VkBoundBuffer>> boundBuffers{};
         std::vector<URef<VkTextureSampler>> textureSamplers{};
         std::vector<URef<VkTextureLayout>> textureLayouts{};
         std::vector<URef<VkShaderLayout>> shaderLayouts{};

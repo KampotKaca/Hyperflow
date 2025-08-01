@@ -36,7 +36,7 @@ namespace hf
             .offset = info.offset,
             .vertexCount = info.vertCount
         };
-        inter::HF.renderingApi.api.UploadVertBuffer(uploadInfo);
+        inter::HF.renderingApi.api.UploadVertBuffer(nullptr, uploadInfo);
     }
 
     namespace inter::rendering

@@ -294,12 +294,12 @@ namespace hf::inter::rendering
         //vertex buffer
         void* (*CreateVertBuffer)(const VertBufferCreationInfo& info);
         void (*DestroyVertBuffer)(void* handle);
-        void (*UploadVertBuffer)(const VertBufferUploadInfo_i& info);
+        void (*UploadVertBuffer)(const void* rn, const VertBufferUploadInfo_i& info);
 
         //index buffer
         void* (*CreateIndexBuffer)(const IndexBufferCreationInfo& info);
         void (*DestroyIndexBuffer)(void* handle);
-        void (*UploadIndexBuffer)(const IndexBufferUploadInfo_i& info);
+        void (*UploadIndexBuffer)(const void* rn, const IndexBufferUploadInfo_i& info);
 
         //copy operations
         void (*SubmitBufferCopyOperations)();

@@ -29,7 +29,7 @@ namespace hf
             .offset = info.offset,
             .indexCount = info.indexCount
         };
-        inter::HF.renderingApi.api.UploadIndexBuffer(uploadInfo);
+        inter::HF.renderingApi.api.UploadIndexBuffer(nullptr, uploadInfo);
     }
 
     Ref<IndexBuffer> Create(const IndexBufferCreationInfo& info)

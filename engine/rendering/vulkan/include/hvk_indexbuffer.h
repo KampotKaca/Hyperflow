@@ -2,23 +2,18 @@
 #define HVK_INDEXBUFFER_H
 
 #include "hvk_shared.h"
+#include "hvk_buffer.h"
 
 namespace hf
 {
-    struct VkIndexBuffer
+    struct VkIndexBuffer : public VkBufferBase
     {
         explicit VkIndexBuffer(const IndexBufferCreationInfo& info);
-        ~VkIndexBuffer();
+        ~VkIndexBuffer() override = default;
 
         uint32_t indexCount = 0;
-        BufferMemoryType memoryType = BufferMemoryType::Static;
         BufferDataType indexFormat = BufferDataType::U16;
         VkIndexType indexType = VK_INDEX_TYPE_UINT16;
-
-        VkBuffer buffer{};
-        VmaAllocation bufferMemory{};
-
-        void* mapping{};
     };
 }
 

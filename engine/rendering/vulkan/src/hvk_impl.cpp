@@ -132,14 +132,14 @@ namespace hf::inter::rendering
 
     Buffer DefineUniformBuffer(const BufferDefinitionInfo& info)
     {
-        GRAPHICS_DATA.buffers.emplace_back(MakeURef<VkUniformBuffer>(info));
-        return (Buffer)GRAPHICS_DATA.buffers.size();
+        GRAPHICS_DATA.boundBuffers.emplace_back(MakeURef<VkUniformBuffer>(info));
+        return (Buffer)GRAPHICS_DATA.boundBuffers.size();
     }
 
     Buffer DefineStorageBuffer(const StorageBufferDefinitionInfo& info)
     {
-        GRAPHICS_DATA.buffers.emplace_back(MakeURef<VkStorageBuffer>(info));
-        return (Buffer)GRAPHICS_DATA.buffers.size();
+        GRAPHICS_DATA.boundBuffers.emplace_back(MakeURef<VkStorageBuffer>(info));
+        return (Buffer)GRAPHICS_DATA.boundBuffers.size();
     }
 
     void UploadBuffer(const void* rn, const BufferUploadInfo_i& info)
@@ -149,13 +149,7 @@ namespace hf::inter::rendering
 
     void BindBuffer(const void* rn, const BindResourceInfo_i<Buffer>& info)
     {
-        BindResourceInfo_i<VkBoundBuffer*> bufferInfo;
-        bufferInfo.bindingType = info.bindingType;
-        bufferInfo.setBindingIndex = info.setBindingIndex;
-        bufferInfo.objectCount = info.objectCount;
-        for (uint32_t i = 0; i < info.objectCount; ++i) bufferInfo.objects[i] = (VkBoundBuffer*)GetBuffer(info.objects[i]).get();
-
-        BindBuffer((VkRenderer*)rn, bufferInfo);
+        hf::BindBuffer((VkRenderer*)rn, info);
     }
 
     ShaderLayout DefineShaderLayout(const ShaderLayoutDefinitionInfo& info)
@@ -184,17 +178,9 @@ namespace hf::inter::rendering
         delete (VkVertBuffer*)handle;
     }
 
-    void UploadVertBuffer(const VertBufferUploadInfo_i& info)
+    void UploadVertBuffer(const void* rn, const VertBufferUploadInfo_i& info)
     {
-        auto buffer = (VkVertBuffer*)info.buffer;
-        if (buffer->memoryType == BufferMemoryType::Static)
-            throw GENERIC_EXCEPT("[Hyperflow]", "Cannot modify static buffer");
-
-        auto& attribute = GetAttrib(buffer->attrib);
-        auto fullSize = (uint64_t)attribute->vertexSize * info.vertexCount;
-        auto fullOffset = (uint64_t)info.offset * info.vertexCount;
-
-        UploadBufferMemory(buffer->bufferMemory, info.data, fullOffset, fullSize);
+        hf::UploadBuffer((VkRenderer*)rn, (VkVertBuffer*)info.buffer, info.data, info.offset, info.vertexCount);
     }
 
     void* CreateIndexBuffer(const IndexBufferCreationInfo& info)
@@ -207,16 +193,9 @@ namespace hf::inter::rendering
         delete (VkIndexBuffer*)handle;
     }
 
-    void UploadIndexBuffer(const IndexBufferUploadInfo_i& info)
+    void UploadIndexBuffer(const void* rn, const IndexBufferUploadInfo_i& info)
     {
-        auto buffer = (VkIndexBuffer*)info.buffer;
-        if (buffer->memoryType == BufferMemoryType::Static)
-            throw GENERIC_EXCEPT("[Hyperflow]", "Cannot modify static buffer");
-
-        auto fullSize = (uint64_t)BUFFER_DATA_SIZE[(uint32_t)buffer->indexFormat] * info.indexCount;
-        auto fullOffset = (uint64_t)info.offset * info.indexCount;
-
-        UploadBufferMemory(buffer->bufferMemory, info.data, fullOffset, fullSize);
+        hf::UploadBuffer((VkRenderer*)rn, (VkIndexBuffer*)info.buffer, info.data, info.offset, info.indexCount);
     }
 
     void SubmitBufferCopyOperations()
@@ -263,7 +242,7 @@ namespace hf::inter::rendering
         for (uint32_t i = 0; i < info.bufferCount; i++)
         {
             auto vertBuffer = (VkVertBuffer*)info.pVertBuffers[i];
-            vrn->vertBufferCache[i] = vertBuffer->buffer;
+            vrn->vertBufferCache[i] = vertBuffer->buffers[vrn->currentFrame];
             vrn->drawOffsets[i] = offset;
             offset += GetAttrib(vertBuffer->attrib)->vertexSize;
             vertCount = vertBuffer->vertCount;
@@ -282,7 +261,7 @@ namespace hf::inter::rendering
         if (info.indexBuffer)
         {
             auto indexBuffer = (VkIndexBuffer*)info.indexBuffer;
-            drawInfo.indexBuffer = indexBuffer->buffer;
+            drawInfo.indexBuffer = indexBuffer->buffers[vrn->currentFrame];
             drawInfo.indexType = indexBuffer->indexType;
             drawInfo.indexCount = indexBuffer->indexCount;
         }
