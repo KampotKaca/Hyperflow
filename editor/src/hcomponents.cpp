@@ -169,8 +169,8 @@ namespace hf::editor
             ImGui::Text("Mapped Size:     %.1f Mbs", globalStats.mappedTotalSizeMbs);
             ImGui::Text("Unmapped Size:   %.1f Mbs", globalStats.unmappedTotalSizeMbs);
 
-            DrawThreadStats("Update Thread Statistics", utils::GetThreadMemoryStatistics());
-            DrawThreadStats("Render Thread Statistics", GetMemoryStatistics(GetRenderer(GetMainWindow())));
+            DrawThreadStats("Update Thread", utils::GetThreadMemoryStatistics());
+            DrawThreadStats("Render Thread", GetMemoryStatistics(GetRenderer(GetMainWindow())));
 
             EndWindow();
             return true;

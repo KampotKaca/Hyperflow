@@ -29,20 +29,17 @@ namespace hf
 
         if (info.bufferCount > 0 || info.textureLayoutCount > 0)
         {
+            GRAPHICS_DATA.preAllocBuffers.descLayouts.resize(info.bufferCount + info.textureLayoutCount);
+            GRAPHICS_DATA.preAllocBuffers.descLayouts.clear();
+
             for (uint32_t i = 0; i < info.bufferCount; i++)
-            {
-                const auto buffer = (VkBoundBuffer*)GetBuffer(info.pBuffers[i]).get();
-                GRAPHICS_DATA.preAllocBuffers.descLayouts[i] = buffer->layout;
-            }
+                GRAPHICS_DATA.preAllocBuffers.descLayouts.push_back(GetBuffer(info.pBuffers[i])->layout);
 
             for (uint32_t i = 0; i < info.textureLayoutCount; i++)
-            {
-                const auto& layout = GetTextureLayout(info.pTextureLayouts[i]);
-                GRAPHICS_DATA.preAllocBuffers.descLayouts[info.bufferCount + i] = layout->layout;
-            }
+                GRAPHICS_DATA.preAllocBuffers.descLayouts.push_back(GetTextureLayout(info.pTextureLayouts[i])->layout);
 
-            pipelineLayoutInfo.pSetLayouts = GRAPHICS_DATA.preAllocBuffers.descLayouts;
-            pipelineLayoutInfo.setLayoutCount = info.bufferCount + info.textureLayoutCount;
+            pipelineLayoutInfo.pSetLayouts = GRAPHICS_DATA.preAllocBuffers.descLayouts.data();
+            pipelineLayoutInfo.setLayoutCount = GRAPHICS_DATA.preAllocBuffers.descLayouts.size();
         }
         else
         {

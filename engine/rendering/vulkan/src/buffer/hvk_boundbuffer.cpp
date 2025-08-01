@@ -13,6 +13,9 @@ namespace hf
         bindings = std::vector<BufferBindingInfo>(info.bindingCount);
         memcpy(bindings.data(), info.pBindings, sizeof(BufferBindingInfo) * info.bindingCount);
 
+        GRAPHICS_DATA.preAllocBuffers.descLayoutBindings.resize(info.bindingCount);
+        GRAPHICS_DATA.preAllocBuffers.descLayoutBindings.clear();
+
         for (uint32_t i = 0; i < info.bindingCount; i++)
         {
             auto bindingInfo = info.pBindings[i];
@@ -23,7 +26,7 @@ namespace hf
             layout.descriptorCount = bindingInfo.arraySize;
             layout.stageFlags = (uint32_t)bindingInfo.usageFlags;
             layout.pImmutableSamplers = nullptr;
-            GRAPHICS_DATA.preAllocBuffers.descLayoutBindings[i] = layout;
+            GRAPHICS_DATA.preAllocBuffers.descLayoutBindings.push_back(layout);
 
             const auto offset = bindingInfo.elementSizeInBytes * bindingInfo.arraySize;
             if (i != info.bindingCount - 1 && offset % 256 != 0)
@@ -34,8 +37,8 @@ namespace hf
 
         VkDescriptorSetLayoutCreateInfo layoutInfo{};
         layoutInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
-        layoutInfo.bindingCount = info.bindingCount;
-        layoutInfo.pBindings = GRAPHICS_DATA.preAllocBuffers.descLayoutBindings;
+        layoutInfo.bindingCount = GRAPHICS_DATA.preAllocBuffers.descLayoutBindings.size();
+        layoutInfo.pBindings = GRAPHICS_DATA.preAllocBuffers.descLayoutBindings.data();
         layoutInfo.flags = VK_DESCRIPTOR_SET_LAYOUT_CREATE_DESCRIPTOR_BUFFER_BIT_EXT;
 
         VK_HANDLE_EXCEPT(vkCreateDescriptorSetLayout(GRAPHICS_DATA.device.logicalDevice.device,
@@ -85,31 +88,40 @@ namespace hf
     {
         const auto currentFrame = rn->currentFrame;
 
+        GRAPHICS_DATA.preAllocBuffers.descBindingInfos.resize(info.objectCount);
+        GRAPHICS_DATA.preAllocBuffers.indices.resize(info.objectCount);
+        GRAPHICS_DATA.preAllocBuffers.sizes.resize(info.objectCount);
+
+        GRAPHICS_DATA.preAllocBuffers.descBindingInfos.clear();
+        GRAPHICS_DATA.preAllocBuffers.indices.clear();
+        GRAPHICS_DATA.preAllocBuffers.sizes.clear();
+
         for (uint32_t i = 0; i < info.objectCount; i++)
         {
             const auto& binding = GetBuffer(info.objects[i])->descriptorBindings[currentFrame];
-            GRAPHICS_DATA.preAllocBuffers.descBindingInfos[i] = VkDescriptorBufferBindingInfoEXT
-            {
-                .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_BUFFER_BINDING_INFO_EXT,
-                .address = GRAPHICS_DATA.bufferDescriptorBuffer->address,
-                .usage = binding.usageFlags,
-            };
-            GRAPHICS_DATA.preAllocBuffers.indices[i] = 0;
-            GRAPHICS_DATA.preAllocBuffers.sizes[i] = binding.offset; //will be used as offsets.
+            VkDescriptorBufferBindingInfoEXT bindingInfo{};
+            bindingInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_BUFFER_BINDING_INFO_EXT;
+            bindingInfo.address = GRAPHICS_DATA.bufferDescriptorBuffer->address;
+            bindingInfo.usage = binding.usageFlags;
+
+            GRAPHICS_DATA.preAllocBuffers.descBindingInfos.push_back(bindingInfo);
+            GRAPHICS_DATA.preAllocBuffers.indices.push_back(0);
+            GRAPHICS_DATA.preAllocBuffers.sizes.push_back(binding.offset); //will be used as offsets.
         }
 
-        FinishObjectBinding(rn, info.objectCount, (VkPipelineBindPoint)info.bindingType, info.setBindingIndex);
+        FinishObjectBinding(rn, (VkPipelineBindPoint)info.bindingType, info.setBindingIndex);
     }
 
-    void FinishObjectBinding(const VkRenderer* rn, uint32_t objectCount, VkPipelineBindPoint bindPoint, uint32_t setBindingIndex)
+    void FinishObjectBinding(const VkRenderer* rn, VkPipelineBindPoint bindPoint, uint32_t setBindingIndex)
     {
+        const auto objectCount = (uint32_t)GRAPHICS_DATA.preAllocBuffers.descBindingInfos.size();
         GRAPHICS_DATA.extensionFunctions.vkCmdBindDescriptorBuffersEXT
-        (rn->currentCommand, objectCount, GRAPHICS_DATA.preAllocBuffers.descBindingInfos);
+        (rn->currentCommand, objectCount, GRAPHICS_DATA.preAllocBuffers.descBindingInfos.data());
 
         GRAPHICS_DATA.extensionFunctions.vkCmdSetDescriptorBufferOffsetsEXT
         (rn->currentCommand, bindPoint, rn->currentLayout,
             setBindingIndex, objectCount,
-            GRAPHICS_DATA.preAllocBuffers.indices, GRAPHICS_DATA.preAllocBuffers.sizes);
+            GRAPHICS_DATA.preAllocBuffers.indices.data(), GRAPHICS_DATA.preAllocBuffers.sizes.data());
     }
 
     bool IsValidBuffer(const Buffer buffer)

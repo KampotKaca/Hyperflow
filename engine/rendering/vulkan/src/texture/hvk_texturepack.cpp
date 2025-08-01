@@ -204,6 +204,10 @@ namespace hf
         const auto currentFrame = rn->currentFrame;
         uint32_t bindingCount = 0;
 
+        GRAPHICS_DATA.preAllocBuffers.descBindingInfos.clear();
+        GRAPHICS_DATA.preAllocBuffers.indices.clear();
+        GRAPHICS_DATA.preAllocBuffers.sizes.clear();
+
         for (uint32_t i = 0; i < info.objectCount; i++)
         {
             const auto& obj = info.objects[i];
@@ -212,21 +216,20 @@ namespace hf
                 for (const auto& viewData : binding.bindingArray)
                 {
                     const auto& loc = viewData.descriptorBindings[currentFrame];
+                    VkDescriptorBufferBindingInfoEXT bindingInfo{};
+                    bindingInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_BUFFER_BINDING_INFO_EXT;
+                    bindingInfo.address = GRAPHICS_DATA.imageDescriptorBuffer->address;
+                    bindingInfo.usage = loc.usageFlags;
 
-                    GRAPHICS_DATA.preAllocBuffers.descBindingInfos[bindingCount] = VkDescriptorBufferBindingInfoEXT
-                    {
-                        .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_BUFFER_BINDING_INFO_EXT,
-                        .address = GRAPHICS_DATA.imageDescriptorBuffer->address,
-                        .usage = loc.usageFlags,
-                    };
+                    GRAPHICS_DATA.preAllocBuffers.descBindingInfos.push_back(bindingInfo);
 
-                    GRAPHICS_DATA.preAllocBuffers.indices[bindingCount] = 0;
-                    GRAPHICS_DATA.preAllocBuffers.sizes[bindingCount] = loc.offset; //will be used as offsets.
+                    GRAPHICS_DATA.preAllocBuffers.indices.push_back(0);
+                    GRAPHICS_DATA.preAllocBuffers.sizes.push_back(loc.offset); //will be used as offsets.
                     bindingCount++;
                 }
             }
         }
 
-        FinishObjectBinding(rn, bindingCount, (VkPipelineBindPoint)info.bindingType, info.setBindingIndex);
+        FinishObjectBinding(rn, (VkPipelineBindPoint)info.bindingType, info.setBindingIndex);
     }
 }

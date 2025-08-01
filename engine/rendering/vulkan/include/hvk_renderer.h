@@ -88,7 +88,7 @@ namespace hf
     void BindShaderLayout(VkRenderer* rn, ShaderLayout setup);
     void UploadPushConstants(const VkRenderer* rn, const PushConstantUploadInfo& info);
 
-    void FinishObjectBinding(const VkRenderer* rn, uint32_t objectCount, VkPipelineBindPoint bindPoint, uint32_t setBindingIndex);
+    void FinishObjectBinding(const VkRenderer* rn, VkPipelineBindPoint bindPoint, uint32_t setBindingIndex);
 }
 
 #endif //HVK_RENDERER_H

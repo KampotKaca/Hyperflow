@@ -155,23 +155,15 @@ namespace hf
         bool deleteSrcAfterCopy = false;
     };
 
-    struct ImageTransitionArray
-    {
-        ImageTransitionInfo infos[VK_MAX_IMAGE_BARRIERS]{};
-        uint32_t count = 0;
-    };
-
     struct PreAllocatedBuffers
     {
-        VkDescriptorSetLayout descLayouts[VK_MAX_UNIFORM_AND_TEXTURE_BINDINGS]{};
-        VkDescriptorSetLayoutBinding descLayoutBindings[VK_MAX_UNIFORM_AND_TEXTURE_BINDINGS]{};
-        VkDescriptorBufferBindingInfoEXT descBindingInfos[VK_MAX_UNIFORM_AND_TEXTURE_BINDINGS]{};
-        VkDescriptorBufferInfo bufferInfos[VK_MAX_UNIFORM_AND_TEXTURE_BINDINGS * FRAMES_IN_FLIGHT]{};
-        VkDescriptorImageInfo descImageBindings[VK_MAX_IMAGE_BINDINGS]{};
-        VkImageMemoryBarrier imageBarriers[VK_MAX_IMAGE_BARRIERS]{};
-        ImageTransitionArray imageTransitions[9]{};
-        uint32_t indices[VK_MAX_INDICES]{};
-        VkDeviceSize sizes[VK_MAX_INDICES]{};
+        std::vector<VkDescriptorSetLayout> descLayouts{};
+        std::vector<VkDescriptorSetLayoutBinding> descLayoutBindings{};
+        std::vector<VkDescriptorBufferBindingInfoEXT> descBindingInfos{};
+        std::vector<VkImageMemoryBarrier> imageBarriers{};
+        std::vector<uint32_t> indices{};
+        std::vector<VkDeviceSize> sizes{};
+        std::vector<ImageTransitionInfo> imageTransitions[9]{};
     };
 
     struct RenderApiEditorInfo
