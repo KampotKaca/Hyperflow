@@ -11,13 +11,15 @@ namespace hf
     static void ThreadDraw(const Ref<Renderer>& rn)
     {
         rn->threadInfo.isRunning = true;
+        uint64_t renderFrameCount = 0;
         while (rn->threadInfo.isRunning)
         {
             inter::rendering::RendererUpdate_i(rn);
-            utils::CollectThreadMemoryCache();
+            if (renderFrameCount % 1024 == 0) utils::CollectThreadMemoryCache();
 
             std::lock_guard lock(rn->threadInfo.statLock);
             rn->threadInfo.memoryStatistics = utils::GetThreadMemoryStatistics();
+            renderFrameCount++;
         }
         rn->threadInfo.isRunning = false;
 
