@@ -135,17 +135,19 @@ namespace hf
         }
         else throw GENERIC_EXCEPT("[Hyperflow]", "Unsupported layout transition!");
 
-        GRAPHICS_DATA.preAllocBuffers.imageBarriers.resize(imageInfoCount);
+        GRAPHICS_DATA.preAllocBuffers.imageBarriers.reserve(imageInfoCount);
         GRAPHICS_DATA.preAllocBuffers.imageBarriers.clear();
 
         for (uint32_t i = 0; i < imageInfoCount; i++)
         {
             auto& imageInfo = pImageInfos[i];
 
-            VkImageMemoryBarrier barrier{};
-            barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
+            VkImageMemoryBarrier2 barrier{};
+            barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER_2;
             barrier.srcAccessMask = srcAccessMask;
             barrier.dstAccessMask = dstAccessMask;
+            barrier.srcStageMask = sourceStage;
+            barrier.dstStageMask = destinationStage;
             barrier.oldLayout = oldLayout;
             barrier.newLayout = newLayout;
             barrier.image = imageInfo.image;
@@ -157,10 +159,12 @@ namespace hf
             GRAPHICS_DATA.preAllocBuffers.imageBarriers.push_back(barrier);
         }
 
-        vkCmdPipelineBarrier(command, sourceStage, destinationStage,
-            0, 0, nullptr,
-            0, nullptr,
-            GRAPHICS_DATA.preAllocBuffers.imageBarriers.size(), GRAPHICS_DATA.preAllocBuffers.imageBarriers.data());
+        VkDependencyInfo depInfo{};
+        depInfo.sType = VK_STRUCTURE_TYPE_DEPENDENCY_INFO;
+        depInfo.imageMemoryBarrierCount = GRAPHICS_DATA.preAllocBuffers.imageBarriers.size();
+        depInfo.pImageMemoryBarriers = GRAPHICS_DATA.preAllocBuffers.imageBarriers.data();
+
+        GRAPHICS_DATA.extensionFunctions.vkCmdPipelineBarrier2KHR(command, &depInfo);
     }
 
     inline void TransitionBufferToImageStart(VkCommandBuffer command)
@@ -240,14 +244,14 @@ namespace hf
 
     void GenerateMimMaps(VkCommandBuffer command)
     {
-        GRAPHICS_DATA.preAllocBuffers.imageBarriers.resize(GRAPHICS_DATA.bufferToImageCopyOperations.size());
+        GRAPHICS_DATA.preAllocBuffers.imageBarriers.reserve(GRAPHICS_DATA.bufferToImageCopyOperations.size());
         GRAPHICS_DATA.preAllocBuffers.imageBarriers.clear();
 
         for (auto& operation : GRAPHICS_DATA.bufferToImageCopyOperations)
         {
-            VkImageMemoryBarrier barrier{};
+            VkImageMemoryBarrier2 barrier{};
 
-            barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
+            barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER_2;
             barrier.image = operation.imageInfo.image;
 
             barrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
@@ -260,14 +264,18 @@ namespace hf
                 barrier.subresourceRange.baseMipLevel = mip - 1;
                 barrier.oldLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
                 barrier.newLayout = VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL;
-                barrier.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
-                barrier.dstAccessMask = VK_ACCESS_TRANSFER_READ_BIT;
+                barrier.srcAccessMask = VK_ACCESS_2_TRANSFER_WRITE_BIT;
+                barrier.dstAccessMask = VK_ACCESS_2_TRANSFER_READ_BIT;
 
-                vkCmdPipelineBarrier(command,
-                VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_TRANSFER_BIT, 0,
-                0, nullptr,
-                0, nullptr,
-                1, &barrier);
+                barrier.srcStageMask = VK_PIPELINE_STAGE_2_TRANSFER_BIT;
+                barrier.dstStageMask = VK_PIPELINE_STAGE_2_TRANSFER_BIT;
+
+                VkDependencyInfo depInfo{};
+                depInfo.sType = VK_STRUCTURE_TYPE_DEPENDENCY_INFO;
+                depInfo.imageMemoryBarrierCount = 1;
+                depInfo.pImageMemoryBarriers = &barrier;
+
+                GRAPHICS_DATA.extensionFunctions.vkCmdPipelineBarrier2KHR(command, &depInfo);
 
                 VkImageBlit blit{};
                 blit.srcSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
@@ -291,14 +299,13 @@ namespace hf
 
                 barrier.oldLayout = VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL;
                 barrier.newLayout = operation.dstLayout;
-                barrier.srcAccessMask = VK_ACCESS_TRANSFER_READ_BIT;
-                barrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
+                barrier.srcAccessMask = VK_ACCESS_2_TRANSFER_READ_BIT;
+                barrier.dstAccessMask = VK_ACCESS_2_SHADER_READ_BIT;
 
-                vkCmdPipelineBarrier(command,
-                VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT, 0,
-                0, nullptr,
-                0, nullptr,
-                1, &barrier);
+                barrier.srcStageMask = VK_PIPELINE_STAGE_2_TRANSFER_BIT;
+                barrier.dstStageMask = VK_PIPELINE_STAGE_2_FRAGMENT_SHADER_BIT;
+
+                GRAPHICS_DATA.extensionFunctions.vkCmdPipelineBarrier2KHR(command, &depInfo);
 
                 if (size.x > 1) size.x /= 2;
                 if (size.y > 1) size.y /= 2;
@@ -307,16 +314,20 @@ namespace hf
             barrier.subresourceRange.baseMipLevel = operation.imageInfo.mipLevels - 1;
             barrier.oldLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
             barrier.newLayout = operation.dstLayout;
-            barrier.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
-            barrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
+            barrier.srcAccessMask = VK_ACCESS_2_TRANSFER_WRITE_BIT;
+            barrier.dstAccessMask = VK_ACCESS_2_SHADER_READ_BIT;
+
+            barrier.srcStageMask = VK_PIPELINE_STAGE_2_TRANSFER_BIT;
+            barrier.dstStageMask = VK_PIPELINE_STAGE_2_FRAGMENT_SHADER_BIT;
 
             GRAPHICS_DATA.preAllocBuffers.imageBarriers.push_back(barrier);
         }
 
-        vkCmdPipelineBarrier(command,
-                VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT, 0,
-                0, nullptr,
-                0, nullptr,
-                GRAPHICS_DATA.preAllocBuffers.imageBarriers.size(), GRAPHICS_DATA.preAllocBuffers.imageBarriers.data());
+        VkDependencyInfo depInfo{};
+        depInfo.sType = VK_STRUCTURE_TYPE_DEPENDENCY_INFO;
+        depInfo.imageMemoryBarrierCount = GRAPHICS_DATA.preAllocBuffers.imageBarriers.size();
+        depInfo.pImageMemoryBarriers = GRAPHICS_DATA.preAllocBuffers.imageBarriers.data();
+
+        GRAPHICS_DATA.extensionFunctions.vkCmdPipelineBarrier2KHR(command, &depInfo);
     }
 }

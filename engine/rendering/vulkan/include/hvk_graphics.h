@@ -160,7 +160,7 @@ namespace hf
         std::vector<VkDescriptorSetLayout> descLayouts{};
         std::vector<VkDescriptorSetLayoutBinding> descLayoutBindings{};
         std::vector<VkDescriptorBufferBindingInfoEXT> descBindingInfos{};
-        std::vector<VkImageMemoryBarrier> imageBarriers{};
+        std::vector<VkImageMemoryBarrier2> imageBarriers{};
         std::vector<uint32_t> indices{};
         std::vector<VkDeviceSize> sizes{};
         std::vector<ImageTransitionInfo> imageTransitions[9]{};

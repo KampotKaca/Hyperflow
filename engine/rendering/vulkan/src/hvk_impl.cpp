@@ -271,41 +271,33 @@ namespace hf::inter::rendering
 
     void ApplyRenderAttachmentDependencies(void* rn, RenderAttachmentDependencyInfo* pInfos, uint32_t count)
     {
-        static VkImageMemoryBarrier2 barriers[RENDERING_MAX_NUM_RENDER_ATTACHMENT_DEPENDENCIES]{};
         const auto* vrn = (VkRenderer*)rn;
+        GRAPHICS_DATA.preAllocBuffers.imageBarriers.reserve(count);
+        GRAPHICS_DATA.preAllocBuffers.imageBarriers.clear();
 
         for (uint32_t i = 0; i < count; i++)
         {
             auto& info = pInfos[i];
-            barriers[i] =
-            {
-                .sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER_2,
-                .srcStageMask = (VkPipelineStageFlags2)info.src.stageMask,
-                .srcAccessMask = (VkAccessFlags2)info.src.accessMask,
-                .dstStageMask = (VkPipelineStageFlags2)info.dst.stageMask,
-                .dstAccessMask = (VkAccessFlags2)info.dst.accessMask,
-                .oldLayout = (VkImageLayout)info.src.targetLayout,
-                .newLayout = (VkImageLayout)info.dst.targetLayout,
-                .srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
-                .dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
-                .image = GetRenderTextureImage(vrn->prevRenderTexture, info.attachmentIndex),
-                .subresourceRange =
-                {
-                    .aspectMask = (VkImageAspectFlags)info.aspectFlags,
-                    .baseMipLevel = 0,
-                    .levelCount = 1,
-                    .baseArrayLayer = 0,
-                    .layerCount = 1,
-                },
-            };
+            VkImageMemoryBarrier2 barrier{};
+            barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER_2;
+            barrier.srcStageMask = (VkPipelineStageFlags2)info.src.stageMask;
+            barrier.srcAccessMask = (VkAccessFlags2)info.src.accessMask;
+            barrier.dstStageMask = (VkPipelineStageFlags2)info.dst.stageMask;
+            barrier.dstAccessMask = (VkAccessFlags2)info.dst.accessMask;
+            barrier.oldLayout = (VkImageLayout)info.src.targetLayout;
+            barrier.newLayout = (VkImageLayout)info.dst.targetLayout;
+            barrier.image = GetRenderTextureImage(vrn->prevRenderTexture, info.attachmentIndex);
+
+            barrier.subresourceRange.aspectMask = (VkImageAspectFlags)info.aspectFlags;
+            barrier.subresourceRange.levelCount = 1;
+            barrier.subresourceRange.layerCount = 1;
+            GRAPHICS_DATA.preAllocBuffers.imageBarriers.push_back(barrier);
         }
 
-        const VkDependencyInfo depInfo
-        {
-            .sType = VK_STRUCTURE_TYPE_DEPENDENCY_INFO,
-            .imageMemoryBarrierCount = count,
-            .pImageMemoryBarriers = barriers,
-        };
+        VkDependencyInfo depInfo{};
+        depInfo.sType = VK_STRUCTURE_TYPE_DEPENDENCY_INFO;
+        depInfo.imageMemoryBarrierCount = GRAPHICS_DATA.preAllocBuffers.imageBarriers.size();
+        depInfo.pImageMemoryBarriers = GRAPHICS_DATA.preAllocBuffers.imageBarriers.data();
 
         GRAPHICS_DATA.extensionFunctions.vkCmdPipelineBarrier2KHR(vrn->currentCommand, &depInfo);
     }
