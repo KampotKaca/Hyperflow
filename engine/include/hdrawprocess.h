@@ -124,6 +124,29 @@ namespace hf
         StaticVector<uint8_t, RENDERING_MAX_UNIFORM_UPLOAD_BUFFER_SIZE> bufferUploads{};
         StaticVector<uint8_t, RENDERING_MAX_PUSH_CONSTANT_UPLOAD_BUFFER_SIZE> pushConstantUploads{};
         StaticVector<BufferUploadPacketInfo, RENDERING_MAX_UNIFORM_UPLOAD_COUNT> bufferUploadPackets{};
+
+        void clear()
+        {
+            dependencies.clear();
+            renderTextures.clear();
+            shaderLayouts.clear();
+            shaders.clear();
+            materials.clear();
+            drawPackets.clear();
+            texpacks.clear();
+
+            textureGroupRebindings.clear();
+            textureRebindings.clear();
+            textures.clear();
+
+            bufferSets.clear();
+            buffers.clear();
+
+            drawCalls.clear();
+            bufferUploads.clear();
+            pushConstantUploads.clear();
+            bufferUploadPackets.clear();
+        }
     };
 
     struct RenderPacketDrawProcess
@@ -136,7 +159,18 @@ namespace hf
         DrawPacketInfo* currentDraw{};
         TexturePackRebindingGroupPacketInfo* currentTexturePackBinding{};
 
-        RenderPacket packet{};
+        RenderPacket* packet{};
+
+        void clear()
+        {
+            currentRenderTexture = nullptr;
+            currentShaderLayout = nullptr;
+            currentShader = nullptr;
+            currentMaterial = nullptr;
+            currentUniformSet = nullptr;
+            currentDraw = nullptr;
+            currentTexturePackBinding = nullptr;
+        }
     };
 }
 

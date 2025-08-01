@@ -39,14 +39,14 @@ namespace hf
 #endif
 
             auto& packet = rn->currentDraw.packet;
-            packet.bufferUploadPackets.push_back(
+            packet->bufferUploadPackets.push_back(
             {
                 .buffer = info.buffer,
                 .offsetInBytes = info.offsetInBytes,
-                .bufferRange = (AssetRange<uint32_t>) { .start = (uint32_t)packet.bufferUploads.size(), .size = info.sizeInBytes }
+                .bufferRange = (AssetRange<uint32_t>) { .start = (uint32_t)packet->bufferUploads.size(), .size = info.sizeInBytes }
             });
 
-            packet.bufferUploads.push_back((uint8_t*)info.data, info.sizeInBytes);
+            packet->bufferUploads.push_back((uint8_t*)info.data, info.sizeInBytes);
         }
         catch (...)
         {
@@ -88,12 +88,12 @@ namespace hf
 #endif
 
             auto& packet = rn->currentDraw.packet;
-            packet.textureGroupRebindings.push_back(TexturePackRebindingGroupPacketInfo
+            packet->textureGroupRebindings.push_back(TexturePackRebindingGroupPacketInfo
             {
                 .texturePack = texPack,
-                .bindingPacketRange = (AssetRange<uint16_t>){ .start = (uint16_t)packet.textureRebindings.size(), .size = 0 }
+                .bindingPacketRange = (AssetRange<uint16_t>){ .start = (uint16_t)packet->textureRebindings.size(), .size = 0 }
             });
-            rn->currentDraw.currentTexturePackBinding = packet.textureGroupRebindings.atP(packet.textureGroupRebindings.size() - 1);
+            rn->currentDraw.currentTexturePackBinding = packet->textureGroupRebindings.atP(packet->textureGroupRebindings.size() - 1);
         }
         catch (...)
         {
@@ -148,13 +148,13 @@ namespace hf
             {
                 .offset = textures.offset,
                 .type = type,
-                .range = (AssetRange<uint16_t>){ .start = (uint16_t)packet.textures.size(), .size = (uint16_t)textures.count }
+                .range = (AssetRange<uint16_t>){ .start = (uint16_t)packet->textures.size(), .size = (uint16_t)textures.count }
             };
 
             for (uint32_t i = 0; i < textures.count; i++)
             {
                 auto texture = textures.pTextures[i];
-                packet.textures.push_back({
+                packet->textures.push_back({
                     .texture = texture.texture->handle,
                     .index = texture.index
                 });
@@ -164,7 +164,7 @@ namespace hf
 
         if (wasModified)
         {
-            packet.textureRebindings.push_back(binding);
+            packet->textureRebindings.push_back(binding);
             rn->currentDraw.currentTexturePackBinding->bindingPacketRange.size++;
         }
         else LOG_WARN("Unnecessary binding upload! nothing changed");
@@ -294,7 +294,7 @@ namespace hf
 #endif
 
             auto& packet = rn->currentDraw.packet;
-            packet.dependencies.push_back(info);
+            packet->dependencies.push_back(info);
             rn->currentDraw.currentRenderTexture->dependencyRange.size++;
         }
         catch (...)
@@ -314,13 +314,13 @@ namespace hf
 #endif
 
             auto& packet = rn->currentDraw.packet;
-            packet.renderTextures.push_back({
+            packet->renderTextures.push_back({
                 .texture = rt,
-                .shaderLayoutRange = (AssetRange<uint16_t>){ .start = (uint16_t)packet.shaderLayouts.size(), .size = 0 },
-                .dependencyRange = (AssetRange<uint8_t>){ .start = (uint8_t)packet.dependencies.size(), .size = 0 }
+                .shaderLayoutRange = (AssetRange<uint16_t>){ .start = (uint16_t)packet->shaderLayouts.size(), .size = 0 },
+                .dependencyRange = (AssetRange<uint8_t>){ .start = (uint8_t)packet->dependencies.size(), .size = 0 }
             });
 
-            rn->currentDraw.currentRenderTexture = packet.renderTextures.atP(packet.renderTextures.size() - 1);
+            rn->currentDraw.currentRenderTexture = packet->renderTextures.atP(packet->renderTextures.size() - 1);
         }
         catch (...)
         {
@@ -360,13 +360,13 @@ namespace hf
 #endif
 
             auto& packet = rn->currentDraw.packet;
-            packet.shaderLayouts.push_back({
+            packet->shaderLayouts.push_back({
                 .layout = layout,
-                .shaderPacketRange = (AssetRange<uint16_t>){ .start = (uint16_t)packet.shaders.size(), .size = 0 },
-                .bufferSetRange = (AssetRange<uint32_t>){ .start = (uint32_t)packet.bufferSets.size(), .size = 0 },
+                .shaderPacketRange = (AssetRange<uint16_t>){ .start = (uint16_t)packet->shaders.size(), .size = 0 },
+                .bufferSetRange = (AssetRange<uint32_t>){ .start = (uint32_t)packet->bufferSets.size(), .size = 0 },
             });
 
-            rn->currentDraw.currentShaderLayout = packet.shaderLayouts.atP(packet.shaderLayouts.size() - 1);
+            rn->currentDraw.currentShaderLayout = packet->shaderLayouts.atP(packet->shaderLayouts.size() - 1);
             rn->currentDraw.currentRenderTexture->shaderLayoutRange.size++;
         }
         catch (...)
@@ -399,12 +399,12 @@ namespace hf
 #endif
 
             auto& packet = rn->currentDraw.packet;
-            packet.shaders.push_back({
+            packet->shaders.push_back({
                 .shader = shader,
-                .materialPacketRange = (AssetRange<uint16_t>){ .start = (uint16_t)packet.materials.size(), .size = 0 }
+                .materialPacketRange = (AssetRange<uint16_t>){ .start = (uint16_t)packet->materials.size(), .size = 0 }
             });
 
-            rn->currentDraw.currentShader = packet.shaders.atP(packet.shaders.size() - 1);
+            rn->currentDraw.currentShader = packet->shaders.atP(packet->shaders.size() - 1);
             rn->currentDraw.currentShaderLayout->shaderPacketRange.size++;
         }
         catch (...)
@@ -440,13 +440,13 @@ namespace hf
 #endif
 
             auto& packet = rn->currentDraw.packet;
-            packet.materials.push_back({
+            packet->materials.push_back({
                 .material = material,
-                .drawPacketRange = (AssetRange<uint32_t>){ .start = (uint32_t)packet.drawPackets.size(), .size = 0 },
-                .texpackRange = (AssetRange<uint32_t>){ .start = (uint32_t)packet.texpacks.size(), .size = 0 },
+                .drawPacketRange = (AssetRange<uint32_t>){ .start = (uint32_t)packet->drawPackets.size(), .size = 0 },
+                .texpackRange = (AssetRange<uint32_t>){ .start = (uint32_t)packet->texpacks.size(), .size = 0 },
             });
 
-            rn->currentDraw.currentMaterial = packet.materials.atP(packet.materials.size() - 1);
+            rn->currentDraw.currentMaterial = packet->materials.atP(packet->materials.size() - 1);
             rn->currentDraw.currentShader->materialPacketRange.size++;
         }
         catch (...)
@@ -481,19 +481,19 @@ namespace hf
 #endif
 
             auto& packet = rn->currentDraw.packet;
-            packet.drawPackets.push_back({
-                .texpackRange = (AssetRange<uint32_t>){ .start = (uint32_t)packet.texpacks.size(), .size = 0 },
-                .drawCallRange = (AssetRange<uint32_t>){ .start = (uint32_t)packet.drawCalls.size(), .size = 0 },
-                .pushConstantRange = (AssetRange<uint32_t>){ .start = (uint32_t)packet.pushConstantUploads.size(), .size = 0 },
+            packet->drawPackets.push_back({
+                .texpackRange = (AssetRange<uint32_t>){ .start = (uint32_t)packet->texpacks.size(), .size = 0 },
+                .drawCallRange = (AssetRange<uint32_t>){ .start = (uint32_t)packet->drawCalls.size(), .size = 0 },
+                .pushConstantRange = (AssetRange<uint32_t>){ .start = (uint32_t)packet->pushConstantUploads.size(), .size = 0 },
             });
 
-            rn->currentDraw.currentDraw = packet.drawPackets.atP(packet.drawPackets.size() - 1);
+            rn->currentDraw.currentDraw = packet->drawPackets.atP(packet->drawPackets.size() - 1);
             rn->currentDraw.currentMaterial->drawPacketRange.size++;
         }
         catch (...)
         {
             LOG_ERROR("Unable to start draw! Draw packet buffer usage: %f",
-                rn->currentDraw.packet.drawPackets.size() / (float_t)RENDERING_MAX_NUM_DRAWPACKETS);
+                rn->currentDraw.packet->drawPackets.size() / (float_t)RENDERING_MAX_NUM_DRAWPACKETS);
             throw;
         }
     }
@@ -523,13 +523,13 @@ namespace hf
 #endif
 
             auto& packet = rn->currentDraw.packet;
-            packet.bufferSets.push_back(BufferSetPacketInfo
+            packet->bufferSets.push_back(BufferSetPacketInfo
             {
                 .bindingType = bindingType,
                 .setBindingIndex = setBindingIndex,
-                .bufferRange = (AssetRange<uint16_t>){ .start = (uint16_t)packet.buffers.size(), .size = 0 },
+                .bufferRange = (AssetRange<uint16_t>){ .start = (uint16_t)packet->buffers.size(), .size = 0 },
             });
-            rn->currentDraw.currentUniformSet = packet.bufferSets.atP(packet.bufferSets.size() - 1);
+            rn->currentDraw.currentUniformSet = packet->bufferSets.atP(packet->bufferSets.size() - 1);
             rn->currentDraw.currentShaderLayout->bufferSetRange.size++;
         }
         catch (...)
@@ -558,7 +558,7 @@ namespace hf
 #endif
 
             auto& packet = rn->currentDraw.packet;
-            packet.buffers.push_back(buffer);
+            packet->buffers.push_back(buffer);
             rn->currentDraw.currentUniformSet->bufferRange.size++;
         }
         catch (...)
@@ -578,7 +578,7 @@ namespace hf
 #endif
 
             auto& packet = rn->currentDraw.packet;
-            packet.texpacks.push_back({
+            packet->texpacks.push_back({
                 .pack = texPack,
                 .setBindingIndex = setBindingIndex,
             });
@@ -627,7 +627,7 @@ namespace hf
 #endif
 
             auto& packet = rn->currentDraw.packet;
-            packet.drawCalls.push_back(drawCall);
+            packet->drawCalls.push_back(drawCall);
             rn->currentDraw.currentDraw->drawCallRange.size++;
         }
         catch (...)
@@ -647,7 +647,7 @@ namespace hf
 #endif
 
             auto& packet = rn->currentDraw.packet;
-            packet.texpacks.push_back({
+            packet->texpacks.push_back({
                 .pack = texPack,
                 .setBindingIndex = setBindingIndex
             });
@@ -675,7 +675,7 @@ namespace hf
 
             auto& packet = currentDraw.packet;
             currentDraw.currentDraw->pushConstantRange.size = dataSize;
-            packet.pushConstantUploads.push_back((uint8_t*)data, dataSize);
+            packet->pushConstantUploads.push_back((uint8_t*)data, dataSize);
         }
         catch (...)
         {
@@ -688,25 +688,33 @@ namespace hf
     {
         void StartRenderPacket_i(const Ref<Renderer>& rn)
         {
+#if DEBUG
+            if (rn->currentDraw.packet) throw GENERIC_EXCEPT("[Hyperflow]", "Cannot start RenderPacket, without submitting previous one!");
+#endif
+
+            std::lock_guard lock(rn->threadInfo.threadLock);
+            rn->currentDraw.packet = rn->threadInfo.cachedPackets.back();
+            rn->threadInfo.cachedPackets.pop_back();
+            rn->currentDraw.packet->clear();
             rn->isDrawing = true;
         }
 
         void EndRenderPacket_i(const Ref<Renderer>& rn)
         {
-            auto& tInfo = rn->threadInfo;
 #if DEBUG
             if (!rn->isDrawing) throw GENERIC_EXCEPT("[Hyperflow]", "Cannot end RenderPacket, without starting it!");
 #endif
 
             {
-                std::lock_guard lock(tInfo.threadLock);
-                tInfo.drawPacket = rn->currentDraw.packet;
-                tInfo.packetIsReady = true;
-                tInfo.renderCondition.notify_one();
+                std::lock_guard lock(rn->threadInfo.threadLock);;
+
+                if (rn->threadInfo.drawPacket) rn->threadInfo.cachedPackets.push_back(rn->threadInfo.drawPacket);
+                rn->threadInfo.drawPacket = rn->currentDraw.packet;
+                rn->currentDraw.packet = nullptr;
+                rn->threadInfo.renderCondition.notify_one();
             }
 
-            rn->currentDraw = {};
-
+            rn->currentDraw.clear();
             rn->isDrawing = false;
         }
 
@@ -736,48 +744,51 @@ namespace hf
             CleanMarkedResources_i();
 
             auto& tInfo = rn->threadInfo;
-            RenderPacket packet;
+            RenderPacket* packet;
             {
                 std::unique_lock lock(tInfo.threadLock);
-                tInfo.renderCondition.wait(lock, [&]{ return tInfo.packetIsReady || !tInfo.isRunning; });
+                tInfo.renderCondition.wait(lock, [&]{ return tInfo.drawPacket || !tInfo.isRunning; });
                 if (!tInfo.isRunning) return;
                 packet = tInfo.drawPacket;
-                tInfo.packetIsReady = false;
+                tInfo.drawPacket = nullptr;
             }
 
             void* renderTextures[RENDERING_MAX_NUM_RENDER_TEXTURES];
-            for (uint8_t rtIndex = 0; rtIndex < (uint8_t)packet.renderTextures.size(); rtIndex++)
-                renderTextures[rtIndex] = packet.renderTextures.atC(rtIndex).texture->handle;
+            for (uint8_t rtIndex = 0; rtIndex < (uint8_t)packet->renderTextures.size(); rtIndex++)
+                renderTextures[rtIndex] = packet->renderTextures.atC(rtIndex).texture->handle;
 
-            uvec2 size = HF.renderingApi.api.GetReadyForRendering(rn->handle, renderTextures, packet.renderTextures.size());
+            uvec2 size = HF.renderingApi.api.GetReadyForRendering(rn->handle, renderTextures, packet->renderTextures.size());
             if (size != uvec2(0, 0))
             {
-                for (uint8_t rtIndex = 0; rtIndex < (uint8_t)packet.renderTextures.size(); rtIndex++)
-                    packet.renderTextures.atC(rtIndex).texture->createInfo.size = size;
+                for (uint8_t rtIndex = 0; rtIndex < (uint8_t)packet->renderTextures.size(); rtIndex++)
+                    packet->renderTextures.atC(rtIndex).texture->createInfo.size = size;
 
                 HF.renderingApi.api.StartFrame(rn->handle);
                 RendererDraw_i(rn, packet);
                 HF.renderingApi.api.EndFrame(rn->handle);
             }
+
+            std::lock_guard lock(tInfo.threadLock);
+            tInfo.cachedPackets.push_back(packet);
         }
 
-        static void RendererDrawUploads(const void* handle, RenderPacket& packet);
-        static void BindBuffers(const void* handle, RenderPacket& packet, const AssetRange<uint32_t>& range, DescriptorBindingInfo* descBindings);
-        static void CollectTexpacks(RenderPacket& packet, const AssetRange<uint32_t>& range, DescriptorBindingInfo* descBindings);
+        static void RendererDrawUploads(const void* handle, RenderPacket* packet);
+        static void BindBuffers(const void* handle, RenderPacket* packet, const AssetRange<uint32_t>& range, DescriptorBindingInfo* descBindings);
+        static void CollectTexpacks(RenderPacket* packet, const AssetRange<uint32_t>& range, DescriptorBindingInfo* descBindings);
 
-        void RendererDraw_i(const Ref<Renderer>& rn, RenderPacket& packet)
+        void RendererDraw_i(const Ref<Renderer>& rn, RenderPacket* packet)
         {
             void* vBufferCache[MAX_NUM_BUFFER_CACHE];
             const auto handle = rn->handle;
             RendererDrawUploads(handle, packet);
 
-            for (uint8_t rtIndex = 0; rtIndex < (uint8_t)packet.renderTextures.size(); rtIndex++)
+            for (uint8_t rtIndex = 0; rtIndex < (uint8_t)packet->renderTextures.size(); rtIndex++)
             {
-                auto& rt = packet.renderTextures.atC(rtIndex);
+                auto& rt = packet->renderTextures.atC(rtIndex);
                 if (rt.dependencyRange.size > 0)
                 {
                     HF.renderingApi.api.ApplyRenderAttachmentDependencies(handle,
-                    packet.dependencies.atP(rt.dependencyRange.start), rt.dependencyRange.size);
+                    packet->dependencies.atP(rt.dependencyRange.start), rt.dependencyRange.size);
                 }
 
                 HF.renderingApi.api.BeginRendering(handle, rt.texture->handle);
@@ -787,7 +798,7 @@ namespace hf
                 {
                     DescriptorBindingInfo descBindings[MAX_NUM_BOUND_DESCRIPTORS]{};
 
-                    const auto& shaderLayout = packet.shaderLayouts.atC(shaderLayoutIndex);
+                    const auto& shaderLayout = packet->shaderLayouts.atC(shaderLayoutIndex);
                     HF.renderingApi.api.BindShaderLayout(handle, shaderLayout.layout);
 
                     BindBuffers(handle, packet, shaderLayout.bufferSetRange, descBindings);
@@ -795,7 +806,7 @@ namespace hf
                     uint16_t shaderEnd = shaderLayout.shaderPacketRange.end();
                     for (uint16_t shaderIndex = shaderLayout.shaderPacketRange.start; shaderIndex < shaderEnd; shaderIndex++)
                     {
-                        const auto& shader = packet.shaders.atC(shaderIndex);
+                        const auto& shader = packet->shaders.atC(shaderIndex);
                         const auto& shaderHandle = shader.shader->handle;
 
                         if (shaderHandle)
@@ -805,7 +816,7 @@ namespace hf
                             const uint16_t materialEnd = shader.materialPacketRange.end();
                             for (uint16_t materialIndex = shader.materialPacketRange.start; materialIndex < materialEnd; materialIndex++)
                             {
-                                auto& material = packet.materials.atC(materialIndex);
+                                auto& material = packet->materials.atC(materialIndex);
 
                                 if (material.material->sizeInBytes > 0)
                                 {
@@ -823,14 +834,14 @@ namespace hf
                                 uint32_t drawPacketEnd = material.drawPacketRange.end();
                                 for (uint32_t drawPacketIndex = material.drawPacketRange.start; drawPacketIndex < drawPacketEnd; drawPacketIndex++)
                                 {
-                                    auto& drawPacket = packet.drawPackets.atC(drawPacketIndex);
+                                    auto& drawPacket = packet->drawPackets.atC(drawPacketIndex);
 
                                     if (drawPacket.pushConstantRange.size > 0)
                                     {
                                         PushConstantUploadInfo uploadInfo
                                         {
                                             .layout = shaderLayout.layout,
-                                            .data = &packet.pushConstantUploads.atC(drawPacket.pushConstantRange.start),
+                                            .data = &packet->pushConstantUploads.atC(drawPacket.pushConstantRange.start),
                                         };
 
                                         HF.renderingApi.api.UploadPushConstants(handle, uploadInfo);
@@ -871,7 +882,7 @@ namespace hf
                                     uint32_t drawCallEnd = drawPacket.drawCallRange.end();
                                     for (uint32_t drawCallIndex = drawPacket.drawCallRange.start; drawCallIndex < drawCallEnd; drawCallIndex++)
                                     {
-                                        const auto& drawCall = packet.drawCalls.atC(drawCallIndex);
+                                        const auto& drawCall = packet->drawCalls.atC(drawCallIndex);
 #if DEBUG
                                         if (drawCall.bufferCount > MAX_NUM_BUFFER_CACHE)
                                             throw GENERIC_EXCEPT("[Hyperflow]", "Trying to draw too many buffers at once, max is %i", MAX_NUM_BUFFER_CACHE);
@@ -900,13 +911,13 @@ namespace hf
             }
         }
 
-        void BindBuffers(const void* handle, RenderPacket& packet,
+        void BindBuffers(const void* handle, RenderPacket* packet,
             const AssetRange<uint32_t>& range, DescriptorBindingInfo* descBindings)
         {
             const uint32_t bufferEnd = range.end();
             for (uint32_t bufferIndex = range.start; bufferIndex < bufferEnd; bufferIndex++)
             {
-                const auto& bufferSet = packet.bufferSets.atC(bufferIndex);
+                const auto& bufferSet = packet->bufferSets.atC(bufferIndex);
 
                 BindResourceInfo_i<Buffer> info
                 {
@@ -919,7 +930,7 @@ namespace hf
                 uint32_t index = 0;
                 for (uint32_t i = bufferSet.bufferRange.start; i < end; i++)
                 {
-                    info.objects[index] = packet.buffers.at(i),
+                    info.objects[index] = packet->buffers.at(i),
                     descBindings[info.setBindingIndex] = DescriptorBindingInfo
                     {
                         .object = (void*)(uint64_t)info.objects[index],
@@ -932,12 +943,12 @@ namespace hf
             }
         }
 
-        void CollectTexpacks(RenderPacket& packet, const AssetRange<uint32_t>& range, DescriptorBindingInfo* descBindings)
+        void CollectTexpacks(RenderPacket* packet, const AssetRange<uint32_t>& range, DescriptorBindingInfo* descBindings)
         {
             const uint32_t texpackEnd = range.end();
             for (uint32_t texpackIndex = range.start; texpackIndex < texpackEnd; texpackIndex++)
             {
-                const auto texPack = packet.texpacks.atC(texpackIndex);
+                const auto texPack = packet->texpacks.atC(texpackIndex);
                 descBindings[texPack.setBindingIndex] =
                 {
                     .object = texPack.pack->handle,
@@ -946,24 +957,24 @@ namespace hf
             }
         }
 
-        void RendererDrawUploads(const void* handle, RenderPacket& packet)
+        void RendererDrawUploads(const void* handle, RenderPacket* packet)
         {
             //Uniform Buffer Uploads
             {
                 const BufferUploadInfo_i uploadInfo
                 {
-                    .pUploadPackets = packet.bufferUploadPackets.begin(),
-                    .uploadPacketCount = (uint16_t)packet.bufferUploadPackets.size(),
-                    .pUniformDataBuffer = packet.bufferUploads.begin()
+                    .pUploadPackets = packet->bufferUploadPackets.begin(),
+                    .uploadPacketCount = (uint16_t)packet->bufferUploadPackets.size(),
+                    .pUniformDataBuffer = packet->bufferUploads.begin()
                 };
                 HF.renderingApi.api.UploadBuffer(handle, uploadInfo);
             }
             //Texture Pack Uploads.
             {
                 static TexturePackBindingUploadInfo_i uploads[128];
-                for (uint32_t i = 0; i < packet.textureGroupRebindings.size(); i++)
+                for (uint32_t i = 0; i < packet->textureGroupRebindings.size(); i++)
                 {
-                    const auto& group = packet.textureGroupRebindings.atC(i);
+                    const auto& group = packet->textureGroupRebindings.atC(i);
                     TexturePackBindingUploadGroupInfo_i uploadInfo
                     {
                         .bindings = uploads,
@@ -974,7 +985,7 @@ namespace hf
                     uint32_t current = 0;
                     for (uint32_t j = group.bindingPacketRange.start; j < end; j++)
                     {
-                        auto& p = packet.textureRebindings.atC(j);
+                        auto& p = packet->textureRebindings.atC(j);
                         TexturePackBindingUploadInfo_i binding
                         {
                             .bindingIndex = p.bindingIndex,
@@ -984,11 +995,11 @@ namespace hf
                         if (p.textures.has_value())
                         {
                             auto& textures = p.textures.value();
-                            packet.textures.atC(textures.range.start);
+                            packet->textures.atC(textures.range.start);
 
                             binding.texInfo = (TexturePackTextureUploadInfo_i)
                             {
-                                .pTextures = (TexturePackTextureUploadInfo_i::TextureInfo*)packet.textures.atP(textures.range.start),
+                                .pTextures = (TexturePackTextureUploadInfo_i::TextureInfo*)packet->textures.atP(textures.range.start),
                                 .offset = textures.offset,
                                 .count = textures.range.size,
                             };
