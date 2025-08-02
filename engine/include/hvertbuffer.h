@@ -6,7 +6,7 @@
 
 namespace hf
 {
-    struct VertBuffer : public RuntimeBufferBase
+    struct VertBuffer final : public RuntimeBufferBase
     {
         VertBuffer(const VertBufferCreationInfo& info, DataTransferType transferType);
         ~VertBuffer() override = default;

@@ -16,6 +16,11 @@ namespace hf
         std::vector<VkPipelineShaderStageCreateInfo> stageCreateInfos{};
         stageCreateInfos.reserve(maxShadingModules);
 
+        std::vector<VkVertexInputBindingDescription> vertexInputDescriptions{};
+        vertexInputDescriptions.reserve(info.vertexInputModuleCount * MAX_VERTEX_INPUT_BUFFER_ATTRIBUTES);
+        std::vector<VkVertexInputAttributeDescription> vertexInputAttributes{};
+        vertexInputAttributes.reserve(info.vertexInputModuleCount * MAX_VERTEX_INPUT_BUFFER_ATTRIBUTES);
+
         std::vector<VkGraphicsPipelineCreateInfo> pipelineCreateInfos(moduleCount);
 
         std::vector<VkPipelineVertexInputStateCreateInfo> vertexInputInfos(info.vertexInputModuleCount);
@@ -85,14 +90,28 @@ namespace hf
 
         for (uint32_t i = 0; i < info.vertexInputModuleCount; i++)
         {
+            uint32_t descFrom = vertexInputDescriptions.size(),
+                     attribFrom = vertexInputAttributes.size();
+
+            uint32_t attribCount = 0;
             auto& moduleInfo = info.pVertexInputModules[i];
 
-            const auto& attribute = GetAttrib(moduleInfo.attribute);
             VkPipelineVertexInputStateCreateInfo vInfo{};
             vInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
-            vInfo.vertexBindingDescriptionCount = 1;
-            vInfo.pVertexBindingDescriptions = &attribute->bindingDescription;
-            vInfo.vertexAttributeDescriptionCount = (uint32_t)attribute->attribDescriptions.size();
+            vInfo.vertexBindingDescriptionCount = moduleInfo.attributeCount;
+
+            for (uint32_t k = 0; k < moduleInfo.attributeCount; k++)
+            {
+                const auto& attribute = GetAttrib(moduleInfo.pAttributes[k]);
+                vertexInputDescriptions.push_back(attribute->bindingDescription);
+
+                for (uint32_t j = 0; j < attribute->attribDescriptions.size(); j++)
+                    vertexInputAttributes.push_back(attribute->attribDescriptions[j]);
+                attribCount += attribute->attribDescriptions.size();
+            }
+
+            vInfo.pVertexBindingDescriptions = &vertexInputDescriptions[descFrom];
+            vInfo.vertexAttributeDescriptionCount = attribCount;
             vInfo.pVertexAttributeDescriptions = attribute->attribDescriptions.data();
             vertexInputInfos[i] = vInfo;
 

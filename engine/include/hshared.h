@@ -128,6 +128,7 @@ namespace hf
 
 	struct BufferAttribDefinitionInfo
 	{
+	    BufferInputRate inputRate = BufferInputRate::Vertex;
 		uint32_t bindingId = 0;
 		uint32_t formatCount = 0;
 		BufferAttribFormat* pFormats = nullptr;
@@ -240,7 +241,8 @@ namespace hf
 
     struct ShaderLibraryVertexInputModuleInfo
     {
-        BufferAttrib attribute{};
+        BufferAttrib pAttributes[MAX_VERTEX_INPUT_BUFFER_ATTRIBUTES]{};
+        uint32_t attributeCount{};
         MeshPrimitiveTopologyType topology = MeshPrimitiveTopologyType::TriangleList;
         bool enablePrimitiveRestart = false;
     };

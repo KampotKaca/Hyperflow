@@ -27,11 +27,11 @@ namespace hf
         bindingId = info.bindingId;
         attribCount = info.formatCount;
         vertexSize = fullStride;
-        bindingDescription =
+        bindingDescription = VkVertexInputBindingDescription
         {
             .binding = bindingId,
             .stride = fullStride,
-            .inputRate = VK_VERTEX_INPUT_RATE_VERTEX
+            .inputRate = (VkVertexInputRate)info.inputRate
         };
 
         attribDescriptions = std::vector<VkVertexInputAttributeDescription>(info.formatCount);
@@ -41,13 +41,13 @@ namespace hf
         for (uint32_t i = 0; i < info.formatCount; i++)
         {
             auto& stride = info.pFormats[i];
-            VkVertexInputAttributeDescription description =
-            {
-                .location = location,
-                .binding = bindingId,
-                .format = BUFFER_FORMAT[(uint32_t)BufferDataType::Count * (stride.size - 1) + (uint32_t)stride.type],
-                .offset = currentOffset
-            };
+
+            VkVertexInputAttributeDescription description{};
+            description.location = location;
+            description.binding = bindingId;
+            description.format = BUFFER_FORMAT[(uint32_t)BufferDataType::Count * (stride.size - 1) + (uint32_t)stride.type];
+            description.offset = currentOffset;
+
             attribDescriptions[i] = description;
             if (stride.lSize % 4 != 0)
                 throw GENERIC_EXCEPT("[Hyperflow]", "Vertex buffer attribute size should be multiple of 4");

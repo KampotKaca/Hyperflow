@@ -27,6 +27,8 @@ namespace hf
 	enum class BufferMemoryType { Static, WriteOnly, PerFrameWriteOnly, ReadWrite, PerFrameReadWrite, Count };
 	enum class RenderBindingType { Graphics = 0, Compute = 1, RayTracing = 1000165000, HuaweiSubpassShading = 1000369003 };
 
+    enum class BufferInputRate { Vertex = 0, Instance = 1 };
+
 	enum class AccessType
 	{
 		None = 0,
