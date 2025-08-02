@@ -75,7 +75,7 @@ namespace hf
 					{
 						auto rn = window->renderer;
 						inter::rendering::StartRenderPacket_i(rn);
-						auto& cInfo = rn->eventInfo;
+						const auto& cInfo = rn->eventInfo;
 						if (cInfo.onPreRenderCallback) cInfo.onPreRenderCallback(rn);
 						inter::rendering::PreDraw_i(rn);
 						{

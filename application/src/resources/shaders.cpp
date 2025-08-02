@@ -25,7 +25,8 @@ namespace app
                     .resultId = &APP_SHADERS.modules.defaultVertexInput,
                     .module =
                     {
-                        .attribute = APP_BUFFER_ATTRIBUTES.pos_nor_tex,
+                        .pAttributes = { APP_BUFFER_ATTRIBUTES.pos_nor_tex },
+                        .attributeCount = 1,
                     },
                 }
             };

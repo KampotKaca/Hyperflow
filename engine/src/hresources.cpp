@@ -370,12 +370,20 @@ namespace hf
                     ShaderLibraryModule<ShaderLibraryVertexInputModuleInfo>
                     {
                         .resultId = &HF.staticResources.engineShadersLibModules.quadVertexInput,
-                        .module = { .attribute = HF.staticResources.quadAttrib },
+                        .module =
+                        {
+                            .pAttributes = { HF.staticResources.quadAttrib },
+                            .attributeCount = 1,
+                        },
                     },
                     ShaderLibraryModule<ShaderLibraryVertexInputModuleInfo>
                     {
                         .resultId = &HF.staticResources.engineShadersLibModules.defaultVertexInput,
-                        .module = { .attribute = HF.staticResources.defaultAttrib },
+                        .module =
+                        {
+                            .pAttributes = { HF.staticResources.defaultAttrib },
+                            .attributeCount = 1
+                        },
                     },
                 };
 

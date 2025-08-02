@@ -105,14 +105,14 @@ namespace hf
                 const auto& attribute = GetAttrib(moduleInfo.pAttributes[k]);
                 vertexInputDescriptions.push_back(attribute->bindingDescription);
 
-                for (uint32_t j = 0; j < attribute->attribDescriptions.size(); j++)
-                    vertexInputAttributes.push_back(attribute->attribDescriptions[j]);
+                for (auto attribDescription : attribute->attribDescriptions)
+                    vertexInputAttributes.push_back(attribDescription);
                 attribCount += attribute->attribDescriptions.size();
             }
 
             vInfo.pVertexBindingDescriptions = &vertexInputDescriptions[descFrom];
             vInfo.vertexAttributeDescriptionCount = attribCount;
-            vInfo.pVertexAttributeDescriptions = attribute->attribDescriptions.data();
+            vInfo.pVertexAttributeDescriptions = &vertexInputAttributes[attribFrom];
             vertexInputInfos[i] = vInfo;
 
             VkPipelineInputAssemblyStateCreateInfo inputAssembly{};
