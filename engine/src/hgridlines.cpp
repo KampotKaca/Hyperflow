@@ -17,13 +17,10 @@ namespace hf::gridlines
                     {
                         DrawSet_PushConstant(rn, info);
 
-                        const DrawCallInfo drawCallInfo
-                        {
-                            .pVertBuffers = &inter::HF.staticResources.quadBuffer,
-                            .bufferCount = 1,
-                            .indexBuffer = nullptr,
-                            .instanceCount = 1
-                        };
+                        DrawCallInfo drawCallInfo{};
+                        drawCallInfo.pVertBuffers = &inter::HF.staticResources.quadBuffer;
+                        drawCallInfo.bufferCount = 1;
+                        drawCallInfo.instanceCount = 1;
 
                         DrawAdd_DrawCall(rn, drawCallInfo);
                     }

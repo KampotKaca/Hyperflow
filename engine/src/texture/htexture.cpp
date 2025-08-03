@@ -52,10 +52,8 @@ namespace hf
 
         try
         {
-            TextureCreationInfo info
-            {
-                .filePath = assetPath,
-            };
+            TextureCreationInfo info{};
+            info.filePath = assetPath;
 
             ryml::Tree tree = ryml::parse_in_place(ryml::to_substr(metadata.data()));
             ryml::NodeRef root = tree.rootref();

@@ -22,13 +22,12 @@ namespace hf
 
     void Upload(const Ref<IndexBuffer>& ib, const IndexBufferUploadInfo& info)
     {
-        inter::rendering::IndexBufferUploadInfo_i uploadInfo
-        {
-            .buffer = ib->handle,
-            .data = ib->buffer,
-            .offset = info.offset,
-            .indexCount = info.indexCount
-        };
+        inter::rendering::IndexBufferUploadInfo_i uploadInfo{};
+        uploadInfo.buffer = ib->handle;
+        uploadInfo.data = ib->buffer;
+        uploadInfo.offset = info.offset;
+        uploadInfo.indexCount = info.indexCount;
+
         inter::HF.renderingApi.api.UploadIndexBuffer(nullptr, uploadInfo);
     }
 

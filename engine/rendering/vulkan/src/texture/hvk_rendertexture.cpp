@@ -24,33 +24,18 @@ namespace hf
             auto& attachmentInfo = info.pColorAttachments[i];
             auto& attachment = colorAttachments[i];
 
-            attachment =
-            {
-                .sType = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO_KHR,
-                .pNext = nullptr,
-                .imageView = nullptr,
-                .imageLayout = (VkImageLayout)attachmentInfo.layout,
-                .resolveMode = VK_RESOLVE_MODE_NONE,
-                .clearValue =
-                {
-                    .color =
-                    {
-                        {
-                            attachmentInfo.clearColor.x,
-                            attachmentInfo.clearColor.y,
-                            attachmentInfo.clearColor.z,
-                            attachmentInfo.clearColor.w
-                        }
-                    }
-                }
-            };
+            attachment.sType = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO_KHR;
+            attachment.imageLayout = (VkImageLayout)attachmentInfo.layout;
+            attachment.clearValue.color.float32[0] = attachmentInfo.clearColor.x;
+            attachment.clearValue.color.float32[1] = attachmentInfo.clearColor.y;
+            attachment.clearValue.color.float32[2] = attachmentInfo.clearColor.z;
+            attachment.clearValue.color.float32[3] = attachmentInfo.clearColor.w;
 
             SetOperations(attachment.loadOp, attachment.storeOp, attachmentInfo.lsOperation);
-            colorInfos[i] =
-            {
-                .format = (VkFormat)attachmentInfo.format,
-                .usage = (VkImageUsageFlags)attachmentInfo.usageFlags
-            };
+            ImageInfo imageInfo{};
+            imageInfo.format = (VkFormat)attachmentInfo.format;
+            imageInfo.usage = (VkImageUsageFlags)attachmentInfo.usageFlags;
+            colorInfos[i] = imageInfo;
 
             if (attachmentInfo.isUsedForPresentation)
             {
@@ -95,20 +80,14 @@ namespace hf
         {
             VkImageMemoryBarrier2 preBarrier{};
             preBarrier.sType            = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER_2;
-            preBarrier.srcStageMask     = 0;
-            preBarrier.srcAccessMask    = 0;
             preBarrier.dstStageMask     = VK_PIPELINE_STAGE_2_COLOR_ATTACHMENT_OUTPUT_BIT;
             preBarrier.dstAccessMask    = VK_ACCESS_2_COLOR_ATTACHMENT_WRITE_BIT;
             preBarrier.oldLayout        = VK_IMAGE_LAYOUT_UNDEFINED;
             preBarrier.newLayout        = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-            preBarrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-            preBarrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
             preBarrier.image = rn->swapchain.images[rn->imageIndex].image;
 
             preBarrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-            preBarrier.subresourceRange.baseMipLevel = 0;
             preBarrier.subresourceRange.levelCount = 1;
-            preBarrier.subresourceRange.baseArrayLayer = 0;
             preBarrier.subresourceRange.layerCount = 1;
 
             VkDependencyInfo depInfo{};
@@ -130,7 +109,6 @@ namespace hf
         renderingInfo.renderArea.offset = offset;
         renderingInfo.renderArea.extent = extent;
         renderingInfo.layerCount = 1;
-        renderingInfo.viewMask = 0;
         renderingInfo.colorAttachmentCount = tex->colorAttachmentCount;
         renderingInfo.pColorAttachments = tex->colorAttachments;
 
@@ -158,18 +136,12 @@ namespace hf
             postBarrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER_2;
             postBarrier.srcStageMask = VK_PIPELINE_STAGE_2_COLOR_ATTACHMENT_OUTPUT_BIT;
             postBarrier.srcAccessMask = VK_ACCESS_2_COLOR_ATTACHMENT_WRITE_BIT;
-            postBarrier.dstStageMask = 0;
-            postBarrier.dstAccessMask = 0;
             postBarrier.oldLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
             postBarrier.newLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
-            postBarrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-            postBarrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
             postBarrier.image = rn->swapchain.images[rn->imageIndex].image;
 
             postBarrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-            postBarrier.subresourceRange.baseMipLevel = 0;
             postBarrier.subresourceRange.levelCount = 1;
-            postBarrier.subresourceRange.baseArrayLayer = 0;
             postBarrier.subresourceRange.layerCount = 1;
 
             VkDependencyInfo depInfo{};

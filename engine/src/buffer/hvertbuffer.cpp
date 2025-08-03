@@ -29,13 +29,12 @@ namespace hf
 
     void Upload(const Ref<VertBuffer>& vb, const VertBufferUploadInfo& info)
     {
-        const inter::rendering::VertBufferUploadInfo_i uploadInfo
-        {
-            .buffer = vb->handle,
-            .data = vb->buffer,
-            .offset = info.offset,
-            .vertexCount = info.vertCount
-        };
+        inter::rendering::VertBufferUploadInfo_i uploadInfo{};
+        uploadInfo.buffer = vb->handle;
+        uploadInfo.data = vb->buffer;
+        uploadInfo.offset = info.offset;
+        uploadInfo.vertexCount = info.vertCount;
+
         inter::HF.renderingApi.api.UploadVertBuffer(nullptr, uploadInfo);
     }
 

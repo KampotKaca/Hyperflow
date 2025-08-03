@@ -129,11 +129,9 @@ namespace hf
                     throw GENERIC_EXCEPT("[Hyperflow]", "Cannot create shader without loading renderer");
                 }
 
-                ShaderLibraryPreRasterModuleInfo_i info
-                {
-                    .options = moduleInfo.options,
-                    .layout = moduleInfo.layout,
-                };
+                ShaderLibraryPreRasterModuleInfo_i info{};
+                info.options = moduleInfo.options;
+                info.layout = moduleInfo.layout;
 
                 {
                     auto& v = moduleCodes[(size_t)vertexCodeIndex];
@@ -184,11 +182,9 @@ namespace hf
                     throw GENERIC_EXCEPT("[Hyperflow]", "Cannot create shader without loading renderer");
                 }
 
-                ShaderLibraryFragmentModuleInfo_i info
-                {
-                    .depthStencilOptions = moduleInfo.depthStencilOptions,
-                    .layout = moduleInfo.layout,
-                };
+                ShaderLibraryFragmentModuleInfo_i info{};
+                info.depthStencilOptions = moduleInfo.depthStencilOptions;
+                info.layout = moduleInfo.layout;
 
                 {
                     auto& v = moduleCodes[(size_t)fragmentCodeIndex];
@@ -199,19 +195,17 @@ namespace hf
                 fragmentModules[i] = info;
             }
 
-            ShaderLibraryCreationInfo_i info
-            {
-                .uniqueLibraryName = lib->name.c_str(),
-                .outputFormats = lib->outputFormats,
-                .pVertexInputModules = lib->vertexInputModules.data(),
-                .vertexInputModuleCount = (uint32_t)lib->vertexInputModules.size(),
-                .pPreRasterModules = preRasterModules.data(),
-                .preRasterModuleCount = (uint32_t)preRasterModules.size(),
-                .pFragmentModules = fragmentModules.data(),
-                .fragmentModuleCount = (uint32_t)fragmentModules.size(),
-                .pFragmentOutputModules = lib->fragmentOutputModules.data(),
-                .fragmentOutputModuleCount = (uint32_t)lib->fragmentOutputModules.size()
-            };
+            ShaderLibraryCreationInfo_i info{};
+            info.uniqueLibraryName         = lib->name.c_str();
+            info.outputFormats             = lib->outputFormats;
+            info.pVertexInputModules       = lib->vertexInputModules.data();
+            info.vertexInputModuleCount    = (uint32_t)lib->vertexInputModules.size();
+            info.pPreRasterModules         = preRasterModules.data();
+            info.preRasterModuleCount      = (uint32_t)preRasterModules.size();
+            info.pFragmentModules          = fragmentModules.data();
+            info.fragmentModuleCount       = (uint32_t)fragmentModules.size();
+            info.pFragmentOutputModules    = lib->fragmentOutputModules.data();
+            info.fragmentOutputModuleCount = (uint32_t)lib->fragmentOutputModules.size();
 
             lib->handle = HF.renderingApi.api.CreateShaderLibrary(info);
             return true;

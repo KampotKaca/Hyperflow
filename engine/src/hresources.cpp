@@ -8,12 +8,12 @@ namespace hf
     {
         Ref<Mesh> GetCubeMesh() { return inter::HF.staticResources.cube; }
 
-        Ref<VertBuffer> GetQuadBuffer() { return inter::HF.staticResources.quadBuffer; }
+        Ref<VertBuffer> GetQuadBuffer()   { return inter::HF.staticResources.quadBuffer; }
         Ref<VertBuffer>* GetQuadBufferP() { return &inter::HF.staticResources.quadBuffer; }
 
-        BufferAttrib GetQuadBufferAttrib() { return inter::HF.staticResources.quadAttrib; }
-        Buffer GetGlobalUniformBuffer() { return inter::HF.staticResources.globalUniform; }
-        Buffer GetMaterialStorageBuffer() { return inter::HF.graphicsResources.materialDataStorageBuffer; }
+        BufferAttrib GetQuadBufferAttrib()  { return inter::HF.staticResources.quadAttrib; }
+        Buffer GetGlobalUniformBuffer()     { return inter::HF.staticResources.globalUniform; }
+        Buffer GetMaterialStorageBuffer()   { return inter::HF.graphicsResources.materialDataStorageBuffer; }
         void BindGlobalUniformBuffer(const Ref<Renderer>& rn)
         {
             Start_BufferSet(rn, RenderBindingType::Graphics, 0);
@@ -24,10 +24,11 @@ namespace hf
         BufferAttrib GetCubeBufferAttrib() { return inter::HF.staticResources.defaultAttrib; }
         TextureSampler GetCubemapSampler() { return inter::HF.staticResources.cubemapSampler; }
 
-        Ref<Mesh> GetCube() { return inter::HF.staticResources.cube; }
-        Ref<Mesh> GetPlane() { return inter::HF.staticResources.plane; }
+        Ref<Mesh> GetCube()      { return inter::HF.staticResources.cube; }
+        Ref<Mesh> GetPlane()     { return inter::HF.staticResources.plane; }
         Ref<Mesh> GetIcoSphere() { return inter::HF.staticResources.icoSphere; }
-        Ref<Mesh> GetUvSphere() { return inter::HF.staticResources.uvSphere; }
+        Ref<Mesh> GetUvSphere()  { return inter::HF.staticResources.uvSphere; }
+
         Ref<Material> GetEmptyMaterial() { return inter::HF.staticResources.emptyMaterial; }
     }
 
@@ -71,14 +72,12 @@ namespace hf
             //Quat Attribute
             {
                 std::array<BufferAttribFormat, 1> formats{};
-                formats[0] = { .type = BufferDataType::F32, .size = 2 }; //Position
+                formats[0] = BufferAttribFormat{ .type = BufferDataType::F32, .size = 2 }; //Position
 
-                const BufferAttribDefinitionInfo attribInfo
-                {
-                    .bindingId = 0,
-                    .formatCount = formats.size(),
-                    .pFormats = formats.data()
-                };
+                BufferAttribDefinitionInfo attribInfo{};
+                attribInfo.bindingId = 0;
+                attribInfo.formatCount = formats.size();
+                attribInfo.pFormats = formats.data();
 
                 HF.staticResources.quadAttrib = Define(attribInfo);
             }
@@ -86,16 +85,14 @@ namespace hf
             //Cube Attrib
             {
                 std::array<BufferAttribFormat, 3> formats{};
-                formats[0] = { .type = BufferDataType::F32, .size = 3 }; //Position
-                formats[1] = { .type = BufferDataType::F32, .size = 3 }; //Normal
-                formats[2] = { .type = BufferDataType::F32, .size = 2 }; //TexCoord
+                formats[0] = BufferAttribFormat{ .type = BufferDataType::F32, .size = 3 }; //Position
+                formats[1] = BufferAttribFormat{ .type = BufferDataType::F32, .size = 3 }; //Normal
+                formats[2] = BufferAttribFormat{ .type = BufferDataType::F32, .size = 2 }; //TexCoord
 
-                BufferAttribDefinitionInfo attribInfo
-                {
-                    .bindingId = 0,
-                    .formatCount = formats.size(),
-                    .pFormats = formats.data()
-                };
+                BufferAttribDefinitionInfo attribInfo{};
+                attribInfo.bindingId = 0;
+                attribInfo.formatCount = formats.size();
+                attribInfo.pFormats = formats.data();
 
                 HF.staticResources.defaultAttrib = Define(attribInfo);
             }
@@ -105,18 +102,15 @@ namespace hf
         {
             //Skybox Texture Layout
             {
-                TextureLayoutBindingInfo cubemapBinding
-                {
-                    .bindingId = 0,
-                    .usageFlags = ShaderUsageStage::Vertex | ShaderUsageStage::Fragment,
-                    .arraySize = 1
-                };
+                TextureLayoutBindingInfo cubemapBinding{};
+                cubemapBinding.bindingId = 0;
+                cubemapBinding.usageFlags = ShaderUsageStage::Vertex |
+                                            ShaderUsageStage::Fragment;
+                cubemapBinding.arraySize = 1;
 
-                const TextureLayoutDefinitionInfo layoutInfo
-                {
-                    .pBindings = &cubemapBinding,
-                    .bindingCount = 1
-                };
+                TextureLayoutDefinitionInfo layoutInfo{};
+                layoutInfo.pBindings = &cubemapBinding;
+                layoutInfo.bindingCount = 1;
 
                 HF.staticResources.skyboxLayout = Define(layoutInfo);
             }
@@ -126,14 +120,9 @@ namespace hf
         {
             //Cubemap Sampler
             {
-                constexpr TextureSamplerDefinitionInfo samplerInfo
-                {
-                    .filter = TextureFilter::Bilinear,
-                    .anisotropicFilter = TextureAnisotropicFilter::X16,
-                    .repeatMode = TextureRepeatMode::ClampToEdge,
-                    .useNormalizedCoordinates = true,
-                    .comparison = ComparisonOperation::Never,
-                };
+                TextureSamplerDefinitionInfo samplerInfo{};
+                samplerInfo.comparison = ComparisonOperation::Never;
+                samplerInfo.repeatMode = TextureRepeatMode::ClampToEdge;
 
                 HF.staticResources.cubemapSampler = Define(samplerInfo);
             }
@@ -142,34 +131,28 @@ namespace hf
         void DefineBuffers()
         {
             {
-                constexpr BufferDefinitionInfo uniform
-                {
-                    .bindingId = 0,
-                    .pBindings = &HF.internalResourcesFormat.globalUniformBindingInfo,
-                    .bindingCount = 1
-                };
+                BufferDefinitionInfo uniform{};
+                uniform.bindingId = 0;
+                uniform.pBindings = &HF.internalResourcesFormat.globalUniformBindingInfo;
+                uniform.bindingCount = 1;
 
                 HF.staticResources.globalUniform = Define(uniform);
             }
 
             {
-                BufferBindingInfo bindingInfo
-                {
-                    .usageFlags = ShaderUsageStage::All,
-                    .arraySize = 1,
-                    .elementSizeInBytes = 64 * 64 * RENDERING_MAX_MATERIAL_OCTREE_COUNT * RENDERING_MAX_MATERIAL_MEMORY_BADGET
-                };
-                const StorageBufferDefinitionInfo info
-                {
-                    .bufferInfo =
-                    {
-                        .bindingId = 0,
-                        .pBindings = &bindingInfo,
-                        .bindingCount = 1
-                    },
-                    .memoryType = BufferMemoryType::WriteOnly,
-                    .data = nullptr
-                };
+                BufferBindingInfo bindingInfo{};
+                bindingInfo.usageFlags = ShaderUsageStage::All;
+                bindingInfo.arraySize = 1;
+                bindingInfo.elementSizeInBytes = 64 * 64 * RENDERING_MAX_MATERIAL_OCTREE_COUNT * RENDERING_MAX_MATERIAL_MEMORY_BADGET;
+
+                BufferDefinitionInfo defInfo{};
+                defInfo.bindingId = 0;
+                defInfo.pBindings = &bindingInfo;
+                defInfo.bindingCount = 1;
+
+                StorageBufferDefinitionInfo info{};
+                info.bufferInfo = defInfo;
+                info.memoryType = BufferMemoryType::WriteOnly;
 
                 HF.graphicsResources.materialDataStorageBuffer = Define(info);
             }
@@ -181,36 +164,32 @@ namespace hf
         {
             //Axis Lines Shader Setup
             {
-                const ShaderLayoutDefinitionInfo info
-                {
-                    .pushConstant =
-                    {
-                        .usageFlags = ShaderUsageStage::Vertex | ShaderUsageStage::Fragment,
-                        .sizeInBytes = sizeof(GridLinesInfo),
-                    },
-                    .pBuffers = &HF.staticResources.globalUniform,
-                    .bufferCount = 1,
-                    .pTextureLayouts = nullptr,
-                    .textureLayoutCount = 0
-                };
+                PushConstantInfo pushConstantInfo{};
+                pushConstantInfo.usageFlags = ShaderUsageStage::Vertex |
+                                              ShaderUsageStage::Fragment;
+                pushConstantInfo.sizeInBytes = sizeof(GridLinesInfo);
+
+                ShaderLayoutDefinitionInfo info{};
+                info.pushConstant = pushConstantInfo;
+                info.pBuffers = &HF.staticResources.globalUniform;
+                info.bufferCount = 1;
 
                 HF.staticResources.axisLinesShaderLayout = Define(info);
             }
 
             //Skybox Shader Setup
             {
-                const ShaderLayoutDefinitionInfo info
-                {
-                    .pushConstant =
-                    {
-                        .usageFlags = ShaderUsageStage::Vertex | ShaderUsageStage::Fragment,
-                        .sizeInBytes = 0,
-                    },
-                    .pBuffers = &HF.staticResources.globalUniform,
-                    .bufferCount = 1,
-                    .pTextureLayouts = &HF.staticResources.skyboxLayout,
-                    .textureLayoutCount = 1
-                };
+                PushConstantInfo pushConstantInfo{};
+                pushConstantInfo.usageFlags = ShaderUsageStage::Vertex |
+                                              ShaderUsageStage::Fragment;
+                pushConstantInfo.sizeInBytes = 0;
+
+                ShaderLayoutDefinitionInfo info{};
+                info.pushConstant = pushConstantInfo;
+                info.pBuffers = &HF.staticResources.globalUniform;
+                info.bufferCount = 1;
+                info.pTextureLayouts = &HF.staticResources.skyboxLayout;
+                info.textureLayoutCount = 1;
 
                 HF.staticResources.skyboxShaderLayout = Define(info);
             }
@@ -220,30 +199,19 @@ namespace hf
         {
             //Skybox cubemap
             {
-                constexpr CubemapCreationInfo info
-                {
-                    .folderPath = "__toony",
-                    .desiredChannel = TextureChannel::RGBA,
-                    .mipLevels = 1,
-                    .texturePaths =
-                    {
-                        .left =  "left.png",
-                        .right = "right.png",
-                        .down =  "down.png",
-                        .up =    "up.png",
-                        .back =  "back.png",
-                        .front = "front.png"
-                    },
-                    .details =
-                    {
-                        .format = TextureFormat::R8G8B8A8_Srgb,
-                        .aspectFlags = TextureAspectFlags::Color,
-                        .tiling = TextureTiling::Optimal,
-                        .usageFlags = TextureUsageFlags::Sampled,
-                        .memoryType = BufferMemoryType::Static,
-                        .finalLayout = TextureResultLayoutType::ShaderReadOnly,
-                    }
-                };
+                CubemapTexturePaths texPaths{};
+                texPaths.left  = "left.png";
+                texPaths.right = "right.png";
+                texPaths.down  = "down.png";
+                texPaths.up    = "up.png";
+                texPaths.back  = "back.png";
+                texPaths.front = "front.png";
+
+                CubemapCreationInfo info{};
+                info.folderPath = "__toony";
+                info.desiredChannel = TextureChannel::RGBA;
+                info.mipLevels = 1;
+                info.texturePaths = texPaths;
 
                 HF.staticResources.defaultSkyboxCubemap = Create(info);
                 HF.staticResources.boundCubemap = HF.staticResources.defaultSkyboxCubemap;
@@ -254,26 +222,21 @@ namespace hf
         {
             //Skybox texturepack
             {
-                TexturePackBindingInfo<Cubemap>::TextureInfo ti
-                {
-                    .texture = HF.staticResources.defaultSkyboxCubemap,
-                    .index = 0
-                };
+                TexturePackBindingInfo<Cubemap>::TextureInfo ti{};
+                ti.texture = HF.staticResources.defaultSkyboxCubemap;
+                ti.index = 0;
 
-                TexturePackBindingInfo<Cubemap> binding
-                {
-                    .sampler = HF.staticResources.cubemapSampler,
-                    .textures = &ti,
-                    .arraySize = 1,
-                    .bindingIndex = 0
-                };
+                TexturePackBindingInfo<Cubemap> binding{};
+                binding.sampler = HF.staticResources.cubemapSampler;
+                binding.textures = &ti;
+                binding.arraySize = 1;
+                binding.bindingIndex = 0;
 
-                const TexturePackCreationInfo info
-                {
-                    .pCubemapBindings = &binding,
-                    .cubemapBindingCount = 1,
-                    .layout = HF.staticResources.skyboxLayout,
-                };
+                TexturePackCreationInfo info{};
+                info.pCubemapBindings = &binding;
+                info.cubemapBindingCount = 1;
+                info.layout = HF.staticResources.skyboxLayout;
+
                 HF.staticResources.skyboxTexturePack = Create(info);
             }
         }
@@ -284,79 +247,60 @@ namespace hf
             {
                 vec2 vertices[6]
                 {
-                    { -1, -1 }, { 1, 1 }, { -1, 1 },
-                    { -1, -1 }, { 1, -1 }, { 1, 1 },
+                    vec2{ -1, -1 }, vec2{ 1, 1 },  vec2{ -1, 1 },
+                    vec2{ -1, -1 }, vec2{ 1, -1 }, vec2{ 1, 1 },
                 };
 
-                const VertBufferCreationInfo bufferInfo
-                {
-                    .bufferAttrib = HF.staticResources.quadAttrib,
-                    .memoryType = BufferMemoryType::Static,
-                    .usageFlags = BufferUsageType::All,
-                    .vertexCount = 6,
-                    .pVertices = vertices
-                };
+                VertBufferCreationInfo bufferInfo{};
+                bufferInfo.bufferAttrib = HF.staticResources.quadAttrib;
+                bufferInfo.memoryType = BufferMemoryType::Static;
+                bufferInfo.usageFlags = BufferUsageType::All;
+                bufferInfo.vertexCount = 6;
+                bufferInfo.pVertices = vertices;
 
                 HF.staticResources.quadBuffer = Create(bufferInfo);
             }
 
+            MeshStats primitiveStats{};
+            primitiveStats.typeFlags = MeshDataType::Position |
+                                       MeshDataType::Normal |
+                                       MeshDataType::TexCoord;
+            primitiveStats.memoryType = BufferMemoryType::Static;
+            primitiveStats.bufferAttrib = HF.staticResources.defaultAttrib;
+
             //Cube Mesh
             {
-                const MeshCreationInfo info
-                {
-                    .filePath = "__cube.obj",
-                    .stats =
-                    {
-                        .typeFlags = MeshDataType::Position | MeshDataType::Normal | MeshDataType::TexCoord,
-                        .memoryType = BufferMemoryType::Static,
-                        .bufferAttrib = HF.staticResources.defaultAttrib,
-                    }
-                };
+                MeshCreationInfo info{};
+                info.filePath = "__cube.obj";
+                info.stats = primitiveStats;
+
                 HF.staticResources.cube = Create(info);
             }
 
             //Plane mesh
             {
-                const MeshCreationInfo info
-                {
-                    .filePath = "__plane.obj",
-                    .stats =
-                    {
-                        .typeFlags = MeshDataType::Position | MeshDataType::Normal | MeshDataType::TexCoord,
-                        .memoryType = BufferMemoryType::Static,
-                        .bufferAttrib = HF.staticResources.defaultAttrib,
-                    }
-                };
+                MeshCreationInfo info{};
+                info.filePath = "__plane.obj";
+                info.stats = primitiveStats;
+
                 HF.staticResources.plane = Create(info);
             }
 
             //Ico Sphere mesh
             {
-                const MeshCreationInfo info
-                {
-                    .filePath = "__ico_sphere.obj",
-                    .stats =
-                    {
-                        .typeFlags = MeshDataType::Position | MeshDataType::Normal | MeshDataType::TexCoord,
-                        .memoryType = BufferMemoryType::Static,
-                        .bufferAttrib = HF.staticResources.defaultAttrib,
-                    }
-                };
+                MeshCreationInfo info{};
+                info.filePath = "__ico_sphere.obj";
+                info.stats = primitiveStats;
+
                 HF.staticResources.icoSphere = Create(info);
             }
 
             //Uv Sphere mesh
             {
-                const MeshCreationInfo info
-                {
-                    .filePath = "__uv_sphere.obj",
-                    .stats =
-                    {
-                        .typeFlags = MeshDataType::Position | MeshDataType::Normal | MeshDataType::TexCoord,
-                        .memoryType = BufferMemoryType::Static,
-                        .bufferAttrib = HF.staticResources.defaultAttrib,
-                    }
-                };
+                MeshCreationInfo info{};
+                info.filePath = "__uv_sphere.obj";
+                info.stats = primitiveStats;
+
                 HF.staticResources.uvSphere = Create(info);
             }
         }
@@ -365,170 +309,177 @@ namespace hf
         {
             //Shader Library!
             {
+                //--------- Vertex Input ------------------------------------------------
+                ShaderLibraryVertexInputModuleInfo quadVertInputModule{};
+                quadVertInputModule.pAttributes[0] = HF.staticResources.quadAttrib;
+                quadVertInputModule.attributeCount = 1;
+
+                ShaderLibraryVertexInputModuleInfo defaultVertInputModule{};
+                defaultVertInputModule.pAttributes[0] = HF.staticResources.defaultAttrib;
+                defaultVertInputModule.attributeCount = 1;
+
                 std::array vertexInputModules
                 {
-                    ShaderLibraryModule<ShaderLibraryVertexInputModuleInfo>
+                    ShaderLibraryModule
                     {
                         .resultId = &HF.staticResources.engineShadersLibModules.quadVertexInput,
-                        .module =
-                        {
-                            .pAttributes = { HF.staticResources.quadAttrib },
-                            .attributeCount = 1,
-                        },
+                        .module = quadVertInputModule,
                     },
-                    ShaderLibraryModule<ShaderLibraryVertexInputModuleInfo>
+                    ShaderLibraryModule
                     {
                         .resultId = &HF.staticResources.engineShadersLibModules.defaultVertexInput,
-                        .module =
-                        {
-                            .pAttributes = { HF.staticResources.defaultAttrib },
-                            .attributeCount = 1
-                        },
+                        .module = defaultVertInputModule,
                     },
                 };
+
+                //--------- Pre Raster ------------------------------------------------
+
+                ShaderDepthBiasOptions axisLinesDepthBiasOptions{};
+                axisLinesDepthBiasOptions.constantFactor = 1.25f;
+                axisLinesDepthBiasOptions.slopeFactor = 1.75f;
+
+                ShaderRasterizerOptions axisLinesRasterOptions{};
+                axisLinesRasterOptions.cullMode = ShaderCullMode::None;
+                axisLinesRasterOptions.biasOptions = axisLinesDepthBiasOptions;
+
+                ShaderRasterizerOptions skyboxRasterOptions{};
+                skyboxRasterOptions.cullMode = ShaderCullMode::Front;
+
+                ShaderLibraryPreRasterModuleInfo axisLinesPreRasterModule{};
+                axisLinesPreRasterModule.vertexShaderPath = FilePath{ .path = "__axislines" };
+                axisLinesPreRasterModule.options = axisLinesRasterOptions;
+                axisLinesPreRasterModule.layout = HF.staticResources.axisLinesShaderLayout;
+
+                ShaderLibraryPreRasterModuleInfo skyboxPreRasterModule{};
+                skyboxPreRasterModule.vertexShaderPath = FilePath{ .path = "__skybox" };
+                skyboxPreRasterModule.options = skyboxRasterOptions;
+                skyboxPreRasterModule.layout = HF.staticResources.skyboxShaderLayout;
 
                 std::array preRasterModules
                 {
-                    ShaderLibraryModule<ShaderLibraryPreRasterModuleInfo> //Axis Lines Vertex Shader
+                    ShaderLibraryModule //Axis Lines Vertex Shader
                     {
                         .resultId = &HF.staticResources.engineShadersLibModules.axisLinesPreRaster,
-                        .module =
-                        {
-                            .vertexShaderPath = { .path = "__axislines" },
-                            .options = ShaderRasterizerOptions
-                            {
-                                .cullMode = ShaderCullMode::None,
-                                .biasOptions = ShaderDepthBiasOptions
-                                {
-                                    .constantFactor = 1.25f,
-                                    .clamp = 0.0f,
-                                    .slopeFactor = 1.75f
-                                }
-                            },
-                            .layout = HF.staticResources.axisLinesShaderLayout
-                        }
+                        .module = axisLinesPreRasterModule
                     },
-                    ShaderLibraryModule<ShaderLibraryPreRasterModuleInfo> //Skybox Vertex Shader
+                    ShaderLibraryModule //Skybox Vertex Shader
                     {
                         .resultId = &HF.staticResources.engineShadersLibModules.skyboxPreRaster,
-                        .module =
-                        {
-                            .vertexShaderPath = { .path = "__skybox" },
-                            .options = { .cullMode = ShaderCullMode::Front, },
-                            .layout = HF.staticResources.skyboxShaderLayout
-                        }
+                        .module = skyboxPreRasterModule
                     },
                 };
+
+                //--------- Fragment ------------------------------------------------
+
+                ShaderDepthStencilOptions axisLinesDepthStencilOptions{};
+                axisLinesDepthStencilOptions.enableDepth = true;
+                axisLinesDepthStencilOptions.writeDepth = true;
+                axisLinesDepthStencilOptions.comparisonFunc = DepthComparisonFunction::LessOrEqual;
+                axisLinesDepthStencilOptions.enableDepthBounds = false;
+                axisLinesDepthStencilOptions.enableStencil = false;
+
+                ShaderDepthStencilOptions skyboxDepthStencilOptions{};
+                skyboxDepthStencilOptions.enableDepth = true;
+                skyboxDepthStencilOptions.writeDepth = false;
+                skyboxDepthStencilOptions.comparisonFunc = DepthComparisonFunction::Less;
+                skyboxDepthStencilOptions.enableDepthBounds = false;
+                skyboxDepthStencilOptions.enableStencil = false;
+
+                ShaderLibraryFragmentModuleInfo axisLinesFragmentModule{};
+                axisLinesFragmentModule.fragmentShaderPath = FilePath{ .path = "__axislines" };
+                axisLinesFragmentModule.depthStencilOptions = axisLinesDepthStencilOptions;
+                axisLinesFragmentModule.layout = HF.staticResources.axisLinesShaderLayout;
+
+                ShaderLibraryFragmentModuleInfo skyboxFragmentModule{};
+                skyboxFragmentModule.fragmentShaderPath = FilePath{ .path = "__skybox" };
+                skyboxFragmentModule.depthStencilOptions = skyboxDepthStencilOptions;
+                skyboxFragmentModule.layout = HF.staticResources.skyboxShaderLayout;
 
                 std::array fragmentModules
                 {
-                    ShaderLibraryModule<ShaderLibraryFragmentModuleInfo>
+                    ShaderLibraryModule
                     {
                         .resultId = &HF.staticResources.engineShadersLibModules.axisLinesFragment,
-                        .module =
-                        {
-                            .fragmentShaderPath = { .path = "__axislines" },
-                            .depthStencilOptions =
-                            {
-                                .enableDepth = true,
-                                .writeDepth = true,
-                                .comparisonFunc = DepthComparisonFunction::LessOrEqual,
-                                .enableDepthBounds = false,
-                                .enableStencil = false,
-                            },
-                            .layout = HF.staticResources.axisLinesShaderLayout,
-                        }
+                        .module = axisLinesFragmentModule
                     },
-                    ShaderLibraryModule<ShaderLibraryFragmentModuleInfo>
+                    ShaderLibraryModule
                     {
                         .resultId = &HF.staticResources.engineShadersLibModules.skyboxFragment,
-                        .module =
-                        {
-                            .fragmentShaderPath = { .path = "__skybox" },
-                            .depthStencilOptions =
-                            {
-                                .enableDepth = true,
-                                .writeDepth = false,
-                                .comparisonFunc = DepthComparisonFunction::Less,
-                                .enableDepthBounds = false,
-                                .enableStencil = false,
-                            },
-                            .layout = HF.staticResources.skyboxShaderLayout
-                        }
+                        .module = skyboxFragmentModule
                     },
                 };
+
+                //--------- Fragment Output ------------------------------------------------
+
+                ColorAttachmentSettings colorAttachmentSettings{};
+                colorAttachmentSettings.colorWriteMask = ColorMaskingFlags::All;
+                colorAttachmentSettings.blending = ShaderBlendingOptions{};
+
+                ShaderLibraryFragmentOutputModuleInfo axisLinesFragmentOutputModule{};
+                axisLinesFragmentOutputModule.pColorAttachmentsSettings[0] = colorAttachmentSettings;
+                axisLinesFragmentOutputModule.colorAttachmentCount = 1;
+
+                ShaderLibraryFragmentOutputModuleInfo skyboxFragmentOutputModule{};
+                skyboxFragmentOutputModule.colorAttachmentCount = 1;
 
                 std::array fragmentOutputModules
                 {
-                    ShaderLibraryModule<ShaderLibraryFragmentOutputModuleInfo> //Axis lines
+                    ShaderLibraryModule //Axis lines
                     {
                         .resultId = &HF.staticResources.engineShadersLibModules.axisLinesFragmentOutput,
-                        .module
-                        {
-                            .colorAttachmentsSettings =
-                            {
-                                ColorAttachmentSettings
-                                {
-                                    .colorWriteMask = ColorMaskingFlags::All,
-                                    .blending = ShaderBlendingOptions{}
-                                }
-                            },
-                            .colorAttachmentCount = 1
-                        }
+                        .module = axisLinesFragmentOutputModule
                     },
-                    ShaderLibraryModule<ShaderLibraryFragmentOutputModuleInfo> //Skybox
+                    ShaderLibraryModule //Skybox
                     {
                         .resultId = &HF.staticResources.engineShadersLibModules.skyboxFragmentOutput,
+                        .module = skyboxFragmentOutputModule
                     },
                 };
 
-                const ShaderLibraryCreationInfo info
-                {
-                    .uniqueLibraryName = "__engine_shader_lib_cache",
-                    .outputFormats = HF.internalResourcesFormat.drawOutputFormats,
-                    .pVertexInputModules = vertexInputModules.data(),
-                    .vertexInputModuleCount = vertexInputModules.size(),
-                    .pPreRasterModules = preRasterModules.data(),
-                    .preRasterModuleCount = preRasterModules.size(),
-                    .pFragmentModules = fragmentModules.data(),
-                    .fragmentModuleCount = fragmentModules.size(),
-                    .pFragmentOutputModules = fragmentOutputModules.data(),
-                    .fragmentOutputModuleCount = fragmentOutputModules.size()
-                };
+                ShaderLibraryCreationInfo info{};
+                info.uniqueLibraryName         = "__engine_shader_lib_cache";
+                info.outputFormats             = HF.internalResourcesFormat.drawOutputFormats;
+                info.pVertexInputModules       = vertexInputModules.data();
+                info.vertexInputModuleCount    = vertexInputModules.size();
+                info.pPreRasterModules         = preRasterModules.data();
+                info.preRasterModuleCount      = preRasterModules.size();
+                info.pFragmentModules          = fragmentModules.data();
+                info.fragmentModuleCount       = fragmentModules.size();
+                info.pFragmentOutputModules    = fragmentOutputModules.data();
+                info.fragmentOutputModuleCount = fragmentOutputModules.size();
+
                 HF.staticResources.engineShadersLib = Create(info);
             }
 
             //Axis Lines Shader
             {
-                const ShaderCreationInfo shaderInfo
-                {
-                    .layout = HF.staticResources.axisLinesShaderLayout,
-                    .library = HF.staticResources.engineShadersLib,
-                    .modules =
-                    {
-                        .vertexInputModuleId = HF.staticResources.engineShadersLibModules.quadVertexInput,
-                        .preRasterModuleId = HF.staticResources.engineShadersLibModules.axisLinesPreRaster,
-                        .fragmentModuleId = HF.staticResources.engineShadersLibModules.axisLinesFragment,
-                        .fragmentOutputModuleId = HF.staticResources.engineShadersLibModules.axisLinesFragmentOutput
-                    }
-                };
+                ShaderModulesInfo modulesInfo{};
+                modulesInfo.vertexInputModuleId    = HF.staticResources.engineShadersLibModules.quadVertexInput;
+                modulesInfo.preRasterModuleId      = HF.staticResources.engineShadersLibModules.axisLinesPreRaster;
+                modulesInfo.fragmentModuleId       = HF.staticResources.engineShadersLibModules.axisLinesFragment;
+                modulesInfo.fragmentOutputModuleId = HF.staticResources.engineShadersLibModules.axisLinesFragmentOutput;
+
+                ShaderCreationInfo shaderInfo{};
+                shaderInfo.layout = HF.staticResources.axisLinesShaderLayout;
+                shaderInfo.library = HF.staticResources.engineShadersLib;
+                shaderInfo.modules = modulesInfo;
+
                 HF.staticResources.axisLinesShader = Create(shaderInfo);
             }
 
             //Skybox Shader
             {
-                const ShaderCreationInfo shaderInfo
-                {
-                    .layout = HF.staticResources.skyboxShaderLayout,
-                    .library = HF.staticResources.engineShadersLib,
-                    .modules =
-                    {
-                        .vertexInputModuleId = HF.staticResources.engineShadersLibModules.defaultVertexInput,
-                        .preRasterModuleId = HF.staticResources.engineShadersLibModules.skyboxPreRaster,
-                        .fragmentModuleId = HF.staticResources.engineShadersLibModules.skyboxFragment,
-                        .fragmentOutputModuleId = HF.staticResources.engineShadersLibModules.skyboxFragmentOutput
-                    }
-                };
+                ShaderModulesInfo modulesInfo{};
+                modulesInfo.vertexInputModuleId    = HF.staticResources.engineShadersLibModules.defaultVertexInput;
+                modulesInfo.preRasterModuleId      = HF.staticResources.engineShadersLibModules.skyboxPreRaster;
+                modulesInfo.fragmentModuleId       = HF.staticResources.engineShadersLibModules.skyboxFragment;
+                modulesInfo.fragmentOutputModuleId = HF.staticResources.engineShadersLibModules.skyboxFragmentOutput;
+
+                ShaderCreationInfo shaderInfo{};
+                shaderInfo.layout = HF.staticResources.skyboxShaderLayout;
+                shaderInfo.library = HF.staticResources.engineShadersLib;
+                shaderInfo.modules = modulesInfo;
+
                 HF.staticResources.skyboxShader = Create(shaderInfo);
             }
         }

@@ -329,7 +329,6 @@ namespace hf
 
 	namespace primitives
 	{
-		Ref<Mesh> GetCubeMesh();
 		Ref<VertBuffer> GetQuadBuffer();
 		Ref<VertBuffer>* GetQuadBufferP();
 

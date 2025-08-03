@@ -49,12 +49,10 @@ namespace hf
         {
             if (shader->handle) return false;
 
-            const ShaderCreationInfo_i creationInfo
-            {
-                .layout = shader->layout,
-                .library = shader->library->handle,
-                .modules = shader->modules
-            };
+            ShaderCreationInfo_i creationInfo{};
+            creationInfo.layout = shader->layout;
+            creationInfo.library = shader->library->handle;
+            creationInfo.modules = shader->modules;
 
             shader->handle = HF.renderingApi.api.CreateShader(creationInfo);
 

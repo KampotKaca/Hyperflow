@@ -57,11 +57,11 @@ namespace hf
 
 	TimeUniformInfo GetTimeUniformInfo()
 	{
-		return
-		{
-			.deltaTime = inter::HF.time.deltaTime,
-			.timeSinceStartup = inter::HF.time.GetTimePassed(),
-		};
+	    TimeUniformInfo info{};
+	    info.deltaTime = inter::HF.time.deltaTime;
+	    info.timeSinceStartup = inter::HF.time.GetTimePassed();
+
+		return info;
 	}
 
 	double_t GetSystemTime()

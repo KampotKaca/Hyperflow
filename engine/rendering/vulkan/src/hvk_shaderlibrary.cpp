@@ -233,7 +233,7 @@ namespace hf
             uint32_t colorAttachmentStart = colorAttachmentCount;
             for (uint32_t j = 0; j < moduleInfo.colorAttachmentCount; j++)
             {
-                auto& cInfo = moduleInfo.colorAttachmentsSettings[j];
+                auto& cInfo = moduleInfo.pColorAttachmentsSettings[j];
                 VkPipelineColorBlendAttachmentState colorBlendAttachment{};
                 colorBlendAttachment.colorWriteMask = (VkColorComponentFlags)cInfo.colorWriteMask;
 

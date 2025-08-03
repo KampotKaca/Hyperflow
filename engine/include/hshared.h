@@ -266,7 +266,7 @@ namespace hf
 
     struct ShaderLibraryFragmentOutputModuleInfo
     {
-        ColorAttachmentSettings colorAttachmentsSettings[MAX_COLOR_ATTACHMENTS]{};
+        ColorAttachmentSettings pColorAttachmentsSettings[MAX_COLOR_ATTACHMENTS]{};
         uint32_t colorAttachmentCount = 1;
 		std::optional<ShaderBlendOp> blendOp;
     };
@@ -392,7 +392,7 @@ namespace hf
 	struct TextureSamplerDefinitionInfo
 	{
 		TextureFilter filter = TextureFilter::Bilinear;
-		TextureAnisotropicFilter anisotropicFilter = TextureAnisotropicFilter::X8;
+		TextureAnisotropicFilter anisotropicFilter = TextureAnisotropicFilter::X16;
 		TextureRepeatMode repeatMode = TextureRepeatMode::Repeat;
 		bool useNormalizedCoordinates = true;
 		ComparisonOperation comparison = ComparisonOperation::None;

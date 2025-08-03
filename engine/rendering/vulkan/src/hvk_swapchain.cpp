@@ -43,7 +43,7 @@ namespace hf
         }
 
         if (GetAvailableSurfaceDetails(scs, (VkFormat)VULKAN_API_COLOR_FORMAT,
-            targetPresentMode, defaultPresentMode, targetSize, &details))
+            targetPresentMode, defaultPresentMode, targetSize, details))
         {
             uint32_t imageCount = scs.capabilities.minImageCount + 1;
             uint32_t maxImageCount = scs.capabilities.maxImageCount;
@@ -90,21 +90,13 @@ namespace hf
             createInfo.image = images[i];
             createInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
             createInfo.format = details.format.format;
-            createInfo.components =
-            {
-                .r = VK_COMPONENT_SWIZZLE_IDENTITY,
-                .g = VK_COMPONENT_SWIZZLE_IDENTITY,
-                .b = VK_COMPONENT_SWIZZLE_IDENTITY,
-                .a = VK_COMPONENT_SWIZZLE_IDENTITY,
-            };
-            createInfo.subresourceRange =
-            {
-                .aspectMask = VK_IMAGE_ASPECT_COLOR_BIT,
-                .baseMipLevel = 0,
-                .levelCount = 1,
-                .baseArrayLayer = 0,
-                .layerCount = 1,
-            };
+            createInfo.components.r = VK_COMPONENT_SWIZZLE_IDENTITY;
+            createInfo.components.g = VK_COMPONENT_SWIZZLE_IDENTITY;
+            createInfo.components.b = VK_COMPONENT_SWIZZLE_IDENTITY;
+            createInfo.components.a = VK_COMPONENT_SWIZZLE_IDENTITY;
+            createInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+            createInfo.subresourceRange.levelCount = 1;
+            createInfo.subresourceRange.layerCount = 1;
 
             VK_HANDLE_EXCEPT(vkCreateImageView(GRAPHICS_DATA.device.logicalDevice.device,
                 &createInfo, &GRAPHICS_DATA.platform.allocator, &imageViews[i]));
@@ -120,7 +112,7 @@ namespace hf
         }
     }
 
-    void DestroySwapchain(GraphicsSwapChain& gc, VkSwapchainKHR* swapchain)
+    void DestroySwapchain(const GraphicsSwapChain& gc, VkSwapchainKHR* swapchain)
     {
         if (*swapchain != VK_NULL_HANDLE)
         {

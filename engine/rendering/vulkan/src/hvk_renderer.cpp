@@ -47,7 +47,7 @@ namespace hf
 
     void Draw(const VkDrawInfo& info)
     {
-        auto command = info.renderer->currentCommand;
+        const auto command = info.renderer->currentCommand;
         vkCmdBindVertexBuffers(command, 0, info.bufferCount, info.pBuffers, info.pOffsets);
         if (info.indexBuffer)
         {

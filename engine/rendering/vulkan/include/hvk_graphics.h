@@ -281,7 +281,7 @@ namespace hf
     void WaitForDevice();
 
     void CreateSwapchain(VkSurfaceKHR surface, uvec2 targetSize, VsyncMode vsyncMode, GraphicsSwapChain& result);
-    void DestroySwapchain(GraphicsSwapChain& gc, VkSwapchainKHR* swapchain);
+    void DestroySwapchain(const GraphicsSwapChain& gc, VkSwapchainKHR* swapchain);
 
     void CreateCommandPool(const GraphicsDevice& device, uint32_t familyIndex, CommandPool* result);
     void DestroyCommandPool(const GraphicsDevice& device, CommandPool& pool);
@@ -290,7 +290,7 @@ namespace hf
 
     bool GetAvailableSurfaceDetails(const SwapChainSupportDetails& swapChainSupportDetails,
                                     VkFormat targetFormat, VkPresentModeKHR targetPresentMode, VkPresentModeKHR defaultPresentMode,
-                                    uvec2 targetExtents, GraphicsSwapchainDetails* result);
+                                    uvec2 targetExtents, GraphicsSwapchainDetails& result);
 
     bool CheckDeviceExtensionSupport(const VkPhysicalDevice& device);
     void QuerySwapChainSupport(const VkPhysicalDevice& device, const VkSurfaceKHR& surface, SwapChainSupportDetails& supportDetails);

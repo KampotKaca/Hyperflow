@@ -16,18 +16,21 @@ namespace hf
         bufferSize = size.x * size.y * size.z * 4;
         layout = (VkImageLayout)info.details.finalLayout;
 
-        auto device = GRAPHICS_DATA.device.logicalDevice.device;
+        const auto device = GRAPHICS_DATA.device.logicalDevice.device;
+        VkExtent3D extent{};
+        extent.width  = size.x;
+        extent.height = size.y;
+        extent.depth  = size.z;
 
         VkImageCreateInfo imageInfo{};
         imageInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
         imageInfo.flags = (VkImageCreateFlags)info.flags;
         imageInfo.imageType = (VkImageType)info.type;
         imageInfo.format = (VkFormat)details.format;
-        imageInfo.extent = { size.x, size.y, size.z };
+        imageInfo.extent = extent;
         imageInfo.arrayLayers = info.textureCount;
         imageInfo.samples = (VkSampleCountFlagBits)info.samples;
         imageInfo.tiling = (VkImageTiling)details.tiling;
-        imageInfo.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
 
         if (info.pTextures)
         {
@@ -208,7 +211,7 @@ namespace hf
     {
         if (!GRAPHICS_DATA.bufferToImageCopyOperations.empty())
         {
-            auto& device = GRAPHICS_DATA.device.logicalDevice;
+            const auto& device = GRAPHICS_DATA.device.logicalDevice;
             BufferOperation(GRAPHICS_DATA.transferPool.buffers[0], device.transferQueue, TransitionBufferToImageStart);
             BufferOperation(GRAPHICS_DATA.transferPool.buffers[0], device.transferQueue, CopyBufferToImage);
             BufferOperation(GRAPHICS_DATA.graphicsPool.buffers[0], device.graphicsQueue, GenerateMimMaps);

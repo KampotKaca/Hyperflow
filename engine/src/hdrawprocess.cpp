@@ -800,7 +800,7 @@ namespace hf
 
                 HF.renderingApi.api.BeginRendering(handle, rt.texture->handle);
 
-                uint16_t shaderLayoutEnd = rt.shaderLayoutRange.end();
+                const uint16_t shaderLayoutEnd = rt.shaderLayoutRange.end();
                 for (uint16_t shaderLayoutIndex = rt.shaderLayoutRange.start; shaderLayoutIndex < shaderLayoutEnd; shaderLayoutIndex++)
                 {
                     DescriptorBindingInfo descBindings[MAX_NUM_BOUND_DESCRIPTORS]{};
@@ -827,12 +827,11 @@ namespace hf
 
                                 if (material.material->sizeInBytes > 0)
                                 {
-                                    BindResourceInfo_i<Buffer> info
-                                    {
-                                        .bindingType = RenderBindingType::Graphics,
-                                        .setBindingIndex = 1,
-                                        .objectCount = 1
-                                    };
+                                    BindResourceInfo_i<Buffer> info{};
+                                    info.bindingType = RenderBindingType::Graphics;
+                                    info.setBindingIndex = 1;
+                                    info.objectCount = 1;
+
                                     info.objects[0] = HF.graphicsResources.materialDataStorageBuffer,
 
                                     HF.renderingApi.api.BindBuffer(handle, info);
@@ -845,11 +844,9 @@ namespace hf
 
                                     if (drawPacket.pushConstantRange.size > 0)
                                     {
-                                        PushConstantUploadInfo uploadInfo
-                                        {
-                                            .layout = shaderLayout.layout,
-                                            .data = &packet->pushConstantUploads[drawPacket.pushConstantRange.start],
-                                        };
+                                        PushConstantUploadInfo uploadInfo{};
+                                        uploadInfo.layout = shaderLayout.layout;
+                                        uploadInfo.data = &packet->pushConstantUploads[drawPacket.pushConstantRange.start];
 
                                         HF.renderingApi.api.UploadPushConstants(handle, uploadInfo);
                                     }
@@ -868,19 +865,17 @@ namespace hf
                                                 {
                                                     case BUFFER: throw GENERIC_EXCEPT("[Hyperflow]", "Cannot bind buffer here!");
                                                     case TEXPACK:
-                                                        {
-                                                            BindResourceInfo_i<void*> info
-                                                            {
-                                                                .bindingType = RenderBindingType::Graphics,
-                                                                .setBindingIndex = i,
-                                                                .objectCount = 1,
-                                                            };
-                                                            info.objects[0] = cPack.object;
+                                                    {
+                                                        BindResourceInfo_i<void*> info{};
+                                                        info.bindingType = RenderBindingType::Graphics;
+                                                        info.setBindingIndex = i;
+                                                        info.objectCount = 1;
 
-                                                            HF.renderingApi.api.BindTexturePack(handle, info);
-                                                            descBindings[i] = cPack;
-                                                        }
-                                                        break;
+                                                        info.objects[0] = cPack.object;
+
+                                                        HF.renderingApi.api.BindTexturePack(handle, info);
+                                                        descBindings[i] = cPack;
+                                                    }break;
                                                 }
                                             }
                                         }

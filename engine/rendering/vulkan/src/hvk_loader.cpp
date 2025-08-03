@@ -222,7 +222,7 @@ namespace hf
     {
         GRAPHICS_DATA.editorInfo = new RenderApiEditorInfo();
 
-        VkDescriptorPoolSize pool_sizes[] =
+        const VkDescriptorPoolSize pool_sizes[] =
         {
             { VK_DESCRIPTOR_TYPE_SAMPLER, 1000 },
             { VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1000 },

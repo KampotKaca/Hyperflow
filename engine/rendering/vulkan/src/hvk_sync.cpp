@@ -4,10 +4,8 @@ namespace hf
 {
     void CreateSemaphore(const GraphicsDevice& device, VkSemaphore* semaphore)
     {
-        VkSemaphoreCreateInfo semaphoreInfo
-        {
-            .sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO
-        };
+        VkSemaphoreCreateInfo semaphoreInfo{};
+        semaphoreInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
 
         VK_HANDLE_EXCEPT(vkCreateSemaphore(device.logicalDevice.device, &semaphoreInfo, &GRAPHICS_DATA.platform.allocator, semaphore));
     }
@@ -20,10 +18,8 @@ namespace hf
 
     void CreateFence(const GraphicsDevice& device, VkFence* fence, bool startSignaled)
     {
-        VkFenceCreateInfo fenceInfo
-        {
-            .sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO
-        };
+        VkFenceCreateInfo fenceInfo{};
+        fenceInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
 
         if (startSignaled) fenceInfo.flags = VK_FENCE_CREATE_SIGNALED_BIT;
 

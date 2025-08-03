@@ -15,25 +15,23 @@ namespace hf
         {
         case RenderingApiType::None: throw GENERIC_EXCEPT("[Hyperflow]", "No rendering api to use the texture for!");
         case RenderingApiType::Vulkan:
-            {
-                texturePaths[0] = info.texturePaths.front;
-                texturePaths[1] = info.texturePaths.back;
-                texturePaths[2] = info.texturePaths.up;
-                texturePaths[3] = info.texturePaths.down;
-                texturePaths[4] = info.texturePaths.right;
-                texturePaths[5] = info.texturePaths.left;
-            }
-            break;
+        {
+            texturePaths[0] = info.texturePaths.front;
+            texturePaths[1] = info.texturePaths.back;
+            texturePaths[2] = info.texturePaths.up;
+            texturePaths[3] = info.texturePaths.down;
+            texturePaths[4] = info.texturePaths.right;
+            texturePaths[5] = info.texturePaths.left;
+        }break;
         case RenderingApiType::Direct3D:
-            {
-                texturePaths[0] = info.texturePaths.left;
-                texturePaths[1] = info.texturePaths.right;
-                texturePaths[2] = info.texturePaths.down;
-                texturePaths[3] = info.texturePaths.up;
-                texturePaths[4] = info.texturePaths.back;
-                texturePaths[5] = info.texturePaths.front;
-            }
-            break;
+        {
+            texturePaths[0] = info.texturePaths.left;
+            texturePaths[1] = info.texturePaths.right;
+            texturePaths[2] = info.texturePaths.down;
+            texturePaths[3] = info.texturePaths.up;
+            texturePaths[4] = info.texturePaths.back;
+            texturePaths[5] = info.texturePaths.front;
+        }break;
         }
 
         inter::rendering::CreateCubemap_i(this);
@@ -77,10 +75,8 @@ namespace hf
 
         try
         {
-            CubemapCreationInfo info
-            {
-                .folderPath = assetPath,
-            };
+            CubemapCreationInfo info{};
+            info.folderPath = assetPath;
 
             ryml::Tree tree = ryml::parse_in_place(ryml::to_substr(metadata.data()));
             ryml::NodeRef root = tree.rootref();
@@ -130,15 +126,15 @@ namespace hf
                 front = vView;
             }
 
-            info.texturePaths =
-            {
-                .left = left.c_str(),
-                .right = right.c_str(),
-                .down = down.c_str(),
-                .up = up.c_str(),
-                .back = back.c_str(),
-                .front = front.c_str()
-            };
+            CubemapTexturePaths paths{};
+            paths.left  = left.c_str();
+            paths.right = right.c_str();
+            paths.down  = down.c_str();
+            paths.up    = up.c_str();
+            paths.back  = back.c_str();
+            paths.front = front.c_str();
+
+            info.texturePaths = paths;
 
             utils::ReadTextureDetails(&tree, &root, info.details);
 
@@ -207,11 +203,11 @@ namespace hf
 
                 if (pixelData)
                 {
-                    textures[i] =
-                    {
-                        .pixels = pixelData,
-                        .size = size
-                    };
+                    TexData texData{};
+                    texData.pixels = pixelData;
+                    texData.size = size;
+
+                    textures[i] = texData;
                 }
             }
             VALIDATION_CHECK
@@ -232,19 +228,18 @@ namespace hf
             const auto allPixels = (uint8_t*)utils::Allocate(6 * texSize);
             for (uint32_t i = 0; i < 6; i++) memcpy(allPixels + i * texSize, textures[i].pixels, texSize);
 
-            const TextureCreationInfo_i info
-            {
-                .type = TextureType::Tex2D,
-                .viewType = TextureViewType::TexCube,
-                .flags = TextureFlags::CubeCompatible,
-                .size = size,
-                .channel = TextureChannel::RGBA,
-                .mipLevels = cubemap->mipLevels,
-                .samples = MultisampleMode::MSAA_1X,
-                .pTextures = allPixels,
-                .textureCount = 6,
-                .details = cubemap->details
-            };
+            TextureCreationInfo_i info{};
+            info.type         = TextureType::Tex2D;
+            info.viewType     = TextureViewType::TexCube;
+            info.flags        = TextureFlags::CubeCompatible;
+            info.size         = size;
+            info.channel      = TextureChannel::RGBA;
+            info.mipLevels    = cubemap->mipLevels;
+            info.samples      = MultisampleMode::MSAA_1X;
+            info.pTextures    = allPixels;
+            info.textureCount = 6;
+            info.details      = cubemap->details;
+
             cubemap->handle = HF.renderingApi.api.CreateTexture(info);
 
             return true;

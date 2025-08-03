@@ -13,22 +13,19 @@ namespace hf::skybox
         inter::HF.staticResources.boundCubemap = cubemap;
         UploadStart_TexturePack(rn, inter::HF.staticResources.skyboxTexturePack);
         {
-            TexturePackTextureUploadInfo<Cubemap>::TextureInfo tInfo
-            {
-                .texture = cubemap,
-                .index = 0
-            };
+            TexturePackTextureUploadInfo<Cubemap>::TextureInfo tInfo{};
+            tInfo.texture = cubemap;
+            tInfo.index = 0;
 
-            TexturePackBindingUploadInfo<Cubemap> bindingInfo
-            {
-                .bindingIndex = 0,
-                .texInfo = (TexturePackTextureUploadInfo<Cubemap>)
-                {
-                    .pTextures = &tInfo,
-                    .count = 1,
-                    .offset = 0
-                }
-            };
+            TexturePackTextureUploadInfo<Cubemap> uInfo{};
+            uInfo.pTextures = &tInfo;
+            uInfo.count = 1;
+            uInfo.offset = 0;
+
+            TexturePackBindingUploadInfo<Cubemap> bindingInfo{};
+            bindingInfo.bindingIndex = 0;
+            bindingInfo.texInfo = uInfo;
+
             UploadAdd_TexturePackBindings(rn, bindingInfo);
         }
         UploadEnd_TexturePack(rn);

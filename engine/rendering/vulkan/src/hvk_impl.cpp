@@ -210,7 +210,7 @@ namespace hf::inter::rendering
 
     uvec2 GetReadyForRendering(void* rn, void** pTextures, uint32_t textureCount)
     {
-        auto renderer = (VkRenderer*)rn;
+        const auto renderer = (VkRenderer*)rn;
         return GetReadyForRendering(renderer, (VkRenderTexture**)pTextures, textureCount);
     }
 
@@ -221,13 +221,13 @@ namespace hf::inter::rendering
 
     void StartFrame(void* rn)
     {
-        auto renderer = (VkRenderer*)rn;
+        const auto renderer = (VkRenderer*)rn;
         StartFrame(renderer);
     }
 
     void EndFrame(void* rn)
     {
-        auto renderer = (VkRenderer*)rn;
+        const auto renderer = (VkRenderer*)rn;
         renderer->prevRenderTexture = nullptr;
         renderer->currentRenderTexture = nullptr;
         EndFrame(renderer);
@@ -241,26 +241,24 @@ namespace hf::inter::rendering
         uint32_t vertCount = 0;
         for (uint32_t i = 0; i < info.bufferCount; i++)
         {
-            auto vertBuffer = (VkVertBuffer*)info.pVertBuffers[i];
+            const auto vertBuffer = (VkVertBuffer*)info.pVertBuffers[i];
             vrn->vertBufferCache[i] = vertBuffer->buffers[vrn->currentFrame];
             vrn->drawOffsets[i] = offset;
             offset += GetAttrib(vertBuffer->attrib)->vertexSize;
             vertCount = vertBuffer->vertCount;
         }
 
-        VkDrawInfo drawInfo
-        {
-            .renderer = vrn,
-            .pBuffers = vrn->vertBufferCache,
-            .pOffsets = vrn->drawOffsets,
-            .bufferCount = info.bufferCount,
-            .vertCount = vertCount,
-            .instanceCount = info.instanceCount,
-        };
+        VkDrawInfo drawInfo{};
+        drawInfo.renderer = vrn;
+        drawInfo.pBuffers = vrn->vertBufferCache;
+        drawInfo.pOffsets = vrn->drawOffsets;
+        drawInfo.bufferCount = info.bufferCount;
+        drawInfo.vertCount = vertCount;
+        drawInfo.instanceCount = info.instanceCount;
 
         if (info.indexBuffer)
         {
-            auto indexBuffer = (VkIndexBuffer*)info.indexBuffer;
+            const auto indexBuffer = (VkIndexBuffer*)info.indexBuffer;
             drawInfo.indexBuffer = indexBuffer->buffers[vrn->currentFrame];
             drawInfo.indexType = indexBuffer->indexType;
             drawInfo.indexCount = indexBuffer->indexCount;
@@ -279,14 +277,14 @@ namespace hf::inter::rendering
         {
             auto& info = pInfos[i];
             VkImageMemoryBarrier2 barrier{};
-            barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER_2;
-            barrier.srcStageMask = (VkPipelineStageFlags2)info.src.stageMask;
-            barrier.srcAccessMask = (VkAccessFlags2)info.src.accessMask;
-            barrier.dstStageMask = (VkPipelineStageFlags2)info.dst.stageMask;
-            barrier.dstAccessMask = (VkAccessFlags2)info.dst.accessMask;
-            barrier.oldLayout = (VkImageLayout)info.src.targetLayout;
-            barrier.newLayout = (VkImageLayout)info.dst.targetLayout;
-            barrier.image = GetRenderTextureImage(vrn->prevRenderTexture, info.attachmentIndex);
+            barrier.sType           = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER_2;
+            barrier.srcStageMask    = (VkPipelineStageFlags2)info.src.stageMask;
+            barrier.srcAccessMask   = (VkAccessFlags2)info.src.accessMask;
+            barrier.dstStageMask    = (VkPipelineStageFlags2)info.dst.stageMask;
+            barrier.dstAccessMask   = (VkAccessFlags2)info.dst.accessMask;
+            barrier.oldLayout       = (VkImageLayout)info.src.targetLayout;
+            barrier.newLayout       = (VkImageLayout)info.dst.targetLayout;
+            barrier.image           = GetRenderTextureImage(vrn->prevRenderTexture, info.attachmentIndex);
 
             barrier.subresourceRange.aspectMask = (VkImageAspectFlags)info.aspectFlags;
             barrier.subresourceRange.levelCount = 1;
@@ -332,7 +330,7 @@ namespace hf::inter::rendering
 
     void RegisterFrameBufferChange(void* rn, uvec2 newSize)
     {
-        auto renderer = (VkRenderer*)rn;
+        const auto renderer = (VkRenderer*)rn;
         RegisterFrameBufferChange(renderer, newSize);
     }
 

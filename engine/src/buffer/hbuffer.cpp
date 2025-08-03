@@ -37,11 +37,10 @@ namespace hf
             if (buffer->handle)
             {
                 std::lock_guard lock(HF.deletedResources.syncLock);
-                const ResourcesMarkedForDeletion::TypedBuffer tb
-                {
-                    .buffer = buffer->handle,
-                    .type = buffer->GetType(),
-                };
+                ResourcesMarkedForDeletion::TypedBuffer tb{};
+                tb.buffer = buffer->handle;
+                tb.type = buffer->GetType();
+
                 HF.deletedResources.buffers.push_back(tb);
                 buffer->handle = nullptr;
                 return true;

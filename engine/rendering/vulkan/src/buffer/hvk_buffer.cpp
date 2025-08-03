@@ -32,8 +32,6 @@ namespace hf
                     bufferInfo.memoryType = memoryType;
                     bufferInfo.requiredFlags = requiredFlags;
                     bufferInfo.allocationFlags = allocationFlags;
-                    bufferInfo.pQueueFamilies = nullptr;
-                    bufferInfo.familyCount = 0;
 
                     CreateBuffer(bufferInfo, &buffers[0], &memoryRegions[0]);
                     VK_HANDLE_EXCEPT(vmaMapMemory(GRAPHICS_DATA.allocator, memoryRegions[0], &memoryMappings[0]));
@@ -55,8 +53,6 @@ namespace hf
                         bufferInfo.memoryType = memoryType;
                         bufferInfo.requiredFlags = requiredFlags;
                         bufferInfo.allocationFlags = allocationFlags;
-                        bufferInfo.pQueueFamilies = nullptr;
-                        bufferInfo.familyCount = 0;
 
                         CreateBuffer(bufferInfo, &buffers[i], &memoryRegions[i]);
                         VK_HANDLE_EXCEPT(vmaMapMemory(GRAPHICS_DATA.allocator, memoryRegions[i], &memoryMappings[i]));

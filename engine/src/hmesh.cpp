@@ -169,27 +169,22 @@ namespace hf
                 return;
             }
 
-            VertBufferCreationInfo vertInfo
-            {
-                .bufferAttrib = stats.bufferAttrib,
-                .memoryType = stats.memoryType,
-                .vertexCount = header.vertexCount,
-                .pVertices = vertices
-            };
+            VertBufferCreationInfo vertInfo{};
+            vertInfo.bufferAttrib = stats.bufferAttrib;
+            vertInfo.memoryType = stats.memoryType;
+            vertInfo.vertexCount = header.vertexCount;
+            vertInfo.pVertices = vertices;
 
-            IndexBufferCreationInfo indexInfo
-            {
-                .indexFormat = (BufferDataType)header.indexFormat,
-                .memoryType = stats.memoryType,
-                .indexCount = header.indexCount,
-                .pIndices = indices
-            };
+            IndexBufferCreationInfo indexInfo{};
+            indexInfo.indexFormat = (BufferDataType)header.indexFormat;
+            indexInfo.memoryType = stats.memoryType;
+            indexInfo.indexCount = header.indexCount;
+            indexInfo.pIndices = indices;
 
-            SubMesh submesh
-            {
-                .vertBuffer = MakeRef<VertBuffer>(vertInfo, DataTransferType::TransferOwnership),
-                .indexBuffer = MakeRef<IndexBuffer>(indexInfo, DataTransferType::TransferOwnership)
-            };
+            SubMesh submesh{};
+            submesh.vertBuffer = MakeRef<VertBuffer>(vertInfo, DataTransferType::TransferOwnership);
+            submesh.indexBuffer = MakeRef<IndexBuffer>(indexInfo, DataTransferType::TransferOwnership);
+
             subMeshes.push_back(submesh);
         }
 

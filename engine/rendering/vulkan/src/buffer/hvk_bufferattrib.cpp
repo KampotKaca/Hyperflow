@@ -27,12 +27,9 @@ namespace hf
         bindingId = info.bindingId;
         attribCount = info.formatCount;
         vertexSize = fullStride;
-        bindingDescription = VkVertexInputBindingDescription
-        {
-            .binding = bindingId,
-            .stride = fullStride,
-            .inputRate = (VkVertexInputRate)info.inputRate
-        };
+        bindingDescription.binding = bindingId;
+        bindingDescription.stride = fullStride;
+        bindingDescription.inputRate = (VkVertexInputRate)info.inputRate;
 
         attribDescriptions = std::vector<VkVertexInputAttributeDescription>(info.formatCount);
 

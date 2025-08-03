@@ -5,12 +5,10 @@ namespace hf
 {
     void CreateCommandPool(const GraphicsDevice& device, uint32_t familyIndex, CommandPool* result)
     {
-        VkCommandPoolCreateInfo poolCreateInfo
-        {
-            .sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO,
-            .flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT,
-            .queueFamilyIndex = familyIndex
-        };
+        VkCommandPoolCreateInfo poolCreateInfo{};
+        poolCreateInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
+        poolCreateInfo.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
+        poolCreateInfo.queueFamilyIndex = familyIndex;
 
         VK_HANDLE_EXCEPT(vkCreateCommandPool(device.logicalDevice.device, &poolCreateInfo, &GRAPHICS_DATA.platform.allocator, &result->pool));
     }
@@ -23,13 +21,11 @@ namespace hf
 
     void CreateCommandBuffers(const GraphicsDevice& device, CommandPool* pool, const uint32_t count)
     {
-        VkCommandBufferAllocateInfo allocInfo
-        {
-            .sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO,
-            .commandPool = pool->pool,
-            .level = VK_COMMAND_BUFFER_LEVEL_PRIMARY,
-            .commandBufferCount = count,
-        };
+        VkCommandBufferAllocateInfo allocInfo{};
+        allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
+        allocInfo.commandPool = pool->pool;
+        allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
+        allocInfo.commandBufferCount = count;
 
         std::vector<VkCommandBuffer> commandBuffers(count);
         VK_HANDLE_EXCEPT(vkAllocateCommandBuffers(device.logicalDevice.device, &allocInfo, commandBuffers.data()));
@@ -42,10 +38,8 @@ namespace hf
         if (frame.usedCommandCount >= VULKAN_API_MAX_COMMANDS_PER_FRAME)
             throw GENERIC_EXCEPT("[Vulkan]", "Please increase MAX_COMMANDS_PER_FRAME");
 
-        VkCommandBufferBeginInfo beginInfo
-        {
-            .sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO,
-        };
+        VkCommandBufferBeginInfo beginInfo{};
+        beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
 
         VK_HANDLE_EXCEPT(vkResetCommandBuffer(buffer, 0));
         VK_HANDLE_EXCEPT(vkBeginCommandBuffer(buffer, &beginInfo));
@@ -67,20 +61,18 @@ namespace hf
     void SubmitCommands(VkRenderer* rn)
     {
         constexpr VkPipelineStageFlags waitStages[] = { VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT };
-        auto& frame = rn->frames[rn->currentFrame];
-        auto& image = rn->swapchain.images[rn->imageIndex];
+        const auto& frame = rn->frames[rn->currentFrame];
+        const auto& image = rn->swapchain.images[rn->imageIndex];
 
-        VkSubmitInfo submitInfo
-        {
-            .sType = VK_STRUCTURE_TYPE_SUBMIT_INFO,
-            .waitSemaphoreCount = 1,
-            .pWaitSemaphores = &frame.isImageAvailable,
-            .pWaitDstStageMask = waitStages,
-            .commandBufferCount = frame.usedCommandCount,
-            .pCommandBuffers = frame.usedCommands,
-            .signalSemaphoreCount = 1,
-            .pSignalSemaphores = &image.isRenderingFinished,
-        };
+        VkSubmitInfo submitInfo{};
+        submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+        submitInfo.waitSemaphoreCount = 1;
+        submitInfo.pWaitSemaphores = &frame.isImageAvailable;
+        submitInfo.pWaitDstStageMask = waitStages;
+        submitInfo.commandBufferCount = frame.usedCommandCount;
+        submitInfo.pCommandBuffers = frame.usedCommands;
+        submitInfo.signalSemaphoreCount = 1;
+        submitInfo.pSignalSemaphores = &image.isRenderingFinished;
 
         const auto& device = GRAPHICS_DATA.device.logicalDevice;
         VK_HANDLE_EXCEPT(vkResetFences(device.device, 1, &image.isInFlight));

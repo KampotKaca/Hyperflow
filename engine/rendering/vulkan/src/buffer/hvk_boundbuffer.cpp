@@ -25,7 +25,6 @@ namespace hf
             layout.descriptorType = descriptorType;
             layout.descriptorCount = bindingInfo.arraySize;
             layout.stageFlags = (uint32_t)bindingInfo.usageFlags;
-            layout.pImmutableSamplers = nullptr;
             GRAPHICS_DATA.preAllocBuffers.descLayoutBindings.push_back(layout);
 
             const auto offset = bindingInfo.elementSizeInBytes * bindingInfo.arraySize;

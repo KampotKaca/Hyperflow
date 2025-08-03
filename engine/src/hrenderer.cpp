@@ -136,9 +136,9 @@ namespace hf
             for (auto& mesh : std::ranges::views::values(HF.graphicsResources.meshes)) CreateMesh_i(mesh.get());
             SubmitAllBuffers();
 
-            for (auto& texture : std::ranges::views::values(HF.graphicsResources.textures)) CreateTexture_i(texture.get());
-            for (auto& cubemap : std::ranges::views::values(HF.graphicsResources.cubemaps)) CreateCubemap_i(cubemap.get());
-            for (auto& rt : std::ranges::views::values(HF.graphicsResources.renderTextures)) CreateRenderTexture_i(rt.get());
+            for (auto& texture   : std::ranges::views::values(HF.graphicsResources.textures))       CreateTexture_i(texture.get());
+            for (auto& cubemap : std::ranges::views::values(HF.graphicsResources.cubemaps))       CreateCubemap_i(cubemap.get());
+            for (auto& rt   : std::ranges::views::values(HF.graphicsResources.renderTextures)) CreateRenderTexture_i(rt.get());
             SubmitAllTextures();
 
             for (auto& texPack : std::ranges::views::values(HF.graphicsResources.texturePacks)) CreateTexturePack_i(texPack.get());
@@ -159,11 +159,7 @@ namespace hf
 
             platform::UnloadDll(HF.renderingApi.handle);
 
-            HF.renderingApi = RenderingApi
-            {
-                .type = RenderingApiType::None,
-                .handle = nullptr,
-            };
+            HF.renderingApi = RenderingApi{};
 
             HF.graphicsResources.bufferAttribs.clear();
         }
@@ -175,23 +171,23 @@ namespace hf
                 const auto engineV = utils::ConvertVersion(VERSION);
                 const auto appV = utils::ConvertVersion(APP_VERSION);
 
+                RendererInternalFunctions_i funcs{};
+                funcs.fileExistsFunc = utils::FileExists;
+                funcs.readFileFunc = utils::ReadFile;
+                funcs.writeFileFunc = utils::WriteFile;
+
+                funcs.allocateFunc = utils::Allocate;
+                funcs.allocateAlignedFunc = utils::AllocateAligned;
+                funcs.deallocateFunc = utils::Deallocate;
+                funcs.deallocateAlignedFunc = utils::DeallocateAligned;
+                funcs.reallocateFunc = utils::Reallocate;
+
                 RendererLoadInfo_i loadInfo
                 {
                     .appVersion = appV,
                     .engineVersion = engineV,
                     .applicationTitle = HF.appTitle.c_str(),
-                    .functions = RendererInternalFunctions_i
-                    {
-                        .fileExistsFunc = utils::FileExists,
-                        .readFileFunc = utils::ReadFile,
-                        .writeFileFunc = utils::WriteFile,
-
-                        .allocateFunc = utils::Allocate,
-                        .allocateAlignedFunc = utils::AllocateAligned,
-                        .deallocateFunc = utils::Deallocate,
-                        .deallocateAlignedFunc = utils::DeallocateAligned,
-                        .reallocateFunc = utils::Reallocate
-                    }
+                    .functions = funcs
                 };
 
                 if (HF.renderingApi.type == RenderingApiType::Vulkan)
@@ -201,10 +197,8 @@ namespace hf
                 HF.renderingApi.isLoaded = true;
             }
             HF.rendererCount++;
-            RendererInstanceCreationInfo_i createInfo
-            {
-                .size = rn->threadInfo.size,
-            };
+            RendererInstanceCreationInfo_i createInfo{};
+            createInfo.size = rn->threadInfo.size;
 
             if (rn->window)
             {

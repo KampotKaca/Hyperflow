@@ -10,11 +10,8 @@ namespace hf
 		: title(info.title), style(info.style), pointerState(info.pointerState), vSyncMode(info.vsyncMode), parent(parent),
 		  rnEventInfo(info.rnEventInfo)
 	{
-		rect =
-		{
-			.position = info.position,
-			.size = info.size
-		};
+		rect.position = info.position;
+		rect.size     = info.size;
 		renderer = nullptr;
 
 		inter::window::Open(this, info);
