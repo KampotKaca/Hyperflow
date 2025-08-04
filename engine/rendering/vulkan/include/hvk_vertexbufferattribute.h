@@ -5,10 +5,10 @@
 
 namespace hf
 {
-    struct VkBufferAttrib
+    struct VkVertexBufferAttribute
     {
-        VkBufferAttrib(const BufferAttribDefinitionInfo& info, uint32_t fullStride);
-        ~VkBufferAttrib();
+        VkVertexBufferAttribute(const VertexBufferAttributeDefinitionInfo& info, uint32_t fullStride);
+        ~VkVertexBufferAttribute();
 
         VkVertexInputBindingDescription bindingDescription{};
         std::vector<VkVertexInputAttributeDescription> attribDescriptions{};
@@ -17,8 +17,8 @@ namespace hf
         uint32_t bindingId = 0;
     };
 
-    bool IsValidAttrib(BufferAttrib attrib);
-    URef<VkBufferAttrib>& GetAttrib(BufferAttrib attrib);
+    bool IsValidAttrib(VertexBufferAttribute attrib);
+    URef<VkVertexBufferAttribute>& GetAttrib(VertexBufferAttribute attrib);
 }
 
 #endif //HVK_BUFFERATTRIB_H

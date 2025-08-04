@@ -282,8 +282,8 @@ namespace hf::inter::rendering
         TextureLayout (*DefineTextureLayout)(const TextureLayoutDefinitionInfo& info);
 
         //buffer attribute
-        BufferAttrib (*DefineVertBufferAttrib)(const BufferAttribDefinitionInfo& info, uint32_t fullStride);
-        uint32_t (*GetVertBufferAttribSize)(BufferAttrib attrib);
+        VertexBufferAttribute (*DefineVertBufferAttrib)(const VertexBufferAttributeDefinitionInfo& info, uint32_t fullStride);
+        uint32_t (*GetVertBufferAttribSize)(VertexBufferAttribute attrib);
 
         //buffers
         Buffer (*DefineUniformBuffer)(const BufferDefinitionInfo& info);

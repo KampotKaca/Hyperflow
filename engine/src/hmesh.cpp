@@ -170,7 +170,7 @@ namespace hf
             }
 
             VertBufferCreationInfo vertInfo{};
-            vertInfo.bufferAttrib = stats.bufferAttrib;
+            vertInfo.bufferAttrib = stats.vertexAttribute;
             vertInfo.memoryType = stats.memoryType;
             vertInfo.vertexCount = header.vertexCount;
             vertInfo.pVertices = vertices;
@@ -213,20 +213,9 @@ namespace hf
 
     Ref<Mesh> CreateMeshAsset(const char* assetPath)
     {
-        std::string assetLoc = TO_RES_PATH(std::string("meshes/") + assetPath) + ".meta";
-        if (!utils::FileExists(assetLoc.c_str()))
-        {
-            LOG_ERROR("[Hyperflow] Unable to find mesh meta file: %s", assetPath);
-            return nullptr;
-        }
-
+        const std::string assetLoc = TO_RES_PATH(std::string("meshes/") + assetPath) + ".meta";
         std::vector<char> metadata{};
-        if (!utils::ReadFile(assetLoc, metadata))
-        {
-            LOG_ERROR("[Hyperflow] Unable to read mesh meta: %s", assetPath);
-            return nullptr;
-        }
-        metadata.push_back('\0');
+        if (!START_READING(assetLoc.c_str(), metadata)) return nullptr;
 
         try
         {
@@ -255,9 +244,9 @@ namespace hf
             }
 
             {
-                auto v = root["bufferAttrib"].val();
+                auto v = root["vertexAttribute"].val();
                 std::string_view memTypeView(v.str, v.len);
-                info.stats.bufferAttrib = inter::HF.graphicsResources.bufferAttribs[memTypeView];
+                info.stats.vertexAttribute = inter::HF.graphicsResources.vertexAttributes[memTypeView];
             }
 
             return Create(info);

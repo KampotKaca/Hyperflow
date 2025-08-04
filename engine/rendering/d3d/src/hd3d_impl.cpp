@@ -78,12 +78,12 @@ namespace hf::inter::rendering
         return 1;
     }
 
-    uint32_t DefineVertBufferAttrib(const BufferAttribDefinitionInfo& info, uint32_t fullStride)
+    uint32_t DefineVertBufferAttrib(const VertexBufferAttributeDefinitionInfo& info, uint32_t fullStride)
     {
         return 1;
     }
 
-    uint32_t GetVertBufferAttribSize(BufferAttrib attrib)
+    uint32_t GetVertBufferAttribSize(VertexBufferAttribute attrib)
     {
         return 0;
     }

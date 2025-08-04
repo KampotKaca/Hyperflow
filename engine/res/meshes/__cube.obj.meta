@@ -2,7 +2,7 @@ typeFlags:
   - Position
   - Normal
 #  - Color
-#  - TexCoord
+  - TexCoord
 
 memoryType: Static
-bufferAttrib: pos_nor_tex
+vertexAttribute: __pos_nor_tex

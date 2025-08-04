@@ -4,7 +4,7 @@
 
 namespace hf
 {
-    static uint64_t GetVertBufferSize(BufferAttrib attrib, uint32_t vertexCount)
+    static uint64_t GetVertBufferSize(VertexBufferAttribute attrib, uint32_t vertexCount)
     {
         const auto& bufferAttrib = GetAttrib(attrib);
         return (uint64_t)bufferAttrib->vertexSize * vertexCount;

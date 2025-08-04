@@ -1,0 +1,5 @@
+bindingId: 0
+locationOffset: 0
+formats:
+  - type: F32 #position
+    size: 2

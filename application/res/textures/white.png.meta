@@ -1,13 +1,12 @@
 desiredChannel: RGBA
-mipLevels: 1,
+mipLevels: 8
 
-format: R8G8B8A8_Srgb
-aspectFlags:
-  - Color
-
-tiling: Optimal
-usageFlags:
-  - Sampled
-
-memoryType: Static
-finalLayout: ShaderReadOnly
+details:
+  format: R8G8B8A8_Srgb
+  tiling: Optimal
+  memoryType: Static
+  finalLayout: ShaderReadOnly
+  aspectFlags:
+    - Color
+  usageFlags:
+    - Sampled

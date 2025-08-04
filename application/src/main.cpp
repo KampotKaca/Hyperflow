@@ -25,7 +25,7 @@ int main()
 	    {
 		    .globalUniformBindingInfo =
         {
-		        .usageFlags = hf::ShaderUsageStage::All,
+		        .usageFlags = hf::ShaderUsageStageFlags::All,
                 .arraySize = 1,
                 .elementSizeInBytes = sizeof(app::GlobalUniformInfo)
             },

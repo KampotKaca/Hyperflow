@@ -118,13 +118,13 @@ namespace hf::inter::rendering
         return (TextureLayout)GRAPHICS_DATA.textureLayouts.size();
     }
 
-    BufferAttrib DefineVertBufferAttrib(const BufferAttribDefinitionInfo& info, uint32_t fullStride)
+    VertexBufferAttribute DefineVertBufferAttrib(const VertexBufferAttributeDefinitionInfo& info, uint32_t fullStride)
     {
-        GRAPHICS_DATA.bufferAttribs.emplace_back(MakeURef<VkBufferAttrib>(info, fullStride));
-        return (BufferAttrib)GRAPHICS_DATA.bufferAttribs.size();
+        GRAPHICS_DATA.bufferAttribs.emplace_back(MakeURef<VkVertexBufferAttribute>(info, fullStride));
+        return (VertexBufferAttribute)GRAPHICS_DATA.bufferAttribs.size();
     }
 
-    uint32_t GetVertBufferAttribSize(BufferAttrib attrib)
+    uint32_t GetVertBufferAttribSize(VertexBufferAttribute attrib)
     {
         auto& attribute = GetAttrib(attrib);
         return attribute->vertexSize;

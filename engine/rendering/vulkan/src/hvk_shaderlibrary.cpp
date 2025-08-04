@@ -237,16 +237,16 @@ namespace hf
                 VkPipelineColorBlendAttachmentState colorBlendAttachment{};
                 colorBlendAttachment.colorWriteMask = (VkColorComponentFlags)cInfo.colorWriteMask;
 
-                if (cInfo.blending.has_value())
+                if (cInfo.blendingOptions.has_value())
                 {
-                    auto blending = cInfo.blending.value();
+                    auto blending = cInfo.blendingOptions.value();
                     colorBlendAttachment.blendEnable = VK_TRUE;
-                    colorBlendAttachment.srcColorBlendFactor = (VkBlendFactor)blending.colorBlendingOptions.srcFactor;
-                    colorBlendAttachment.dstColorBlendFactor = (VkBlendFactor)blending.colorBlendingOptions.dstFactor;
-                    colorBlendAttachment.colorBlendOp = (VkBlendOp)blending.colorBlendingOptions.op;
-                    colorBlendAttachment.srcAlphaBlendFactor = (VkBlendFactor)blending.alphaBlendingOptions.srcFactor;
-                    colorBlendAttachment.dstAlphaBlendFactor = (VkBlendFactor)blending.alphaBlendingOptions.dstFactor;
-                    colorBlendAttachment.alphaBlendOp = (VkBlendOp)blending.alphaBlendingOptions.op;
+                    colorBlendAttachment.srcColorBlendFactor = (VkBlendFactor)blending.color.srcFactor;
+                    colorBlendAttachment.dstColorBlendFactor = (VkBlendFactor)blending.color.dstFactor;
+                    colorBlendAttachment.colorBlendOp = (VkBlendOp)blending.color.op;
+                    colorBlendAttachment.srcAlphaBlendFactor = (VkBlendFactor)blending.alpha.srcFactor;
+                    colorBlendAttachment.dstAlphaBlendFactor = (VkBlendFactor)blending.alpha.dstFactor;
+                    colorBlendAttachment.alphaBlendOp = (VkBlendOp)blending.alpha.op;
                 }
                 else colorBlendAttachment.blendEnable = VK_FALSE;
                 colorBlendAttachments[colorAttachmentCount] = colorBlendAttachment;

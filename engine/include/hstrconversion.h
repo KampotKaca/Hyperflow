@@ -5,7 +5,7 @@
 
 namespace hf
 {
-    constexpr uint32_t fnv1a(std::string_view str)
+    constexpr uint32_t fnv1a(const std::string_view str)
     {
         uint32_t hash = 2166136261u;
         for (const char c : str)
@@ -16,7 +16,7 @@ namespace hf
         return hash;
     }
 
-    constexpr BufferDataType STRING_TO_BUFFER_DATA_TYPE(std::string_view str)
+    constexpr BufferDataType STRING_TO_BUFFER_DATA_TYPE(const std::string_view str)
     {
         switch (fnv1a(str))
         {
@@ -31,24 +31,22 @@ namespace hf
         case fnv1a("F16"): return BufferDataType::F16;
         case fnv1a("F32"): return BufferDataType::F32;
         case fnv1a("F64"): return BufferDataType::F64;
-        default:
-            throw std::invalid_argument("Unknown BufferDataType string");
+        default: throw std::invalid_argument("Unknown BufferDataType string");
         }
     }
 
-    constexpr BufferMemoryType STRING_TO_BUFFER_MEMORY_TYPE(std::string_view str)
+    constexpr BufferMemoryType STRING_TO_BUFFER_MEMORY_TYPE(const std::string_view str)
     {
         switch (fnv1a(str))
         {
         case fnv1a("Static"):    return BufferMemoryType::Static;
         case fnv1a("WriteOnly"): return BufferMemoryType::WriteOnly;
         case fnv1a("ReadWrite"): return BufferMemoryType::ReadWrite;
-        default:
-            throw std::invalid_argument("Unknown BufferMemoryType string");
+        default: throw std::invalid_argument("Unknown BufferMemoryType string");
         }
     }
 
-    constexpr MeshDataType STRING_TO_MESH_DATA_TYPE(std::string_view str)
+    constexpr MeshDataType STRING_TO_MESH_DATA_TYPE(const std::string_view str)
     {
         switch (fnv1a(str))
         {
@@ -56,12 +54,11 @@ namespace hf
         case fnv1a("Normal"):   return MeshDataType::Normal;
         case fnv1a("Color"):    return MeshDataType::Color;
         case fnv1a("TexCoord"): return MeshDataType::TexCoord;
-        default:
-            throw std::invalid_argument("Unknown MeshDataType string");
+        default: throw std::invalid_argument("Unknown MeshDataType string");
         }
     }
 
-    constexpr TextureChannel STRING_TO_TEXTURE_CHANNEL(std::string_view str)
+    constexpr TextureChannel STRING_TO_TEXTURE_CHANNEL(const std::string_view str)
     {
         switch (fnv1a(str))
         {
@@ -70,12 +67,11 @@ namespace hf
         case fnv1a("GrayAlpha"): return TextureChannel::GrayAlpha;
         case fnv1a("RGB"): return TextureChannel::RGB;
         case fnv1a("RGBA"): return TextureChannel::RGBA;
-        default:
-            throw std::invalid_argument("Unknown TextureChannel string");
+        default: throw std::invalid_argument("Unknown TextureChannel string");
         }
     }
 
-    constexpr TextureAspectFlags STRING_TO_TEXTURE_ASPECT_FLAGS(std::string_view str)
+    constexpr TextureAspectFlags STRING_TO_TEXTURE_ASPECT_FLAGS(const std::string_view str)
     {
         switch (fnv1a(str))
         {
@@ -87,12 +83,11 @@ namespace hf
         case fnv1a("Plane0"): return TextureAspectFlags::Plane0;
         case fnv1a("Plane1"): return TextureAspectFlags::Plane1;
         case fnv1a("Plane2"): return TextureAspectFlags::Plane2;
-        default:
-            throw std::invalid_argument("Unknown TextureAspectFlags string");
+        default: throw std::invalid_argument("Unknown TextureAspectFlags string");
         }
     }
 
-    constexpr TextureFormat STRING_TO_TEXTURE_FORMAT(std::string_view str)
+    constexpr TextureFormat STRING_TO_TEXTURE_FORMAT(const std::string_view str)
     {
         switch (fnv1a(str))
         {
@@ -299,23 +294,21 @@ namespace hf
         case fnv1a("ASTC_12x12_Unorm_Block"): return TextureFormat::ASTC_12x12_Unorm_Block; //183
         case fnv1a("ASTC_12x12_Srgb_Block"):  return TextureFormat::ASTC_12x12_Srgb_Block;  //184
 
-        default:
-            throw std::invalid_argument("Unknown TextureFormat string");
+        default: throw std::invalid_argument("Unknown TextureFormat string");
         }
     }
 
-    constexpr TextureTiling STRING_TO_TEXTURE_TILING(std::string_view str)
+    constexpr TextureTiling STRING_TO_TEXTURE_TILING(const std::string_view str)
     {
         switch (fnv1a(str))
         {
         case fnv1a("Optimal"): return TextureTiling::Optimal;
         case fnv1a("Linear"):  return TextureTiling::Linear;
-        default:
-            throw std::invalid_argument("Unknown TextureChannel string");
+        default: throw std::invalid_argument("Unknown TextureChannel string");
         }
     }
 
-    constexpr TextureUsageFlags STRING_TO_TEXTURE_USAGE_FLAGS(std::string_view str)
+    constexpr TextureUsageFlags STRING_TO_TEXTURE_USAGE_FLAGS(const std::string_view str)
     {
         switch (fnv1a(str))
         {
@@ -329,12 +322,29 @@ namespace hf
         case fnv1a("Transient"):    return TextureUsageFlags::Transient;
         case fnv1a("Input"):        return TextureUsageFlags::Input;
         case fnv1a("Host"):         return TextureUsageFlags::Host;
-        default:
-            throw std::invalid_argument("Unknown TextureUsageFlags string");
+        default: throw std::invalid_argument("Unknown TextureUsageFlags string");
         }
     }
 
-    constexpr TextureResultLayoutType STRING_TO_TEXTURE_RESULT_LAYOUT_TYPE(std::string_view str)
+    constexpr ShaderUsageStageFlags STRING_TO_SHADER_USAGE_FLAGS(const std::string_view str)
+    {
+        switch (fnv1a(str))
+        {
+        case fnv1a("None"):                   return ShaderUsageStageFlags::None;
+        case fnv1a("Vertex"):                 return ShaderUsageStageFlags::Vertex;
+        case fnv1a("TessellationControl"):    return ShaderUsageStageFlags::TessellationControl;
+        case fnv1a("TessellationEvaluation"): return ShaderUsageStageFlags::TessellationEvaluation;
+        case fnv1a("Geometry"):               return ShaderUsageStageFlags::Geometry;
+        case fnv1a("Fragment"):               return ShaderUsageStageFlags::Fragment;
+        case fnv1a("Compute"):                return ShaderUsageStageFlags::Compute;
+        case fnv1a("Default"):                return ShaderUsageStageFlags::Default;
+        case fnv1a("AllGraphics"):            return ShaderUsageStageFlags::AllGraphics;
+        case fnv1a("All"):                    return ShaderUsageStageFlags::All;
+        default: throw std::invalid_argument("Unknown TextureUsageFlags string");
+        }
+    }
+
+    constexpr TextureResultLayoutType STRING_TO_TEXTURE_RESULT_LAYOUT_TYPE(const std::string_view str)
     {
         switch (fnv1a(str))
         {
@@ -356,9 +366,283 @@ namespace hf
         case fnv1a("ReadOnly"):                 return TextureResultLayoutType::ReadOnly;
         case fnv1a("Attachment"):               return TextureResultLayoutType::Attachment;
         case fnv1a("RenderingLocalRead"):       return TextureResultLayoutType::RenderingLocalRead;
-        default:
-            throw std::invalid_argument("Unknown TextureUsageFlags string");
+        default: throw std::invalid_argument("Unknown TextureUsageFlags string");
         }
+    }
+
+    constexpr MipMapMode STRING_TO_MIP_MAP_MODE(const std::string_view str)
+    {
+        switch (fnv1a(str))
+        {
+        case fnv1a("Nearest"): return MipMapMode::Nearest;
+        case fnv1a("Linear"):  return MipMapMode::Linear;
+        default: throw std::invalid_argument("Unknown MipMap mode string");
+        }
+    }
+
+    constexpr TextureFilter STRING_TO_TEXTURE_FILTER(const std::string_view str)
+    {
+        switch (fnv1a(str))
+        {
+        case fnv1a("Point"):     return TextureFilter::Point;
+        case fnv1a("Bilinear"):  return TextureFilter::Bilinear;
+        default: throw std::invalid_argument("Unknown MipMap mode string");
+        }
+    }
+
+    constexpr TextureRepeatMode STRING_TO_TEXTURE_REPEAT_MODE(const std::string_view str)
+    {
+        switch (fnv1a(str))
+        {
+        case fnv1a("Repeat"):            return TextureRepeatMode::Repeat;
+        case fnv1a("MirroredRepeat"):    return TextureRepeatMode::MirroredRepeat;
+        case fnv1a("ClampToEdge"):       return TextureRepeatMode::ClampToEdge;
+        case fnv1a("ClampToBorder"):     return TextureRepeatMode::ClampToBorder;
+        case fnv1a("MirrorClampToEdge"): return TextureRepeatMode::MirrorClampToEdge;
+        default: throw std::invalid_argument("Unknown Texture Repeat Mode string");
+        }
+    }
+
+    constexpr ComparisonOperation STRING_TO_COMPARISON_OPERATION(const std::string_view str)
+    {
+        switch (fnv1a(str))
+        {
+        case fnv1a("None"):           return ComparisonOperation::None;
+        case fnv1a("Never"):          return ComparisonOperation::Never;
+        case fnv1a("Less"):           return ComparisonOperation::Less;
+        case fnv1a("Equal"):          return ComparisonOperation::Equal;
+        case fnv1a("LessOrEqual"):    return ComparisonOperation::LessOrEqual;
+        case fnv1a("Greater"):        return ComparisonOperation::Greater;
+        case fnv1a("NotEqual"):       return ComparisonOperation::NotEqual;
+        case fnv1a("GreaterOrEqual"): return ComparisonOperation::GreaterOrEqual;
+        case fnv1a("Always"):         return ComparisonOperation::Always;
+        default: throw std::invalid_argument("Unknown Comparison Operation string");
+        }
+    }
+
+    constexpr DepthComparisonFunction STRING_TO_DEPTH_COMPARISON_FUNCTION(const std::string_view str)
+    {
+        switch (fnv1a(str))
+        {
+        case fnv1a("Never"):          return DepthComparisonFunction::Never;
+        case fnv1a("Less"):           return DepthComparisonFunction::Less;
+        case fnv1a("Equal"):          return DepthComparisonFunction::Equal;
+        case fnv1a("LessOrEqual"):    return DepthComparisonFunction::LessOrEqual;
+        case fnv1a("Greater"):        return DepthComparisonFunction::Greater;
+        case fnv1a("NotEqual"):       return DepthComparisonFunction::NotEqual;
+        case fnv1a("GreaterOrEqual"): return DepthComparisonFunction::GreaterOrEqual;
+        case fnv1a("Always"):         return DepthComparisonFunction::Always;
+        default: throw std::invalid_argument("Unknown Depth Comparison Function string");
+        }
+    }
+
+    constexpr StencilOperation STRING_TO_STENCIL_OPERATION(const std::string_view str)
+    {
+        switch (fnv1a(str))
+        {
+        case fnv1a("Keep"):              return StencilOperation::Keep;
+        case fnv1a("Zero"):              return StencilOperation::Zero;
+        case fnv1a("Replace"):           return StencilOperation::Replace;
+        case fnv1a("IncrementAndClamp"): return StencilOperation::IncrementAndClamp;
+        case fnv1a("DecrementAndClamp"): return StencilOperation::DecrementAndClamp;
+        case fnv1a("Invert"):            return StencilOperation::Invert;
+        case fnv1a("IncrementAndWrap"):  return StencilOperation::IncrementAndWrap;
+        case fnv1a("DecrementAndWrap"):  return StencilOperation::DecrementAndWrap;
+        default: throw std::invalid_argument("Unknown Stencil Operation string");
+        }
+    }
+
+    constexpr MeshPrimitiveTopologyType STRING_TO_PRIMITIVE_TOPOLOGY_TYPE(const std::string_view str)
+    {
+        switch (fnv1a(str))
+        {
+        case fnv1a("PointList"):                  return MeshPrimitiveTopologyType::PointList;
+        case fnv1a("LineList"):                   return MeshPrimitiveTopologyType::LineList;
+        case fnv1a("LineStrip"):                  return MeshPrimitiveTopologyType::LineStrip;
+        case fnv1a("TriangleList"):               return MeshPrimitiveTopologyType::TriangleList;
+        case fnv1a("TriangleStrip"):              return MeshPrimitiveTopologyType::TriangleStrip;
+        case fnv1a("TriangleFan"):                return MeshPrimitiveTopologyType::TriangleFan;
+        case fnv1a("LineListWithAdjacency"):      return MeshPrimitiveTopologyType::LineListWithAdjacency;
+        case fnv1a("LineStripWithAdjacency"):     return MeshPrimitiveTopologyType::LineStripWithAdjacency;
+        case fnv1a("TriangleListWithAdjacency"):  return MeshPrimitiveTopologyType::TriangleListWithAdjacency;
+        case fnv1a("TriangleStripWithAdjacency"): return MeshPrimitiveTopologyType::TriangleStripWithAdjacency;
+        case fnv1a("PatchList"):                  return MeshPrimitiveTopologyType::PatchList;
+        default: throw std::invalid_argument("Unknown Mesh Primitive Topology Type string");
+        }
+    }
+
+    constexpr ShaderCullMode STRING_TO_SHADER_CULL_MODE(const std::string_view str)
+    {
+        switch (fnv1a(str))
+        {
+        case fnv1a("None"):  return ShaderCullMode::None;
+        case fnv1a("Front"): return ShaderCullMode::Front;
+        case fnv1a("Back"):  return ShaderCullMode::Back;
+        case fnv1a("Both"):  return ShaderCullMode::Both;
+        default: throw std::invalid_argument("Unknown Shader Cull Mode string");
+        }
+    }
+
+    constexpr ShaderFaceDirection STRING_TO_SHADER_FACE_DIRECTION(const std::string_view str)
+    {
+        switch (fnv1a(str))
+        {
+        case fnv1a("CounterClockwise"): return ShaderFaceDirection::CounterClockwise;
+        case fnv1a("Clockwise"):        return ShaderFaceDirection::Clockwise;
+        default: throw std::invalid_argument("Unknown Shader Face Direction string");
+        }
+    }
+
+    constexpr MeshPolygonMode STRING_TO_MESH_POLYGON_MODE(const std::string_view str)
+    {
+        switch (fnv1a(str))
+        {
+        case fnv1a("Fill"):            return MeshPolygonMode::Fill;
+        case fnv1a("Line"):            return MeshPolygonMode::Line;
+        case fnv1a("Point"):           return MeshPolygonMode::Point;
+        case fnv1a("FillRectangleNV"): return MeshPolygonMode::FillRectangleNV;
+        default: throw std::invalid_argument("Unknown Mesh Polygon Mode string");
+        }
+    }
+
+    constexpr ColorMaskingFlags STRING_TO_COLOR_MASKING_FLAGS(const std::string_view str)
+    {
+        switch (fnv1a(str))
+        {
+        case fnv1a("Red"):   return ColorMaskingFlags::Red;
+        case fnv1a("Green"): return ColorMaskingFlags::Green;
+        case fnv1a("Blue"):  return ColorMaskingFlags::Blue;
+        case fnv1a("Alpha"): return ColorMaskingFlags::Alpha;
+        case fnv1a("All"):   return ColorMaskingFlags::All;
+        default: throw std::invalid_argument("Unknown Color Masking Flags string");
+        }
+    }
+
+    constexpr ShaderBlendOp STRING_TO_SHADER_BLEND_OPERATION(const std::string_view str)
+    {
+        switch (fnv1a(str))
+        {
+        case fnv1a("Clear"):        return ShaderBlendOp::Clear;
+        case fnv1a("And"):          return ShaderBlendOp::And;
+        case fnv1a("AndReverse"):   return ShaderBlendOp::AndReverse;
+        case fnv1a("Copy"):         return ShaderBlendOp::Copy;
+        case fnv1a("AndInverted"):  return ShaderBlendOp::AndInverted;
+        case fnv1a("NoOp"):         return ShaderBlendOp::NoOp;
+        case fnv1a("XOr"):          return ShaderBlendOp::XOr;
+        case fnv1a("Or"):           return ShaderBlendOp::Or;
+        case fnv1a("Nor"):          return ShaderBlendOp::Nor;
+        case fnv1a("Equivalent"):   return ShaderBlendOp::Equivalent;
+        case fnv1a("Invert"):       return ShaderBlendOp::Invert;
+        case fnv1a("OrReverse"):    return ShaderBlendOp::OrReverse;
+        case fnv1a("CopyInverted"): return ShaderBlendOp::CopyInverted;
+        case fnv1a("OrInverted"):   return ShaderBlendOp::OrInverted;
+        case fnv1a("Nand"):         return ShaderBlendOp::Nand;
+        case fnv1a("Set"):          return ShaderBlendOp::Set;
+        default: throw std::invalid_argument("Unknown Shader Blend Operation string");
+        }
+    }
+
+    constexpr ColorBlendFactorType STRING_TO_COLOR_BLEND_FACTOR_TYPE(const std::string_view str)
+    {
+        switch (fnv1a(str))
+        {
+        case fnv1a("Zero"):                  return ColorBlendFactorType::Zero;
+        case fnv1a("One"):                   return ColorBlendFactorType::One;
+        case fnv1a("SrcColor"):              return ColorBlendFactorType::SrcColor;
+        case fnv1a("OneMinusSrcColor"):      return ColorBlendFactorType::OneMinusSrcColor;
+        case fnv1a("DstColor"):              return ColorBlendFactorType::DstColor;
+        case fnv1a("OneMinusDstColor"):      return ColorBlendFactorType::OneMinusDstColor;
+        case fnv1a("SrcAlpha"):              return ColorBlendFactorType::SrcAlpha;
+        case fnv1a("OneMinusSrcAlpha"):      return ColorBlendFactorType::OneMinusSrcAlpha;
+        case fnv1a("DstAlpha"):              return ColorBlendFactorType::DstAlpha;
+        case fnv1a("OneMinusDstAlpha"):      return ColorBlendFactorType::OneMinusDstAlpha;
+        case fnv1a("ConstantColor"):         return ColorBlendFactorType::ConstantColor;
+        case fnv1a("OneMinusConstantColor"): return ColorBlendFactorType::OneMinusConstantColor;
+        case fnv1a("ConstantAlpha"):         return ColorBlendFactorType::ConstantAlpha;
+        case fnv1a("OneMinusConstantAlpha"): return ColorBlendFactorType::OneMinusConstantAlpha;
+        case fnv1a("SrcAlphaSaturate"):      return ColorBlendFactorType::SrcAlphaSaturate;
+        case fnv1a("Src1Color"):             return ColorBlendFactorType::Src1Color;
+        case fnv1a("OneMinusSrc1Color"):     return ColorBlendFactorType::OneMinusSrc1Color;
+        case fnv1a("Src1Alpha"):             return ColorBlendFactorType::Src1Alpha;
+        case fnv1a("OneMinusSrc1Alpha"):     return ColorBlendFactorType::OneMinusSrc1Alpha;
+        default: throw std::invalid_argument("Unknown Color Masking Flags string");
+        }
+    }
+
+    constexpr ColorBlendOp STRING_TO_COLOR_BLEND_OPERATION(const std::string_view str)
+    {
+        switch (fnv1a(str))
+        {
+        case fnv1a("Add"):              return ColorBlendOp::Add;
+        case fnv1a("Subtract"):         return ColorBlendOp::Subtract;
+        case fnv1a("ReverseSubtract"):  return ColorBlendOp::ReverseSubtract;
+        case fnv1a("Min"):              return ColorBlendOp::Min;
+        case fnv1a("Max"):              return ColorBlendOp::Max;
+        case fnv1a("Zero"):             return ColorBlendOp::Zero;
+        case fnv1a("Src"):              return ColorBlendOp::Src;
+        case fnv1a("Dst"):              return ColorBlendOp::Dst;
+        case fnv1a("SrcOver"):          return ColorBlendOp::SrcOver;
+        case fnv1a("DstOver"):          return ColorBlendOp::DstOver;
+        case fnv1a("SrcIn"):            return ColorBlendOp::SrcIn;
+        case fnv1a("DstIn"):            return ColorBlendOp::DstIn;
+        case fnv1a("SrcOut"):           return ColorBlendOp::SrcOut;
+        case fnv1a("DstOut"):           return ColorBlendOp::DstOut;
+        case fnv1a("SrcAtop"):          return ColorBlendOp::SrcAtop;
+        case fnv1a("DstAtop"):          return ColorBlendOp::DstAtop;
+        case fnv1a("Xor"):              return ColorBlendOp::Xor;
+        case fnv1a("Multiply"):         return ColorBlendOp::Multiply;
+        case fnv1a("Screen"):           return ColorBlendOp::Screen;
+        case fnv1a("Overlay"):          return ColorBlendOp::Overlay;
+        case fnv1a("Darken"):           return ColorBlendOp::Darken;
+        case fnv1a("Lighten"):          return ColorBlendOp::Lighten;
+        case fnv1a("ColorDodge"):       return ColorBlendOp::ColorDodge;
+        case fnv1a("ColorBurn"):        return ColorBlendOp::ColorBurn;
+        case fnv1a("HardLight"):        return ColorBlendOp::HardLight;
+        case fnv1a("SoftLight"):        return ColorBlendOp::SoftLight;
+        case fnv1a("Difference"):       return ColorBlendOp::Difference;
+        case fnv1a("Exclusion"):        return ColorBlendOp::Exclusion;
+        case fnv1a("Invert"):           return ColorBlendOp::Invert;
+        case fnv1a("InvertRGB"):        return ColorBlendOp::InvertRGB;
+        case fnv1a("LinearDodge"):      return ColorBlendOp::LinearDodge;
+        case fnv1a("LinearBurn"):       return ColorBlendOp::LinearBurn;
+        case fnv1a("VividLight"):       return ColorBlendOp::VividLight;
+        case fnv1a("LinearLight"):      return ColorBlendOp::LinearLight;
+        case fnv1a("PinLight"):         return ColorBlendOp::PinLight;
+        case fnv1a("HardMix"):          return ColorBlendOp::HardMix;
+        case fnv1a("HslHue"):           return ColorBlendOp::HslHue;
+        case fnv1a("HslSaturation"):    return ColorBlendOp::HslSaturation;
+        case fnv1a("HslColor"):         return ColorBlendOp::HslColor;
+        case fnv1a("HslLuminosity"):    return ColorBlendOp::HslLuminosity;
+        case fnv1a("Plus"):             return ColorBlendOp::Plus;
+        case fnv1a("PlusClamped"):      return ColorBlendOp::PlusClamped;
+        case fnv1a("PlusClampedAlpha"): return ColorBlendOp::PlusClampedAlpha;
+        case fnv1a("PlusDarken"):       return ColorBlendOp::PlusDarken;
+        case fnv1a("Minus"):            return ColorBlendOp::Minus;
+        case fnv1a("MinusClamped"):     return ColorBlendOp::MinusClamped;
+        case fnv1a("Contrast"):         return ColorBlendOp::Contrast;
+        case fnv1a("InvertOVG"):        return ColorBlendOp::InvertOVG;
+        case fnv1a("Red"):              return ColorBlendOp::Red;
+        case fnv1a("Green"):            return ColorBlendOp::Green;
+        case fnv1a("Blue"):             return ColorBlendOp::Blue;
+        default: throw std::invalid_argument("Unknown Color Masking Flags string");
+        }
+    }
+
+    inline bool START_READING(const char* assetPath, std::vector<char>& metadata)
+    {
+        if (!utils::FileExists(assetPath))
+        {
+            LOG_ERROR("[Hyperflow] Unable to find meta file: %s", assetPath);
+            return false;
+        }
+
+        if (!utils::ReadFile(assetPath, metadata))
+        {
+            LOG_ERROR("[Hyperflow] Unable to read meta: %s", assetPath);
+            return false;
+        }
+        metadata.push_back('\0');
+        return true;
     }
 }
 

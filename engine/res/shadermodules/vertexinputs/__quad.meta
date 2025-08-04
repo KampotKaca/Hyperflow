@@ -1,0 +1,5 @@
+attributes:
+  - __quad
+
+topology: TriangleList
+enablePrimitiveRestart: false

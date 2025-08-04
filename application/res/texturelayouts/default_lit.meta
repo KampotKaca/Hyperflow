@@ -1,0 +1,5 @@
+bindings:
+  - bindingId: 0
+    arraySize: 1
+    usageFlags:
+      - Default

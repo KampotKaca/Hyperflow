@@ -10,8 +10,7 @@ namespace hf
         explicit Texture(const TextureCreationInfo& info);
         ~Texture();
 
-        std::string filePath{};
-        bool useAbsolutePath{};
+        FilePath path{};
         TextureChannel desiredChannel = TextureChannel::RGBA;
         TextureDetails details{};
         uint32_t mipLevels{};

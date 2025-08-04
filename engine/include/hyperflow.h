@@ -18,11 +18,9 @@ namespace hf
 	ShaderLayout Define(const ShaderLayoutDefinitionInfo& info);
 	TextureSampler Define(const TextureSamplerDefinitionInfo& info);
 	TextureLayout Define(const TextureLayoutDefinitionInfo& info);
-	BufferAttrib Define(const BufferAttribDefinitionInfo& info);
+	VertexBufferAttribute Define(const VertexBufferAttributeDefinitionInfo& info);
 	Buffer Define(const BufferDefinitionInfo& info);
 	Buffer Define(const StorageBufferDefinitionInfo& info);
-
-	BufferAttrib DefineBufferAttrib(const char* assetPath);
 
 	Ref<Window> Create(const WindowCreationInfo &data, const Ref<Window> &parent);
 	//No need to destroy the material, if it goes out of scope it is automatically freed!
@@ -67,7 +65,11 @@ namespace hf
 	void Destroy(const Ref<AudioPlayer>* pPlayers, uint32_t count);
 	void Destroy(const Ref<AudioPlayer3D>* pPlayers, uint32_t count);
 
-	Ref<Mesh> CreateMeshAsset(const char* assetPath);
+	VertexBufferAttribute DefineVertexAttributeAsset(const char* assetPath);
+	TextureLayout DefineTextureLayoutAsset(const char* assetPath);
+	TextureSampler DefineTextureSamplerAsset(const char* assetPath);
+
+    Ref<Mesh> CreateMeshAsset(const char* assetPath);
 	Ref<Texture> CreateTextureAsset(const char* assetPath);
 	Ref<Cubemap> CreateCubemapAsset(const char* assetPath);
 
@@ -223,6 +225,10 @@ namespace hf
 	}
     //endregion
 
+    VertexBufferAttribute FindVertexAttribute(const char* id);
+    TextureLayout FindTextureLayout(const char* id);
+    TextureSampler FindTextureSampler(const char* id);
+
 	uint16_t GetBufferIndex(const Ref<Material>& mat);
 
 	MeshStats GetStats(const Ref<Mesh>& mesh);
@@ -324,7 +330,10 @@ namespace hf
 	    GlobalMemoryStatistics GetGlobalMemoryStatistics();
 	    ThreadMemoryStatistics GetThreadMemoryStatistics();
 
-		void ReadTextureDetails(void* yamlTree, void* yamlRoot, TextureDetails& result);
+	    void ReadVertexInputModule   (const char* assetPath, ShaderLibraryVertexInputModuleInfo& result);
+	    void ReadPreRasterModule     (const char* assetPath, ShaderLayout layout, ShaderLibraryPreRasterModuleInfo& result);
+	    void ReadFragmentModule      (const char* assetPath, ShaderLayout layout, ShaderLibraryFragmentModuleInfo& result);
+	    void ReadFragmentOutputModule(const char* assetPath, ShaderLibraryFragmentOutputModuleInfo& result);
 	}
 
 	namespace primitives
@@ -332,12 +341,10 @@ namespace hf
 		Ref<VertBuffer> GetQuadBuffer();
 		Ref<VertBuffer>* GetQuadBufferP();
 
-		BufferAttrib GetQuadBufferAttrib();
 		Buffer GetGlobalUniformBuffer();
 		Buffer GetMaterialStorageBuffer();
 		void BindGlobalUniformBuffer(const Ref<Renderer>& rn);
 
-		BufferAttrib GetCubeBufferAttrib();
 		TextureSampler GetCubemapSampler();
 
 		Ref<Mesh> GetCube();

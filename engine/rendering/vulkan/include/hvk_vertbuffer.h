@@ -12,7 +12,7 @@ namespace hf
         ~VkVertBuffer() override = default;
 
         uint32_t vertCount = 0;
-        BufferAttrib attrib{};
+        VertexBufferAttribute attrib{};
     };
 }
 

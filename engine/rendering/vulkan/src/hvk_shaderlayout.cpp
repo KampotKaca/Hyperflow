@@ -11,7 +11,7 @@ namespace hf
         pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
 
         VkPushConstantRange pushConstant{};
-        if (info.pushConstant.usageFlags != ShaderUsageStage::None &&
+        if (info.pushConstant.usageFlags != ShaderUsageStageFlags::None &&
             pushConstantInfo.sizeInBytes > 0)
         {
             pushConstant.stageFlags = (VkShaderStageFlags)pushConstantInfo.usageFlags;

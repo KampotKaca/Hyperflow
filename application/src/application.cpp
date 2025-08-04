@@ -11,7 +11,6 @@ namespace app
 	{
 		TextureSamplerDefineAll();
 		TextureLayoutDefineAll();
-		BufferAttributeDefineAll();
 		UniformDefineAll();
 		ShaderLayoutDefineAll();
 		DebugDefine();

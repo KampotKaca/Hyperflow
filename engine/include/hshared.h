@@ -112,7 +112,7 @@ namespace hf
 	struct Material;
 	struct RenderTexture;
 
-	typedef uint32_t BufferAttrib;
+	typedef uint32_t VertexBufferAttribute;
 	typedef uint32_t Buffer;
 	typedef uint32_t TextureLayout;
 	typedef uint32_t TextureSampler;
@@ -122,23 +122,23 @@ namespace hf
 	{
 		BufferDataType type = BufferDataType::F32;
 		uint32_t size = 1;
-		//Do not implement lSize
-		uint32_t lSize = 1;
+		uint32_t lSize = 1; //Do not implement lSize
 	};
 
-	struct BufferAttribDefinitionInfo
+	struct VertexBufferAttributeDefinitionInfo
 	{
 	    BufferInputRate inputRate = BufferInputRate::Vertex;
 		uint32_t bindingId = 0;
+		uint32_t locationOffset = 0;
 		uint32_t formatCount = 0;
 		BufferAttribFormat* pFormats = nullptr;
 	};
 
 	struct VertBufferCreationInfo
 	{
-		BufferAttrib bufferAttrib = 0;
+		VertexBufferAttribute bufferAttrib = 0;
 		BufferMemoryType memoryType = BufferMemoryType::Static;
-		BufferUsageType usageFlags = BufferUsageType::Vertex;
+		BufferUsageTypeFlags usageFlags = BufferUsageTypeFlags::Vertex;
 		uint32_t vertexCount = 0;
 		void* pVertices = nullptr;
 	};
@@ -147,7 +147,7 @@ namespace hf
 	{
 		BufferDataType indexFormat = BufferDataType::U16;
 		BufferMemoryType memoryType = BufferMemoryType::Static;
-		BufferUsageType usageFlags = BufferUsageType::Index;
+		BufferUsageTypeFlags usageFlags = BufferUsageTypeFlags::Index;
 		uint32_t indexCount = 0;
 		void* pIndices = nullptr;
 	};
@@ -177,8 +177,8 @@ namespace hf
 
 	struct ShaderBlendingOptions
 	{
-	    BlendingOptions colorBlendingOptions{};
-	    BlendingOptions alphaBlendingOptions
+	    BlendingOptions color{};
+	    BlendingOptions alpha
 	    {
 	        .srcFactor = ColorBlendFactorType::One,
             .dstFactor = ColorBlendFactorType::Zero,
@@ -199,8 +199,9 @@ namespace hf
 	    MeshPolygonMode polygonMode = MeshPolygonMode::Fill;
 	    bool enableRasterizerDiscard = false;
 	    bool enableDepthClamping = false;
-	    std::optional<ShaderDepthBiasOptions> biasOptions{};
 	    float lineWidth = 1.0f; //Width of the line in Topology Lines mode.
+
+	    std::optional<ShaderDepthBiasOptions> biasOptions{};
 	};
 
 	struct ShaderDepthStencilOptions
@@ -229,7 +230,7 @@ namespace hf
     struct ColorAttachmentSettings
     {
         ColorMaskingFlags colorWriteMask = ColorMaskingFlags::All;
-        std::optional<ShaderBlendingOptions> blending{};
+        std::optional<ShaderBlendingOptions> blendingOptions{};
     };
 
     template<typename T>
@@ -241,7 +242,7 @@ namespace hf
 
     struct ShaderLibraryVertexInputModuleInfo
     {
-        BufferAttrib pAttributes[MAX_VERTEX_INPUT_BUFFER_ATTRIBUTES]{};
+        VertexBufferAttribute pAttributes[MAX_VERTEX_INPUT_BUFFER_ATTRIBUTES]{};
         uint32_t attributeCount{};
         MeshPrimitiveTopologyType topology = MeshPrimitiveTopologyType::TriangleList;
         bool enablePrimitiveRestart = false;
@@ -303,7 +304,7 @@ namespace hf
 
 	struct BufferBindingInfo
 	{
-		ShaderUsageStage usageFlags = ShaderUsageStage::Vertex | ShaderUsageStage::Fragment;
+		ShaderUsageStageFlags usageFlags = ShaderUsageStageFlags::Vertex | ShaderUsageStageFlags::Fragment;
 
 		//this variable describes this specific uniform buffers array size,
 		//example:
@@ -340,7 +341,7 @@ namespace hf
 	struct TextureLayoutBindingInfo
 	{
 		uint32_t bindingId{};
-		ShaderUsageStage usageFlags = ShaderUsageStage::Vertex | ShaderUsageStage::Fragment;
+		ShaderUsageStageFlags usageFlags = ShaderUsageStageFlags::Vertex | ShaderUsageStageFlags::Fragment;
 
 		//this variable describes this specific uniform buffers array size,
 		//example:
@@ -360,7 +361,7 @@ namespace hf
 	//on vulkan it directly translates to push constant, but on other pipelines ...
 	struct PushConstantInfo
 	{
-		ShaderUsageStage usageFlags = ShaderUsageStage::None;
+		ShaderUsageStageFlags usageFlags = ShaderUsageStageFlags::None;
 		uint32_t sizeInBytes{};
 	};
 
@@ -411,8 +412,7 @@ namespace hf
 
 	struct TextureCreationInfo
 	{
-		const char* filePath{};
-		bool useAbsolutePath{};
+	    FilePath filePath{};
 		TextureChannel desiredChannel = TextureChannel::RGBA;
 		uint32_t mipLevels = 1;
 		TextureDetails details{};
@@ -420,17 +420,17 @@ namespace hf
 
 	struct CubemapTexturePaths
 	{
-		const char* left{};
-		const char* right{};
-		const char* down{};
-		const char* up{};
-		const char* back{};
-		const char* front{};
+		FilePath left{};
+		FilePath right{};
+		FilePath down{};
+		FilePath up{};
+		FilePath back{};
+		FilePath front{};
 	};
 
 	struct CubemapCreationInfo
 	{
-		const char* folderPath{};
+		FilePath folderPath{};
 		TextureChannel desiredChannel = TextureChannel::RGBA;
 		uint32_t mipLevels = 1;
 		CubemapTexturePaths texturePaths{};
@@ -512,7 +512,7 @@ namespace hf
 
 	struct RenderAttachmentDependencyTarget
 	{
-		RenderPipelineStage stageMask = RenderPipelineStage::None;
+		RenderPipelineStageFlags stageMask = RenderPipelineStageFlags::None;
 		AccessType accessMask = AccessType::None;
 	    TextureResultLayoutType targetLayout = TextureResultLayoutType::Undefined;
 	};
@@ -524,13 +524,13 @@ namespace hf
 
 		RenderAttachmentDependencyTarget src
 		{
-			.stageMask = RenderPipelineStage::ColorAttachmentOutput,
+			.stageMask = RenderPipelineStageFlags::ColorAttachmentOutput,
 			.accessMask = AccessType::None,
 		    .targetLayout = TextureResultLayoutType::Undefined
 		};
 		RenderAttachmentDependencyTarget dst
 		{
-			.stageMask = RenderPipelineStage::ColorAttachmentOutput,
+			.stageMask = RenderPipelineStageFlags::ColorAttachmentOutput,
 			.accessMask = AccessType::ColorAttachmentWrite,
 		    .targetLayout = TextureResultLayoutType::Attachment
 		};
@@ -559,7 +559,7 @@ namespace hf
 	{
 		MeshDataType typeFlags = MeshDataType::Default;
 		BufferMemoryType memoryType = BufferMemoryType::Static;
-		BufferAttrib bufferAttrib{};
+		VertexBufferAttribute vertexAttribute{};
 	};
 
 	struct MeshCreationInfo

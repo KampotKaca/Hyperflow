@@ -16,7 +16,7 @@ namespace app
             {
                 .pushConstant =
                 {
-                    .usageFlags = hf::ShaderUsageStage::Vertex | hf::ShaderUsageStage::Fragment,
+                    .usageFlags = hf::ShaderUsageStageFlags::Vertex | hf::ShaderUsageStageFlags::Fragment,
                     .sizeInBytes = sizeof(DefaultPushConstant)
                 },
                 .pBuffers = buffers.data(),
@@ -35,7 +35,7 @@ namespace app
             {
                 .pushConstant =
                 {
-                    .usageFlags = hf::ShaderUsageStage::Vertex | hf::ShaderUsageStage::Fragment,
+                    .usageFlags = hf::ShaderUsageStageFlags::Vertex | hf::ShaderUsageStageFlags::Fragment,
                     .sizeInBytes = sizeof(UnlitColorPushConstant)
                 },
                 .pBuffers = buffers.data(),

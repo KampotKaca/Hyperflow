@@ -2,7 +2,7 @@
 #define HVK_GRAPHICS_H
 
 #include "hvk_shared.h"
-#include "hvk_bufferattrib.h"
+#include "hvk_vertexbufferattribute.h"
 #include "hvk_vertbuffer.h"
 #include "hvk_uniformbuffer.h"
 #include "hvk_shaderlayout.h"
@@ -199,7 +199,7 @@ namespace hf
         URef<VkDescriptorBuffer> bufferDescriptorBuffer{};
         URef<VkDescriptorBuffer> imageDescriptorBuffer{};
 
-        std::vector<URef<VkBufferAttrib>> bufferAttribs{};
+        std::vector<URef<VkVertexBufferAttribute>> bufferAttribs{};
         std::vector<URef<VkBoundBuffer>> boundBuffers{};
         std::vector<URef<VkTextureSampler>> textureSamplers{};
         std::vector<URef<VkTextureLayout>> textureLayouts{};

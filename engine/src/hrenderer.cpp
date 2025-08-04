@@ -161,7 +161,7 @@ namespace hf
 
             HF.renderingApi = RenderingApi{};
 
-            HF.graphicsResources.bufferAttribs.clear();
+            HF.graphicsResources.vertexAttributes.clear();
         }
 
         void CreateRenderer_i(Renderer* rn)

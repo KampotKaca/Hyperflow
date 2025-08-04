@@ -1,5 +1,4 @@
 #include "resources/shaders.h"
-#include "resources/bufferattributes.h"
 #include "resources/shaderlayouts.h"
 #include "resources/rendertextures.h"
 #include "../appconfig.h"
@@ -10,76 +9,53 @@ namespace app
 
     void ShaderLoadAll()
     {
-        hf::ShaderDrawOutputFormats shaderOutputFormats
-        {
-            .sampleMode = MSAA_MODE,
-            .depthFormat = DEPTH_STENCIL_MODE,
-        };
-
         //Shader Library!
         {
+            //--------------- Vertex Input --------------------------------------------------
             std::array vertexInputModules
             {
                 hf::ShaderLibraryModule<hf::ShaderLibraryVertexInputModuleInfo> //Default
                 {
                     .resultId = &APP_SHADERS.modules.defaultVertexInput,
-                    .module =
-                    {
-                        .pAttributes = { APP_BUFFER_ATTRIBUTES.pos_nor_tex },
-                        .attributeCount = 1,
-                    },
                 }
             };
+            hf::utils::ReadVertexInputModule("default", vertexInputModules[0].module);
+
+            //--------------- Pre Raster --------------------------------------------------
 
             std::array preRasterModules
             {
-                hf::ShaderLibraryModule<hf::ShaderLibraryPreRasterModuleInfo> //Default Lit Vertex Shader
+                hf::ShaderLibraryModule<hf::ShaderLibraryPreRasterModuleInfo> //Default Lit
                 {
                     .resultId = &APP_SHADERS.modules.default_lit_preRaster,
-                    .module =
-                    {
-                        .vertexShaderPath = { .path = "default_lit" },
-                        .options = hf::ShaderRasterizerOptions
-                        {
-                            // .cullMode = hf::ShaderCullMode::None,
-                            .polygonMode = hf::MeshPolygonMode::Fill,
-                            .lineWidth = 1.0f
-                        },
-                        .layout = APP_SHADER_LAYOUTS.default_lit
-                    }
                 },
-                hf::ShaderLibraryModule<hf::ShaderLibraryPreRasterModuleInfo> //Default Unlit Vertex Shader
+                hf::ShaderLibraryModule<hf::ShaderLibraryPreRasterModuleInfo> //Default Unlit
                 {
                     .resultId = &APP_SHADERS.modules.default_unlit_preRaster,
-                    .module =
-                    {
-                        .vertexShaderPath = { .path = "default_unlit" },
-                        .layout = APP_SHADER_LAYOUTS.default_unlit
-                    }
                 },
             };
+
+            hf::utils::ReadPreRasterModule("default_lit", APP_SHADER_LAYOUTS.default_lit, preRasterModules[0].module);
+            hf::utils::ReadPreRasterModule("default_unlit", APP_SHADER_LAYOUTS.default_unlit, preRasterModules[1].module);
+
+            //--------------- Fragment --------------------------------------------------
 
             std::array fragmentModules
             {
                 hf::ShaderLibraryModule<hf::ShaderLibraryFragmentModuleInfo> //Default Lit Fragment
                 {
                     .resultId = &APP_SHADERS.modules.default_lit_fragment,
-                    .module =
-                    {
-                        .fragmentShaderPath = { .path = "default_lit" },
-                        .layout = APP_SHADER_LAYOUTS.default_lit
-                    }
                 },
                 hf::ShaderLibraryModule<hf::ShaderLibraryFragmentModuleInfo> //Default Unlit Fragment
                 {
                     .resultId = &APP_SHADERS.modules.default_unlit_fragment,
-                    .module =
-                    {
-                        .fragmentShaderPath = { .path = "default_unlit" },
-                        .layout = APP_SHADER_LAYOUTS.default_unlit
-                    }
                 },
             };
+
+            hf::utils::ReadFragmentModule("default_lit", APP_SHADER_LAYOUTS.default_lit, fragmentModules[0].module);
+            hf::utils::ReadFragmentModule("default_unlit", APP_SHADER_LAYOUTS.default_unlit, fragmentModules[1].module);
+
+            //--------------- Fragment Output --------------------------------------------------
 
             std::array fragmentOutputModules
             {
@@ -88,55 +64,55 @@ namespace app
                     .resultId = &APP_SHADERS.modules.defaultFragmentOutput,
                 },
             };
+            hf::utils::ReadFragmentOutputModule("default", fragmentOutputModules[0].module);
 
-            const hf::ShaderLibraryCreationInfo info
-            {
-                .uniqueLibraryName = "app_shader_lib_cache",
-                .outputFormats = shaderOutputFormats,
-                .pVertexInputModules = vertexInputModules.data(),
-                .vertexInputModuleCount = vertexInputModules.size(),
-                .pPreRasterModules = preRasterModules.data(),
-                .preRasterModuleCount = preRasterModules.size(),
-                .pFragmentModules = fragmentModules.data(),
-                .fragmentModuleCount = fragmentModules.size(),
-                .pFragmentOutputModules = fragmentOutputModules.data(),
-                .fragmentOutputModuleCount = fragmentOutputModules.size()
-            };
+            hf::ShaderDrawOutputFormats shaderOutputFormats{};
+            shaderOutputFormats.sampleMode = MSAA_MODE;
+            shaderOutputFormats.depthFormat = DEPTH_STENCIL_MODE;
+
+            hf::ShaderLibraryCreationInfo info{};
+            info.uniqueLibraryName         = "app_shader_lib_cache";
+            info.outputFormats             = shaderOutputFormats;
+            info.pVertexInputModules       = vertexInputModules.data();
+            info.vertexInputModuleCount    = vertexInputModules.size();
+            info.pPreRasterModules         = preRasterModules.data();
+            info.preRasterModuleCount      = preRasterModules.size();
+            info.pFragmentModules          = fragmentModules.data();
+            info.fragmentModuleCount       = fragmentModules.size();
+            info.pFragmentOutputModules    = fragmentOutputModules.data();
+            info.fragmentOutputModuleCount = fragmentOutputModules.size();
+
             APP_SHADERS.library = Create(info);
         }
 
         //Default Lit Shader
         {
-            const hf::ShaderCreationInfo shaderInfo
-            {
-                .layout = APP_SHADER_LAYOUTS.default_lit,
-                .library = APP_SHADERS.library,
-                .modules =
-                {
-                    .vertexInputModuleId = APP_SHADERS.modules.defaultVertexInput,
-                    .preRasterModuleId = APP_SHADERS.modules.default_lit_preRaster,
-                    .fragmentModuleId = APP_SHADERS.modules.default_lit_fragment,
-                    .fragmentOutputModuleId = APP_SHADERS.modules.defaultFragmentOutput
-                }
-            };
+            hf::ShaderModulesInfo moduleInfo{};
+            moduleInfo.vertexInputModuleId    = APP_SHADERS.modules.defaultVertexInput;
+            moduleInfo.preRasterModuleId      = APP_SHADERS.modules.default_lit_preRaster;
+            moduleInfo.fragmentModuleId       = APP_SHADERS.modules.default_lit_fragment;
+            moduleInfo.fragmentOutputModuleId = APP_SHADERS.modules.defaultFragmentOutput;
+
+            hf::ShaderCreationInfo shaderInfo{};
+            shaderInfo.layout  = APP_SHADER_LAYOUTS.default_lit;
+            shaderInfo.library = APP_SHADERS.library;
+            shaderInfo.modules = moduleInfo;
 
             APP_SHADERS.default_lit = hf::Create(shaderInfo);
         }
 
         //Default Unlit shader
         {
-            const hf::ShaderCreationInfo shaderInfo
-            {
-                .layout = APP_SHADER_LAYOUTS.default_unlit,
-                .library = APP_SHADERS.library,
-                .modules =
-                {
-                    .vertexInputModuleId = APP_SHADERS.modules.defaultVertexInput,
-                    .preRasterModuleId = APP_SHADERS.modules.default_unlit_preRaster,
-                    .fragmentModuleId = APP_SHADERS.modules.default_unlit_fragment,
-                    .fragmentOutputModuleId = APP_SHADERS.modules.defaultFragmentOutput
-                }
-            };
+            hf::ShaderModulesInfo moduleInfo{};
+            moduleInfo.vertexInputModuleId    = APP_SHADERS.modules.defaultVertexInput;
+            moduleInfo.preRasterModuleId      = APP_SHADERS.modules.default_unlit_preRaster;
+            moduleInfo.fragmentModuleId       = APP_SHADERS.modules.default_unlit_fragment;
+            moduleInfo.fragmentOutputModuleId = APP_SHADERS.modules.defaultFragmentOutput;
+
+            hf::ShaderCreationInfo shaderInfo{};
+            shaderInfo.layout = APP_SHADER_LAYOUTS.default_unlit;
+            shaderInfo.library = APP_SHADERS.library;
+            shaderInfo.modules = moduleInfo;
 
             APP_SHADERS.default_unlit = hf::Create(shaderInfo);
         }

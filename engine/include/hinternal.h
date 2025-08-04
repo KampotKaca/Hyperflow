@@ -37,7 +37,10 @@ namespace hf::inter
         unordered_map<uint64_t, Ref<RenderTexture>> renderTextures{};
         unordered_map<uint64_t, Ref<TexturePack>> texturePacks{};
 
-        unordered_map<std::string, BufferAttrib> bufferAttribs{};
+        unordered_map<std::string, VertexBufferAttribute> vertexAttributes{};
+        unordered_map<std::string, TextureLayout> textureLayouts{};
+        unordered_map<std::string, TextureSampler> textureSamplers{};
+
         unordered_map<std::string, Ref<Mesh>> meshes{};
         unordered_map<std::string, Ref<Texture>> textures{};
         unordered_map<std::string, Ref<Cubemap>> cubemaps{};
@@ -88,8 +91,8 @@ namespace hf::inter
 
     struct StaticResources
     {
-        BufferAttrib quadAttrib{};
-        BufferAttrib defaultAttrib{};
+        VertexBufferAttribute quadAttrib{};
+        VertexBufferAttribute pos_nor_tex{};
 
         TextureLayout skyboxLayout{};
         TextureSampler cubemapSampler{};

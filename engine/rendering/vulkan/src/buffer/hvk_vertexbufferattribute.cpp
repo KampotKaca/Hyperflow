@@ -1,4 +1,4 @@
-#include "hvk_bufferattrib.h"
+#include "hvk_vertexbufferattribute.h"
 #include "hvk_graphics.h"
 
 namespace hf
@@ -22,7 +22,7 @@ namespace hf
         VK_FORMAT_R16G16B16A16_SFLOAT, VK_FORMAT_R32G32B32A32_SFLOAT, VK_FORMAT_R64G64B64A64_SFLOAT,
     };
 
-    VkBufferAttrib::VkBufferAttrib(const BufferAttribDefinitionInfo& info, uint32_t fullStride)
+    VkVertexBufferAttribute::VkVertexBufferAttribute(const VertexBufferAttributeDefinitionInfo& info, uint32_t fullStride)
     {
         bindingId = info.bindingId;
         attribCount = info.formatCount;
@@ -34,7 +34,7 @@ namespace hf
         attribDescriptions = std::vector<VkVertexInputAttributeDescription>(info.formatCount);
 
         uint32_t currentOffset = 0;
-        uint32_t location = 0;
+        uint32_t location = info.locationOffset;
         for (uint32_t i = 0; i < info.formatCount; i++)
         {
             auto& stride = info.pFormats[i];
@@ -54,17 +54,17 @@ namespace hf
         }
     }
 
-    VkBufferAttrib::~VkBufferAttrib()
+    VkVertexBufferAttribute::~VkVertexBufferAttribute()
     {
         attribDescriptions.clear();
     }
 
-    bool IsValidAttrib(BufferAttrib attrib)
+    bool IsValidAttrib(VertexBufferAttribute attrib)
     {
         return attrib > 0 && attrib <= GRAPHICS_DATA.bufferAttribs.size();
     }
 
-    URef<VkBufferAttrib>& GetAttrib(BufferAttrib attrib)
+    URef<VkVertexBufferAttribute>& GetAttrib(VertexBufferAttribute attrib)
     {
         if (!IsValidAttrib(attrib)) throw GENERIC_EXCEPT("[Hyperflow]", "Invalid buffer attribute");
         return GRAPHICS_DATA.bufferAttribs[attrib - 1];

@@ -5,7 +5,7 @@
 
 namespace hf
 {
-    BufferAttrib Define(const BufferAttribDefinitionInfo& info)
+    VertexBufferAttribute Define(const VertexBufferAttributeDefinitionInfo& info)
     {
         uint32_t fullStride = 0;
         for (uint32_t i = 0; i < info.formatCount; i++)
@@ -18,30 +18,20 @@ namespace hf
         return inter::HF.renderingApi.api.DefineVertBufferAttrib(info, fullStride);
     }
 
-    BufferAttrib DefineBufferAttrib(const char* assetPath)
+    VertexBufferAttribute DefineVertexAttributeAsset(const char* assetPath)
     {
-        const auto assetLoc = TO_RES_PATH(std::string("bufferattribs/") + assetPath) + ".meta";
-        if (!utils::FileExists(assetLoc.c_str()))
-        {
-            LOG_ERROR("[Hyperflow] Unable to find buffer attrib meta file: %s", assetPath);
-            return 0;
-        }
-
+        const auto assetLoc = TO_RES_PATH(std::string("vertexattributes/") + assetPath) + ".meta";
         std::vector<char> metadata{};
-        if (!utils::ReadFile(assetLoc, metadata))
-        {
-            LOG_ERROR("[Hyperflow] Unable to read buffer attribute meta: %s", assetPath);
-            return 0;
-        }
-        metadata.push_back('\0');
+        if (!START_READING(assetLoc.c_str(), metadata)) return 0;
 
         try
         {
-            BufferAttribDefinitionInfo info{};
+            VertexBufferAttributeDefinitionInfo info{};
 
             ryml::Tree tree = ryml::parse_in_place(ryml::to_substr(metadata.data()));
             ryml::NodeRef root = tree.rootref();
             info.bindingId = std::stoi(root["bindingId"].val().str);
+            info.locationOffset = std::stoi(root["locationOffset"].val().str);
 
             auto formats = root["formats"];
             std::vector<BufferAttribFormat> formatList{};
@@ -49,10 +39,10 @@ namespace hf
 
             for (ryml::NodeRef fmt : formats.children())
             {
-                auto type = fmt["type"].val();
-                auto size = fmt["size"].val();
+                const auto type = fmt["type"].val();
+                const auto size = fmt["size"].val();
 
-                std::string_view typeView{type.str, type.len};
+                const std::string_view typeView{type.str, type.len};
 
                 formatList.emplace_back(STRING_TO_BUFFER_DATA_TYPE(typeView), std::stoi(size.str));
             }
@@ -61,7 +51,7 @@ namespace hf
             info.pFormats = formatList.data();
 
             const auto attrib = Define(info);
-            inter::HF.graphicsResources.bufferAttribs[assetPath] = attrib;
+            inter::HF.graphicsResources.vertexAttributes[assetPath] = attrib;
             return attrib;
         }catch (...)
         {
