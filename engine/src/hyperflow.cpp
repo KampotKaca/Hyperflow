@@ -42,7 +42,7 @@ namespace hf
 
 			inter::HF.mainWindow = Create(engineData.windowData, nullptr);
 
-			if (inter::HF.internalAudioInfo.usedListenersCount > 0) inter::audio::Load_i();
+			if (inter::HF.internalAudioInfo.audioEnabled) inter::audio::Load_i();
 
 			inter::rendering::LoadApi_i(engineData.renderingApi);
 			inter::primitives::LoadStaticResources_i();

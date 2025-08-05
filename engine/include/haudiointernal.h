@@ -9,6 +9,10 @@ namespace hf::inter
     {
         ma_engine engine{};
         uint32_t definedListenersCount = 0;
+        bool isLoaded = false;
+
+        Ref<AudioGroup> group2D{};
+        Ref<AudioGroup> group3D{};
     };
 
     extern AudioData AUDIO_DATA;

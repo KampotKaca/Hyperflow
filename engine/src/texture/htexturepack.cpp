@@ -1,6 +1,9 @@
 #include "htexturepack.h"
 #include "hinternal.h"
 #include "hyperflow.h"
+#include "htexture.h"
+#include "hcubemap.h"
+#include "hrendertexture.h"
 
 namespace hf
 {

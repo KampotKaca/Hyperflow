@@ -583,6 +583,86 @@ namespace hf
 
 	//endregion
 
+    //region Audio
+
+    struct AudioClip;
+    struct AudioPlayer;
+    struct AudioPlayer3D;
+    struct AudioListener;
+    struct AudioGroup;
+
+    struct AudioCone
+    {
+        float_t innerAngle = 360.0f;
+        float_t outerAngle = 360.0f;
+        float_t outerGain = 0.1f;
+
+        vec3 position{};
+        vec3 euler{};
+    };
+
+    struct AudioClipSettings
+    {
+        AudioClipFormat format = AudioClipFormat::Default;
+        uint32_t sampleRate = 0;
+        AudioClipChannelMixMode channelMixMode = AudioClipChannelMixMode::Rectangular;
+        AudioClipDitherMode ditherMode = AudioClipDitherMode::None;
+        AudioClipEncodingFormat encodingFormat = AudioClipEncodingFormat::Unknown;
+    };
+
+    struct AudioClipCreationInfo
+    {
+        const char* filePath{};
+        bool useAbsolutePath = false;
+        AudioClipSettings settings{};
+    };
+
+    struct AudioPlayerSettings
+    {
+        float_t volume = 1.0f;
+        float_t pitch = 1.0f;
+        bool loopingEnabled = false;
+    };
+
+    struct AudioPlayer3DSettings
+    {
+        float_t maxRange = 100.0f;
+        float_t falloff = 10.0f;
+        Audio3DAttenuationModel attenuationModel = Audio3DAttenuationModel::Linear;
+    };
+
+    struct AudioPlayerCreationInfo
+    {
+        Ref<AudioClip> clip{};
+        Ref<AudioGroup> parent{};
+        AudioPlayerSettings settings{};
+    };
+
+    struct AudioGroupCreationInfo
+    {
+        Ref<AudioGroup> parent{};
+        bool enabled = true;
+        float_t volume = 1.0f;
+        float_t pitch = 1.0f;
+    };
+
+    struct AudioPlayer3DCreationInfo
+    {
+        Ref<AudioClip> clip{};
+        Ref<AudioGroup> parent{};
+        AudioPlayerSettings settings{};
+        AudioPlayer3DSettings settings3d{};
+        AudioCone cone{};
+    };
+
+    struct AudioListenerCreationInfo
+    {
+        bool isEnabled = true;
+        AudioCone cone{};
+    };
+
+    //endregion
+
 	//region Window
 
 	struct Window;
@@ -637,8 +717,11 @@ namespace hf
 
     struct EngineInternalAudioInfo
     {
+        bool audioEnabled = true; //Set this to false and audio system will not be initialized.
         float_t volume = 1.0f; //Initial global audio volume multiplier
-        uint32_t usedListenersCount = 1; //Set this to 0 and audio system will not be initialized.
+        uint32_t usedListenersCount = 1; //Set this to 0 there will not be any valid audio.
+        AudioGroupCreationInfo audio2DInfo{};
+        AudioGroupCreationInfo audio3DInfo{};
     };
 
 	struct EngineData
@@ -716,75 +799,6 @@ namespace hf
 	{
 
 	};
-
-	//endregion
-
-	//region Audio
-
-	struct AudioClip;
-	struct AudioPlayer;
-	struct AudioPlayer3D;
-	struct AudioListener;
-
-    struct AudioCone
-    {
-        float_t innerAngle = 360.0f;
-        float_t outerAngle = 360.0f;
-        float_t outerGain = 0.1f;
-
-        vec3 position{};
-        vec3 euler{};
-    };
-
-	struct AudioClipSettings
-	{
-		AudioClipFormat format = AudioClipFormat::Default;
-		uint32_t sampleRate = 0;
-		AudioClipChannelMixMode channelMixMode = AudioClipChannelMixMode::Rectangular;
-		AudioClipDitherMode ditherMode = AudioClipDitherMode::None;
-		AudioClipEncodingFormat encodingFormat = AudioClipEncodingFormat::Unknown;
-	};
-
-	struct AudioClipCreationInfo
-	{
-		const char* filePath{};
-		bool useAbsolutePath = false;
-		AudioClipSettings settings{};
-	};
-
-	struct AudioPlayerSettings
-	{
-		float_t volume = 1.0f;
-		float_t pitch = 1.0f;
-		bool loopingEnabled = false;
-	};
-
-    struct AudioPlayer3DSettings
-    {
-        float_t maxRange = 100.0f;
-        float_t falloff = 10.0f;
-        Audio3DAttenuationModel attenuationModel = Audio3DAttenuationModel::Linear;
-    };
-
-	struct AudioPlayerCreationInfo
-	{
-		Ref<AudioClip> clip{};
-		AudioPlayerSettings settings{};
-	};
-
-    struct AudioPlayer3DCreationInfo
-    {
-        Ref<AudioClip> clip{};
-        AudioPlayerSettings settings{};
-        AudioPlayer3DSettings settings3d{};
-        AudioCone cone{};
-    };
-
-    struct AudioListenerCreationInfo
-    {
-        bool isEnabled = true;
-        AudioCone cone{};
-    };
 
 	//endregion
 

@@ -38,6 +38,7 @@ namespace hf
 	Ref<AudioPlayer> Create(const AudioPlayerCreationInfo& info);
 	Ref<AudioPlayer3D> Create(const AudioPlayer3DCreationInfo& info);
     Ref<AudioListener> Create(const AudioListenerCreationInfo& info);
+    Ref<AudioGroup> Create(const AudioGroupCreationInfo& info);
 
 	void Destroy(const Ref<Mesh>& mesh);
 	void Destroy(const Ref<ShaderLibrary>& lib);
@@ -86,6 +87,7 @@ namespace hf
 	bool IsLoaded(const Ref<AudioClip>& clip);
 	bool IsLoaded(const Ref<AudioPlayer>& player);
 	bool IsLoaded(const Ref<AudioPlayer3D>& player);
+	bool IsLoaded(const Ref<AudioGroup>& group);
 
 	void Upload(const Ref<Material>& mat, const void* data);
 	void Upload(const Ref<VertBuffer>& vb, const VertBufferUploadInfo& info);
@@ -100,11 +102,15 @@ namespace hf
 	void Pause(const Ref<AudioPlayer>& player);
 	void Pause(const Ref<AudioPlayer3D>& player);
 
+	void Enable(const Ref<AudioGroup>& group, bool enable);
+
 	void SetVolume(const Ref<AudioPlayer>& player, float_t volume);
 	void SetVolume(const Ref<AudioPlayer3D>& player, float_t volume);
+    void SetVolume(const Ref<AudioGroup>& group, float_t volume);
 
 	void SetPitch(const Ref<AudioPlayer>& player, float_t pitch);
 	void SetPitch(const Ref<AudioPlayer3D>& player, float_t pitch);
+    void SetPitch(const Ref<AudioGroup>& group, float_t pitch);
 
 	void SetLoopingMode(const Ref<AudioPlayer>& player, bool loopingEnabled);
 	void SetLoopingMode(const Ref<AudioPlayer3D>& player, bool loopingEnabled);
@@ -117,9 +123,11 @@ namespace hf
 
 	float_t GetPitch(const Ref<AudioPlayer>& player);
 	float_t GetPitch(const Ref<AudioPlayer3D>& player);
+    float_t GetPitch(const Ref<AudioGroup>& group);
 
 	float_t GetVolume(const Ref<AudioPlayer>& player);
 	float_t GetVolume(const Ref<AudioPlayer3D>& player);
+	float_t GetVolume(const Ref<AudioGroup>& group);
 
     double_t GetPlayedInSeconds(const Ref<AudioPlayer>& player);
     double_t GetPlayedInSeconds(const Ref<AudioPlayer3D>& player);
@@ -127,11 +135,16 @@ namespace hf
     double_t GetPlayedPercent(const Ref<AudioPlayer>& player);
     double_t GetPlayedPercent(const Ref<AudioPlayer3D>& player);
 
+    Ref<AudioGroup> Get2DAudioGroup();
+    Ref<AudioGroup> Get3DAudioGroup();
+
 	bool IsLoopingEnabled(const Ref<AudioPlayer>& player);
 	bool IsLoopingEnabled(const Ref<AudioPlayer3D>& player);
 
     bool IsPlaying(const Ref<AudioPlayer>& player);
     bool IsPlaying(const Ref<AudioPlayer3D>& player);
+
+    bool IsEnabled(const Ref<AudioGroup>& group);
 
     void SetRange(const Ref<AudioPlayer3D>& player, float_t maxRange, float_t falloff);
     void SetAttenuationModel(const Ref<AudioPlayer3D>& player, Audio3DAttenuationModel atten);

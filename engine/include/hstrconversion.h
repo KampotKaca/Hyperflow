@@ -2,6 +2,7 @@
 #define HSTRCONVERSION_H
 
 #include "hshared.h"
+#include "hyperflow.h"
 
 namespace hf
 {

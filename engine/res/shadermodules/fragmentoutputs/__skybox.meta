@@ -1,13 +1,13 @@
 colorAttachmentsSettings:
   - colorWriteMask: All
-    blendingOptions:         #Optional
-      color:
-        srcFactor: SrcAlpha
-        dstFactor: OneMinusSrcAlpha
-        op: Add
-      alpha:
-        srcFactor: One
-        dstFactor: Zero
-        op: Add
+#    blendingOptions:         #Optional
+#      color:
+#        srcFactor: SrcAlpha
+#        dstFactor: OneMinusSrcAlpha
+#        op: Add
+#      alpha:
+#        srcFactor: One
+#        dstFactor: Zero
+#        op: Add
 
 #blendOp: Clear #Optional

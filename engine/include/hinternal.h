@@ -55,6 +55,7 @@ namespace hf::inter
         unordered_map<std::string, Ref<AudioClip>> clips{};
         unordered_map<uint64_t, Ref<AudioPlayer>> players{};
         unordered_map<uint64_t, Ref<AudioPlayer3D>> player3Ds{};
+        unordered_map<uint64_t, Ref<AudioGroup>> groups{};
     };
 
     struct ResourcesMarkedForDeletion
