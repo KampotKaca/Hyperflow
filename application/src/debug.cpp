@@ -1,7 +1,6 @@
 #include "debug.h"
 #include "application.h"
 #include "resources.h"
-#include <hyaml.h>
 
 #include "hyperfloweditor.h"
 #include "../appconfig.h"
