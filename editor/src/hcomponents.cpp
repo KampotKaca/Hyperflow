@@ -178,6 +178,26 @@ namespace hf::editor
         return false;
     }
 
+    bool DrawAudioSettingsWindow(const char* label, bool* isOpen, WindowFlags flags)
+    {
+        if(StartWindow(label, isOpen, flags))
+        {
+            if(StartComponent("General"))
+            {
+                float volume = GetAudioVolume();
+                if(DrawSlider("Volume", volume, 0.0f, 1.0f, "%.2f")) SetAudioVolume(volume);
+                EndComponent();
+            }
+
+            Draw("Audio 2D Settings", Get2DAudioGroup());
+            Draw("Audio 3D Settings", Get3DAudioGroup());
+
+            EndWindow();
+            return true;
+        }
+        return false;
+    }
+
     bool Draw(const char* label, const Ref<AudioPlayer>& pl, DrawStateFlag flags)
     {
         if(StartComponent(label, flags))
@@ -240,6 +260,24 @@ namespace hf::editor
         result = Draw("Position", cone.position, 0, flags | DrawStateFlag::ButtonLess) || result;
         result = Draw("Rotation", cone.euler, 0, flags | DrawStateFlag::ButtonLess) || result;
         return result;
+    }
+
+    bool Draw(const char* label, const Ref<AudioGroup>& gr, DrawStateFlag flags)
+    {
+        if(StartComponent(label, flags))
+        {
+            bool isEnabled = IsEnabled(gr);
+            float volume = GetVolume(gr);
+            float pitch = GetPitch(gr);
+
+            if (Draw("Enabled", isEnabled, flags)) Enable(gr, isEnabled);
+            if (DrawSlider("Volume", volume, 0.0f, 1.0f, "%.2f", flags)) SetVolume(gr, volume);
+            if (DrawSlider("Pitch", pitch, 0.0f, 3.0f, "%.2f", flags)) SetPitch(gr, pitch);
+
+            EndComponent();
+            return true;
+        }
+        return false;
     }
 
     bool DrawTable(const char* label)
