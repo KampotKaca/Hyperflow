@@ -75,6 +75,12 @@ namespace hf::inter
         std::vector<void*> renderTextures{};
     };
 
+    struct StaticVertexAttributes
+    {
+        VertexBufferAttribute quad{};
+        VertexBufferAttribute pos_nor_tex{};
+    };
+
     struct StaticResourcesLibraryModules
     {
         uint32_t quadVertexInput{};
@@ -90,38 +96,54 @@ namespace hf::inter
         uint32_t skyboxFragmentOutput{};
     };
 
-    struct StaticResources
+    struct StaticPrimitiveMeshes
     {
-        VertexBufferAttribute quadAttrib{};
-        VertexBufferAttribute pos_nor_tex{};
-
-        TextureLayout skyboxLayout{};
-        TextureSampler cubemapSampler{};
-
-        Buffer globalUniform = 0;
-
-        ShaderLayout axisLinesShaderLayout{};
-        ShaderLayout skyboxShaderLayout{};
-
-        Ref<ShaderLibrary> engineShadersLib{};
-        StaticResourcesLibraryModules engineShadersLibModules{};
-
-        Ref<Shader> axisLinesShader{};
-        Ref<Shader> skyboxShader{};
-
-        Ref<Cubemap> defaultSkyboxCubemap{};
-        Ref<Cubemap> boundCubemap{};
-
-        Ref<TexturePack> skyboxTexturePack{};
-
         Ref<Mesh> cube{};
         Ref<Mesh> plane{};
         Ref<Mesh> icoSphere{};
         Ref<Mesh> uvSphere{};
+    };
+
+    struct StaticShaderLayouts
+    {
+        ShaderLayout axisLines{};
+        ShaderLayout skybox{};
+    };
+
+    struct StaticShaders
+    {
+        Ref<Shader> axisLines{};
+        Ref<Shader> skybox{};
+    };
+
+    struct StaticSkyboxResources
+    {
+        Ref<Cubemap> defaultCubemap{};
+        Ref<Cubemap> boundCubemap{};
+
+        Ref<TexturePack> texturePack{};
+    };
+
+    struct StaticResources
+    {
+        Buffer globalUniform{};
+
+        TextureLayout skyboxLayout{};
+        TextureSampler cubemapSampler{};
+
+        Ref<ShaderLibrary> engineShadersLib{};
+
+        StaticShaderLayouts shaderLayouts{};
+        StaticShaders shaders{};
+
+        StaticVertexAttributes vertexAttributes{};
+        StaticResourcesLibraryModules engineShadersLibModules{};
+        StaticPrimitiveMeshes primitives{};
+        StaticSkyboxResources skyboxResources{};
 
         Ref<Material> emptyMaterial{};
-
         Ref<VertBuffer> quadBuffer{};
+        Ref<VertBuffer> instanceBuffer{};
     };
 
     struct Hyperflow

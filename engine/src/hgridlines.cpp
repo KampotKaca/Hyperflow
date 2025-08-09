@@ -5,11 +5,11 @@ namespace hf::gridlines
 {
     void Draw(const Ref<Renderer>& rn, const GridLinesInfo& info)
     {
-        Start_ShaderLayout(rn, inter::HF.staticResources.axisLinesShaderLayout);
+        Start_ShaderLayout(rn, inter::HF.staticResources.shaderLayouts.axisLines);
         {
             primitives::BindGlobalUniformBuffer(rn);
 
-            Start_Shader(rn, inter::HF.staticResources.axisLinesShader);
+            Start_Shader(rn, inter::HF.staticResources.shaders.axisLines);
             {
                 Start_Material(rn, inter::HF.staticResources.emptyMaterial);
                 {
