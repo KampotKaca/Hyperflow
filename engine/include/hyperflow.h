@@ -21,6 +21,7 @@ namespace hf
 	VertexBufferAttribute Define(const VertexBufferAttributeDefinitionInfo& info);
 	Buffer Define(const BufferDefinitionInfo& info);
 	Buffer Define(const StorageBufferDefinitionInfo& info);
+	uint32_t GetVertexSize(VertexBufferAttribute attribute);
 
 	Ref<Window> Create(const WindowCreationInfo &data, const Ref<Window> &parent);
 	//No need to destroy the material, if it goes out of scope it is automatically freed!
@@ -31,7 +32,7 @@ namespace hf
 	Ref<Texture> Create(const TextureCreationInfo& info);
 	Ref<RenderTexture> Create(const RenderTextureCreationInfo& info);
 	Ref<TexturePack> Create(const TexturePackCreationInfo& info);
-	Ref<VertBuffer> Create(const VertBufferCreationInfo& info);
+	Ref<VertexBuffer> Create(const VertexBufferCreationInfo& info);
 	Ref<Cubemap> Create(const CubemapCreationInfo& info);
 	Ref<IndexBuffer> Create(const IndexBufferCreationInfo& info);
 	Ref<AudioClip> Create(const AudioClipCreationInfo& info);
@@ -90,7 +91,7 @@ namespace hf
 	bool IsLoaded(const Ref<AudioGroup>& group);
 
 	void Upload(const Ref<Material>& mat, const void* data);
-	void Upload(const Ref<VertBuffer>& vb, const VertBufferUploadInfo& info);
+	void Upload(const Ref<VertexBuffer>& vb, const VertBufferUploadInfo& info);
 	void Upload(const Ref<IndexBuffer>& ib, const IndexBufferUploadInfo& info);
 
 	void ChangeClip(const Ref<AudioPlayer>& player, const Ref<AudioClip>& clip, float_t startingDuration = -1);
@@ -351,8 +352,8 @@ namespace hf
 
 	namespace primitives
 	{
-		Ref<VertBuffer> GetQuadBuffer();
-		Ref<VertBuffer>* GetQuadBufferP();
+		Ref<VertexBuffer> GetQuadBuffer();
+		Ref<VertexBuffer>* GetQuadBufferP();
 
 		Buffer GetGlobalUniformBuffer();
 		Buffer GetMaterialStorageBuffer();

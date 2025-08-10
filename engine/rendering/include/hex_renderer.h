@@ -128,7 +128,7 @@ namespace hf::inter::rendering
         RendererInternalFunctions_i functions{};
     };
 
-    struct VertBufferUploadInfo_i
+    struct VertexBufferUploadInfo_i
     {
         const void* buffer{};
         const void* data{};
@@ -232,7 +232,7 @@ namespace hf::inter::rendering
 
     struct DrawCallInfo_i
     {
-        void** pVertBuffers{};
+        void** pVertexBuffers{};
         uint32_t bufferCount{};
 
         void* indexBuffer{};
@@ -282,8 +282,8 @@ namespace hf::inter::rendering
         TextureLayout (*DefineTextureLayout)(const TextureLayoutDefinitionInfo& info);
 
         //buffer attribute
-        VertexBufferAttribute (*DefineVertBufferAttrib)(const VertexBufferAttributeDefinitionInfo& info, uint32_t fullStride);
-        uint32_t (*GetVertBufferAttribSize)(VertexBufferAttribute attrib);
+        VertexBufferAttribute (*DefineVertexBufferAttribute)(const VertexBufferAttributeDefinitionInfo& info, uint32_t fullStride);
+        uint32_t (*GetVertexBufferAttributeSize)(VertexBufferAttribute attrib);
 
         //buffers
         Buffer (*DefineUniformBuffer)(const BufferDefinitionInfo& info);
@@ -292,9 +292,9 @@ namespace hf::inter::rendering
         void (*BindBuffer)(const void* rn, const BindResourceInfo_i<Buffer>& info);
 
         //vertex buffer
-        void* (*CreateVertBuffer)(const VertBufferCreationInfo& info);
-        void (*DestroyVertBuffer)(void* handle);
-        void (*UploadVertBuffer)(const void* rn, const VertBufferUploadInfo_i& info);
+        void* (*CreateVertexBuffer)(const VertexBufferCreationInfo& info);
+        void (*DestroyVertexBuffer)(void* handle);
+        void (*UploadVertexBuffer)(const void* rn, const VertexBufferUploadInfo_i& info);
 
         //index buffer
         void* (*CreateIndexBuffer)(const IndexBufferCreationInfo& info);

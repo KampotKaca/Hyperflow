@@ -3,7 +3,7 @@
 
 #include "hwindow.h"
 #include "hshared.h"
-#include "hvertbuffer.h"
+#include "hvertexbuffer.h"
 #include "hindexbuffer.h"
 #include "hcubemap.h"
 #include "hshaderlibrary.h"
@@ -142,8 +142,8 @@ namespace hf::inter
         StaticSkyboxResources skyboxResources{};
 
         Ref<Material> emptyMaterial{};
-        Ref<VertBuffer> quadBuffer{};
-        Ref<VertBuffer> instanceBuffer{};
+        Ref<VertexBuffer> quadBuffer{};
+        Ref<VertexBuffer> instanceBuffer{};
     };
 
     struct Hyperflow
@@ -226,7 +226,7 @@ namespace hf::inter
         bool CreateShader_i(Shader* shader);
         bool DestroyShader_i(Shader* shader);
 
-        bool CreateVertBuffer_i(VertBuffer* buffer);
+        bool CreateVertBuffer_i(VertexBuffer* buffer);
         bool CreateIndexBuffer_i(IndexBuffer* buffer);
 
         bool DestroyBuffer_i(RuntimeBufferBase* buffer);

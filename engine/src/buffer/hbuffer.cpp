@@ -6,8 +6,9 @@ namespace hf
 {
     RuntimeBufferBase::~RuntimeBufferBase()
     {
-        if (transferType == DataTransferType::CopyData ||
-            transferType == DataTransferType::TransferOwnership)
+        if (buffer &&
+            (transferType == DataTransferType::CopyData ||
+            transferType == DataTransferType::TransferOwnership))
             utils::Deallocate(buffer);
         inter::rendering::DestroyBuffer_i(this);
     }

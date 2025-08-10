@@ -128,7 +128,7 @@ namespace hf
             {
                 switch (buffer->GetType())
                 {
-                    case RuntimeBufferType::Vertex: CreateVertBuffer_i((VertBuffer*)buffer.get()); break;
+                    case RuntimeBufferType::Vertex: CreateVertBuffer_i((VertexBuffer*)buffer.get()); break;
                     case RuntimeBufferType::Index: CreateIndexBuffer_i((IndexBuffer*)buffer.get()); break;
                 }
             }

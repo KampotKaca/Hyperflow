@@ -15,7 +15,7 @@ namespace hf
             fullStride += stride.lSize;
         }
 
-        return inter::HF.renderingApi.api.DefineVertBufferAttrib(info, fullStride);
+        return inter::HF.renderingApi.api.DefineVertexBufferAttribute(info, fullStride);
     }
 
     VertexBufferAttribute DefineVertexAttributeAsset(const char* assetPath)
@@ -59,4 +59,6 @@ namespace hf
             return 0;
         }
     }
+
+    uint32_t GetVertexSize(VertexBufferAttribute attribute) { return inter::HF.renderingApi.api.GetVertexBufferAttributeSize(attribute); }
 }

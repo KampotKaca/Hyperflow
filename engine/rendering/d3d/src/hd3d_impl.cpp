@@ -78,12 +78,12 @@ namespace hf::inter::rendering
         return 1;
     }
 
-    uint32_t DefineVertBufferAttrib(const VertexBufferAttributeDefinitionInfo& info, uint32_t fullStride)
+    uint32_t DefineVertexBufferAttribute(const VertexBufferAttributeDefinitionInfo& info, uint32_t fullStride)
     {
         return 1;
     }
 
-    uint32_t GetVertBufferAttribSize(VertexBufferAttribute attrib)
+    uint32_t GetVertexBufferAttributeSize(VertexBufferAttribute attrib)
     {
         return 0;
     }
@@ -123,7 +123,7 @@ namespace hf::inter::rendering
 
     }
 
-    void* CreateVertBuffer(const VertBufferCreationInfo& info)
+    void* CreateVertBuffer(const VertexBufferCreationInfo& info)
     {
         return nullptr;
     }
@@ -133,7 +133,7 @@ namespace hf::inter::rendering
 
     }
 
-    void UploadVertBuffer(const void* rn, const VertBufferUploadInfo_i& info)
+    void UploadVertBuffer(const void* rn, const VertexBufferUploadInfo_i& info)
     {
 
     }
@@ -255,8 +255,8 @@ namespace hf::inter::rendering
             .DefineTextureLayout        = DefineTextureLayout,
 
             //buffer attribute
-            .DefineVertBufferAttrib     = DefineVertBufferAttrib,
-            .GetVertBufferAttribSize    = GetVertBufferAttribSize,
+            .DefineVertexBufferAttribute     = DefineVertexBufferAttribute,
+            .GetVertexBufferAttributeSize    = GetVertexBufferAttributeSize,
 
             //uniform buffer
             .DefineUniformBuffer        = DefineUniformBuffer,
@@ -265,9 +265,9 @@ namespace hf::inter::rendering
             .BindBuffer                 = BindBuffer,
 
             //vertex buffer
-            .CreateVertBuffer           = CreateVertBuffer,
-            .DestroyVertBuffer          = DestroyVertBuffer,
-            .UploadVertBuffer           = UploadVertBuffer,
+            .CreateVertexBuffer           = CreateVertBuffer,
+            .DestroyVertexBuffer          = DestroyVertBuffer,
+            .UploadVertexBuffer           = UploadVertBuffer,
 
             //index buffer
             .CreateIndexBuffer          = CreateIndexBuffer,

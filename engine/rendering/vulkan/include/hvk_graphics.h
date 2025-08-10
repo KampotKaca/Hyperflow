@@ -3,7 +3,7 @@
 
 #include "hvk_shared.h"
 #include "hvk_vertexbufferattribute.h"
-#include "hvk_vertbuffer.h"
+#include "hvk_vertexbuffer.h"
 #include "hvk_uniformbuffer.h"
 #include "hvk_shaderlayout.h"
 #include "hvk_texturelayout.h"

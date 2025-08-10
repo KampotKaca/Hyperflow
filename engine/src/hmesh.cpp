@@ -169,8 +169,8 @@ namespace hf
                 return;
             }
 
-            VertBufferCreationInfo vertInfo{};
-            vertInfo.bufferAttrib = stats.vertexAttribute;
+            VertexBufferCreationInfo vertInfo{};
+            vertInfo.vertexSize = GetVertexSize(stats.vertexAttribute);
             vertInfo.memoryType = stats.memoryType;
             vertInfo.vertexCount = header.vertexCount;
             vertInfo.pVertices = vertices;
@@ -182,7 +182,7 @@ namespace hf
             indexInfo.pIndices = indices;
 
             SubMesh submesh{};
-            submesh.vertBuffer = MakeRef<VertBuffer>(vertInfo, DataTransferType::TransferOwnership);
+            submesh.vertBuffer = MakeRef<VertexBuffer>(vertInfo, DataTransferType::TransferOwnership);
             submesh.indexBuffer = MakeRef<IndexBuffer>(indexInfo, DataTransferType::TransferOwnership);
 
             subMeshes.push_back(submesh);

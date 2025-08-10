@@ -8,11 +8,11 @@ namespace hf
 {
     struct VkVertBuffer final : public VkBufferBase
     {
-        explicit VkVertBuffer(const VertBufferCreationInfo& info);
+        explicit VkVertBuffer(const VertexBufferCreationInfo& info);
         ~VkVertBuffer() override = default;
 
         uint32_t vertCount = 0;
-        VertexBufferAttribute attrib{};
+        uint32_t vertexSize = 0;
     };
 }
 

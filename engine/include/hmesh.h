@@ -12,7 +12,7 @@ namespace hf
 
         struct SubMesh
         {
-            Ref<VertBuffer> vertBuffer{};
+            Ref<VertexBuffer> vertBuffer{};
             Ref<IndexBuffer> indexBuffer{};
         };
 

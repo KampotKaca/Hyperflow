@@ -3,7 +3,7 @@
 #include "hvk_renderer.h"
 #include "hvk_shader.h"
 #include "hvk_texturepack.h"
-#include "hvk_vertbuffer.h"
+#include "hvk_vertexbuffer.h"
 #include "hvk_storagebuffer.h"
 #include "hvk_rendertexture.h"
 #include "hvk_shaderlibrary.h"
@@ -118,13 +118,13 @@ namespace hf::inter::rendering
         return (TextureLayout)GRAPHICS_DATA.textureLayouts.size();
     }
 
-    VertexBufferAttribute DefineVertBufferAttrib(const VertexBufferAttributeDefinitionInfo& info, uint32_t fullStride)
+    VertexBufferAttribute DefineVertexBufferAttribute(const VertexBufferAttributeDefinitionInfo& info, uint32_t fullStride)
     {
         GRAPHICS_DATA.bufferAttribs.emplace_back(MakeURef<VkVertexBufferAttribute>(info, fullStride));
         return (VertexBufferAttribute)GRAPHICS_DATA.bufferAttribs.size();
     }
 
-    uint32_t GetVertBufferAttribSize(VertexBufferAttribute attrib)
+    uint32_t GetVertexBufferAttributeSize(VertexBufferAttribute attrib)
     {
         auto& attribute = GetAttrib(attrib);
         return attribute->vertexSize;
@@ -168,7 +168,7 @@ namespace hf::inter::rendering
         hf::UploadPushConstants((VkRenderer*)rn, info);
     }
 
-    void* CreateVertBuffer(const VertBufferCreationInfo& info)
+    void* CreateVertBuffer(const VertexBufferCreationInfo& info)
     {
         return new VkVertBuffer(info);
     }
@@ -178,7 +178,7 @@ namespace hf::inter::rendering
         delete (VkVertBuffer*)handle;
     }
 
-    void UploadVertBuffer(const void* rn, const VertBufferUploadInfo_i& info)
+    void UploadVertBuffer(const void* rn, const VertexBufferUploadInfo_i& info)
     {
         hf::UploadBuffer((VkRenderer*)rn, (VkVertBuffer*)info.buffer, info.data, info.offset, info.vertexCount);
     }
@@ -241,16 +241,16 @@ namespace hf::inter::rendering
         uint32_t vertCount = 0;
         for (uint32_t i = 0; i < info.bufferCount; i++)
         {
-            const auto vertBuffer = (VkVertBuffer*)info.pVertBuffers[i];
-            vrn->vertBufferCache[i] = vertBuffer->buffers[vrn->currentFrame];
+            const auto vertexBuffer = (VkVertBuffer*)info.pVertexBuffers[i];
+            vrn->vertexBufferCache[i] = vertexBuffer->buffers[vrn->currentFrame];
             vrn->drawOffsets[i] = offset;
-            offset += GetAttrib(vertBuffer->attrib)->vertexSize;
-            vertCount = vertBuffer->vertCount;
+            offset += vertexBuffer->vertexSize;
+            vertCount = vertexBuffer->vertCount;
         }
 
         VkDrawInfo drawInfo{};
         drawInfo.renderer = vrn;
-        drawInfo.pBuffers = vrn->vertBufferCache;
+        drawInfo.pBuffers = vrn->vertexBufferCache;
         drawInfo.pOffsets = vrn->drawOffsets;
         drawInfo.bufferCount = info.bufferCount;
         drawInfo.vertCount = vertCount;
@@ -393,8 +393,8 @@ namespace hf::inter::rendering
             .DefineTextureLayout        = DefineTextureLayout,
 
             //buffer attribute
-            .DefineVertBufferAttrib     = DefineVertBufferAttrib,
-            .GetVertBufferAttribSize    = GetVertBufferAttribSize,
+            .DefineVertexBufferAttribute     = DefineVertexBufferAttribute,
+            .GetVertexBufferAttributeSize    = GetVertexBufferAttributeSize,
 
             //buffers
             .DefineUniformBuffer        = DefineUniformBuffer,
@@ -403,9 +403,9 @@ namespace hf::inter::rendering
             .BindBuffer                 = BindBuffer,
 
             //vertex buffer
-            .CreateVertBuffer           = CreateVertBuffer,
-            .DestroyVertBuffer          = DestroyVertBuffer,
-            .UploadVertBuffer           = UploadVertBuffer,
+            .CreateVertexBuffer           = CreateVertBuffer,
+            .DestroyVertexBuffer          = DestroyVertBuffer,
+            .UploadVertexBuffer           = UploadVertBuffer,
 
             //index buffer
             .CreateIndexBuffer          = CreateIndexBuffer,

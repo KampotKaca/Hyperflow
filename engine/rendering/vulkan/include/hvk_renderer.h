@@ -23,7 +23,7 @@ namespace hf
 
         VkCommandBuffer currentCommand{};
 
-        VkBuffer vertBufferCache[MAX_NUM_BUFFER_CACHE]{};
+        VkBuffer vertexBufferCache[MAX_NUM_BUFFER_CACHE]{};
         VkDeviceSize drawOffsets[MAX_NUM_BUFFER_CACHE]{};
 
         VkPipelineLayout currentLayout{};

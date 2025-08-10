@@ -106,7 +106,7 @@ namespace hf
 	struct TexturePack;
 
 	struct RuntimeBufferBase;
-	struct VertBuffer;
+	struct VertexBuffer;
 	struct IndexBuffer;
 	struct Mesh;
 	struct Material;
@@ -134,9 +134,9 @@ namespace hf
 		BufferAttribFormat* pFormats = nullptr;
 	};
 
-	struct VertBufferCreationInfo
+	struct VertexBufferCreationInfo
 	{
-		VertexBufferAttribute bufferAttrib = 0;
+		uint32_t vertexSize = 0;
 		BufferMemoryType memoryType = BufferMemoryType::Static;
 		BufferUsageTypeFlags usageFlags = BufferUsageTypeFlags::Vertex;
 		uint32_t vertexCount = 0;
@@ -570,7 +570,7 @@ namespace hf
 
 	struct DrawCallInfo
 	{
-		Ref<VertBuffer>* pVertBuffers{}; //vertex buffers to render
+		Ref<VertexBuffer>* pVertBuffers{}; //vertex buffers to render
 		uint32_t bufferCount = 0; //amount of buffers to render
 
 		Ref<IndexBuffer> indexBuffer{}; //is optional property, if nullptr engine will render vertex buffer in ordered manner.

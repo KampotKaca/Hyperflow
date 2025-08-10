@@ -895,7 +895,7 @@ namespace hf
 
                                         DrawCallInfo_i drawInfo
                                         {
-                                            .pVertBuffers = vBufferCache,
+                                            .pVertexBuffers = vBufferCache,
                                             .bufferCount = drawCall.bufferCount,
                                             .indexBuffer = drawCall.indexBuffer ? drawCall.indexBuffer->handle : nullptr,
                                             .instanceCount = drawCall.instanceCount

@@ -6,8 +6,8 @@ namespace hf
 {
     namespace primitives
     {
-        Ref<VertBuffer> GetQuadBuffer()   { return inter::HF.staticResources.quadBuffer; }
-        Ref<VertBuffer>* GetQuadBufferP() { return &inter::HF.staticResources.quadBuffer; }
+        Ref<VertexBuffer> GetQuadBuffer()   { return inter::HF.staticResources.quadBuffer; }
+        Ref<VertexBuffer>* GetQuadBufferP() { return &inter::HF.staticResources.quadBuffer; }
 
         Buffer GetGlobalUniformBuffer()     { return inter::HF.staticResources.globalUniform; }
         Buffer GetMaterialStorageBuffer()   { return inter::HF.graphicsResources.materialDataStorageBuffer; }
@@ -185,14 +185,26 @@ namespace hf
                     vec2{ -1, -1 }, vec2{ 1, -1 }, vec2{ 1, 1 },
                 };
 
-                VertBufferCreationInfo bufferInfo{};
-                bufferInfo.bufferAttrib = HF.staticResources.vertexAttributes.quad;
+                VertexBufferCreationInfo bufferInfo{};
+                bufferInfo.vertexSize = GetVertexSize(HF.staticResources.vertexAttributes.quad);
                 bufferInfo.memoryType = BufferMemoryType::Static;
                 bufferInfo.usageFlags = BufferUsageTypeFlags::All;
                 bufferInfo.vertexCount = 6;
                 bufferInfo.pVertices = vertices;
 
                 HF.staticResources.quadBuffer = Create(bufferInfo);
+            }
+
+            //Instance Buffer
+            {
+                VertexBufferCreationInfo bufferInfo{};
+                bufferInfo.vertexSize = MAX_PER_INSTANCE_BUFFER_SIZE;
+                bufferInfo.memoryType = BufferMemoryType::PerFrameWriteOnly;
+                bufferInfo.usageFlags = BufferUsageTypeFlags::All;
+                bufferInfo.vertexCount = MAX_NUM_INSTANCES_PER_DRAW;
+                bufferInfo.pVertices = nullptr;
+
+                HF.staticResources.instanceBuffer = Create(bufferInfo);
             }
 
             HF.staticResources.primitives.cube      = CreateMeshAsset("__cube.obj");

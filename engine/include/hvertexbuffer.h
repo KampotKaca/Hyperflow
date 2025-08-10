@@ -6,14 +6,14 @@
 
 namespace hf
 {
-    struct VertBuffer final : public RuntimeBufferBase
+    struct VertexBuffer final : public RuntimeBufferBase
     {
-        VertBuffer(const VertBufferCreationInfo& info, DataTransferType transferType);
-        ~VertBuffer() override = default;
+        VertexBuffer(const VertexBufferCreationInfo& info, DataTransferType transferType);
+        ~VertexBuffer() override = default;
 
         [[nodiscard]] RuntimeBufferType GetType() const override { return RuntimeBufferType::Vertex; }
 
-        VertBufferCreationInfo details{};
+        VertexBufferCreationInfo details{};
     };
 }
 
