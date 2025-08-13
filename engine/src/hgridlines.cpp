@@ -13,18 +13,15 @@ namespace hf::gridlines
             {
                 Start_Material(rn, inter::HF.staticResources.emptyMaterial);
                 {
-                    Start_Draw(rn);
+                    Start_DrawGroup(rn);
                     {
-                        DrawSet_PushConstant(rn, info);
+                        DrawGroupSet_PushConstant(rn, info);
 
-                        DrawCallInfo drawCallInfo{};
-                        drawCallInfo.pVertBuffers = &inter::HF.staticResources.quadBuffer;
-                        drawCallInfo.bufferCount = 1;
-                        drawCallInfo.instanceCount = 1;
-
-                        DrawAdd_DrawCall(rn, drawCallInfo);
+                        Start_DrawCall(rn, nullptr);
+                        DrawAdd_VertexBuffer(rn, inter::HF.staticResources.quadBuffer);
+                        End_DrawCall(rn);
                     }
-                    End_Draw(rn);
+                    End_DrawGroup(rn);
                 }
                 End_Material(rn);
             }

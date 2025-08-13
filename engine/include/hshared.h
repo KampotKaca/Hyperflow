@@ -568,19 +568,6 @@ namespace hf
 		MeshStats stats{};
 	};
 
-	struct DrawCallInfo
-	{
-		Ref<VertexBuffer>* pVertBuffers{}; //vertex buffers to render
-		uint32_t bufferCount = 0; //amount of buffers to render
-
-		Ref<IndexBuffer> indexBuffer{}; //is optional property, if nullptr engine will render vertex buffer in ordered manner.
-		uint32_t instanceCount = 0; //amount of instances to render
-
-#if DEBUG
-		char debugName[16];
-#endif
-	};
-
 	//endregion
 
     //region Audio

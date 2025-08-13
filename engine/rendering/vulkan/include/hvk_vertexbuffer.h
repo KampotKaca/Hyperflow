@@ -6,13 +6,10 @@
 
 namespace hf
 {
-    struct VkVertBuffer final : public VkBufferBase
+    struct VkVertexBuffer final : public VkBufferBase
     {
-        explicit VkVertBuffer(const VertexBufferCreationInfo& info);
-        ~VkVertBuffer() override = default;
-
-        uint32_t vertCount = 0;
-        uint32_t vertexSize = 0;
+        explicit VkVertexBuffer(const inter::rendering::VertexBufferCreationInfo_i& info);
+        ~VkVertexBuffer() override = default;
     };
 }
 

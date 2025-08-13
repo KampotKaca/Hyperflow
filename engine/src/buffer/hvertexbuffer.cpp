@@ -5,10 +5,9 @@
 
 namespace hf
 {
-    VertexBuffer::VertexBuffer(const VertexBufferCreationInfo& info, DataTransferType transferType) : details(info)
+    VertexBuffer::VertexBuffer(const VertexBufferCreationInfo& info, DataTransferType transferType) :
+    vertexSize(info.vertexSize), vertexCount(info.vertexCount), memoryType(info.memoryType), usageFlags(info.usageFlags)
     {
-        if (info.vertexSize == 0) throw GENERIC_EXCEPT("[Hyperflow]", "vertex size must be greater than 0");
-
         this->transferType = transferType;
         if (transferType == DataTransferType::CopyData && info.pVertices)
         {
@@ -16,6 +15,7 @@ namespace hf
             buffer = utils::Allocate(bufferSize);
             memcpy(buffer, info.pVertices, bufferSize);
         }
+        else buffer = info.pVertices;
 
         inter::rendering::CreateVertBuffer_i(this);
     }
@@ -27,15 +27,17 @@ namespace hf
         return buffer;
     }
 
-    void Upload(const Ref<VertexBuffer>& vb, const VertBufferUploadInfo& info)
+    void Upload(const Ref<Renderer>& rn, const Ref<VertexBuffer>& vb, const VertBufferUploadInfo& info)
     {
         inter::rendering::VertexBufferUploadInfo_i uploadInfo{};
         uploadInfo.buffer = vb->handle;
         uploadInfo.data = vb->buffer;
-        uploadInfo.offset = info.offset;
-        uploadInfo.vertexCount = info.vertCount;
+        uploadInfo.offsetInBytes = info.offset * vb->vertexSize;
+        uploadInfo.sizeInBytes = info.vertCount * vb->vertexSize;
 
-        inter::HF.renderingApi.api.UploadVertexBuffer(nullptr, uploadInfo);
+        void* rnHandle = nullptr;
+        if (rn) rnHandle = rn->handle;
+        inter::HF.renderingApi.api.UploadVertexBuffer(rnHandle, uploadInfo);
     }
 
     namespace inter::rendering
@@ -43,7 +45,14 @@ namespace hf
         bool CreateVertBuffer_i(VertexBuffer* buffer)
         {
             if (buffer->handle) return false;
-            buffer->handle = HF.renderingApi.api.CreateVertexBuffer(buffer->details);
+
+            VertexBufferCreationInfo_i info{};
+            info.sizeInBytes = buffer->vertexCount * buffer->vertexSize;
+            info.memoryType = buffer->memoryType;
+            info.usageFlags = buffer->usageFlags;
+            info.pVertices = buffer->buffer;
+
+            buffer->handle = HF.renderingApi.api.CreateVertexBuffer(info);
             return true;
         }
     }

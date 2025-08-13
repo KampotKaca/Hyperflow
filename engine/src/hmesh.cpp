@@ -198,6 +198,8 @@ namespace hf
 
     bool IsLoaded(const Ref<Mesh>& mesh) { return mesh->isLoaded; }
     MeshStats GetStats(const Ref<Mesh>& mesh) { return mesh->stats; }
+    uint32_t GetSubmeshCount(const Ref<Mesh>& mesh) { return mesh->subMeshes.size(); }
+
     void Destroy(const Ref<Mesh>& mesh)
     {
         if (inter::rendering::DestroyMesh_i(mesh.get()))

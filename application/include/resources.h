@@ -13,5 +13,6 @@
 #include "resources/shaderlayouts.h"
 #include "resources/cubemaps.h"
 #include "resources/audios.h"
+#include "resources/vertexattributes.h"
 
 #endif //RESOURCES_H

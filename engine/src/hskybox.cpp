@@ -41,12 +41,13 @@ namespace hf::skybox
             {
                 Start_Material(rn, inter::HF.staticResources.emptyMaterial);
                 {
-                    Start_Draw(rn);
+                    Start_DrawGroup(rn);
                     {
-                        DrawAdd_TexturePackBinding(rn, inter::HF.staticResources.skyboxResources.texturePack, 1);
-                        DrawAdd_DrawCall(rn, inter::HF.staticResources.primitives.cube);
+                        DrawGroupAdd_TexturePackBinding(rn, inter::HF.staticResources.skyboxResources.texturePack, 1);
+                        Start_DrawCall(rn, inter::HF.staticResources.primitives.cube, 0);
+                        End_DrawCall(rn);
                     }
-                    End_Draw(rn);
+                    End_DrawGroup(rn);
                 }
                 End_Material(rn);
             }

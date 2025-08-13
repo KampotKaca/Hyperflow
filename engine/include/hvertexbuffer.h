@@ -13,7 +13,10 @@ namespace hf
 
         [[nodiscard]] RuntimeBufferType GetType() const override { return RuntimeBufferType::Vertex; }
 
-        VertexBufferCreationInfo details{};
+        uint32_t vertexSize{};
+        uint32_t vertexCount{};
+        BufferMemoryType memoryType = BufferMemoryType::Static;
+        BufferUsageTypeFlags usageFlags = BufferUsageTypeFlags::Vertex;
     };
 }
 

@@ -1,5 +1,6 @@
 attributes:
   - __pos_nor_tex
+  - instance_default
 
 topology: TriangleList
 enablePrimitiveRestart: false

@@ -45,15 +45,62 @@ namespace hf
         rn->frameBufferChanged = true;
     }
 
-    void Draw(const VkDrawInfo& info)
+    struct DrawStartData
     {
-        const auto command = info.renderer->currentCommand;
-        vkCmdBindVertexBuffers(command, 0, info.bufferCount, info.pBuffers, info.pOffsets);
-        if (info.indexBuffer)
+        uint32_t bufferCount;
+        uint32_t instanceCount;
+    };
+
+    static DrawStartData DrawStart(const VkRenderer* rn, const inter::rendering::DrawCallInfo_i& info,
+                                   VkBuffer* vbCache, VkDeviceSize* offsetsCache)
+    {
+        uint32_t bufferCount = info.vertexBufferCount;
+        uint32_t instanceCount = 1;
+
+        for (uint32_t i = 0; i < info.vertexBufferCount; i++)
         {
-            vkCmdBindIndexBuffer(command, info.indexBuffer, 0, info.indexType);
-            vkCmdDrawIndexed(command, info.indexCount, info.instanceCount, 0, 0, 0);
+            auto& vb = info.pVertexBuffers[i];
+            const auto vertexBuffer = (VkVertexBuffer*)vb.buffer;
+            vbCache[i] = vertexBuffer->buffers[rn->currentFrame];
+            offsetsCache[i] = vb.offsetInBytes;
         }
-        else vkCmdDraw(command, info.vertCount, info.instanceCount, 0, 0);
+
+        if (info.instanceBuffer.has_value())
+        {
+            const auto instanceBuffer = info.instanceBuffer.value();
+            vbCache[bufferCount] = ((VkVertexBuffer*)instanceBuffer.buffer)->buffers[rn->currentFrame];
+            offsetsCache[bufferCount] = instanceBuffer.offsetInBytes;
+            bufferCount++;
+            instanceCount = instanceBuffer.instanceCount;
+        }
+
+        return DrawStartData{ bufferCount, instanceCount };
+    }
+
+    void Draw(const VkRenderer* rn, const inter::rendering::IndexedDrawCallInfo_i& info)
+    {
+        VkBuffer vertexBufferCache[MAX_NUM_BUFFER_CACHE]{};
+        VkDeviceSize drawOffsets[MAX_NUM_BUFFER_CACHE]{};
+
+        const auto data = DrawStart(rn, info.drawInfo, vertexBufferCache, drawOffsets);
+
+        const auto command = rn->currentCommand;
+        vkCmdBindVertexBuffers(command, 0, data.bufferCount, vertexBufferCache, drawOffsets);
+        const auto indexBuffer = (VkIndexBuffer*)info.indexBuffer.buffer;
+        vkCmdBindIndexBuffer(command, indexBuffer->buffers[rn->currentFrame], info.indexBuffer.offset * (uint64_t)BUFFER_DATA_SIZE[(uint32_t)indexBuffer->indexType], indexBuffer->indexType);
+
+        vkCmdDrawIndexed(command, info.indexBuffer.indexCount, data.instanceCount, 0, 0, 0);
+    }
+
+    void Draw(const VkRenderer* rn, const inter::rendering::VertexedDrawCallInfo_i& info)
+    {
+        VkBuffer vertexBufferCache[MAX_NUM_BUFFER_CACHE]{};
+        VkDeviceSize drawOffsets[MAX_NUM_BUFFER_CACHE]{};
+
+        const auto data = DrawStart(rn, info.drawInfo, vertexBufferCache, drawOffsets);
+
+        const auto command = rn->currentCommand;
+        vkCmdBindVertexBuffers(command, 0, data.bufferCount, vertexBufferCache, drawOffsets);
+        vkCmdDraw(command, info.vertexCount, data.instanceCount, 0, 0);
     }
 }

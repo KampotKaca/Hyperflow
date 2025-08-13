@@ -22,10 +22,6 @@ namespace hf
         uvec2 targetSize{};
 
         VkCommandBuffer currentCommand{};
-
-        VkBuffer vertexBufferCache[MAX_NUM_BUFFER_CACHE]{};
-        VkDeviceSize drawOffsets[MAX_NUM_BUFFER_CACHE]{};
-
         VkPipelineLayout currentLayout{};
 
         std::vector<VkFrame> frames{};
@@ -37,21 +33,6 @@ namespace hf
 
         VkRenderTexture* prevRenderTexture{};
         VkRenderTexture* currentRenderTexture{};
-    };
-
-    struct VkDrawInfo
-    {
-        VkRenderer* renderer{};
-        VkBuffer* pBuffers{};
-        VkDeviceSize* pOffsets{};
-
-        VkBuffer indexBuffer{};
-        VkIndexType indexType{};
-        uint32_t indexCount{};
-
-        uint32_t bufferCount{};
-        uint32_t vertCount{};
-        uint32_t instanceCount{};
     };
 
     void DestroySurface(VkRenderer* rn);
@@ -70,13 +51,14 @@ namespace hf
 
     void UploadViewportAndScissor(const VkRenderer* rn);
 
-    void UploadBuffer(const VkRenderer* rn, const VkVertBuffer* buffer, const void* data, uint32_t offset, uint32_t vertexCount);
+    void UploadBuffer(const VkRenderer* rn, const VkVertexBuffer* buffer, const void* data, uint32_t offsetInBytes, uint32_t sizeInBytes);
     void UploadBuffer(const VkRenderer* rn, const VkIndexBuffer* buffer, const void* data, uint32_t offset, uint32_t indexCount);
 
     uvec2 GetReadyForRendering(VkRenderer* rn, VkRenderTexture** pTextures, uint32_t textureCount);
     void StartFrame(VkRenderer* rn);
     void EndFrame(VkRenderer* rn);
-    void Draw(const VkDrawInfo& info);
+    void Draw(const VkRenderer* rn, const inter::rendering::IndexedDrawCallInfo_i& info);
+    void Draw(const VkRenderer* rn, const inter::rendering::VertexedDrawCallInfo_i& info);
 
     void RegisterFrameBufferChange(VkRenderer* rn, uvec2 newSize);
     void SetVSync(VkRenderer* rn, VsyncMode mode);

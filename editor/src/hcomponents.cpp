@@ -182,7 +182,7 @@ namespace hf::editor
     {
         if(StartWindow(label, isOpen, flags))
         {
-            if(StartComponent("General"))
+            if(StartComponent("General Audio Settings"))
             {
                 float volume = GetAudioVolume();
                 if(DrawSlider("Volume", volume, 0.0f, 1.0f, "%.2f")) SetAudioVolume(volume);
@@ -203,7 +203,6 @@ namespace hf::editor
         if(StartComponent(label, flags))
         {
             DrawAudioSettings(pl, flags);
-
             EndComponent();
             return true;
         }
@@ -256,9 +255,9 @@ namespace hf::editor
         bool result = false;
         result = DrawSlider("Inner Angle", cone.innerAngle, 0.0f, 360.0f, "%.1f", flags) || result;
         result = DrawSlider("Outer Angle", cone.outerAngle, 0.0f, 360.0f, "%.1f", flags) || result;
-        result = DrawSlider("Outer Gain", cone.outerGain, 0.0f, 1.0f, "%.1f", flags) || result;
-        result = Draw("Position", cone.position, 0, flags | DrawStateFlag::ButtonLess) || result;
-        result = Draw("Rotation", cone.euler, 0, flags | DrawStateFlag::ButtonLess) || result;
+        result = DrawSlider("Outer Gain", cone.outerGain, 0.0f, 1.0f, "%.1f", flags)     || result;
+        result = Draw("Position", cone.position, 0, flags | DrawStateFlag::ButtonLess)            || result;
+        result = Draw("Rotation", cone.euler, 0, flags | DrawStateFlag::ButtonLess)               || result;
         return result;
     }
 

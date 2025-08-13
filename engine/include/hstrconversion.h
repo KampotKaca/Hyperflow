@@ -438,6 +438,17 @@ namespace hf
 #undef X
     }
 
+    constexpr BufferInputRate STRING_TO_BUFFER_INPUT_RATE(const std::string_view str)
+    {
+#define X BufferInputRate
+        switch (fnv1a(str))
+        {
+            DATA_TYPE(Vertex) DATA_TYPE(Instance)
+        default: throw std::invalid_argument("Unknown Buffer input rate string");
+        }
+#undef X
+    }
+
     inline bool START_READING(const char* assetPath, std::vector<char>& metadata)
     {
         if (!utils::FileExists(assetPath))

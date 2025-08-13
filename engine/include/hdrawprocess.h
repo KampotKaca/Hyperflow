@@ -54,6 +54,18 @@ namespace hf
         AssetRange<uint16_t> bindingPacketRange{};
     };
 
+    struct DrawCallPacketInfo
+    {
+        AssetRange<uint32_t> vertexBufferRange{};
+        AssetRange<uint32_t> instanceDataRange{};
+        Ref<IndexBuffer> indexBuffer{};
+        uint32_t instanceCount{};
+
+#if DEBUG
+        char debugName[16];
+#endif
+    };
+
     struct DrawPacketInfo
     {
         AssetRange<uint32_t> texpackRange{};
@@ -120,9 +132,11 @@ namespace hf
         std::vector<BufferSetPacketInfo> bufferSets{};
         std::vector<Buffer> buffers{};
 
-        std::vector<DrawCallInfo> drawCalls{};
+        std::vector<DrawCallPacketInfo> drawCalls{};
+        std::vector<Ref<VertexBuffer>> vertexBuffers{};
         std::vector<uint8_t> bufferUploads{};
         std::vector<uint8_t> pushConstantUploads{};
+        std::vector<uint8_t> instanceUploads{};
         std::vector<BufferUploadPacketInfo> bufferUploadPackets{};
 
         void clear()
@@ -143,8 +157,10 @@ namespace hf
             buffers.clear();
 
             drawCalls.clear();
+            vertexBuffers.clear();
             bufferUploads.clear();
             pushConstantUploads.clear();
+            instanceUploads.clear();
             bufferUploadPackets.clear();
         }
     };
@@ -156,8 +172,9 @@ namespace hf
         ShaderPacketInfo* currentShader{};
         MaterialPacketInfo* currentMaterial{};
         BufferSetPacketInfo* currentUniformSet{};
-        DrawPacketInfo* currentDraw{};
+        DrawPacketInfo* currentDrawPacket{};
         TexturePackRebindingGroupPacketInfo* currentTexturePackBinding{};
+        DrawCallPacketInfo* currentDrawCall{};
 
         RenderPacket* packet{};
 
@@ -168,7 +185,8 @@ namespace hf
             currentShader = nullptr;
             currentMaterial = nullptr;
             currentUniformSet = nullptr;
-            currentDraw = nullptr;
+            currentDrawPacket = nullptr;
+            currentDrawCall = nullptr;
             currentTexturePackBinding = nullptr;
         }
     };

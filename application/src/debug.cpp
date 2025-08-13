@@ -193,6 +193,18 @@ namespace app
                 hf::editor::EndDropdown();
             }
 
+            if (hf::editor::StartDropdown("Ground"))
+            {
+                hf::editor::Draw("Transform", APP_OBJECTS.groundTransform);
+                hf::editor::EndDropdown();
+            }
+
+            if (hf::editor::StartDropdown("Sphere"))
+            {
+                hf::editor::Draw("Transform", APP_OBJECTS.sphereTransform);
+                hf::editor::EndDropdown();
+            }
+
             hf::editor::EndWindow();
         }
 

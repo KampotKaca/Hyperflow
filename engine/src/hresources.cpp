@@ -186,10 +186,10 @@ namespace hf
                 };
 
                 VertexBufferCreationInfo bufferInfo{};
+                bufferInfo.vertexCount = 6;
                 bufferInfo.vertexSize = GetVertexSize(HF.staticResources.vertexAttributes.quad);
                 bufferInfo.memoryType = BufferMemoryType::Static;
                 bufferInfo.usageFlags = BufferUsageTypeFlags::All;
-                bufferInfo.vertexCount = 6;
                 bufferInfo.pVertices = vertices;
 
                 HF.staticResources.quadBuffer = Create(bufferInfo);
@@ -198,10 +198,10 @@ namespace hf
             //Instance Buffer
             {
                 VertexBufferCreationInfo bufferInfo{};
+                bufferInfo.vertexCount = MAX_INSTANCE_BUFFER_SIZE_BYTES / MAX_PER_INSTANCE_BUFFER_SIZE;
                 bufferInfo.vertexSize = MAX_PER_INSTANCE_BUFFER_SIZE;
                 bufferInfo.memoryType = BufferMemoryType::PerFrameWriteOnly;
                 bufferInfo.usageFlags = BufferUsageTypeFlags::All;
-                bufferInfo.vertexCount = MAX_NUM_INSTANCES_PER_DRAW;
                 bufferInfo.pVertices = nullptr;
 
                 HF.staticResources.instanceBuffer = Create(bufferInfo);

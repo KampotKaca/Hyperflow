@@ -5,7 +5,7 @@
 
 namespace app
 {
-    struct UnlitColorPushConstant
+    struct DefaultInstanceData
     {
         alignas(16) hf::mat4 modelMatrix;
         alignas(16) hf::vec4 color;
@@ -13,8 +13,6 @@ namespace app
 
     struct DefaultPushConstant
     {
-        alignas(16) hf::mat4 modelMatrix;
-        alignas(16) hf::vec4 color;
         alignas(16) hf::vec4 phongData; //xyz specular color, w smoothness
     };
 

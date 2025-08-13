@@ -91,8 +91,8 @@ namespace hf
 	bool IsLoaded(const Ref<AudioGroup>& group);
 
 	void Upload(const Ref<Material>& mat, const void* data);
-	void Upload(const Ref<VertexBuffer>& vb, const VertBufferUploadInfo& info);
-	void Upload(const Ref<IndexBuffer>& ib, const IndexBufferUploadInfo& info);
+	void Upload(const Ref<Renderer>& rn, const Ref<VertexBuffer>& vb, const VertBufferUploadInfo& info); //Renderer is optional!
+	void Upload(const Ref<Renderer>& rn, const Ref<IndexBuffer>& ib, const IndexBufferUploadInfo& info); //Renderer is optional!
 
 	void ChangeClip(const Ref<AudioPlayer>& player, const Ref<AudioClip>& clip, float_t startingDuration = -1);
 	void ChangeClip(const Ref<AudioPlayer3D>& player, const Ref<AudioClip>& clip, float_t startingDuration = -1);
@@ -216,8 +216,8 @@ namespace hf
 	void Start_Material(const Ref<Renderer>& rn, const Ref<Material>& material);
 	void End_Material(const Ref<Renderer>& rn);
 
-	void Start_Draw(const Ref<Renderer>& rn);
-	void End_Draw(const Ref<Renderer>& rn);
+	void Start_DrawGroup(const Ref<Renderer>& rn);
+	void End_DrawGroup(const Ref<Renderer>& rn);
 
 	void Start_BufferSet(const Ref<Renderer>& rn, RenderBindingType bindingType, uint32_t setBindingIndex);
 	void End_BufferSet(const Ref<Renderer>& rn);
@@ -225,17 +225,26 @@ namespace hf
 
 	void MaterialAdd_TexturePackBinding(const Ref<Renderer>& rn, const Ref<TexturePack>& texPack, uint32_t setBindingIndex);
 
-	void DrawAdd_DrawCall(const Ref<Renderer>& rn, const Ref<Mesh>& mesh);
-	void DrawAdd_DrawCall(const Ref<Renderer>& rn, const DrawCallInfo& drawCall);
+	void Start_DrawCall(const Ref<Renderer>& rn, const Ref<IndexBuffer>& indexBuffer);
+    void Start_DrawCall(const Ref<Renderer>& rn, const Ref<Mesh>& mesh, uint32_t submeshIndex);
+    void End_DrawCall(const Ref<Renderer>& rn);
 
-	void DrawAdd_TexturePackBinding(const Ref<Renderer>& rn, const Ref<TexturePack>& texPack, uint32_t setBindingIndex);
+	void DrawGroupAdd_TexturePackBinding(const Ref<Renderer>& rn, const Ref<TexturePack>& texPack, uint32_t setBindingIndex);
 
-	void DrawSet_PushConstant(const Ref<Renderer>& rn, const void* data, uint32_t dataSize);
+	void DrawGroupSet_PushConstant(const Ref<Renderer>& rn, const void* data, uint32_t dataSize);
+	void DrawAdd_Instance(const Ref<Renderer>& rn, const void* data, uint32_t dataSize);
+	void DrawAdd_VertexBuffer(const Ref<Renderer>& rn, const Ref<VertexBuffer>& vb);
 
 	template<typename T>
-	void DrawSet_PushConstant(const Ref<Renderer>& rn, const T& data)
+	void DrawGroupSet_PushConstant(const Ref<Renderer>& rn, const T& data)
 	{
-		DrawSet_PushConstant(rn, &data, sizeof(T));
+		DrawGroupSet_PushConstant(rn, &data, sizeof(T));
+	}
+
+    template<typename T>
+    void DrawAdd_Instance(const Ref<Renderer>& rn, const T& data)
+	{
+	    DrawAdd_Instance(rn, &data, sizeof(T));
 	}
     //endregion
 
@@ -246,6 +255,7 @@ namespace hf
 	uint16_t GetBufferIndex(const Ref<Material>& mat);
 
 	MeshStats GetStats(const Ref<Mesh>& mesh);
+	uint32_t GetSubmeshCount(const Ref<Mesh>& mesh);
 
 	void SubmitAllTextures();
 	void SubmitAllBuffers();

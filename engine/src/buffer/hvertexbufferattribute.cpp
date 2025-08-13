@@ -33,6 +33,12 @@ namespace hf
             info.bindingId = std::stoi(root["bindingId"].val().str);
             info.locationOffset = std::stoi(root["locationOffset"].val().str);
 
+            {
+                const auto v = root["inputRate"].val();
+                const std::string_view vView{v.str, v.len};
+                info.inputRate = STRING_TO_BUFFER_INPUT_RATE(vView);
+            }
+
             auto formats = root["formats"];
             std::vector<BufferAttribFormat> formatList{};
             formatList.reserve(formats.num_children());

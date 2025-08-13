@@ -168,19 +168,19 @@ namespace hf::inter::rendering
         hf::UploadPushConstants((VkRenderer*)rn, info);
     }
 
-    void* CreateVertBuffer(const VertexBufferCreationInfo& info)
+    void* CreateVertBuffer(const VertexBufferCreationInfo_i& info)
     {
-        return new VkVertBuffer(info);
+        return new VkVertexBuffer(info);
     }
 
     void DestroyVertBuffer(void* handle)
     {
-        delete (VkVertBuffer*)handle;
+        delete (VkVertexBuffer*)handle;
     }
 
     void UploadVertBuffer(const void* rn, const VertexBufferUploadInfo_i& info)
     {
-        hf::UploadBuffer((VkRenderer*)rn, (VkVertBuffer*)info.buffer, info.data, info.offset, info.vertexCount);
+        hf::UploadBuffer((VkRenderer*)rn, (VkVertexBuffer*)info.buffer, info.data, info.offsetInBytes, info.sizeInBytes);
     }
 
     void* CreateIndexBuffer(const IndexBufferCreationInfo& info)
@@ -233,38 +233,14 @@ namespace hf::inter::rendering
         EndFrame(renderer);
     }
 
-    void Draw(void* rn, const DrawCallInfo_i& info)
+    void DrawIndexed(void* rn, const IndexedDrawCallInfo_i& info)
     {
-        auto* vrn = (VkRenderer*)rn;
+        Draw((VkRenderer*)rn, info);
+    }
 
-        uint32_t offset = 0;
-        uint32_t vertCount = 0;
-        for (uint32_t i = 0; i < info.bufferCount; i++)
-        {
-            const auto vertexBuffer = (VkVertBuffer*)info.pVertexBuffers[i];
-            vrn->vertexBufferCache[i] = vertexBuffer->buffers[vrn->currentFrame];
-            vrn->drawOffsets[i] = offset;
-            offset += vertexBuffer->vertexSize;
-            vertCount = vertexBuffer->vertCount;
-        }
-
-        VkDrawInfo drawInfo{};
-        drawInfo.renderer = vrn;
-        drawInfo.pBuffers = vrn->vertexBufferCache;
-        drawInfo.pOffsets = vrn->drawOffsets;
-        drawInfo.bufferCount = info.bufferCount;
-        drawInfo.vertCount = vertCount;
-        drawInfo.instanceCount = info.instanceCount;
-
-        if (info.indexBuffer)
-        {
-            const auto indexBuffer = (VkIndexBuffer*)info.indexBuffer;
-            drawInfo.indexBuffer = indexBuffer->buffers[vrn->currentFrame];
-            drawInfo.indexType = indexBuffer->indexType;
-            drawInfo.indexCount = indexBuffer->indexCount;
-        }
-
-        Draw(drawInfo);
+    void Draw(void* rn, const VertexedDrawCallInfo_i& info)
+    {
+        Draw((VkRenderer*)rn, info);
     }
 
     void ApplyRenderAttachmentDependencies(void* rn, RenderAttachmentDependencyInfo* pInfos, uint32_t count)
@@ -421,7 +397,10 @@ namespace hf::inter::rendering
             .GetReadyForRendering       = GetReadyForRendering,
             .StartFrame                 = StartFrame,
             .EndFrame                   = EndFrame,
+
+            .DrawIndexed                = DrawIndexed,
             .Draw                       = Draw,
+
             .ApplyRenderAttachmentDependencies = ApplyRenderAttachmentDependencies,
             .WaitForDevice              = WaitForDevice,
 
