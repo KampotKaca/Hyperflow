@@ -18,12 +18,8 @@ namespace hf
             End_BufferSet(rn);
         }
 
-        TextureSampler GetCubemapSampler() { return inter::HF.staticResources.cubemapSampler; }
-
-        Ref<Mesh> GetCube()      { return inter::HF.staticResources.primitives.cube; }
-        Ref<Mesh> GetPlane()     { return inter::HF.staticResources.primitives.plane; }
-        Ref<Mesh> GetIcoSphere() { return inter::HF.staticResources.primitives.icoSphere; }
-        Ref<Mesh> GetUvSphere()  { return inter::HF.staticResources.primitives.uvSphere; }
+        Ref<Mesh> GetMesh(PrimitiveMeshType type) { return inter::HF.staticResources.primitiveMeshes[(uint32_t)type]; }
+        Ref<Texture> GetTexture(PrimitiveTextureType type) { return inter::HF.staticResources.primitiveTextures[(uint32_t)type]; }
 
         Ref<Material> GetEmptyMaterial() { return inter::HF.staticResources.emptyMaterial; }
     }
@@ -39,6 +35,7 @@ namespace hf
         static void LoadCubemaps();
         static void LoadTexturePacks();
         static void LoadMeshes();
+        static void LoadTextures();
         static void LoadShaders();
         static void LoadMaterials();
 
@@ -55,6 +52,7 @@ namespace hf
         {
             LoadShaders();
             LoadMeshes();
+            LoadTextures();
             LoadCubemaps();
 
             SubmitAllTextures();
@@ -207,10 +205,24 @@ namespace hf
                 HF.staticResources.instanceBuffer = Create(bufferInfo);
             }
 
-            HF.staticResources.primitives.cube      = CreateMeshAsset("__cube.obj");
-            HF.staticResources.primitives.icoSphere = CreateMeshAsset("__ico_sphere.obj");
-            HF.staticResources.primitives.plane     = CreateMeshAsset("__plane.obj");
-            HF.staticResources.primitives.uvSphere  = CreateMeshAsset("__uv_sphere.obj");
+            HF.staticResources.primitiveMeshes[(uint32_t)PrimitiveMeshType::Cube]      = CreateMeshAsset("__cube.obj");
+            HF.staticResources.primitiveMeshes[(uint32_t)PrimitiveMeshType::IcoSphere] = CreateMeshAsset("__ico_sphere.obj");
+            HF.staticResources.primitiveMeshes[(uint32_t)PrimitiveMeshType::Plane]     = CreateMeshAsset("__plane.obj");
+            HF.staticResources.primitiveMeshes[(uint32_t)PrimitiveMeshType::UVSphere]  = CreateMeshAsset("__uv_sphere.obj");
+            HF.staticResources.primitiveMeshes[(uint32_t)PrimitiveMeshType::Cone]      = CreateMeshAsset("__cone.obj");
+            HF.staticResources.primitiveMeshes[(uint32_t)PrimitiveMeshType::Cylinder]  = CreateMeshAsset("__cylinder.obj");
+            HF.staticResources.primitiveMeshes[(uint32_t)PrimitiveMeshType::Torus]     = CreateMeshAsset("__torus.obj");
+        }
+
+        void LoadTextures()
+        {
+            HF.staticResources.primitiveTextures[(uint32_t)PrimitiveTextureType::Default]           = CreateTextureAsset("__default.png");
+            HF.staticResources.primitiveTextures[(uint32_t)PrimitiveTextureType::Circle]            = CreateTextureAsset("__circle.png");
+            HF.staticResources.primitiveTextures[(uint32_t)PrimitiveTextureType::Triangle]          = CreateTextureAsset("__triangle.png");
+            HF.staticResources.primitiveTextures[(uint32_t)PrimitiveTextureType::Capsule]           = CreateTextureAsset("__capsule.png");
+            HF.staticResources.primitiveTextures[(uint32_t)PrimitiveTextureType::HexagonFlatTop]    = CreateTextureAsset("__hexagon_flat_top.png");
+            HF.staticResources.primitiveTextures[(uint32_t)PrimitiveTextureType::HexagonPointedTop] = CreateTextureAsset("__hexagon_pointed_top.png");
+            HF.staticResources.primitiveTextures[(uint32_t)PrimitiveTextureType::IsometricDiamond]  = CreateTextureAsset("__isometric_diamond.png");
         }
 
         void LoadShaders()

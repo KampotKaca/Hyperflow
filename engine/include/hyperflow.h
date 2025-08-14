@@ -362,19 +362,15 @@ namespace hf
 
 	namespace primitives
 	{
+	    Ref<Mesh> GetMesh(PrimitiveMeshType type);
+        Ref<Texture> GetTexture(PrimitiveTextureType type);
+
 		Ref<VertexBuffer> GetQuadBuffer();
 		Ref<VertexBuffer>* GetQuadBufferP();
 
 		Buffer GetGlobalUniformBuffer();
 		Buffer GetMaterialStorageBuffer();
 		void BindGlobalUniformBuffer(const Ref<Renderer>& rn);
-
-		TextureSampler GetCubemapSampler();
-
-		Ref<Mesh> GetCube();
-		Ref<Mesh> GetPlane();
-	    Ref<Mesh> GetIcoSphere();
-	    Ref<Mesh> GetUvSphere();
 
 		Ref<Material> GetEmptyMaterial();
 	}

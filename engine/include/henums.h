@@ -18,6 +18,11 @@ namespace hf
         return a;\
     }\
 
+    //----------------------------- Primitives ---------------------------------------------------
+
+    enum class PrimitiveMeshType { Cube, IcoSphere, Plane, UVSphere, Cone, Cylinder, Torus, Count };
+    enum class PrimitiveTextureType { Default, Circle, Triangle, Capsule, HexagonFlatTop, HexagonPointedTop, IsometricDiamond, Count };
+
     //----------------------------- Rendering ---------------------------------------------------
 
     enum class TexturePackBindingType { Texture2D, Cubemap, RenderTexture };

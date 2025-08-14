@@ -38,7 +38,7 @@ namespace app
         {
             hf::TexturePackBindingInfo<hf::Texture>::TextureInfo white_info
             {
-                .texture = APP_TEXTURES.white,
+                .texture = hf::primitives::GetTexture(hf::PrimitiveTextureType::Default),
                 .index = 0
             };
 

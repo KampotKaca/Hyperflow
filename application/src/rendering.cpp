@@ -85,7 +85,7 @@ namespace app
                             pc.phongData = hf::vec4{ hf::utils::ColorFromHash(0x9B9B9B), 1.0 };
 
                             hf::DrawGroupSet_PushConstant(rn, pc);
-                            hf::Start_DrawCall(rn, hf::primitives::GetIcoSphere(), 0);
+                            hf::Start_DrawCall(rn, hf::primitives::GetMesh(hf::PrimitiveMeshType::IcoSphere), 0);
 
                             hf::DrawAdd_Instance(rn, DefaultInstanceData
                             {
@@ -113,7 +113,7 @@ namespace app
                     {
                         hf::Start_DrawGroup(rn);
                         {
-                            hf::Start_DrawCall(rn, hf::primitives::GetPlane(), 0);
+                            hf::Start_DrawCall(rn, hf::primitives::GetMesh(hf::PrimitiveMeshType::Plane), 0);
 
                             hf::DrawAdd_Instance(rn, DefaultInstanceData
                             {

@@ -96,14 +96,6 @@ namespace hf::inter
         uint32_t skyboxFragmentOutput{};
     };
 
-    struct StaticPrimitiveMeshes
-    {
-        Ref<Mesh> cube{};
-        Ref<Mesh> plane{};
-        Ref<Mesh> icoSphere{};
-        Ref<Mesh> uvSphere{};
-    };
-
     struct StaticShaderLayouts
     {
         ShaderLayout axisLines{};
@@ -138,7 +130,8 @@ namespace hf::inter
 
         StaticVertexAttributes vertexAttributes{};
         StaticResourcesLibraryModules engineShadersLibModules{};
-        StaticPrimitiveMeshes primitives{};
+        Ref<Mesh> primitiveMeshes[(uint32_t)PrimitiveMeshType::Count]{};
+        Ref<Texture> primitiveTextures[(uint32_t)PrimitiveTextureType::Count]{};
         StaticSkyboxResources skyboxResources{};
 
         Ref<Material> emptyMaterial{};
