@@ -1,9 +1,9 @@
 #ifndef HPACKETS_H
 #define HPACKETS_H
 
+#include "../components/include/hcomponents.h"
 #include "hshared.h"
 #include "../config.h"
-#include "../components/include/hstaticvector.h"
 
 namespace hf
 {
@@ -117,6 +117,11 @@ namespace hf
 
     struct RenderPacket
     {
+        std::optional<Camera3DFreeLook> camera{};
+        std::vector<DirectionalLight> directionalLights{};
+        std::vector<SpotLight> spotLights{};
+        std::vector<PointLight> pointLights{};
+
         std::vector<RenderAttachmentDependencyInfo> dependencies{};
         std::vector<RenderTexturePacketInfo> renderTextures{};
         std::vector<ShaderLayoutPacketInfo> shaderLayouts{};
@@ -141,6 +146,11 @@ namespace hf
 
         void clear()
         {
+            camera = std::nullopt;
+            directionalLights.clear();
+            spotLights.clear();
+            pointLights.clear();
+
             dependencies.clear();
             renderTextures.clear();
             shaderLayouts.clear();

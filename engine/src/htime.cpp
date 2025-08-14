@@ -47,6 +47,15 @@ namespace hf
 
 	int32_t Time::GetFrameRate() const { return (int32_t)glm::round(frameRate); }
 
+    TimeUniformInfo Time::GetUniformInfo()const
+	{
+	    TimeUniformInfo info{};
+	    info.deltaTime = deltaTime;
+	    info.timeSinceStartup = GetTimePassed();
+
+	    return info;
+	}
+
 	uint64_t GetFrameCount() { return inter::HF.time.frameCount; }
 	double_t GetDeltaTime(){ return inter::HF.time.deltaTime; }
 	double_t GetTimePassed() { return inter::HF.time.GetTimePassed(); }
@@ -54,15 +63,6 @@ namespace hf
 	int16_t GetTargetFrameRate() { return inter::HF.time.targetFrameRate; }
 	int32_t GetFrameRate() { return inter::HF.time.GetFrameRate(); }
 	void SetTargetFrameRate(int16_t targetFrameRate) { return inter::HF.time.SetTargetFrameRate(targetFrameRate); }
-
-	TimeUniformInfo GetTimeUniformInfo()
-	{
-	    TimeUniformInfo info{};
-	    info.deltaTime = inter::HF.time.deltaTime;
-	    info.timeSinceStartup = inter::HF.time.GetTimePassed();
-
-		return info;
-	}
 
 	double_t GetSystemTime()
 	{

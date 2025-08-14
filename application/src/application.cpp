@@ -12,7 +12,6 @@ namespace app
 		VertexAttributesDefineAll();
 		TextureSamplerDefineAll();
 		TextureLayoutDefineAll();
-		UniformDefineAll();
 		ShaderLayoutDefineAll();
 		DebugDefine();
 	}
@@ -36,7 +35,6 @@ namespace app
 	void AppStart()
 	{
 		APP_OBJECTS.sphereTransform.position = { -3, 1, 3 };
-		UniformStartAll();
 		DebugStart();
 
 		VoxelTerrainGenerate();

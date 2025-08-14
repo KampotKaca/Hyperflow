@@ -10,7 +10,6 @@ namespace hf
         Ref<VertexBuffer>* GetQuadBufferP() { return &inter::HF.staticResources.quadBuffer; }
 
         Buffer GetGlobalUniformBuffer()     { return inter::HF.staticResources.globalUniform; }
-        Buffer GetMaterialStorageBuffer()   { return inter::HF.graphicsResources.materialDataStorageBuffer; }
         void BindGlobalUniformBuffer(const Ref<Renderer>& rn)
         {
             Start_BufferSet(rn, RenderBindingType::Graphics, 0);
@@ -20,8 +19,6 @@ namespace hf
 
         Ref<Mesh> GetMesh(PrimitiveMeshType type) { return inter::HF.staticResources.primitiveMeshes[(uint32_t)type]; }
         Ref<Texture> GetTexture(PrimitiveTextureType type) { return inter::HF.staticResources.primitiveTextures[(uint32_t)type]; }
-
-        Ref<Material> GetEmptyMaterial() { return inter::HF.staticResources.emptyMaterial; }
     }
 
     namespace inter::primitives
@@ -37,7 +34,6 @@ namespace hf
         static void LoadMeshes();
         static void LoadTextures();
         static void LoadShaders();
-        static void LoadMaterials();
 
         void DefineStaticResources_i()
         {
@@ -54,11 +50,9 @@ namespace hf
             LoadMeshes();
             LoadTextures();
             LoadCubemaps();
-
             SubmitAllTextures();
 
             LoadTexturePacks();
-            LoadMaterials();
         }
 
         void DefineBufferAttribs()
@@ -80,9 +74,14 @@ namespace hf
         void DefineBuffers()
         {
             {
+                BufferBindingInfo info{};
+                info.usageFlags = ShaderUsageStageFlags::All;
+                info.arraySize = 1;
+                info.elementSizeInBytes = sizeof(GlobalUniformInfo);
+
                 BufferDefinitionInfo uniform{};
                 uniform.bindingId = 0;
-                uniform.pBindings = &HF.internalResourcesFormat.globalUniformBindingInfo;
+                uniform.pBindings = &info;
                 uniform.bindingCount = 1;
 
                 HF.staticResources.globalUniform = Define(uniform);
@@ -343,15 +342,6 @@ namespace hf
 
                 HF.staticResources.shaders.skybox = Create(shaderInfo);
             }
-        }
-
-        void LoadMaterials()
-        {
-            const MaterialCreationInfo materialInfo
-            {
-                .sizeInBytes = 0
-            };
-            HF.staticResources.emptyMaterial = Create(materialInfo);
         }
     }
 }

@@ -1,4 +1,3 @@
-#include "resources/uniforms.h"
 #include "resources/texturelayouts.h"
 #include "resources/shaderlayouts.h"
 #include "resources/materials.h"

@@ -1,8 +1,8 @@
 #ifndef HYPERFLOW_H
 #define HYPERFLOW_H
 
-#include "hrenderer.h"
 #include "../components/include/hcomponents.h"
+#include "hrenderer.h"
 #include "hshared.h"
 
 namespace hf
@@ -188,6 +188,14 @@ namespace hf
 
     //region Draw Process
     void Set_DrawCallback(const Ref<Renderer>& rn, void (*callback)(const Ref<Renderer>&, void*));
+
+    void Set_Camera(const Ref<Renderer>& rn, const Camera3DAnchored& camera);
+    void Set_Camera(const Ref<Renderer>& rn, const Camera3DFreeLook& camera);
+
+    void Add_Light(const Ref<Renderer>& rn, const DirectionalLight& light);
+    void Add_Light(const Ref<Renderer>& rn, const SpotLight& light);
+    void Add_Light(const Ref<Renderer>& rn, const PointLight& light);
+
     void Upload_Buffer(const Ref<Renderer>& rn, const BufferUploadInfo& info);
 	void Upload_Material(const Ref<Renderer>& rn, const Ref<Material>& material);
 
@@ -213,6 +221,7 @@ namespace hf
 	void Start_Shader(const Ref<Renderer>& rn, const Ref<Shader>& shader);
 	void End_Shader(const Ref<Renderer>& rn);
 
+    //material can be null, when you do not use it in the shader!
 	void Start_Material(const Ref<Renderer>& rn, const Ref<Material>& material);
 	void End_Material(const Ref<Renderer>& rn);
 
@@ -320,7 +329,6 @@ namespace hf
 	double GetSystemTime();
 	int32_t GetFrameRate();
 	void SetTargetFrameRate(int16_t targetFrameRate);
-	TimeUniformInfo GetTimeUniformInfo();
 
     void* GetEditorApiHandles();
 
@@ -369,10 +377,7 @@ namespace hf
 		Ref<VertexBuffer>* GetQuadBufferP();
 
 		Buffer GetGlobalUniformBuffer();
-		Buffer GetMaterialStorageBuffer();
 		void BindGlobalUniformBuffer(const Ref<Renderer>& rn);
-
-		Ref<Material> GetEmptyMaterial();
 	}
 }
 

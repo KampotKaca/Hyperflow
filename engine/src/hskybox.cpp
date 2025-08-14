@@ -39,7 +39,7 @@ namespace hf::skybox
 
             Start_Shader(rn, inter::HF.staticResources.shaders.skybox);
             {
-                Start_Material(rn, inter::HF.staticResources.emptyMaterial);
+                Start_Material(rn, nullptr);
                 {
                     Start_DrawGroup(rn);
                     {

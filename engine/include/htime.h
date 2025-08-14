@@ -17,6 +17,7 @@ namespace hf
 		[[nodiscard]] int32_t GetFrameRate() const;
 
 		void SetTargetFrameRate(int16_t targetFrameRate);
+		TimeUniformInfo GetUniformInfo()const;
 
 		int16_t targetFrameRate = 50;
 		double_t targetFrameDuration = (1.0 / targetFrameRate);

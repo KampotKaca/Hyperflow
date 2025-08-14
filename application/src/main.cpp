@@ -23,12 +23,6 @@ int main()
 		.updateType = hf::EngineUpdateType::Continues,
 	    .internalResourcesFormat = hf::EngineInternalResourceFormatInfo
 	    {
-		    .globalUniformBindingInfo = hf::BufferBindingInfo
-            {
-		        .usageFlags         = hf::ShaderUsageStageFlags::All,
-                .arraySize          = 1,
-                .elementSizeInBytes = sizeof(app::GlobalUniformInfo)
-            },
 		    .drawOutputFormats = hf::ShaderDrawOutputFormats
 		    {
 		        .sampleMode  = MSAA_MODE,

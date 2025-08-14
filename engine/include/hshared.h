@@ -698,7 +698,6 @@ namespace hf
 
     struct EngineInternalResourceFormatInfo
     {
-		BufferBindingInfo globalUniformBindingInfo{}; //this is binding for global uniform which should contain at least Camera and Time uniforms
         ShaderDrawOutputFormats drawOutputFormats{}; //this is general outline of the render texture you are going to draw on with the shaders.
     };
 

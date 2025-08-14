@@ -21,6 +21,13 @@
 
 namespace hf::inter
 {
+    struct GlobalUniformInfo
+    {
+        CameraUniformInfo camera{};
+        TimeUniformInfo time{};
+        LightUniformInfo light{};
+    };
+
     struct RenderingApi
     {
         RenderingApiType type = RenderingApiType::None;
@@ -134,7 +141,6 @@ namespace hf::inter
         Ref<Texture> primitiveTextures[(uint32_t)PrimitiveTextureType::Count]{};
         StaticSkyboxResources skyboxResources{};
 
-        Ref<Material> emptyMaterial{};
         Ref<VertexBuffer> quadBuffer{};
         Ref<VertexBuffer> instanceBuffer{};
     };

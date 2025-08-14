@@ -11,7 +11,7 @@ namespace hf::gridlines
 
             Start_Shader(rn, inter::HF.staticResources.shaders.axisLines);
             {
-                Start_Material(rn, inter::HF.staticResources.emptyMaterial);
+                Start_Material(rn, nullptr);
                 {
                     Start_DrawGroup(rn);
                     {

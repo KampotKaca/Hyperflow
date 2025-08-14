@@ -1,8 +1,8 @@
 #ifndef HRENDERER_H
 #define HRENDERER_H
 
-#include "hshared.h"
 #include "hdrawprocess.h"
+#include "hshared.h"
 
 namespace hf
 {

@@ -1,5 +1,6 @@
 #include "hyperfloweditor.h"
 #include "heditorinternal.h"
+#include "hyperflow.h"
 #include "hutils.h"
 
 namespace hf::editor

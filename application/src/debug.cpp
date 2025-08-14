@@ -154,8 +154,6 @@ namespace app
 
     void DebugPreRender(const hf::Ref<hf::Renderer>& rn)
     {
-        APP_UNIFORMS.globalUniformInfo.camera = APP_DEBUG.camera.camera3D.GetUniformInfo(rn);
-
         hf::editor::StartFrame();
 
         hf::editor::SetNextWindowSize({ 300, 300 }, hf::editor::Condition::FirstUseEver);

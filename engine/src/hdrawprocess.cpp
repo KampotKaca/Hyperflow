@@ -29,13 +29,133 @@ namespace hf
         }
     }
 
+    void Set_Camera(const Ref<Renderer>& rn, const Camera3DAnchored& camera)
+    {
+        try
+        {
+#if DEBUG
+            if (!rn->isDrawing)
+                throw GENERIC_EXCEPT("[Hyperflow]", "Cannot set camera until drawing process starts");
+
+            if (rn->currentDraw.packet->camera.has_value())
+                throw GENERIC_EXCEPT("[Hyperflow]", "Cannot set camera twice");
+#endif
+
+            rn->currentDraw.packet->camera = Camera3DFreeLook
+            {
+                .position = camera.GetPosition(),
+                .direction = camera.GetDirection(),
+                .up = camera.up,
+                .core = camera.core,
+            };
+        }
+        catch (...)
+        {
+            LOG_ERROR("%s", "Unable to set camera!");
+            throw;
+        }
+    }
+
+    void Set_Camera(const Ref<Renderer>& rn, const Camera3DFreeLook& camera)
+    {
+        try
+        {
+#if DEBUG
+            if (!rn->isDrawing)
+                throw GENERIC_EXCEPT("[Hyperflow]", "Cannot set camera until drawing process starts");
+
+            if (rn->currentDraw.packet->camera.has_value())
+                throw GENERIC_EXCEPT("[Hyperflow]", "Cannot set camera twice");
+#endif
+
+            rn->currentDraw.packet->camera = camera;
+        }
+        catch (...)
+        {
+            LOG_ERROR("%s", "Unable to set camera!");
+            throw;
+        }
+    }
+
+    void Add_Light(const Ref<Renderer>& rn, const DirectionalLight& light)
+    {
+        try
+        {
+#if DEBUG
+            if (!rn->isDrawing)
+                throw GENERIC_EXCEPT("[Hyperflow]", "Cannot add light until drawing process starts");
+
+            if (rn->currentDraw.packet->directionalLights.size() >= MAX_DIRECTIONAL_LIGHTS)
+            {
+                LOG_ERROR("Cannot add more than %i directional lights!", MAX_DIRECTIONAL_LIGHTS);
+                return;
+            }
+#endif
+
+            rn->currentDraw.packet->directionalLights.push_back(light);
+        }
+        catch (...)
+        {
+            LOG_ERROR("%s", "Unable to add light!");
+            throw;
+        }
+    }
+
+    void Add_Light(const Ref<Renderer>& rn, const SpotLight& light)
+    {
+        try
+        {
+#if DEBUG
+            if (!rn->isDrawing)
+                throw GENERIC_EXCEPT("[Hyperflow]", "Cannot add light until drawing process starts");
+
+            if (rn->currentDraw.packet->spotLights.size() >= MAX_SPOT_LIGHTS)
+            {
+                LOG_ERROR("Cannot add more than %i spot lights!", MAX_SPOT_LIGHTS);
+                return;
+            }
+#endif
+
+            rn->currentDraw.packet->spotLights.push_back(light);
+        }
+        catch (...)
+        {
+            LOG_ERROR("%s", "Unable to add light!");
+            throw;
+        }
+    }
+
+    void Add_Light(const Ref<Renderer>& rn, const PointLight& light)
+    {
+        try
+        {
+#if DEBUG
+            if (!rn->isDrawing)
+                throw GENERIC_EXCEPT("[Hyperflow]", "Cannot add light until drawing process starts");
+
+            if (rn->currentDraw.packet->pointLights.size() >= MAX_POINT_LIGHTS)
+            {
+                LOG_ERROR("Cannot add more than %i point lights!", MAX_POINT_LIGHTS);
+                return;
+            }
+#endif
+
+            rn->currentDraw.packet->pointLights.push_back(light);
+        }
+        catch (...)
+        {
+            LOG_ERROR("%s", "Unable to add light!");
+            throw;
+        }
+    }
+
     void Upload_Buffer(const Ref<Renderer>& rn, const BufferUploadInfo& info)
     {
         try
         {
 #if DEBUG
             if (!rn->isDrawing)
-                throw GENERIC_EXCEPT("[Hyperflow]", "Cannot upload uniform util drawing process starts");
+                throw GENERIC_EXCEPT("[Hyperflow]", "Cannot upload uniform until drawing process starts");
 #endif
 
             const auto& packet = rn->currentDraw.packet;
@@ -766,7 +886,41 @@ namespace hf
         {
 #if DEBUG
             if (!rn->isDrawing) throw GENERIC_EXCEPT("[Hyperflow]", "Cannot end RenderPacket, without starting it!");
+
+            if (!rn->currentDraw.packet->camera.has_value())
+                LOG_WARN("[Hyperflow] %s", "You are drawing without camera");
 #endif
+
+            {
+                const auto packet = rn->currentDraw.packet;
+                GlobalUniformInfo uniformInfo{};
+                uniformInfo.camera = packet->camera.value().GetUniformInfo(rn);
+                uniformInfo.time = HF.time.GetUniformInfo();
+
+                for (uint32_t i = 0; i < packet->directionalLights.size(); i++)
+                    uniformInfo.light.directionalLights[i] = packet->directionalLights[i].GetUniformInfo();
+
+                for (uint32_t i = 0; i < packet->spotLights.size(); i++)
+                    uniformInfo.light.spotLights[i] = packet->spotLights[i].GetUniformInfo();
+
+                for (uint32_t i = 0; i < packet->pointLights.size(); i++)
+                    uniformInfo.light.pointLights[i] = packet->pointLights[i].GetUniformInfo();
+
+                uniformInfo.light.lightCounts = uvec3{
+                    (uint32_t)packet->directionalLights.size(),
+                    (uint32_t)packet->spotLights.size(),
+                    (uint32_t)packet->pointLights.size() };
+
+                const BufferUploadInfo uniformUpload
+                {
+                    .buffer = HF.staticResources.globalUniform,
+                    .offsetInBytes = 0,
+                    .sizeInBytes = sizeof(GlobalUniformInfo),
+                    .data = &uniformInfo
+                };
+
+                hf::Upload_Buffer(rn, uniformUpload);
+            }
 
             {
                 std::lock_guard lock(rn->threadInfo.threadLock);;
@@ -879,7 +1033,7 @@ namespace hf
                             {
                                 auto& material = packet->materials[materialIndex];
 
-                                if (material.material->sizeInBytes > 0)
+                                if (material.material && material.material->sizeInBytes > 0)
                                 {
                                     BindResourceInfo_i<Buffer> info{};
                                     info.bindingType = RenderBindingType::Graphics;

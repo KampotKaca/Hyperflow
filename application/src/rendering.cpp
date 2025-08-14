@@ -19,12 +19,6 @@ namespace app
     void AppPreRender(const hf::Ref<hf::Renderer>& rn)
     {
         DebugPreRender(rn);
-        APP_UNIFORMS.globalUniformInfo.time = hf::GetTimeUniformInfo();
-
-        APP_UNIFORMS.globalUniformInfo.light.lightCounts = { 1, 0, 0 };
-        APP_UNIFORMS.globalUniformInfo.light.directionalLights[0] = APP_OBJECTS.mainLight.GetUniformInfo();
-
-        UniformUploadAll(rn);
 
         if (hf::IsKeyDown(hf::Key::P) || hf::IsKeyDown(hf::Key::O))
         {
@@ -47,6 +41,9 @@ namespace app
 
     void AppRender(const hf::Ref<hf::Renderer>& rn)
     {
+        hf::Set_Camera(rn, APP_DEBUG.camera.camera3D);
+        hf::Add_Light(rn, APP_OBJECTS.mainLight);
+
         DebugPrepass(rn);
         hf::Start_RenderTexture(rn, APP_RENDER_TEXTURES.mainDrawRenderTexture);
         {
@@ -56,7 +53,7 @@ namespace app
 
                 hf::Start_Shader(rn, APP_SHADERS.default_lit);
                 {
-                    hf::Start_Material(rn, hf::primitives::GetEmptyMaterial());
+                    hf::Start_Material(rn, nullptr);
                     {
                         hf::MaterialAdd_TexturePackBinding(rn, APP_TEXTURE_PACKS.viking_room_pack, 1);
 
@@ -109,7 +106,7 @@ namespace app
 
                 hf::Start_Shader(rn, APP_SHADERS.default_unlit);
                 {
-                    hf::Start_Material(rn, hf::primitives::GetEmptyMaterial());
+                    hf::Start_Material(rn, nullptr);
                     {
                         hf::Start_DrawGroup(rn);
                         {

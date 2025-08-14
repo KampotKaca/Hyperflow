@@ -1,4 +1,5 @@
-#include "hexternal.h"
+#include "hshared.h"
+#include "hrenderer.h"
 #include "hcamera3dcore.h"
 #include "hcamera3danchored.h"
 #include "hcamera3dfreelook.h"
@@ -6,7 +7,7 @@
 namespace hf
 {
     static CameraUniformInfo GetUniform(const Ref<Renderer>& rn, const Camera3DCore& core,
-                                        const vec3 lookDirection, const vec3 position, const mat4& view);
+                                         vec3 lookDirection,  vec3 position, const mat4& view);
 
     mat4 Camera3DCore::ToProjectionMat4(const Ref<Renderer>& rn) const
     {
@@ -38,16 +39,14 @@ namespace hf
     CameraUniformInfo GetUniform(const Ref<Renderer>& rn, const Camera3DCore& core,
                       const vec3 lookDirection, const vec3 position, const mat4& view)
     {
-        CameraUniformInfo info
-        {
-            .lookDirection = lookDirection,
-            .position = position,
-            .view = view,
-            .invView = glm::inverse(view),
-            .proj = core.ToProjectionMat4(rn),
-        };
+        CameraUniformInfo info{};
+        info.lookDirection = lookDirection;
+        info.position      = position;
+        info.view          = view;
+        info.invView       = glm::inverse(view);
+        info.proj          = core.ToProjectionMat4(rn);
 
-        info.invProj = glm::inverse(info.proj);
+        info.invProj  = glm::inverse(info.proj);
         info.viewProj = info.proj * info.view;
         return info;
     }
