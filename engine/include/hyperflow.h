@@ -2,6 +2,7 @@
 #define HYPERFLOW_H
 
 #include "../components/include/hcomponents.h"
+#include "hrenderer.h"
 #include "hshared.h"
 
 namespace hf
@@ -17,11 +18,10 @@ namespace hf
 	ShaderLayout Define(const ShaderLayoutDefinitionInfo& info);
 	TextureSampler Define(const TextureSamplerDefinitionInfo& info);
 	TextureLayout Define(const TextureLayoutDefinitionInfo& info);
-	BufferAttrib Define(const BufferAttribDefinitionInfo& info);
+	VertexBufferAttribute Define(const VertexBufferAttributeDefinitionInfo& info);
 	Buffer Define(const BufferDefinitionInfo& info);
 	Buffer Define(const StorageBufferDefinitionInfo& info);
-
-	BufferAttrib DefineBufferAttrib(const char* assetPath);
+	uint32_t GetVertexSize(VertexBufferAttribute attribute);
 
 	Ref<Window> Create(const WindowCreationInfo &data, const Ref<Window> &parent);
 	//No need to destroy the material, if it goes out of scope it is automatically freed!
@@ -32,13 +32,14 @@ namespace hf
 	Ref<Texture> Create(const TextureCreationInfo& info);
 	Ref<RenderTexture> Create(const RenderTextureCreationInfo& info);
 	Ref<TexturePack> Create(const TexturePackCreationInfo& info);
-	Ref<VertBuffer> Create(const VertBufferCreationInfo& info);
+	Ref<VertexBuffer> Create(const VertexBufferCreationInfo& info);
 	Ref<Cubemap> Create(const CubemapCreationInfo& info);
 	Ref<IndexBuffer> Create(const IndexBufferCreationInfo& info);
 	Ref<AudioClip> Create(const AudioClipCreationInfo& info);
 	Ref<AudioPlayer> Create(const AudioPlayerCreationInfo& info);
 	Ref<AudioPlayer3D> Create(const AudioPlayer3DCreationInfo& info);
     Ref<AudioListener> Create(const AudioListenerCreationInfo& info);
+    Ref<AudioGroup> Create(const AudioGroupCreationInfo& info);
 
 	void Destroy(const Ref<Mesh>& mesh);
 	void Destroy(const Ref<ShaderLibrary>& lib);
@@ -66,7 +67,11 @@ namespace hf
 	void Destroy(const Ref<AudioPlayer>* pPlayers, uint32_t count);
 	void Destroy(const Ref<AudioPlayer3D>* pPlayers, uint32_t count);
 
-	Ref<Mesh> CreateMeshAsset(const char* assetPath);
+	VertexBufferAttribute DefineVertexAttributeAsset(const char* assetPath);
+	TextureLayout DefineTextureLayoutAsset(const char* assetPath);
+	TextureSampler DefineTextureSamplerAsset(const char* assetPath);
+
+    Ref<Mesh> CreateMeshAsset(const char* assetPath);
 	Ref<Texture> CreateTextureAsset(const char* assetPath);
 	Ref<Cubemap> CreateCubemapAsset(const char* assetPath);
 
@@ -83,10 +88,11 @@ namespace hf
 	bool IsLoaded(const Ref<AudioClip>& clip);
 	bool IsLoaded(const Ref<AudioPlayer>& player);
 	bool IsLoaded(const Ref<AudioPlayer3D>& player);
+	bool IsLoaded(const Ref<AudioGroup>& group);
 
 	void Upload(const Ref<Material>& mat, const void* data);
-	void Upload(const Ref<VertBuffer>& vb, const VertBufferUploadInfo& info);
-	void Upload(const Ref<IndexBuffer>& ib, const IndexBufferUploadInfo& info);
+	void Upload(const Ref<Renderer>& rn, const Ref<VertexBuffer>& vb, const VertBufferUploadInfo& info); //Renderer is optional!
+	void Upload(const Ref<Renderer>& rn, const Ref<IndexBuffer>& ib, const IndexBufferUploadInfo& info); //Renderer is optional!
 
 	void ChangeClip(const Ref<AudioPlayer>& player, const Ref<AudioClip>& clip, float_t startingDuration = -1);
 	void ChangeClip(const Ref<AudioPlayer3D>& player, const Ref<AudioClip>& clip, float_t startingDuration = -1);
@@ -97,11 +103,15 @@ namespace hf
 	void Pause(const Ref<AudioPlayer>& player);
 	void Pause(const Ref<AudioPlayer3D>& player);
 
+	void Enable(const Ref<AudioGroup>& group, bool enable);
+
 	void SetVolume(const Ref<AudioPlayer>& player, float_t volume);
 	void SetVolume(const Ref<AudioPlayer3D>& player, float_t volume);
+    void SetVolume(const Ref<AudioGroup>& group, float_t volume);
 
 	void SetPitch(const Ref<AudioPlayer>& player, float_t pitch);
 	void SetPitch(const Ref<AudioPlayer3D>& player, float_t pitch);
+    void SetPitch(const Ref<AudioGroup>& group, float_t pitch);
 
 	void SetLoopingMode(const Ref<AudioPlayer>& player, bool loopingEnabled);
 	void SetLoopingMode(const Ref<AudioPlayer3D>& player, bool loopingEnabled);
@@ -114,9 +124,11 @@ namespace hf
 
 	float_t GetPitch(const Ref<AudioPlayer>& player);
 	float_t GetPitch(const Ref<AudioPlayer3D>& player);
+    float_t GetPitch(const Ref<AudioGroup>& group);
 
 	float_t GetVolume(const Ref<AudioPlayer>& player);
 	float_t GetVolume(const Ref<AudioPlayer3D>& player);
+	float_t GetVolume(const Ref<AudioGroup>& group);
 
     double_t GetPlayedInSeconds(const Ref<AudioPlayer>& player);
     double_t GetPlayedInSeconds(const Ref<AudioPlayer3D>& player);
@@ -124,11 +136,16 @@ namespace hf
     double_t GetPlayedPercent(const Ref<AudioPlayer>& player);
     double_t GetPlayedPercent(const Ref<AudioPlayer3D>& player);
 
+    Ref<AudioGroup> Get2DAudioGroup();
+    Ref<AudioGroup> Get3DAudioGroup();
+
 	bool IsLoopingEnabled(const Ref<AudioPlayer>& player);
 	bool IsLoopingEnabled(const Ref<AudioPlayer3D>& player);
 
     bool IsPlaying(const Ref<AudioPlayer>& player);
     bool IsPlaying(const Ref<AudioPlayer3D>& player);
+
+    bool IsEnabled(const Ref<AudioGroup>& group);
 
     void SetRange(const Ref<AudioPlayer3D>& player, float_t maxRange, float_t falloff);
     void SetAttenuationModel(const Ref<AudioPlayer3D>& player, Audio3DAttenuationModel atten);
@@ -167,9 +184,18 @@ namespace hf
 	bool IsValidApi(RenderingApiType targetApi);
 	uvec2 GetSize(const Ref<Renderer>& rn);
 	void Resize(const Ref<Renderer>& rn, uvec2 size);
+    ThreadMemoryStatistics GetMemoryStatistics(const Ref<Renderer>& rn);
 
     //region Draw Process
     void Set_DrawCallback(const Ref<Renderer>& rn, void (*callback)(const Ref<Renderer>&, void*));
+
+    void Set_Camera(const Ref<Renderer>& rn, const Camera3DAnchored& camera);
+    void Set_Camera(const Ref<Renderer>& rn, const Camera3DFreeLook& camera);
+
+    void Add_Light(const Ref<Renderer>& rn, const DirectionalLight& light);
+    void Add_Light(const Ref<Renderer>& rn, const SpotLight& light);
+    void Add_Light(const Ref<Renderer>& rn, const PointLight& light);
+
     void Upload_Buffer(const Ref<Renderer>& rn, const BufferUploadInfo& info);
 	void Upload_Material(const Ref<Renderer>& rn, const Ref<Material>& material);
 
@@ -195,11 +221,12 @@ namespace hf
 	void Start_Shader(const Ref<Renderer>& rn, const Ref<Shader>& shader);
 	void End_Shader(const Ref<Renderer>& rn);
 
+    //material can be null, when you do not use it in the shader!
 	void Start_Material(const Ref<Renderer>& rn, const Ref<Material>& material);
 	void End_Material(const Ref<Renderer>& rn);
 
-	void Start_Draw(const Ref<Renderer>& rn);
-	void End_Draw(const Ref<Renderer>& rn);
+	void Start_DrawGroup(const Ref<Renderer>& rn);
+	void End_DrawGroup(const Ref<Renderer>& rn);
 
 	void Start_BufferSet(const Ref<Renderer>& rn, RenderBindingType bindingType, uint32_t setBindingIndex);
 	void End_BufferSet(const Ref<Renderer>& rn);
@@ -207,23 +234,37 @@ namespace hf
 
 	void MaterialAdd_TexturePackBinding(const Ref<Renderer>& rn, const Ref<TexturePack>& texPack, uint32_t setBindingIndex);
 
-	void DrawAdd_DrawCall(const Ref<Renderer>& rn, const Ref<Mesh>& mesh);
-	void DrawAdd_DrawCall(const Ref<Renderer>& rn, const DrawCallInfo& drawCall);
+	void Start_DrawCall(const Ref<Renderer>& rn, const Ref<IndexBuffer>& indexBuffer);
+    void Start_DrawCall(const Ref<Renderer>& rn, const Ref<Mesh>& mesh, uint32_t submeshIndex);
+    void End_DrawCall(const Ref<Renderer>& rn);
 
-	void DrawAdd_TexturePackBinding(const Ref<Renderer>& rn, const Ref<TexturePack>& texPack, uint32_t setBindingIndex);
+	void DrawGroupAdd_TexturePackBinding(const Ref<Renderer>& rn, const Ref<TexturePack>& texPack, uint32_t setBindingIndex);
 
-	void DrawSet_PushConstant(const Ref<Renderer>& rn, const void* data, uint32_t dataSize);
+	void DrawGroupSet_PushConstant(const Ref<Renderer>& rn, const void* data, uint32_t dataSize);
+	void DrawAdd_Instance(const Ref<Renderer>& rn, const void* data, uint32_t dataSize);
+	void DrawAdd_VertexBuffer(const Ref<Renderer>& rn, const Ref<VertexBuffer>& vb);
 
 	template<typename T>
-	void DrawSet_PushConstant(const Ref<Renderer>& rn, const T& data)
+	void DrawGroupSet_PushConstant(const Ref<Renderer>& rn, const T& data)
 	{
-		DrawSet_PushConstant(rn, &data, sizeof(T));
+		DrawGroupSet_PushConstant(rn, &data, sizeof(T));
+	}
+
+    template<typename T>
+    void DrawAdd_Instance(const Ref<Renderer>& rn, const T& data)
+	{
+	    DrawAdd_Instance(rn, &data, sizeof(T));
 	}
     //endregion
+
+    VertexBufferAttribute FindVertexAttribute(const char* id);
+    TextureLayout FindTextureLayout(const char* id);
+    TextureSampler FindTextureSampler(const char* id);
 
 	uint16_t GetBufferIndex(const Ref<Material>& mat);
 
 	MeshStats GetStats(const Ref<Mesh>& mesh);
+	uint32_t GetSubmeshCount(const Ref<Mesh>& mesh);
 
 	void SubmitAllTextures();
 	void SubmitAllBuffers();
@@ -288,7 +329,6 @@ namespace hf
 	double GetSystemTime();
 	int32_t GetFrameRate();
 	void SetTargetFrameRate(int16_t targetFrameRate);
-	TimeUniformInfo GetTimeUniformInfo();
 
     void* GetEditorApiHandles();
 
@@ -316,30 +356,28 @@ namespace hf
 		[[nodiscard]] void* AllocateAligned(std::size_t n, std::align_val_t align);
 		void Deallocate(void* p);
 		void DeallocateAligned(void* p, std::align_val_t align);
+		void* Reallocate(void* p, std::size_t n);
+		void CollectThreadMemoryCache(); //Reduces fragmentation.
 
-		void ReadTextureDetails(void* yamlTree, void* yamlRoot, TextureDetails& result);
+	    GlobalMemoryStatistics GetGlobalMemoryStatistics();
+	    ThreadMemoryStatistics GetThreadMemoryStatistics();
+
+	    void ReadVertexInputModule   (const char* assetPath, ShaderLibraryVertexInputModuleInfo& result);
+	    void ReadPreRasterModule     (const char* assetPath, ShaderLayout layout, ShaderLibraryPreRasterModuleInfo& result);
+	    void ReadFragmentModule      (const char* assetPath, ShaderLayout layout, ShaderLibraryFragmentModuleInfo& result);
+	    void ReadFragmentOutputModule(const char* assetPath, ShaderLibraryFragmentOutputModuleInfo& result);
 	}
 
 	namespace primitives
 	{
-		Ref<Mesh> GetCubeMesh();
-		Ref<VertBuffer> GetQuadBuffer();
-		Ref<VertBuffer>* GetQuadBufferP();
+	    Ref<Mesh> GetMesh(PrimitiveMeshType type);
+        Ref<Texture> GetTexture(PrimitiveTextureType type);
 
-		BufferAttrib GetQuadBufferAttrib();
+		Ref<VertexBuffer> GetQuadBuffer();
+		Ref<VertexBuffer>* GetQuadBufferP();
+
 		Buffer GetGlobalUniformBuffer();
-		Buffer GetMaterialStorageBuffer();
 		void BindGlobalUniformBuffer(const Ref<Renderer>& rn);
-
-		BufferAttrib GetCubeBufferAttrib();
-		TextureSampler GetCubemapSampler();
-
-		Ref<Mesh> GetCube();
-		Ref<Mesh> GetPlane();
-	    Ref<Mesh> GetIcoSphere();
-	    Ref<Mesh> GetUvSphere();
-
-		Ref<Material> GetEmptyMaterial();
 	}
 }
 

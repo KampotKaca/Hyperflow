@@ -1,8 +1,8 @@
 #ifndef HRENDERER_H
 #define HRENDERER_H
 
-#include "hshared.h"
 #include "hdrawprocess.h"
+#include "hshared.h"
 
 namespace hf
 {
@@ -13,20 +13,20 @@ namespace hf
 
 		struct ThreadInfo
 		{
+		    ThreadMemoryStatistics memoryStatistics{};
 			std::thread thread;
 			std::mutex threadLock{};
+			std::mutex statLock{};
 
 			std::condition_variable renderCondition;
 			uvec2 size{};
 
-			bool packetIsReady{};
 			bool isRunning{};
-			RenderPacket drawPacket{};
+			RenderPacket* drawPacket{};
+			std::vector<RenderPacket*> cachedPackets{};
 		};
 
-#if DEBUG
-	    void (*debugDrawCallback)(const Ref<Renderer>&, void*);
-#endif
+	    RenderPacket allPackets[3]{};
 	    RenderPacketDrawProcess currentDraw{};
 		bool isDrawing = false;
 		ThreadInfo threadInfo{};

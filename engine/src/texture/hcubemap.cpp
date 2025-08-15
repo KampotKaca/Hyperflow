@@ -15,25 +15,23 @@ namespace hf
         {
         case RenderingApiType::None: throw GENERIC_EXCEPT("[Hyperflow]", "No rendering api to use the texture for!");
         case RenderingApiType::Vulkan:
-            {
-                texturePaths[0] = info.texturePaths.front;
-                texturePaths[1] = info.texturePaths.back;
-                texturePaths[2] = info.texturePaths.up;
-                texturePaths[3] = info.texturePaths.down;
-                texturePaths[4] = info.texturePaths.right;
-                texturePaths[5] = info.texturePaths.left;
-            }
-            break;
+        {
+            texturePaths[0] = info.texturePaths.front;
+            texturePaths[1] = info.texturePaths.back;
+            texturePaths[2] = info.texturePaths.up;
+            texturePaths[3] = info.texturePaths.down;
+            texturePaths[4] = info.texturePaths.right;
+            texturePaths[5] = info.texturePaths.left;
+        }break;
         case RenderingApiType::Direct3D:
-            {
-                texturePaths[0] = info.texturePaths.left;
-                texturePaths[1] = info.texturePaths.right;
-                texturePaths[2] = info.texturePaths.down;
-                texturePaths[3] = info.texturePaths.up;
-                texturePaths[4] = info.texturePaths.back;
-                texturePaths[5] = info.texturePaths.front;
-            }
-            break;
+        {
+            texturePaths[0] = info.texturePaths.left;
+            texturePaths[1] = info.texturePaths.right;
+            texturePaths[2] = info.texturePaths.down;
+            texturePaths[3] = info.texturePaths.up;
+            texturePaths[4] = info.texturePaths.back;
+            texturePaths[5] = info.texturePaths.front;
+        }break;
         }
 
         inter::rendering::CreateCubemap_i(this);
@@ -48,39 +46,26 @@ namespace hf
     void Destroy(const Ref<Cubemap>& cb)
     {
         if (inter::rendering::DestroyCubemap_i(cb.get()))
-            inter::HF.graphicsResources.cubemaps.erase(cb->folderPath);
+            inter::HF.graphicsResources.cubemaps.erase(cb->folderPath.path);
     }
 
     Ref<Cubemap> Create(const CubemapCreationInfo& info)
     {
         Ref<Cubemap> cubemap = MakeRef<Cubemap>(info);
-        inter::HF.graphicsResources.cubemaps[info.folderPath] = cubemap;
+        inter::HF.graphicsResources.cubemaps[info.folderPath.path] = cubemap;
         return cubemap;
     }
 
     Ref<Cubemap> CreateCubemapAsset(const char* assetPath)
     {
-        auto assetLoc = TO_RES_PATH(std::string("cubemaps/") + assetPath) + ".meta";
-        if (!utils::FileExists(assetLoc.c_str()))
-        {
-            LOG_ERROR("[Hyperflow] Unable to find cubemap meta file: %s", assetPath);
-            return nullptr;
-        }
-
+        const auto assetLoc = TO_RES_PATH(std::string("cubemaps/") + assetPath) + ".meta";
         std::vector<char> metadata{};
-        if (!utils::ReadFile(assetLoc, metadata))
-        {
-            LOG_ERROR("[Hyperflow] Unable to read cubemap meta: %s", assetPath);
-            return nullptr;
-        }
-        metadata.push_back('\0');
+        if (!START_READING(assetLoc.c_str(), metadata)) return nullptr;
 
         try
         {
-            CubemapCreationInfo info
-            {
-                .folderPath = assetPath,
-            };
+            CubemapCreationInfo info{};
+            info.folderPath = FilePath{ .path = assetPath, .isAbsolute = true };
 
             ryml::Tree tree = ryml::parse_in_place(ryml::to_substr(metadata.data()));
             ryml::NodeRef root = tree.rootref();
@@ -92,58 +77,12 @@ namespace hf
             }
 
             info.mipLevels = std::stoi(root["mipLevels"].val().str);
-            std::string left, right, down, up, back, front;
 
-            {
-                const auto v = root["left"].val();
-                std::string_view vView{v.str, v.len};
-                left = vView;
-            }
-
-            {
-                const auto v = root["right"].val();
-                std::string_view vView{v.str, v.len};
-                right = vView;
-            }
-
-            {
-                const auto v = root["down"].val();
-                std::string_view vView{v.str, v.len};
-                down = vView;
-            }
-
-            {
-                const auto v = root["up"].val();
-                std::string_view vView{v.str, v.len};
-                up = vView;
-            }
-
-            {
-                const auto v = root["back"].val();
-                std::string_view vView{v.str, v.len};
-                back = vView;
-            }
-
-            {
-                const auto v = root["front"].val();
-                std::string_view vView{v.str, v.len};
-                front = vView;
-            }
-
-            info.texturePaths =
-            {
-                .left = left.c_str(),
-                .right = right.c_str(),
-                .down = down.c_str(),
-                .up = up.c_str(),
-                .back = back.c_str(),
-                .front = front.c_str()
-            };
-
-            utils::ReadTextureDetails(&tree, &root, info.details);
+            ReadCubemapTexturePaths_i(root["texturePaths"], info.texturePaths);
+            ReadTextureDetails_i     (root["details"], info.details);
 
             auto cubemap = Create(info);
-            inter::HF.graphicsResources.cubemaps[cubemap->folderPath] = cubemap;
+            inter::HF.graphicsResources.cubemaps[cubemap->folderPath.path] = cubemap;
             return cubemap;
         }catch (...)
         {
@@ -158,7 +97,7 @@ namespace hf
         {
             auto cubemap = pCubemaps[i];
             if (inter::rendering::DestroyCubemap_i(cubemap.get()))
-                inter::HF.graphicsResources.cubemaps.erase(cubemap->folderPath);
+                inter::HF.graphicsResources.cubemaps.erase(cubemap->folderPath.path);
         }
     }
 
@@ -182,17 +121,17 @@ namespace hf
 
             if (cubemap->handle) return false;
 
-            const auto fullCubemapFolderPath = TO_RES_PATH(std::string("cubemaps/") + cubemap->folderPath + "/");
+            const auto fullCubemapFolderPath = TO_RES_PATH(std::string("cubemaps/") + cubemap->folderPath.path + "/");
             TexData textures[6]{};
             bool validLoading = true;
 
             for (uint32_t i = 0; i < 6; i++)
             {
-                std::string path = fullCubemapFolderPath + cubemap->texturePaths[i];
+                std::string path = fullCubemapFolderPath + cubemap->texturePaths[i].path;
 
                 if (!utils::FileExists(path.c_str()))
                 {
-                    LOG_ERROR("[Hyperflow] Unable to find texture: %s", cubemap->texturePaths[i].c_str());
+                    LOG_ERROR("[Hyperflow] Unable to find texture: %s", cubemap->texturePaths[i].path.c_str());
                     validLoading = false;
                     break;
                 }
@@ -207,11 +146,11 @@ namespace hf
 
                 if (pixelData)
                 {
-                    textures[i] =
-                    {
-                        .pixels = pixelData,
-                        .size = size
-                    };
+                    TexData texData{};
+                    texData.pixels = pixelData;
+                    texData.size = size;
+
+                    textures[i] = texData;
                 }
             }
             VALIDATION_CHECK
@@ -232,19 +171,18 @@ namespace hf
             const auto allPixels = (uint8_t*)utils::Allocate(6 * texSize);
             for (uint32_t i = 0; i < 6; i++) memcpy(allPixels + i * texSize, textures[i].pixels, texSize);
 
-            const TextureCreationInfo_i info
-            {
-                .type = TextureType::Tex2D,
-                .viewType = TextureViewType::TexCube,
-                .flags = TextureFlags::CubeCompatible,
-                .size = size,
-                .channel = TextureChannel::RGBA,
-                .mipLevels = cubemap->mipLevels,
-                .samples = MultisampleMode::MSAA_1X,
-                .pTextures = allPixels,
-                .textureCount = 6,
-                .details = cubemap->details
-            };
+            TextureCreationInfo_i info{};
+            info.type         = TextureType::Tex2D;
+            info.viewType     = TextureViewType::TexCube;
+            info.flags        = TextureFlags::CubeCompatible;
+            info.size         = size;
+            info.channel      = TextureChannel::RGBA;
+            info.mipLevels    = cubemap->mipLevels;
+            info.samples      = MultisampleMode::MSAA_1X;
+            info.pTextures    = allPixels;
+            info.textureCount = 6;
+            info.details      = cubemap->details;
+
             cubemap->handle = HF.renderingApi.api.CreateTexture(info);
 
             return true;

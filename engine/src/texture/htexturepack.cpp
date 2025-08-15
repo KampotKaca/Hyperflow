@@ -2,8 +2,8 @@
 #include "hinternal.h"
 #include "hyperflow.h"
 #include "htexture.h"
-#include "hrendertexture.h"
 #include "hcubemap.h"
+#include "hrendertexture.h"
 
 namespace hf
 {

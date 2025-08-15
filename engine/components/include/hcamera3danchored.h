@@ -14,20 +14,20 @@ namespace hf
         float_t distance = 10.0f;
         Camera3DCore core{};
 
-        [[nodiscard]] inline vec3 GetDirection() const
+        [[nodiscard]] vec3 GetDirection() const
         {
-            float_t yawRad = glm::radians(yaw);
-            float_t pitchRad = glm::radians(fmodf(pitch - 90, 180));
-            float_t cpr = cosf(pitchRad);
-            return { cpr * sinf(yawRad), sinf(pitchRad), cpr * cosf(yawRad) };
+            const float_t yawRad = glm::radians(yaw);
+            const float_t pitchRad = glm::radians(fmodf(pitch - 90, 180));
+            const float_t cpr = cosf(pitchRad);
+            return vec3{ cpr * sinf(yawRad), sinf(pitchRad), cpr * cosf(yawRad) };
         }
 
-        [[nodiscard]] inline vec3 GetPosition() const
+        [[nodiscard]] vec3 GetPosition() const
         {
             return anchor - GetDirection() * distance;
         }
 
-        [[nodiscard]] inline mat4 ToViewMat4() const
+        [[nodiscard]] mat4 ToViewMat4() const
         {
             return glm::lookAt(GetPosition(), anchor, -up);
         }

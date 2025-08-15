@@ -1,7 +1,7 @@
 #ifndef HSPOTLIGHT_H
 #define HSPOTLIGHT_H
 
-#include "hexternal.h"
+#include "hshared.h"
 
 namespace hf
 {
@@ -13,6 +13,15 @@ namespace hf
         float_t innerAngle = 0.5f;
         float_t outerAngle = 3.0f;
         float_t range = 10.0f;
+
+        [[nodiscard]] LightUniformInfo::Spot GetUniformInfo() const
+        {
+            return LightUniformInfo::Spot
+            {
+                .position = position,
+                .color = vec4(color, 1)
+            };
+        }
     };
 }
 

@@ -21,49 +21,44 @@ int main()
 		// .renderingApi = hf::renderer::GetBestApiType(),
 		.renderingApi = hf::RenderingApiType::Vulkan,
 		.updateType = hf::EngineUpdateType::Continues,
-	    .internalResourcesFormat =
+	    .internalResourcesFormat = hf::EngineInternalResourceFormatInfo
 	    {
-		    .globalUniformBindingInfo =
-        {
-		        .usageFlags = hf::ShaderUsageStage::All,
-                .arraySize = 1,
-                .elementSizeInBytes = sizeof(app::GlobalUniformInfo)
-            },
-		    .drawOutputFormats =
+		    .drawOutputFormats = hf::ShaderDrawOutputFormats
 		    {
-		        .sampleMode = MSAA_MODE,
+		        .sampleMode  = MSAA_MODE,
 		        .depthFormat = DEPTH_STENCIL_MODE,
 		    },
 	    },
-		.lifecycleCallbacks =
+		.lifecycleCallbacks = hf::EngineLifecycleCallbacks
 		{
-			.onRendererLoad     	 = app::AppRendererLoad,
-			.onResourcesLoad     	 = app::AppLoadResources,
-			.onStartCallback     	 = app::AppStart,
-			.onUpdateCallback    	 = app::AppUpdate,
-			.onQuitCallback      	 = app::AppQuit,
+			.onRendererLoad   = app::AppRendererLoad,
+			.onResourcesLoad  = app::AppLoadResources,
+			.onStartCallback  = app::AppStart,
+			.onUpdateCallback = app::AppUpdate,
+			.onQuitCallback   = app::AppQuit,
 		},
-	    .audioInfo =
+	    .audioInfo = hf::EngineInternalAudioInfo
 	    {
+	        .audioEnabled = true,
 		    .volume = 1.0f,
 		    .usedListenersCount = 1
 	    },
-		.windowData =
+		.windowData = hf::WindowCreationInfo
 		{
-			.title        		 = "Hyperflow",
-			.iconFolderPath		 = "app/icons",
-			.eventFlags			 = hf::WindowEventFlags::Default,
-			.pointerState		 = hf::WindowPointerState::Normal,
-			.style        		 = hf::WindowStyle::Default,
-			.position     		 = { 200, 200 },
-			.size         		 = { 920, 480 },
-			.vsyncMode			 = hf::VsyncMode::Relaxed,
-			.rnEventInfo =
+			.title        	= "Hyperflow",
+			.iconFolderPath	= "app/icons",
+			.eventFlags		= hf::WindowEventFlags::Default,
+			.pointerState	= hf::WindowPointerState::Normal,
+			.style        	= hf::WindowStyle::Default,
+			.position     	= { 200, 200 },
+			.size         	= { 920, 480 },
+			.vsyncMode		= hf::VsyncMode::Relaxed,
+			.rnEventInfo = hf::RendererEventInfo
 			{
 				.onRendererInitCallback 	= app::AppRendererInit,
 				.onRendererShutdownCallback = app::AppRendererShutdown,
-				.onPreRenderCallback 	= app::AppPreRender,
-				.onRenderCallback    	= app::AppRender,
+				.onPreRenderCallback 	    = app::AppPreRender,
+				.onRenderCallback    	    = app::AppRender,
 			},
 		}
 	};

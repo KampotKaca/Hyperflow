@@ -1,6 +1,7 @@
 #ifndef HAUDIOIMPL_H
 #define HAUDIOIMPL_H
 
+#include "haudiogroup.h"
 #include "audio/haudioclip.h"
 #include "haudiointernal.h"
 
@@ -42,7 +43,7 @@ namespace hf::inter
         auto handle = (ma_sound*)player->buffer;
         if (!handle) handle = new ma_sound();
         if (ma_sound_init_from_data_source(&AUDIO_DATA.engine, buffer,
-            flags, nullptr, handle) != MA_SUCCESS)
+            flags, (ma_sound_group*)player->parent->handle, handle) != MA_SUCCESS)
         {
             LOG_ERROR("Unable create player for the Audio clip -> %s", clip->filePath.c_str());
             return false;

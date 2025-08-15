@@ -5,21 +5,19 @@ namespace hf
 {
     VkTextureSampler::VkTextureSampler(const TextureSamplerDefinitionInfo& info)
     {
-        VkSamplerCreateInfo samplerInfo
-        {
-            .sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO,
-            .magFilter = (VkFilter)info.filter,
-            .minFilter = (VkFilter)info.filter,
-            .mipmapMode = (VkSamplerMipmapMode)info.mipMaps.mode,
-            .addressModeU = (VkSamplerAddressMode)info.repeatMode,
-            .addressModeV = (VkSamplerAddressMode)info.repeatMode,
-            .addressModeW = (VkSamplerAddressMode)info.repeatMode,
-            .mipLodBias = info.mipMaps.lodBias,
-            .minLod = info.mipMaps.minLod,
-            .maxLod = info.mipMaps.maxLod,
-            .borderColor = VK_BORDER_COLOR_INT_OPAQUE_BLACK,
-            .unnormalizedCoordinates = !info.useNormalizedCoordinates,
-        };
+        VkSamplerCreateInfo samplerInfo{};
+        samplerInfo.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
+        samplerInfo.magFilter = (VkFilter)info.filter;
+        samplerInfo.minFilter = (VkFilter)info.filter;
+        samplerInfo.mipmapMode = (VkSamplerMipmapMode)info.mipMaps.mode;
+        samplerInfo.addressModeU = (VkSamplerAddressMode)info.repeatMode;
+        samplerInfo.addressModeV = (VkSamplerAddressMode)info.repeatMode;
+        samplerInfo.addressModeW = (VkSamplerAddressMode)info.repeatMode;
+        samplerInfo.mipLodBias = info.mipMaps.lodBias;
+        samplerInfo.minLod = info.mipMaps.minLod;
+        samplerInfo.maxLod = info.mipMaps.maxLod;
+        samplerInfo.borderColor = VK_BORDER_COLOR_INT_OPAQUE_BLACK;
+        samplerInfo.unnormalizedCoordinates = !info.useNormalizedCoordinates;
 
         if (info.anisotropicFilter != TextureAnisotropicFilter::None &&
             GRAPHICS_DATA.device.features.samplerAnisotropy)
@@ -47,12 +45,12 @@ namespace hf
         }
 
         VK_HANDLE_EXCEPT(vkCreateSampler(GRAPHICS_DATA.device.logicalDevice.device,
-            &samplerInfo, nullptr, &sampler));
+            &samplerInfo, &GRAPHICS_DATA.platform.allocator, &sampler));
     }
 
     VkTextureSampler::~VkTextureSampler()
     {
-        if (sampler) vkDestroySampler(GRAPHICS_DATA.device.logicalDevice.device, sampler, nullptr);
+        if (sampler) vkDestroySampler(GRAPHICS_DATA.device.logicalDevice.device, sampler, &GRAPHICS_DATA.platform.allocator);
     }
 
     bool IsValidSampler(TextureSampler sampler)

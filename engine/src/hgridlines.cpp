@@ -5,29 +5,23 @@ namespace hf::gridlines
 {
     void Draw(const Ref<Renderer>& rn, const GridLinesInfo& info)
     {
-        Start_ShaderLayout(rn, inter::HF.staticResources.axisLinesShaderLayout);
+        Start_ShaderLayout(rn, inter::HF.staticResources.shaderLayouts.axisLines);
         {
             primitives::BindGlobalUniformBuffer(rn);
 
-            Start_Shader(rn, inter::HF.staticResources.axisLinesShader);
+            Start_Shader(rn, inter::HF.staticResources.shaders.axisLines);
             {
-                Start_Material(rn, inter::HF.staticResources.emptyMaterial);
+                Start_Material(rn, nullptr);
                 {
-                    Start_Draw(rn);
+                    Start_DrawGroup(rn);
                     {
-                        DrawSet_PushConstant(rn, info);
+                        DrawGroupSet_PushConstant(rn, info);
 
-                        const DrawCallInfo drawCallInfo
-                        {
-                            .pVertBuffers = &inter::HF.staticResources.quadBuffer,
-                            .bufferCount = 1,
-                            .indexBuffer = nullptr,
-                            .instanceCount = 1
-                        };
-
-                        DrawAdd_DrawCall(rn, drawCallInfo);
+                        Start_DrawCall(rn, nullptr);
+                        DrawAdd_VertexBuffer(rn, inter::HF.staticResources.quadBuffer);
+                        End_DrawCall(rn);
                     }
-                    End_Draw(rn);
+                    End_DrawGroup(rn);
                 }
                 End_Material(rn);
             }

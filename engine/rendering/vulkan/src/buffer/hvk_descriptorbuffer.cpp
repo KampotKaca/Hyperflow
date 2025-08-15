@@ -44,8 +44,7 @@ namespace hf
 
     VkDescriptorBuffer::VkDescriptorBuffer(VkDescriptorTypeCount* pTypes, uint32_t count, VkBufferUsageFlagBits typeFlags) :
         VkBufferBase(BufferMemoryType::WriteOnly, nullptr,
-        VK_MEMORY_ALLOCATE_DEVICE_ADDRESS_BIT,
-        0,
+        VK_MEMORY_ALLOCATE_DEVICE_ADDRESS_BIT, 0,
         VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT | typeFlags,
         ComputeDescriptorBufferSize(pTypes, count))
     {
@@ -53,14 +52,13 @@ namespace hf
         for (uint32_t i = 0; i < count; i++)
         {
             const auto& type = pTypes[i];
-            typeDatas[type.type] = VkDescriptorTypeData
-            {
-                .offset = size,
-                .size = type.bufferSize,
-                .alignment = type.alignment,
-                .typeSize = type.typeSize,
-                .usageMasks = std::vector<uint64_t>((uint32_t)glm::ceil((float_t)type.descriptorCount / 64.0f))
-            };
+            VkDescriptorTypeData typeData{};
+            typeData.offset = size;
+            typeData.size = type.bufferSize;
+            typeData.alignment = type.alignment;
+            typeData.typeSize = type.typeSize;
+            typeData.usageMasks = std::vector<uint64_t>((uint32_t)glm::ceil((float_t)type.descriptorCount / 64.0f));
+            typeDatas[type.type] = typeData;
             size += type.bufferSize;
         }
 
@@ -94,11 +92,9 @@ namespace hf
         addressInfo.address = info.address;
         addressInfo.range = info.size;
 
-        VkDescriptorGetInfoEXT getInfo
-        {
-            .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_GET_INFO_EXT,
-            .type = (VkDescriptorType)info.type,
-        };
+        VkDescriptorGetInfoEXT getInfo{};
+        getInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_GET_INFO_EXT;
+        getInfo.type = (VkDescriptorType)info.type;
 
         switch (info.type)
         {
@@ -115,11 +111,9 @@ namespace hf
 
     VkResult GetImageDescriptorFromBuffer(const URef<VkDescriptorBuffer>& descBuffer, const VkGetImageDescriptorInfo& info, VkDescriptorLocation& descriptor)
     {
-        VkDescriptorGetInfoEXT getInfo
-        {
-            .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_GET_INFO_EXT,
-            .type = (VkDescriptorType)info.type,
-        };
+        VkDescriptorGetInfoEXT getInfo{};
+        getInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_GET_INFO_EXT;
+        getInfo.type = (VkDescriptorType)info.type;
 
         switch (info.type)
         {

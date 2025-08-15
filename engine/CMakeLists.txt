@@ -119,11 +119,11 @@ target_link_libraries(${PROJECT_NAME}
         glm
         stb
         logc
-        ryml
         lz4_static
         ext
         components
         PRIVATE
+        ryml
         rpmalloc
         glfw
         platform
@@ -164,8 +164,8 @@ target_include_directories(${PROJECT_NAME}
         include/
         external/glm
         external/logc/include
-        external/rapidyaml/src
         PRIVATE
+        external/rapidyaml/src
         external/stb/include
         external/rpmalloc
         external/glfw/include

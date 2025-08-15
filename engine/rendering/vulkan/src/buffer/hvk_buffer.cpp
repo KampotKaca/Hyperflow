@@ -32,8 +32,6 @@ namespace hf
                     bufferInfo.memoryType = memoryType;
                     bufferInfo.requiredFlags = requiredFlags;
                     bufferInfo.allocationFlags = allocationFlags;
-                    bufferInfo.pQueueFamilies = nullptr;
-                    bufferInfo.familyCount = 0;
 
                     CreateBuffer(bufferInfo, &buffers[0], &memoryRegions[0]);
                     VK_HANDLE_EXCEPT(vmaMapMemory(GRAPHICS_DATA.allocator, memoryRegions[0], &memoryMappings[0]));
@@ -55,8 +53,6 @@ namespace hf
                         bufferInfo.memoryType = memoryType;
                         bufferInfo.requiredFlags = requiredFlags;
                         bufferInfo.allocationFlags = allocationFlags;
-                        bufferInfo.pQueueFamilies = nullptr;
-                        bufferInfo.familyCount = 0;
 
                         CreateBuffer(bufferInfo, &buffers[i], &memoryRegions[i]);
                         VK_HANDLE_EXCEPT(vmaMapMemory(GRAPHICS_DATA.allocator, memoryRegions[i], &memoryMappings[i]));
@@ -76,7 +72,11 @@ namespace hf
             const uint32_t count = GetBufferCount(memoryType);
             for (uint32_t i = 0; i < count; i++)
             {
-                vmaUnmapMemory(GRAPHICS_DATA.allocator, memoryRegions[i]);
+                if (memoryMappings[i])
+                {
+                    vmaUnmapMemory(GRAPHICS_DATA.allocator, memoryRegions[i]);
+                    memoryMappings[i] = nullptr;
+                }
                 vmaDestroyBuffer(GRAPHICS_DATA.allocator, buffers[i], memoryRegions[i]);
             }
 
@@ -84,20 +84,10 @@ namespace hf
         }
     }
 
-    bool IsValidBuffer(const Buffer buffer)
-    {
-        return buffer > 0 && buffer <= GRAPHICS_DATA.buffers.size();
-    }
-
-    URef<VkBufferBase>& GetBuffer(const Buffer buffer)
-    {
-        if (!IsValidBuffer(buffer)) throw GENERIC_EXCEPT("[Hyperflow]", "Invalid buffer");
-        return GRAPHICS_DATA.buffers[buffer - 1];
-    }
-
     void UploadBuffers(const VkRenderer* rn, const inter::rendering::BufferUploadInfo_i& info)
     {
-        const auto currentFrame = rn->currentFrame;
+        uint32_t currentFrame = 0;
+        if (rn) currentFrame = rn->currentFrame;
 
         for (uint32_t i = 0; i < info.uploadPacketCount; i++)
         {
@@ -285,7 +275,7 @@ namespace hf
         memcpy((uint8_t*)mapping + fullOffset, data, fullSize);
     }
 
-    void BufferOperation(const VkCommandBuffer command, const VkQueue queue, void (*CopyCallback)(VkCommandBuffer command))
+    void BufferOperation(VkCommandBuffer command, VkQueue queue, void (*CopyCallback)(VkCommandBuffer command))
     {
         VkCommandBufferBeginInfo beginInfo{};
         beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;

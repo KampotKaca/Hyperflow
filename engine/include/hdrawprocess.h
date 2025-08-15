@@ -1,9 +1,9 @@
 #ifndef HPACKETS_H
 #define HPACKETS_H
 
+#include "../components/include/hcomponents.h"
 #include "hshared.h"
 #include "../config.h"
-#include "../components/include/hstaticvector.h"
 
 namespace hf
 {
@@ -52,6 +52,18 @@ namespace hf
     {
         Ref<TexturePack> texturePack{};
         AssetRange<uint16_t> bindingPacketRange{};
+    };
+
+    struct DrawCallPacketInfo
+    {
+        AssetRange<uint32_t> vertexBufferRange{};
+        AssetRange<uint32_t> instanceDataRange{};
+        Ref<IndexBuffer> indexBuffer{};
+        uint32_t instanceCount{};
+
+#if DEBUG
+        char debugName[16];
+#endif
     };
 
     struct DrawPacketInfo
@@ -105,25 +117,62 @@ namespace hf
 
     struct RenderPacket
     {
-        StaticVector<RenderAttachmentDependencyInfo, RENDERING_MAX_NUM_RENDER_ATTACHMENT_DEPENDENCIES> dependencies{};
-        StaticVector<RenderTexturePacketInfo, RENDERING_MAX_NUM_RENDER_TEXTURES> renderTextures{};
-        StaticVector<ShaderLayoutPacketInfo, RENDERING_MAX_NUM_SHADER_LAYOUTS> shaderLayouts{};
-        StaticVector<ShaderPacketInfo, RENDERING_MAX_NUM_SHADERS> shaders{};
-        StaticVector<MaterialPacketInfo, RENDERING_MAX_NUM_MATERIALS> materials{};
-        StaticVector<DrawPacketInfo, RENDERING_MAX_NUM_DRAWPACKETS> drawPackets{};
-        StaticVector<TextureBindingInfo, RENDERING_MAX_NUM_TEXPACKS> texpacks{};
+        std::optional<Camera3DFreeLook> camera{};
+        std::vector<DirectionalLight> directionalLights{};
+        std::vector<SpotLight> spotLights{};
+        std::vector<PointLight> pointLights{};
 
-        StaticVector<TexturePackRebindingGroupPacketInfo, RENDERING_MAX_NUM_TEXPACK_REBINDING> textureGroupRebindings{};
-        StaticVector<TexturePackRebindingPacketInfo, RENDERING_MAX_NUM_TEXPACK_REBINDING> textureRebindings{};
-        StaticVector<TextureInfo, RENDERING_MAX_NUM_TEXTURES> textures{};
+        std::vector<RenderAttachmentDependencyInfo> dependencies{};
+        std::vector<RenderTexturePacketInfo> renderTextures{};
+        std::vector<ShaderLayoutPacketInfo> shaderLayouts{};
+        std::vector<ShaderPacketInfo> shaders{};
+        std::vector<MaterialPacketInfo> materials{};
+        std::vector<DrawPacketInfo> drawPackets{};
+        std::vector<TextureBindingInfo> texpacks{};
 
-        StaticVector<BufferSetPacketInfo, RENDERING_MAX_NUM_UNIFORMS> bufferSets{};
-        StaticVector<Buffer, RENDERING_MAX_NUM_UNIFORMS> buffers{};
+        std::vector<TexturePackRebindingGroupPacketInfo> textureGroupRebindings{};
+        std::vector<TexturePackRebindingPacketInfo> textureRebindings{};
+        std::vector<TextureInfo> textures{};
 
-        StaticVector<DrawCallInfo, RENDERING_MAX_NUM_DRAW_CALLS> drawCalls{};
-        StaticVector<uint8_t, RENDERING_MAX_UNIFORM_UPLOAD_BUFFER_SIZE> bufferUploads{};
-        StaticVector<uint8_t, RENDERING_MAX_PUSH_CONSTANT_UPLOAD_BUFFER_SIZE> pushConstantUploads{};
-        StaticVector<BufferUploadPacketInfo, RENDERING_MAX_UNIFORM_UPLOAD_COUNT> bufferUploadPackets{};
+        std::vector<BufferSetPacketInfo> bufferSets{};
+        std::vector<Buffer> buffers{};
+
+        std::vector<DrawCallPacketInfo> drawCalls{};
+        std::vector<Ref<VertexBuffer>> vertexBuffers{};
+        std::vector<uint8_t> bufferUploads{};
+        std::vector<uint8_t> pushConstantUploads{};
+        std::vector<uint8_t> instanceUploads{};
+        std::vector<BufferUploadPacketInfo> bufferUploadPackets{};
+
+        void clear()
+        {
+            camera = std::nullopt;
+            directionalLights.clear();
+            spotLights.clear();
+            pointLights.clear();
+
+            dependencies.clear();
+            renderTextures.clear();
+            shaderLayouts.clear();
+            shaders.clear();
+            materials.clear();
+            drawPackets.clear();
+            texpacks.clear();
+
+            textureGroupRebindings.clear();
+            textureRebindings.clear();
+            textures.clear();
+
+            bufferSets.clear();
+            buffers.clear();
+
+            drawCalls.clear();
+            vertexBuffers.clear();
+            bufferUploads.clear();
+            pushConstantUploads.clear();
+            instanceUploads.clear();
+            bufferUploadPackets.clear();
+        }
     };
 
     struct RenderPacketDrawProcess
@@ -133,10 +182,23 @@ namespace hf
         ShaderPacketInfo* currentShader{};
         MaterialPacketInfo* currentMaterial{};
         BufferSetPacketInfo* currentUniformSet{};
-        DrawPacketInfo* currentDraw{};
+        DrawPacketInfo* currentDrawPacket{};
         TexturePackRebindingGroupPacketInfo* currentTexturePackBinding{};
+        DrawCallPacketInfo* currentDrawCall{};
 
-        RenderPacket packet{};
+        RenderPacket* packet{};
+
+        void clear()
+        {
+            currentRenderTexture = nullptr;
+            currentShaderLayout = nullptr;
+            currentShader = nullptr;
+            currentMaterial = nullptr;
+            currentUniformSet = nullptr;
+            currentDrawPacket = nullptr;
+            currentDrawCall = nullptr;
+            currentTexturePackBinding = nullptr;
+        }
     };
 }
 

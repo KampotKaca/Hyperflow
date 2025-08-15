@@ -23,6 +23,7 @@ namespace hf
         void* handle{};
         void* buffer{};
         Ref<AudioClip> clip{};
+        Ref<AudioGroup> parent{};
         AudioPlayerStateFlags stateFlags{};
     };
 }

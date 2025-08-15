@@ -9,10 +9,9 @@ namespace app
 
 	void AppRendererLoad()
 	{
+		VertexAttributesDefineAll();
 		TextureSamplerDefineAll();
 		TextureLayoutDefineAll();
-		BufferAttributeDefineAll();
-		UniformDefineAll();
 		ShaderLayoutDefineAll();
 		DebugDefine();
 	}
@@ -36,7 +35,6 @@ namespace app
 	void AppStart()
 	{
 		APP_OBJECTS.sphereTransform.position = { -3, 1, 3 };
-		UniformStartAll();
 		DebugStart();
 
 		VoxelTerrainGenerate();
@@ -47,7 +45,7 @@ namespace app
 	void AppUpdate()
 	{
 		APP_OBJECTS.vikingRoomTransform.euler.y -= (float)hf::GetDeltaTime() * 10.0f;
-		APP_OBJECTS.groundTransform.scale = { 100, 1, 100 };
+		APP_OBJECTS.groundTransform.scale = hf::vec3{ 100, 1, 100 };
 		DebugUpdate();
 		VoxelTerrainUpdate();
 	}

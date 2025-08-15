@@ -28,8 +28,9 @@ namespace hf
     static void ChangeClip(AudioPlayer3D* player, const Ref<AudioClip>& clip, float_t startingDuration);
 
     AudioPlayer3D::AudioPlayer3D(const AudioPlayer3DCreationInfo& info)
-    : settings(info.settings), settings3d(info.settings3d), cone(info.cone)
+    : settings(info.settings), settings3d(info.settings3d), cone(info.cone), parent(info.parent)
     {
+        if (!parent) parent = inter::AUDIO_DATA.group3D;
         ChangeClip(this, info.clip, -1);
     }
 

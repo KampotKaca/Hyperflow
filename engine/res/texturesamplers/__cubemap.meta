@@ -1,0 +1,11 @@
+filter: Bilinear
+anisotropicFilter: 16
+repeatMode: Repeat
+useNormalizedCoordinates: true
+comparison: None
+
+mipMaps:
+  mode: Linear
+  minLod: 0.0
+  maxLod: 8.0
+  lodBias: 0.0

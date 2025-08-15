@@ -3,7 +3,7 @@
 
 #include "hwindow.h"
 #include "hshared.h"
-#include "hvertbuffer.h"
+#include "hvertexbuffer.h"
 #include "hindexbuffer.h"
 #include "hcubemap.h"
 #include "hshaderlibrary.h"
@@ -21,6 +21,13 @@
 
 namespace hf::inter
 {
+    struct GlobalUniformInfo
+    {
+        CameraUniformInfo camera{};
+        TimeUniformInfo time{};
+        LightUniformInfo light{};
+    };
+
     struct RenderingApi
     {
         RenderingApiType type = RenderingApiType::None;
@@ -37,7 +44,10 @@ namespace hf::inter
         unordered_map<uint64_t, Ref<RenderTexture>> renderTextures{};
         unordered_map<uint64_t, Ref<TexturePack>> texturePacks{};
 
-        unordered_map<std::string, BufferAttrib> bufferAttribs{};
+        unordered_map<std::string, VertexBufferAttribute> vertexAttributes{};
+        unordered_map<std::string, TextureLayout> textureLayouts{};
+        unordered_map<std::string, TextureSampler> textureSamplers{};
+
         unordered_map<std::string, Ref<Mesh>> meshes{};
         unordered_map<std::string, Ref<Texture>> textures{};
         unordered_map<std::string, Ref<Cubemap>> cubemaps{};
@@ -52,6 +62,7 @@ namespace hf::inter
         unordered_map<std::string, Ref<AudioClip>> clips{};
         unordered_map<uint64_t, Ref<AudioPlayer>> players{};
         unordered_map<uint64_t, Ref<AudioPlayer3D>> player3Ds{};
+        unordered_map<uint64_t, Ref<AudioGroup>> groups{};
     };
 
     struct ResourcesMarkedForDeletion
@@ -71,6 +82,12 @@ namespace hf::inter
         std::vector<void*> renderTextures{};
     };
 
+    struct StaticVertexAttributes
+    {
+        VertexBufferAttribute quad{};
+        VertexBufferAttribute pos_nor_tex{};
+    };
+
     struct StaticResourcesLibraryModules
     {
         uint32_t quadVertexInput{};
@@ -86,38 +103,46 @@ namespace hf::inter
         uint32_t skyboxFragmentOutput{};
     };
 
+    struct StaticShaderLayouts
+    {
+        ShaderLayout axisLines{};
+        ShaderLayout skybox{};
+    };
+
+    struct StaticShaders
+    {
+        Ref<Shader> axisLines{};
+        Ref<Shader> skybox{};
+    };
+
+    struct StaticSkyboxResources
+    {
+        Ref<Cubemap> defaultCubemap{};
+        Ref<Cubemap> boundCubemap{};
+
+        Ref<TexturePack> texturePack{};
+    };
+
     struct StaticResources
     {
-        BufferAttrib quadAttrib{};
-        BufferAttrib defaultAttrib{};
+        Buffer globalUniform{};
 
         TextureLayout skyboxLayout{};
         TextureSampler cubemapSampler{};
 
-        Buffer globalUniform = 0;
-
-        ShaderLayout axisLinesShaderLayout{};
-        ShaderLayout skyboxShaderLayout{};
-
         Ref<ShaderLibrary> engineShadersLib{};
+
+        StaticShaderLayouts shaderLayouts{};
+        StaticShaders shaders{};
+
+        StaticVertexAttributes vertexAttributes{};
         StaticResourcesLibraryModules engineShadersLibModules{};
+        Ref<Mesh> primitiveMeshes[(uint32_t)PrimitiveMeshType::Count]{};
+        Ref<Texture> primitiveTextures[(uint32_t)PrimitiveTextureType::Count]{};
+        StaticSkyboxResources skyboxResources{};
 
-        Ref<Shader> axisLinesShader{};
-        Ref<Shader> skyboxShader{};
-
-        Ref<Cubemap> defaultSkyboxCubemap{};
-        Ref<Cubemap> boundCubemap{};
-
-        Ref<TexturePack> skyboxTexturePack{};
-
-        Ref<Mesh> cube{};
-        Ref<Mesh> plane{};
-        Ref<Mesh> icoSphere{};
-        Ref<Mesh> uvSphere{};
-
-        Ref<Material> emptyMaterial{};
-
-        Ref<VertBuffer> quadBuffer{};
+        Ref<VertexBuffer> quadBuffer{};
+        Ref<VertexBuffer> instanceBuffer{};
     };
 
     struct Hyperflow
@@ -156,9 +181,6 @@ namespace hf::inter
 
         void LogMemoryStats_i();
         void LogThreadMemoryStats_i();
-
-        GlobalMemoryStatistics GetGlobalMemoryStatistics_i();
-        ThreadMemoryStatistics GetThreadMemoryStatistics_i();
     }
 
     namespace primitives
@@ -195,7 +217,7 @@ namespace hf::inter
         bool SetWindowIcons_i(const Window* win, const char* folderPath);
 
         void RendererUpdate_i(const Ref<Renderer>& rn);
-        void RendererDraw_i(const Ref<Renderer>& rn, RenderPacket& packet);
+        void RendererDraw_i(const Ref<Renderer>& rn, RenderPacket* packet);
 
         bool CreateShaderLibrary_i(ShaderLibrary* lib);
         bool DestroyShaderLibrary_i(ShaderLibrary* lib);
@@ -203,7 +225,7 @@ namespace hf::inter
         bool CreateShader_i(Shader* shader);
         bool DestroyShader_i(Shader* shader);
 
-        bool CreateVertBuffer_i(VertBuffer* buffer);
+        bool CreateVertBuffer_i(VertexBuffer* buffer);
         bool CreateIndexBuffer_i(IndexBuffer* buffer);
 
         bool DestroyBuffer_i(RuntimeBufferBase* buffer);

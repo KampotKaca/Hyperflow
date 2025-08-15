@@ -1,0 +1,5 @@
+attributes:
+  - __pos_nor_tex
+
+topology: TriangleList
+enablePrimitiveRestart: false

@@ -4,8 +4,6 @@
 
 layout(push_constant) uniform PushConstants
 {
-    mat4 model;
-    vec4 albedo;
     vec4 phongData; //xyz specular color, w smoothness
 } PUSH_CONSTANT;
 

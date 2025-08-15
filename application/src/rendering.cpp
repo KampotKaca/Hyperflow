@@ -19,12 +19,6 @@ namespace app
     void AppPreRender(const hf::Ref<hf::Renderer>& rn)
     {
         DebugPreRender(rn);
-        APP_UNIFORMS.globalUniformInfo.time = hf::GetTimeUniformInfo();
-
-        APP_UNIFORMS.globalUniformInfo.light.lightCounts = { 1, 0, 0 };
-        APP_UNIFORMS.globalUniformInfo.light.directionalLights[0] = APP_OBJECTS.mainLight.GetUniformInfo();
-
-        UniformUploadAll(rn);
 
         if (hf::IsKeyDown(hf::Key::P) || hf::IsKeyDown(hf::Key::O))
         {
@@ -47,6 +41,9 @@ namespace app
 
     void AppRender(const hf::Ref<hf::Renderer>& rn)
     {
+        hf::Set_Camera(rn, APP_DEBUG.camera.camera3D);
+        hf::Add_Light(rn, APP_OBJECTS.mainLight);
+
         DebugPrepass(rn);
         hf::Start_RenderTexture(rn, APP_RENDER_TEXTURES.mainDrawRenderTexture);
         {
@@ -56,36 +53,46 @@ namespace app
 
                 hf::Start_Shader(rn, APP_SHADERS.default_lit);
                 {
-                    hf::Start_Material(rn, hf::primitives::GetEmptyMaterial());
+                    hf::Start_Material(rn, nullptr);
                     {
                         hf::MaterialAdd_TexturePackBinding(rn, APP_TEXTURE_PACKS.viking_room_pack, 1);
 
-                        hf::Start_Draw(rn);
+                        hf::Start_DrawGroup(rn);
                         {
-                            const DefaultPushConstant pc
+                            DefaultPushConstant pc{};
+                            pc.phongData = hf::vec4{ hf::utils::ColorFromHash(0x9B9B9B), 0.8 };
+
+                            hf::DrawGroupSet_PushConstant(rn, pc);
+                            hf::Start_DrawCall(rn, APP_MESHES.viking_room, 0);
+
+                            hf::DrawAdd_Instance(rn, DefaultInstanceData
                             {
                                 .modelMatrix = APP_OBJECTS.vikingRoomTransform.ToMat4(),
                                 .color = hf::vec4{ hf::utils::ColorFromHash(0xFFFFFF), 1 },
-                                .phongData = hf::vec4{ hf::utils::ColorFromHash(0x9B9B9B), 0.8 }
-                            };
-                            hf::DrawSet_PushConstant(rn, pc);
-                            hf::DrawAdd_DrawCall(rn, APP_MESHES.viking_room);
-                        }
-                        hf::End_Draw(rn);
+                            });
 
-                        hf::Start_Draw(rn);
+                            hf::End_DrawCall(rn);
+                        }
+                        hf::End_DrawGroup(rn);
+
+                        hf::Start_DrawGroup(rn);
                         {
-                            hf::DrawAdd_TexturePackBinding(rn, APP_TEXTURE_PACKS.white_pack, 1);
-                            const DefaultPushConstant pc
+                            hf::DrawGroupAdd_TexturePackBinding(rn, APP_TEXTURE_PACKS.white_pack, 1);
+                            DefaultPushConstant pc{};
+                            pc.phongData = hf::vec4{ hf::utils::ColorFromHash(0x9B9B9B), 1.0 };
+
+                            hf::DrawGroupSet_PushConstant(rn, pc);
+                            hf::Start_DrawCall(rn, hf::primitives::GetMesh(hf::PrimitiveMeshType::IcoSphere), 0);
+
+                            hf::DrawAdd_Instance(rn, DefaultInstanceData
                             {
                                 .modelMatrix = APP_OBJECTS.sphereTransform.ToMat4(),
                                 .color = hf::vec4{ hf::utils::ColorFromHash(0x9E0505), 1 },
-                                .phongData = hf::vec4{ hf::utils::ColorFromHash(0x9B9B9B), 1.0 }
-                            };
-                            hf::DrawSet_PushConstant(rn, pc);
-                            hf::DrawAdd_DrawCall(rn, hf::primitives::GetIcoSphere());
+                            });
+
+                            hf::End_DrawCall(rn);
                         }
-                        hf::End_Draw(rn);
+                        hf::End_DrawGroup(rn);
                     }
                     hf::End_Material(rn);
                 }
@@ -99,19 +106,21 @@ namespace app
 
                 hf::Start_Shader(rn, APP_SHADERS.default_unlit);
                 {
-                    hf::Start_Material(rn, hf::primitives::GetEmptyMaterial());
+                    hf::Start_Material(rn, nullptr);
                     {
-                        hf::Start_Draw(rn);
+                        hf::Start_DrawGroup(rn);
                         {
-                            const UnlitColorPushConstant pc
+                            hf::Start_DrawCall(rn, hf::primitives::GetMesh(hf::PrimitiveMeshType::Plane), 0);
+
+                            hf::DrawAdd_Instance(rn, DefaultInstanceData
                             {
                                 .modelMatrix = APP_OBJECTS.groundTransform.ToMat4(),
                                 .color = hf::vec4{ hf::utils::ColorFromHash(0x19CB1E), 1 }
-                            };
-                            hf::DrawSet_PushConstant(rn, pc);
-                            hf::DrawAdd_DrawCall(rn, hf::primitives::GetPlane());
+                            });
+
+                            hf::End_DrawCall(rn);
                         }
-                        hf::End_Draw(rn);
+                        hf::End_DrawGroup(rn);
                     }
                     hf::End_Material(rn);
                 }

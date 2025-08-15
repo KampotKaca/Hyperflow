@@ -41,11 +41,11 @@ endif ()
 
 #region Prebuild
 file(COPY ${CMAKE_SOURCE_DIR}/application/res DESTINATION ${CMAKE_BINARY_DIR})
-file(COPY ${CMAKE_SOURCE_DIR}/engine/res/cubemaps DESTINATION ${CMAKE_BINARY_DIR}/res)
+file(COPY ${CMAKE_SOURCE_DIR}/engine/res DESTINATION ${CMAKE_BINARY_DIR})
 
 # === Shader Setup ===
 set(SHADER_SOURCE_DIRS
-        "${CMAKE_SOURCE_DIR}/engine/res/shaders/vulkan"
+        "${CMAKE_SOURCE_DIR}/engine/assets/shaders/vulkan"
         "${CMAKE_SOURCE_DIR}/application/assets/shaders/vulkan"
         # Add more shader source directories here
 )
@@ -73,7 +73,7 @@ endforeach()
 
 # === Mesh Setup ===
 set(MESH_SOURCE_DIRS
-        "${CMAKE_SOURCE_DIR}/engine/res/meshes"
+        "${CMAKE_SOURCE_DIR}/engine/assets/meshes"
         "${CMAKE_SOURCE_DIR}/application/assets/meshes"
         # Add more mesh source directories here
 )

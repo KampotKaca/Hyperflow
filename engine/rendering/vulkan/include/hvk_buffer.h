@@ -8,7 +8,7 @@ namespace hf
     struct VkBufferBase
     {
         VkBufferBase(BufferMemoryType memoryType, const uint8_t* data,
-        VkMemoryPropertyFlags requiredFlags, const VmaAllocationCreateFlags allocationFlags, VkBufferUsageFlags usage, uint64_t bufferSize);
+        VkMemoryPropertyFlags requiredFlags, VmaAllocationCreateFlags allocationFlags, VkBufferUsageFlags usage, uint64_t bufferSize);
         virtual ~VkBufferBase();
 
         bool isLoaded = false;
@@ -18,10 +18,6 @@ namespace hf
         VmaAllocation memoryRegions[FRAMES_IN_FLIGHT]{};
         void* memoryMappings[FRAMES_IN_FLIGHT]{};
     };
-
-    bool IsValidBuffer(Buffer buffer);
-    URef<VkBufferBase>& GetBuffer(Buffer buffer);
-    void SetupBuffer(const URef<VkBufferBase>& buffer);
 
     inline uint32_t GetBufferCount(BufferMemoryType memType)
     {

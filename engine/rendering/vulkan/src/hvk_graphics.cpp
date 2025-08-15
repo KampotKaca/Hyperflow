@@ -16,7 +16,8 @@ namespace hf
         : shutdownCallback(info.shutdownCallback), windowHandle(info.handle), targetSize(info.size), vSyncMode(info.vSyncMode)
     {
         if (!GRAPHICS_DATA.deviceIsLoaded) LoadDevice(windowHandle, &swapchain.surface);
-        else VK_HANDLE_EXCEPT((VkResult)GRAPHICS_DATA.platform.functions.createVulkanSurfaceFunc(windowHandle, GRAPHICS_DATA.instance, &swapchain.surface));
+        else VK_HANDLE_EXCEPT((VkResult)GRAPHICS_DATA.platform.functions.createVulkanSurfaceFunc
+            (windowHandle, GRAPHICS_DATA.instance, &GRAPHICS_DATA.platform.allocator, &swapchain.surface));
 
         if (info.initCallback) info.initCallback();
         CreateSwapchain(swapchain.surface, targetSize, vSyncMode,  swapchain);
@@ -79,30 +80,25 @@ namespace hf
             queueCreateInfos.push_back(queueCreateInfo);
         }
 
-        VkPhysicalDeviceFeatures2 deviceFeatures2
-        {
-            .sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2,
-            .pNext = &DYNAMIC_RENDERING_FEATURES,
-            .features = device.features
-        };
+        VkPhysicalDeviceFeatures2 deviceFeatures2{};
+        deviceFeatures2.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2;
+        deviceFeatures2.pNext = &DYNAMIC_RENDERING_FEATURES;
+        deviceFeatures2.features = device.features;
 
-        VkDeviceCreateInfo createInfo
-        {
-            .sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO,
-            .pNext = &deviceFeatures2,
-            .queueCreateInfoCount = (uint32_t)queueCreateInfos.size(),
-            .pQueueCreateInfos = queueCreateInfos.data(),
-            .enabledLayerCount = 0,
-            .enabledExtensionCount = DEVICE_EXTENSIONS.size(),
-            .ppEnabledExtensionNames = DEVICE_EXTENSIONS.data(),
-        };
+        VkDeviceCreateInfo createInfo{};
+        createInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
+        createInfo.pNext = &deviceFeatures2;
+        createInfo.queueCreateInfoCount = (uint32_t)queueCreateInfos.size();
+        createInfo.pQueueCreateInfos = queueCreateInfos.data();
+        createInfo.enabledExtensionCount = DEVICE_EXTENSIONS.size();
+        createInfo.ppEnabledExtensionNames = DEVICE_EXTENSIONS.data();
 
 #if DEBUG
         createInfo.ppEnabledLayerNames = DEBUG_VALIDATION_LAYERS;
         createInfo.enabledLayerCount = NUM_VK_VALIDATION_LAYERS;
 #endif
 
-        VK_HANDLE_EXCEPT(vkCreateDevice(device.device, &createInfo, nullptr, &device.logicalDevice.device));
+        VK_HANDLE_EXCEPT(vkCreateDevice(device.device, &createInfo, &GRAPHICS_DATA.platform.allocator, &device.logicalDevice.device));
 
         auto& indices = device.familyIndices;
         vkGetDeviceQueue(device.logicalDevice.device, indices.graphicsFamily.value(),
@@ -147,12 +143,9 @@ namespace hf
         for (uint32_t i = 0; i < queueFamilies.size(); i++)
         {
             auto& flags = queueFamilies[i].queueFlags;
-            if (flags & VK_QUEUE_GRAPHICS_BIT)
-                deviceData.familyIndices.graphicsFamily = i;
-            else if (flags & VK_QUEUE_TRANSFER_BIT)
-                deviceData.familyIndices.transferFamily = i;
-            else if (flags & VK_QUEUE_COMPUTE_BIT)
-                deviceData.familyIndices.computeFamily = i;
+            if (flags & VK_QUEUE_GRAPHICS_BIT)      deviceData.familyIndices.graphicsFamily = i;
+            else if (flags & VK_QUEUE_TRANSFER_BIT) deviceData.familyIndices.transferFamily = i;
+            else if (flags & VK_QUEUE_COMPUTE_BIT)  deviceData.familyIndices.computeFamily = i;
 
             VkBool32 presentSupport = false;
             VK_HANDLE_EXCEPT(vkGetPhysicalDeviceSurfaceSupportKHR(device, i, surface, &presentSupport));
@@ -175,7 +168,6 @@ namespace hf
         if (indices.graphicsFamily != indices.presentFamily)
         {
             std::set uniqueIndices = { indices.transferFamily.value(), indices.graphicsFamily.value(), indices.presentFamily.value() };
-
             deviceData.transferData.indices = std::vector(uniqueIndices.begin(), uniqueIndices.end());
 
             if (deviceData.transferData.indices.size() > 1) deviceData.transferData.sharingMode = VK_SHARING_MODE_CONCURRENT;
@@ -206,16 +198,16 @@ namespace hf
     void LoadDevice(void* windowHandle, VkSurfaceKHR* resultSurface)
     {
         uint32_t deviceCount = 0;
-        VK_HANDLE_EXCEPT(vkEnumeratePhysicalDevices(GRAPHICS_DATA.instance,
-            &deviceCount, nullptr));
+        VK_HANDLE_EXCEPT(vkEnumeratePhysicalDevices(GRAPHICS_DATA.instance, &deviceCount, nullptr));
 
         if (deviceCount == 0) throw GENERIC_EXCEPT("[Vulkan]", "No Graphics device found");
 
         std::vector<VkPhysicalDevice> availableDevices(deviceCount);
         VK_HANDLE_EXCEPT(vkEnumeratePhysicalDevices(GRAPHICS_DATA.instance,
-                &deviceCount, availableDevices.data()));
+        &deviceCount, availableDevices.data()));
 
-        VK_HANDLE_EXCEPT((VkResult)GRAPHICS_DATA.platform.functions.createVulkanSurfaceFunc(windowHandle, GRAPHICS_DATA.instance, resultSurface));
+        VK_HANDLE_EXCEPT((VkResult)GRAPHICS_DATA.platform.functions.createVulkanSurfaceFunc
+        (windowHandle, GRAPHICS_DATA.instance, &GRAPHICS_DATA.platform.allocator, resultSurface));
 
         std::vector<GraphicsDevice> devices{};
 
@@ -234,8 +226,8 @@ namespace hf
         if (devices.empty()) throw GENERIC_EXCEPT("[Vulkan]", "No suitable graphics device found");
 
         std::ranges::stable_sort(devices,
-            [](const GraphicsDevice& a, const GraphicsDevice& b)
-            { return a.score > b.score; });
+        [](const GraphicsDevice& a, const GraphicsDevice& b)
+        { return a.score > b.score; });
 
         GRAPHICS_DATA.device = devices[0];
         CreateLogicalDevice(GRAPHICS_DATA.device);
@@ -248,6 +240,7 @@ namespace hf
         allocatorInfo.device = GRAPHICS_DATA.device.logicalDevice.device;
         allocatorInfo.instance = GRAPHICS_DATA.instance;
         allocatorInfo.flags = VMA_ALLOCATOR_CREATE_BUFFER_DEVICE_ADDRESS_BIT;
+        allocatorInfo.pAllocationCallbacks = &GRAPHICS_DATA.platform.allocator;
 
         VK_HANDLE_EXCEPT(vmaCreateAllocator(&allocatorInfo, &GRAPHICS_DATA.allocator));
 
@@ -262,8 +255,8 @@ namespace hf
         {
             std::array types
             {
-                VkDescriptorTypeCount{ .type = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,         .descriptorCount = VK_MAX_STORAGE_BUFFER_DESCRIPTORS },
-                VkDescriptorTypeCount{ .type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,         .descriptorCount = VK_MAX_UNIFORM_BUFFER_DESCRIPTORS },
+                VkDescriptorTypeCount{ .type = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, .descriptorCount = VK_MAX_STORAGE_BUFFER_DESCRIPTORS },
+                VkDescriptorTypeCount{ .type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, .descriptorCount = VK_MAX_UNIFORM_BUFFER_DESCRIPTORS },
             };
             GRAPHICS_DATA.bufferDescriptorBuffer = MakeURef<VkDescriptorBuffer>(types.data(), types.size(), VK_BUFFER_USAGE_RESOURCE_DESCRIPTOR_BUFFER_BIT_EXT);
         }
@@ -277,19 +270,19 @@ namespace hf
         }
 
         LOG_LOG("[Vulkan] Max vertex attributes supported: %i", GRAPHICS_DATA.device.properties.properties.limits.maxVertexInputAttributes);
-        LOG_LOG("[Vulkan] Max image array layers: %i", GRAPHICS_DATA.device.properties.properties.limits.maxImageArrayLayers);
-        LOG_LOG("[Vulkan] Max texel buffer elements: %i", GRAPHICS_DATA.device.properties.properties.limits.maxTexelBufferElements);
-        LOG_LOG("[Vulkan] Max uniform buffer range: %i", GRAPHICS_DATA.device.properties.properties.limits.maxUniformBufferRange);
-        LOG_LOG("[Vulkan] Max storage buffer range: %i", GRAPHICS_DATA.device.properties.properties.limits.maxStorageBufferRange);
-        LOG_LOG("[Vulkan] Max push constant size: %i", GRAPHICS_DATA.device.properties.properties.limits.maxPushConstantsSize);
-        LOG_LOG("[Vulkan] Max color attachments: %i", GRAPHICS_DATA.device.properties.properties.limits.maxColorAttachments);
+        LOG_LOG("[Vulkan] Max image array layers: %i",          GRAPHICS_DATA.device.properties.properties.limits.maxImageArrayLayers);
+        LOG_LOG("[Vulkan] Max texel buffer elements: %i",       GRAPHICS_DATA.device.properties.properties.limits.maxTexelBufferElements);
+        LOG_LOG("[Vulkan] Max uniform buffer range: %i",        GRAPHICS_DATA.device.properties.properties.limits.maxUniformBufferRange);
+        LOG_LOG("[Vulkan] Max storage buffer range: %i",        GRAPHICS_DATA.device.properties.properties.limits.maxStorageBufferRange);
+        LOG_LOG("[Vulkan] Max push constant size: %i",          GRAPHICS_DATA.device.properties.properties.limits.maxPushConstantsSize);
+        LOG_LOG("[Vulkan] Max color attachments: %i",           GRAPHICS_DATA.device.properties.properties.limits.maxColorAttachments);
     }
 
     static void DestroyLogicalDevice(LogicalDevice& device)
     {
         if (device.device != VK_NULL_HANDLE)
         {
-            vkDestroyDevice(device.device, nullptr);
+            vkDestroyDevice(device.device, &GRAPHICS_DATA.platform.allocator);
             device.device = VK_NULL_HANDLE;
         }
     }

@@ -9,33 +9,34 @@ namespace hf
         bindingInfos = std::vector<TextureLayoutBindingInfo>(info.bindingCount);
         memcpy(bindingInfos.data(), info.pBindings, sizeof(TextureLayoutBindingInfo) * info.bindingCount);
 
+        GRAPHICS_DATA.preAllocBuffers.descLayoutBindings.resize(info.bindingCount);
+        GRAPHICS_DATA.preAllocBuffers.descLayoutBindings.clear();
+
         for (uint32_t i = 0; i < info.bindingCount; ++i)
         {
             auto& bindingInfo = info.pBindings[i];
-            GRAPHICS_DATA.preAllocBuffers.descLayoutBindings[i] =
-            {
-                .binding = bindingInfo.bindingId,
-                .descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
-                .descriptorCount = bindingInfo.arraySize,
-                .stageFlags = (VkShaderStageFlags)bindingInfo.usageFlags,
-                .pImmutableSamplers = nullptr
-            };
+            VkDescriptorSetLayoutBinding setLayoutBinding{};
+            setLayoutBinding.binding = bindingInfo.bindingId;
+            setLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+            setLayoutBinding.descriptorCount = bindingInfo.arraySize;
+            setLayoutBinding.stageFlags = (VkShaderStageFlags)bindingInfo.usageFlags;
+            GRAPHICS_DATA.preAllocBuffers.descLayoutBindings.push_back(setLayoutBinding);
         }
 
         VkDescriptorSetLayoutCreateInfo layoutInfo{};
 
         layoutInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
-        layoutInfo.bindingCount = info.bindingCount;
-        layoutInfo.pBindings = GRAPHICS_DATA.preAllocBuffers.descLayoutBindings;
+        layoutInfo.bindingCount = GRAPHICS_DATA.preAllocBuffers.descLayoutBindings.size();
+        layoutInfo.pBindings = GRAPHICS_DATA.preAllocBuffers.descLayoutBindings.data();
         layoutInfo.flags = VK_DESCRIPTOR_SET_LAYOUT_CREATE_DESCRIPTOR_BUFFER_BIT_EXT;
 
         VK_HANDLE_EXCEPT(vkCreateDescriptorSetLayout(GRAPHICS_DATA.device.logicalDevice.device,
-            &layoutInfo, nullptr, &layout));
+            &layoutInfo, &GRAPHICS_DATA.platform.allocator, &layout));
     }
 
     VkTextureLayout::~VkTextureLayout()
     {
-        if (layout) vkDestroyDescriptorSetLayout(GRAPHICS_DATA.device.logicalDevice.device, layout, nullptr);
+        if (layout) vkDestroyDescriptorSetLayout(GRAPHICS_DATA.device.logicalDevice.device, layout, &GRAPHICS_DATA.platform.allocator);
     }
 
     bool IsValidLayout(TextureLayout layout)

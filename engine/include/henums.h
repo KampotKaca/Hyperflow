@@ -18,6 +18,11 @@ namespace hf
         return a;\
     }\
 
+    //----------------------------- Primitives ---------------------------------------------------
+
+    enum class PrimitiveMeshType { Cube, IcoSphere, Plane, UVSphere, Cone, Cylinder, Torus, Count };
+    enum class PrimitiveTextureType { Default, Circle, Triangle, Capsule, HexagonFlatTop, HexagonPointedTop, IsometricDiamond, Count };
+
     //----------------------------- Rendering ---------------------------------------------------
 
     enum class TexturePackBindingType { Texture2D, Cubemap, RenderTexture };
@@ -26,6 +31,8 @@ namespace hf
 	enum class BufferDataType { U8, I8, U16, I16, U32, I32, U64, I64, F16, F32, F64, Count };
 	enum class BufferMemoryType { Static, WriteOnly, PerFrameWriteOnly, ReadWrite, PerFrameReadWrite, Count };
 	enum class RenderBindingType { Graphics = 0, Compute = 1, RayTracing = 1000165000, HuaweiSubpassShading = 1000369003 };
+
+    enum class BufferInputRate { Vertex = 0, Instance = 1 };
 
 	enum class AccessType
 	{
@@ -42,7 +49,7 @@ namespace hf
 	};
 	DEFINE_ENUM_FLAGS(AccessType)
 
-	enum class ShaderUsageStage
+	enum class ShaderUsageStageFlags
 	{
 		None = 0,
 		Vertex = (1u << 0), TessellationControl = (1u << 1), TessellationEvaluation = (1u << 2),
@@ -51,9 +58,9 @@ namespace hf
 		AllGraphics = Vertex | TessellationControl | TessellationEvaluation | Geometry | Fragment,
 		All = Vertex | TessellationControl | TessellationEvaluation | Geometry | Fragment | Compute,
 	};
-	DEFINE_ENUM_FLAGS(ShaderUsageStage)
+	DEFINE_ENUM_FLAGS(ShaderUsageStageFlags)
 
-	enum class RenderPipelineStage
+	enum class RenderPipelineStageFlags
 	{
 		None = 0,
 		PreDraw = (1 << 0),
@@ -66,18 +73,18 @@ namespace hf
 		Host = (1 << 14), AllGraphics = (1 << 15), AllCommands = (1 << 16),
 		Default = Vertex | Fragment,
 	};
-	DEFINE_ENUM_FLAGS(RenderPipelineStage)
+	DEFINE_ENUM_FLAGS(RenderPipelineStageFlags)
 
 	constexpr uint32_t BUFFER_DATA_SIZE[(uint32_t)BufferDataType::Count] = { 1, 1, 2, 2, 4, 4, 8, 8, 2, 4, 8 };
 
-	enum class BufferUsageType
+	enum class BufferUsageTypeFlags
 	{
 		TransferSrc = 1 << 0, TransferDst = 1 << 1, UniformTexel = 1 << 2, StorageTexel = 1 << 3,
 		Uniform = 1 << 4, Storage = 1 << 5, Index = 1 << 6, Vertex = 1 << 7, Indirect = 1 << 8,
 		Default = TransferSrc | TransferDst | Vertex | Index | Storage,
 		All = TransferSrc | TransferDst | UniformTexel | StorageTexel | Uniform | Storage | Index | Vertex | Indirect,
 	};
-	DEFINE_ENUM_FLAGS(BufferUsageType)
+	DEFINE_ENUM_FLAGS(BufferUsageTypeFlags)
 
 	enum class ShaderCullMode { None = 0, Front = 1, Back = 2, Both = 3 };
 	enum class ShaderFaceDirection { CounterClockwise = 0, Clockwise = 1 };

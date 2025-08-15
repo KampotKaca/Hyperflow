@@ -1,10 +1,19 @@
 #include "hvk_indexbuffer.h"
 #include "hvk_graphics.h"
+#include "hvk_renderer.h"
 
 namespace hf
 {
+    static uint64_t GetIndexBufferSize(BufferDataType indexFormat, uint32_t indexCount)
+    {
+        return (uint64_t)BUFFER_DATA_SIZE[(uint32_t)indexFormat] * indexCount;
+    }
+
     VkIndexBuffer::VkIndexBuffer(const IndexBufferCreationInfo& info)
-        : indexCount(info.indexCount), memoryType(info.memoryType), indexFormat(info.indexFormat)
+        : VkBufferBase(info.memoryType, (uint8_t*)info.pIndices, 0, 0,
+            VK_BUFFER_USAGE_INDEX_BUFFER_BIT | (uint32_t)info.usageFlags,
+            GetIndexBufferSize(info.indexFormat, info.indexCount)),
+        indexCount(info.indexCount), indexFormat(info.indexFormat)
     {
         switch (indexFormat)
         {
@@ -13,51 +22,20 @@ namespace hf
             case BufferDataType::U32: indexType = VK_INDEX_TYPE_UINT32; break;
             default: throw GENERIC_EXCEPT("[Hyperflow]", "Invalid index format!!!");
         }
-
-        uint64_t bufferSize = (uint64_t)BUFFER_DATA_SIZE[(uint32_t)info.indexFormat] * info.indexCount;
-
-        switch (memoryType)
-        {
-            case BufferMemoryType::Static:
-                {
-                    if (!info.pIndices) throw GENERIC_EXCEPT("[Hyperflow]", "Static buffer is without any data, this is not allowed");
-
-                    VkStaticBufferInfo createInfo
-                    {
-                        .bufferSize = bufferSize,
-                        .data = info.pIndices,
-                        .usage = VK_BUFFER_USAGE_INDEX_BUFFER_BIT | (uint32_t)info.usageFlags,
-                    };
-
-                    CreateStaticBuffer(createInfo, &buffer, &bufferMemory);
-                }
-            break;
-            case BufferMemoryType::WriteOnly:
-                {
-                    VkCreateBufferInfo createInfo
-                    {
-                        .size = bufferSize,
-                        .usage = VK_BUFFER_USAGE_INDEX_BUFFER_BIT | (uint32_t)info.usageFlags,
-                        .sharingMode = VK_SHARING_MODE_EXCLUSIVE,
-                        .memoryType = BufferMemoryType::WriteOnly
-                    };
-                    CreateBuffer(createInfo, &buffer, &bufferMemory);
-                    VK_HANDLE_EXCEPT(vmaMapMemory(GRAPHICS_DATA.allocator, bufferMemory, &mapping));
-                    if (info.pIndices) UploadBufferMemory(info.pIndices, mapping, 0, bufferSize);
-                }
-            break;
-            default: throw GENERIC_EXCEPT("[Hyperflow]", "Unknown memory type");
-        }
     }
 
-    VkIndexBuffer::~VkIndexBuffer()
+    void UploadBuffer(const VkRenderer* rn, const VkIndexBuffer* buffer, const void* data,
+        uint32_t offset, uint32_t indexCount)
     {
-        if (mapping)
-        {
-            vmaUnmapMemory(GRAPHICS_DATA.allocator, bufferMemory);
-            mapping = nullptr;
-        }
+        uint32_t currentFrame = 0;
+        if (rn) currentFrame = rn->currentFrame;
 
-        vmaDestroyBuffer(GRAPHICS_DATA.allocator, buffer, bufferMemory);
+        if (buffer->memoryType == BufferMemoryType::Static)
+            throw GENERIC_EXCEPT("[Hyperflow]", "Cannot modify static buffer");
+
+        const auto fullSize = (uint64_t)BUFFER_DATA_SIZE[(uint32_t)buffer->indexFormat] * indexCount;
+        const auto fullOffset = (uint64_t)offset * indexCount;
+
+        memcpy((uint8_t*)buffer->memoryMappings[currentFrame] + fullOffset, data, fullSize);
     }
 }

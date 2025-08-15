@@ -1,0 +1,13 @@
+fragmentShaderPath: default_unlit
+
+depthStencilOptions:
+  enableDepth: true
+  writeDepth: true
+  comparisonFunc: LessOrEqual
+  enableDepthBounds: false
+  enableStencil: false
+
+  frontStencil: Keep
+  backStencil: Zero
+  minDepthBounds: 0
+  maxDepthBounds: 1

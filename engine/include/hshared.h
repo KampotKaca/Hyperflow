@@ -106,13 +106,13 @@ namespace hf
 	struct TexturePack;
 
 	struct RuntimeBufferBase;
-	struct VertBuffer;
+	struct VertexBuffer;
 	struct IndexBuffer;
 	struct Mesh;
 	struct Material;
 	struct RenderTexture;
 
-	typedef uint32_t BufferAttrib;
+	typedef uint32_t VertexBufferAttribute;
 	typedef uint32_t Buffer;
 	typedef uint32_t TextureLayout;
 	typedef uint32_t TextureSampler;
@@ -122,22 +122,23 @@ namespace hf
 	{
 		BufferDataType type = BufferDataType::F32;
 		uint32_t size = 1;
-		//Do not implement lSize
-		uint32_t lSize = 1;
+		uint32_t lSize = 1; //Do not implement lSize
 	};
 
-	struct BufferAttribDefinitionInfo
+	struct VertexBufferAttributeDefinitionInfo
 	{
+	    BufferInputRate inputRate = BufferInputRate::Vertex;
 		uint32_t bindingId = 0;
+		uint32_t locationOffset = 0;
 		uint32_t formatCount = 0;
 		BufferAttribFormat* pFormats = nullptr;
 	};
 
-	struct VertBufferCreationInfo
+	struct VertexBufferCreationInfo
 	{
-		BufferAttrib bufferAttrib = 0;
+		uint32_t vertexSize = 0;
 		BufferMemoryType memoryType = BufferMemoryType::Static;
-		BufferUsageType usageFlags = BufferUsageType::Vertex;
+		BufferUsageTypeFlags usageFlags = BufferUsageTypeFlags::Vertex;
 		uint32_t vertexCount = 0;
 		void* pVertices = nullptr;
 	};
@@ -146,7 +147,7 @@ namespace hf
 	{
 		BufferDataType indexFormat = BufferDataType::U16;
 		BufferMemoryType memoryType = BufferMemoryType::Static;
-		BufferUsageType usageFlags = BufferUsageType::Index;
+		BufferUsageTypeFlags usageFlags = BufferUsageTypeFlags::Index;
 		uint32_t indexCount = 0;
 		void* pIndices = nullptr;
 	};
@@ -176,8 +177,8 @@ namespace hf
 
 	struct ShaderBlendingOptions
 	{
-	    BlendingOptions colorBlendingOptions{};
-	    BlendingOptions alphaBlendingOptions
+	    BlendingOptions color{};
+	    BlendingOptions alpha
 	    {
 	        .srcFactor = ColorBlendFactorType::One,
             .dstFactor = ColorBlendFactorType::Zero,
@@ -198,8 +199,9 @@ namespace hf
 	    MeshPolygonMode polygonMode = MeshPolygonMode::Fill;
 	    bool enableRasterizerDiscard = false;
 	    bool enableDepthClamping = false;
-	    std::optional<ShaderDepthBiasOptions> biasOptions{};
 	    float lineWidth = 1.0f; //Width of the line in Topology Lines mode.
+
+	    std::optional<ShaderDepthBiasOptions> biasOptions{};
 	};
 
 	struct ShaderDepthStencilOptions
@@ -228,7 +230,7 @@ namespace hf
     struct ColorAttachmentSettings
     {
         ColorMaskingFlags colorWriteMask = ColorMaskingFlags::All;
-        std::optional<ShaderBlendingOptions> blending{};
+        std::optional<ShaderBlendingOptions> blendingOptions{};
     };
 
     template<typename T>
@@ -240,7 +242,8 @@ namespace hf
 
     struct ShaderLibraryVertexInputModuleInfo
     {
-        BufferAttrib attribute{};
+        VertexBufferAttribute pAttributes[MAX_VERTEX_INPUT_BUFFER_ATTRIBUTES]{};
+        uint32_t attributeCount{};
         MeshPrimitiveTopologyType topology = MeshPrimitiveTopologyType::TriangleList;
         bool enablePrimitiveRestart = false;
     };
@@ -264,7 +267,7 @@ namespace hf
 
     struct ShaderLibraryFragmentOutputModuleInfo
     {
-        ColorAttachmentSettings colorAttachmentsSettings[MAX_COLOR_ATTACHMENTS]{};
+        ColorAttachmentSettings pColorAttachmentsSettings[MAX_COLOR_ATTACHMENTS]{};
         uint32_t colorAttachmentCount = 1;
 		std::optional<ShaderBlendOp> blendOp;
     };
@@ -301,7 +304,7 @@ namespace hf
 
 	struct BufferBindingInfo
 	{
-		ShaderUsageStage usageFlags = ShaderUsageStage::Vertex | ShaderUsageStage::Fragment;
+		ShaderUsageStageFlags usageFlags = ShaderUsageStageFlags::Vertex | ShaderUsageStageFlags::Fragment;
 
 		//this variable describes this specific uniform buffers array size,
 		//example:
@@ -338,7 +341,7 @@ namespace hf
 	struct TextureLayoutBindingInfo
 	{
 		uint32_t bindingId{};
-		ShaderUsageStage usageFlags = ShaderUsageStage::Vertex | ShaderUsageStage::Fragment;
+		ShaderUsageStageFlags usageFlags = ShaderUsageStageFlags::Vertex | ShaderUsageStageFlags::Fragment;
 
 		//this variable describes this specific uniform buffers array size,
 		//example:
@@ -358,7 +361,7 @@ namespace hf
 	//on vulkan it directly translates to push constant, but on other pipelines ...
 	struct PushConstantInfo
 	{
-		ShaderUsageStage usageFlags = ShaderUsageStage::None;
+		ShaderUsageStageFlags usageFlags = ShaderUsageStageFlags::None;
 		uint32_t sizeInBytes{};
 	};
 
@@ -390,7 +393,7 @@ namespace hf
 	struct TextureSamplerDefinitionInfo
 	{
 		TextureFilter filter = TextureFilter::Bilinear;
-		TextureAnisotropicFilter anisotropicFilter = TextureAnisotropicFilter::X8;
+		TextureAnisotropicFilter anisotropicFilter = TextureAnisotropicFilter::X16;
 		TextureRepeatMode repeatMode = TextureRepeatMode::Repeat;
 		bool useNormalizedCoordinates = true;
 		ComparisonOperation comparison = ComparisonOperation::None;
@@ -409,8 +412,7 @@ namespace hf
 
 	struct TextureCreationInfo
 	{
-		const char* filePath{};
-		bool useAbsolutePath{};
+	    FilePath filePath{};
 		TextureChannel desiredChannel = TextureChannel::RGBA;
 		uint32_t mipLevels = 1;
 		TextureDetails details{};
@@ -418,17 +420,17 @@ namespace hf
 
 	struct CubemapTexturePaths
 	{
-		const char* left{};
-		const char* right{};
-		const char* down{};
-		const char* up{};
-		const char* back{};
-		const char* front{};
+		FilePath left{};
+		FilePath right{};
+		FilePath down{};
+		FilePath up{};
+		FilePath back{};
+		FilePath front{};
 	};
 
 	struct CubemapCreationInfo
 	{
-		const char* folderPath{};
+		FilePath folderPath{};
 		TextureChannel desiredChannel = TextureChannel::RGBA;
 		uint32_t mipLevels = 1;
 		CubemapTexturePaths texturePaths{};
@@ -510,7 +512,7 @@ namespace hf
 
 	struct RenderAttachmentDependencyTarget
 	{
-		RenderPipelineStage stageMask = RenderPipelineStage::None;
+		RenderPipelineStageFlags stageMask = RenderPipelineStageFlags::None;
 		AccessType accessMask = AccessType::None;
 	    TextureResultLayoutType targetLayout = TextureResultLayoutType::Undefined;
 	};
@@ -522,13 +524,13 @@ namespace hf
 
 		RenderAttachmentDependencyTarget src
 		{
-			.stageMask = RenderPipelineStage::ColorAttachmentOutput,
+			.stageMask = RenderPipelineStageFlags::ColorAttachmentOutput,
 			.accessMask = AccessType::None,
 		    .targetLayout = TextureResultLayoutType::Undefined
 		};
 		RenderAttachmentDependencyTarget dst
 		{
-			.stageMask = RenderPipelineStage::ColorAttachmentOutput,
+			.stageMask = RenderPipelineStageFlags::ColorAttachmentOutput,
 			.accessMask = AccessType::ColorAttachmentWrite,
 		    .targetLayout = TextureResultLayoutType::Attachment
 		};
@@ -557,7 +559,7 @@ namespace hf
 	{
 		MeshDataType typeFlags = MeshDataType::Default;
 		BufferMemoryType memoryType = BufferMemoryType::Static;
-		BufferAttrib bufferAttrib{};
+		VertexBufferAttribute vertexAttribute{};
 	};
 
 	struct MeshCreationInfo
@@ -566,20 +568,87 @@ namespace hf
 		MeshStats stats{};
 	};
 
-	struct DrawCallInfo
-	{
-		Ref<VertBuffer>* pVertBuffers{}; //vertex buffers to render
-		uint32_t bufferCount = 0; //amount of buffers to render
-
-		Ref<IndexBuffer> indexBuffer{}; //is optional property, if nullptr engine will render vertex buffer in ordered manner.
-		uint32_t instanceCount = 0; //amount of instances to render
-
-#if DEBUG
-		char debugName[16];
-#endif
-	};
-
 	//endregion
+
+    //region Audio
+
+    struct AudioClip;
+    struct AudioPlayer;
+    struct AudioPlayer3D;
+    struct AudioListener;
+    struct AudioGroup;
+
+    struct AudioCone
+    {
+        float_t innerAngle = 360.0f;
+        float_t outerAngle = 360.0f;
+        float_t outerGain = 0.1f;
+
+        vec3 position{};
+        vec3 euler{};
+    };
+
+    struct AudioClipSettings
+    {
+        AudioClipFormat format = AudioClipFormat::Default;
+        uint32_t sampleRate = 0;
+        AudioClipChannelMixMode channelMixMode = AudioClipChannelMixMode::Rectangular;
+        AudioClipDitherMode ditherMode = AudioClipDitherMode::None;
+        AudioClipEncodingFormat encodingFormat = AudioClipEncodingFormat::Unknown;
+    };
+
+    struct AudioClipCreationInfo
+    {
+        const char* filePath{};
+        bool useAbsolutePath = false;
+        AudioClipSettings settings{};
+    };
+
+    struct AudioPlayerSettings
+    {
+        float_t volume = 1.0f;
+        float_t pitch = 1.0f;
+        bool loopingEnabled = false;
+    };
+
+    struct AudioPlayer3DSettings
+    {
+        float_t maxRange = 100.0f;
+        float_t falloff = 10.0f;
+        Audio3DAttenuationModel attenuationModel = Audio3DAttenuationModel::Linear;
+    };
+
+    struct AudioPlayerCreationInfo
+    {
+        Ref<AudioClip> clip{};
+        Ref<AudioGroup> parent{};
+        AudioPlayerSettings settings{};
+    };
+
+    struct AudioGroupCreationInfo
+    {
+        Ref<AudioGroup> parent{};
+        bool enabled = true;
+        float_t volume = 1.0f;
+        float_t pitch = 1.0f;
+    };
+
+    struct AudioPlayer3DCreationInfo
+    {
+        Ref<AudioClip> clip{};
+        Ref<AudioGroup> parent{};
+        AudioPlayerSettings settings{};
+        AudioPlayer3DSettings settings3d{};
+        AudioCone cone{};
+    };
+
+    struct AudioListenerCreationInfo
+    {
+        bool isEnabled = true;
+        AudioCone cone{};
+    };
+
+    //endregion
 
 	//region Window
 
@@ -629,14 +698,16 @@ namespace hf
 
     struct EngineInternalResourceFormatInfo
     {
-		BufferBindingInfo globalUniformBindingInfo{}; //this is binding for global uniform which should contain at least Camera and Time uniforms
         ShaderDrawOutputFormats drawOutputFormats{}; //this is general outline of the render texture you are going to draw on with the shaders.
     };
 
     struct EngineInternalAudioInfo
     {
+        bool audioEnabled = true; //Set this to false and audio system will not be initialized.
         float_t volume = 1.0f; //Initial global audio volume multiplier
-        uint32_t usedListenersCount = 1; //Set this to 0 and audio system will not be initialized.
+        uint32_t usedListenersCount = 1; //Set this to 0 there will not be any valid audio.
+        AudioGroupCreationInfo audio2DInfo{};
+        AudioGroupCreationInfo audio3DInfo{};
     };
 
 	struct EngineData
@@ -717,92 +788,23 @@ namespace hf
 
 	//endregion
 
-	//region Audio
-
-	struct AudioClip;
-	struct AudioPlayer;
-	struct AudioPlayer3D;
-	struct AudioListener;
-
-    struct AudioCone
-    {
-        float_t innerAngle = 360.0f;
-        float_t outerAngle = 360.0f;
-        float_t outerGain = 0.1f;
-
-        vec3 position{};
-        vec3 euler{};
-    };
-
-	struct AudioClipSettings
-	{
-		AudioClipFormat format = AudioClipFormat::Default;
-		uint32_t sampleRate = 0;
-		AudioClipChannelMixMode channelMixMode = AudioClipChannelMixMode::Rectangular;
-		AudioClipDitherMode ditherMode = AudioClipDitherMode::None;
-		AudioClipEncodingFormat encodingFormat = AudioClipEncodingFormat::Unknown;
-	};
-
-	struct AudioClipCreationInfo
-	{
-		const char* filePath{};
-		bool useAbsolutePath = false;
-		AudioClipSettings settings{};
-	};
-
-	struct AudioPlayerSettings
-	{
-		float_t volume = 1.0f;
-		float_t pitch = 1.0f;
-		bool loopingEnabled = false;
-	};
-
-    struct AudioPlayer3DSettings
-    {
-        float_t maxRange = 100.0f;
-        float_t falloff = 10.0f;
-        Audio3DAttenuationModel attenuationModel = Audio3DAttenuationModel::Linear;
-    };
-
-	struct AudioPlayerCreationInfo
-	{
-		Ref<AudioClip> clip{};
-		AudioPlayerSettings settings{};
-	};
-
-    struct AudioPlayer3DCreationInfo
-    {
-        Ref<AudioClip> clip{};
-        AudioPlayerSettings settings{};
-        AudioPlayer3DSettings settings3d{};
-        AudioCone cone{};
-    };
-
-    struct AudioListenerCreationInfo
-    {
-        bool isEnabled = true;
-        AudioCone cone{};
-    };
-
-	//endregion
-
     struct GlobalMemoryStatistics
     {
-        size_t mappedSizeMbs = 0;
-        size_t mappedPeakSizeMbs = 0;
-        size_t cashedSizeMbs = 0;
-        size_t hugeAllocSizeMbs = 0;
-        size_t hugeAllocPeakSizeMbs = 0;
-        size_t mappedTotalSizeMbs = 0;
-        size_t unmappedTotalSizeMbs = 0;
+        double mappedSizeMbs = 0;
+        double mappedPeakSizeMbs = 0;
+        double cachedSizeMbs = 0;
+        double hugeAllocSizeMbs = 0;
+        double hugeAllocPeakSizeMbs = 0;
+        double mappedTotalSizeMbs = 0;
+        double unmappedTotalSizeMbs = 0;
     };
 
     struct ThreadMemoryStatistics
     {
-        size_t cacheSizeMbs = 0;
-        size_t cacheSpanMbs = 0;
-        size_t threadToGlobalMbs = 0;
-        size_t globalToThreadMbs = 0;
+        double cacheSizeMbs = 0;
+        double cacheSpanMbs = 0;
+        double threadToGlobalMbs = 0;
+        double globalToThreadMbs = 0;
 
         size_t currentNumSpans = 0;
         size_t peakNumSpans = 0;

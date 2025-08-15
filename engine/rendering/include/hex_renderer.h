@@ -106,11 +106,17 @@ namespace hf::inter::rendering
 
     struct RendererInternalFunctions_i
     {
-        uint32_t (*createVulkanSurfaceFunc)(void* windowHandle, void* instance, void* surfaceResult){};
+        uint32_t (*createVulkanSurfaceFunc)(void* windowHandle, void* instance, const void* allocator, void* surfaceResult){};
 
         bool (*fileExistsFunc)(const char* path){};
         bool (*readFileFunc)(const std::string& filename, std::vector<char>& result){};
         bool (*writeFileFunc)(const std::string& filename, const std::vector<char>& result){};
+
+        void* (*allocateFunc)(std::size_t n);
+        void* (*allocateAlignedFunc)(std::size_t n, std::align_val_t align);
+        void (*deallocateFunc)(void* p);
+        void (*deallocateAlignedFunc)(void* p, std::align_val_t align);
+        void* (*reallocateFunc)(void* p, std::size_t n);
     };
 
     struct RendererLoadInfo_i
@@ -122,12 +128,12 @@ namespace hf::inter::rendering
         RendererInternalFunctions_i functions{};
     };
 
-    struct VertBufferUploadInfo_i
+    struct VertexBufferUploadInfo_i
     {
         const void* buffer{};
         const void* data{};
-        uint32_t offset{};
-        uint32_t vertexCount{};
+        uint32_t offsetInBytes{};
+        uint32_t sizeInBytes{};
     };
 
     struct IndexBufferUploadInfo_i
@@ -159,6 +165,14 @@ namespace hf::inter::rendering
         const void* pTextures{};
         uint32_t textureCount = 1;
         TextureDetails details{};
+    };
+
+    struct VertexBufferCreationInfo_i
+    {
+        uint64_t sizeInBytes = 0;
+        BufferMemoryType memoryType = BufferMemoryType::Static;
+        BufferUsageTypeFlags usageFlags = BufferUsageTypeFlags::Vertex;
+        void* pVertices = nullptr;
     };
 
     struct TexturePackTextureUploadInfo_i
@@ -224,13 +238,44 @@ namespace hf::inter::rendering
         uint32_t setBindingIndex = 0;
     };
 
+    struct IndexBufferRegionInfo_i
+    {
+        void* buffer{};
+        uint32_t offset{};
+        uint32_t indexCount{};
+    };
+
+    struct VertexBufferRegionInfo_i
+    {
+        void* buffer{};
+        uint64_t offsetInBytes{};
+    };
+
+    struct InstanceBufferRegionInfo_i
+    {
+        void* buffer{};
+        uint64_t offsetInBytes{};
+        uint32_t instanceCount{};
+    };
+
     struct DrawCallInfo_i
     {
-        void** pVertBuffers{};
-        uint32_t bufferCount{};
+        VertexBufferRegionInfo_i pVertexBuffers[MAX_NUM_BUFFER_CACHE];
+        uint32_t vertexBufferCount{};
 
-        void* indexBuffer{};
-        uint32_t instanceCount{};
+        std::optional<InstanceBufferRegionInfo_i> instanceBuffer{};
+    };
+
+    struct IndexedDrawCallInfo_i
+    {
+        DrawCallInfo_i drawInfo{};
+        IndexBufferRegionInfo_i indexBuffer{};
+    };
+
+    struct VertexedDrawCallInfo_i
+    {
+        DrawCallInfo_i drawInfo{};
+        uint32_t vertexCount{};
     };
 
     struct RendererAPI
@@ -276,8 +321,8 @@ namespace hf::inter::rendering
         TextureLayout (*DefineTextureLayout)(const TextureLayoutDefinitionInfo& info);
 
         //buffer attribute
-        BufferAttrib (*DefineVertBufferAttrib)(const BufferAttribDefinitionInfo& info, uint32_t fullStride);
-        uint32_t (*GetVertBufferAttribSize)(BufferAttrib attrib);
+        VertexBufferAttribute (*DefineVertexBufferAttribute)(const VertexBufferAttributeDefinitionInfo& info, uint32_t fullStride);
+        uint32_t (*GetVertexBufferAttributeSize)(VertexBufferAttribute attrib);
 
         //buffers
         Buffer (*DefineUniformBuffer)(const BufferDefinitionInfo& info);
@@ -286,14 +331,14 @@ namespace hf::inter::rendering
         void (*BindBuffer)(const void* rn, const BindResourceInfo_i<Buffer>& info);
 
         //vertex buffer
-        void* (*CreateVertBuffer)(const VertBufferCreationInfo& info);
-        void (*DestroyVertBuffer)(void* handle);
-        void (*UploadVertBuffer)(const VertBufferUploadInfo_i& info);
+        void* (*CreateVertexBuffer)(const VertexBufferCreationInfo_i& info);
+        void (*DestroyVertexBuffer)(void* handle);
+        void (*UploadVertexBuffer)(const void* rn, const VertexBufferUploadInfo_i& info);
 
         //index buffer
         void* (*CreateIndexBuffer)(const IndexBufferCreationInfo& info);
         void (*DestroyIndexBuffer)(void* handle);
-        void (*UploadIndexBuffer)(const IndexBufferUploadInfo_i& info);
+        void (*UploadIndexBuffer)(const void* rn, const IndexBufferUploadInfo_i& info);
 
         //copy operations
         void (*SubmitBufferCopyOperations)();
@@ -304,7 +349,8 @@ namespace hf::inter::rendering
         uvec2 (*GetReadyForRendering)(void* rn, void** pTextures, uint32_t textureCount);
         void (*StartFrame)(void* rn);
         void (*EndFrame)(void* rn);
-        void (*Draw)(void* rn, const DrawCallInfo_i& info);
+        void (*DrawIndexed)(void* rn, const IndexedDrawCallInfo_i& info);
+        void (*Draw)(void* rn, const VertexedDrawCallInfo_i& info);
         void (*ApplyRenderAttachmentDependencies)(void* rn, RenderAttachmentDependencyInfo* pInfos, uint32_t count);
         void (*WaitForDevice)();
 

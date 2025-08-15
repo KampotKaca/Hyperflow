@@ -5,14 +5,14 @@ namespace hf
 {
     bool GetAvailableSurfaceDetails(const SwapChainSupportDetails& swapChainSupportDetails,
     VkFormat targetFormat, VkPresentModeKHR targetPresentMode, VkPresentModeKHR defaultPresentMode,
-    uvec2 targetExtents, GraphicsSwapchainDetails* result)
+    uvec2 targetExtents, GraphicsSwapchainDetails& result)
     {
         int mask = 0;
         for (auto& format : swapChainSupportDetails.formats)
         {
             if (format.format == targetFormat)
             {
-                result->format = format;
+                result.format = format;
                 mask |= 1 << 0;
                 break;
             }
@@ -22,7 +22,7 @@ namespace hf
         {
             if (presentMode == targetPresentMode)
             {
-                result->presentMode = presentMode;
+                result.presentMode = presentMode;
                 mask |= 1 << 1;
                 break;
             }
@@ -33,14 +33,14 @@ namespace hf
             swapChainSupportDetails.capabilities.maxImageExtent.width);
         extents.height = std::clamp(extents.height, swapChainSupportDetails.capabilities.minImageExtent.height,
             swapChainSupportDetails.capabilities.maxImageExtent.height);
-        result->extent = extents;
+        result.extent = extents;
 
         if (!(mask & (1 << 0))) LOG_WARN("[Vulkan] %s", "Unable to choose target swapchain surface format");
         if (!(mask & (1 << 1)))
         {
-            result->presentMode = defaultPresentMode;
+            result.presentMode = defaultPresentMode;
             mask |= 1 << 1;
-            // LOG_WARN("[Vulkan] %s", "Unable to choose target swapchain present mode, defaulted to FIFO");
+            LOG_LOG("[Vulkan] %s", "Unable to choose target swapchain present mode, defaulted to FIFO");
         }
 
         return mask == (1 << 2) - 1;

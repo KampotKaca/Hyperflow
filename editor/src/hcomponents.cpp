@@ -1,5 +1,6 @@
 #include "hyperfloweditor.h"
 #include "heditorinternal.h"
+#include "hyperflow.h"
 #include "hutils.h"
 
 namespace hf::editor
@@ -65,7 +66,7 @@ namespace hf::editor
 
     bool StartDropdown(const char* label)
     {
-        bool result = ImGui::CollapsingHeader(label);
+        const bool result = ImGui::CollapsingHeader(label);
         if (result) ImGui::Indent();
         return result;
     }
@@ -92,34 +93,40 @@ namespace hf::editor
 
     bool Draw(const char* label, Transform& trs, DrawStateFlag flags)
     {
-        if(StartComponent(label, flags))
+        ImGui::PushID(PointerToID(&trs));
+        const bool result = StartComponent(label, flags);
+        if(result)
         {
             Draw("Position", trs.position, 0, flags);
             Draw("Rotation", trs.euler, 0, flags);
             Draw("Scale", trs.scale, 1, flags);
 
             EndComponent();
-            return true;
         }
-        return false;
+        ImGui::PopID();
+        return result;
     }
 
     bool Draw(const char* label, DirectionalLight& dl, DrawStateFlag flags)
     {
-        if(StartComponent(label, flags))
+        ImGui::PushID(PointerToID(&dl));
+        const bool result = StartComponent(label, flags);
+        if(result)
         {
             DrawColor("Color", dl.color, flags);
             Draw("Rotation", dl.euler, 0, flags | DrawStateFlag::ButtonLess);
 
             EndComponent();
-            return true;
         }
-        return false;
+        ImGui::PopID();
+        return result;
     }
 
     bool Draw(const char* label, Camera3DCore& cam, DrawStateFlag flags)
     {
-        if(StartComponent(label, flags))
+        ImGui::PushID(PointerToID(&cam));
+        const bool result = StartComponent(label, flags);
+        if(result)
         {
             DrawSlider("Fov", cam.fov, 1.0f, 179.0f, "%.1f", flags);
             Draw("Distance", cam.farPlane, 0.01f, 100000.0f, "%.1f", flags | DrawStateFlag::DontStretchWidth);
@@ -130,6 +137,69 @@ namespace hf::editor
             cam.farPlane = glm::max(cam.nearPlane, cam.farPlane);
 
             EndComponent();
+        }
+        ImGui::PopID();
+        return result;
+    }
+
+    static void DrawThreadStats(const char* label, const ThreadMemoryStatistics& stats)
+    {
+        if (StartDropdown(label))
+        {
+            ImGui::Text("Cash Size:               %.1f Mbs", stats.cacheSizeMbs);
+            ImGui::Text("Cash Span:               %.1f Mbs", stats.cacheSpanMbs);
+            ImGui::Text("Thread To Global:        %.1f Mbs", stats.threadToGlobalMbs);
+            ImGui::Text("Global To Thread:        %.1f Mbs", stats.globalToThreadMbs);
+
+            ImGui::Text("Current Num Spans:       %llu", stats.currentNumSpans);
+            ImGui::Text("Peak Num Spans:          %llu", stats.peakNumSpans);
+
+            ImGui::Text("Current Num Allocations: %llu", stats.currentNumAllocations);
+            ImGui::Text("Peak Num Allocations:    %llu", stats.peakNumAllocations);
+            ImGui::Text("Total Num Allocations:   %llu", stats.totalNumAllocations);
+            ImGui::Text("Total Num Frees:         %llu", stats.totalNumFrees);
+
+            EndDropdown();
+        }
+    }
+
+    bool DrawMemoryStatisticsWindow(const char* label, bool* isOpen, const WindowFlags flags)
+    {
+        if(StartWindow(label, isOpen, flags))
+        {
+            const auto globalStats = utils::GetGlobalMemoryStatistics();
+            ImGui::Text("Mapped:          %.1f Mbs", globalStats.mappedSizeMbs);
+            ImGui::Text("Mapped Peak:     %.1f Mbs", globalStats.mappedPeakSizeMbs);
+            ImGui::Text("Cached:          %.1f Mbs", globalStats.cachedSizeMbs);
+            ImGui::Text("Huge Alloc:      %.1f Mbs", globalStats.hugeAllocSizeMbs);
+            ImGui::Text("Huge Alloc Peak: %.1f Mbs", globalStats.hugeAllocPeakSizeMbs);
+            ImGui::Text("Mapped Size:     %.1f Mbs", globalStats.mappedTotalSizeMbs);
+            ImGui::Text("Unmapped Size:   %.1f Mbs", globalStats.unmappedTotalSizeMbs);
+
+            DrawThreadStats("Update Thread", utils::GetThreadMemoryStatistics());
+            DrawThreadStats("Render Thread", GetMemoryStatistics(GetRenderer(GetMainWindow())));
+
+            EndWindow();
+            return true;
+        }
+        return false;
+    }
+
+    bool DrawAudioSettingsWindow(const char* label, bool* isOpen, WindowFlags flags)
+    {
+        if(StartWindow(label, isOpen, flags))
+        {
+            if(StartComponent("General Audio Settings", DrawStateFlag::DontUseDropdown))
+            {
+                float volume = GetAudioVolume();
+                if(DrawSlider("Volume", volume, 0.0f, 1.0f, "%.2f")) SetAudioVolume(volume);
+                EndComponent();
+            }
+
+            Draw("2D Settings", Get2DAudioGroup());
+            Draw("3D Settings", Get3DAudioGroup());
+
+            EndWindow();
             return true;
         }
         return false;
@@ -137,19 +207,22 @@ namespace hf::editor
 
     bool Draw(const char* label, const Ref<AudioPlayer>& pl, DrawStateFlag flags)
     {
-        if(StartComponent(label, flags))
+        ImGui::PushID(PointerToID(pl.get()));
+        const bool result = StartComponent(label, flags);
+        if(result)
         {
             DrawAudioSettings(pl, flags);
-
             EndComponent();
-            return true;
         }
-        return false;
+        ImGui::PopID();
+        return result;
     }
 
     bool Draw(const char* label, const Ref<AudioPlayer3D>& pl, DrawStateFlag flags)
     {
-        if(StartComponent(label, flags))
+        ImGui::PushID(PointerToID(pl.get()));
+        const bool result = StartComponent(label, flags);
+        if(result)
         {
             vec2 range = GetRange(pl);
             vec2 oldDistance = range;
@@ -166,14 +239,16 @@ namespace hf::editor
             if (Draw("Velocity", velocity, 0, flags | DrawStateFlag::ButtonLess)) SetVelocity(pl, velocity);
 
             EndComponent();
-            return true;
         }
-        return false;
+        ImGui::PopID();
+        return result;
     }
 
     bool Draw(const char* label, const Ref<AudioListener>& ls, DrawStateFlag flags)
     {
-        if(StartComponent(label, flags))
+        ImGui::PushID(PointerToID(ls.get()));
+        const bool result = StartComponent(label, flags);
+        if(result)
         {
             auto isEnabled = IsEnabled(ls);
             if (Draw("Enabled", isEnabled, flags)) Enable(ls, isEnabled);
@@ -183,9 +258,9 @@ namespace hf::editor
             if (Draw("Velocity", velocity, 0, flags | DrawStateFlag::ButtonLess)) SetVelocity(ls, velocity);
 
             EndComponent();
-            return true;
         }
-        return false;
+        ImGui::PopID();
+        return result;
     }
 
     bool DrawCone(AudioCone& cone, DrawStateFlag flags)
@@ -193,9 +268,29 @@ namespace hf::editor
         bool result = false;
         result = DrawSlider("Inner Angle", cone.innerAngle, 0.0f, 360.0f, "%.1f", flags) || result;
         result = DrawSlider("Outer Angle", cone.outerAngle, 0.0f, 360.0f, "%.1f", flags) || result;
-        result = DrawSlider("Outer Gain", cone.outerGain, 0.0f, 1.0f, "%.1f", flags) || result;
-        result = Draw("Position", cone.position, 0, flags | DrawStateFlag::ButtonLess) || result;
-        result = Draw("Rotation", cone.euler, 0, flags | DrawStateFlag::ButtonLess) || result;
+        result = DrawSlider("Outer Gain", cone.outerGain, 0.0f, 1.0f, "%.1f", flags)     || result;
+        result = Draw("Position", cone.position, 0, flags | DrawStateFlag::ButtonLess)            || result;
+        result = Draw("Rotation", cone.euler, 0, flags | DrawStateFlag::ButtonLess)               || result;
+        return result;
+    }
+
+    bool Draw(const char* label, const Ref<AudioGroup>& gr, DrawStateFlag flags)
+    {
+        ImGui::PushID(PointerToID(gr.get()));
+        const bool result = StartComponent(label, flags);
+        if(result)
+        {
+            bool isEnabled = IsEnabled(gr);
+            float volume = GetVolume(gr);
+            float pitch = GetPitch(gr);
+
+            if (Draw("Enabled", isEnabled, flags)) Enable(gr, isEnabled);
+            if (DrawSlider("Volume", volume, 0.0f, 1.0f, "%.2f", flags)) SetVolume(gr, volume);
+            if (DrawSlider("Pitch", pitch, 0.0f, 3.0f, "%.2f", flags)) SetPitch(gr, pitch);
+
+            EndComponent();
+        }
+        ImGui::PopID();
         return result;
     }
 

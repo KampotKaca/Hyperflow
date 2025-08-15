@@ -25,8 +25,10 @@ namespace hf
         template void SetLoopingMode_i(AudioPlayer* player, bool loopingEnabled);
     }
 
-    AudioPlayer::AudioPlayer(const AudioPlayerCreationInfo& info) : settings(info.settings)
+    AudioPlayer::AudioPlayer(const AudioPlayerCreationInfo& info) :
+    settings(info.settings), parent(info.parent)
     {
+        if (!parent) parent = inter::AUDIO_DATA.group2D;
         inter::ChangeClip_i(this, info.clip, MA_SOUND_FLAG_NO_SPATIALIZATION);
     }
 

@@ -1,0 +1,16 @@
+vertexShaderPath: default_lit
+#tessellationControlShaderPath: default_lit      #Optional
+#tessellationEvaluationShaderPath: default_lit   #Optional
+#geometryShaderPath: default_lit                 #Optional
+
+options:
+  cullMode: Back
+  faceDirection: Clockwise
+  polygonMode: Fill
+  enableRasterizerDiscard: false
+  enableDepthClamping: false
+  lineWidth: 1.0
+#  biasOptions:            #Optional
+#    constantFactor: 0.0
+#    clamp: 0.0
+#    slopeFactor: 0.0

@@ -1,7 +1,6 @@
 #include "debug.h"
 #include "application.h"
 #include "resources.h"
-#include <hyaml.h>
 
 #include "hyperfloweditor.h"
 #include "../appconfig.h"
@@ -155,8 +154,6 @@ namespace app
 
     void DebugPreRender(const hf::Ref<hf::Renderer>& rn)
     {
-        APP_UNIFORMS.globalUniformInfo.camera = APP_DEBUG.camera.camera3D.GetUniformInfo(rn);
-
         hf::editor::StartFrame();
 
         hf::editor::SetNextWindowSize({ 300, 300 }, hf::editor::Condition::FirstUseEver);
@@ -175,20 +172,11 @@ namespace app
                 hf::editor::EndDropdown();
             }
 
-            if (hf::editor::StartDropdown("Audios"))
-            {
-                if (hf::editor::StartComponent("Global Audio", hf::editor::DrawStateFlag::DontUseDropdown))
-                {
-                    float audioVolume = hf::GetAudioVolume();
-                    if(hf::editor::DrawSlider("Global Volume", audioVolume, 0.0f, 1.0f))
-                        hf::SetAudioVolume(audioVolume);
-                    hf::editor::EndComponent();
-                }
-
-                hf::editor::EndDropdown();
-            }
             hf::editor::EndWindow();
         }
+
+        hf::editor::DrawMemoryStatisticsWindow("Memory Statistics");
+        hf::editor::DrawAudioSettingsWindow("Audio Settings");
 
         hf::editor::SetNextWindowSize({ 300, 300 }, hf::editor::Condition::FirstUseEver);
         hf::editor::SetNextWindowPos({ 100, 100 }, hf::editor::Condition::FirstUseEver);
@@ -200,6 +188,18 @@ namespace app
                 hf::editor::Draw("Audio", APP_AUDIOS.background_music);
                 hf::editor::Draw("Audio3D", APP_AUDIOS.background_music3D);
                 hf::editor::Draw("Listener", APP_AUDIOS.main_listener);
+                hf::editor::EndDropdown();
+            }
+
+            if (hf::editor::StartDropdown("Ground"))
+            {
+                hf::editor::Draw("Transform", APP_OBJECTS.groundTransform);
+                hf::editor::EndDropdown();
+            }
+
+            if (hf::editor::StartDropdown("Sphere"))
+            {
+                hf::editor::Draw("Transform", APP_OBJECTS.sphereTransform);
                 hf::editor::EndDropdown();
             }
 

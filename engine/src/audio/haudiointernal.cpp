@@ -11,6 +11,9 @@ namespace hf::inter
     {
         void Load_i()
         {
+            if (AUDIO_DATA.isLoaded) return;
+            AUDIO_DATA.isLoaded = true;
+
             const ma_engine_config config
             {
                 .listenerCount = HF.internalAudioInfo.usedListenersCount,
@@ -20,6 +23,9 @@ namespace hf::inter
             if (result != MA_SUCCESS) throw GENERIC_EXCEPT("[Hyperflow]", "Unable to load audio engine!");
 
             ma_engine_set_volume(&AUDIO_DATA.engine, HF.internalAudioInfo.volume);
+
+            AUDIO_DATA.group2D = Create(HF.internalAudioInfo.audio2DInfo);
+            AUDIO_DATA.group3D = Create(HF.internalAudioInfo.audio3DInfo);
         }
 
         void Unload_i()
@@ -41,4 +47,7 @@ namespace hf
     }
 
     float_t GetAudioVolume() { return inter::HF.internalAudioInfo.volume; }
+
+    Ref<AudioGroup> Get2DAudioGroup() { return inter::AUDIO_DATA.group2D; }
+    Ref<AudioGroup> Get3DAudioGroup() { return inter::AUDIO_DATA.group3D; }
 }

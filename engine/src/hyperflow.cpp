@@ -42,7 +42,7 @@ namespace hf
 
 			inter::HF.mainWindow = Create(engineData.windowData, nullptr);
 
-			if (inter::HF.internalAudioInfo.usedListenersCount > 0) inter::audio::Load_i();
+			if (inter::HF.internalAudioInfo.audioEnabled) inter::audio::Load_i();
 
 			inter::rendering::LoadApi_i(engineData.renderingApi);
 			inter::primitives::LoadStaticResources_i();
@@ -61,7 +61,6 @@ namespace hf
 			    if (!IsRunning()) continue;
 				if(IsKeyDown(Key::Escape))
 				{
-					inter::alloc::LogThreadMemoryStats_i();
 					Terminate();
 				    continue;
 				}
@@ -76,7 +75,7 @@ namespace hf
 					{
 						auto rn = window->renderer;
 						inter::rendering::StartRenderPacket_i(rn);
-						auto& cInfo = rn->eventInfo;
+						const auto& cInfo = rn->eventInfo;
 						if (cInfo.onPreRenderCallback) cInfo.onPreRenderCallback(rn);
 						inter::rendering::PreDraw_i(rn);
 						{

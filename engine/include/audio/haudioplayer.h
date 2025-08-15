@@ -12,6 +12,7 @@ namespace hf
 
         AudioPlayerSettings settings{};
         Ref<AudioClip> clip{};
+        Ref<AudioGroup> parent{};
         void* handle{};
         void* buffer{};
         AudioPlayerStateFlags stateFlags{};

@@ -1,8 +1,0 @@
-typeFlags:
-  - Position
-  - Normal
-#  - Color
-#  - TexCoord
-
-memoryType: Static
-bufferAttrib: pos_nor_tex

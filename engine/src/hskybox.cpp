@@ -5,30 +5,27 @@ namespace hf::skybox
 {
     void BindDefaultCubemap(const Ref<Renderer>& rn)
     {
-        BindCubemap(rn, inter::HF.staticResources.defaultSkyboxCubemap);
+        BindCubemap(rn, inter::HF.staticResources.skyboxResources.defaultCubemap);
     }
 
     void BindCubemap(const Ref<Renderer>& rn, const Ref<Cubemap>& cubemap)
     {
-        inter::HF.staticResources.boundCubemap = cubemap;
-        UploadStart_TexturePack(rn, inter::HF.staticResources.skyboxTexturePack);
+        inter::HF.staticResources.skyboxResources.boundCubemap = cubemap;
+        UploadStart_TexturePack(rn, inter::HF.staticResources.skyboxResources.texturePack);
         {
-            TexturePackTextureUploadInfo<Cubemap>::TextureInfo tInfo
-            {
-                .texture = cubemap,
-                .index = 0
-            };
+            TexturePackTextureUploadInfo<Cubemap>::TextureInfo tInfo{};
+            tInfo.texture = cubemap;
+            tInfo.index = 0;
 
-            TexturePackBindingUploadInfo<Cubemap> bindingInfo
-            {
-                .bindingIndex = 0,
-                .texInfo = (TexturePackTextureUploadInfo<Cubemap>)
-                {
-                    .pTextures = &tInfo,
-                    .count = 1,
-                    .offset = 0
-                }
-            };
+            TexturePackTextureUploadInfo<Cubemap> uInfo{};
+            uInfo.pTextures = &tInfo;
+            uInfo.count = 1;
+            uInfo.offset = 0;
+
+            TexturePackBindingUploadInfo<Cubemap> bindingInfo{};
+            bindingInfo.bindingIndex = 0;
+            bindingInfo.texInfo = uInfo;
+
             UploadAdd_TexturePackBindings(rn, bindingInfo);
         }
         UploadEnd_TexturePack(rn);
@@ -36,20 +33,21 @@ namespace hf::skybox
 
     void Draw(const Ref<Renderer>& rn, const SkyboxInfo& info)
     {
-        Start_ShaderLayout(rn, inter::HF.staticResources.skyboxShaderLayout);
+        Start_ShaderLayout(rn, inter::HF.staticResources.shaderLayouts.skybox);
         {
             primitives::BindGlobalUniformBuffer(rn);
 
-            Start_Shader(rn, inter::HF.staticResources.skyboxShader);
+            Start_Shader(rn, inter::HF.staticResources.shaders.skybox);
             {
-                Start_Material(rn, inter::HF.staticResources.emptyMaterial);
+                Start_Material(rn, nullptr);
                 {
-                    Start_Draw(rn);
+                    Start_DrawGroup(rn);
                     {
-                        DrawAdd_TexturePackBinding(rn, inter::HF.staticResources.skyboxTexturePack, 1);
-                        DrawAdd_DrawCall(rn, inter::HF.staticResources.cube);
+                        DrawGroupAdd_TexturePackBinding(rn, inter::HF.staticResources.skyboxResources.texturePack, 1);
+                        Start_DrawCall(rn, primitives::GetMesh(PrimitiveMeshType::Cube), 0);
+                        End_DrawCall(rn);
                     }
-                    End_Draw(rn);
+                    End_DrawGroup(rn);
                 }
                 End_Material(rn);
             }
@@ -58,5 +56,5 @@ namespace hf::skybox
         End_ShaderLayout(rn);
     }
 
-    bool IsDefaultCubemapBound() { return inter::HF.staticResources.boundCubemap == inter::HF.staticResources.defaultSkyboxCubemap; }
+    bool IsDefaultCubemapBound() { return inter::HF.staticResources.skyboxResources.boundCubemap == inter::HF.staticResources.skyboxResources.defaultCubemap; }
 }

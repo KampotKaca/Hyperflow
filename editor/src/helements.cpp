@@ -8,7 +8,7 @@ namespace hf::editor
     {
         bool valueChanged = false;
         ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, { 0, 0 });
-        if (!(uint32_t)(flags & DrawStateFlag::Nameless)) DrawLabel(label);
+        if (!(uint32_t)(flags & DrawStateFlag::Nameless)) DrawLabel(label, 0);
 
         valueChanged = ImGui::Checkbox(DrawKeyGen(label), &v);
 
@@ -21,7 +21,7 @@ namespace hf::editor
         static std::string old_String;
         bool valueChanged = false;
         ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, { 0, 0 });
-        if (!(uint32_t)(flags & DrawStateFlag::Nameless)) DrawLabel(label);
+        if (!(uint32_t)(flags & DrawStateFlag::Nameless)) DrawLabel(label, 0);
 
         ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x);
         valueChanged = ImGui::InputText(DrawKeyGen(label), &v[0], 128);
@@ -33,7 +33,7 @@ namespace hf::editor
         static std::string old_String;
         bool valueChanged = false;
         ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, { 0, 0 });
-        if (!(uint32_t)(flags & DrawStateFlag::Nameless)) DrawLabel(label);
+        if (!(uint32_t)(flags & DrawStateFlag::Nameless)) DrawLabel(label, 0);
 
         valueChanged = ImGui::InputTextMultiline(DrawKeyGen(label), &v[0], 4096,
                                      { ImGui::GetContentRegionAvail().x, 100.0f });
@@ -97,7 +97,7 @@ namespace hf::editor
         bool valueChanged = false;
         ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, { 0, 0 });
 
-        if (!(uint32_t)(flags & DrawStateFlag::Nameless)) DrawLabel(label);
+        if (!(uint32_t)(flags & DrawStateFlag::Nameless)) DrawLabel(label, 0);
 
         ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x);
         valueChanged = ImGui::ColorEdit4(label, &vec[0],
@@ -114,7 +114,7 @@ namespace hf::editor
         bool valueChanged = false;
         ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, { 0, 0 });
 
-        if (!(uint32_t)(flags & DrawStateFlag::Nameless)) DrawLabel(label);
+        if (!(uint32_t)(flags & DrawStateFlag::Nameless)) DrawLabel(label, 0);
 
         ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x);
         valueChanged = ImGui::ColorEdit3(label, &vec[0],

@@ -54,13 +54,17 @@ namespace hf::editor
     void SetNextWindowSize(vec2 size, Condition cond = Condition::None);
     void SetNextWindowPos(vec2 pos, Condition cond = Condition::None);
 
-    bool Draw(const char* label, Transform& trs, DrawStateFlag flags = DrawStateFlag::None);
+    bool Draw(const char* label, Transform& trs,       DrawStateFlag flags = DrawStateFlag::None);
     bool Draw(const char* label, DirectionalLight& dl, DrawStateFlag flags = DrawStateFlag::None);
-    bool Draw(const char* label, Camera3DCore& cam, DrawStateFlag flags = DrawStateFlag::None);
-    
-    bool Draw(const char* label, const Ref<AudioPlayer>& pl, DrawStateFlag flags = DrawStateFlag::None);
+    bool Draw(const char* label, Camera3DCore& cam,    DrawStateFlag flags = DrawStateFlag::None);
+
+    bool DrawMemoryStatisticsWindow(const char* label, bool* isOpen = nullptr, WindowFlags flags = WindowFlags::None);
+    bool DrawAudioSettingsWindow(const char* label, bool* isOpen = nullptr, WindowFlags flags = WindowFlags::None);
+
+    bool Draw(const char* label, const Ref<AudioPlayer>& pl,   DrawStateFlag flags = DrawStateFlag::None);
     bool Draw(const char* label, const Ref<AudioPlayer3D>& pl, DrawStateFlag flags = DrawStateFlag::None);
     bool Draw(const char* label, const Ref<AudioListener>& ls, DrawStateFlag flags = DrawStateFlag::None);
+    bool Draw(const char* label, const Ref<AudioGroup>& gr,    DrawStateFlag flags = DrawStateFlag::None);
 
     bool DrawString(const char* label, std::string& v, DrawStateFlag flags = DrawStateFlag::None);
     bool DrawStringBox(const char* label, std::string& v, DrawStateFlag flags = DrawStateFlag::None);
@@ -297,9 +301,14 @@ namespace hf::editor
     inline bool Draw(const char* label, Transform& trs,         DrawStateFlag flags = DrawStateFlag::None) { return false; }
     inline bool Draw(const char* label, DirectionalLight& dl,   DrawStateFlag flags = DrawStateFlag::None) { return false; }
     inline bool Draw(const char* label, Camera3DCore& cam,      DrawStateFlag flags = DrawStateFlag::None) { return false; }
+
+    inline bool DrawMemoryStatisticsWindow(const char* label, bool* isOpen = nullptr, WindowFlags flags = WindowFlags::None) { return false; }
+    inline bool DrawAudioSettingsWindow   (const char* label, bool* isOpen = nullptr, WindowFlags flags = WindowFlags::None) { return false; }
+
     inline bool Draw(const char* label, const Ref<AudioPlayer>& pl,   DrawStateFlag flags = DrawStateFlag::None) { return false; }
     inline bool Draw(const char* label, const Ref<AudioPlayer3D>& pl, DrawStateFlag flags = DrawStateFlag::None) { return false; }
     inline bool Draw(const char* label, const Ref<AudioListener>& ls, DrawStateFlag flags = DrawStateFlag::None) { return false; }
+    inline bool Draw(const char* label, const Ref<AudioGroup>& gr,    DrawStateFlag flags = DrawStateFlag::None) { return false; }
 
     inline bool DrawString   (const char* label, std::string& v, DrawStateFlag flags = DrawStateFlag::None) { return false; }
     inline bool DrawStringBox(const char* label, std::string& v, DrawStateFlag flags = DrawStateFlag::None) { return false; }

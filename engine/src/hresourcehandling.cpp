@@ -26,7 +26,7 @@ namespace hf::inter
         {
             switch (buffer.type)
             {
-                case RuntimeBufferType::Vertex: HF.renderingApi.api.DestroyVertBuffer(buffer.buffer); break;
+                case RuntimeBufferType::Vertex: HF.renderingApi.api.DestroyVertexBuffer(buffer.buffer); break;
                 case RuntimeBufferType::Index: HF.renderingApi.api.DestroyIndexBuffer(buffer.buffer); break;
             }
         }

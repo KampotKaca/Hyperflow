@@ -1,0 +1,10 @@
+bindingId: 0
+locationOffset: 0
+inputRate: Vertex
+formats:
+  - type: F32 #position
+    size: 3
+  - type: F32 #normal
+    size: 3
+  - type: F32 #texcoord
+    size: 2

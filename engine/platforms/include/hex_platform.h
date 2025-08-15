@@ -20,7 +20,7 @@ namespace hf::inter
 
         RenderingApiType GetBestRenderingApi();
         bool IsValidRenderingApi(RenderingApiType api);
-        uint32_t CreateVulkanSurface(void* windowHandle, void* instance, void* surfaceResult);
+        uint32_t CreateVulkanSurface(void* windowHandle, void* instance, const void* allocator, void* surfaceResult);
     }
 
     namespace window

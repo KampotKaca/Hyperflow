@@ -1,4 +1,3 @@
-#include "resources/uniforms.h"
 #include "resources/texturelayouts.h"
 #include "resources/shaderlayouts.h"
 #include "resources/materials.h"
@@ -14,9 +13,9 @@ namespace app
             std::array buffers { hf::primitives::GetGlobalUniformBuffer() };
             const hf::ShaderLayoutDefinitionInfo info
             {
-                .pushConstant =
+                .pushConstant = hf::PushConstantInfo
                 {
-                    .usageFlags = hf::ShaderUsageStage::Vertex | hf::ShaderUsageStage::Fragment,
+                    .usageFlags = hf::ShaderUsageStageFlags::Vertex | hf::ShaderUsageStageFlags::Fragment,
                     .sizeInBytes = sizeof(DefaultPushConstant)
                 },
                 .pBuffers = buffers.data(),
@@ -31,18 +30,9 @@ namespace app
         //Default Unlit
         {
             std::array buffers { hf::primitives::GetGlobalUniformBuffer() };
-            const hf::ShaderLayoutDefinitionInfo info
-            {
-                .pushConstant =
-                {
-                    .usageFlags = hf::ShaderUsageStage::Vertex | hf::ShaderUsageStage::Fragment,
-                    .sizeInBytes = sizeof(UnlitColorPushConstant)
-                },
-                .pBuffers = buffers.data(),
-                .bufferCount = buffers.size(),
-                .pTextureLayouts = nullptr,
-                .textureLayoutCount = 0
-            };
+            hf::ShaderLayoutDefinitionInfo info{};
+            info.pBuffers = buffers.data();
+            info.bufferCount = buffers.size();
 
             APP_SHADER_LAYOUTS.default_unlit = hf::Define(info);
         }

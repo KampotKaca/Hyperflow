@@ -6,8 +6,9 @@ namespace hf
 {
     RuntimeBufferBase::~RuntimeBufferBase()
     {
-        if (transferType == DataTransferType::CopyData ||
-            transferType == DataTransferType::TransferOwnership)
+        if (buffer &&
+            (transferType == DataTransferType::CopyData ||
+            transferType == DataTransferType::TransferOwnership))
             utils::Deallocate(buffer);
         inter::rendering::DestroyBuffer_i(this);
     }
@@ -37,11 +38,10 @@ namespace hf
             if (buffer->handle)
             {
                 std::lock_guard lock(HF.deletedResources.syncLock);
-                const ResourcesMarkedForDeletion::TypedBuffer tb
-                {
-                    .buffer = buffer->handle,
-                    .type = buffer->GetType(),
-                };
+                ResourcesMarkedForDeletion::TypedBuffer tb{};
+                tb.buffer = buffer->handle;
+                tb.type = buffer->GetType();
+
                 HF.deletedResources.buffers.push_back(tb);
                 buffer->handle = nullptr;
                 return true;

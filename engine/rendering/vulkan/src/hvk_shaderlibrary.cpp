@@ -4,15 +4,22 @@
 
 namespace hf
 {
-    static VkShaderModule AddShaderStage(const void* code, uint32_t codeSize, VkShaderStageFlagBits stage, VkPipelineShaderStageCreateInfo* result);
+    static VkShaderModule AddShaderStage(const void* code, uint32_t codeSize, VkShaderStageFlagBits stage, std::vector<VkPipelineShaderStageCreateInfo>& res);
 
     VkShaderLibrary::VkShaderLibrary(const inter::rendering::ShaderLibraryCreationInfo_i& info) : outputFormats(info.outputFormats)
     {
         uint32_t moduleCount = info.vertexInputModuleCount + info.preRasterModuleCount + info.fragmentModuleCount + info.fragmentOutputModuleCount;
         uint32_t maxShadingModules = info.preRasterModuleCount * 4 + info.fragmentModuleCount;
 
-        std::vector<VkShaderModule> shaderModules(maxShadingModules);
-        std::vector<VkPipelineShaderStageCreateInfo> stageCreateInfos(maxShadingModules);
+        std::vector<VkShaderModule> shaderModules{};
+        shaderModules.reserve(maxShadingModules);
+        std::vector<VkPipelineShaderStageCreateInfo> stageCreateInfos{};
+        stageCreateInfos.reserve(maxShadingModules);
+
+        std::vector<VkVertexInputBindingDescription> vertexInputDescriptions{};
+        vertexInputDescriptions.reserve(info.vertexInputModuleCount * MAX_VERTEX_INPUT_BUFFER_ATTRIBUTES);
+        std::vector<VkVertexInputAttributeDescription> vertexInputAttributes{};
+        vertexInputAttributes.reserve(info.vertexInputModuleCount * MAX_VERTEX_INPUT_BUFFER_ATTRIBUTES);
 
         std::vector<VkGraphicsPipelineCreateInfo> pipelineCreateInfos(moduleCount);
 
@@ -32,7 +39,7 @@ namespace hf
 
         modules = std::vector<VkPipeline>(moduleCount);
 
-        uint32_t moduleIndex = 0, stageInfoCount = 0;
+        uint32_t moduleIndex = 0;
         colorAttachmentCount = 0;
 
         VkPipelineMultisampleStateCreateInfo multisampling{};
@@ -83,15 +90,29 @@ namespace hf
 
         for (uint32_t i = 0; i < info.vertexInputModuleCount; i++)
         {
+            uint32_t descFrom = vertexInputDescriptions.size(),
+                     attribFrom = vertexInputAttributes.size();
+
+            uint32_t attribCount = 0;
             auto& moduleInfo = info.pVertexInputModules[i];
 
-            const auto& attribute = GetAttrib(moduleInfo.attribute);
             VkPipelineVertexInputStateCreateInfo vInfo{};
             vInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
-            vInfo.vertexBindingDescriptionCount = 1;
-            vInfo.pVertexBindingDescriptions = &attribute->bindingDescription;
-            vInfo.vertexAttributeDescriptionCount = (uint32_t)attribute->attribDescriptions.size();
-            vInfo.pVertexAttributeDescriptions = attribute->attribDescriptions.data();
+            vInfo.vertexBindingDescriptionCount = moduleInfo.attributeCount;
+
+            for (uint32_t k = 0; k < moduleInfo.attributeCount; k++)
+            {
+                const auto& attribute = GetAttrib(moduleInfo.pAttributes[k]);
+                vertexInputDescriptions.push_back(attribute->bindingDescription);
+
+                for (auto attribDescription : attribute->attribDescriptions)
+                    vertexInputAttributes.push_back(attribDescription);
+                attribCount += attribute->attribDescriptions.size();
+            }
+
+            vInfo.pVertexBindingDescriptions = &vertexInputDescriptions[descFrom];
+            vInfo.vertexAttributeDescriptionCount = attribCount;
+            vInfo.pVertexAttributeDescriptions = &vertexInputAttributes[attribFrom];
             vertexInputInfos[i] = vInfo;
 
             VkPipelineInputAssemblyStateCreateInfo inputAssembly{};
@@ -116,7 +137,7 @@ namespace hf
             auto module = x;\
             if (module)\
             {\
-                shaderModules[stageInfoCount + stageCount] = module;\
+                shaderModules.push_back(module);\
                 stageCount++;\
             }\
         }
@@ -125,11 +146,12 @@ namespace hf
         {
             const auto& moduleInfo = info.pPreRasterModules[i];
 
+            uint32_t from = stageCreateInfos.size();
             uint32_t stageCount = 0;
-            ADD_MODULE(AddShaderStage(moduleInfo.vertexShaderCode, moduleInfo.vertexShaderCodeSize, VK_SHADER_STAGE_VERTEX_BIT, &stageCreateInfos[stageInfoCount + stageCount]))
-            ADD_MODULE(AddShaderStage(moduleInfo.tessellationControlShaderCode, moduleInfo.tessellationControlShaderCodeSize, VK_SHADER_STAGE_TESSELLATION_CONTROL_BIT, &stageCreateInfos[stageInfoCount + stageCount]));
-            ADD_MODULE(AddShaderStage(moduleInfo.tessellationEvaluationShaderCode, moduleInfo.tessellationEvaluationShaderCodeSize, VK_SHADER_STAGE_TESSELLATION_EVALUATION_BIT, &stageCreateInfos[stageInfoCount + stageCount]));
-            ADD_MODULE(AddShaderStage(moduleInfo.geometryShaderCode, moduleInfo.geometryShaderCodeSize, VK_SHADER_STAGE_GEOMETRY_BIT, &stageCreateInfos[stageInfoCount + stageCount]));
+            ADD_MODULE(AddShaderStage(moduleInfo.vertexShaderCode, moduleInfo.vertexShaderCodeSize, VK_SHADER_STAGE_VERTEX_BIT, stageCreateInfos))
+            ADD_MODULE(AddShaderStage(moduleInfo.tessellationControlShaderCode, moduleInfo.tessellationControlShaderCodeSize, VK_SHADER_STAGE_TESSELLATION_CONTROL_BIT, stageCreateInfos));
+            ADD_MODULE(AddShaderStage(moduleInfo.tessellationEvaluationShaderCode, moduleInfo.tessellationEvaluationShaderCodeSize, VK_SHADER_STAGE_TESSELLATION_EVALUATION_BIT, stageCreateInfos));
+            ADD_MODULE(AddShaderStage(moduleInfo.geometryShaderCode, moduleInfo.geometryShaderCodeSize, VK_SHADER_STAGE_GEOMETRY_BIT, stageCreateInfos));
 
             VkPipelineRasterizationStateCreateInfo rasterInfo{};
             rasterInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;
@@ -157,7 +179,7 @@ namespace hf
             preRasterPipelineInfo.pNext = &preRasterLibInfo;
             preRasterPipelineInfo.flags = VK_PIPELINE_CREATE_LIBRARY_BIT_KHR;
             preRasterPipelineInfo.stageCount = stageCount;
-            preRasterPipelineInfo.pStages = &stageCreateInfos[stageInfoCount];
+            preRasterPipelineInfo.pStages = &stageCreateInfos[from];
             preRasterPipelineInfo.pViewportState = &viewportState;
             preRasterPipelineInfo.pRasterizationState = &rasterizers[i];
             preRasterPipelineInfo.pDynamicState = &SHADER_DYNAMIC;
@@ -165,15 +187,15 @@ namespace hf
             pipelineCreateInfos[moduleIndex] = preRasterPipelineInfo;
 
             moduleIndex++;
-            stageInfoCount += stageCount;
         }
 
         for (uint32_t i = 0; i < info.fragmentModuleCount; i++)
         {
             const auto& moduleInfo = info.pFragmentModules[i];
 
+            uint32_t from = stageCreateInfos.size();
             uint32_t stageCount = 0;
-            ADD_MODULE(AddShaderStage(moduleInfo.fragmentShaderCode, moduleInfo.fragmentShaderCodeSize, VK_SHADER_STAGE_FRAGMENT_BIT, &stageCreateInfos[stageInfoCount + stageCount]));
+            ADD_MODULE(AddShaderStage(moduleInfo.fragmentShaderCode, moduleInfo.fragmentShaderCodeSize, VK_SHADER_STAGE_FRAGMENT_BIT, stageCreateInfos));
 
             VkPipelineDepthStencilStateCreateInfo depthStencilState{};
             depthStencilState.sType = VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO;
@@ -193,14 +215,13 @@ namespace hf
             fragmentPipelineInfo.pNext = &fragmentLibInfo;
             fragmentPipelineInfo.flags = VK_PIPELINE_CREATE_LIBRARY_BIT_KHR;
             fragmentPipelineInfo.stageCount = stageCount;
-            fragmentPipelineInfo.pStages = &stageCreateInfos[stageInfoCount];
+            fragmentPipelineInfo.pStages = &stageCreateInfos[from];
             fragmentPipelineInfo.pMultisampleState = &multisampling;
             fragmentPipelineInfo.pDepthStencilState = &depthStencilStates[i];
             fragmentPipelineInfo.layout = GetShaderLayout(moduleInfo.layout)->layout;
             pipelineCreateInfos[moduleIndex] = fragmentPipelineInfo;
 
             moduleIndex++;
-            stageInfoCount += stageCount;
         }
 
 #undef ADD_MODULE
@@ -212,20 +233,20 @@ namespace hf
             uint32_t colorAttachmentStart = colorAttachmentCount;
             for (uint32_t j = 0; j < moduleInfo.colorAttachmentCount; j++)
             {
-                auto& cInfo = moduleInfo.colorAttachmentsSettings[j];
+                auto& cInfo = moduleInfo.pColorAttachmentsSettings[j];
                 VkPipelineColorBlendAttachmentState colorBlendAttachment{};
                 colorBlendAttachment.colorWriteMask = (VkColorComponentFlags)cInfo.colorWriteMask;
 
-                if (cInfo.blending.has_value())
+                if (cInfo.blendingOptions.has_value())
                 {
-                    auto blending = cInfo.blending.value();
+                    auto blending = cInfo.blendingOptions.value();
                     colorBlendAttachment.blendEnable = VK_TRUE;
-                    colorBlendAttachment.srcColorBlendFactor = (VkBlendFactor)blending.colorBlendingOptions.srcFactor;
-                    colorBlendAttachment.dstColorBlendFactor = (VkBlendFactor)blending.colorBlendingOptions.dstFactor;
-                    colorBlendAttachment.colorBlendOp = (VkBlendOp)blending.colorBlendingOptions.op;
-                    colorBlendAttachment.srcAlphaBlendFactor = (VkBlendFactor)blending.alphaBlendingOptions.srcFactor;
-                    colorBlendAttachment.dstAlphaBlendFactor = (VkBlendFactor)blending.alphaBlendingOptions.dstFactor;
-                    colorBlendAttachment.alphaBlendOp = (VkBlendOp)blending.alphaBlendingOptions.op;
+                    colorBlendAttachment.srcColorBlendFactor = (VkBlendFactor)blending.color.srcFactor;
+                    colorBlendAttachment.dstColorBlendFactor = (VkBlendFactor)blending.color.dstFactor;
+                    colorBlendAttachment.colorBlendOp = (VkBlendOp)blending.color.op;
+                    colorBlendAttachment.srcAlphaBlendFactor = (VkBlendFactor)blending.alpha.srcFactor;
+                    colorBlendAttachment.dstAlphaBlendFactor = (VkBlendFactor)blending.alpha.dstFactor;
+                    colorBlendAttachment.alphaBlendOp = (VkBlendOp)blending.alpha.op;
                 }
                 else colorBlendAttachment.blendEnable = VK_FALSE;
                 colorBlendAttachments[colorAttachmentCount] = colorBlendAttachment;
@@ -257,55 +278,62 @@ namespace hf
             moduleIndex++;
         }
 
-        VkPipelineCacheCreateInfo pipelineCacheCreateInfo{};
-        pipelineCacheCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_CACHE_CREATE_INFO;
+        VkPipelineCache cache{};
 
+#if defined(VK_ENABLE_PIPELINE_CACHES)
         std::string cachePath = TO_RES_PATH(std::string(info.uniqueLibraryName) + ".cache");
-        std::vector<char> initialCacheData{};
+        std::vector<char> cacheData{};
 
-        if (GRAPHICS_DATA.platform.functions.fileExistsFunc(cachePath.c_str()) &&
-            GRAPHICS_DATA.platform.functions.readFileFunc(cachePath, initialCacheData))
         {
-            pipelineCacheCreateInfo.initialDataSize = initialCacheData.size();
-            pipelineCacheCreateInfo.pInitialData = initialCacheData.data();
-        }
-        else
-        {
-            pipelineCacheCreateInfo.initialDataSize = 0;
-            pipelineCacheCreateInfo.pInitialData = nullptr;
-        }
+            VkPipelineCacheCreateInfo pipelineCacheCreateInfo{};
+            pipelineCacheCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_CACHE_CREATE_INFO;
 
-        VkPipelineCache pipelineCache{};
-        {
+            if (GRAPHICS_DATA.platform.functions.fileExistsFunc(cachePath.c_str()) &&
+                GRAPHICS_DATA.platform.functions.readFileFunc(cachePath, cacheData) &&
+                !cacheData.empty())
+            {
+                pipelineCacheCreateInfo.initialDataSize = cacheData.size();
+                pipelineCacheCreateInfo.pInitialData = cacheData.data();
+            }
+            else
+            {
+                pipelineCacheCreateInfo.initialDataSize = 0;
+                pipelineCacheCreateInfo.pInitialData = nullptr;
+            }
+
             auto result = vkCreatePipelineCache(GRAPHICS_DATA.device.logicalDevice.device,
-                                                    &pipelineCacheCreateInfo, nullptr, &pipelineCache);
+                                                &pipelineCacheCreateInfo, &GRAPHICS_DATA.platform.allocator, &cache);
             if (result != VK_SUCCESS)
             {
                 LOG_WARN("[Hyperflow] Failed to load pipeline cache, probably file was corrupted %s", info.uniqueLibraryName);
-                pipelineCache = VK_NULL_HANDLE;
+                cache = VK_NULL_HANDLE;
             }
+
+            pipelineCacheCreateInfo.pInitialData = nullptr;
+            pipelineCacheCreateInfo.initialDataSize = 0;
         }
+#endif
 
         VK_HANDLE_EXCEPT(vkCreateGraphicsPipelines(GRAPHICS_DATA.device.logicalDevice.device,
-                         pipelineCache, (uint32_t)pipelineCreateInfos.size(), pipelineCreateInfos.data(),
-                         nullptr, modules.data()));
+                             cache, (uint32_t)pipelineCreateInfos.size(), pipelineCreateInfos.data(),
+                             &GRAPHICS_DATA.platform.allocator, modules.data()));
 
-        size_t cacheSize = 0;
+#if defined(VK_ENABLE_PIPELINE_CACHES)
         {
-            auto result = vkGetPipelineCacheData(GRAPHICS_DATA.device.logicalDevice.device,
-                                                 pipelineCache, &cacheSize, nullptr);
-            if (result != VK_SUCCESS)
+            size_t cacheSize = 0;
             {
-                LOG_WARN("[Hyperflow] Failed to request cache size to store for future use! %s", info.uniqueLibraryName);
-                cacheSize = 0;
+                auto result = vkGetPipelineCacheData(GRAPHICS_DATA.device.logicalDevice.device,
+                                                     cache, &cacheSize, nullptr);
+                if (result != VK_SUCCESS)
+                {
+                    LOG_WARN("[Hyperflow] Failed to request cache size to store for future use! %s", info.uniqueLibraryName);
+                    cacheSize = 0;
+                }
             }
-        }
 
-        if (cacheSize > 0)
-        {
-            std::vector<char> cacheData(cacheSize);
+            cacheData.resize(cacheSize);
             auto result = vkGetPipelineCacheData(GRAPHICS_DATA.device.logicalDevice.device,
-                                                     pipelineCache, &cacheSize, cacheData.data());
+                                                 cache, &cacheSize, cacheData.data());
             if (result != VK_SUCCESS)
                 LOG_WARN("[Hyperflow] Failed to read cache to store for future use! %s", info.uniqueLibraryName);
             else
@@ -316,21 +344,25 @@ namespace hf
             }
         }
 
-        if (pipelineCache != VK_NULL_HANDLE)
-            vkDestroyPipelineCache(GRAPHICS_DATA.device.logicalDevice.device, pipelineCache, nullptr);
+        if (cache != VK_NULL_HANDLE)
+        {
+            vkDestroyPipelineCache(GRAPHICS_DATA.device.logicalDevice.device, cache, &GRAPHICS_DATA.platform.allocator);
+            cache = VK_NULL_HANDLE;
+        }
+#endif
 
-        for (uint32_t i = 0; i < stageInfoCount; i++)
-            vkDestroyShaderModule(GRAPHICS_DATA.device.logicalDevice.device, shaderModules[i], nullptr);
+        for (auto& shaderModule : shaderModules)
+            vkDestroyShaderModule(GRAPHICS_DATA.device.logicalDevice.device, shaderModule, &GRAPHICS_DATA.platform.allocator);
     }
 
     VkShaderLibrary::~VkShaderLibrary()
     {
         for (const auto& module : modules)
-            vkDestroyPipeline(GRAPHICS_DATA.device.logicalDevice.device, module, nullptr);
+            vkDestroyPipeline(GRAPHICS_DATA.device.logicalDevice.device, module, &GRAPHICS_DATA.platform.allocator);
         modules.clear();
     }
 
-    VkShaderModule AddShaderStage(const void* code, uint32_t codeSize, VkShaderStageFlagBits stage, VkPipelineShaderStageCreateInfo* result)
+    VkShaderModule AddShaderStage(const void* code, uint32_t codeSize, VkShaderStageFlagBits stage, std::vector<VkPipelineShaderStageCreateInfo>& res)
     {
         if (codeSize > 0 && code != nullptr)
         {
@@ -339,7 +371,7 @@ namespace hf
             createInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
             createInfo.codeSize = codeSize;
             createInfo.pCode = (uint32_t*)code;
-            VK_HANDLE_EXCEPT(vkCreateShaderModule(GRAPHICS_DATA.device.logicalDevice.device, &createInfo, nullptr, &module));
+            VK_HANDLE_EXCEPT(vkCreateShaderModule(GRAPHICS_DATA.device.logicalDevice.device, &createInfo, &GRAPHICS_DATA.platform.allocator, &module));
 
             VkPipelineShaderStageCreateInfo stageInfo{};
             stageInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
@@ -347,7 +379,7 @@ namespace hf
             stageInfo.module = module;
             stageInfo.pName = "main";
 
-            *result = stageInfo;
+            res.push_back(stageInfo);
             return module;
         }
 

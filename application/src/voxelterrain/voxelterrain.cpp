@@ -32,8 +32,6 @@ namespace app
                 }
             }
         }
-
-        LOG_WARN("%s", "Finish");
     }
 
     void VoxelTerrainUpdate()

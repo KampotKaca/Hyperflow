@@ -29,24 +29,146 @@ namespace hf
         }
     }
 
+    void Set_Camera(const Ref<Renderer>& rn, const Camera3DAnchored& camera)
+    {
+        try
+        {
+#if DEBUG
+            if (!rn->isDrawing)
+                throw GENERIC_EXCEPT("[Hyperflow]", "Cannot set camera until drawing process starts");
+
+            if (rn->currentDraw.packet->camera.has_value())
+                throw GENERIC_EXCEPT("[Hyperflow]", "Cannot set camera twice");
+#endif
+
+            rn->currentDraw.packet->camera = Camera3DFreeLook
+            {
+                .position = camera.GetPosition(),
+                .direction = camera.GetDirection(),
+                .up = camera.up,
+                .core = camera.core,
+            };
+        }
+        catch (...)
+        {
+            LOG_ERROR("%s", "Unable to set camera!");
+            throw;
+        }
+    }
+
+    void Set_Camera(const Ref<Renderer>& rn, const Camera3DFreeLook& camera)
+    {
+        try
+        {
+#if DEBUG
+            if (!rn->isDrawing)
+                throw GENERIC_EXCEPT("[Hyperflow]", "Cannot set camera until drawing process starts");
+
+            if (rn->currentDraw.packet->camera.has_value())
+                throw GENERIC_EXCEPT("[Hyperflow]", "Cannot set camera twice");
+#endif
+
+            rn->currentDraw.packet->camera = camera;
+        }
+        catch (...)
+        {
+            LOG_ERROR("%s", "Unable to set camera!");
+            throw;
+        }
+    }
+
+    void Add_Light(const Ref<Renderer>& rn, const DirectionalLight& light)
+    {
+        try
+        {
+#if DEBUG
+            if (!rn->isDrawing)
+                throw GENERIC_EXCEPT("[Hyperflow]", "Cannot add light until drawing process starts");
+
+            if (rn->currentDraw.packet->directionalLights.size() >= MAX_DIRECTIONAL_LIGHTS)
+            {
+                LOG_ERROR("Cannot add more than %i directional lights!", MAX_DIRECTIONAL_LIGHTS);
+                return;
+            }
+#endif
+
+            rn->currentDraw.packet->directionalLights.push_back(light);
+        }
+        catch (...)
+        {
+            LOG_ERROR("%s", "Unable to add light!");
+            throw;
+        }
+    }
+
+    void Add_Light(const Ref<Renderer>& rn, const SpotLight& light)
+    {
+        try
+        {
+#if DEBUG
+            if (!rn->isDrawing)
+                throw GENERIC_EXCEPT("[Hyperflow]", "Cannot add light until drawing process starts");
+
+            if (rn->currentDraw.packet->spotLights.size() >= MAX_SPOT_LIGHTS)
+            {
+                LOG_ERROR("Cannot add more than %i spot lights!", MAX_SPOT_LIGHTS);
+                return;
+            }
+#endif
+
+            rn->currentDraw.packet->spotLights.push_back(light);
+        }
+        catch (...)
+        {
+            LOG_ERROR("%s", "Unable to add light!");
+            throw;
+        }
+    }
+
+    void Add_Light(const Ref<Renderer>& rn, const PointLight& light)
+    {
+        try
+        {
+#if DEBUG
+            if (!rn->isDrawing)
+                throw GENERIC_EXCEPT("[Hyperflow]", "Cannot add light until drawing process starts");
+
+            if (rn->currentDraw.packet->pointLights.size() >= MAX_POINT_LIGHTS)
+            {
+                LOG_ERROR("Cannot add more than %i point lights!", MAX_POINT_LIGHTS);
+                return;
+            }
+#endif
+
+            rn->currentDraw.packet->pointLights.push_back(light);
+        }
+        catch (...)
+        {
+            LOG_ERROR("%s", "Unable to add light!");
+            throw;
+        }
+    }
+
     void Upload_Buffer(const Ref<Renderer>& rn, const BufferUploadInfo& info)
     {
         try
         {
 #if DEBUG
             if (!rn->isDrawing)
-                throw GENERIC_EXCEPT("[Hyperflow]", "Cannot upload uniform util drawing process starts");
+                throw GENERIC_EXCEPT("[Hyperflow]", "Cannot upload uniform until drawing process starts");
 #endif
 
-            auto& packet = rn->currentDraw.packet;
-            packet.bufferUploadPackets.push_back(
+            const auto& packet = rn->currentDraw.packet;
+            packet->bufferUploadPackets.push_back(BufferUploadPacketInfo
             {
                 .buffer = info.buffer,
                 .offsetInBytes = info.offsetInBytes,
-                .bufferRange = (AssetRange<uint32_t>) { .start = (uint32_t)packet.bufferUploads.size(), .size = info.sizeInBytes }
+                .bufferRange = (AssetRange<uint32_t>) { .start = (uint32_t)packet->bufferUploads.size(), .size = info.sizeInBytes }
             });
 
-            packet.bufferUploads.push_back((uint8_t*)info.data, info.sizeInBytes);
+            packet->bufferUploads.insert(packet->bufferUploads.end(),
+                             (uint8_t*)info.data,
+                             (uint8_t*)info.data + info.sizeInBytes);
         }
         catch (...)
         {
@@ -88,12 +210,12 @@ namespace hf
 #endif
 
             auto& packet = rn->currentDraw.packet;
-            packet.textureGroupRebindings.push_back(TexturePackRebindingGroupPacketInfo
+            packet->textureGroupRebindings.push_back(TexturePackRebindingGroupPacketInfo
             {
                 .texturePack = texPack,
-                .bindingPacketRange = (AssetRange<uint16_t>){ .start = (uint16_t)packet.textureRebindings.size(), .size = 0 }
+                .bindingPacketRange = (AssetRange<uint16_t>){ .start = (uint16_t)packet->textureRebindings.size(), .size = 0 }
             });
-            rn->currentDraw.currentTexturePackBinding = packet.textureGroupRebindings.atP(packet.textureGroupRebindings.size() - 1);
+            rn->currentDraw.currentTexturePackBinding = &packet->textureGroupRebindings[packet->textureGroupRebindings.size() - 1];
         }
         catch (...)
         {
@@ -148,13 +270,13 @@ namespace hf
             {
                 .offset = textures.offset,
                 .type = type,
-                .range = (AssetRange<uint16_t>){ .start = (uint16_t)packet.textures.size(), .size = (uint16_t)textures.count }
+                .range = (AssetRange<uint16_t>){ .start = (uint16_t)packet->textures.size(), .size = (uint16_t)textures.count }
             };
 
             for (uint32_t i = 0; i < textures.count; i++)
             {
                 auto texture = textures.pTextures[i];
-                packet.textures.push_back({
+                packet->textures.push_back({
                     .texture = texture.texture->handle,
                     .index = texture.index
                 });
@@ -164,7 +286,7 @@ namespace hf
 
         if (wasModified)
         {
-            packet.textureRebindings.push_back(binding);
+            packet->textureRebindings.push_back(binding);
             rn->currentDraw.currentTexturePackBinding->bindingPacketRange.size++;
         }
         else LOG_WARN("Unnecessary binding upload! nothing changed");
@@ -294,7 +416,7 @@ namespace hf
 #endif
 
             auto& packet = rn->currentDraw.packet;
-            packet.dependencies.push_back(info);
+            packet->dependencies.push_back(info);
             rn->currentDraw.currentRenderTexture->dependencyRange.size++;
         }
         catch (...)
@@ -313,14 +435,15 @@ namespace hf
                 throw GENERIC_EXCEPT("[Hyperflow]", "You are already drawing on render texture!");
 #endif
 
-            auto& packet = rn->currentDraw.packet;
-            packet.renderTextures.push_back({
+            const auto& packet = rn->currentDraw.packet;
+            packet->renderTextures.push_back(RenderTexturePacketInfo
+            {
                 .texture = rt,
-                .shaderLayoutRange = (AssetRange<uint16_t>){ .start = (uint16_t)packet.shaderLayouts.size(), .size = 0 },
-                .dependencyRange = (AssetRange<uint8_t>){ .start = (uint8_t)packet.dependencies.size(), .size = 0 }
+                .shaderLayoutRange = (AssetRange<uint16_t>){ .start = (uint16_t)packet->shaderLayouts.size(), .size = 0 },
+                .dependencyRange = (AssetRange<uint8_t>){ .start = (uint8_t)packet->dependencies.size(), .size = 0 }
             });
 
-            rn->currentDraw.currentRenderTexture = packet.renderTextures.atP(packet.renderTextures.size() - 1);
+            rn->currentDraw.currentRenderTexture = &packet->renderTextures[packet->renderTextures.size() - 1];
         }
         catch (...)
         {
@@ -359,14 +482,15 @@ namespace hf
                 throw GENERIC_EXCEPT("[Hyperflow]", "Cannot start ShaderLayout without ending previous one!");
 #endif
 
-            auto& packet = rn->currentDraw.packet;
-            packet.shaderLayouts.push_back({
+            const auto& packet = rn->currentDraw.packet;
+            packet->shaderLayouts.push_back(ShaderLayoutPacketInfo
+            {
                 .layout = layout,
-                .shaderPacketRange = (AssetRange<uint16_t>){ .start = (uint16_t)packet.shaders.size(), .size = 0 },
-                .bufferSetRange = (AssetRange<uint32_t>){ .start = (uint32_t)packet.bufferSets.size(), .size = 0 },
+                .shaderPacketRange = (AssetRange<uint16_t>){ .start = (uint16_t)packet->shaders.size(), .size = 0 },
+                .bufferSetRange = (AssetRange<uint32_t>){ .start = (uint32_t)packet->bufferSets.size(), .size = 0 },
             });
 
-            rn->currentDraw.currentShaderLayout = packet.shaderLayouts.atP(packet.shaderLayouts.size() - 1);
+            rn->currentDraw.currentShaderLayout = &packet->shaderLayouts[packet->shaderLayouts.size() - 1];
             rn->currentDraw.currentRenderTexture->shaderLayoutRange.size++;
         }
         catch (...)
@@ -398,13 +522,14 @@ namespace hf
                 throw GENERIC_EXCEPT("[Hyperflow]", "Cannot start Shader without ending previous one!");
 #endif
 
-            auto& packet = rn->currentDraw.packet;
-            packet.shaders.push_back({
+            const auto& packet = rn->currentDraw.packet;
+            packet->shaders.push_back(ShaderPacketInfo
+            {
                 .shader = shader,
-                .materialPacketRange = (AssetRange<uint16_t>){ .start = (uint16_t)packet.materials.size(), .size = 0 }
+                .materialPacketRange = (AssetRange<uint16_t>){ .start = (uint16_t)packet->materials.size(), .size = 0 }
             });
 
-            rn->currentDraw.currentShader = packet.shaders.atP(packet.shaders.size() - 1);
+            rn->currentDraw.currentShader = &packet->shaders[packet->shaders.size() - 1];
             rn->currentDraw.currentShaderLayout->shaderPacketRange.size++;
         }
         catch (...)
@@ -439,14 +564,15 @@ namespace hf
                 throw GENERIC_EXCEPT("[Hyperflow]", "Cannot start Material without ending previous one!");
 #endif
 
-            auto& packet = rn->currentDraw.packet;
-            packet.materials.push_back({
+            const auto& packet = rn->currentDraw.packet;
+            packet->materials.push_back(MaterialPacketInfo
+            {
                 .material = material,
-                .drawPacketRange = (AssetRange<uint32_t>){ .start = (uint32_t)packet.drawPackets.size(), .size = 0 },
-                .texpackRange = (AssetRange<uint32_t>){ .start = (uint32_t)packet.texpacks.size(), .size = 0 },
+                .drawPacketRange = (AssetRange<uint32_t>){ .start = (uint32_t)packet->drawPackets.size(), .size = 0 },
+                .texpackRange = (AssetRange<uint32_t>){ .start = (uint32_t)packet->texpacks.size(), .size = 0 },
             });
 
-            rn->currentDraw.currentMaterial = packet.materials.atP(packet.materials.size() - 1);
+            rn->currentDraw.currentMaterial = &packet->materials[packet->materials.size() - 1];
             rn->currentDraw.currentShader->materialPacketRange.size++;
         }
         catch (...)
@@ -468,7 +594,7 @@ namespace hf
         rn->currentDraw.currentMaterial = nullptr;
     }
 
-    void Start_Draw(const Ref<Renderer>& rn)
+    void Start_DrawGroup(const Ref<Renderer>& rn)
     {
         try
         {
@@ -476,39 +602,39 @@ namespace hf
             if (!rn->currentDraw.currentMaterial)
                 throw GENERIC_EXCEPT("[Hyperflow]", "Material must be set!");
 
-            if (rn->currentDraw.currentDraw)
+            if (rn->currentDraw.currentDrawPacket)
                 throw GENERIC_EXCEPT("[Hyperflow]", "Need to end draw before starting new one!");
 #endif
 
-            auto& packet = rn->currentDraw.packet;
-            packet.drawPackets.push_back({
-                .texpackRange = (AssetRange<uint32_t>){ .start = (uint32_t)packet.texpacks.size(), .size = 0 },
-                .drawCallRange = (AssetRange<uint32_t>){ .start = (uint32_t)packet.drawCalls.size(), .size = 0 },
-                .pushConstantRange = (AssetRange<uint32_t>){ .start = (uint32_t)packet.pushConstantUploads.size(), .size = 0 },
+            const auto& packet = rn->currentDraw.packet;
+            packet->drawPackets.push_back(DrawPacketInfo
+            {
+                .texpackRange = (AssetRange<uint32_t>){ .start = (uint32_t)packet->texpacks.size(), .size = 0 },
+                .drawCallRange = (AssetRange<uint32_t>){ .start = (uint32_t)packet->drawCalls.size(), .size = 0 },
+                .pushConstantRange = (AssetRange<uint32_t>){ .start = (uint32_t)packet->pushConstantUploads.size(), .size = 0 },
             });
 
-            rn->currentDraw.currentDraw = packet.drawPackets.atP(packet.drawPackets.size() - 1);
+            rn->currentDraw.currentDrawPacket = &packet->drawPackets[packet->drawPackets.size() - 1];
             rn->currentDraw.currentMaterial->drawPacketRange.size++;
         }
         catch (...)
         {
-            LOG_ERROR("Unable to start draw! Draw packet buffer usage: %f",
-                rn->currentDraw.packet.drawPackets.size() / (float_t)RENDERING_MAX_NUM_DRAWPACKETS);
+            LOG_ERROR("Unable to start draw! Draw packet buffer usage: %llu", rn->currentDraw.packet->drawPackets.size());
             throw;
         }
     }
 
-    void End_Draw(const Ref<Renderer>& rn)
+    void End_DrawGroup(const Ref<Renderer>& rn)
     {
 #if DEBUG
         if (!rn->currentDraw.currentShader)
             throw GENERIC_EXCEPT("[Hyperflow]", "Shader must be set!");
 
-        if (!rn->currentDraw.currentDraw)
+        if (!rn->currentDraw.currentDrawPacket)
             throw GENERIC_EXCEPT("[Hyperflow]", "Need to start draw before ending it!");
 #endif
 
-        rn->currentDraw.currentDraw = nullptr;
+        rn->currentDraw.currentDrawPacket = nullptr;
     }
 
     void Start_BufferSet(const Ref<Renderer>& rn, RenderBindingType bindingType, uint32_t setBindingIndex)
@@ -522,14 +648,14 @@ namespace hf
                 throw GENERIC_EXCEPT("[Hyperflow]", "Cannot start uniform set without ending previous one!");
 #endif
 
-            auto& packet = rn->currentDraw.packet;
-            packet.bufferSets.push_back(BufferSetPacketInfo
+            const auto& packet = rn->currentDraw.packet;
+            packet->bufferSets.push_back(BufferSetPacketInfo
             {
                 .bindingType = bindingType,
                 .setBindingIndex = setBindingIndex,
-                .bufferRange = (AssetRange<uint16_t>){ .start = (uint16_t)packet.buffers.size(), .size = 0 },
+                .bufferRange = (AssetRange<uint16_t>){ .start = (uint16_t)packet->buffers.size(), .size = 0 },
             });
-            rn->currentDraw.currentUniformSet = packet.bufferSets.atP(packet.bufferSets.size() - 1);
+            rn->currentDraw.currentUniformSet = &packet->bufferSets[packet->bufferSets.size() - 1];
             rn->currentDraw.currentShaderLayout->bufferSetRange.size++;
         }
         catch (...)
@@ -558,7 +684,7 @@ namespace hf
 #endif
 
             auto& packet = rn->currentDraw.packet;
-            packet.buffers.push_back(buffer);
+            packet->buffers.push_back(buffer);
             rn->currentDraw.currentUniformSet->bufferRange.size++;
         }
         catch (...)
@@ -578,7 +704,7 @@ namespace hf
 #endif
 
             auto& packet = rn->currentDraw.packet;
-            packet.texpacks.push_back({
+            packet->texpacks.push_back({
                 .pack = texPack,
                 .setBindingIndex = setBindingIndex,
             });
@@ -591,67 +717,71 @@ namespace hf
         }
     }
 
-    void DrawAdd_DrawCall(const Ref<Renderer>& rn, const Ref<Mesh>& mesh)
+    void Start_DrawCall(const Ref<Renderer>& rn, const Ref<IndexBuffer>& indexBuffer)
     {
         try
         {
-            for (auto& submesh : mesh->subMeshes)
+#if DEBUG
+            if (!rn->currentDraw.currentDrawPacket)
+                throw GENERIC_EXCEPT("[Hyperflow]", "DrawPacket must be set!");
+
+            if (rn->currentDraw.currentDrawCall)
+                throw GENERIC_EXCEPT("[Hyperflow]", "Cannot start draw call without ending previous one!");
+#endif
+
+            const auto& packet = rn->currentDraw.packet;
+            packet->drawCalls.push_back(DrawCallPacketInfo
             {
-                DrawCallInfo drawInfo
-                {
-                    .pVertBuffers = &submesh.vertBuffer,
-                    .bufferCount = 1,
-                    .indexBuffer = submesh.indexBuffer,
-                    .instanceCount = 1
-                };
-#if DEBUG
-                strcpy(drawInfo.debugName, mesh->filePath.c_str());
-#endif
-                DrawAdd_DrawCall(rn, drawInfo);
-            }
+                .vertexBufferRange = (AssetRange<uint32_t>){ .start = (uint32_t)packet->vertexBuffers.size(), .size = 0 },
+                .instanceDataRange = (AssetRange<uint32_t>){ .start = (uint32_t)packet->instanceUploads.size(), .size = 0 },
+                .indexBuffer = indexBuffer,
+                .instanceCount = 0
+            });
+            rn->currentDraw.currentDrawPacket->drawCallRange.size++;
+            rn->currentDraw.currentDrawCall = &packet->drawCalls[packet->drawCalls.size() - 1];
         }
         catch (...)
         {
-            LOG_ERROR("%s", "Unable to Add Draw Call!");
+            LOG_ERROR("%s", "Unable to Start Draw Call!");
             throw;
         }
     }
 
-    void DrawAdd_DrawCall(const Ref<Renderer>& rn, const DrawCallInfo& drawCall)
+    void Start_DrawCall(const Ref<Renderer>& rn, const Ref<Mesh>& mesh, uint32_t submeshIndex)
     {
-        try
-        {
+        const auto& submesh = mesh->subMeshes[submeshIndex];
+        Start_DrawCall(rn, submesh.indexBuffer);
+        DrawAdd_VertexBuffer(rn, submesh.vertBuffer);
 #if DEBUG
-            if (!rn->currentDraw.currentDraw)
-                throw GENERIC_EXCEPT("[Hyperflow]", "DrawPacket must be set!");
+        strcpy(rn->currentDraw.currentDrawCall->debugName, mesh->filePath.c_str());
 #endif
-
-            auto& packet = rn->currentDraw.packet;
-            packet.drawCalls.push_back(drawCall);
-            rn->currentDraw.currentDraw->drawCallRange.size++;
-        }
-        catch (...)
-        {
-            LOG_ERROR("%s", "Unable to Add Draw Call!");
-            throw;
-        }
     }
 
-    void DrawAdd_TexturePackBinding(const Ref<Renderer>& rn, const Ref<TexturePack>& texPack, uint32_t setBindingIndex)
+    void End_DrawCall(const Ref<Renderer>& rn)
+    {
+#if DEBUG
+        if (!rn->currentDraw.currentDrawCall)
+            throw GENERIC_EXCEPT("[Hyperflow]", "Cannot start draw call without ending previous one!");
+#endif
+
+        rn->currentDraw.currentDrawCall = nullptr;
+    }
+
+    void DrawGroupAdd_TexturePackBinding(const Ref<Renderer>& rn, const Ref<TexturePack>& texPack, uint32_t setBindingIndex)
     {
         try
         {
 #if DEBUG
-            if (!rn->currentDraw.currentDraw)
+            if (!rn->currentDraw.currentDrawPacket)
                 throw GENERIC_EXCEPT("[Hyperflow]", "DrawPacket must be set!");
 #endif
 
             auto& packet = rn->currentDraw.packet;
-            packet.texpacks.push_back({
+            packet->texpacks.push_back({
                 .pack = texPack,
                 .setBindingIndex = setBindingIndex
             });
-            rn->currentDraw.currentDraw->texpackRange.size++;
+            rn->currentDraw.currentDrawPacket->texpackRange.size++;
         }
         catch (...)
         {
@@ -660,22 +790,24 @@ namespace hf
         }
     }
 
-    void DrawSet_PushConstant(const Ref<Renderer>& rn, const void* data, uint32_t dataSize)
+    void DrawGroupSet_PushConstant(const Ref<Renderer>& rn, const void* data, uint32_t dataSize)
     {
         try
         {
             auto& currentDraw = rn->currentDraw;
 #if DEBUG
-            if (!currentDraw.currentDraw)
+            if (!currentDraw.currentDrawPacket)
                 throw GENERIC_EXCEPT("[Hyperflow]", "DrawPacket must be set!");
 
-            if (currentDraw.currentDraw->pushConstantRange.size > 0)
+            if (currentDraw.currentDrawPacket->pushConstantRange.size > 0)
                 throw GENERIC_EXCEPT("[Hyperflow]", "Cannot set push constant twice for a single draw packet!");
 #endif
 
-            auto& packet = currentDraw.packet;
-            currentDraw.currentDraw->pushConstantRange.size = dataSize;
-            packet.pushConstantUploads.push_back((uint8_t*)data, dataSize);
+            const auto& packet = currentDraw.packet;
+            currentDraw.currentDrawPacket->pushConstantRange.size = dataSize;
+            packet->pushConstantUploads.insert(packet->pushConstantUploads.end(),
+                                            (uint8_t*)data,
+                                            (uint8_t*)data + dataSize);
         }
         catch (...)
         {
@@ -684,29 +816,122 @@ namespace hf
         }
     }
 
+    void DrawAdd_Instance(const Ref<Renderer>& rn, const void* data, uint32_t dataSize)
+    {
+        try
+        {
+            const auto& currentDraw = rn->currentDraw;
+#if DEBUG
+            if (!currentDraw.currentDrawPacket)
+                throw GENERIC_EXCEPT("[Hyperflow]", "DrawPacket must be set!");
+
+            if (dataSize > MAX_PER_INSTANCE_BUFFER_SIZE)
+                throw GENERIC_EXCEPT("[Hyperflow]", "Instance data cannot be more the %i bytes!", MAX_PER_INSTANCE_BUFFER_SIZE);
+
+            if (currentDraw.currentDrawCall->instanceDataRange.size + dataSize > MAX_INSTANCE_BUFFER_SIZE_BYTES)
+                throw GENERIC_EXCEPT("[Hyperflow]", "Too much instance data, max size is %i bytes!", MAX_INSTANCE_BUFFER_SIZE_BYTES);
+#endif
+
+            const auto& packet = currentDraw.packet;
+            currentDraw.currentDrawCall->instanceCount++;
+            currentDraw.currentDrawCall->instanceDataRange.size += dataSize;
+            packet->instanceUploads.insert(packet->instanceUploads.end(),
+                                            (uint8_t*)data,
+                                            (uint8_t*)data + dataSize);
+        }
+        catch (...)
+        {
+            LOG_ERROR("%s", "Unable add instance!");
+            throw;
+        }
+    }
+
+    void DrawAdd_VertexBuffer(const Ref<Renderer>& rn, const Ref<VertexBuffer>& vb)
+    {
+        try
+        {
+            const auto& currentDraw = rn->currentDraw;
+#if DEBUG
+            if (!currentDraw.currentDrawCall)
+                throw GENERIC_EXCEPT("[Hyperflow]", "You must be start draw call first!");
+#endif
+
+            const auto& packet = currentDraw.packet;
+            packet->vertexBuffers.push_back(vb);
+            currentDraw.currentDrawCall->vertexBufferRange.size++;
+        }
+        catch (...)
+        {
+            LOG_ERROR("%s", "Unable add vertex buffer!");
+            throw;
+        }
+    }
+
     namespace inter::rendering
     {
         void StartRenderPacket_i(const Ref<Renderer>& rn)
         {
+#if DEBUG
+            if (rn->currentDraw.packet) throw GENERIC_EXCEPT("[Hyperflow]", "Cannot start RenderPacket, without submitting previous one!");
+#endif
+
+            std::lock_guard lock(rn->threadInfo.threadLock);
+            rn->currentDraw.packet = rn->threadInfo.cachedPackets.back();
+            rn->threadInfo.cachedPackets.pop_back();
+            rn->currentDraw.packet->clear();
             rn->isDrawing = true;
         }
 
         void EndRenderPacket_i(const Ref<Renderer>& rn)
         {
-            auto& tInfo = rn->threadInfo;
 #if DEBUG
             if (!rn->isDrawing) throw GENERIC_EXCEPT("[Hyperflow]", "Cannot end RenderPacket, without starting it!");
+
+            if (!rn->currentDraw.packet->camera.has_value())
+                LOG_WARN("[Hyperflow] %s", "You are drawing without camera");
 #endif
 
             {
-                std::lock_guard lock(tInfo.threadLock);
-                tInfo.drawPacket = rn->currentDraw.packet;
-                tInfo.packetIsReady = true;
-                tInfo.renderCondition.notify_one();
+                const auto packet = rn->currentDraw.packet;
+                GlobalUniformInfo uniformInfo{};
+                uniformInfo.camera = packet->camera.value().GetUniformInfo(rn);
+                uniformInfo.time = HF.time.GetUniformInfo();
+
+                for (uint32_t i = 0; i < packet->directionalLights.size(); i++)
+                    uniformInfo.light.directionalLights[i] = packet->directionalLights[i].GetUniformInfo();
+
+                for (uint32_t i = 0; i < packet->spotLights.size(); i++)
+                    uniformInfo.light.spotLights[i] = packet->spotLights[i].GetUniformInfo();
+
+                for (uint32_t i = 0; i < packet->pointLights.size(); i++)
+                    uniformInfo.light.pointLights[i] = packet->pointLights[i].GetUniformInfo();
+
+                uniformInfo.light.lightCounts = uvec3{
+                    (uint32_t)packet->directionalLights.size(),
+                    (uint32_t)packet->spotLights.size(),
+                    (uint32_t)packet->pointLights.size() };
+
+                const BufferUploadInfo uniformUpload
+                {
+                    .buffer = HF.staticResources.globalUniform,
+                    .offsetInBytes = 0,
+                    .sizeInBytes = sizeof(GlobalUniformInfo),
+                    .data = &uniformInfo
+                };
+
+                hf::Upload_Buffer(rn, uniformUpload);
             }
 
-            rn->currentDraw = {};
+            {
+                std::lock_guard lock(rn->threadInfo.threadLock);;
 
+                if (rn->threadInfo.drawPacket) rn->threadInfo.cachedPackets.push_back(rn->threadInfo.drawPacket);
+                rn->threadInfo.drawPacket = rn->currentDraw.packet;
+                rn->currentDraw.packet = nullptr;
+                rn->threadInfo.renderCondition.notify_one();
+            }
+
+            rn->currentDraw.clear();
             rn->isDrawing = false;
         }
 
@@ -736,66 +961,67 @@ namespace hf
             CleanMarkedResources_i();
 
             auto& tInfo = rn->threadInfo;
-            RenderPacket packet;
+            RenderPacket* packet;
             {
                 std::unique_lock lock(tInfo.threadLock);
-                tInfo.renderCondition.wait(lock, [&]{ return tInfo.packetIsReady || !tInfo.isRunning; });
+                tInfo.renderCondition.wait(lock, [&]{ return tInfo.drawPacket || !tInfo.isRunning; });
                 if (!tInfo.isRunning) return;
                 packet = tInfo.drawPacket;
-                tInfo.packetIsReady = false;
+                tInfo.drawPacket = nullptr;
             }
 
             void* renderTextures[RENDERING_MAX_NUM_RENDER_TEXTURES];
-            for (uint8_t rtIndex = 0; rtIndex < (uint8_t)packet.renderTextures.size(); rtIndex++)
-                renderTextures[rtIndex] = packet.renderTextures.atC(rtIndex).texture->handle;
+            for (uint8_t rtIndex = 0; rtIndex < (uint8_t)packet->renderTextures.size(); rtIndex++)
+                renderTextures[rtIndex] = packet->renderTextures[rtIndex].texture->handle;
 
-            uvec2 size = HF.renderingApi.api.GetReadyForRendering(rn->handle, renderTextures, packet.renderTextures.size());
+            uvec2 size = HF.renderingApi.api.GetReadyForRendering(rn->handle, renderTextures, packet->renderTextures.size());
             if (size != uvec2(0, 0))
             {
-                for (uint8_t rtIndex = 0; rtIndex < (uint8_t)packet.renderTextures.size(); rtIndex++)
-                    packet.renderTextures.atC(rtIndex).texture->createInfo.size = size;
+                for (const auto& rtPacket : packet->renderTextures) rtPacket.texture->createInfo.size = size;
 
                 HF.renderingApi.api.StartFrame(rn->handle);
                 RendererDraw_i(rn, packet);
                 HF.renderingApi.api.EndFrame(rn->handle);
             }
+
+            std::lock_guard lock(tInfo.threadLock);
+            tInfo.cachedPackets.push_back(packet);
         }
 
-        static void RendererDrawUploads(const void* handle, RenderPacket& packet);
-        static void BindBuffers(const void* handle, RenderPacket& packet, const AssetRange<uint32_t>& range, DescriptorBindingInfo* descBindings);
-        static void CollectTexpacks(RenderPacket& packet, const AssetRange<uint32_t>& range, DescriptorBindingInfo* descBindings);
+        static void RendererDrawUploads(const void* handle, RenderPacket* packet);
+        static void BindBuffers(const void* handle, const RenderPacket* packet, const AssetRange<uint32_t>& range, DescriptorBindingInfo* descBindings);
+        static void CollectTexpacks(const RenderPacket* packet, const AssetRange<uint32_t>& range, DescriptorBindingInfo* descBindings);
 
-        void RendererDraw_i(const Ref<Renderer>& rn, RenderPacket& packet)
+        void RendererDraw_i(const Ref<Renderer>& rn, RenderPacket* packet)
         {
-            void* vBufferCache[MAX_NUM_BUFFER_CACHE];
             const auto handle = rn->handle;
             RendererDrawUploads(handle, packet);
 
-            for (uint8_t rtIndex = 0; rtIndex < (uint8_t)packet.renderTextures.size(); rtIndex++)
+            for (uint8_t rtIndex = 0; rtIndex < (uint8_t)packet->renderTextures.size(); rtIndex++)
             {
-                auto& rt = packet.renderTextures.atC(rtIndex);
+                auto& rt = packet->renderTextures[rtIndex];
                 if (rt.dependencyRange.size > 0)
                 {
                     HF.renderingApi.api.ApplyRenderAttachmentDependencies(handle,
-                    packet.dependencies.atP(rt.dependencyRange.start), rt.dependencyRange.size);
+                    &packet->dependencies[rt.dependencyRange.start], rt.dependencyRange.size);
                 }
 
                 HF.renderingApi.api.BeginRendering(handle, rt.texture->handle);
 
-                uint16_t shaderLayoutEnd = rt.shaderLayoutRange.end();
+                const uint16_t shaderLayoutEnd = rt.shaderLayoutRange.end();
                 for (uint16_t shaderLayoutIndex = rt.shaderLayoutRange.start; shaderLayoutIndex < shaderLayoutEnd; shaderLayoutIndex++)
                 {
                     DescriptorBindingInfo descBindings[MAX_NUM_BOUND_DESCRIPTORS]{};
 
-                    const auto& shaderLayout = packet.shaderLayouts.atC(shaderLayoutIndex);
+                    const auto& shaderLayout = packet->shaderLayouts[shaderLayoutIndex];
                     HF.renderingApi.api.BindShaderLayout(handle, shaderLayout.layout);
 
                     BindBuffers(handle, packet, shaderLayout.bufferSetRange, descBindings);
 
-                    uint16_t shaderEnd = shaderLayout.shaderPacketRange.end();
+                    const uint16_t shaderEnd = shaderLayout.shaderPacketRange.end();
                     for (uint16_t shaderIndex = shaderLayout.shaderPacketRange.start; shaderIndex < shaderEnd; shaderIndex++)
                     {
-                        const auto& shader = packet.shaders.atC(shaderIndex);
+                        const auto& shader = packet->shaders[shaderIndex];
                         const auto& shaderHandle = shader.shader->handle;
 
                         if (shaderHandle)
@@ -805,33 +1031,30 @@ namespace hf
                             const uint16_t materialEnd = shader.materialPacketRange.end();
                             for (uint16_t materialIndex = shader.materialPacketRange.start; materialIndex < materialEnd; materialIndex++)
                             {
-                                auto& material = packet.materials.atC(materialIndex);
+                                auto& material = packet->materials[materialIndex];
 
-                                if (material.material->sizeInBytes > 0)
+                                if (material.material && material.material->sizeInBytes > 0)
                                 {
-                                    BindResourceInfo_i<Buffer> info
-                                    {
-                                        .bindingType = RenderBindingType::Graphics,
-                                        .setBindingIndex = 1,
-                                        .objectCount = 1
-                                    };
+                                    BindResourceInfo_i<Buffer> info{};
+                                    info.bindingType = RenderBindingType::Graphics;
+                                    info.setBindingIndex = 1;
+                                    info.objectCount = 1;
+
                                     info.objects[0] = HF.graphicsResources.materialDataStorageBuffer,
 
                                     HF.renderingApi.api.BindBuffer(handle, info);
                                 }
 
-                                uint32_t drawPacketEnd = material.drawPacketRange.end();
+                                const uint32_t drawPacketEnd = material.drawPacketRange.end();
                                 for (uint32_t drawPacketIndex = material.drawPacketRange.start; drawPacketIndex < drawPacketEnd; drawPacketIndex++)
                                 {
-                                    auto& drawPacket = packet.drawPackets.atC(drawPacketIndex);
+                                    auto& drawPacket = packet->drawPackets[drawPacketIndex];
 
                                     if (drawPacket.pushConstantRange.size > 0)
                                     {
-                                        PushConstantUploadInfo uploadInfo
-                                        {
-                                            .layout = shaderLayout.layout,
-                                            .data = &packet.pushConstantUploads.atC(drawPacket.pushConstantRange.start),
-                                        };
+                                        PushConstantUploadInfo uploadInfo{};
+                                        uploadInfo.layout = shaderLayout.layout;
+                                        uploadInfo.data = &packet->pushConstantUploads[drawPacket.pushConstantRange.start];
 
                                         HF.renderingApi.api.UploadPushConstants(handle, uploadInfo);
                                     }
@@ -850,44 +1073,81 @@ namespace hf
                                                 {
                                                     case BUFFER: throw GENERIC_EXCEPT("[Hyperflow]", "Cannot bind buffer here!");
                                                     case TEXPACK:
-                                                        {
-                                                            BindResourceInfo_i<void*> info
-                                                            {
-                                                                .bindingType = RenderBindingType::Graphics,
-                                                                .setBindingIndex = i,
-                                                                .objectCount = 1,
-                                                            };
-                                                            info.objects[0] = cPack.object;
+                                                    {
+                                                        BindResourceInfo_i<void*> info{};
+                                                        info.bindingType = RenderBindingType::Graphics;
+                                                        info.setBindingIndex = i;
+                                                        info.objectCount = 1;
 
-                                                            HF.renderingApi.api.BindTexturePack(handle, info);
-                                                            descBindings[i] = cPack;
-                                                        }
-                                                        break;
+                                                        info.objects[0] = cPack.object;
+
+                                                        HF.renderingApi.api.BindTexturePack(handle, info);
+                                                        descBindings[i] = cPack;
+                                                    }break;
                                                 }
                                             }
                                         }
                                     }
 
-                                    uint32_t drawCallEnd = drawPacket.drawCallRange.end();
+                                    const uint32_t drawCallEnd = drawPacket.drawCallRange.end();
                                     for (uint32_t drawCallIndex = drawPacket.drawCallRange.start; drawCallIndex < drawCallEnd; drawCallIndex++)
                                     {
-                                        const auto& drawCall = packet.drawCalls.atC(drawCallIndex);
+                                        const auto& drawCall = packet->drawCalls[drawCallIndex];
 #if DEBUG
-                                        if (drawCall.bufferCount > MAX_NUM_BUFFER_CACHE)
+                                        if (drawCall.vertexBufferRange.size > MAX_NUM_BUFFER_CACHE)
                                             throw GENERIC_EXCEPT("[Hyperflow]", "Trying to draw too many buffers at once, max is %i", MAX_NUM_BUFFER_CACHE);
 #endif
 
-                                        for (uint32_t i = 0; i < drawCall.bufferCount; i++)
-                                            vBufferCache[i] = drawCall.pVertBuffers[i]->handle;
+                                        uint32_t bufferCount = drawCall.vertexBufferRange.size;
 
-                                        DrawCallInfo_i drawInfo
+                                        DrawCallInfo_i drawInfo{};
+                                        drawInfo.vertexBufferCount = bufferCount;
+
                                         {
-                                            .pVertBuffers = vBufferCache,
-                                            .bufferCount = drawCall.bufferCount,
-                                            .indexBuffer = drawCall.indexBuffer ? drawCall.indexBuffer->handle : nullptr,
-                                            .instanceCount = drawCall.instanceCount
-                                        };
-                                        HF.renderingApi.api.Draw(handle, drawInfo);
+                                            uint32_t currentIndex = 0;
+                                            const uint32_t vertexBufferEnd = drawCall.vertexBufferRange.end();
+                                            for (uint32_t i = drawCall.vertexBufferRange.start; i < vertexBufferEnd; i++)
+                                            {
+                                                drawInfo.pVertexBuffers[currentIndex] = VertexBufferRegionInfo_i
+                                                {
+                                                    .buffer = packet->vertexBuffers[i]->handle,
+                                                    .offsetInBytes = 0
+                                                };
+                                                currentIndex++;
+                                            }
+                                        }
+
+                                        if (drawCall.instanceCount > 0)
+                                        {
+                                            drawInfo.instanceBuffer = InstanceBufferRegionInfo_i
+                                            {
+                                                .buffer = HF.staticResources.instanceBuffer->handle,
+                                                .offsetInBytes = drawCall.instanceDataRange.start,
+                                                .instanceCount = drawCall.instanceCount
+                                            };
+                                        }
+
+                                        if (drawCall.indexBuffer)
+                                        {
+                                            IndexedDrawCallInfo_i idcInfo{};
+                                            idcInfo.drawInfo = drawInfo;
+                                            idcInfo.indexBuffer = IndexBufferRegionInfo_i
+                                            {
+                                                .buffer = drawCall.indexBuffer->handle,
+                                                .offset = 0,
+                                                .indexCount = drawCall.indexBuffer->details.indexCount
+                                            };
+
+                                            HF.renderingApi.api.DrawIndexed(handle, idcInfo);
+                                        }
+                                        else
+                                        {
+                                            VertexedDrawCallInfo_i vdcInfo{};
+                                            vdcInfo.drawInfo = drawInfo;
+                                            vdcInfo.vertexCount = packet->vertexBuffers[drawCall.vertexBufferRange.start]->vertexCount;
+
+                                            HF.renderingApi.api.Draw(handle, vdcInfo);
+                                        }
                                     }
                                 }
                             }
@@ -900,31 +1160,30 @@ namespace hf
             }
         }
 
-        void BindBuffers(const void* handle, RenderPacket& packet,
+        void BindBuffers(const void* handle, const RenderPacket* packet,
             const AssetRange<uint32_t>& range, DescriptorBindingInfo* descBindings)
         {
             const uint32_t bufferEnd = range.end();
             for (uint32_t bufferIndex = range.start; bufferIndex < bufferEnd; bufferIndex++)
             {
-                const auto& bufferSet = packet.bufferSets.atC(bufferIndex);
+                const auto& bufferSet = packet->bufferSets[bufferIndex];
 
-                BindResourceInfo_i<Buffer> info
-                {
-                    .bindingType = bufferSet.bindingType,
-                    .setBindingIndex = bufferSet.setBindingIndex,
-                    .objectCount = bufferSet.bufferRange.size
-                };
+                BindResourceInfo_i<Buffer> info{};
+                info.bindingType = bufferSet.bindingType;
+                info.setBindingIndex = bufferSet.setBindingIndex;
+                info.objectCount = bufferSet.bufferRange.size;
 
                 const auto end = bufferSet.bufferRange.end();
                 uint32_t index = 0;
                 for (uint32_t i = bufferSet.bufferRange.start; i < end; i++)
                 {
-                    info.objects[index] = packet.buffers.at(i),
-                    descBindings[info.setBindingIndex] = DescriptorBindingInfo
-                    {
-                        .object = (void*)(uint64_t)info.objects[index],
-                        .type = BUFFER
-                    };
+                    info.objects[index] = packet->buffers.at(i);
+
+                    DescriptorBindingInfo dbi{};
+                    dbi.object = (void*)(uint64_t)info.objects[index];
+                    dbi.type = BUFFER;
+
+                    descBindings[info.setBindingIndex] = dbi;
                     index++;
                 }
 
@@ -932,13 +1191,13 @@ namespace hf
             }
         }
 
-        void CollectTexpacks(RenderPacket& packet, const AssetRange<uint32_t>& range, DescriptorBindingInfo* descBindings)
+        void CollectTexpacks(const RenderPacket* packet, const AssetRange<uint32_t>& range, DescriptorBindingInfo* descBindings)
         {
             const uint32_t texpackEnd = range.end();
             for (uint32_t texpackIndex = range.start; texpackIndex < texpackEnd; texpackIndex++)
             {
-                const auto texPack = packet.texpacks.atC(texpackIndex);
-                descBindings[texPack.setBindingIndex] =
+                const auto texPack = packet->texpacks[texpackIndex];
+                descBindings[texPack.setBindingIndex] = DescriptorBindingInfo
                 {
                     .object = texPack.pack->handle,
                     .type = TEXPACK
@@ -946,52 +1205,60 @@ namespace hf
             }
         }
 
-        void RendererDrawUploads(const void* handle, RenderPacket& packet)
+        void RendererDrawUploads(const void* handle, RenderPacket* packet)
         {
             //Uniform Buffer Uploads
             {
-                const BufferUploadInfo_i uploadInfo
-                {
-                    .pUploadPackets = packet.bufferUploadPackets.begin(),
-                    .uploadPacketCount = (uint16_t)packet.bufferUploadPackets.size(),
-                    .pUniformDataBuffer = packet.bufferUploads.begin()
-                };
+                BufferUploadInfo_i uploadInfo{};
+                uploadInfo.pUploadPackets = &packet->bufferUploadPackets[0];
+                uploadInfo.uploadPacketCount = (uint16_t)packet->bufferUploadPackets.size();
+                uploadInfo.pUniformDataBuffer = &packet->bufferUploads[0];
+
                 HF.renderingApi.api.UploadBuffer(handle, uploadInfo);
             }
+
+            //Instance Buffer Uploads
+            {
+                VertexBufferUploadInfo_i vbUploadInfo{};
+                vbUploadInfo.buffer = HF.staticResources.instanceBuffer->handle;
+                vbUploadInfo.data = &packet->instanceUploads[0];
+                vbUploadInfo.offsetInBytes = 0;
+                vbUploadInfo.sizeInBytes = packet->instanceUploads.size();
+
+                HF.renderingApi.api.UploadVertexBuffer(handle, vbUploadInfo);
+            }
+
             //Texture Pack Uploads.
             {
                 static TexturePackBindingUploadInfo_i uploads[128];
-                for (uint32_t i = 0; i < packet.textureGroupRebindings.size(); i++)
+                for (uint32_t i = 0; i < packet->textureGroupRebindings.size(); i++)
                 {
-                    const auto& group = packet.textureGroupRebindings.atC(i);
-                    TexturePackBindingUploadGroupInfo_i uploadInfo
-                    {
-                        .bindings = uploads,
-                        .bindingCount = group.bindingPacketRange.size
-                    };
+                    const auto& group = packet->textureGroupRebindings[i];
 
-                    uint32_t end = group.bindingPacketRange.end();
+                    TexturePackBindingUploadGroupInfo_i uploadInfo{};
+                    uploadInfo.bindings = uploads;
+                    uploadInfo.bindingCount = group.bindingPacketRange.size;
+
                     uint32_t current = 0;
+                    const uint32_t end = group.bindingPacketRange.end();
                     for (uint32_t j = group.bindingPacketRange.start; j < end; j++)
                     {
-                        auto& p = packet.textureRebindings.atC(j);
-                        TexturePackBindingUploadInfo_i binding
-                        {
-                            .bindingIndex = p.bindingIndex,
-                            .sampler = p.sampler,
-                        };
+                        auto& p = packet->textureRebindings[j];
+
+                        TexturePackBindingUploadInfo_i binding{};
+                        binding.bindingIndex = p.bindingIndex;
+                        binding.sampler      = p.sampler;
 
                         if (p.textures.has_value())
                         {
-                            auto& textures = p.textures.value();
-                            packet.textures.atC(textures.range.start);
+                            const auto& textures = p.textures.value();
 
-                            binding.texInfo = (TexturePackTextureUploadInfo_i)
-                            {
-                                .pTextures = (TexturePackTextureUploadInfo_i::TextureInfo*)packet.textures.atP(textures.range.start),
-                                .offset = textures.offset,
-                                .count = textures.range.size,
-                            };
+                            TexturePackTextureUploadInfo_i tuInfo{};
+                            tuInfo.pTextures = (TexturePackTextureUploadInfo_i::TextureInfo*)&packet->textures[textures.range.start];
+                            tuInfo.offset = textures.offset;
+                            tuInfo.count = textures.range.size;
+
+                            binding.texInfo = tuInfo;
                         }
 
                         uploads[current] = binding;

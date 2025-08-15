@@ -1,5 +1,5 @@
 #include "hfreemovecamera3d.h"
-#include "hexternal.h"
+#include "hyperflow.h"
 
 namespace hf
 {

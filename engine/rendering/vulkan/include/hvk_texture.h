@@ -27,6 +27,8 @@ namespace hf
         uint32_t bufferCount = 1;
         uint32_t mipLevels = 1;
     };
+
+    void QueueTextureUpload(VkTexture* tex, const void* pTextures, VkImageAspectFlags aspectFlags);
 }
 
 #endif //HVK_TEXTURE_H

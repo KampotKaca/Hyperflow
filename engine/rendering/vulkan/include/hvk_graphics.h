@@ -2,8 +2,8 @@
 #define HVK_GRAPHICS_H
 
 #include "hvk_shared.h"
-#include "hvk_bufferattrib.h"
-#include "hvk_vertbuffer.h"
+#include "hvk_vertexbufferattribute.h"
+#include "hvk_vertexbuffer.h"
 #include "hvk_uniformbuffer.h"
 #include "hvk_shaderlayout.h"
 #include "hvk_texturelayout.h"
@@ -97,6 +97,7 @@ namespace hf
         inter::rendering::RendererInternalFunctions_i functions{};
         void* platformDll{};
         VulkanPlatformAPI* api{};
+        VkAllocationCallbacks allocator{};
     };
 
     struct VkExtensionFunctions
@@ -154,23 +155,15 @@ namespace hf
         bool deleteSrcAfterCopy = false;
     };
 
-    struct ImageTransitionArray
-    {
-        ImageTransitionInfo infos[VK_MAX_IMAGE_BARRIERS]{};
-        uint32_t count = 0;
-    };
-
     struct PreAllocatedBuffers
     {
-        VkDescriptorSetLayout descLayouts[VK_MAX_UNIFORM_AND_TEXTURE_BINDINGS]{};
-        VkDescriptorSetLayoutBinding descLayoutBindings[VK_MAX_UNIFORM_AND_TEXTURE_BINDINGS]{};
-        VkDescriptorBufferBindingInfoEXT descBindingInfos[VK_MAX_UNIFORM_AND_TEXTURE_BINDINGS]{};
-        VkDescriptorBufferInfo bufferInfos[VK_MAX_UNIFORM_AND_TEXTURE_BINDINGS * FRAMES_IN_FLIGHT]{};
-        VkDescriptorImageInfo descImageBindings[VK_MAX_IMAGE_BINDINGS]{};
-        VkImageMemoryBarrier imageBarriers[VK_MAX_IMAGE_BARRIERS]{};
-        ImageTransitionArray imageTransitions[9]{};
-        uint32_t indices[VK_MAX_INDICES]{};
-        VkDeviceSize sizes[VK_MAX_INDICES]{};
+        std::vector<VkDescriptorSetLayout> descLayouts{};
+        std::vector<VkDescriptorSetLayoutBinding> descLayoutBindings{};
+        std::vector<VkDescriptorBufferBindingInfoEXT> descBindingInfos{};
+        std::vector<VkImageMemoryBarrier2> imageBarriers{};
+        std::vector<uint32_t> indices{};
+        std::vector<VkDeviceSize> sizes{};
+        std::vector<ImageTransitionInfo> imageTransitions[9]{};
     };
 
     struct RenderApiEditorInfo
@@ -206,8 +199,8 @@ namespace hf
         URef<VkDescriptorBuffer> bufferDescriptorBuffer{};
         URef<VkDescriptorBuffer> imageDescriptorBuffer{};
 
-        std::vector<URef<VkBufferAttrib>> bufferAttribs{};
-        std::vector<URef<VkBufferBase>> buffers{};
+        std::vector<URef<VkVertexBufferAttribute>> bufferAttribs{};
+        std::vector<URef<VkBoundBuffer>> boundBuffers{};
         std::vector<URef<VkTextureSampler>> textureSamplers{};
         std::vector<URef<VkTextureLayout>> textureLayouts{};
         std::vector<URef<VkShaderLayout>> shaderLayouts{};
@@ -288,7 +281,7 @@ namespace hf
     void WaitForDevice();
 
     void CreateSwapchain(VkSurfaceKHR surface, uvec2 targetSize, VsyncMode vsyncMode, GraphicsSwapChain& result);
-    void DestroySwapchain(GraphicsSwapChain& gc, VkSwapchainKHR* swapchain);
+    void DestroySwapchain(const GraphicsSwapChain& gc, VkSwapchainKHR* swapchain);
 
     void CreateCommandPool(const GraphicsDevice& device, uint32_t familyIndex, CommandPool* result);
     void DestroyCommandPool(const GraphicsDevice& device, CommandPool& pool);
@@ -297,7 +290,7 @@ namespace hf
 
     bool GetAvailableSurfaceDetails(const SwapChainSupportDetails& swapChainSupportDetails,
                                     VkFormat targetFormat, VkPresentModeKHR targetPresentMode, VkPresentModeKHR defaultPresentMode,
-                                    uvec2 targetExtents, GraphicsSwapchainDetails* result);
+                                    uvec2 targetExtents, GraphicsSwapchainDetails& result);
 
     bool CheckDeviceExtensionSupport(const VkPhysicalDevice& device);
     void QuerySwapChainSupport(const VkPhysicalDevice& device, const VkSurfaceKHR& surface, SwapChainSupportDetails& supportDetails);

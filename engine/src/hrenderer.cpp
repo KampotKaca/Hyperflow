@@ -11,9 +11,15 @@ namespace hf
     static void ThreadDraw(const Ref<Renderer>& rn)
     {
         rn->threadInfo.isRunning = true;
+        uint64_t renderFrameCount = 0;
         while (rn->threadInfo.isRunning)
         {
             inter::rendering::RendererUpdate_i(rn);
+            if (renderFrameCount % 1024 == 0) utils::CollectThreadMemoryCache();
+
+            std::lock_guard lock(rn->threadInfo.statLock);
+            rn->threadInfo.memoryStatistics = utils::GetThreadMemoryStatistics();
+            renderFrameCount++;
         }
         rn->threadInfo.isRunning = false;
 
@@ -25,6 +31,13 @@ namespace hf
     {
         this->window = window;
         threadInfo.size = inter::window::GetSize(window);
+
+        threadInfo.cachedPackets = std::vector<RenderPacket*>(3);
+        for (uint32_t i = 0; i < 3; i++)
+        {
+            threadInfo.cachedPackets[i] = &allPackets[i];
+        }
+
         inter::rendering::CreateRenderer_i(this);
     }
 
@@ -41,6 +54,15 @@ namespace hf
         if (rn->window != nullptr) throw GENERIC_EXCEPT("[Hyperflow]", "Cannot resize renderer connected to the window");
         rn->threadInfo.size = size;
         inter::HF.renderingApi.api.RegisterFrameBufferChange(rn->handle, size);
+    }
+    ThreadMemoryStatistics GetMemoryStatistics(const Ref<Renderer>& rn)
+    {
+        ThreadMemoryStatistics stats{};
+        {
+            std::lock_guard lock(rn->threadInfo.statLock);
+            stats = rn->threadInfo.memoryStatistics;
+        }
+        return stats;
     }
 
     RenderingApiType GetApiType()     { return inter::HF.renderingApi.type; }
@@ -106,7 +128,7 @@ namespace hf
             {
                 switch (buffer->GetType())
                 {
-                    case RuntimeBufferType::Vertex: CreateVertBuffer_i((VertBuffer*)buffer.get()); break;
+                    case RuntimeBufferType::Vertex: CreateVertBuffer_i((VertexBuffer*)buffer.get()); break;
                     case RuntimeBufferType::Index: CreateIndexBuffer_i((IndexBuffer*)buffer.get()); break;
                 }
             }
@@ -114,9 +136,9 @@ namespace hf
             for (auto& mesh : std::ranges::views::values(HF.graphicsResources.meshes)) CreateMesh_i(mesh.get());
             SubmitAllBuffers();
 
-            for (auto& texture : std::ranges::views::values(HF.graphicsResources.textures)) CreateTexture_i(texture.get());
-            for (auto& cubemap : std::ranges::views::values(HF.graphicsResources.cubemaps)) CreateCubemap_i(cubemap.get());
-            for (auto& rt : std::ranges::views::values(HF.graphicsResources.renderTextures)) CreateRenderTexture_i(rt.get());
+            for (auto& texture   : std::ranges::views::values(HF.graphicsResources.textures))       CreateTexture_i(texture.get());
+            for (auto& cubemap : std::ranges::views::values(HF.graphicsResources.cubemaps))       CreateCubemap_i(cubemap.get());
+            for (auto& rt   : std::ranges::views::values(HF.graphicsResources.renderTextures)) CreateRenderTexture_i(rt.get());
             SubmitAllTextures();
 
             for (auto& texPack : std::ranges::views::values(HF.graphicsResources.texturePacks)) CreateTexturePack_i(texPack.get());
@@ -137,13 +159,9 @@ namespace hf
 
             platform::UnloadDll(HF.renderingApi.handle);
 
-            HF.renderingApi = RenderingApi
-            {
-                .type = RenderingApiType::None,
-                .handle = nullptr,
-            };
+            HF.renderingApi = RenderingApi{};
 
-            HF.graphicsResources.bufferAttribs.clear();
+            HF.graphicsResources.vertexAttributes.clear();
         }
 
         void CreateRenderer_i(Renderer* rn)
@@ -153,17 +171,23 @@ namespace hf
                 const auto engineV = utils::ConvertVersion(VERSION);
                 const auto appV = utils::ConvertVersion(APP_VERSION);
 
+                RendererInternalFunctions_i funcs{};
+                funcs.fileExistsFunc = utils::FileExists;
+                funcs.readFileFunc = utils::ReadFile;
+                funcs.writeFileFunc = utils::WriteFile;
+
+                funcs.allocateFunc = utils::Allocate;
+                funcs.allocateAlignedFunc = utils::AllocateAligned;
+                funcs.deallocateFunc = utils::Deallocate;
+                funcs.deallocateAlignedFunc = utils::DeallocateAligned;
+                funcs.reallocateFunc = utils::Reallocate;
+
                 RendererLoadInfo_i loadInfo
                 {
                     .appVersion = appV,
                     .engineVersion = engineV,
                     .applicationTitle = HF.appTitle.c_str(),
-                    .functions =
-                    {
-                        .fileExistsFunc = utils::FileExists,
-                        .readFileFunc = utils::ReadFile,
-                        .writeFileFunc = utils::WriteFile
-                    }
+                    .functions = funcs
                 };
 
                 if (HF.renderingApi.type == RenderingApiType::Vulkan)
@@ -173,10 +197,8 @@ namespace hf
                 HF.renderingApi.isLoaded = true;
             }
             HF.rendererCount++;
-            RendererInstanceCreationInfo_i createInfo
-            {
-                .size = rn->threadInfo.size,
-            };
+            RendererInstanceCreationInfo_i createInfo{};
+            createInfo.size = rn->threadInfo.size;
 
             if (rn->window)
             {

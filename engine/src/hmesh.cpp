@@ -169,27 +169,22 @@ namespace hf
                 return;
             }
 
-            VertBufferCreationInfo vertInfo
-            {
-                .bufferAttrib = stats.bufferAttrib,
-                .memoryType = stats.memoryType,
-                .vertexCount = header.vertexCount,
-                .pVertices = vertices
-            };
+            VertexBufferCreationInfo vertInfo{};
+            vertInfo.vertexSize = GetVertexSize(stats.vertexAttribute);
+            vertInfo.memoryType = stats.memoryType;
+            vertInfo.vertexCount = header.vertexCount;
+            vertInfo.pVertices = vertices;
 
-            IndexBufferCreationInfo indexInfo
-            {
-                .indexFormat = (BufferDataType)header.indexFormat,
-                .memoryType = stats.memoryType,
-                .indexCount = header.indexCount,
-                .pIndices = indices
-            };
+            IndexBufferCreationInfo indexInfo{};
+            indexInfo.indexFormat = (BufferDataType)header.indexFormat;
+            indexInfo.memoryType = stats.memoryType;
+            indexInfo.indexCount = header.indexCount;
+            indexInfo.pIndices = indices;
 
-            SubMesh submesh
-            {
-                .vertBuffer = MakeRef<VertBuffer>(vertInfo, DataTransferType::TransferOwnership),
-                .indexBuffer = MakeRef<IndexBuffer>(indexInfo, DataTransferType::TransferOwnership)
-            };
+            SubMesh submesh{};
+            submesh.vertBuffer = MakeRef<VertexBuffer>(vertInfo, DataTransferType::TransferOwnership);
+            submesh.indexBuffer = MakeRef<IndexBuffer>(indexInfo, DataTransferType::TransferOwnership);
+
             subMeshes.push_back(submesh);
         }
 
@@ -203,6 +198,8 @@ namespace hf
 
     bool IsLoaded(const Ref<Mesh>& mesh) { return mesh->isLoaded; }
     MeshStats GetStats(const Ref<Mesh>& mesh) { return mesh->stats; }
+    uint32_t GetSubmeshCount(const Ref<Mesh>& mesh) { return mesh->subMeshes.size(); }
+
     void Destroy(const Ref<Mesh>& mesh)
     {
         if (inter::rendering::DestroyMesh_i(mesh.get()))
@@ -218,20 +215,9 @@ namespace hf
 
     Ref<Mesh> CreateMeshAsset(const char* assetPath)
     {
-        std::string assetLoc = TO_RES_PATH(std::string("meshes/") + assetPath) + ".meta";
-        if (!utils::FileExists(assetLoc.c_str()))
-        {
-            LOG_ERROR("[Hyperflow] Unable to find mesh meta file: %s", assetPath);
-            return nullptr;
-        }
-
+        const std::string assetLoc = TO_RES_PATH(std::string("meshes/") + assetPath) + ".meta";
         std::vector<char> metadata{};
-        if (!utils::ReadFile(assetLoc, metadata))
-        {
-            LOG_ERROR("[Hyperflow] Unable to read mesh meta: %s", assetPath);
-            return nullptr;
-        }
-        metadata.push_back('\0');
+        if (!START_READING(assetLoc.c_str(), metadata)) return nullptr;
 
         try
         {
@@ -260,9 +246,9 @@ namespace hf
             }
 
             {
-                auto v = root["bufferAttrib"].val();
+                auto v = root["vertexAttribute"].val();
                 std::string_view memTypeView(v.str, v.len);
-                info.stats.bufferAttrib = inter::HF.graphicsResources.bufferAttribs[memTypeView];
+                info.stats.vertexAttribute = inter::HF.graphicsResources.vertexAttributes[memTypeView];
             }
 
             return Create(info);

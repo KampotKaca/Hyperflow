@@ -16,18 +16,21 @@ namespace hf
         bufferSize = size.x * size.y * size.z * 4;
         layout = (VkImageLayout)info.details.finalLayout;
 
-        auto device = GRAPHICS_DATA.device.logicalDevice.device;
+        const auto device = GRAPHICS_DATA.device.logicalDevice.device;
+        VkExtent3D extent{};
+        extent.width  = size.x;
+        extent.height = size.y;
+        extent.depth  = size.z;
 
         VkImageCreateInfo imageInfo{};
         imageInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
         imageInfo.flags = (VkImageCreateFlags)info.flags;
         imageInfo.imageType = (VkImageType)info.type;
         imageInfo.format = (VkFormat)details.format;
-        imageInfo.extent = { size.x, size.y, size.z };
+        imageInfo.extent = extent;
         imageInfo.arrayLayers = info.textureCount;
         imageInfo.samples = (VkSampleCountFlagBits)info.samples;
         imageInfo.tiling = (VkImageTiling)details.tiling;
-        imageInfo.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
 
         if (info.pTextures)
         {
@@ -55,66 +58,53 @@ namespace hf
 
         imageInfo.mipLevels = mipLevels;
 
-        VK_HANDLE_EXCEPT(vkCreateImage(device, &imageInfo, nullptr, &image));
+        VK_HANDLE_EXCEPT(vkCreateImage(device, &imageInfo, &GRAPHICS_DATA.platform.allocator, &image));
         AllocateImage(details.memoryType, image, &imageMemory);
 
-        if (info.pTextures)
-        {
-            VkBuffer stagingBuffer;
-            VmaAllocation stagingBufferMemory;
-            CreateStagingBuffer(bufferSize * bufferCount, info.pTextures, &stagingBuffer, &stagingBufferMemory);
-
-            VkBufferImageCopy copyRegion
-            {
-                .bufferOffset = 0,
-                .bufferRowLength = 0,
-                .bufferImageHeight = 0,
-                .imageSubresource =
-                {
-                    .aspectMask = (VkImageAspectFlags)details.aspectFlags,
-                    .mipLevel = 0,
-                    .baseArrayLayer = 0,
-                    .layerCount = bufferCount,
-                },
-                .imageOffset = { 0, 0, 0 },
-                .imageExtent = { size.x, size.y, size.z },
-            };
-
-            VkCopyBufferToImageOperation copyOperation
-            {
-                .srcBuffer = stagingBuffer,
-                .srcMemory = stagingBufferMemory,
-                .srcLayout = VK_IMAGE_LAYOUT_UNDEFINED,
-                .dstMemory = imageMemory,
-                .dstLayout = (VkImageLayout)info.details.finalLayout,
-                .imageInfo =
-                {
-                    .image = image,
-                    .format = (VkFormat)details.format,
-                    .aspectFlags = (VkImageAspectFlags)info.details.aspectFlags,
-                    .mipLevels = mipLevels,
-                    .layerCount = bufferCount
-                },
-                .regionCount = 1,
-                .imageSize = size,
-                .uData = this,
-                .taskCompletionCallback = TextureViewCallback,
-                .deleteSrcAfterCopy = true
-            };
-
-            copyOperation.pRegions[0] = copyRegion;
-            StageCopyOperation(copyOperation);
-        }
+        if (info.pTextures) QueueTextureUpload(this, info.pTextures, (VkImageAspectFlags)info.details.aspectFlags);
         else TextureViewCallback(this);
     }
 
     VkTexture::~VkTexture()
     {
-        if (view) vkDestroyImageView(GRAPHICS_DATA.device.logicalDevice.device, view, nullptr);
+        if (view) vkDestroyImageView(GRAPHICS_DATA.device.logicalDevice.device, view, &GRAPHICS_DATA.platform.allocator);
         vmaDestroyImage(GRAPHICS_DATA.allocator, image, imageMemory);
     }
 
-    void TransitionImageLayout(VkCommandBuffer command, const ImageTransitionInfo* pImageInfos, uint32_t imageInfoCount,
+    void QueueTextureUpload(VkTexture* tex, const void* pTextures, VkImageAspectFlags aspectFlags)
+    {
+        VkBuffer stagingBuffer;
+        VmaAllocation stagingBufferMemory;
+        CreateStagingBuffer(tex->bufferSize * tex->bufferCount, pTextures, &stagingBuffer, &stagingBufferMemory);
+
+        VkBufferImageCopy copyRegion{};
+        copyRegion.imageSubresource.aspectMask = aspectFlags;
+        copyRegion.imageSubresource.layerCount = tex->bufferCount;
+        copyRegion.imageExtent = VkExtent3D{ tex->size.x, tex->size.y, tex->size.z };
+
+        VkCopyBufferToImageOperation copyOperation{};
+        copyOperation.srcBuffer = stagingBuffer;
+        copyOperation.srcMemory = stagingBufferMemory;
+        copyOperation.dstMemory = tex->imageMemory;
+        copyOperation.dstLayout = tex->layout;
+
+        copyOperation.imageInfo.image = tex->image;
+        copyOperation.imageInfo.format = (VkFormat)tex->details.format;
+        copyOperation.imageInfo.aspectFlags = aspectFlags;
+        copyOperation.imageInfo.mipLevels = tex->mipLevels;
+        copyOperation.imageInfo.layerCount = tex->bufferCount;
+
+        copyOperation.regionCount = 1;
+        copyOperation.imageSize = tex->size;
+        copyOperation.uData = tex;
+        copyOperation.taskCompletionCallback = TextureViewCallback;
+        copyOperation.deleteSrcAfterCopy = true;
+
+        copyOperation.pRegions[0] = copyRegion;
+        StageCopyOperation(copyOperation);
+    }
+
+    inline void TransitionImageLayout(VkCommandBuffer command, const ImageTransitionInfo* pImageInfos, uint32_t imageInfoCount,
         VkImageLayout oldLayout, VkImageLayout newLayout)
     {
         VkPipelineStageFlags sourceStage, destinationStage;
@@ -148,55 +138,55 @@ namespace hf
         }
         else throw GENERIC_EXCEPT("[Hyperflow]", "Unsupported layout transition!");
 
+        GRAPHICS_DATA.preAllocBuffers.imageBarriers.reserve(imageInfoCount);
+        GRAPHICS_DATA.preAllocBuffers.imageBarriers.clear();
+
         for (uint32_t i = 0; i < imageInfoCount; i++)
         {
             auto& imageInfo = pImageInfos[i];
 
-            GRAPHICS_DATA.preAllocBuffers.imageBarriers[i] = VkImageMemoryBarrier
-            {
-                .sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER,
-                .srcAccessMask = srcAccessMask,
-                .dstAccessMask = dstAccessMask,
-                .oldLayout = oldLayout,
-                .newLayout = newLayout,
-                .srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
-                .dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
-                .image = imageInfo.image,
-                .subresourceRange
-                {
-                    .aspectMask = imageInfo.aspectFlags,
-                    .baseMipLevel = 0,
-                    .levelCount = imageInfo.mipLevels,
-                    .baseArrayLayer = 0,
-                    .layerCount = imageInfo.layerCount
-                },
-            };
+            VkImageMemoryBarrier2 barrier{};
+            barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER_2;
+            barrier.srcAccessMask = srcAccessMask;
+            barrier.dstAccessMask = dstAccessMask;
+            barrier.srcStageMask = sourceStage;
+            barrier.dstStageMask = destinationStage;
+            barrier.oldLayout = oldLayout;
+            barrier.newLayout = newLayout;
+            barrier.image = imageInfo.image;
+
+            barrier.subresourceRange.aspectMask = imageInfo.aspectFlags;
+            barrier.subresourceRange.levelCount = imageInfo.mipLevels;
+            barrier.subresourceRange.layerCount = imageInfo.layerCount;
+
+            GRAPHICS_DATA.preAllocBuffers.imageBarriers.push_back(barrier);
         }
 
-        vkCmdPipelineBarrier(command, sourceStage, destinationStage,
-            0, 0, nullptr,
-            0, nullptr,
-            imageInfoCount, GRAPHICS_DATA.preAllocBuffers.imageBarriers);
+        VkDependencyInfo depInfo{};
+        depInfo.sType = VK_STRUCTURE_TYPE_DEPENDENCY_INFO;
+        depInfo.imageMemoryBarrierCount = GRAPHICS_DATA.preAllocBuffers.imageBarriers.size();
+        depInfo.pImageMemoryBarriers = GRAPHICS_DATA.preAllocBuffers.imageBarriers.data();
+
+        GRAPHICS_DATA.extensionFunctions.vkCmdPipelineBarrier2KHR(command, &depInfo);
     }
 
     inline void TransitionBufferToImageStart(VkCommandBuffer command)
     {
-        for (auto& imageTransition : GRAPHICS_DATA.preAllocBuffers.imageTransitions) imageTransition.count = 0;
+        for (auto& imageTransition : GRAPHICS_DATA.preAllocBuffers.imageTransitions) imageTransition.clear();
 
         for (uint32_t i = 0; i < GRAPHICS_DATA.bufferToImageCopyOperations.size(); i++)
         {
-            auto& operation = GRAPHICS_DATA.bufferToImageCopyOperations[i];
+            const auto& operation = GRAPHICS_DATA.bufferToImageCopyOperations[i];
             auto& imageTransitionArray = GRAPHICS_DATA.preAllocBuffers.imageTransitions[operation.srcLayout];
-            imageTransitionArray.infos[imageTransitionArray.count] = operation.imageInfo;
-            imageTransitionArray.count++;
+            imageTransitionArray.push_back(operation.imageInfo);
         }
 
         for (uint32_t i = 0; i < 9; i++)
         {
-            auto& imageTransitionArray = GRAPHICS_DATA.preAllocBuffers.imageTransitions[i];
-            if (imageTransitionArray.count > 0)
+            const auto& imageTransitionArray = GRAPHICS_DATA.preAllocBuffers.imageTransitions[i];
+            if (imageTransitionArray.size() > 0)
             {
-                TransitionImageLayout(command, imageTransitionArray.infos, imageTransitionArray.count,
+                TransitionImageLayout(command, imageTransitionArray.data(), imageTransitionArray.size(),
                 (VkImageLayout)i, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
             }
         }
@@ -221,7 +211,7 @@ namespace hf
     {
         if (!GRAPHICS_DATA.bufferToImageCopyOperations.empty())
         {
-            auto& device = GRAPHICS_DATA.device.logicalDevice;
+            const auto& device = GRAPHICS_DATA.device.logicalDevice;
             BufferOperation(GRAPHICS_DATA.transferPool.buffers[0], device.transferQueue, TransitionBufferToImageStart);
             BufferOperation(GRAPHICS_DATA.transferPool.buffers[0], device.transferQueue, CopyBufferToImage);
             BufferOperation(GRAPHICS_DATA.graphicsPool.buffers[0], device.graphicsQueue, GenerateMimMaps);
@@ -240,44 +230,36 @@ namespace hf
     void TextureViewCallback(void* uData)
     {
         auto* texture = (VkTexture*)uData;
-        VkImageViewCreateInfo viewInfo
-        {
-            .sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO,
-            .image = texture->image,
-            .viewType = (VkImageViewType)texture->viewType,
-            .format = (VkFormat)texture->details.format,
-            .subresourceRange =
-            {
-                .aspectMask = (VkImageAspectFlags)texture->details.aspectFlags,
-                .baseMipLevel = 0,
-                .levelCount = texture->mipLevels,
-                .baseArrayLayer = 0,
-                .layerCount = texture->bufferCount,
-            }
-        };
+        VkImageViewCreateInfo viewInfo{};
+
+        viewInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
+        viewInfo.image = texture->image;
+        viewInfo.viewType = (VkImageViewType)texture->viewType;
+        viewInfo.format = (VkFormat)texture->details.format;
+
+        viewInfo.subresourceRange.aspectMask = (VkImageAspectFlags)texture->details.aspectFlags;
+        viewInfo.subresourceRange.levelCount = texture->mipLevels;
+        viewInfo.subresourceRange.layerCount = texture->bufferCount;
 
         const auto device = GRAPHICS_DATA.device.logicalDevice.device;
-        VK_HANDLE_EXCEPT(vkCreateImageView(device, &viewInfo, nullptr, &texture->view));
+        VK_HANDLE_EXCEPT(vkCreateImageView(device, &viewInfo, &GRAPHICS_DATA.platform.allocator, &texture->view));
     }
 
     void GenerateMimMaps(VkCommandBuffer command)
     {
+        GRAPHICS_DATA.preAllocBuffers.imageBarriers.reserve(GRAPHICS_DATA.bufferToImageCopyOperations.size());
+        GRAPHICS_DATA.preAllocBuffers.imageBarriers.clear();
+
         for (auto& operation : GRAPHICS_DATA.bufferToImageCopyOperations)
         {
-            VkImageMemoryBarrier barrier
-            {
-                .sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER,
-                .srcAccessMask = VK_QUEUE_FAMILY_IGNORED,
-                .dstAccessMask = VK_QUEUE_FAMILY_IGNORED,
-                .image = operation.imageInfo.image,
-                .subresourceRange =
-                {
-                    .aspectMask = VK_IMAGE_ASPECT_COLOR_BIT,
-                    .levelCount = 1,
-                    .baseArrayLayer = 0,
-                    .layerCount = operation.imageInfo.layerCount
-                }
-            };
+            VkImageMemoryBarrier2 barrier{};
+
+            barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER_2;
+            barrier.image = operation.imageInfo.image;
+
+            barrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+            barrier.subresourceRange.levelCount = 1;
+            barrier.subresourceRange.layerCount = operation.imageInfo.layerCount;
 
             ivec2 size = operation.imageSize;
             for (uint32_t mip = 1; mip < operation.imageInfo.mipLevels; mip++)
@@ -285,42 +267,33 @@ namespace hf
                 barrier.subresourceRange.baseMipLevel = mip - 1;
                 barrier.oldLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
                 barrier.newLayout = VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL;
-                barrier.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
-                barrier.dstAccessMask = VK_ACCESS_TRANSFER_READ_BIT;
+                barrier.srcAccessMask = VK_ACCESS_2_TRANSFER_WRITE_BIT;
+                barrier.dstAccessMask = VK_ACCESS_2_TRANSFER_READ_BIT;
 
-                vkCmdPipelineBarrier(command,
-                VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_TRANSFER_BIT, 0,
-                0, nullptr,
-                0, nullptr,
-                1, &barrier);
+                barrier.srcStageMask = VK_PIPELINE_STAGE_2_TRANSFER_BIT;
+                barrier.dstStageMask = VK_PIPELINE_STAGE_2_TRANSFER_BIT;
 
-                VkImageBlit blit
-                {
-                    .srcSubresource =
-                    {
-                        .aspectMask = VK_IMAGE_ASPECT_COLOR_BIT,
-                        .mipLevel = mip - 1,
-                        .baseArrayLayer = 0,
-                        .layerCount = operation.imageInfo.layerCount
-                    },
-                    .srcOffsets =
-                    {
-                        { 0, 0, 0 },
-                        { size.x, size.y, 1 }
-                    },
-                    .dstSubresource =
-                    {
-                        .aspectMask = VK_IMAGE_ASPECT_COLOR_BIT,
-                        .mipLevel = mip,
-                        .baseArrayLayer = 0,
-                        .layerCount = operation.imageInfo.layerCount
-                    },
-                    .dstOffsets =
-                    {
-                        { 0, 0, 0 },
-                        { size.x > 1 ? size.x / 2 : 1, size.y > 1 ? size.y / 2 : 1, 1 }
-                    }
-                };
+                VkDependencyInfo depInfo{};
+                depInfo.sType = VK_STRUCTURE_TYPE_DEPENDENCY_INFO;
+                depInfo.imageMemoryBarrierCount = 1;
+                depInfo.pImageMemoryBarriers = &barrier;
+
+                GRAPHICS_DATA.extensionFunctions.vkCmdPipelineBarrier2KHR(command, &depInfo);
+
+                VkImageBlit blit{};
+                blit.srcSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+                blit.srcSubresource.mipLevel = mip - 1;
+                blit.srcSubresource.layerCount = operation.imageInfo.layerCount;
+
+                blit.srcOffsets[0] = VkOffset3D{ 0, 0, 0 };
+                blit.srcOffsets[1] = VkOffset3D{ size.x, size.y, 1 };
+
+                blit.dstSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+                blit.dstSubresource.mipLevel = mip;
+                blit.dstSubresource.layerCount = operation.imageInfo.layerCount;
+
+                blit.dstOffsets[0] = VkOffset3D{ 0, 0, 0 };
+                blit.dstOffsets[1] = VkOffset3D{ size.x > 1 ? size.x / 2 : 1, size.y > 1 ? size.y / 2 : 1, 1 };
 
                 vkCmdBlitImage(command,
                 operation.imageInfo.image, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
@@ -329,14 +302,13 @@ namespace hf
 
                 barrier.oldLayout = VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL;
                 barrier.newLayout = operation.dstLayout;
-                barrier.srcAccessMask = VK_ACCESS_TRANSFER_READ_BIT;
-                barrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
+                barrier.srcAccessMask = VK_ACCESS_2_TRANSFER_READ_BIT;
+                barrier.dstAccessMask = VK_ACCESS_2_SHADER_READ_BIT;
 
-                vkCmdPipelineBarrier(command,
-                VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT, 0,
-                0, nullptr,
-                0, nullptr,
-                1, &barrier);
+                barrier.srcStageMask = VK_PIPELINE_STAGE_2_TRANSFER_BIT;
+                barrier.dstStageMask = VK_PIPELINE_STAGE_2_FRAGMENT_SHADER_BIT;
+
+                GRAPHICS_DATA.extensionFunctions.vkCmdPipelineBarrier2KHR(command, &depInfo);
 
                 if (size.x > 1) size.x /= 2;
                 if (size.y > 1) size.y /= 2;
@@ -345,13 +317,20 @@ namespace hf
             barrier.subresourceRange.baseMipLevel = operation.imageInfo.mipLevels - 1;
             barrier.oldLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
             barrier.newLayout = operation.dstLayout;
-            barrier.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
-            barrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
+            barrier.srcAccessMask = VK_ACCESS_2_TRANSFER_WRITE_BIT;
+            barrier.dstAccessMask = VK_ACCESS_2_SHADER_READ_BIT;
 
-            vkCmdPipelineBarrier(command,
-                VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT, 0,
-                0, nullptr,
-                0, nullptr,
-                1, &barrier);        }
+            barrier.srcStageMask = VK_PIPELINE_STAGE_2_TRANSFER_BIT;
+            barrier.dstStageMask = VK_PIPELINE_STAGE_2_FRAGMENT_SHADER_BIT;
+
+            GRAPHICS_DATA.preAllocBuffers.imageBarriers.push_back(barrier);
+        }
+
+        VkDependencyInfo depInfo{};
+        depInfo.sType = VK_STRUCTURE_TYPE_DEPENDENCY_INFO;
+        depInfo.imageMemoryBarrierCount = GRAPHICS_DATA.preAllocBuffers.imageBarriers.size();
+        depInfo.pImageMemoryBarriers = GRAPHICS_DATA.preAllocBuffers.imageBarriers.data();
+
+        GRAPHICS_DATA.extensionFunctions.vkCmdPipelineBarrier2KHR(command, &depInfo);
     }
 }

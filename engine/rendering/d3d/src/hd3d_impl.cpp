@@ -11,7 +11,7 @@ namespace hf::inter::rendering
     void Unload()
     {
         Direct3DUnload();
-        GRAPHICS_DATA = {};
+        GRAPHICS_DATA = GraphicsData{};
     }
 
     void* CreateInstance(const RendererInstanceCreationInfo_i& info)
@@ -22,6 +22,16 @@ namespace hf::inter::rendering
     void DestroyInstance(void* rnInstance)
     {
         hf::DestroyRenderer((D3DRenderer*)rnInstance);
+    }
+
+    void* CreateShaderLibrary(const ShaderLibraryCreationInfo_i& info)
+    {
+        return nullptr;
+    }
+
+    void DestroyShaderLibrary(void* library)
+    {
+
     }
 
     void* CreateShader(const ShaderCreationInfo_i& info)
@@ -44,6 +54,16 @@ namespace hf::inter::rendering
     }
 
     void DestroyTexture(void* tex)
+    {
+
+    }
+
+    void* CreateRenderTexture(const RenderTextureCreationInfo& info)
+    {
+        return nullptr;
+    }
+
+    void DestroyRenderTexture(void* tex)
     {
 
     }
@@ -78,12 +98,12 @@ namespace hf::inter::rendering
         return 1;
     }
 
-    uint32_t DefineVertBufferAttrib(const BufferAttribDefinitionInfo& info, uint32_t fullStride)
+    uint32_t DefineVertexBufferAttribute(const VertexBufferAttributeDefinitionInfo& info, uint32_t fullStride)
     {
         return 1;
     }
 
-    uint32_t GetVertBufferAttribSize(BufferAttrib attrib)
+    uint32_t GetVertexBufferAttributeSize(VertexBufferAttribute attrib)
     {
         return 0;
     }
@@ -123,7 +143,7 @@ namespace hf::inter::rendering
 
     }
 
-    void* CreateVertBuffer(const VertBufferCreationInfo& info)
+    void* CreateVertBuffer(const VertexBufferCreationInfo_i& info)
     {
         return nullptr;
     }
@@ -133,7 +153,7 @@ namespace hf::inter::rendering
 
     }
 
-    void UploadVertBuffer(const VertBufferUploadInfo_i& info)
+    void UploadVertBuffer(const void* rn, const VertexBufferUploadInfo_i& info)
     {
 
     }
@@ -148,7 +168,7 @@ namespace hf::inter::rendering
 
     }
 
-    void UploadIndexBuffer(const IndexBufferUploadInfo_i& info)
+    void UploadIndexBuffer(const void* rn, const IndexBufferUploadInfo_i& info)
     {
 
     }
@@ -202,13 +222,34 @@ namespace hf::inter::rendering
         return nullptr;
     }
 
-    void Draw(void* rn, const DrawCallInfo_i& info)
+    void DrawIndexed(void* rn, const IndexedDrawCallInfo_i& info)
     {
         auto renderer = (D3DRenderer*)rn;
         Draw(renderer);
     }
 
+    void Draw(void* rn, const VertexedDrawCallInfo_i& info)
+    {
+        auto renderer = (D3DRenderer*)rn;
+        Draw(renderer);
+    }
+
+    void ApplyRenderAttachmentDependencies(void* rn, RenderAttachmentDependencyInfo* pInfos, uint32_t count)
+    {
+
+    }
+
     void WaitForDevice()
+    {
+
+    }
+
+    void BeginRendering(void* rn, void* tex)
+    {
+
+    }
+
+    void EndRendering(void* rn)
     {
 
     }
@@ -228,6 +269,9 @@ namespace hf::inter::rendering
             .CreateInstance             = CreateInstance,
             .DestroyInstance            = DestroyInstance,
 
+            .CreateShaderLibrary        = CreateShaderLibrary,
+            .DestroyShaderLibrary       = DestroyShaderLibrary,
+
             //shader
             .CreateShader               = CreateShader,
             .DestroyShader              = DestroyShader,
@@ -242,6 +286,10 @@ namespace hf::inter::rendering
             .CreateTexture              = CreateTexture,
             .DestroyTexture             = DestroyTexture,
 
+            //render texture
+            .CreateRenderTexture        = CreateRenderTexture,
+            .DestroyRenderTexture       = DestroyRenderTexture,
+
             //texture pack
             .CreateTexturePack          = CreateTexturePack,
             .DestroyTexturePack         = DestroyTexturePack,
@@ -255,19 +303,19 @@ namespace hf::inter::rendering
             .DefineTextureLayout        = DefineTextureLayout,
 
             //buffer attribute
-            .DefineVertBufferAttrib     = DefineVertBufferAttrib,
-            .GetVertBufferAttribSize    = GetVertBufferAttribSize,
+            .DefineVertexBufferAttribute     = DefineVertexBufferAttribute,
+            .GetVertexBufferAttributeSize    = GetVertexBufferAttributeSize,
 
-            //uniform buffer
+            //buffers
             .DefineUniformBuffer        = DefineUniformBuffer,
             .DefineStorageBuffer        = DefineStorageBuffer,
             .UploadBuffer               = UploadBuffer,
             .BindBuffer                 = BindBuffer,
 
             //vertex buffer
-            .CreateVertBuffer           = CreateVertBuffer,
-            .DestroyVertBuffer          = DestroyVertBuffer,
-            .UploadVertBuffer           = UploadVertBuffer,
+            .CreateVertexBuffer           = CreateVertBuffer,
+            .DestroyVertexBuffer          = DestroyVertBuffer,
+            .UploadVertexBuffer           = UploadVertBuffer,
 
             //index buffer
             .CreateIndexBuffer          = CreateIndexBuffer,
@@ -283,8 +331,15 @@ namespace hf::inter::rendering
             .GetReadyForRendering       = GetReadyForRendering,
             .StartFrame                 = StartFrame,
             .EndFrame                   = EndFrame,
+
+            .DrawIndexed                = DrawIndexed,
             .Draw                       = Draw,
+
+            .ApplyRenderAttachmentDependencies = ApplyRenderAttachmentDependencies,
             .WaitForDevice              = WaitForDevice,
+
+            .BeginRendering             = BeginRendering,
+            .EndRendering               = EndRendering,
 
             .RegisterFrameBufferChange  = RegisterFrameBufferChange,
             .SetVSync                   = SetVSync,
