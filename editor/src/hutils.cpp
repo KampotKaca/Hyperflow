@@ -12,6 +12,13 @@ namespace hf::editor
         return key;
     }
 
+    const char* PointerToID(const void* ptr)
+    {
+        static char key[32];
+        snprintf(key, sizeof(key), "%llu", (uint64_t)ptr);
+        return key;
+    }
+
     void DrawLabel(const char* label, uint32_t columnIndex)
     {
         ImGui::TableNextRow();

@@ -51,6 +51,7 @@ namespace hf::editor
     static const std::string VECTOR_COLUMN_IDS[] = { "##col_vX", "##col_vY", "##col_vZ", "##col_vW" };
 
     const char* DrawKeyGen(const char* label);
+    const char* PointerToID(const void* ptr);
     void DrawLabel(const char* label, uint32_t columnIndex);
     bool DrawScalar(const char* label, ImGuiDataType data_type, void* v, float speed = 0.1f, const void* from = nullptr, const void* to = nullptr, const char* format = "%.2f", DrawStateFlag flags = DrawStateFlag::None);
     bool DrawVectorN(const char* label, ImGuiDataType data_type, int size, void* vec, float speed = 0.1f, void* from = nullptr, void* to = nullptr, const void* resetValue = nullptr, const char* format = "%.2f", DrawStateFlag flags = DrawStateFlag::None);
