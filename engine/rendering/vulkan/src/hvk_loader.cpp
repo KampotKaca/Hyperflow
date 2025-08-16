@@ -3,7 +3,7 @@
 
 namespace hf
 {
-#if DEBUG
+#if defined(VULKAN_VALIDATOR)
 
     const char* DEBUG_VALIDATION_LAYERS[NUM_VK_VALIDATION_LAYERS] =
     {
@@ -84,7 +84,7 @@ namespace hf
         InitExtensions();
         InitInstanceVersion();
 
-#if DEBUG
+#if defined(VULKAN_VALIDATOR)
         for (const char* layer : DEBUG_VALIDATION_LAYERS)
         {
             if (!IsLayerSupported(layer))
@@ -164,11 +164,10 @@ namespace hf
         createInfo.enabledExtensionCount = GRAPHICS_DATA.platform.api->requiredExtensionCount;
         createInfo.ppEnabledExtensionNames = GRAPHICS_DATA.platform.api->requiredExtension;
 
-#if DEBUG
+#if defined(VULKAN_VALIDATOR)
         VkDebugUtilsMessengerCreateInfoEXT debugCreateInfo{};
         debugCreateInfo.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT;
 
-// #define DEEP_RENDERING_VALIDATION
 #if defined(DEEP_RENDERING_VALIDATION)
 
         constexpr VkValidationFeatureEnableEXT enables[] =
@@ -203,7 +202,7 @@ namespace hf
 #endif
         VK_HANDLE_EXCEPT(vkCreateInstance(&createInfo, &GRAPHICS_DATA.platform.allocator, &GRAPHICS_DATA.instance));
 
-#if DEBUG
+#if defined(VULKAN_VALIDATOR)
         VK_HANDLE_EXCEPT(Debug_CreateUtilsMessengerEXT(GRAPHICS_DATA.instance, &debugCreateInfo,
                             &GRAPHICS_DATA.platform.allocator, &GRAPHICS_DATA.debugMessenger));
 #endif
@@ -211,7 +210,7 @@ namespace hf
 
     void DestroyInstance()
     {
-#if DEBUG
+#if defined(VULKAN_VALIDATOR)
         Debug_DestroyUtilsMessengerEXT(GRAPHICS_DATA.instance, GRAPHICS_DATA.debugMessenger, &GRAPHICS_DATA.platform.allocator);
 #endif
 

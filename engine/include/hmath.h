@@ -86,6 +86,40 @@ namespace hf
         ivec2 position{};
         ivec2 size{};
     };
+
+    struct TransformedBoundingVolume
+    {
+        vec3 min{};
+        vec3 max{};
+        mat4 transform = glm::identity<mat4>();
+    };
+
+    struct BoundingVolume
+    {
+        vec3 min{};
+        vec3 max{};
+
+        void Encapsulate(const vec3 point)
+        {
+            min = glm::min(min, point);
+            max = glm::max(max, point);
+        }
+
+        void Encapsulate(const BoundingVolume& other)
+        {
+            min = glm::min(min, other.min);
+            max = glm::max(max, other.max);
+        }
+
+        TransformedBoundingVolume GetTransformedVolume(const mat4& transform) const
+        {
+            TransformedBoundingVolume volume{};
+            volume.transform = transform;
+            volume.min = min;
+            volume.max = max;
+            return volume;
+        }
+    };
 }
 
 #endif //HMATH_H

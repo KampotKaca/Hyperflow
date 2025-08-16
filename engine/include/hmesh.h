@@ -14,6 +14,7 @@ namespace hf
         {
             Ref<VertexBuffer> vertBuffer{};
             Ref<IndexBuffer> indexBuffer{};
+            BoundingVolume volume{};
         };
 
         std::string filePath{};

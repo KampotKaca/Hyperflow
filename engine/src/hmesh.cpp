@@ -48,6 +48,7 @@ namespace hf
 
         uint32_t offset = 0;
 
+        BoundingVolume volume{};
         uint32_t submeshCount = 0;
         memcpy(&submeshCount, compressedData.data() + offset, sizeof(uint32_t));
         offset += sizeof(uint32_t);
@@ -104,6 +105,8 @@ namespace hf
                     for (uint32_t j = 0; j < header.vertexCount; j++)
                     {
                         memcpy(&rf[j * vertexStride + strideOffset], &meshData[offset], pncStep);
+                        vec3 position = *(vec3*)&rf[j * vertexStride + strideOffset];
+                        volume.Encapsulate(position);
                         offset += pncStep;
                     }
                 }
@@ -184,6 +187,7 @@ namespace hf
             SubMesh submesh{};
             submesh.vertBuffer = MakeRef<VertexBuffer>(vertInfo, DataTransferType::TransferOwnership);
             submesh.indexBuffer = MakeRef<IndexBuffer>(indexInfo, DataTransferType::TransferOwnership);
+            submesh.volume = volume;
 
             subMeshes.push_back(submesh);
         }
@@ -199,6 +203,7 @@ namespace hf
     bool IsLoaded(const Ref<Mesh>& mesh) { return mesh->isLoaded; }
     MeshStats GetStats(const Ref<Mesh>& mesh) { return mesh->stats; }
     uint32_t GetSubmeshCount(const Ref<Mesh>& mesh) { return mesh->subMeshes.size(); }
+    const BoundingVolume& GetSubmeshBoundingVolume(const Ref<Mesh>& mesh, uint32_t submeshIndex) { return mesh->subMeshes[submeshIndex].volume; }
 
     void Destroy(const Ref<Mesh>& mesh)
     {

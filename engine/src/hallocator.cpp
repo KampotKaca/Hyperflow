@@ -22,8 +22,6 @@ namespace hf
         void* Allocate(std::size_t n)
         {
             EnsureAllocatorInit();
-            inter::alloc::LoadAllocatorThread_i();
-
             void* memory = rpmalloc(n);
             if (!memory) throw std::bad_alloc();
             return memory;
@@ -32,7 +30,6 @@ namespace hf
         void* AllocateAligned(std::size_t n, std::align_val_t align)
         {
             EnsureAllocatorInit();
-            inter::alloc::LoadAllocatorThread_i();
             void* memory = rpaligned_alloc((size_t)align, n);
             if (!memory) throw std::bad_alloc();
             return memory;
@@ -134,6 +131,8 @@ namespace hf
         }
     }
 }
+
+#if defined(HF_ENABLE_ALLOCATOR)
 
 void* operator new(std::size_t size)
 {
@@ -244,3 +243,5 @@ void operator delete[](void* ptr, std::align_val_t align, std::size_t size) noex
 {
     hf::utils::DeallocateAligned(ptr, align);
 }
+
+#endif

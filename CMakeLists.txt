@@ -32,7 +32,16 @@ endif()
 
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
     add_definitions(-DDEBUG)
+    #editor
+    set(EDITOR BOOL TRUE)
+    add_definitions(-DEDITOR)
     add_subdirectory(editor)
+
+    #vulkan validation
+#    set(VULKAN_VALIDATOR BOOL TRUE)
+#    add_definitions(-DVULKAN_VALIDATOR)
+#    add_definitions(-DDEEP_RENDERING_VALIDATION)
+
 elseif(CMAKE_BUILD_TYPE STREQUAL "Release")
     add_definitions(-DRELEASE)
 endif()

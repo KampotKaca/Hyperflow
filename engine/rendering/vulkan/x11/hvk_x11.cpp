@@ -6,7 +6,7 @@ namespace hf
     {
         VK_KHR_SURFACE_EXTENSION_NAME,
         "VK_KHR_xcb_surface",
-#if DEBUG
+#if defined(VULKAN_VALIDATOR)
         "VK_EXT_debug_utils"
 #endif
     };

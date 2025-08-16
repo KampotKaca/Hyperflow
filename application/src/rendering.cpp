@@ -65,9 +65,10 @@ namespace app
                             hf::DrawGroupSet_PushConstant(rn, pc);
                             hf::Start_DrawCall(rn, APP_MESHES.viking_room, 0);
 
+                            const auto modelMatrix = APP_OBJECTS.vikingRoomTransform.ToMat4();
                             hf::DrawAdd_Instance(rn, DefaultInstanceData
                             {
-                                .modelMatrix = APP_OBJECTS.vikingRoomTransform.ToMat4(),
+                                .modelMatrix = modelMatrix,
                                 .color = hf::vec4{ hf::utils::ColorFromHash(0xFFFFFF), 1 },
                             });
 
@@ -84,9 +85,10 @@ namespace app
                             hf::DrawGroupSet_PushConstant(rn, pc);
                             hf::Start_DrawCall(rn, hf::primitives::GetMesh(hf::PrimitiveMeshType::IcoSphere), 0);
 
+                            const auto modelMatrix = APP_OBJECTS.sphereTransform.ToMat4();
                             hf::DrawAdd_Instance(rn, DefaultInstanceData
                             {
-                                .modelMatrix = APP_OBJECTS.sphereTransform.ToMat4(),
+                                .modelMatrix = modelMatrix,
                                 .color = hf::vec4{ hf::utils::ColorFromHash(0x9E0505), 1 },
                             });
 
@@ -112,9 +114,10 @@ namespace app
                         {
                             hf::Start_DrawCall(rn, hf::primitives::GetMesh(hf::PrimitiveMeshType::Plane), 0);
 
+                            const auto modelMatrix = APP_OBJECTS.groundTransform.ToMat4();
                             hf::DrawAdd_Instance(rn, DefaultInstanceData
                             {
-                                .modelMatrix = APP_OBJECTS.groundTransform.ToMat4(),
+                                .modelMatrix = modelMatrix,
                                 .color = hf::vec4{ hf::utils::ColorFromHash(0x19CB1E), 1 }
                             });
 

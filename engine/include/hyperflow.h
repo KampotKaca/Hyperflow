@@ -265,6 +265,7 @@ namespace hf
 
 	MeshStats GetStats(const Ref<Mesh>& mesh);
 	uint32_t GetSubmeshCount(const Ref<Mesh>& mesh);
+	const BoundingVolume& GetSubmeshBoundingVolume(const Ref<Mesh>& mesh, uint32_t submeshIndex);
 
 	void SubmitAllTextures();
 	void SubmitAllBuffers();

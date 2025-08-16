@@ -32,7 +32,7 @@ target_link_libraries(${PROJECT_NAME}
         Hyperflow_Engine
 )
 
-if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+if(EDITOR)
 target_link_libraries(${PROJECT_NAME}
         PRIVATE
         Hyperflow_Editor

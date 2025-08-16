@@ -10,6 +10,8 @@ namespace hf
 {
     static void ThreadDraw(const Ref<Renderer>& rn)
     {
+        inter::alloc::LoadAllocatorThread_i();
+
         rn->threadInfo.isRunning = true;
         uint64_t renderFrameCount = 0;
         while (rn->threadInfo.isRunning)
@@ -22,8 +24,9 @@ namespace hf
             renderFrameCount++;
         }
         rn->threadInfo.isRunning = false;
-
         inter::HF.renderingApi.api.WaitForDevice();
+
+        inter::alloc::UnloadAllocatorThread_i();
     }
 
     Renderer::Renderer(const Window* window, const RendererEventInfo& eventInfo)

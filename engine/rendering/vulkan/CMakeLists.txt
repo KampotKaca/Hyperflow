@@ -45,6 +45,7 @@ file(GLOB_RECURSE VULKAN_SRC CONFIGURE_DEPENDS src/*.cpp)
 
 add_subdirectory(external/vma)
 
+
 add_library(vk SHARED ${VULKAN_SRC} ${ADDITIONAL_SRC})
 target_precompile_headers(vk PRIVATE "include/hvk_shared.h")
 set_target_properties(vk PROPERTIES UNITY_BUILD ON)

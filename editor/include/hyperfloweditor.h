@@ -33,7 +33,7 @@ namespace hf::editor
     DEFINE_ENUM_FLAGS(Condition)
     DEFINE_ENUM_FLAGS(DrawStateFlag)
 
-#if DEBUG
+#if EDITOR
 
     void Load(const LoadInfo& info);
     void Unload();

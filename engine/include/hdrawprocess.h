@@ -57,9 +57,8 @@ namespace hf
     struct DrawCallPacketInfo
     {
         AssetRange<uint32_t> vertexBufferRange{};
-        AssetRange<uint32_t> instanceDataRange{};
+        AssetRange<uint32_t> instanceRange{};
         Ref<IndexBuffer> indexBuffer{};
-        uint32_t instanceCount{};
 
 #if DEBUG
         char debugName[16];
@@ -115,6 +114,11 @@ namespace hf
         uint32_t index{};
     };
 
+    struct InstancePacketInfo
+    {
+        AssetRange<uint32_t> dataRange{};
+    };
+
     struct RenderPacket
     {
         std::optional<Camera3DFreeLook> camera{};
@@ -138,6 +142,7 @@ namespace hf
         std::vector<Buffer> buffers{};
 
         std::vector<DrawCallPacketInfo> drawCalls{};
+        std::vector<InstancePacketInfo> instances{};
         std::vector<Ref<VertexBuffer>> vertexBuffers{};
         std::vector<uint8_t> bufferUploads{};
         std::vector<uint8_t> pushConstantUploads{};
@@ -170,6 +175,7 @@ namespace hf
             vertexBuffers.clear();
             bufferUploads.clear();
             pushConstantUploads.clear();
+            instances.clear();
             instanceUploads.clear();
             bufferUploadPackets.clear();
         }
@@ -196,8 +202,8 @@ namespace hf
             currentMaterial = nullptr;
             currentUniformSet = nullptr;
             currentDrawPacket = nullptr;
-            currentDrawCall = nullptr;
             currentTexturePackBinding = nullptr;
+            currentDrawCall = nullptr;
         }
     };
 }

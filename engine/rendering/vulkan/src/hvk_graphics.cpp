@@ -93,7 +93,7 @@ namespace hf
         createInfo.enabledExtensionCount = DEVICE_EXTENSIONS.size();
         createInfo.ppEnabledExtensionNames = DEVICE_EXTENSIONS.data();
 
-#if DEBUG
+#if defined(VULKAN_VALIDATOR)
         createInfo.ppEnabledLayerNames = DEBUG_VALIDATION_LAYERS;
         createInfo.enabledLayerCount = NUM_VK_VALIDATION_LAYERS;
 #endif
