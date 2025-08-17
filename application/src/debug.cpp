@@ -176,6 +176,7 @@ namespace app
         }
 
         hf::editor::DrawMemoryStatisticsWindow("Memory Statistics");
+        hf::editor::DrawRenderStatisticsWindow("Rendering Statistics");
         hf::editor::DrawAudioSettingsWindow("Audio Settings");
 
         hf::editor::SetNextWindowSize({ 300, 300 }, hf::editor::Condition::FirstUseEver);

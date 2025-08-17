@@ -129,6 +129,8 @@ namespace hf
             stats.totalNumFrees         = su.free_total;
             return stats;
         }
+
+        RendererStatistics GetRendererStatistics(const Ref<Renderer>& rn) { return rn->lastDrawStatistics; }
     }
 }
 

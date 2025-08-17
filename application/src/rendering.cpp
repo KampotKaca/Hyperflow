@@ -59,18 +59,27 @@ namespace app
 
                         hf::Start_DrawGroup(rn);
                         {
+                            const auto meshVolume = hf::GetSubmeshBoundingVolume(APP_MESHES.viking_room, 0);
                             DefaultPushConstant pc{};
                             pc.phongData = hf::vec4{ hf::utils::ColorFromHash(0x9B9B9B), 0.8 };
 
                             hf::DrawGroupSet_PushConstant(rn, pc);
                             hf::Start_DrawCall(rn, APP_MESHES.viking_room, 0);
 
-                            const auto modelMatrix = APP_OBJECTS.vikingRoomTransform.ToMat4();
-                            hf::DrawAdd_Instance(rn, DefaultInstanceData
+                            for (uint32_t x = 0; x < 100; x++)
                             {
-                                .modelMatrix = modelMatrix,
-                                .color = hf::vec4{ hf::utils::ColorFromHash(0xFFFFFF), 1 },
-                            });
+                                for (uint32_t y = 0; y < 100; y++)
+                                {
+                                    auto currentTransform = APP_OBJECTS.vikingRoomTransform;
+                                    currentTransform.position = hf::vec3{ x, 0, y } * 2.0f - hf::vec3{ 100, 0, 100 };
+                                    const auto modelMatrix = currentTransform.ToMat4();
+                                    hf::DrawAdd_Instance(rn, DefaultInstanceData
+                                    {
+                                        .modelMatrix = modelMatrix,
+                                        .color = hf::vec4{ hf::utils::ColorFromHash(0xFFFFFF), 1 },
+                                    }, meshVolume.GetTransformedVolume(modelMatrix, currentTransform.scale));
+                                }
+                            }
 
                             hf::End_DrawCall(rn);
                         }
@@ -78,6 +87,8 @@ namespace app
 
                         hf::Start_DrawGroup(rn);
                         {
+                            const auto meshVolume = hf::GetSubmeshBoundingVolume(hf::primitives::GetMesh(hf::PrimitiveMeshType::IcoSphere), 0);
+
                             hf::DrawGroupAdd_TexturePackBinding(rn, APP_TEXTURE_PACKS.white_pack, 1);
                             DefaultPushConstant pc{};
                             pc.phongData = hf::vec4{ hf::utils::ColorFromHash(0x9B9B9B), 1.0 };
@@ -90,7 +101,7 @@ namespace app
                             {
                                 .modelMatrix = modelMatrix,
                                 .color = hf::vec4{ hf::utils::ColorFromHash(0x9E0505), 1 },
-                            });
+                            }, meshVolume.GetTransformedVolume(modelMatrix, APP_OBJECTS.sphereTransform.scale));
 
                             hf::End_DrawCall(rn);
                         }
@@ -112,6 +123,7 @@ namespace app
                     {
                         hf::Start_DrawGroup(rn);
                         {
+                            const auto meshVolume = hf::GetSubmeshBoundingVolume(hf::primitives::GetMesh(hf::PrimitiveMeshType::Plane), 0);
                             hf::Start_DrawCall(rn, hf::primitives::GetMesh(hf::PrimitiveMeshType::Plane), 0);
 
                             const auto modelMatrix = APP_OBJECTS.groundTransform.ToMat4();
@@ -119,7 +131,7 @@ namespace app
                             {
                                 .modelMatrix = modelMatrix,
                                 .color = hf::vec4{ hf::utils::ColorFromHash(0x19CB1E), 1 }
-                            });
+                            }, meshVolume.GetTransformedVolume(modelMatrix, APP_OBJECTS.groundTransform.scale));
 
                             hf::End_DrawCall(rn);
                         }

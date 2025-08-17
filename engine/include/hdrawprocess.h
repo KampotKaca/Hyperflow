@@ -59,6 +59,9 @@ namespace hf
         AssetRange<uint32_t> vertexBufferRange{};
         AssetRange<uint32_t> instanceRange{};
         Ref<IndexBuffer> indexBuffer{};
+        uint32_t instanceBufferOffset{};
+        uint32_t singleInstanceSize{};
+        bool isInstanced = true;
 
 #if DEBUG
         char debugName[16];
@@ -75,7 +78,7 @@ namespace hf
     struct MaterialPacketInfo
     {
         Ref<Material> material{};
-        AssetRange<uint32_t> drawPacketRange{};
+        AssetRange<uint32_t> drawGroupRange{};
         AssetRange<uint32_t> texpackRange{};
     };
 
@@ -116,12 +119,16 @@ namespace hf
 
     struct InstancePacketInfo
     {
-        AssetRange<uint32_t> dataRange{};
+
     };
 
     struct RenderPacket
     {
-        std::optional<Camera3DFreeLook> camera{};
+        RendererStatistics statistics{};
+
+        CameraFrustum frustum{};
+        Camera3DFreeLook camera{};
+
         std::vector<DirectionalLight> directionalLights{};
         std::vector<SpotLight> spotLights{};
         std::vector<PointLight> pointLights{};
@@ -151,7 +158,8 @@ namespace hf
 
         void clear()
         {
-            camera = std::nullopt;
+            statistics = RendererStatistics{};
+
             directionalLights.clear();
             spotLights.clear();
             pointLights.clear();

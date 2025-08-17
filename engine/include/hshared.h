@@ -815,6 +815,11 @@ namespace hf
         size_t totalNumFrees = 0;
     };
 
+    struct RendererStatistics
+    {
+        uint32_t culledDrawCalls = 0;
+    };
+
 	namespace utils
 	{
 		inline uint32_t GetFirstBitOne64(const uint64_t n) { return n ? __builtin_ctzll(n) : 64u; }

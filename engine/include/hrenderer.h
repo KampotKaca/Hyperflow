@@ -28,6 +28,8 @@ namespace hf
 
 	    RenderPacket allPackets[3]{};
 	    RenderPacketDrawProcess currentDraw{};
+	    RendererStatistics lastDrawStatistics{};
+
 		bool isDrawing = false;
 		ThreadInfo threadInfo{};
 		const Window* window{};

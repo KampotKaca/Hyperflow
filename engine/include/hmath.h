@@ -6,6 +6,7 @@
 #define GLM_FORCE_RIGHT_HANDED
 #define GLM_ENABLE_EXPERIMENTAL
 #include <cinttypes>
+
 #include "glm/vec2.hpp"
 #include "glm/vec3.hpp"
 #include "glm/vec4.hpp"
@@ -20,6 +21,7 @@
 #include "glm/gtx/quaternion.hpp"
 #include "glm/gtx/rotate_vector.hpp"
 #include "glm/gtx/euler_angles.hpp"
+#include "glm/gtc/matrix_access.hpp"
 
 namespace hf
 {
@@ -87,10 +89,17 @@ namespace hf
         ivec2 size{};
     };
 
+    struct SphereVolume
+    {
+        vec3 center{};
+        float_t radius{};
+    };
+
     struct TransformedBoundingVolume
     {
         vec3 min{};
         vec3 max{};
+        SphereVolume sphereVolume{};
         mat4 transform = glm::identity<mat4>();
     };
 
@@ -111,15 +120,30 @@ namespace hf
             max = glm::max(max, other.max);
         }
 
-        TransformedBoundingVolume GetTransformedVolume(const mat4& transform) const
+        TransformedBoundingVolume GetTransformedVolume(const mat4& transform, const vec3& scale) const
         {
             TransformedBoundingVolume volume{};
             volume.transform = transform;
             volume.min = min;
             volume.max = max;
+            volume.sphereVolume = GetSphereVolume(scale, transform);
+            return volume;
+        }
+
+        SphereVolume GetSphereVolume(const vec3& scale, const mat4& transform) const
+        {
+            SphereVolume volume{};
+            volume.center = glm::vec3(transform * glm::vec4((max + min) * 0.5f, 1.0f));
+            volume.radius = glm::length(max - volume.center) * glm::max(scale.x, scale.y, scale.z);
             return volume;
         }
     };
+
+    inline vec4 NormalizePlane(const vec4& p)
+    {
+        const float len = glm::length(glm::vec3(p));
+        return p / len;
+    }
 }
 
 #endif //HMATH_H

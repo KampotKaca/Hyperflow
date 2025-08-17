@@ -33,7 +33,7 @@ namespace hf::editor
     DEFINE_ENUM_FLAGS(Condition)
     DEFINE_ENUM_FLAGS(DrawStateFlag)
 
-#if EDITOR
+#if defined(EDITOR)
 
     void Load(const LoadInfo& info);
     void Unload();
@@ -59,6 +59,7 @@ namespace hf::editor
     bool Draw(const char* label, Camera3DCore& cam,    DrawStateFlag flags = DrawStateFlag::None);
 
     bool DrawMemoryStatisticsWindow(const char* label, bool* isOpen = nullptr, WindowFlags flags = WindowFlags::None);
+    bool DrawRenderStatisticsWindow(const char* label, bool* isOpen = nullptr, WindowFlags flags = WindowFlags::None);
     bool DrawAudioSettingsWindow(const char* label, bool* isOpen = nullptr, WindowFlags flags = WindowFlags::None);
 
     bool Draw(const char* label, const Ref<AudioPlayer>& pl,   DrawStateFlag flags = DrawStateFlag::None);
@@ -303,6 +304,7 @@ namespace hf::editor
     inline bool Draw(const char* label, Camera3DCore& cam,      DrawStateFlag flags = DrawStateFlag::None) { return false; }
 
     inline bool DrawMemoryStatisticsWindow(const char* label, bool* isOpen = nullptr, WindowFlags flags = WindowFlags::None) { return false; }
+    inline bool DrawRenderStatisticsWindow(const char* label, bool* isOpen = nullptr, WindowFlags flags = WindowFlags::None) { return false; }
     inline bool DrawAudioSettingsWindow   (const char* label, bool* isOpen = nullptr, WindowFlags flags = WindowFlags::None) { return false; }
 
     inline bool Draw(const char* label, const Ref<AudioPlayer>& pl,   DrawStateFlag flags = DrawStateFlag::None) { return false; }

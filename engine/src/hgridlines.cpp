@@ -16,10 +16,7 @@ namespace hf::gridlines
                     Start_DrawGroup(rn);
                     {
                         DrawGroupSet_PushConstant(rn, info);
-
-                        Start_DrawCall(rn, nullptr);
-                        DrawAdd_VertexBuffer(rn, inter::HF.staticResources.quadBuffer);
-                        End_DrawCall(rn);
+                        DrawGroupAdd_DrawCall(rn, nullptr, inter::HF.staticResources.quadBuffer);
                     }
                     End_DrawGroup(rn);
                 }

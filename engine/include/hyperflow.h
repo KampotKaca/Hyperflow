@@ -239,9 +239,11 @@ namespace hf
     void End_DrawCall(const Ref<Renderer>& rn);
 
 	void DrawGroupAdd_TexturePackBinding(const Ref<Renderer>& rn, const Ref<TexturePack>& texPack, uint32_t setBindingIndex);
+    void DrawGroupAdd_DrawCall(const Ref<Renderer>& rn, const Ref<IndexBuffer>& indexBuffer, const Ref<VertexBuffer>& vertexBuffer);
+    void DrawGroupAdd_DrawCall(const Ref<Renderer>& rn, const Ref<Mesh>& mesh, uint32_t submeshIndex);
 
 	void DrawGroupSet_PushConstant(const Ref<Renderer>& rn, const void* data, uint32_t dataSize);
-	void DrawAdd_Instance(const Ref<Renderer>& rn, const void* data, uint32_t dataSize);
+	void DrawAdd_Instance(const Ref<Renderer>& rn, const void* data, uint32_t dataSize, const TransformedBoundingVolume& volume);
 	void DrawAdd_VertexBuffer(const Ref<Renderer>& rn, const Ref<VertexBuffer>& vb);
 
 	template<typename T>
@@ -251,9 +253,9 @@ namespace hf
 	}
 
     template<typename T>
-    void DrawAdd_Instance(const Ref<Renderer>& rn, const T& data)
+    void DrawAdd_Instance(const Ref<Renderer>& rn, const T& data, const TransformedBoundingVolume& volume)
 	{
-	    DrawAdd_Instance(rn, &data, sizeof(T));
+	    DrawAdd_Instance(rn, &data, sizeof(T), volume);
 	}
     //endregion
 
@@ -362,6 +364,7 @@ namespace hf
 
 	    GlobalMemoryStatistics GetGlobalMemoryStatistics();
 	    ThreadMemoryStatistics GetThreadMemoryStatistics();
+	    RendererStatistics GetRendererStatistics(const Ref<Renderer>& rn);
 
 	    void ReadVertexInputModule   (const char* assetPath, ShaderLibraryVertexInputModuleInfo& result);
 	    void ReadPreRasterModule     (const char* assetPath, ShaderLayout layout, ShaderLibraryPreRasterModuleInfo& result);

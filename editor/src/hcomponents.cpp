@@ -185,6 +185,19 @@ namespace hf::editor
         return false;
     }
 
+    bool DrawRenderStatisticsWindow(const char* label, bool* isOpen, WindowFlags flags)
+    {
+        if(StartWindow(label, isOpen, flags))
+        {
+            const auto stats = utils::GetRendererStatistics(GetRenderer(GetMainWindow()));
+            ImGui::Text("Culled DrawCalls: %i", stats.culledDrawCalls);
+
+            EndWindow();
+            return true;
+        }
+        return false;
+    }
+
     bool DrawAudioSettingsWindow(const char* label, bool* isOpen, WindowFlags flags)
     {
         if(StartWindow(label, isOpen, flags))

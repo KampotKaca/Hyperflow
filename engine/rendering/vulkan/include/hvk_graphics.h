@@ -13,7 +13,7 @@
 
 namespace hf
 {
-#if defined(VULKAN_VALIDATOR)
+#if defined(VK_ENABLE_VALIDATION)
 #define NUM_VK_VALIDATION_LAYERS 1
     extern const char* DEBUG_VALIDATION_LAYERS[NUM_VK_VALIDATION_LAYERS];
 
@@ -212,7 +212,7 @@ namespace hf
         RenderApiEditorInfo* editorInfo{};
         VkExtensionFunctions extensionFunctions{};
 
-#if defined(VULKAN_VALIDATOR)
+#if defined(VK_ENABLE_VALIDATION)
         VkDebugUtilsMessengerEXT debugMessenger{};
 #endif
     };
