@@ -2,6 +2,7 @@
 #define HCAMERA3DFREELOOK_H
 
 #include "hcamera3dcore.h"
+#include <immintrin.h>
 
 namespace hf
 {
@@ -9,7 +10,7 @@ namespace hf
     {
         vec4 planes[6];
 
-        bool IsVisible(const SphereVolume& volume)
+        bool IsVisible(const SphereVolume& volume) const
         {
             for (const auto& plane : planes)
             {
@@ -19,15 +20,28 @@ namespace hf
             return true;
         }
 
-        template<typename T, bool ApplyTransform>
-        bool IsVisible(const T& vol)
+        bool IsVisible(const BoundingVolume& vol) const
         {
-            if constexpr (ApplyTransform)
+            for (const auto& plane : planes)
             {
-                if (!IsVisible(vol.sphereVolume)) return false;
-            }
+                glm::vec3 positive = vol.min;
+                if (plane.x >= 0) positive.x = vol.max.x;
+                if (plane.y >= 0) positive.y = vol.max.y;
+                if (plane.z >= 0) positive.z = vol.max.z;
 
-            std::array corners =
+                if (glm::dot(vec3(plane), positive) + plane.w < 0.0f) return false;
+            }
+            return true;
+        }
+
+        bool IsVisible(const TransformedBoundingVolume& vol) const
+        {
+            if (!IsVisible(vol.sphereVolume)) return false;
+
+            vec3 newMin( std::numeric_limits<float>::max() );
+            vec3 newMax( std::numeric_limits<float>::lowest() );
+
+            const std::array corners =
             {
                 glm::vec3(vol.min.x, vol.min.y, vol.min.z),
                 glm::vec3(vol.max.x, vol.min.y, vol.min.z),
@@ -39,32 +53,17 @@ namespace hf
                 glm::vec3(vol.max.x, vol.max.y, vol.max.z)
             };
 
-            if constexpr (ApplyTransform)
+            for (int i = 0; i < 8; i++)
             {
-                for (auto& c : corners)
-                    c = glm::vec3(vol.transform * glm::vec4(c, 1.0f));
+                auto transformed = glm::vec3(vol.transform * glm::vec4(corners[i], 1.0f));
+
+                newMin = glm::min(newMin, transformed);
+                newMax = glm::max(newMax, transformed);
             }
 
-            for (const auto& plane : planes)
-            {
-                int insideCount = 0;
-                for (const auto& c : corners)
-                {
-                    if (glm::dot(glm::vec3(plane), c) + plane.w >= 0.0f)
-                    {
-                        insideCount++;
-                        break;
-                    }
-                }
-
-                if (insideCount == 0) return false;
-            }
-
-            return true;
+            const BoundingVolume worldAABB{ newMin, newMax };
+            return IsVisible(worldAABB);
         }
-
-        bool IsVisible(const TransformedBoundingVolume& vol) { return IsVisible<TransformedBoundingVolume, true>(vol); }
-        bool IsVisible(const BoundingVolume& vol)            { return IsVisible<BoundingVolume, false>(vol); }
     };
 
     inline void ExtractFrustum(const mat4& viewProj, CameraFrustum& result)

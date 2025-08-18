@@ -120,6 +120,14 @@ namespace hf
             max = glm::max(max, other.max);
         }
 
+        SphereVolume GetSphereVolume(const vec3& scale, const mat4& transform) const
+        {
+            SphereVolume volume{};
+            volume.center = glm::vec3(transform * glm::vec4((max + min) * 0.5f, 1.0f));
+            volume.radius = glm::length(max - volume.center) * glm::max(scale.x, scale.y, scale.z);
+            return volume;
+        }
+
         TransformedBoundingVolume GetTransformedVolume(const mat4& transform, const vec3& scale) const
         {
             TransformedBoundingVolume volume{};
@@ -130,11 +138,11 @@ namespace hf
             return volume;
         }
 
-        SphereVolume GetSphereVolume(const vec3& scale, const mat4& transform) const
+        SphereVolume GetSphereVolume() const
         {
             SphereVolume volume{};
-            volume.center = glm::vec3(transform * glm::vec4((max + min) * 0.5f, 1.0f));
-            volume.radius = glm::length(max - volume.center) * glm::max(scale.x, scale.y, scale.z);
+            volume.center = (max + min) * 0.5f;
+            volume.radius = glm::length(max - volume.center);
             return volume;
         }
     };
