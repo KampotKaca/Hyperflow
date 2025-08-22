@@ -60,6 +60,60 @@ namespace hf
 
     void CreateLogicalDevice(GraphicsDevice& device)
     {
+        if (!device.features.features.robustBufferAccess)           LOG_WARN("[Vulkan] Feature Not Supported %s", "Robust Buffer Access");
+        if (!device.features.features.fullDrawIndexUint32)          LOG_WARN("[Vulkan] Feature Not Supported %s", "Full Draw Index Uint32");
+        if (!device.features.features.imageCubeArray)               LOG_WARN("[Vulkan] Feature Not Supported %s", "Image Cube Array");
+        if (!device.features.features.independentBlend)             LOG_WARN("[Vulkan] Feature Not Supported %s", "Independent Blend");
+        if (!device.features.features.sampleRateShading)            LOG_WARN("[Vulkan] Feature Not Supported %s", "Sample Rate Shading");
+        if (!device.features.features.dualSrcBlend)                 LOG_WARN("[Vulkan] Feature Not Supported %s", "Dual Src Blend");
+        if (!device.features.features.logicOp)                      LOG_WARN("[Vulkan] Feature Not Supported %s", "Logic Op");
+        if (!device.features.features.multiDrawIndirect)            LOG_WARN("[Vulkan] Feature Not Supported %s", "Multi Draw Indirect");
+        if (!device.features.features.drawIndirectFirstInstance)    LOG_WARN("[Vulkan] Feature Not Supported %s", "Draw Indirect First Instance");
+        if (!device.features.features.depthClamp)                   LOG_WARN("[Vulkan] Feature Not Supported %s", "Depth Clamp");
+        if (!device.features.features.depthBiasClamp)               LOG_WARN("[Vulkan] Feature Not Supported %s", "Depth Bias Clamp");
+        if (!device.features.features.fillModeNonSolid)             LOG_WARN("[Vulkan] Feature Not Supported %s", "Fill Mode Non-Solid");
+        if (!device.features.features.depthBounds)                  LOG_WARN("[Vulkan] Feature Not Supported %s", "Depth Bounds");
+        if (!device.features.features.wideLines)                    LOG_WARN("[Vulkan] Feature Not Supported %s", "Wide Lines");
+        if (!device.features.features.largePoints)                  LOG_WARN("[Vulkan] Feature Not Supported %s", "Large Points");
+        if (!device.features.features.alphaToOne)                   LOG_WARN("[Vulkan] Feature Not Supported %s", "Alpha To One");
+        if (!device.features.features.multiViewport)                LOG_WARN("[Vulkan] Feature Not Supported %s", "Multi Viewport Features");
+        if (!device.features.features.samplerAnisotropy)            LOG_WARN("[Vulkan] Feature Not Supported %s", "Sampler Anisotropy");
+        if (!device.features.features.textureCompressionETC2)       LOG_WARN("[Vulkan] Feature Not Supported %s", "Texture Compression ETC2");
+        if (!device.features.features.textureCompressionASTC_LDR)   LOG_WARN("[Vulkan] Feature Not Supported %s", "Texture Compression ASTC_LDR");
+        if (!device.features.features.textureCompressionBC)         LOG_WARN("[Vulkan] Feature Not Supported %s", "Texture Compression BC");
+        if (!device.features.features.occlusionQueryPrecise)        LOG_WARN("[Vulkan] Feature Not Supported %s", "Occlusion Query Precise");
+        if (!device.features.features.pipelineStatisticsQuery)      LOG_WARN("[Vulkan] Feature Not Supported %s", "Pipeline Statistics Query");
+        if (!device.features.features.vertexPipelineStoresAndAtomics)           LOG_WARN("[Vulkan] Feature Not Supported %s", "Vertex Pipeline Stores And Atomics");
+        if (!device.features.features.fragmentStoresAndAtomics)                 LOG_WARN("[Vulkan] Feature Not Supported %s", "Fragment Stores And Atomics");
+        if (!device.features.features.shaderTessellationAndGeometryPointSize)   LOG_WARN("[Vulkan] Feature Not Supported %s", "Shader Tessellation And Geometry Point Size");
+        if (!device.features.features.shaderImageGatherExtended)                LOG_WARN("[Vulkan] Feature Not Supported %s", "Shader Image Gather Extended");
+        if (!device.features.features.shaderStorageImageExtendedFormats)        LOG_WARN("[Vulkan] Feature Not Supported %s", "Shader Storage Image Extended Formats");
+        if (!device.features.features.shaderStorageImageMultisample)            LOG_WARN("[Vulkan] Feature Not Supported %s", "Shader Storage Image Multisample");
+        if (!device.features.features.shaderStorageImageReadWithoutFormat)      LOG_WARN("[Vulkan] Feature Not Supported %s", "Shader Image Read Without Format");
+        if (!device.features.features.shaderStorageImageWriteWithoutFormat)     LOG_WARN("[Vulkan] Feature Not Supported %s", "Shader Image Write Without Format");
+        if (!device.features.features.shaderUniformBufferArrayDynamicIndexing)  LOG_WARN("[Vulkan] Feature Not Supported %s", "Shader Uniform Buffer Array Dynamic Indexing");
+        if (!device.features.features.shaderSampledImageArrayDynamicIndexing)   LOG_WARN("[Vulkan] Feature Not Supported %s", "Shader Sampled Image Array Dynamic Indexing");
+        if (!device.features.features.shaderStorageBufferArrayDynamicIndexing)  LOG_WARN("[Vulkan] Feature Not Supported %s", "Shader Storage Buffer Array Dynamic Indexing");
+        if (!device.features.features.shaderStorageImageArrayDynamicIndexing)   LOG_WARN("[Vulkan] Feature Not Supported %s", "Shader Storage Image Array Dynamic Indexing");
+        if (!device.features.features.shaderClipDistance)       LOG_WARN("[Vulkan] Feature Not Supported %s", "Shader Clip Distance");
+        if (!device.features.features.shaderCullDistance)       LOG_WARN("[Vulkan] Feature Not Supported %s", "Shader Cull Distance");
+        if (!device.features.features.shaderFloat64)            LOG_WARN("[Vulkan] Feature Not Supported %s", "Shader Float 64");
+        if (!device.features.features.shaderInt64)              LOG_WARN("[Vulkan] Feature Not Supported %s", "Shader Int 64");
+        if (!device.features.features.shaderInt16)              LOG_WARN("[Vulkan] Feature Not Supported %s", "Shader Int 16");
+        if (!device.features.features.shaderResourceResidency)  LOG_WARN("[Vulkan] Feature Not Supported %s", "Shader Resource Residency");
+        if (!device.features.features.shaderResourceMinLod)     LOG_WARN("[Vulkan] Feature Not Supported %s", "Shader Resource Min Lod");
+        if (!device.features.features.sparseBinding)            LOG_WARN("[Vulkan] Feature Not Supported %s", "Sparse Binding");
+        if (!device.features.features.sparseResidencyBuffer)    LOG_WARN("[Vulkan] Feature Not Supported %s", "Sparse Residency Buffer");
+        if (!device.features.features.sparseResidencyImage2D)   LOG_WARN("[Vulkan] Feature Not Supported %s", "Sparse Residency Image 2D");
+        if (!device.features.features.sparseResidencyImage3D)   LOG_WARN("[Vulkan] Feature Not Supported %s", "Sparse Residency Image 3D");
+        if (!device.features.features.sparseResidency2Samples)  LOG_WARN("[Vulkan] Feature Not Supported %s", "Sparse Residency 2 Samples");
+        if (!device.features.features.sparseResidency4Samples)  LOG_WARN("[Vulkan] Feature Not Supported %s", "Sparse Residency 4 Samples");
+        if (!device.features.features.sparseResidency8Samples)  LOG_WARN("[Vulkan] Feature Not Supported %s", "Sparse Residency 8 Samples");
+        if (!device.features.features.sparseResidency16Samples) LOG_WARN("[Vulkan] Feature Not Supported %s", "Sparse Residency 16 Samples");
+        if (!device.features.features.sparseResidencyAliased)   LOG_WARN("[Vulkan] Feature Not Supported %s", "Sparse Residency Aliased");
+        if (!device.features.features.variableMultisampleRate)  LOG_WARN("[Vulkan] Feature Not Supported %s", "Variable Multisample Rate");
+        if (!device.features.features.inheritedQueries)         LOG_WARN("[Vulkan] Feature Not Supported %s", "Inherited Queries");
+
         std::set uniqueQueueFamilies =
         {
             device.familyIndices.graphicsFamily.value(),
@@ -83,7 +137,7 @@ namespace hf
         VkPhysicalDeviceFeatures2 deviceFeatures2{};
         deviceFeatures2.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2;
         deviceFeatures2.pNext = &DYNAMIC_RENDERING_FEATURES;
-        deviceFeatures2.features = device.features;
+        deviceFeatures2.features = device.features.features;
 
         VkDeviceCreateInfo createInfo{};
         createInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
@@ -127,12 +181,15 @@ namespace hf
         deviceData.properties.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PROPERTIES_2;
         deviceData.properties.pNext = &deviceData.descBufferProperties;
 
+        deviceData.features.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2;
+
         deviceData.descBufferProperties.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DESCRIPTOR_BUFFER_PROPERTIES_EXT;
 
         vkGetPhysicalDeviceProperties2(device, &deviceData.properties);
-        vkGetPhysicalDeviceFeatures(device, &deviceData.features);
+        vkGetPhysicalDeviceFeatures2(device, &deviceData.features);
 
-        if (!deviceData.features.geometryShader) return false;
+        if (!deviceData.features.features.geometryShader ||
+            !deviceData.features.features.tessellationShader) return false;
 
         uint32_t familyCount = 0;
         vkGetPhysicalDeviceQueueFamilyProperties(device, &familyCount, nullptr);
@@ -225,11 +282,23 @@ namespace hf
 
         if (devices.empty()) throw GENERIC_EXCEPT("[Vulkan]", "No suitable graphics device found");
 
-        std::ranges::stable_sort(devices,
-        [](const GraphicsDevice& a, const GraphicsDevice& b)
-        { return a.score > b.score; });
+        uint32_t chosenDevice = 0;
+        {
+            uint32_t score = devices[0].score;
+            for (uint32_t i = 1; i < devices.size(); ++i)
+            {
+                if (devices[i].score > score)
+                {
+                    chosenDevice = i;
+                    score = devices[i].score;
+                }
+            }
+        }
 
-        GRAPHICS_DATA.device = devices[0];
+        GRAPHICS_DATA.device = devices[chosenDevice];
+
+        LOG_INFO("[Vulkan] Chosen Device: %s, Is Discrete: %i", GRAPHICS_DATA.device.properties.properties.deviceName,
+                    GRAPHICS_DATA.device.properties.properties.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU);
         CreateLogicalDevice(GRAPHICS_DATA.device);
         GRAPHICS_DATA.deviceIsLoaded = true;
 

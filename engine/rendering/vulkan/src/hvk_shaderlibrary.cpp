@@ -49,7 +49,7 @@ namespace hf
         multisampling.alphaToOneEnable = VK_FALSE;
 
         if (outputFormats.sampleMode != MultisampleMode::MSAA_1X &&
-            GRAPHICS_DATA.device.features.sampleRateShading)
+            GRAPHICS_DATA.device.features.features.sampleRateShading)
         {
             multisampling.sampleShadingEnable = VK_TRUE;
             multisampling.minSampleShading = VK_MSAA_MIN_SAMPLE_SHADING;

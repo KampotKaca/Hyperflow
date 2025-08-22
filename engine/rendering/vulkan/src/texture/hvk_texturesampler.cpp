@@ -20,7 +20,7 @@ namespace hf
         samplerInfo.unnormalizedCoordinates = !info.useNormalizedCoordinates;
 
         if (info.anisotropicFilter != TextureAnisotropicFilter::None &&
-            GRAPHICS_DATA.device.features.samplerAnisotropy)
+            GRAPHICS_DATA.device.features.features.samplerAnisotropy)
         {
             samplerInfo.anisotropyEnable = true;
             samplerInfo.maxAnisotropy = glm::min(

@@ -38,7 +38,7 @@ namespace hf
         .pNext = &BUFFER_DEVICE_ADDRESS_FEATURES,
         .descriptorBuffer = VK_TRUE,
         .descriptorBufferCaptureReplay = VK_FALSE,
-        .descriptorBufferImageLayoutIgnored = VK_TRUE,
+        .descriptorBufferImageLayoutIgnored = VK_FALSE,
         .descriptorBufferPushDescriptors = VK_FALSE
     };
 

@@ -82,7 +82,7 @@ namespace hf
         VkPhysicalDevice device{};
         VkPhysicalDeviceDescriptorBufferPropertiesEXT descBufferProperties{};
         VkPhysicalDeviceProperties2 properties{};
-        VkPhysicalDeviceFeatures features{};
+        VkPhysicalDeviceFeatures2 features{};
         int32_t score{};
 
         QueueFamilyIndices familyIndices{};
