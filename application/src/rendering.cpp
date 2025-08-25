@@ -66,20 +66,17 @@ namespace app
                             hf::DrawGroupSet_PushConstant(rn, pc);
                             hf::Start_DrawCall(rn, APP_MESHES.viking_room, 0);
 
-                            for (uint32_t x = 0; x < 100; x++)
-                            {
-                                for (uint32_t y = 0; y < 100; y++)
+                            for (uint32_t x = 0; x < VIKING_ROOM_AXIS_SIZE; x++)
+                                for (uint32_t z = 0; z < VIKING_ROOM_AXIS_SIZE; z++)
                                 {
-                                    auto currentTransform = APP_OBJECTS.vikingRoomTransform;
-                                    currentTransform.position = hf::vec3{ x, 0, y } * 2.0f - hf::vec3{ 100, 0, 100 };
-                                    const auto modelMatrix = currentTransform.ToMat4();
+                                    auto& vikingRoom = APP_OBJECTS.vikingRooms[x * VIKING_ROOM_AXIS_SIZE + z];
+                                    vikingRoom.cullingVolume.Update(vikingRoom.transform, meshVolume);
                                     hf::DrawAdd_Instance(rn, DefaultInstanceData
                                     {
-                                        .modelMatrix = modelMatrix,
+                                        .modelMatrix = vikingRoom.cullingVolume.matrix,
                                         .color = hf::vec4{ hf::utils::ColorFromHash(0xFFFFFF), 1 },
-                                    }, meshVolume.GetTransformedVolume(modelMatrix, currentTransform.scale));
+                                    }, vikingRoom.cullingVolume);
                                 }
-                            }
 
                             hf::End_DrawCall(rn);
                         }
@@ -96,12 +93,16 @@ namespace app
                             hf::DrawGroupSet_PushConstant(rn, pc);
                             hf::Start_DrawCall(rn, hf::primitives::GetMesh(hf::PrimitiveMeshType::IcoSphere), 0);
 
-                            const auto modelMatrix = APP_OBJECTS.sphereTransform.ToMat4();
-                            hf::DrawAdd_Instance(rn, DefaultInstanceData
                             {
-                                .modelMatrix = modelMatrix,
-                                .color = hf::vec4{ hf::utils::ColorFromHash(0x9E0505), 1 },
-                            }, meshVolume.GetTransformedVolume(modelMatrix, APP_OBJECTS.sphereTransform.scale));
+                                auto& sphere = APP_OBJECTS.sphere;
+                                sphere.cullingVolume.Update(sphere.transform, meshVolume);
+
+                                hf::DrawAdd_Instance(rn, DefaultInstanceData
+                                {
+                                    .modelMatrix = sphere.cullingVolume.matrix,
+                                    .color = hf::vec4{ hf::utils::ColorFromHash(0x9E0505), 1 },
+                                }, sphere.cullingVolume);
+                            }
 
                             hf::End_DrawCall(rn);
                         }
@@ -126,12 +127,16 @@ namespace app
                             const auto meshVolume = hf::GetSubmeshBoundingVolume(hf::primitives::GetMesh(hf::PrimitiveMeshType::Plane), 0);
                             hf::Start_DrawCall(rn, hf::primitives::GetMesh(hf::PrimitiveMeshType::Plane), 0);
 
-                            const auto modelMatrix = APP_OBJECTS.groundTransform.ToMat4();
-                            hf::DrawAdd_Instance(rn, DefaultInstanceData
                             {
-                                .modelMatrix = modelMatrix,
-                                .color = hf::vec4{ hf::utils::ColorFromHash(0x19CB1E), 1 }
-                            }, meshVolume.GetTransformedVolume(modelMatrix, APP_OBJECTS.groundTransform.scale));
+                                auto& ground = APP_OBJECTS.ground;
+                                ground.cullingVolume.Update(ground.transform, meshVolume);
+
+                                hf::DrawAdd_Instance(rn, DefaultInstanceData
+                                {
+                                    .modelMatrix = ground.cullingVolume.matrix,
+                                    .color = hf::vec4{ hf::utils::ColorFromHash(0x19CB1E), 1 }
+                                }, ground.cullingVolume);
+                            }
 
                             hf::End_DrawCall(rn);
                         }

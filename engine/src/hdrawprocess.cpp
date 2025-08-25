@@ -864,7 +864,7 @@ namespace hf
         }
     }
 
-    void DrawAdd_Instance(const Ref<Renderer>& rn, const void* data, uint32_t dataSize, const TransformedBoundingVolume& volume)
+    void DrawAdd_Instance(const Ref<Renderer>& rn, const void* data, uint32_t dataSize, const VolumeTransform& volume)
     {
         try
         {
@@ -885,7 +885,7 @@ namespace hf
 
             const auto packet = currentDraw.packet;
 
-            if (!packet->frustum.IsVisible(volume))
+            if (!packet->frustum.IsVisible(volume.worldVolume))
             {
                 packet->statistics.culledDrawCalls++;
                 return;

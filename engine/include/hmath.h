@@ -95,14 +95,6 @@ namespace hf
         float_t radius{};
     };
 
-    struct TransformedBoundingVolume
-    {
-        vec3 min{};
-        vec3 max{};
-        SphereVolume sphereVolume{};
-        mat4 transform = glm::identity<mat4>();
-    };
-
     struct BoundingVolume
     {
         vec3 min{};
@@ -128,21 +120,11 @@ namespace hf
             return volume;
         }
 
-        TransformedBoundingVolume GetTransformedVolume(const mat4& transform, const vec3& scale) const
-        {
-            TransformedBoundingVolume volume{};
-            volume.transform = transform;
-            volume.min = min;
-            volume.max = max;
-            volume.sphereVolume = GetSphereVolume(scale, transform);
-            return volume;
-        }
-
         SphereVolume GetSphereVolume() const
         {
             SphereVolume volume{};
             volume.center = (max + min) * 0.5f;
-            volume.radius = glm::length(max - volume.center);
+            volume.radius = glm::length((max - min) * 0.5f);
             return volume;
         }
     };
@@ -151,6 +133,17 @@ namespace hf
     {
         const float len = glm::length(glm::vec3(p));
         return p / len;
+    }
+
+    inline bool operator==(const BoundingVolume& lhs, const BoundingVolume& rhs) noexcept
+    {
+        return lhs.min == rhs.min &&
+               lhs.max == rhs.max;
+    }
+
+    inline bool operator!=(const BoundingVolume& lhs, const BoundingVolume& rhs) noexcept
+    {
+        return !(lhs == rhs);
     }
 }
 

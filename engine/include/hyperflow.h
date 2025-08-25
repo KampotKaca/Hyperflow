@@ -243,7 +243,7 @@ namespace hf
     void DrawGroupAdd_DrawCall(const Ref<Renderer>& rn, const Ref<Mesh>& mesh, uint32_t submeshIndex);
 
 	void DrawGroupSet_PushConstant(const Ref<Renderer>& rn, const void* data, uint32_t dataSize);
-	void DrawAdd_Instance(const Ref<Renderer>& rn, const void* data, uint32_t dataSize, const TransformedBoundingVolume& volume);
+	void DrawAdd_Instance(const Ref<Renderer>& rn, const void* data, uint32_t dataSize, const VolumeTransform& volume);
 	void DrawAdd_VertexBuffer(const Ref<Renderer>& rn, const Ref<VertexBuffer>& vb);
 
 	template<typename T>
@@ -253,7 +253,7 @@ namespace hf
 	}
 
     template<typename T>
-    void DrawAdd_Instance(const Ref<Renderer>& rn, const T& data, const TransformedBoundingVolume& volume)
+    void DrawAdd_Instance(const Ref<Renderer>& rn, const T& data, const VolumeTransform& volume)
 	{
 	    DrawAdd_Instance(rn, &data, sizeof(T), volume);
 	}

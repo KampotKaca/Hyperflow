@@ -33,37 +33,6 @@ namespace hf
             }
             return true;
         }
-
-        bool IsVisible(const TransformedBoundingVolume& vol) const
-        {
-            if (!IsVisible(vol.sphereVolume)) return false;
-
-            vec3 newMin( std::numeric_limits<float>::max() );
-            vec3 newMax( std::numeric_limits<float>::lowest() );
-
-            const std::array corners =
-            {
-                glm::vec3(vol.min.x, vol.min.y, vol.min.z),
-                glm::vec3(vol.max.x, vol.min.y, vol.min.z),
-                glm::vec3(vol.min.x, vol.max.y, vol.min.z),
-                glm::vec3(vol.max.x, vol.max.y, vol.min.z),
-                glm::vec3(vol.min.x, vol.min.y, vol.max.z),
-                glm::vec3(vol.max.x, vol.min.y, vol.max.z),
-                glm::vec3(vol.min.x, vol.max.y, vol.max.z),
-                glm::vec3(vol.max.x, vol.max.y, vol.max.z)
-            };
-
-            for (int i = 0; i < 8; i++)
-            {
-                auto transformed = glm::vec3(vol.transform * glm::vec4(corners[i], 1.0f));
-
-                newMin = glm::min(newMin, transformed);
-                newMax = glm::max(newMax, transformed);
-            }
-
-            const BoundingVolume worldAABB{ newMin, newMax };
-            return IsVisible(worldAABB);
-        }
     };
 
     inline void ExtractFrustum(const mat4& viewProj, CameraFrustum& result)

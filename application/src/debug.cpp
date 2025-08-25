@@ -185,7 +185,7 @@ namespace app
         {
             if (hf::editor::StartDropdown("Viking Room"))
             {
-                hf::editor::Draw("Transform", APP_OBJECTS.vikingRoomTransform);
+                // hf::editor::Draw("Transform", APP_OBJECTS.vikingRoom.transform);
                 hf::editor::Draw("Audio", APP_AUDIOS.background_music);
                 hf::editor::Draw("Audio3D", APP_AUDIOS.background_music3D);
                 hf::editor::Draw("Listener", APP_AUDIOS.main_listener);
@@ -194,13 +194,13 @@ namespace app
 
             if (hf::editor::StartDropdown("Ground"))
             {
-                hf::editor::Draw("Transform", APP_OBJECTS.groundTransform);
+                hf::editor::Draw("Transform", APP_OBJECTS.ground.transform);
                 hf::editor::EndDropdown();
             }
 
             if (hf::editor::StartDropdown("Sphere"))
             {
-                hf::editor::Draw("Transform", APP_OBJECTS.sphereTransform);
+                hf::editor::Draw("Transform", APP_OBJECTS.sphere.transform);
                 hf::editor::EndDropdown();
             }
 
