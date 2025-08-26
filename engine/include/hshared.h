@@ -73,6 +73,12 @@ namespace hf
 		return std::make_unique<T>(std::forward<Args>(args)...);
 	}
 
+    template <typename T>
+    Ref<T> Cast(const Ref<void>& c)
+	{
+	    return std::static_pointer_cast<T>(c);
+	}
+
 	template <class K, class V>
 	using unordered_map = phmap::flat_hash_map<K, V>;
 
@@ -787,6 +793,8 @@ namespace hf
 	};
 
 	//endregion
+
+    struct Scene;
 
     struct GlobalMemoryStatistics
     {

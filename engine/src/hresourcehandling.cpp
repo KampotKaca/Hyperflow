@@ -5,12 +5,9 @@ namespace hf::inter
     void UnloadAllResources_i(const bool internalOnly)
     {
         rendering::DestroyAllBuffers_i(internalOnly);
-        rendering::DestroyAllMeshes_i(internalOnly);
+        rendering::DestroyAllAssets_i(internalOnly);
         rendering::DestroyAllShaders_i(internalOnly);
         rendering::DestroyAllShaderLibraries_i(internalOnly);
-
-        rendering::DestroyAllTextures_i(internalOnly);
-        rendering::DestroyAllCubemaps_i(internalOnly);
 
         rendering::DestroyAllTexturePacks_i(internalOnly);
         rendering::DestroyAllRenderTextures_i(internalOnly);

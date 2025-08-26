@@ -205,77 +205,54 @@ namespace hf
     uint32_t GetSubmeshCount(const Ref<Mesh>& mesh) { return mesh->subMeshes.size(); }
     const BoundingVolume& GetSubmeshBoundingVolume(const Ref<Mesh>& mesh, uint32_t submeshIndex) { return mesh->subMeshes[submeshIndex].volume; }
 
-    void Destroy(const Ref<Mesh>& mesh)
-    {
-        if (inter::rendering::DestroyMesh_i(mesh.get()))
-            inter::HF.graphicsResources.meshes.erase(mesh->filePath);
-    }
-
-    Ref<Mesh> Create(const MeshCreationInfo& info)
-    {
-        Ref<Mesh> mesh = MakeRef<Mesh>(info);
-        inter::HF.graphicsResources.meshes[mesh->filePath] = mesh;
-        return mesh;
-    }
-
-    Ref<Mesh> CreateMeshAsset(const char* assetPath)
-    {
-        const std::string assetLoc = TO_RES_PATH(std::string("meshes/") + assetPath) + ".meta";
-        std::vector<char> metadata{};
-        if (!START_READING(assetLoc.c_str(), metadata)) return nullptr;
-
-        try
-        {
-            MeshCreationInfo info
-            {
-                .filePath = assetPath,
-                .stats = {}
-            };
-
-            ryml::Tree tree = ryml::parse_in_place(ryml::to_substr(metadata.data()));
-            ryml::NodeRef root = tree.rootref();
-
-            auto typeFlags = root["typeFlags"];
-
-            for (ryml::NodeRef fmt : typeFlags.children())
-            {
-                auto v = fmt.val();
-                std::string_view valView{v.str, v.len};
-                info.stats.typeFlags |= STRING_TO_MESH_DATA_TYPE(valView);
-            }
-
-            {
-                auto v = root["memoryType"].val();
-                std::string_view memTypeView(v.str, v.len);
-                info.stats.memoryType = STRING_TO_BUFFER_MEMORY_TYPE(memTypeView);
-            }
-
-            {
-                auto v = root["vertexAttribute"].val();
-                std::string_view memTypeView(v.str, v.len);
-                info.stats.vertexAttribute = inter::HF.graphicsResources.vertexAttributes[memTypeView];
-            }
-
-            return Create(info);
-        }catch (...)
-        {
-            LOG_ERROR("[Hyperflow] Error parsing BufferAttribute: %s", assetPath);
-            return nullptr;
-        }
-    }
-
-    void Destroy(const Ref<Mesh>* pMeshes, uint32_t count)
-    {
-        for (uint32_t i = 0; i < count; i++)
-        {
-            auto mesh = pMeshes[i];
-            if (inter::rendering::DestroyMesh_i(mesh.get()))
-                inter::HF.graphicsResources.meshes.erase(mesh->filePath);
-        }
-    }
-
     namespace inter::rendering
     {
+        Ref<Mesh> CreateMeshAsset_i(const char* assetPath)
+        {
+            const std::string assetLoc = TO_RES_PATH(std::string("meshes/") + assetPath) + ".meta";
+            std::vector<char> metadata{};
+            if (!START_READING(assetLoc.c_str(), metadata)) return nullptr;
+
+            try
+            {
+                MeshCreationInfo info
+                {
+                    .filePath = assetPath,
+                    .stats = {}
+                };
+
+                ryml::Tree tree = ryml::parse_in_place(ryml::to_substr(metadata.data()));
+                ryml::NodeRef root = tree.rootref();
+
+                auto typeFlags = root["typeFlags"];
+
+                for (ryml::NodeRef fmt : typeFlags.children())
+                {
+                    auto v = fmt.val();
+                    std::string_view valView{v.str, v.len};
+                    info.stats.typeFlags |= STRING_TO_MESH_DATA_TYPE(valView);
+                }
+
+                {
+                    auto v = root["memoryType"].val();
+                    std::string_view memTypeView(v.str, v.len);
+                    info.stats.memoryType = STRING_TO_BUFFER_MEMORY_TYPE(memTypeView);
+                }
+
+                {
+                    auto v = root["vertexAttribute"].val();
+                    std::string_view memTypeView(v.str, v.len);
+                    info.stats.vertexAttribute = HF.graphicsResources.vertexAttributes[memTypeView];
+                }
+
+                return MakeRef<Mesh>(info);
+            }catch (...)
+            {
+                LOG_ERROR("[Hyperflow] Error parsing BufferAttribute: %s", assetPath);
+                return nullptr;
+            }
+        }
+
         bool CreateMesh_i(Mesh* mesh)
         {
             if (mesh->isLoaded) return false;
@@ -303,13 +280,6 @@ namespace hf
                 return true;
             }
             return false;
-        }
-
-        void DestroyAllMeshes_i(bool internalOnly)
-        {
-            for (const auto& mesh : std::ranges::views::values(HF.graphicsResources.meshes))
-                DestroyMesh_i(mesh.get());
-            if (!internalOnly) HF.graphicsResources.meshes.clear();
         }
     }
 }

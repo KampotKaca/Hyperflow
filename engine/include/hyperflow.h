@@ -26,14 +26,11 @@ namespace hf
 	Ref<Window> Create(const WindowCreationInfo &data, const Ref<Window> &parent);
 	//No need to destroy the material, if it goes out of scope it is automatically freed!
 	Ref<Material> Create(const MaterialCreationInfo& info);
-	Ref<Mesh> Create(const MeshCreationInfo& info);
 	Ref<ShaderLibrary> Create(const ShaderLibraryCreationInfo& info);
 	Ref<Shader> Create(const ShaderCreationInfo& info);
-	Ref<Texture> Create(const TextureCreationInfo& info);
 	Ref<RenderTexture> Create(const RenderTextureCreationInfo& info);
 	Ref<TexturePack> Create(const TexturePackCreationInfo& info);
 	Ref<VertexBuffer> Create(const VertexBufferCreationInfo& info);
-	Ref<Cubemap> Create(const CubemapCreationInfo& info);
 	Ref<IndexBuffer> Create(const IndexBufferCreationInfo& info);
 	Ref<AudioClip> Create(const AudioClipCreationInfo& info);
 	Ref<AudioPlayer> Create(const AudioPlayerCreationInfo& info);
@@ -41,26 +38,20 @@ namespace hf
     Ref<AudioListener> Create(const AudioListenerCreationInfo& info);
     Ref<AudioGroup> Create(const AudioGroupCreationInfo& info);
 
-	void Destroy(const Ref<Mesh>& mesh);
 	void Destroy(const Ref<ShaderLibrary>& lib);
 	void Destroy(const Ref<Shader>& shader);
-	void Destroy(const Ref<Texture>& tex);
 	void Destroy(const Ref<RenderTexture>& tex);
 	void Destroy(const Ref<TexturePack>& texPack);
 	void Destroy(const Ref<RuntimeBufferBase>& rbb);
-	void Destroy(const Ref<Cubemap>& cb);
 	void Destroy(const Ref<Window>& win);
 	void Destroy(const Ref<AudioClip>& clip);
 	void Destroy(const Ref<AudioPlayer>& player);
 	void Destroy(const Ref<AudioPlayer3D>& player);
 
 	void DestroyAllWindows();
-	void Destroy(const Ref<Cubemap>* pCubemaps, uint32_t count);
 	void Destroy(const Ref<RuntimeBufferBase>* pBuffers, uint32_t count);
 	void Destroy(const Ref<TexturePack>* pPacks, uint32_t count);
-	void Destroy(const Ref<Texture>* pTextures, uint32_t count);
 	void Destroy(const Ref<RenderTexture>* pTextures, uint32_t count);
-	void Destroy(const Ref<Mesh>* pMeshes, uint32_t count);
 	void Destroy(const Ref<ShaderLibrary>* pLibraries, uint32_t count);
 	void Destroy(const Ref<Shader>* pShaders, uint32_t count);
 	void Destroy(const Ref<AudioClip>* pClips, uint32_t count);
@@ -71,9 +62,7 @@ namespace hf
 	TextureLayout DefineTextureLayoutAsset(const char* assetPath);
 	TextureSampler DefineTextureSamplerAsset(const char* assetPath);
 
-    Ref<Mesh> CreateMeshAsset(const char* assetPath);
-	Ref<Texture> CreateTextureAsset(const char* assetPath);
-	Ref<Cubemap> CreateCubemapAsset(const char* assetPath);
+	Ref<void> CreateAsset(const char* assetPath, AssetType type);
 
 	bool IsRunning();
 	bool IsLoaded(const Ref<Renderer>& rn);

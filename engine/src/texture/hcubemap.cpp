@@ -43,66 +43,42 @@ namespace hf
     }
 
     bool IsLoaded(const Ref<Cubemap>& cb) { return cb->handle; }
-    void Destroy(const Ref<Cubemap>& cb)
-    {
-        if (inter::rendering::DestroyCubemap_i(cb.get()))
-            inter::HF.graphicsResources.cubemaps.erase(cb->folderPath.path);
-    }
-
-    Ref<Cubemap> Create(const CubemapCreationInfo& info)
-    {
-        Ref<Cubemap> cubemap = MakeRef<Cubemap>(info);
-        inter::HF.graphicsResources.cubemaps[info.folderPath.path] = cubemap;
-        return cubemap;
-    }
-
-    Ref<Cubemap> CreateCubemapAsset(const char* assetPath)
-    {
-        const auto assetLoc = TO_RES_PATH(std::string("cubemaps/") + assetPath) + ".meta";
-        std::vector<char> metadata{};
-        if (!START_READING(assetLoc.c_str(), metadata)) return nullptr;
-
-        try
-        {
-            CubemapCreationInfo info{};
-            info.folderPath = FilePath{ .path = assetPath, .isAbsolute = true };
-
-            ryml::Tree tree = ryml::parse_in_place(ryml::to_substr(metadata.data()));
-            ryml::NodeRef root = tree.rootref();
-
-            {
-                const auto v = root["desiredChannel"].val();
-                std::string_view vView{v.str, v.len};
-                info.desiredChannel = STRING_TO_TEXTURE_CHANNEL(vView);
-            }
-
-            info.mipLevels = std::stoi(root["mipLevels"].val().str);
-
-            ReadCubemapTexturePaths_i(root["texturePaths"], info.texturePaths);
-            ReadTextureDetails_i     (root["details"], info.details);
-
-            auto cubemap = Create(info);
-            inter::HF.graphicsResources.cubemaps[cubemap->folderPath.path] = cubemap;
-            return cubemap;
-        }catch (...)
-        {
-            LOG_ERROR("[Hyperflow] Error parsing Cubemap: %s", assetPath);
-            return nullptr;
-        }
-    }
-
-    void Destroy(const Ref<Cubemap>* pCubemaps, uint32_t count)
-    {
-        for (uint32_t i = 0; i < count; i++)
-        {
-            auto cubemap = pCubemaps[i];
-            if (inter::rendering::DestroyCubemap_i(cubemap.get()))
-                inter::HF.graphicsResources.cubemaps.erase(cubemap->folderPath.path);
-        }
-    }
 
     namespace inter::rendering
     {
+        Ref<Cubemap> CreateCubemapAsset_i(const char* assetPath)
+        {
+            const auto assetLoc = TO_RES_PATH(std::string("cubemaps/") + assetPath) + ".meta";
+            std::vector<char> metadata{};
+            if (!START_READING(assetLoc.c_str(), metadata)) return nullptr;
+
+            try
+            {
+                CubemapCreationInfo info{};
+                info.folderPath = FilePath{ .path = assetPath, .isAbsolute = true };
+
+                ryml::Tree tree = ryml::parse_in_place(ryml::to_substr(metadata.data()));
+                ryml::NodeRef root = tree.rootref();
+
+                {
+                    const auto v = root["desiredChannel"].val();
+                    std::string_view vView{v.str, v.len};
+                    info.desiredChannel = STRING_TO_TEXTURE_CHANNEL(vView);
+                }
+
+                info.mipLevels = std::stoi(root["mipLevels"].val().str);
+
+                ReadCubemapTexturePaths_i(root["texturePaths"], info.texturePaths);
+                ReadTextureDetails_i     (root["details"], info.details);
+
+                return MakeRef<Cubemap>(info);
+            }catch (...)
+            {
+                LOG_ERROR("[Hyperflow] Error parsing Cubemap: %s", assetPath);
+                return nullptr;
+            }
+        }
+
         bool CreateCubemap_i(Cubemap* cubemap)
         {
             struct TexData
@@ -198,13 +174,6 @@ namespace hf
                 return true;
             }
             return false;
-        }
-
-        void DestroyAllCubemaps_i(bool internalOnly)
-        {
-            for (const auto& cubemap : std::ranges::views::values(HF.graphicsResources.cubemaps))
-                DestroyCubemap_i(cubemap.get());
-            if (!internalOnly) HF.graphicsResources.cubemaps.clear();
         }
     }
 }

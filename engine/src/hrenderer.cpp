@@ -136,11 +136,9 @@ namespace hf
                 }
             }
 
-            for (auto& mesh : std::ranges::views::values(HF.graphicsResources.meshes)) CreateMesh_i(mesh.get());
+            for (auto& asset : HF.graphicsResources.assets) asset.second.Create(asset.first.c_str());
             SubmitAllBuffers();
 
-            for (auto& texture   : std::ranges::views::values(HF.graphicsResources.textures))       CreateTexture_i(texture.get());
-            for (auto& cubemap : std::ranges::views::values(HF.graphicsResources.cubemaps))       CreateCubemap_i(cubemap.get());
             for (auto& rt   : std::ranges::views::values(HF.graphicsResources.renderTextures)) CreateRenderTexture_i(rt.get());
             SubmitAllTextures();
 

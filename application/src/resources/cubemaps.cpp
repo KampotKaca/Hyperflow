@@ -6,6 +6,6 @@ namespace app
 
     void CubemapLoadAll()
     {
-        APP_CUBEMAPS.cosmos = hf::CreateCubemapAsset("cosmos");
+        APP_CUBEMAPS.cosmos = hf::Cast<hf::Cubemap>(hf::CreateAsset("cosmos", hf::AssetType::Cubemap));
     }
 }

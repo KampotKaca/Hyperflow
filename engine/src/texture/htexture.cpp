@@ -20,66 +20,41 @@ namespace hf
     }
 
     bool IsLoaded(const Ref<Texture>& tex) { return tex->handle; }
-    void Destroy(const Ref<Texture>& tex)
-    {
-        if (inter::rendering::DestroyTexture_i(tex.get()))
-            inter::HF.graphicsResources.textures.erase(tex->path.path);
-    }
-
-    Ref<Texture> Create(const TextureCreationInfo& info)
-    {
-        Ref<Texture> texture = MakeRef<Texture>(info);
-        inter::HF.graphicsResources.textures[texture->path.path] = texture;
-        return texture;
-    }
-
-    Ref<Texture> CreateTextureAsset(const char* assetPath)
-    {
-        const auto assetLoc = TO_RES_PATH(std::string("textures/") + assetPath) + ".meta";
-        std::vector<char> metadata{};
-        if (!START_READING(assetLoc.c_str(), metadata)) return nullptr;
-
-        try
-        {
-            TextureCreationInfo info{};
-            info.filePath = FilePath{ .path = assetPath };
-
-            ryml::Tree tree = ryml::parse_in_place(ryml::to_substr(metadata.data()));
-            ryml::NodeRef root = tree.rootref();
-
-            {
-                const auto v = root["desiredChannel"].val();
-                std::string_view vView{v.str, v.len};
-                info.desiredChannel = STRING_TO_TEXTURE_CHANNEL(vView);
-            }
-
-            info.mipLevels = (uint32_t)std::stoi(root["mipLevels"].val().str);
-            ReadTextureDetails_i(root["details"], info.details);
-
-            auto texture = Create(info);
-            inter::HF.graphicsResources.textures[texture->path.path] = texture;
-            return texture;
-        }catch (...)
-        {
-            LOG_ERROR("[Hyperflow] Error parsing Texture: %s", assetPath);
-            return nullptr;
-        }
-    }
-
-    void Destroy(const Ref<Texture>* pTextures, uint32_t count)
-    {
-        for (uint32_t i = 0; i < count; i++)
-        {
-            auto tex = pTextures[i];
-            if (inter::rendering::DestroyTexture_i(tex.get()))
-                inter::HF.graphicsResources.textures.erase(tex->path.path);
-        }
-    }
-
     void SubmitAllTextures() { inter::HF.renderingApi.api.SubmitTextureCopyOperations(); }
 
     namespace inter::rendering
     {
+        Ref<Texture> CreateTextureAsset_i(const char* assetPath)
+        {
+            const auto assetLoc = TO_RES_PATH(std::string("textures/") + assetPath) + ".meta";
+            std::vector<char> metadata{};
+            if (!START_READING(assetLoc.c_str(), metadata)) return nullptr;
+
+            try
+            {
+                TextureCreationInfo info{};
+                info.filePath = FilePath{ .path = assetPath };
+
+                ryml::Tree tree = ryml::parse_in_place(ryml::to_substr(metadata.data()));
+                ryml::NodeRef root = tree.rootref();
+
+                {
+                    const auto v = root["desiredChannel"].val();
+                    std::string_view vView{v.str, v.len};
+                    info.desiredChannel = STRING_TO_TEXTURE_CHANNEL(vView);
+                }
+
+                info.mipLevels = (uint32_t)std::stoi(root["mipLevels"].val().str);
+                ReadTextureDetails_i(root["details"], info.details);
+
+                return MakeRef<Texture>(info);
+            }catch (...)
+            {
+                LOG_ERROR("[Hyperflow] Error parsing Texture: %s", assetPath);
+                return nullptr;
+            }
+        }
+
         bool CreateTexture_i(Texture* tex)
         {
             if (tex->handle) return false;
@@ -137,13 +112,6 @@ namespace hf
                 return true;
             }
             return false;
-        }
-
-        void DestroyAllTextures_i(bool internalOnly)
-        {
-            for (const auto& tex : std::ranges::views::values(HF.graphicsResources.textures))
-                DestroyTexture_i(tex.get());
-            if (!internalOnly) HF.graphicsResources.textures.clear();
         }
     }
 

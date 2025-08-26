@@ -6,6 +6,7 @@
 #include "hvertexbuffer.h"
 #include "hindexbuffer.h"
 #include "hcubemap.h"
+#include "hasset.h"
 #include "hshaderlibrary.h"
 #include "htime.h"
 #include "../rendering/include/hex_renderer.h"
@@ -48,9 +49,7 @@ namespace hf::inter
         unordered_map<std::string, TextureLayout> textureLayouts{};
         unordered_map<std::string, TextureSampler> textureSamplers{};
 
-        unordered_map<std::string, Ref<Mesh>> meshes{};
-        unordered_map<std::string, Ref<Texture>> textures{};
-        unordered_map<std::string, Ref<Cubemap>> cubemaps{};
+        unordered_map<std::string, Asset> assets{};
 
         unordered_map<uint64_t, Ref<Material>> materials{};
 
@@ -230,12 +229,15 @@ namespace hf::inter
 
         bool DestroyBuffer_i(RuntimeBufferBase* buffer);
 
+        Ref<Mesh> CreateMeshAsset_i(const char* assetPath);
         bool CreateMesh_i(Mesh* mesh);
         bool DestroyMesh_i(Mesh* mesh);
 
+        Ref<Texture> CreateTextureAsset_i(const char* assetPath);
         bool CreateTexture_i(Texture* tex);
         bool DestroyTexture_i(Texture* tex);
 
+        Ref<Cubemap> CreateCubemapAsset_i(const char* assetPath);
         bool CreateCubemap_i(Cubemap* cubemap);
         bool DestroyCubemap_i(Cubemap* cubemap);
 
@@ -243,9 +245,7 @@ namespace hf::inter
         bool DestroyTexturePack_i(TexturePack* texPack);
 
         void DestroyAllBuffers_i(bool internalOnly = false);
-        void DestroyAllMeshes_i(bool internalOnly = false);
-        void DestroyAllTextures_i(bool internalOnly = false);
-        void DestroyAllCubemaps_i(bool internalOnly = false);
+        void DestroyAllAssets_i(bool internalOnly = false);
         void DestroyAllTexturePacks_i(bool internalOnly = false);
         void DestroyAllRenderTextures_i(bool internalOnly = false);
         void DestroyAllShaders_i(bool internalOnly = false);

@@ -15,7 +15,7 @@ namespace hf
         {
             auto transform = mat4(1.0f);
             transform = glm::translate(transform, position)
-                      * glm::toMat4(glm::quat(glm::radians(euler)))
+                      * glm::toMat4(quat(glm::radians(euler)))
                       * glm::scale(transform, scale);
 
             return transform;
@@ -44,8 +44,7 @@ namespace hf
 
         void Update(const Transform& trs, const BoundingVolume& lVolume)
         {
-            if (trs != transform ||
-                lVolume != localVolume)
+            if (trs != transform || lVolume != localVolume)
             {
                 transform = trs;
                 localVolume = lVolume;
@@ -56,19 +55,19 @@ namespace hf
 
                 const std::array corners =
                 {
-                    glm::vec3(lVolume.min.x, lVolume.min.y, lVolume.min.z),
-                    glm::vec3(lVolume.max.x, lVolume.min.y, lVolume.min.z),
-                    glm::vec3(lVolume.min.x, lVolume.max.y, lVolume.min.z),
-                    glm::vec3(lVolume.max.x, lVolume.max.y, lVolume.min.z),
-                    glm::vec3(lVolume.min.x, lVolume.min.y, lVolume.max.z),
-                    glm::vec3(lVolume.max.x, lVolume.min.y, lVolume.max.z),
-                    glm::vec3(lVolume.min.x, lVolume.max.y, lVolume.max.z),
-                    glm::vec3(lVolume.max.x, lVolume.max.y, lVolume.max.z)
+                    vec3(lVolume.min.x, lVolume.min.y, lVolume.min.z),
+                    vec3(lVolume.max.x, lVolume.min.y, lVolume.min.z),
+                    vec3(lVolume.min.x, lVolume.max.y, lVolume.min.z),
+                    vec3(lVolume.max.x, lVolume.max.y, lVolume.min.z),
+                    vec3(lVolume.min.x, lVolume.min.y, lVolume.max.z),
+                    vec3(lVolume.max.x, lVolume.min.y, lVolume.max.z),
+                    vec3(lVolume.min.x, lVolume.max.y, lVolume.max.z),
+                    vec3(lVolume.max.x, lVolume.max.y, lVolume.max.z)
                 };
 
                 for (int i = 0; i < 8; i++)
                 {
-                    auto transformed = glm::vec3(matrix * glm::vec4(corners[i], 1.0f));
+                    auto transformed = vec3(matrix * vec4(corners[i], 1.0f));
 
                     worldVolume.min = glm::min(worldVolume.min, transformed);
                     worldVolume.max = glm::max(worldVolume.max, transformed);
