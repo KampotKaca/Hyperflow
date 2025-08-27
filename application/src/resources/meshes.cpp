@@ -6,7 +6,6 @@ namespace app
 
     void MeshLoadAll()
     {
-        APP_MESHES.viking_room = hf::Cast<hf::Mesh>(hf::CreateAsset("viking_room.obj", hf::AssetType::Mesh));
-        hf::SubmitAllBuffers();
+
     }
 }

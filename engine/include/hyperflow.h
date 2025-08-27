@@ -2,8 +2,8 @@
 #define HYPERFLOW_H
 
 #include "../components/include/hcomponents.h"
-#include "hrenderer.h"
 #include "hshared.h"
+#include "hscene.h"
 
 namespace hf
 {
@@ -38,6 +38,17 @@ namespace hf
     Ref<AudioListener> Create(const AudioListenerCreationInfo& info);
     Ref<AudioGroup> Create(const AudioGroupCreationInfo& info);
 
+    void LoadSceneBase(const Ref<Scene>& scene);
+    void UnloadScene(const Ref<Scene>& scene);
+
+    template<typename T, typename... Args>
+    Ref<T> LoadScene(Args&&... args)
+    {
+        auto scene = MakeRef<T>(std::forward<Args>(args)...);
+        LoadSceneBase(scene);
+        return scene;
+    }
+
 	void Destroy(const Ref<ShaderLibrary>& lib);
 	void Destroy(const Ref<Shader>& shader);
 	void Destroy(const Ref<RenderTexture>& tex);
@@ -48,6 +59,7 @@ namespace hf
 	void Destroy(const Ref<AudioPlayer>& player);
 	void Destroy(const Ref<AudioPlayer3D>& player);
 
+	void UnloadAllScenes();
 	void DestroyAllWindows();
 	void Destroy(const Ref<RuntimeBufferBase>* pBuffers, uint32_t count);
 	void Destroy(const Ref<TexturePack>* pPacks, uint32_t count);
@@ -63,6 +75,8 @@ namespace hf
 	TextureSampler DefineTextureSamplerAsset(const char* assetPath);
 
 	Ref<void> CreateAsset(const char* assetPath, AssetType type);
+	void DestroyAsset(const char* assetPath);
+    Ref<void> GetAsset(const char* assetPath);
 
 	bool IsRunning();
 	bool IsLoaded(const Ref<Renderer>& rn);

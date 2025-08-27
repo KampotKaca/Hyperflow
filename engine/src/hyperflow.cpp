@@ -3,6 +3,7 @@
 #include "hrenderer.h"
 #include "htime.h"
 #include "hinternal.h"
+#include "hscene.h"
 
 namespace hf
 {
@@ -57,7 +58,11 @@ namespace hf
 				inter::HF.time.StartFrame();
 				inter::platform::HandleEvents(inter::HF.updateType);
 				if (!IsRunning()) continue;
-				if(inter::HF.lifecycleCallbacks.onUpdateCallback) inter::HF.lifecycleCallbacks.onUpdateCallback();
+
+			    if(inter::HF.lifecycleCallbacks.onPreUpdateCallback) inter::HF.lifecycleCallbacks.onPreUpdateCallback();
+                for (const auto& scene : inter::HF.scenes | std::views::values) scene->Update();
+			    if(inter::HF.lifecycleCallbacks.onPostUpdateCallback) inter::HF.lifecycleCallbacks.onPostUpdateCallback();
+
 			    if (!IsRunning()) continue;
 				if(IsKeyDown(Key::Escape))
 				{
@@ -79,7 +84,9 @@ namespace hf
 						if (cInfo.onPreRenderCallback) cInfo.onPreRenderCallback(rn);
 						inter::rendering::PreDraw_i(rn);
 						{
-						    if (cInfo.onRenderCallback) cInfo.onRenderCallback(rn);
+						    if (cInfo.onRenderStartCallback) cInfo.onRenderStartCallback(rn);
+						    for (const auto& scene : inter::HF.scenes | std::views::values) scene->Render(rn);
+						    if (cInfo.onRenderEndCallback) cInfo.onRenderEndCallback(rn);
 						}
 						inter::rendering::EndRenderPacket_i(rn);
 					}
@@ -87,6 +94,7 @@ namespace hf
 			}
 			if (inter::HF.lifecycleCallbacks.onQuitCallback) inter::HF.lifecycleCallbacks.onQuitCallback();
 
+			UnloadAllScenes();
 			DestroyAllWindows();
 			inter::audio::Unload_i();
 			inter::platform::Unload();

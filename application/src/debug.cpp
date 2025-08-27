@@ -86,25 +86,6 @@ namespace app
             hf::SetPointerState(DEBUG_INFO.wn, state);
         }
 
-        if (hf::IsKeyDown(hf::Key::V))
-        {
-        	const hf::WindowCreationInfo data =
-        	{
-        		.title = DEBUG_WINDOW_NAMES[DEBUG_INFO.count % 5],
-        		.style = hf::WindowStyle::Default,
-        		.position = { 100, 100 },
-        		.size = { 200, 200 },
-        		.vsyncMode = hf::VsyncMode::Relaxed,
-        		.rnEventInfo =
-        		{
-        			.onPreRenderCallback = AppPreRender,
-        			.onRenderCallback = AppRender
-        		},
-        	};
-        	DEBUG_INFO.wn = hf::Create(data, nullptr);
-        	DEBUG_INFO.count++;
-        }
-
         if (hf::IsKeyDown(hf::Key::K))
         {
             hf::SetVSyncMode(DEBUG_INFO.wn, (hf::VsyncMode)(((uint32_t)hf::GetVSyncMode(DEBUG_INFO.wn) + 1) % (uint32_t)hf::VsyncMode::Count));

@@ -22,9 +22,7 @@ namespace app
 		CubemapLoadAll();
 	    CreateRenderTextures();
 
-        hf::SubmitAllTextures();
-
-		MeshLoadAll();
+	    MeshLoadAll();
 		TexturePackLoadAll();
 		ShaderLoadAll();
 		MaterialLoadAll();
@@ -35,6 +33,7 @@ namespace app
 	void AppStart()
 	{
 		APP_OBJECTS.sphere.transform.position = hf::vec3{ -3, 1, 3 };
+	    APP_OBJECTS.ground.transform.scale = hf::vec3{ 100, 1, 100 };
 
 	    for (uint32_t x = 0; x < VIKING_ROOM_AXIS_SIZE; x++)
 	        for (uint32_t z = 0; z < VIKING_ROOM_AXIS_SIZE; z++)
@@ -45,13 +44,18 @@ namespace app
 		VoxelTerrainGenerate();
 		hf::SetTargetFrameRate(170);
 	    SetState(hf::GetMainWindow(), hf::WindowState::Maximized);
+	    APP_OBJECTS.mainScene = hf::LoadScene<ApplicationScene>();
 	}
 
-	void AppUpdate()
+    void AppPreUpdate()
 	{
-		APP_OBJECTS.ground.transform.scale = hf::vec3{ 100, 1, 100 };
-		DebugUpdate();
-		VoxelTerrainUpdate();
+	    DebugUpdate();
+	    VoxelTerrainUpdate();
+	}
+
+    void AppPostUpdate()
+	{
+
 	}
 
 	void AppQuit()

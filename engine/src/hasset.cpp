@@ -60,6 +60,28 @@ namespace hf
         return it->second.asset;
     }
 
+    void DestroyAsset(const char* assetPath)
+    {
+        auto it = inter::HF.graphicsResources.assets.find(assetPath);
+        if (it == inter::HF.graphicsResources.assets.end())
+        {
+            LOG_ERROR("Asset not found %s", assetPath);
+            return;
+        }
+        it->second.Decrement();
+    }
+
+    Ref<void> GetAsset(const char* assetPath)
+    {
+        auto it = inter::HF.graphicsResources.assets.find(assetPath);
+        if (it == inter::HF.graphicsResources.assets.end())
+        {
+            LOG_ERROR("Asset not found %s", assetPath);
+            return nullptr;
+        }
+        return it->second.asset;
+    }
+
     namespace inter::rendering
     {
         void DestroyAllAssets_i(bool internalOnly)

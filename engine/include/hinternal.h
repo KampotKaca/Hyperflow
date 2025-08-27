@@ -156,6 +156,7 @@ namespace hf::inter
         Ref<Window> mainWindow{};
         std::vector<Ref<Window>> tempWindows{};
         unordered_map<uint64_t, Ref<Window>> windows{};
+        unordered_map<uint64_t, Ref<Scene>> scenes{};
         uint32_t rendererCount{};
         RenderingApi renderingApi{};
 
@@ -199,6 +200,9 @@ namespace hf::inter
 
     namespace rendering
     {
+        void LoadScene_i(Scene* scene);
+        void UnloadScene_i(Scene* scene);
+
         void StartRenderPacket_i(const Ref<Renderer>& rn);
         void EndRenderPacket_i(const Ref<Renderer>& rn);
         void PreDraw_i(const Ref<Renderer>& rn);

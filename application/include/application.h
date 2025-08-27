@@ -2,6 +2,7 @@
 #define APPLICATION_H
 
 #include <hyperflow.h>
+#include "applicationscene.h"
 
 namespace app
 {
@@ -29,6 +30,7 @@ namespace app
 	{
 		hf::DirectionalLight mainLight{};
 		hf::SkyboxInfo skybox{};
+	    hf::Ref<ApplicationScene> mainScene{};
 
 	    VikingRoom vikingRooms[VIKING_ROOM_AXIS_SIZE * VIKING_ROOM_AXIS_SIZE]{};
 	    Sphere sphere{};
@@ -39,14 +41,16 @@ namespace app
 	void AppRendererLoad();
 	void AppLoadResources();
 	void AppStart();
-	void AppUpdate();
+	void AppPreUpdate();
+	void AppPostUpdate();
 	void AppQuit();
 
 	void AppRendererInit();
 	void AppRendererShutdown();
 
     void AppPreRender(const hf::Ref<hf::Renderer>& rn);
-	void AppRender(const hf::Ref<hf::Renderer>& rn);
+	void AppStartRender(const hf::Ref<hf::Renderer>& rn);
+	void AppEndRender(const hf::Ref<hf::Renderer>& rn);
 }
 
 #endif //APPLICATION_H

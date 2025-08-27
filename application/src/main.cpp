@@ -34,7 +34,8 @@ int main()
 			.onRendererLoad   = app::AppRendererLoad,
 			.onResourcesLoad  = app::AppLoadResources,
 			.onStartCallback  = app::AppStart,
-			.onUpdateCallback = app::AppUpdate,
+			.onPreUpdateCallback  = app::AppPreUpdate,
+			.onPostUpdateCallback = app::AppPostUpdate,
 			.onQuitCallback   = app::AppQuit,
 		},
 	    .audioInfo = hf::EngineInternalAudioInfo
@@ -58,7 +59,8 @@ int main()
 				.onRendererInitCallback 	= app::AppRendererInit,
 				.onRendererShutdownCallback = app::AppRendererShutdown,
 				.onPreRenderCallback 	    = app::AppPreRender,
-				.onRenderCallback    	    = app::AppRender,
+				.onRenderStartCallback    	= app::AppStartRender,
+				.onRenderEndCallback    	= app::AppEndRender,
 			},
 		}
 	};

@@ -666,7 +666,8 @@ namespace hf
 		void (*onRendererShutdownCallback)(){};
 
 		void (*onPreRenderCallback)(const Ref<Renderer>&){};
-		void (*onRenderCallback)(const Ref<Renderer>&){};
+		void (*onRenderStartCallback)(const Ref<Renderer>&){};
+		void (*onRenderEndCallback)(const Ref<Renderer>&){};
 	};
 
 	struct WindowCreationInfo
@@ -697,7 +698,9 @@ namespace hf
 		//Called until the first frame update
 		void (*onStartCallback)(){};
 		//Called every frame
-		void (*onUpdateCallback)(){};
+		void (*onPreUpdateCallback)(){};
+	    //Called every frame
+	    void (*onPostUpdateCallback)(){};
 		//Called when application starts releasing resources until it terminates
 		void (*onQuitCallback)(){};
 	};
@@ -795,6 +798,12 @@ namespace hf
 	//endregion
 
     struct Scene;
+
+    struct AssetLocation
+    {
+        const char* path{};
+        AssetType type{};
+    };
 
     struct GlobalMemoryStatistics
     {
