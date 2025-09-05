@@ -28,6 +28,13 @@ namespace hf::editor
         NoNavFocus = 1 << 17, UnsavedDocument = 1 << 18,
     };
 
+    struct EditorContextData
+    {
+        bool* drawGridLines{};
+        GridLinesInfo* gridLines{};
+        Camera3DCore* camera{};
+    };
+
     enum class Condition { None = 0, Always = 1 << 0, Once = 1 << 1, FirstUseEver = 1 << 2, Appearing = 1 << 3 };
     enum class DrawStateFlag { None = 0, Nameless = 1 << 0, ButtonLess = 1 << 1, DontStretchWidth = 1 << 2, DontUseDropdown = 1 << 3 };
     DEFINE_ENUM_FLAGS(Condition)
@@ -61,6 +68,7 @@ namespace hf::editor
     bool DrawMemoryStatisticsWindow(const char* label, bool* isOpen = nullptr, WindowFlags flags = WindowFlags::None);
     bool DrawRenderStatisticsWindow(const char* label, bool* isOpen = nullptr, WindowFlags flags = WindowFlags::None);
     bool DrawAudioSettingsWindow(const char* label, bool* isOpen = nullptr, WindowFlags flags = WindowFlags::None);
+    bool DrawEditorWindow(const char* label, EditorContextData& data, bool* isOpen = nullptr, WindowFlags flags = WindowFlags::None);
 
     bool Draw(const char* label, const Ref<AudioPlayer>& pl,   DrawStateFlag flags = DrawStateFlag::None);
     bool Draw(const char* label, const Ref<AudioPlayer3D>& pl, DrawStateFlag flags = DrawStateFlag::None);
@@ -306,6 +314,7 @@ namespace hf::editor
     inline bool DrawMemoryStatisticsWindow(const char* label, bool* isOpen = nullptr, WindowFlags flags = WindowFlags::None) { return false; }
     inline bool DrawRenderStatisticsWindow(const char* label, bool* isOpen = nullptr, WindowFlags flags = WindowFlags::None) { return false; }
     inline bool DrawAudioSettingsWindow   (const char* label, bool* isOpen = nullptr, WindowFlags flags = WindowFlags::None) { return false; }
+    inline bool DrawEditorWindow(const char* label, EditorContextData& data, bool* isOpen = nullptr, WindowFlags flags = WindowFlags::None) { return false; }
 
     inline bool Draw(const char* label, const Ref<AudioPlayer>& pl,   DrawStateFlag flags = DrawStateFlag::None) { return false; }
     inline bool Draw(const char* label, const Ref<AudioPlayer3D>& pl, DrawStateFlag flags = DrawStateFlag::None) { return false; }

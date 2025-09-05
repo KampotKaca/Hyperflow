@@ -178,8 +178,8 @@ namespace hf
             {
                 vec2 vertices[6]
                 {
-                    vec2{ -1, -1 }, vec2{ 1, 1 },  vec2{ -1, 1 },
-                    vec2{ -1, -1 }, vec2{ 1, -1 }, vec2{ 1, 1 },
+                    vec2{ -0.5, -0.5 }, vec2{ 0.5, 0.5 },  vec2{ -0.5, 0.5 },
+                    vec2{ -0.5, -0.5 }, vec2{ 0.5, -0.5 }, vec2{ 0.5, 0.5 },
                 };
 
                 VertexBufferCreationInfo bufferInfo{};

@@ -147,18 +147,18 @@ namespace app
                 hf::editor::EndDropdown();
             }
 
-            if (hf::editor::StartDropdown("Cameras"))
-            {
-                hf::editor::Draw("Editor Camera", APP_DEBUG.camera.camera3D.core);
-                hf::editor::EndDropdown();
-            }
-
             hf::editor::EndWindow();
         }
 
         hf::editor::DrawMemoryStatisticsWindow("Memory Statistics");
         hf::editor::DrawRenderStatisticsWindow("Rendering Statistics");
         hf::editor::DrawAudioSettingsWindow("Audio Settings");
+
+        hf::editor::EditorContextData data{};
+        data.camera = &APP_DEBUG.camera.camera3D.core;
+        data.drawGridLines = &APP_DEBUG.drawGridLines;
+        data.gridLines = &APP_DEBUG.gridLinesInfo;
+        hf::editor::DrawEditorWindow("Editor", data);
 
         hf::editor::SetNextWindowSize({ 300, 300 }, hf::editor::Condition::FirstUseEver);
         hf::editor::SetNextWindowPos({ 100, 100 }, hf::editor::Condition::FirstUseEver);

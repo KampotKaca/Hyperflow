@@ -61,8 +61,10 @@ namespace hf::editor
     template bool DrawAudioSettings(const Ref<AudioPlayer>& pl, DrawStateFlag flags);
     template bool DrawAudioSettings(const Ref<AudioPlayer3D>& pl, DrawStateFlag flags);
 
-    static bool DrawCone(AudioCone& cone, DrawStateFlag flags);
+    static bool DrawCone(AudioCone& cone, DrawStateFlag flags = DrawStateFlag::None);
     static bool DrawTable(const char* label);
+    static void DrawCameraCore(Camera3DCore& cam, DrawStateFlag flags = DrawStateFlag::None);
+    static void DrawGridLines(GridLinesInfo& info, bool& enabled, DrawStateFlag flags = DrawStateFlag::None);
 
     bool StartDropdown(const char* label)
     {
@@ -128,14 +130,7 @@ namespace hf::editor
         const bool result = StartComponent(label, flags);
         if(result)
         {
-            DrawSlider("Fov", cam.fov, 1.0f, 179.0f, "%.1f", flags);
-            Draw("Distance", cam.farPlane, 0.01f, 100000.0f, "%.1f", flags | DrawStateFlag::DontStretchWidth);
-            ImGui::SameLine();
-            DrawSlider("Near", cam.nearPlane, 0.1f, cam.farPlane, "%.2f", flags | DrawStateFlag::Nameless);
-            cam.nearPlane = glm::min(cam.nearPlane, cam.farPlane);
-
-            cam.farPlane = glm::max(cam.nearPlane, cam.farPlane);
-
+            DrawCameraCore(cam, flags);
             EndComponent();
         }
         ImGui::PopID();
@@ -212,6 +207,52 @@ namespace hf::editor
             Draw("2D Settings", Get2DAudioGroup());
             Draw("3D Settings", Get3DAudioGroup());
 
+            EndWindow();
+            return true;
+        }
+        return false;
+    }
+
+    static void SetBelowTheElement(float width)
+    {
+        ImVec2 pos = ImGui::GetItemRectMin();
+        ImVec2 size = ImGui::GetItemRectSize();
+        ImVec2 popup_pos(pos.x - (width - size.x) * 0.5f, pos.y + size.y);
+
+        ImGui::SetNextWindowPos(popup_pos);
+        ImGui::SetNextWindowSize(ImVec2(width, 0));
+    }
+
+    bool DrawEditorWindow(const char* label, EditorContextData& data, bool* isOpen, WindowFlags flags)
+    {
+        if(StartWindow(label, isOpen, flags))
+        {
+            ImGui::PushID(PointerToID(&data));
+            if (ImGui::Button("Grid")) ImGui::OpenPopup("pop_grid");
+
+            SetBelowTheElement(300.0f);
+            if (ImGui::BeginPopup("pop_grid"))
+            {
+                DrawTable("grid_lines_table");
+                DrawGridLines(*data.gridLines, *data.drawGridLines);
+                ImGui::EndTable();
+                ImGui::EndPopup();
+            }
+
+            ImGui::SameLine();
+
+            if (ImGui::Button("Cam")) ImGui::OpenPopup("pop_camera");
+
+            SetBelowTheElement(250.0f);
+            if (ImGui::BeginPopup("pop_camera"))
+            {
+                DrawTable("camera");
+                DrawCameraCore(*data.camera);
+                ImGui::EndTable();
+                ImGui::EndPopup();
+            }
+
+            ImGui::PopID();
             EndWindow();
             return true;
         }
@@ -316,5 +357,27 @@ namespace hf::editor
             return true;
         }
         return false;
+    }
+
+    void DrawCameraCore(Camera3DCore& cam, DrawStateFlag flags)
+    {
+        DrawSlider("Fov", cam.fov, 1.0f, 179.0f, "%.1f", flags);
+        Draw("Distance", cam.farPlane, 0.01f, 100000.0f, "%.1f", flags | DrawStateFlag::DontStretchWidth);
+        ImGui::SameLine();
+        DrawSlider("Near", cam.nearPlane, 0.1f, cam.farPlane, "%.2f", flags | DrawStateFlag::Nameless);
+        cam.nearPlane = glm::min(cam.nearPlane, cam.farPlane);
+
+        cam.farPlane = glm::max(cam.nearPlane, cam.farPlane);
+    }
+
+    void DrawGridLines(GridLinesInfo& info, bool& enabled, DrawStateFlag flags)
+    {
+        Draw("Enabled", enabled, flags);
+        if (enabled)
+        {
+            DrawColor("Color", info.color, flags);
+            DrawSlider("Thickness", info.lineThickness, 0.01f, 10.0f, "%.2f", flags);
+            Draw("Distance", info.drawDistance, 0.01f, 10000.0f, "%.2f", flags);
+        }
     }
 }

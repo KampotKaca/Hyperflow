@@ -786,7 +786,8 @@ namespace hf
 
 	struct GridLinesInfo
 	{
-		alignas(16) float_t lineThickness = 3.0f;
+		float_t lineThickness = 3.0f;
+		float_t drawDistance = 1000.0f;
 		alignas(16) vec4 color{ 0.2f, 0.2f, 0.2f, 0.4f };
 	};
 
@@ -807,21 +808,21 @@ namespace hf
 
     struct GlobalMemoryStatistics
     {
-        double mappedSizeMbs = 0;
-        double mappedPeakSizeMbs = 0;
-        double cachedSizeMbs = 0;
-        double hugeAllocSizeMbs = 0;
-        double hugeAllocPeakSizeMbs = 0;
-        double mappedTotalSizeMbs = 0;
-        double unmappedTotalSizeMbs = 0;
+        double_t mappedSizeMbs = 0;
+        double_t mappedPeakSizeMbs = 0;
+        double_t cachedSizeMbs = 0;
+        double_t hugeAllocSizeMbs = 0;
+        double_t hugeAllocPeakSizeMbs = 0;
+        double_t mappedTotalSizeMbs = 0;
+        double_t unmappedTotalSizeMbs = 0;
     };
 
     struct ThreadMemoryStatistics
     {
-        double cacheSizeMbs = 0;
-        double cacheSpanMbs = 0;
-        double threadToGlobalMbs = 0;
-        double globalToThreadMbs = 0;
+        double_t cacheSizeMbs = 0;
+        double_t cacheSpanMbs = 0;
+        double_t threadToGlobalMbs = 0;
+        double_t globalToThreadMbs = 0;
 
         size_t currentNumSpans = 0;
         size_t peakNumSpans = 0;
