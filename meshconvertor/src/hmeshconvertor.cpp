@@ -263,9 +263,7 @@ void LoadModel(const char* path, MeshInfo* meshInfo)
             indices.push_back(uniqueVertices[vertex]);
         }
 
-        SubMeshInfo subMeshInfo
-        {
-        };
+        SubMeshInfo subMeshInfo{};
 
         hf::MeshDataType dataFlags = hf::MeshDataType::None;
         if (!attrib.vertices.empty())
@@ -313,39 +311,57 @@ void LoadModel(const char* path, MeshInfo* meshInfo)
             memcpy(subMeshInfo.indices.data(), indices.data(), sizeof(uint32_t) * indices.size());
         }
 
-        meshInfo->headers.push_back(header);
-
-        for (uint32_t i = 0; i < vertices.size(); ++i)
+        if (header.dataFlags & (uint32_t)hf::MeshDataType::Position)
         {
-            const auto& vertex = vertices[i];
-            if (header.dataFlags & (uint32_t)hf::MeshDataType::Position)
+            for (uint32_t i = 0; i < vertices.size(); ++i)
             {
+                const auto& vertex = vertices[i];
                 subMeshInfo.positions[i * 3 + 0] = vertex.pos.x;
                 subMeshInfo.positions[i * 3 + 1] = vertex.pos.y;
                 subMeshInfo.positions[i * 3 + 2] = vertex.pos.z;
             }
 
-            if (header.dataFlags & (uint32_t)hf::MeshDataType::Normal)
+            if (vertices.size() > 0)
             {
+                header.volume.min = vertices[0].pos;
+                header.volume.max = header.volume.min;
+                for (uint32_t i = 1; i < vertices.size(); ++i) header.volume.Encapsulate(vertices[i].pos);
+            }
+        }
+
+        if (header.dataFlags & (uint32_t)hf::MeshDataType::Normal)
+        {
+            for (uint32_t i = 0; i < vertices.size(); ++i)
+            {
+                const auto& vertex = vertices[i];
                 subMeshInfo.normals[i * 3 + 0] = vertex.normal.x;
                 subMeshInfo.normals[i * 3 + 1] = vertex.normal.y;
                 subMeshInfo.normals[i * 3 + 2] = vertex.normal.z;
             }
+        }
 
-            if (header.dataFlags & (uint32_t)hf::MeshDataType::Color)
+        if (header.dataFlags & (uint32_t)hf::MeshDataType::Color)
+        {
+            for (uint32_t i = 0; i < vertices.size(); ++i)
             {
+                const auto& vertex = vertices[i];
                 subMeshInfo.colors[i * 3 + 0] = vertex.color.x;
                 subMeshInfo.colors[i * 3 + 1] = vertex.color.y;
                 subMeshInfo.colors[i * 3 + 2] = vertex.color.z;
             }
+        }
 
-            if (header.dataFlags & (uint32_t)hf::MeshDataType::TexCoord)
+        if (header.dataFlags & (uint32_t)hf::MeshDataType::TexCoord)
+        {
+            for (uint32_t i = 0; i < vertices.size(); ++i)
             {
+                const auto& vertex = vertices[i];
                 subMeshInfo.texCoords[i * 2 + 0] = vertex.texCoord.x;
                 subMeshInfo.texCoords[i * 2 + 1] = vertex.texCoord.y;
             }
         }
 
+        meshInfo->headers.push_back(header);
         meshInfo->subMeshes.push_back(std::move(subMeshInfo));
     }
 }

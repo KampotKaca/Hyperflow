@@ -48,7 +48,6 @@ namespace hf
 
         uint32_t offset = 0;
 
-        BoundingVolume volume{};
         uint32_t submeshCount = 0;
         memcpy(&submeshCount, compressedData.data() + offset, sizeof(uint32_t));
         offset += sizeof(uint32_t);
@@ -106,7 +105,6 @@ namespace hf
                     {
                         memcpy(&rf[j * vertexStride + strideOffset], &meshData[offset], pncStep);
                         vec3 position = *(vec3*)&rf[j * vertexStride + strideOffset];
-                        volume.Encapsulate(position);
                         offset += pncStep;
                     }
                 }
@@ -187,7 +185,7 @@ namespace hf
             SubMesh submesh{};
             submesh.vertBuffer = MakeRef<VertexBuffer>(vertInfo, DataTransferType::TransferOwnership);
             submesh.indexBuffer = MakeRef<IndexBuffer>(indexInfo, DataTransferType::TransferOwnership);
-            submesh.volume = volume;
+            submesh.volume = header.volume;
 
             subMeshes.push_back(submesh);
         }
