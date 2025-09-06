@@ -1267,6 +1267,7 @@ namespace hf
         void RendererDrawUploads(const void* handle, RenderPacket* packet)
         {
             //Uniform Buffer Uploads
+            if (packet->bufferUploadPackets.size() > 0)
             {
                 BufferUploadInfo_i uploadInfo{};
                 uploadInfo.pUploadPackets = &packet->bufferUploadPackets[0];
@@ -1277,6 +1278,7 @@ namespace hf
             }
 
             //Instance Buffer Uploads
+            if (packet->instanceUploads.size() > 0)
             {
                 VertexBufferUploadInfo_i vbUploadInfo{};
                 vbUploadInfo.buffer = HF.staticResources.instanceBuffer->handle;
