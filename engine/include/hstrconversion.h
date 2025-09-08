@@ -11,7 +11,8 @@ namespace hf
         uint32_t hash = 2166136261u;
         for (const char c : str)
         {
-            hash ^= (uint8_t)c;
+            const char lower = (c >= 'A' && c <= 'Z') ? (c - 'A' + 'a') : c;
+            hash ^= (uint8_t)lower;
             hash *= 16777619u;
         }
         return hash;
@@ -434,6 +435,17 @@ namespace hf
             DATA_TYPE(Contrast) DATA_TYPE(InvertOVG)
             DATA_TYPE(Red) DATA_TYPE(Green) DATA_TYPE(Blue)
         default: throw std::invalid_argument("Unknown Color Masking Flags string");
+        }
+#undef X
+    }
+
+    constexpr ModelType STRING_TO_MODEL_TYPE(const std::string_view str)
+    {
+#define X ModelType
+        switch (fnv1a(str))
+        {
+            DATA_TYPE(Unknown) DATA_TYPE(Obj) DATA_TYPE(Fbx) DATA_TYPE(Gltf) DATA_TYPE(Glb)
+        default: throw std::invalid_argument("Unknown Model types string");
         }
 #undef X
     }

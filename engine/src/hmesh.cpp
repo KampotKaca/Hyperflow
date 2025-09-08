@@ -52,9 +52,9 @@ namespace hf
         memcpy(&submeshCount, compressedData.data() + offset, sizeof(uint32_t));
         offset += sizeof(uint32_t);
 
-        std::vector<SubMeshHeader> headers(submeshCount);
-        memcpy(headers.data(), compressedData.data() + offset, submeshCount * sizeof(SubMeshHeader));
-        offset += submeshCount * sizeof(SubMeshHeader);
+        std::vector<ml::SubMeshHeader> headers(submeshCount);
+        memcpy(headers.data(), compressedData.data() + offset, submeshCount * sizeof(ml::SubMeshHeader));
+        offset += submeshCount * sizeof(ml::SubMeshHeader);
         if (!CheckFileIntegrity(compressedData.data(), offset))
         {
             LOG_ERROR("[Hyperflow] Corrupted mesh file, unable to load: %s", filePath.c_str());
