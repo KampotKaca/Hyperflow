@@ -86,6 +86,8 @@ set(PROCESSED_MESHES)
 foreach(MESH_SOURCE_DIR ${MESH_SOURCE_DIRS})
     file(GLOB_RECURSE MESH_SOURCES_TMP
             "${MESH_SOURCE_DIR}/*.obj"
+            "${MESH_SOURCE_DIR}/*.gltf"
+            "${MESH_SOURCE_DIR}/*.glb"
     )
 
     foreach(MESH ${MESH_SOURCES_TMP})

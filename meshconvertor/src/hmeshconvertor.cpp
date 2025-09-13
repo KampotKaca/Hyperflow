@@ -140,16 +140,17 @@ namespace ml
         const std::string_view ext = sv.substr(dotPos + 1);
         auto type = hf::STRING_TO_MODEL_TYPE(ext);
 
+        bool modelLoadingResult = false;
         switch (type)
         {
         case hf::ModelType::Unknown: return false;
-        case hf::ModelType::Obj: LoadObj(path, meshInfo); break;
-        case hf::ModelType::Fbx: LoadFbx(path, meshInfo); break;
-        case hf::ModelType::Gltf:
-        case hf::ModelType::Glb:  LoadGltf(path, meshInfo); break;
+        case hf::ModelType::Obj:  modelLoadingResult = LoadObj(path, meshInfo); break;
+        case hf::ModelType::Fbx:  modelLoadingResult = LoadFbx(path, meshInfo); break;
+        case hf::ModelType::Gltf: modelLoadingResult = LoadGltf(path, meshInfo, true); break;
+        case hf::ModelType::Glb:  modelLoadingResult = LoadGltf(path, meshInfo, false); break;
         }
 
-        return true;
+        return modelLoadingResult;
     }
 }
 

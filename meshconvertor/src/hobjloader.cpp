@@ -1,51 +1,24 @@
-#define GLM_ENABLE_EXPERIMENTAL
+#include "hmeshashared.h"
 #include "hmeshconvertor.h"
 #include "tiny_obj_loader.h"
-#include <glm/gtx/hash.hpp>
 
 namespace ml
 {
-    struct Vertex
-    {
-        glm::vec3 pos{};
-        glm::vec3 normal{};
-        glm::vec3 color{};
-        glm::vec2 texCoord{};
-
-        bool operator==(const Vertex& other) const
-        {
-            return pos == other.pos && color == other.color &&
-                normal == other.normal && texCoord == other.texCoord;
-        }
-    };
-}
-
-namespace std
-{
-    template<> struct hash<ml::Vertex>
-    {
-        size_t operator()(ml::Vertex const& vertex) const noexcept
-        {
-            return ((hash<glm::vec3>()(vertex.pos) ^
-                    (hash<glm::vec3>()(vertex.normal) << 1)) >> 1) ^
-                    (hash<glm::vec3>()(vertex.color) << 1) ^
-                    (hash<glm::vec2>()(vertex.texCoord) >> 1);
-        }
-    };
-}
-
-namespace ml
-{
-    void LoadObj(const char* path, MeshInfo* meshInfo)
+    bool LoadObj(const char* path, MeshInfo* meshInfo)
     {
         tinyobj::attrib_t attrib;
         std::vector<tinyobj::shape_t> shapes;
         std::vector<tinyobj::material_t> materials;
         std::string warn, err;
+        bool objRes = tinyobj::LoadObj(&attrib, &shapes, &materials, &warn, &err, path);
 
-        if (!tinyobj::LoadObj(&attrib, &shapes, &materials, &warn, &err, path))
+        if (!warn.empty()) std::cout << "[Obj Parse Warning] " << warn.c_str() << std::endl;
+        if (!err.empty())  std::cout << "[Obj Parse Error] "   << err.c_str() << std::endl;
+
+        if (!objRes)
         {
-            throw std::runtime_error(warn + err);
+            std::cout << "Failed to parse Obj" << std::endl;
+            return false;
         }
 
         meshInfo->subMeshes.reserve(shapes.size());
@@ -111,7 +84,7 @@ namespace ml
 
             SubMeshInfo subMeshInfo{};
 
-            hf::MeshDataType dataFlags = hf::MeshDataType::None;
+            auto dataFlags = hf::MeshDataType::None;
             if (!attrib.vertices.empty())
             {
                 subMeshInfo.positions.resize(vertices.size() * 3);
@@ -210,5 +183,6 @@ namespace ml
             meshInfo->headers.push_back(header);
             meshInfo->subMeshes.push_back(std::move(subMeshInfo));
         }
+        return true;
     }
 }

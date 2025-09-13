@@ -3,8 +3,8 @@
 
 namespace ml
 {
-    void LoadFbx(const char* path, MeshInfo* meshInfo)
+    bool LoadFbx(const char* path, MeshInfo* meshInfo)
     {
-
+        return true;
     }
 }

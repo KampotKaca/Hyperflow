@@ -69,9 +69,9 @@ namespace ml
     };
 
     bool LoadModel(const char* path, MeshInfo* meshInfo);
-    void LoadObj(const char* path, MeshInfo* meshInfo);
-    void LoadFbx(const char* path, MeshInfo* meshInfo);
-    void LoadGltf(const char* path, MeshInfo* meshInfo); //or Glb
+    bool LoadObj(const char* path, MeshInfo* meshInfo);
+    bool LoadFbx(const char* path, MeshInfo* meshInfo);
+    bool LoadGltf(const char* path, MeshInfo* meshInfo, bool isGltf); //or Glb
 }
 
 #endif //MESHCONVERTOR_H
