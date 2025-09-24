@@ -11,18 +11,19 @@
 
 namespace ml
 {
-    struct Armature
-    {
-        std::vector<float> joints{};
-        std::vector<float> weights{};
-    };
-
     struct SubMeshHeader
     {
+        enum class DataType
+        {
+            Unique, //normals, colors, texcoords are per vertex position.
+            Triangulated, //normals, colors, texcoords are three per triangle and positions are unique.
+        };
+
         uint32_t vertexCount = 0;
         uint32_t indexCount = 0;
         uint32_t dataFlags = (uint32_t)hf::MeshDataType::None;
         uint32_t indexFormat = (uint32_t)hf::MeshIndexFormat::U16;
+        uint32_t dataType = (uint32_t)DataType::Unique;
         hf::BoundingVolume volume{};
 
         uint32_t GetDataSize() const
@@ -65,7 +66,6 @@ namespace ml
     {
         std::vector<SubMeshHeader> headers{};
         std::vector<SubMeshInfo> subMeshes{};
-        std::vector<Armature> armatures{};
     };
 
     bool LoadModel(const char* path, MeshInfo* meshInfo);

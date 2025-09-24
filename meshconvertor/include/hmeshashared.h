@@ -13,11 +13,7 @@ namespace ml
         glm::vec3 color{};
         glm::vec2 texCoord{};
 
-        bool operator==(const Vertex& other) const
-        {
-            return pos == other.pos && color == other.color &&
-                normal == other.normal && texCoord == other.texCoord;
-        }
+        bool operator==(const Vertex& other) const = default;
     };
 }
 

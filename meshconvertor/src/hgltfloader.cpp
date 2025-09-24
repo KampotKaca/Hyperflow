@@ -21,7 +21,7 @@ namespace ml
 
         if (!gltfResult)
         {
-            std::cout << "Failed to parse Gltf" << std::endl;
+            std::cerr << "Failed to parse Gltf" << std::endl;
             return false;
         }
 
@@ -80,7 +80,7 @@ namespace ml
                     for (size_t i = 0; i < accessor.count; i++)
                     {
                         auto* v = (const float*)(dataPtr + i * accessor.ByteStride(bv));
-                        dst[i] = glm::vec3(v[0], v[1], v[2]);
+                        dst[i] = hf::vec3(v[0], v[1], v[2]);
                     }
                 };
 

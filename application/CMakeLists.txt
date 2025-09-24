@@ -88,6 +88,7 @@ foreach(MESH_SOURCE_DIR ${MESH_SOURCE_DIRS})
             "${MESH_SOURCE_DIR}/*.obj"
             "${MESH_SOURCE_DIR}/*.gltf"
             "${MESH_SOURCE_DIR}/*.glb"
+            "${MESH_SOURCE_DIR}/*.fbx"
     )
 
     foreach(MESH ${MESH_SOURCES_TMP})

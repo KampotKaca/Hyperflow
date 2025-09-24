@@ -1,9 +1,11 @@
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/hash.hpp>
 #include "hmeshconvertor.h"
+#include "hmeshinternal.h"
 #include "hstrconversion.h"
 #include <lz4.h>
 
+#include "hmeshashared.h"
 #include "hyperflow.h"
 
 namespace ml
@@ -151,6 +153,93 @@ namespace ml
         }
 
         return modelLoadingResult;
+    }
+
+    void WriteData(MeshInfo* meshInfo, const std::vector<Vertex>& vertices, const std::vector<uint32_t>& indices,
+        SubMeshHeader::DataType dataType, hf::MeshDataType dataFlags)
+    {
+        SubMeshInfo subMeshInfo{};
+
+        if ((uint32_t)dataFlags & (uint32_t)hf::MeshDataType::Position) subMeshInfo.positions.resize(vertices.size() * 3);
+        if ((uint32_t)dataFlags & (uint32_t)hf::MeshDataType::Normal)   subMeshInfo.normals.resize(vertices.size() * 3);
+        if ((uint32_t)dataFlags & (uint32_t)hf::MeshDataType::Color)    subMeshInfo.colors.resize(vertices.size() * 3);
+        if ((uint32_t)dataFlags & (uint32_t)hf::MeshDataType::TexCoord) subMeshInfo.texCoords.resize(vertices.size() * 2);
+
+        SubMeshHeader header{};
+        header.vertexCount = (uint32_t)vertices.size();
+        header.indexCount  = (uint32_t)indices.size();
+        header.dataFlags   = (uint32_t)dataFlags;
+        header.dataType    = (uint32_t)dataType;
+
+        if (vertices.size() <= 65535)
+        {
+            header.indexFormat = (uint32_t)hf::MeshIndexFormat::U16;
+            subMeshInfo.indices = std::vector<char>(indices.size() * 2);
+            for (uint32_t i = 0; i < indices.size(); ++i)
+            {
+                auto result = (uint16_t)indices[i];
+                memcpy(&subMeshInfo.indices[i * 2], &result, sizeof(uint16_t));
+            }
+        }
+        else
+        {
+            header.indexFormat = (uint32_t)hf::MeshIndexFormat::U32;
+            subMeshInfo.indices = std::vector<char>(indices.size() * 4);
+            memcpy(subMeshInfo.indices.data(), indices.data(), sizeof(uint32_t) * indices.size());
+        }
+
+        if ((uint32_t)dataFlags & (uint32_t)hf::MeshDataType::Position)
+        {
+            for (uint32_t i = 0; i < vertices.size(); ++i)
+            {
+                const auto& vertex = vertices[i];
+                subMeshInfo.positions[i * 3 + 0] = vertex.pos.x;
+                subMeshInfo.positions[i * 3 + 1] = vertex.pos.y;
+                subMeshInfo.positions[i * 3 + 2] = vertex.pos.z;
+            }
+
+            if (vertices.size() > 0)
+            {
+                header.volume.min = vertices[0].pos;
+                header.volume.max = header.volume.min;
+                for (uint32_t i = 1; i < vertices.size(); ++i) header.volume.Encapsulate(vertices[i].pos);
+            }
+        }
+
+        if ((uint32_t)dataFlags & (uint32_t)hf::MeshDataType::Normal)
+        {
+            for (uint32_t i = 0; i < vertices.size(); ++i)
+            {
+                const auto& vertex = vertices[i];
+                subMeshInfo.normals[i * 3 + 0] = vertex.normal.x;
+                subMeshInfo.normals[i * 3 + 1] = vertex.normal.y;
+                subMeshInfo.normals[i * 3 + 2] = vertex.normal.z;
+            }
+        }
+
+        if ((uint32_t)dataFlags & (uint32_t)hf::MeshDataType::Color)
+        {
+            for (uint32_t i = 0; i < vertices.size(); ++i)
+            {
+                const auto& vertex = vertices[i];
+                subMeshInfo.colors[i * 3 + 0] = vertex.color.x;
+                subMeshInfo.colors[i * 3 + 1] = vertex.color.y;
+                subMeshInfo.colors[i * 3 + 2] = vertex.color.z;
+            }
+        }
+
+        if ((uint32_t)dataFlags & (uint32_t)hf::MeshDataType::TexCoord)
+        {
+            for (uint32_t i = 0; i < vertices.size(); ++i)
+            {
+                const auto& vertex = vertices[i];
+                subMeshInfo.texCoords[i * 2 + 0] = vertex.texCoord.x;
+                subMeshInfo.texCoords[i * 2 + 1] = vertex.texCoord.y;
+            }
+        }
+
+        meshInfo->headers.push_back(header);
+        meshInfo->subMeshes.push_back(std::move(subMeshInfo));
     }
 }
 
