@@ -11,7 +11,6 @@ namespace app
         viking_room_albedo_texture = hf::Cast<hf::Texture>(hf::GetAsset(ASSET_VIKING_ROOM_ALBEDO_TEXTURE));
         greek_head_texture         = hf::Cast<hf::Texture>(hf::GetAsset(ASSET_GREEK_HEAD_ALBEDO_TEXTURE));
         viking_room_mesh           = hf::Cast<hf::Mesh>   (hf::GetAsset(ASSET_VIKING_ROOM_MESH));
-        fbx_torus                  = hf::Cast<hf::Mesh>   (hf::GetAsset(ASSET_FBX_TORUS_MESH));
 
         //viking_room_pack
         {
@@ -84,14 +83,15 @@ namespace app
 
                     hf::Start_DrawGroup(rn);
                     {
-                        const auto meshVolume = hf::GetSubmeshBoundingVolume(fbx_torus, 0);
+                        auto mesh = hf::primitives::GetMesh(hf::PrimitiveMeshType::IcoSphere);
+                        const auto meshVolume = hf::GetSubmeshBoundingVolume(mesh, 0);
 
                         hf::DrawGroupAdd_TexturePackBinding(rn, APP_TEXTURE_PACKS.white_pack, 1);
                         DefaultPushConstant pc{};
                         pc.phongData = hf::vec4{ hf::utils::ColorFromHash(0x9B9B9B), 1.0 };
 
                         hf::DrawGroupSet_PushConstant(rn, pc);
-                        hf::Start_DrawCall(rn, fbx_torus, 0);
+                        hf::Start_DrawCall(rn, mesh, 0);
 
                         {
                             auto& sphere = APP_OBJECTS.sphere;

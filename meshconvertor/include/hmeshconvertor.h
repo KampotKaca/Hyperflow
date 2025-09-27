@@ -13,17 +13,13 @@ namespace ml
 {
     struct SubMeshHeader
     {
-        enum class DataType
-        {
-            Unique, //normals, colors, texcoords are per vertex position.
-            Triangulated, //normals, colors, texcoords are three per triangle and positions are unique.
-        };
-
         uint32_t vertexCount = 0;
         uint32_t indexCount = 0;
         uint32_t dataFlags = (uint32_t)hf::MeshDataType::None;
         uint32_t indexFormat = (uint32_t)hf::MeshIndexFormat::U16;
-        uint32_t dataType = (uint32_t)DataType::Unique;
+        uint32_t skinDeformerCount = 0;
+        uint32_t blendDeformerCount = 0;
+
         hf::BoundingVolume volume{};
 
         uint32_t GetDataSize() const
@@ -55,11 +51,27 @@ namespace ml
 
     struct SubMeshInfo
     {
+        static constexpr float_t ToBoneWeight(uint16_t w) { return w / std::numeric_limits<uint16_t>().max(); }
+        static constexpr uint16_t ToBoneWeight(float_t w) { return (uint16_t)(w * std::numeric_limits<uint16_t>().max()); }
+
+        struct BoneWeight
+        {
+            uint16_t index{};
+            uint16_t weight{};
+        };
+
         std::vector<float> positions{};
         std::vector<float> normals{};
         std::vector<float> colors{};
         std::vector<float> texCoords{};
         std::vector<char> indices{};
+
+        //deformations
+        std::vector<uint8_t> boneCounts{};
+        std::vector<BoneWeight> boneWeights{};
+
+        std::vector<uint8_t> blendCounts{};
+        std::vector<float> blendOffsets{};
     };
 
     struct MeshInfo

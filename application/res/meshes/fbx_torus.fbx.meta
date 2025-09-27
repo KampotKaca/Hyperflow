@@ -1,8 +1,0 @@
-typeFlags:
-  - Position
-  - Normal
-  #  - Color
-  - TexCoord
-
-memoryType: Static
-vertexAttribute: __pos_nor_tex

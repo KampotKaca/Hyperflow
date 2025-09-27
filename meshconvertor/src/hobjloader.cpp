@@ -89,7 +89,7 @@ namespace ml
             if (!attrib.colors.empty())    dataFlags |= hf::MeshDataType::Color;
             if (!attrib.texcoords.empty()) dataFlags |= hf::MeshDataType::TexCoord;
 
-            WriteData(meshInfo, vertices, indices, SubMeshHeader::DataType::Unique, dataFlags);
+            WriteData(meshInfo, vertices, indices, dataFlags, 0, 0);
         }
         return true;
     }

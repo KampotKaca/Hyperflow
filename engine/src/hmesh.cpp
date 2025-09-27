@@ -13,8 +13,7 @@ namespace hf
 {
     static bool CheckFileIntegrity(const char* data, uint32_t& offset);
     static uint32_t ComputeVertexStride(MeshDataType dataType);
-    static void LoadSubmeshUnique(const ml::SubMeshHeader& header, std::vector<char>& meshData, uint32_t vertexStride, Mesh* mesh, VertexBufferCreationInfo& vbInfo, IndexBufferCreationInfo& ibInfo, uint32_t& offset);
-    static void LoadSubmeshTriangulate(const ml::SubMeshHeader& header, std::vector<char>& meshData, uint32_t vertexStride, Mesh* mesh, VertexBufferCreationInfo& vbInfo, IndexBufferCreationInfo& ibInfo, uint32_t& offset);
+    static void LoadSubmeshUnique(const ml::SubMeshHeader& header, const std::vector<char>& meshData, uint32_t vertexStride, const Mesh* mesh, VertexBufferCreationInfo& vbInfo, IndexBufferCreationInfo& ibInfo, uint32_t& offset);
 
     Mesh::Mesh(const MeshCreationInfo& info) : filePath(info.filePath), stats(info.stats)
     {
@@ -71,17 +70,7 @@ namespace hf
             VertexBufferCreationInfo vertInfo{};
             IndexBufferCreationInfo indexInfo{};
 
-            switch (header.dataType)
-            {
-            case (uint32_t)ml::SubMeshHeader::DataType::Unique:
-                LoadSubmeshUnique(header, meshData, vertexStride, this, vertInfo, indexInfo, offset);
-                break;
-            case (uint32_t)ml::SubMeshHeader::DataType::Triangulated:
-                LoadSubmeshTriangulate(header, meshData, vertexStride, this, vertInfo, indexInfo, offset);
-                break;
-
-            default: LOG_ERROR("Something went seriously wrong while loading mesh! %", filePath.c_str()); return;
-            }
+            LoadSubmeshUnique(header, meshData, vertexStride, this, vertInfo, indexInfo, offset);
 
             SubMesh submesh{};
             submesh.vertBuffer = MakeRef<VertexBuffer>(vertInfo, DataTransferType::TransferOwnership);
@@ -196,13 +185,13 @@ namespace hf
     {
         uint32_t vertexSize = 0;
         if ((dataType & MeshDataType::Position) != MeshDataType::None) vertexSize += 3 * sizeof(float_t);
-        if ((dataType & MeshDataType::Normal) != MeshDataType::None)   vertexSize += 3 * sizeof(float_t);
-        if ((dataType & MeshDataType::Color) != MeshDataType::None)    vertexSize += 3 * sizeof(float_t);
+        if ((dataType & MeshDataType::Normal)   != MeshDataType::None) vertexSize += 3 * sizeof(float_t);
+        if ((dataType & MeshDataType::Color)    != MeshDataType::None) vertexSize += 3 * sizeof(float_t);
         if ((dataType & MeshDataType::TexCoord) != MeshDataType::None) vertexSize += 2 * sizeof(float_t);
         return vertexSize;
     }
 
-    void LoadSubmeshUnique(const ml::SubMeshHeader& header, std::vector<char>& meshData, uint32_t vertexStride, Mesh* mesh, VertexBufferCreationInfo& vbInfo, IndexBufferCreationInfo& ibInfo, uint32_t& offset)
+    void LoadSubmeshUnique(const ml::SubMeshHeader& header, const std::vector<char>& meshData, uint32_t vertexStride, const Mesh* mesh, VertexBufferCreationInfo& vbInfo, IndexBufferCreationInfo& ibInfo, uint32_t& offset)
     {
         constexpr uint32_t pncStep = sizeof(float_t) * 3;
         constexpr uint32_t tStep = sizeof(float_t) * 2;
@@ -292,115 +281,6 @@ namespace hf
             LOG_ERROR("[Hyperflow] Corrupted mesh file, unable to load: %s", mesh->filePath.c_str());
             return;
         }
-
-        vbInfo.vertexSize = GetVertexSize(mesh->stats.vertexAttribute);
-        vbInfo.memoryType = mesh->stats.memoryType;
-        vbInfo.vertexCount = header.vertexCount;
-        vbInfo.pVertices = vertices;
-
-        ibInfo.indexFormat = (BufferDataType)header.indexFormat;
-        ibInfo.memoryType = mesh->stats.memoryType;
-        ibInfo.indexCount = header.indexCount;
-        ibInfo.pIndices = indices;
-    }
-
-    void LoadSubmeshTriangulate(const ml::SubMeshHeader& header, std::vector<char>& meshData, uint32_t vertexStride, Mesh* mesh, VertexBufferCreationInfo& vbInfo, IndexBufferCreationInfo& ibInfo, uint32_t& offset)
-    {
-        constexpr uint32_t pncStep = sizeof(float_t) * 3;
-        constexpr uint32_t tStep = sizeof(float_t) * 2;
-
-        uint64_t numVertices = header.indexCount;
-        auto* vertices = (unsigned char*)utils::Allocate(numVertices * vertexStride);
-        memset(vertices, 0, numVertices * vertexStride);
-
-#define INTEGRITY_CHECK\
-        if (!CheckFileIntegrity(meshData.data(), offset))\
-        {\
-            utils::Deallocate(vertices);\
-            LOG_ERROR("[Hyperflow] Corrupted mesh file, unable to load: %s", mesh->filePath.c_str());\
-            return;\
-        }
-
-        uint32_t strideOffset = 0;
-
-        if ((mesh->stats.typeFlags & MeshDataType::Position) != MeshDataType::None) strideOffset += pncStep;
-
-        if (((MeshDataType)header.dataFlags & MeshDataType::Normal) != MeshDataType::None)
-        {
-            if ((mesh->stats.typeFlags & MeshDataType::Normal) != MeshDataType::None)
-            {
-                for (uint32_t j = 0; j < numVertices; j++)
-                {
-                    memcpy(&vertices[j * vertexStride + strideOffset], &meshData[offset], pncStep);
-                    offset += pncStep;
-                }
-            }
-            else offset += numVertices * pncStep;
-            INTEGRITY_CHECK
-        }
-        if ((mesh->stats.typeFlags & MeshDataType::Normal) != MeshDataType::None) strideOffset += pncStep;
-
-        if (((MeshDataType)header.dataFlags & MeshDataType::Color) != MeshDataType::None)
-        {
-            if ((mesh->stats.typeFlags & MeshDataType::Color) != MeshDataType::None)
-            {
-                for (uint32_t j = 0; j < numVertices; j++)
-                {
-                    memcpy(&vertices[j * vertexStride + strideOffset], &meshData[offset], pncStep);
-                    offset += pncStep;
-                }
-            }
-            else offset += numVertices * pncStep;
-            INTEGRITY_CHECK
-        }
-        if ((mesh->stats.typeFlags & MeshDataType::Color) != MeshDataType::None) strideOffset += pncStep;
-
-        if (((MeshDataType)header.dataFlags & MeshDataType::TexCoord) != MeshDataType::None)
-        {
-            if ((mesh->stats.typeFlags & MeshDataType::TexCoord) != MeshDataType::None)
-            {
-                for (uint32_t j = 0; j < numVertices; j++)
-                {
-                    memcpy(&vertices[j * vertexStride + strideOffset], &meshData[offset], tStep);
-                    offset += tStep;
-                }
-            }
-            else offset += numVertices * tStep;
-            INTEGRITY_CHECK
-        }
-
-        uint32_t indexSize = BUFFER_DATA_SIZE[header.indexFormat];
-        uint32_t iSize = header.indexCount * indexSize;
-        void* indices = utils::Allocate(iSize);
-        memcpy(indices, &meshData[offset], iSize);
-        offset += iSize;
-        if (!CheckFileIntegrity(meshData.data(), offset))\
-        {
-            utils::Deallocate(vertices);
-            utils::Deallocate(indices);
-            LOG_ERROR("[Hyperflow] Corrupted mesh file, unable to load: %s", mesh->filePath.c_str());
-            return;
-        }
-
-        if (((MeshDataType)header.dataFlags & MeshDataType::Position) != MeshDataType::None)
-        {
-            if ((mesh->stats.typeFlags & MeshDataType::Position) != MeshDataType::None)
-            {
-                for (uint32_t j = 0; j < numVertices; j++)
-                {
-                    uint32_t index;
-                    memcpy(&index, &((uint8_t*)indices)[j * indexSize], indexSize);
-
-                    memcpy(&vertices[j * vertexStride], &meshData[offset], pncStep);
-                    // vec3 position = *(vec3*)&rf[j * vertexStride + strideOffset];
-                    offset += pncStep;
-                }
-            }
-            else offset += header.vertexCount * pncStep;
-            INTEGRITY_CHECK
-        }
-
-#undef INTEGRITY_CHECK
 
         vbInfo.vertexSize = GetVertexSize(mesh->stats.vertexAttribute);
         vbInfo.memoryType = mesh->stats.memoryType;

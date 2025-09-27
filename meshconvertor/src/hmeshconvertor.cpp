@@ -31,68 +31,121 @@ namespace ml
             auto& subMesh = meshInfo.subMeshes[i];
             offset = 0;
 
-            uint32_t submeshDataSize = 1;
+            //spacing is necessary to fast check the validity of the loaded mesh,
+            //program just has \0 character for every data change and if after data copy it won't hit
+            //this character this means something went wrong, this is not full proof solution but
+            //is good enough for most cases that might happen.
+            uint32_t spacingSize = 0;
             uint32_t positionSize = 0;
             uint32_t normalSize = 0;
             uint32_t colorSize = 0;
             uint32_t texcoordSize = 0;
+
+            uint32_t boneCountsSize = 0;
+            uint32_t boneWeightsSize = 0;
+            uint32_t blendCountsSize = 0;
+            uint32_t blendOffsetsSize = 0;
+
             uint32_t indexSize = subMesh.indices.size();
 
             if (!subMesh.positions.empty())
             {
-                positionSize = subMesh.positions.size() * sizeof(float);
-                submeshDataSize++;
+                spacingSize++;
+                positionSize = subMesh.positions.size() * sizeof(float_t);
             }
             if (!subMesh.normals.empty())
             {
-                submeshDataSize++;
-                normalSize = subMesh.normals.size() * sizeof(float);
+                spacingSize++;
+                normalSize = subMesh.normals.size() * sizeof(float_t);
             }
             if (!subMesh.colors.empty())
             {
-                submeshDataSize++;
-                colorSize = subMesh.colors.size() * sizeof(float);
+                spacingSize++;
+                colorSize = subMesh.colors.size() * sizeof(float_t);
             }
             if (!subMesh.texCoords.empty())
             {
-                submeshDataSize++;
-                texcoordSize = subMesh.texCoords.size() * sizeof(float);
+                spacingSize++;
+                texcoordSize = subMesh.texCoords.size() * sizeof(float_t);
+            }
+            if (!subMesh.boneCounts.empty())
+            {
+                spacingSize++;
+                boneCountsSize = subMesh.boneCounts.size() * sizeof(uint8_t);
+            }
+            if (!subMesh.boneWeights.empty())
+            {
+                spacingSize++;
+                boneWeightsSize = subMesh.boneWeights.size() * sizeof(SubMeshInfo::BoneWeight);
+            }
+            if (!subMesh.blendCounts.empty())
+            {
+                spacingSize++;
+                blendCountsSize = subMesh.blendCounts.size() * sizeof(uint8_t);
+            }
+            if (!subMesh.blendOffsets.empty())
+            {
+                spacingSize++;
+                blendOffsetsSize = subMesh.blendOffsets.size() * sizeof(float_t);
             }
 
-            submeshDataSize += positionSize + normalSize + colorSize + texcoordSize + indexSize;
+            uint32_t submeshDataSize = positionSize + normalSize + colorSize + texcoordSize + indexSize +
+                                       boneCountsSize + boneWeightsSize + blendCountsSize + blendOffsetsSize +
+                                       spacingSize + 1;
             uint64_t oldSize = meshData.size();
             meshData.resize(meshData.size() + submeshDataSize);
+
+#define STEP(x)\
+            offset += x;\
+            meshData[offset + oldSize] = '\0';\
+            offset++
 
             if (positionSize > 0)
             {
                 memcpy(meshData.data() + oldSize + offset, subMesh.positions.data(), positionSize);
-                offset += positionSize;
-                meshData[oldSize + offset] = '\0';
-                offset++;
+                STEP(positionSize);
             }
 
             if (normalSize > 0)
             {
                 memcpy(meshData.data() + oldSize + offset, subMesh.normals.data(), normalSize);
-                offset += normalSize;
-                meshData[offset + oldSize] = '\0';
-                offset++;
+                STEP(normalSize);
             }
 
             if (colorSize > 0)
             {
                 memcpy(meshData.data() + oldSize + offset, subMesh.colors.data(), colorSize);
-                offset += colorSize;
-                meshData[offset + oldSize] = '\0';
-                offset++;
+                STEP(colorSize);
             }
 
             if (texcoordSize > 0)
             {
                 memcpy(meshData.data() + oldSize + offset, subMesh.texCoords.data(), texcoordSize);
-                offset += texcoordSize;
-                meshData[offset + oldSize] = '\0';
-                offset++;
+                STEP(texcoordSize);
+            }
+
+            if (boneCountsSize > 0)
+            {
+                memcpy(meshData.data() + oldSize + offset, subMesh.boneCounts.data(), boneCountsSize);
+                STEP(boneCountsSize);
+            }
+
+            if (boneWeightsSize > 0)
+            {
+                memcpy(meshData.data() + oldSize + offset, subMesh.boneWeights.data(), boneWeightsSize);
+                STEP(boneWeightsSize);
+            }
+
+            if (blendCountsSize > 0)
+            {
+                memcpy(meshData.data() + oldSize + offset, subMesh.blendCounts.data(), blendCountsSize);
+                STEP(blendCountsSize);
+            }
+
+            if (blendOffsetsSize > 0)
+            {
+                memcpy(meshData.data() + oldSize + offset, subMesh.blendOffsets.data(), blendOffsetsSize);
+                STEP(blendOffsetsSize);
             }
 
             memcpy(meshData.data() + oldSize + offset, subMesh.indices.data(), indexSize);
@@ -156,7 +209,7 @@ namespace ml
     }
 
     void WriteData(MeshInfo* meshInfo, const std::vector<Vertex>& vertices, const std::vector<uint32_t>& indices,
-        SubMeshHeader::DataType dataType, hf::MeshDataType dataFlags)
+        hf::MeshDataType dataFlags, uint16_t skinDeformationCount, uint16_t blendDeformationCount)
     {
         SubMeshInfo subMeshInfo{};
 
@@ -166,10 +219,11 @@ namespace ml
         if ((uint32_t)dataFlags & (uint32_t)hf::MeshDataType::TexCoord) subMeshInfo.texCoords.resize(vertices.size() * 2);
 
         SubMeshHeader header{};
-        header.vertexCount = (uint32_t)vertices.size();
-        header.indexCount  = (uint32_t)indices.size();
-        header.dataFlags   = (uint32_t)dataFlags;
-        header.dataType    = (uint32_t)dataType;
+        header.vertexCount       = (uint32_t)vertices.size();
+        header.indexCount        = (uint32_t)indices.size();
+        header.dataFlags         = (uint32_t)dataFlags;
+        header.skinDeformerCount  = skinDeformationCount;
+        header.blendDeformerCount = blendDeformationCount;
 
         if (vertices.size() <= 65535)
         {
@@ -235,6 +289,90 @@ namespace ml
                 const auto& vertex = vertices[i];
                 subMeshInfo.texCoords[i * 2 + 0] = vertex.texCoord.x;
                 subMeshInfo.texCoords[i * 2 + 1] = vertex.texCoord.y;
+            }
+        }
+
+        if (skinDeformationCount > 0)
+        {
+            subMeshInfo.boneCounts.resize(vertices.size() * skinDeformationCount);
+            uint32_t sumBoneWeightCount = 0;
+
+            for (size_t b = 0; b < vertices.size(); b++)
+            {
+                auto& vertex = vertices[b];
+
+                for (size_t c = 0; c < skinDeformationCount; c++)
+                {
+                    auto& deformer = vertex.skinDeformers[c];
+                    subMeshInfo.boneCounts[b * skinDeformationCount + c] = deformer.deformationCount;
+                    sumBoneWeightCount += deformer.deformationCount;
+                }
+            }
+
+            subMeshInfo.boneWeights.resize(sumBoneWeightCount);
+
+            size_t currentBoneWeight = 0;
+            for (size_t b = 0; b < vertices.size(); b++)
+            {
+                auto& vertex = vertices[b];
+
+                for (size_t c = 0; c < skinDeformationCount; c++)
+                {
+                    auto& deformer = vertex.skinDeformers[c];
+                    for (size_t d = 0; d < deformer.deformationCount; d++)
+                    {
+                        auto bone = deformer.bones[d];
+                        auto weight = deformer.weights[d];
+
+                        SubMeshInfo::BoneWeight boneWeight{};
+                        boneWeight.index = bone;
+                        boneWeight.weight = SubMeshInfo::ToBoneWeight(weight);
+
+                        subMeshInfo.boneWeights[currentBoneWeight + d] = boneWeight;
+                    }
+
+                    currentBoneWeight += deformer.deformationCount;
+                }
+            }
+        }
+
+        if (blendDeformationCount > 0)
+        {
+            subMeshInfo.blendCounts.resize(vertices.size() * blendDeformationCount);
+            uint32_t sumBlendChannelCount = 0;
+
+            for (size_t b = 0; b < vertices.size(); b++)
+            {
+                auto& vertex = vertices[b];
+
+                for (size_t c = 0; c < blendDeformationCount; c++)
+                {
+                    auto& deformer = vertex.blendDeformers[c];
+                    subMeshInfo.blendCounts[b * blendDeformationCount + c] = deformer.deformationCount;
+                    sumBlendChannelCount += deformer.deformationCount;
+                }
+            }
+
+            subMeshInfo.blendOffsets.resize(sumBlendChannelCount * 3);
+
+            size_t currentBlendChannel = 0;
+            for (size_t b = 0; b < vertices.size(); b++)
+            {
+                auto& vertex = vertices[b];
+
+                for (size_t c = 0; c < blendDeformationCount; c++)
+                {
+                    auto& deformer = vertex.blendDeformers[c];
+                    for (size_t d = 0; d < deformer.deformationCount; d++)
+                    {
+                        auto offset = deformer.offsets[d];
+                        subMeshInfo.blendOffsets[(currentBlendChannel + d) * 3] = offset.x;
+                        subMeshInfo.blendOffsets[(currentBlendChannel + d) * 3 + 1] = offset.y;
+                        subMeshInfo.blendOffsets[(currentBlendChannel + d) * 3 + 2] = offset.z;
+                    }
+
+                    currentBlendChannel += deformer.deformationCount;
+                }
             }
         }
 

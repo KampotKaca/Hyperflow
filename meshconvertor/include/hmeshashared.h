@@ -6,12 +6,35 @@
 
 namespace ml
 {
+#define MAX_DEFORMERS_PER_VERTEX 16
+#define MAX_DEFORMATIONS_PER_VERTEX 4
+
+    struct SkinDeformer
+    {
+        uint8_t deformationCount{};
+        float_t weights[MAX_DEFORMATIONS_PER_VERTEX]{};
+        uint16_t bones[MAX_DEFORMATIONS_PER_VERTEX]{};
+
+        bool operator==(const SkinDeformer& other) const = default;
+    };
+
+    struct BlendDeformer
+    {
+        uint8_t deformationCount{};
+        glm::vec3 offsets[MAX_DEFORMATIONS_PER_VERTEX]{};
+
+        bool operator==(const BlendDeformer& other) const = default;
+    };
+
     struct Vertex
     {
         glm::vec3 pos{};
         glm::vec3 normal{};
         glm::vec3 color{};
         glm::vec2 texCoord{};
+
+        SkinDeformer skinDeformers[MAX_DEFORMERS_PER_VERTEX]{};
+        BlendDeformer blendDeformers[MAX_DEFORMERS_PER_VERTEX]{};
 
         bool operator==(const Vertex& other) const = default;
     };
