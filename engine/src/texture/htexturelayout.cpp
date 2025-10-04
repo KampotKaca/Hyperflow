@@ -1,6 +1,7 @@
 #include "hyperflow.h"
 #include "hyaml.h"
 #include "hstrconversion.h"
+#include "hinternal.h"
 
 namespace hf
 {
