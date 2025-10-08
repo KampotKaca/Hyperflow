@@ -268,6 +268,22 @@ namespace hf
             else offset += header.vertexCount * tStep;
             INTEGRITY_CHECK
         }
+
+        //No point to load deformers if there are no positions in the vertices
+        if (((MeshDataType)header.dataFlags & MeshDataType::Position) != MeshDataType::None &&
+            (mesh->stats.typeFlags & MeshDataType::Normal) != MeshDataType::None)
+        {
+            if (header.skinDeformerCount > 0)
+            {
+                INTEGRITY_CHECK
+            }
+
+            if (header.blendDeformerCount > 0)
+            {
+                INTEGRITY_CHECK
+            }
+        }
+
 #undef INTEGRITY_CHECK
 
         uint32_t iSize = header.indexCount * BUFFER_DATA_SIZE[header.indexFormat];
