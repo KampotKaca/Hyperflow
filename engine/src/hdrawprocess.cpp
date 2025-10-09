@@ -1272,7 +1272,7 @@ namespace hf
                 BufferUploadInfo_i uploadInfo{};
                 uploadInfo.pUploadPackets = &packet->bufferUploadPackets[0];
                 uploadInfo.uploadPacketCount = (uint16_t)packet->bufferUploadPackets.size();
-                uploadInfo.pUniformDataBuffer = &packet->bufferUploads[0];
+                uploadInfo.data = &packet->bufferUploads[0];
 
                 HF.renderingApi.api.UploadBuffer(handle, uploadInfo);
             }

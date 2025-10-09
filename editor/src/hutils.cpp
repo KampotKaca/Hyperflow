@@ -15,7 +15,7 @@ namespace hf::editor
     const char* PointerToID(const void* ptr)
     {
         static char key[32];
-        snprintf(key, sizeof(key), "%llu", (uint64_t)ptr);
+        snprintf(key, sizeof(key), "%lu", (uint64_t)ptr);
         return key;
     }
 

@@ -94,7 +94,7 @@ namespace hf
             auto& packet = info.pUploadPackets[i];
             const auto& buffer = GetBuffer(packet.buffer);
             memcpy((uint8_t*)buffer->memoryMappings[currentFrame] + packet.offsetInBytes,
-                &info.pUniformDataBuffer[packet.bufferRange.start], packet.bufferRange.size);
+                &info.data[packet.bufferRange.start], packet.bufferRange.size);
         }
     }
 
