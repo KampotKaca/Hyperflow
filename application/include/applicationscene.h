@@ -15,7 +15,7 @@ namespace app
 
         hf::Ref<hf::Texture> viking_room_albedo_texture{};
         hf::Ref<hf::Texture> greek_head_texture{};
-        hf::Ref<hf::Mesh> viking_room_mesh{};
+        hf::Ref<hf::Model> viking_room_model{};
 
         hf::Ref<hf::TexturePack> viking_room_pack{};
     };

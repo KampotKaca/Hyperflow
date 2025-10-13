@@ -136,7 +136,7 @@ namespace hf::inter
 
         StaticVertexAttributes vertexAttributes{};
         StaticResourcesLibraryModules engineShadersLibModules{};
-        Ref<Mesh> primitiveMeshes[(uint32_t)PrimitiveMeshType::Count]{};
+        Ref<Model> primitiveModels[(uint32_t)PrimitiveMeshType::Count]{};
         Ref<Texture> primitiveTextures[(uint32_t)PrimitiveTextureType::Count]{};
         StaticSkyboxResources skyboxResources{};
 
@@ -233,7 +233,10 @@ namespace hf::inter
 
         bool DestroyBuffer_i(RuntimeBufferBase* buffer);
 
-        Ref<Mesh> CreateMeshAsset_i(const char* assetPath);
+        Ref<Model> CreateModelAsset_i(const char* assetPath);
+        bool CreateModel_i(Model* model);
+        bool DestroyModel_i(Model* model);
+
         bool CreateMesh_i(Mesh* mesh);
         bool DestroyMesh_i(Mesh* mesh);
 

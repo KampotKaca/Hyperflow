@@ -5,7 +5,7 @@
 
 namespace app
 {
-    constexpr char ASSET_VIKING_ROOM_MESH[]           = "viking_room.obj";
+    constexpr char ASSET_VIKING_ROOM_MODEL[]          = "viking_room.obj";
     constexpr char ASSET_VIKING_ROOM_ALBEDO_TEXTURE[] = "viking_room.png";
     constexpr char ASSET_GREEK_HEAD_ALBEDO_TEXTURE[]  = "greek_head.jpg";
 
@@ -13,8 +13,8 @@ namespace app
     {
         hf::AssetLocation
         {
-            .path = ASSET_VIKING_ROOM_MESH,
-            .type = hf::AssetType::Mesh
+            .path = ASSET_VIKING_ROOM_MODEL,
+            .type = hf::AssetType::Model
         },
         hf::AssetLocation
         {

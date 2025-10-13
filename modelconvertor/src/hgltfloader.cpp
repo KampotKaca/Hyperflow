@@ -1,10 +1,9 @@
-#include "hmeshashared.h"
-#include "hmeshconvertor.h"
+#include "hmodelinternal.h"
 #include "tiny_gltf.h"
 
 namespace ml
 {
-    bool LoadGltf(const char* path, MeshInfo* meshInfo, bool isGltf)
+    bool LoadGltf(const char* path, ModelInfo* meshInfo, bool isGltf)
     {
         tinygltf::Model model;
         tinygltf::TinyGLTF loader;
@@ -102,8 +101,8 @@ namespace ml
                 if (prim.attributes.contains("TEXCOORD_0")) ReadAccessorVec2(texcoords, model.accessors[prim.attributes.at("TEXCOORD_0")]);
 
                 // --- fill SubMeshInfo ---
-                SubMeshInfo subMeshInfo{};
-                SubMeshHeader header{};
+                MeshInfo subMeshInfo{};
+                MeshHeader header{};
 
                 header.vertexCount = (uint32_t)vertexCount;
                 header.indexCount  = (uint32_t)indices.size();

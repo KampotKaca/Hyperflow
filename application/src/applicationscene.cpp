@@ -10,7 +10,7 @@ namespace app
     {
         viking_room_albedo_texture = hf::Cast<hf::Texture>(hf::GetAsset(ASSET_VIKING_ROOM_ALBEDO_TEXTURE));
         greek_head_texture         = hf::Cast<hf::Texture>(hf::GetAsset(ASSET_GREEK_HEAD_ALBEDO_TEXTURE));
-        viking_room_mesh           = hf::Cast<hf::Mesh>   (hf::GetAsset(ASSET_VIKING_ROOM_MESH));
+        viking_room_model          = hf::Cast<hf::Model>  (hf::GetAsset(ASSET_VIKING_ROOM_MODEL));
 
         //viking_room_pack
         {
@@ -58,12 +58,13 @@ namespace app
 
                     hf::Start_DrawGroup(rn);
                     {
-                        const auto meshVolume = hf::GetSubmeshBoundingVolume(viking_room_mesh, 0);
+                        auto mesh = hf::GetMesh(viking_room_model, 0);
+                        const auto meshVolume = hf::GetMeshBoundingVolume(mesh);
                         DefaultPushConstant pc{};
                         pc.phongData = hf::vec4{ hf::utils::ColorFromHash(0x9B9B9B), 0.8 };
 
                         hf::DrawGroupSet_PushConstant(rn, pc);
-                        hf::Start_DrawCall(rn, viking_room_mesh, 0);
+                        hf::Start_DrawCall(rn, mesh);
 
                         for (uint32_t x = 0; x < VIKING_ROOM_AXIS_SIZE; x++)
                             for (uint32_t z = 0; z < VIKING_ROOM_AXIS_SIZE; z++)
@@ -84,14 +85,14 @@ namespace app
                     hf::Start_DrawGroup(rn);
                     {
                         auto mesh = hf::primitives::GetMesh(hf::PrimitiveMeshType::IcoSphere);
-                        const auto meshVolume = hf::GetSubmeshBoundingVolume(mesh, 0);
+                        const auto meshVolume = hf::GetMeshBoundingVolume(mesh);
 
                         hf::DrawGroupAdd_TexturePackBinding(rn, APP_TEXTURE_PACKS.white_pack, 1);
                         DefaultPushConstant pc{};
                         pc.phongData = hf::vec4{ hf::utils::ColorFromHash(0x9B9B9B), 1.0 };
 
                         hf::DrawGroupSet_PushConstant(rn, pc);
-                        hf::Start_DrawCall(rn, mesh, 0);
+                        hf::Start_DrawCall(rn, mesh);
 
                         {
                             auto& sphere = APP_OBJECTS.sphere;
@@ -124,8 +125,8 @@ namespace app
                 {
                     hf::Start_DrawGroup(rn);
                     {
-                        const auto meshVolume = hf::GetSubmeshBoundingVolume(hf::primitives::GetMesh(hf::PrimitiveMeshType::Plane), 0);
-                        hf::Start_DrawCall(rn, hf::primitives::GetMesh(hf::PrimitiveMeshType::Plane), 0);
+                        const auto meshVolume = hf::GetMeshBoundingVolume(hf::primitives::GetMesh(hf::PrimitiveMeshType::Plane));
+                        hf::Start_DrawCall(rn, hf::primitives::GetMesh(hf::PrimitiveMeshType::Plane));
 
                         {
                             auto& ground = APP_OBJECTS.ground;

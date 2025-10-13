@@ -80,7 +80,7 @@ namespace hf
 
 	bool IsRunning();
 	bool IsLoaded(const Ref<Renderer>& rn);
-	bool IsLoaded(const Ref<Mesh>& mesh);
+	bool IsLoaded(const Ref<Model>& model);
 	bool IsLoaded(const Ref<ShaderLibrary>& lib);
 	bool IsLoaded(const Ref<Shader>& shader);
 	bool IsLoaded(const Ref<Texture>& tex);
@@ -238,12 +238,13 @@ namespace hf
 	void MaterialAdd_TexturePackBinding(const Ref<Renderer>& rn, const Ref<TexturePack>& texPack, uint32_t setBindingIndex);
 
 	void Start_DrawCall(const Ref<Renderer>& rn, const Ref<IndexBuffer>& indexBuffer);
-    void Start_DrawCall(const Ref<Renderer>& rn, const Ref<Mesh>& mesh, uint32_t submeshIndex);
+    void Start_DrawCall(const Ref<Renderer>& rn, const Ref<Mesh>& mesh);
+    void Start_DrawCall(const Ref<Renderer>& rn, const Ref<Mesh>& mesh, const Ref<Armature>& armature, uint32_t skinIndex);
     void End_DrawCall(const Ref<Renderer>& rn);
 
 	void DrawGroupAdd_TexturePackBinding(const Ref<Renderer>& rn, const Ref<TexturePack>& texPack, uint32_t setBindingIndex);
     void DrawGroupAdd_DrawCall(const Ref<Renderer>& rn, const Ref<IndexBuffer>& indexBuffer, const Ref<VertexBuffer>& vertexBuffer);
-    void DrawGroupAdd_DrawCall(const Ref<Renderer>& rn, const Ref<Mesh>& mesh, uint32_t submeshIndex);
+    void DrawGroupAdd_DrawCall(const Ref<Renderer>& rn, const Ref<Mesh>& mesh);
 
 	void DrawGroupSet_PushConstant(const Ref<Renderer>& rn, const void* data, uint32_t dataSize);
 	void DrawAdd_Instance(const Ref<Renderer>& rn, const void* data, uint32_t dataSize, const VolumeTransform& volume);
@@ -268,9 +269,12 @@ namespace hf
 
 	uint16_t GetBufferIndex(const Ref<Material>& mat);
 
+    uint32_t GetMeshCount(const Ref<Model>& model);
+    Ref<Mesh> GetMesh(const Ref<Model>& model, uint32_t index);
+
 	MeshStats GetStats(const Ref<Mesh>& mesh);
-	uint32_t GetSubmeshCount(const Ref<Mesh>& mesh);
-	const BoundingVolume& GetSubmeshBoundingVolume(const Ref<Mesh>& mesh, uint32_t submeshIndex);
+	uint32_t GetMeshSkinCount(const Ref<Mesh>& mesh);
+	const BoundingVolume& GetMeshBoundingVolume(const Ref<Mesh>& mesh);
 
 	void SubmitAllTextures();
 	void SubmitAllBuffers();

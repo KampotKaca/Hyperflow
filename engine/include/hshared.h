@@ -115,8 +115,10 @@ namespace hf
 	struct VertexBuffer;
 	struct IndexBuffer;
 	struct Mesh;
+	struct Model;
 	struct Material;
 	struct RenderTexture;
+	struct Armature;
 
 	typedef uint32_t VertexBufferAttribute;
 	typedef uint32_t Buffer;
@@ -568,11 +570,23 @@ namespace hf
 		VertexBufferAttribute vertexAttribute{};
 	};
 
-	struct MeshCreationInfo
+	struct ModelCreationInfo
 	{
 		const char* filePath{};
-		MeshStats stats{};
+		MeshStats meshStats{};
 	};
+
+    struct MeshCreationInfo
+    {
+        VertexBufferCreationInfo vertexBufferCreationInfo{};
+        IndexBufferCreationInfo indexBufferCreationInfo{};
+
+        VertexBufferCreationInfo* pSkinBufferCreationInfos{};
+        uint32_t skinBufferCount{};
+
+        BoundingVolume volume{};
+        MeshStats stats{};
+    };
 
 	//endregion
 

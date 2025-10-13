@@ -24,7 +24,7 @@ namespace hf
         {
             switch (type)
             {
-            case AssetType::Mesh:    inter::rendering::DestroyMesh_i(Cast<Mesh>(asset).get());           break;
+            case AssetType::Model:    inter::rendering::DestroyMesh_i(Cast<Mesh>(asset).get());           break;
             case AssetType::Texture: inter::rendering::DestroyTexture_i(Cast<Texture>(asset).get()); break;
             case AssetType::Cubemap: inter::rendering::DestroyCubemap_i(Cast<Cubemap>(asset).get());     break;
             default: LOG_ERROR("%s", "Invalid mesh type, cannot be destroyed"); break;
@@ -40,7 +40,7 @@ namespace hf
         {
             switch (type)
             {
-            case AssetType::Mesh:    asset = inter::rendering::CreateMeshAsset_i(assetPath);    break;
+            case AssetType::Model:   asset = inter::rendering::CreateModelAsset_i(assetPath);   break;
             case AssetType::Texture: asset = inter::rendering::CreateTextureAsset_i(assetPath); break;
             case AssetType::Cubemap: asset = inter::rendering::CreateCubemapAsset_i(assetPath); break;
             default: LOG_ERROR("%s", "Invalid mesh type, cannot be loaded"); break;

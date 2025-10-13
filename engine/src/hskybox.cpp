@@ -44,7 +44,7 @@ namespace hf::skybox
                     Start_DrawGroup(rn);
                     {
                         DrawGroupAdd_TexturePackBinding(rn, inter::HF.staticResources.skyboxResources.texturePack, 1);
-                        DrawGroupAdd_DrawCall(rn, primitives::GetMesh(PrimitiveMeshType::Cube), 0);
+                        DrawGroupAdd_DrawCall(rn, primitives::GetMesh(PrimitiveMeshType::Cube));
                     }
                     End_DrawGroup(rn);
                 }

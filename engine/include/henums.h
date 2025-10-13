@@ -357,7 +357,7 @@ namespace hf
     //----------------------------- General ---------------------------------------------------
 
 	enum class DataTransferType { DoNotOwn, TransferOwnership, CopyData };
-	enum class AssetType { None, Mesh, Texture, Cubemap };
+	enum class AssetType { None, Model, Texture, Cubemap };
     enum class ModelType { Unknown, Obj, Fbx, Gltf, Glb };
 }
 

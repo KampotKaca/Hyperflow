@@ -1,11 +1,9 @@
-#include "hmeshashared.h"
-#include "hmeshconvertor.h"
-#include "hmeshinternal.h"
+#include "hmodelinternal.h"
 #include "tiny_obj_loader.h"
 
 namespace ml
 {
-    bool LoadObj(const char* path, MeshInfo* meshInfo)
+    bool LoadObj(const char* path, ModelInfo* meshInfo)
     {
         tinyobj::attrib_t attrib;
         std::vector<tinyobj::shape_t> shapes;

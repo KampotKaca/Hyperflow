@@ -10,18 +10,20 @@ namespace hf
         explicit Mesh(const MeshCreationInfo& info);
         ~Mesh();
 
-        struct SubMesh
-        {
-            Ref<VertexBuffer> vertBuffer{};
-            Ref<IndexBuffer> indexBuffer{};
-            BoundingVolume volume{};
-        };
+        std::string name{};
 
-        std::string filePath{};
-        bool isLoaded = false;
+        VertexBufferCreationInfo vertCreationInfo{};
+        IndexBufferCreationInfo indexCreationInfo{};
+        std::vector<VertexBufferCreationInfo> skinBufferCreationInfos{};
+
+        Ref<VertexBuffer> vertBuffer{};
+        Ref<IndexBuffer> indexBuffer{};
+        BoundingVolume volume{};
+        uint32_t vertexStride{};
+
+        std::vector<Ref<VertexBuffer>> skinBuffers{};
+
         MeshStats stats{};
-
-        std::vector<SubMesh> subMeshes{};
     };
 }
 

@@ -770,13 +770,29 @@ namespace hf
         }
     }
 
-    void Start_DrawCall(const Ref<Renderer>& rn, const Ref<Mesh>& mesh, uint32_t submeshIndex)
+    void Start_DrawCall(const Ref<Renderer>& rn, const Ref<Mesh>& mesh)
     {
-        const auto& submesh = mesh->subMeshes[submeshIndex];
-        Start_DrawCall(rn, submesh.indexBuffer);
-        DrawAdd_VertexBuffer(rn, submesh.vertBuffer);
+        Start_DrawCall(rn, mesh->indexBuffer);
+        DrawAdd_VertexBuffer(rn, mesh->vertBuffer);
+
 #if DEBUG
-        strcpy(rn->currentDraw.currentDrawCall->debugName, mesh->filePath.c_str());
+        strcpy(rn->currentDraw.currentDrawCall->debugName, mesh->name.c_str());
+#endif
+    }
+
+    void Start_DrawCall(const Ref<Renderer>& rn, const Ref<Mesh>& mesh, const Ref<Armature>& armature, uint32_t skinIndex)
+    {
+        Start_DrawCall(rn, mesh->indexBuffer);
+        DrawAdd_VertexBuffer(rn, mesh->vertBuffer);
+
+        if (skinIndex >= 0)
+        {
+            if (mesh->skinBuffers.size() <= skinIndex) throw GENERIC_EXCEPT("[Hyperflow]", "Skin index is out of bounds!");
+            DrawAdd_VertexBuffer(rn, mesh->skinBuffers[skinIndex]);
+        }
+
+#if DEBUG
+        strcpy(rn->currentDraw.currentDrawCall->debugName, mesh->name.c_str());
 #endif
     }
 
@@ -831,9 +847,9 @@ namespace hf
         End_DrawCall(rn);
     }
 
-    void DrawGroupAdd_DrawCall(const Ref<Renderer>& rn, const Ref<Mesh>& mesh, uint32_t submeshIndex)
+    void DrawGroupAdd_DrawCall(const Ref<Renderer>& rn, const Ref<Mesh>& mesh)
     {
-        Start_DrawCall(rn, mesh, submeshIndex);
+        Start_DrawCall(rn, mesh);
         rn->currentDraw.currentDrawCall->isInstanced = false;
         End_DrawCall(rn);
     }

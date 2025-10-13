@@ -1,11 +1,9 @@
-#include "hmeshashared.h"
-#include "hmeshinternal.h"
-#include "hmeshconvertor.h"
+#include "hmodelinternal.h"
 #include "ufbx.h"
 
 namespace ml
 {
-    bool LoadFbx(const char* path, MeshInfo* meshInfo)
+    bool LoadFbx(const char* path, ModelInfo* meshInfo)
     {
         //Load the fbx via ufbx api
         ufbx_error error;
