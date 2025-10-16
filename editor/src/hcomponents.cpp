@@ -3,7 +3,7 @@
 #include "hyperflow.h"
 #include "hutils.h"
 
-namespace hf::editor
+namespace hf::ed
 {
     template<typename T>
     bool DrawAudioSettings(const Ref<T>& pl, DrawStateFlag flags)

@@ -12,9 +12,9 @@ namespace hf
         Buffer GetGlobalUniformBuffer()     { return inter::HF.staticResources.globalUniform; }
         void BindGlobalUniformBuffer(const Ref<Renderer>& rn)
         {
-            Start_BufferSet(rn, RenderBindingType::Graphics, 0);
-            BufferSetAdd_Buffer(rn, inter::HF.staticResources.globalUniform);
-            End_BufferSet(rn);
+            dp::StartBufferSet(rn, RenderBindingType::Graphics, 0);
+            dp::BufferSetAddBuffer(rn, inter::HF.staticResources.globalUniform);
+            dp::EndBufferSet(rn);
         }
 
         Ref<Mesh> GetMesh(PrimitiveMeshType type) { return GetMesh(inter::HF.staticResources.primitiveModels[(uint32_t)type], 0); }

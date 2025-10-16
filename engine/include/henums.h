@@ -3,6 +3,8 @@
 
 namespace hf
 {
+    //region Definitions
+
 #define DEFINE_ENUM_FLAGS(Enum)\
     inline Enum operator|(Enum a, Enum b) { return (Enum)((uint32_t)a | (uint32_t)b); }\
     inline Enum operator&(Enum a, Enum b) { return (Enum)((uint32_t)a & (uint32_t)b); }\
@@ -18,12 +20,14 @@ namespace hf
         return a;\
     }\
 
-    //----------------------------- Primitives ---------------------------------------------------
+    //endregion
+    //region Primitives
 
     enum class PrimitiveMeshType { Cube, IcoSphere, Plane, UVSphere, Cone, Cylinder, Torus, Count };
     enum class PrimitiveTextureType { Default, Circle, Triangle, Capsule, HexagonFlatTop, HexagonPointedTop, IsometricDiamond, Count };
 
-    //----------------------------- Rendering ---------------------------------------------------
+    //endregion
+    //region Rendering
 
     enum class TexturePackBindingType { Texture2D, Cubemap, RenderTexture };
 	enum class CubemapTextureType { Left, Right, Down, Up, Back, Front };
@@ -309,7 +313,8 @@ namespace hf
         OneMinusSrc1Color = 16, Src1Alpha = 17, OneMinusSrc1Alpha = 18,
     };
 
-    //----------------------------- Audio ---------------------------------------------------
+    //endregion
+    //region Audio
 
     enum class AudioClipFormat { Default = 0, U8 = 1, S16 = 2, S24 = 3, S32 = 4, F32 };
     enum class AudioClipChannelMixMode { Rectangular = 0, Simple = 1, CustomWeights = 2 };
@@ -319,7 +324,8 @@ namespace hf
     enum class AudioPlayerStateFlags { None = 0, Loaded = 1 << 0, Playing = 1 << 1 };
     DEFINE_ENUM_FLAGS(AudioPlayerStateFlags)
 
-    //----------------------------- Window ---------------------------------------------------
+    //endregion
+    //region Window
 
     enum class WindowStyle
     {
@@ -354,11 +360,14 @@ namespace hf
         EventRaised  //Waits updates only on OS events, good for apps which doesn't change without user interaction
     };
 
-    //----------------------------- General ---------------------------------------------------
+    //endregion
+    //region General
 
 	enum class DataTransferType { DoNotOwn, TransferOwnership, CopyData };
 	enum class AssetType { None, Model, Texture, Cubemap };
     enum class ModelType { Unknown, Obj, Fbx, Gltf, Glb };
+
+    //endregion
 }
 
 #endif //HENUMS_H

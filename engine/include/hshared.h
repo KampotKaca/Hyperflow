@@ -91,7 +91,6 @@ namespace hf
 #endif
 
 	//endregion
-
 	//region Definitions
 
     struct FilePath
@@ -101,7 +100,6 @@ namespace hf
     };
 
 	//endregion
-
 	//region Rendering
 
 	struct Renderer;
@@ -589,7 +587,6 @@ namespace hf
     };
 
 	//endregion
-
     //region Audio
 
     struct AudioClip;
@@ -669,7 +666,6 @@ namespace hf
     };
 
     //endregion
-
 	//region Window
 
 	struct Window;
@@ -699,7 +695,6 @@ namespace hf
 	};
 
 	//endregion
-
 	//region Engine
 
 	struct EngineLifecycleCallbacks
@@ -745,7 +740,6 @@ namespace hf
 	};
 
 	//endregion
-
 	//region Global Uniforms
 
 	struct CameraUniformInfo
@@ -795,7 +789,6 @@ namespace hf
 	};
 
 	//endregion
-
 	//region Constant Objects
 
 	struct GridLinesInfo
@@ -811,8 +804,11 @@ namespace hf
 	};
 
 	//endregion
+    //region General
 
     struct Scene;
+    struct Animation;
+    struct AnimationPlayer;
 
     struct AssetLocation
     {
@@ -852,6 +848,13 @@ namespace hf
         uint32_t culledDrawCalls = 0;
     };
 
+    struct AnimationPlayerCallbacks
+    {
+        void (*onAnimationStart)(const Ref<Animation>& anim);
+        void (*onAnimationEnd)(const Ref<Animation>& anim);
+        void (*onAnimationProgress)(const Ref<Animation>& anim, float_t progress);
+    };
+
 	namespace utils
 	{
 		inline uint32_t GetFirstBitOne64(const uint64_t n) { return n ? __builtin_ctzll(n) : 64u; }
@@ -865,6 +868,8 @@ namespace hf
 			return { r, g, b };
 		}
 	}
+
+    //endregion
 }
 
 #endif //HSHARED_H

@@ -8,8 +8,8 @@
 namespace hf
 {
     Texture::Texture(const TextureCreationInfo& info) :
-        path(info.filePath), desiredChannel(info.desiredChannel), details(info.details),
-        mipLevels(info.mipLevels)
+        path(info.filePath), desiredChannel(info.desiredChannel),
+        details(info.details), mipLevels(info.mipLevels)
     {
         inter::rendering::CreateTexture_i(this);
     }
@@ -113,10 +113,7 @@ namespace hf
             }
             return false;
         }
-    }
 
-    namespace inter::rendering
-    {
         bool SetWindowIcons_i(const Window* win, const char* folderPath)
         {
             std::filesystem::path fPath = TO_RES_PATH(folderPath);

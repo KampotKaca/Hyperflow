@@ -7,7 +7,10 @@ namespace hf
 {
     struct Animation
     {
+        explicit Animation();
+        ~Animation();
 
+        float_t m_Duration{};
     };
 }
 

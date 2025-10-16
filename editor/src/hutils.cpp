@@ -1,6 +1,6 @@
 #include "hutils.h"
 
-namespace hf::editor
+namespace hf::ed
 {
     const char* DrawKeyGen(const char* label)
     {
