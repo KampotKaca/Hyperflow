@@ -24,7 +24,7 @@ namespace hf
         {
             switch (type)
             {
-            case AssetType::Model:    inter::rendering::DestroyMesh_i(Cast<Mesh>(asset).get());           break;
+            case AssetType::Model:   inter::rendering::DestroyModel_i(Cast<Model>(asset).get());         break;
             case AssetType::Texture: inter::rendering::DestroyTexture_i(Cast<Texture>(asset).get()); break;
             case AssetType::Cubemap: inter::rendering::DestroyCubemap_i(Cast<Cubemap>(asset).get());     break;
             default: LOG_ERROR("%s", "Invalid mesh type, cannot be destroyed"); break;

@@ -12,10 +12,6 @@ namespace hf
 
         std::string name{};
 
-        VertexBufferCreationInfo vertCreationInfo{};
-        IndexBufferCreationInfo indexCreationInfo{};
-        std::vector<VertexBufferCreationInfo> skinBufferCreationInfos{};
-
         Ref<VertexBuffer> vertBuffer{};
         Ref<IndexBuffer> indexBuffer{};
         BoundingVolume volume{};

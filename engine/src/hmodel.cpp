@@ -74,7 +74,7 @@ namespace hf
 
     Model::~Model()
     {
-
+        inter::rendering::DestroyModel_i(this);
     }
 
     bool IsLoaded(const Ref<Model>& model) { return model->isLoaded; }
@@ -130,23 +130,13 @@ namespace hf
             }
         }
 
-        bool CreateModel_i(Model* model)
-        {
-            if (model->isLoaded) return false;
-
-            for (auto& mesh : model->meshes) CreateMesh_i(mesh.get());
-
-            model->isLoaded = true;
-            return true;
-        }
-
         bool DestroyModel_i(Model* model)
         {
             if (model->isLoaded)
             {
-                for (auto& mesh : model->meshes) DestroyMesh_i(mesh.get());
-
                 model->isLoaded = false;
+                for (auto& mesh : model->meshes) DestroyMesh_i(mesh.get());
+                model->meshes.clear();
                 return true;
             }
             return false;

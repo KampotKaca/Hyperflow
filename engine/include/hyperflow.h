@@ -329,6 +329,11 @@ namespace hf
     //endregion
     //region Mesh
 
+    Ref<Mesh> Create(const MeshCreationInfo& info);
+    void Destroy(const Ref<Mesh>& mesh);
+    void Destroy(const Ref<Mesh>* pMeshes, uint32_t count);
+    bool IsLoaded(const Ref<Mesh>& mesh);
+
     MeshStats GetStats(const Ref<Mesh>& mesh);
     uint32_t GetMeshSkinCount(const Ref<Mesh>& mesh);
     const BoundingVolume& GetMeshBoundingVolume(const Ref<Mesh>& mesh);

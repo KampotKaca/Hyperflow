@@ -44,6 +44,7 @@ namespace hf::inter
         unordered_map<uint64_t, Ref<RuntimeBufferBase>> buffers{};
         unordered_map<uint64_t, Ref<RenderTexture>> renderTextures{};
         unordered_map<uint64_t, Ref<TexturePack>> texturePacks{};
+        unordered_map<uint64_t, Ref<Mesh>> meshes{};
 
         unordered_map<std::string, VertexBufferAttribute> vertexAttributes{};
         unordered_map<std::string, TextureLayout> textureLayouts{};
@@ -234,10 +235,7 @@ namespace hf::inter
         bool DestroyBuffer_i(RuntimeBufferBase* buffer);
 
         Ref<Model> CreateModelAsset_i(const char* assetPath);
-        bool CreateModel_i(Model* model);
         bool DestroyModel_i(Model* model);
-
-        bool CreateMesh_i(Mesh* mesh);
         bool DestroyMesh_i(Mesh* mesh);
 
         Ref<Texture> CreateTextureAsset_i(const char* assetPath);
