@@ -67,5 +67,12 @@ namespace hf
             }
             return false;
         }
+
+        void DestroyAllMeshes_i(bool internalOnly)
+        {
+            for (const auto& mesh : std::ranges::views::values(HF.graphicsResources.meshes))
+                DestroyMesh_i(mesh.get());
+            if (!internalOnly) HF.graphicsResources.meshes.clear();
+        }
     }
 }

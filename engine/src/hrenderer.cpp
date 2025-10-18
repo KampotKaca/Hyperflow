@@ -71,18 +71,6 @@ namespace hf
     RenderingApiType GetApiType()     { return inter::HF.renderingApi.type; }
     RenderingApiType GetBestApiType() { return inter::platform::GetBestRenderingApi(); }
 
-    //Destroy every renderer which is not connected to the window, before you try to change api
-    void ChangeApi(RenderingApiType targetApi)
-    {
-        if (!IsValidApi(targetApi))
-        {
-            LOG_ERROR("[Hyperflow] %s", "Invalid render Api to load");
-            return;
-        }
-        inter::rendering::UnloadCurrentApi_i(true);
-        inter::rendering::LoadApi_i(targetApi);
-    }
-
     bool IsValidApi(RenderingApiType targetApi)
     {
         if (targetApi == RenderingApiType::None || targetApi == inter::HF.renderingApi.type) return false;
@@ -124,25 +112,6 @@ namespace hf
 
             primitives::DefineStaticResources_i();
             if (HF.lifecycleCallbacks.onRendererLoad) HF.lifecycleCallbacks.onRendererLoad();
-
-            for (auto& shader : std::ranges::views::values(HF.graphicsResources.shaders)) CreateShader_i(shader.get());
-
-            for (auto& buffer : std::ranges::views::values(HF.graphicsResources.buffers))
-            {
-                switch (buffer->GetType())
-                {
-                    case RuntimeBufferType::Vertex: CreateVertBuffer_i((VertexBuffer*)buffer.get()); break;
-                    case RuntimeBufferType::Index: CreateIndexBuffer_i((IndexBuffer*)buffer.get()); break;
-                }
-            }
-
-            for (auto& asset : HF.graphicsResources.assets) asset.second.Create(asset.first.c_str());
-            SubmitAllBuffers();
-
-            for (auto& rt   : std::ranges::views::values(HF.graphicsResources.renderTextures)) CreateRenderTexture_i(rt.get());
-            SubmitAllTextures();
-
-            for (auto& texPack : std::ranges::views::values(HF.graphicsResources.texturePacks)) CreateTexturePack_i(texPack.get());
         }
 
         void UnloadCurrentApi_i(bool retainReferences)

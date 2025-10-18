@@ -42,6 +42,28 @@ namespace hf
         inter::rendering::DestroyCubemap_i(this);
     }
 
+    Ref<Cubemap> Create(const CubemapCreationInfo& info)
+    {
+        auto cm = MakeRef<Cubemap>(info);
+        inter::HF.graphicsResources.cubemaps[(uint64_t)cm.get()] = cm;
+        return cm;
+    }
+
+    void Destroy(const Ref<Cubemap>& cm)
+    {
+        inter::rendering::DestroyCubemap_i(cm.get());
+        inter::HF.graphicsResources.cubemaps.erase((uint64_t)cm.get());
+    }
+
+    void Destroy(const Ref<Cubemap>* pCubemaps, uint32_t count)
+    {
+        for (uint32_t i = 0; i < count; i++)
+        {
+            inter::rendering::DestroyCubemap_i(pCubemaps[i].get());
+            inter::HF.graphicsResources.cubemaps.erase((uint64_t)pCubemaps[i].get());
+        }
+    }
+
     bool IsLoaded(const Ref<Cubemap>& cb) { return cb->handle; }
 
     namespace inter::rendering
@@ -174,6 +196,13 @@ namespace hf
                 return true;
             }
             return false;
+        }
+
+        void DestroyAllCubemaps_i(bool internalOnly)
+        {
+            for (const auto& cm : std::ranges::views::values(HF.graphicsResources.cubemaps))
+                DestroyCubemap_i(cm.get());
+            if (!internalOnly) HF.graphicsResources.cubemaps.clear();
         }
     }
 }

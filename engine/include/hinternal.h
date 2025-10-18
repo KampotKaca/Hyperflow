@@ -42,6 +42,8 @@ namespace hf::inter
         unordered_map<uint64_t, Ref<ShaderLibrary>> shaderLibraries{};
         unordered_map<uint64_t, Ref<Shader>> shaders{};
         unordered_map<uint64_t, Ref<RuntimeBufferBase>> buffers{};
+        unordered_map<uint64_t, Ref<Texture>> textures{};
+        unordered_map<uint64_t, Ref<Cubemap>> cubemaps{};
         unordered_map<uint64_t, Ref<RenderTexture>> renderTextures{};
         unordered_map<uint64_t, Ref<TexturePack>> texturePacks{};
         unordered_map<uint64_t, Ref<Mesh>> meshes{};
@@ -239,7 +241,6 @@ namespace hf::inter
         bool DestroyMesh_i(Mesh* mesh);
 
         Ref<Texture> CreateTextureAsset_i(const char* assetPath);
-        bool CreateTexture_i(Texture* tex);
         bool DestroyTexture_i(Texture* tex);
 
         Ref<Cubemap> CreateCubemapAsset_i(const char* assetPath);
@@ -255,6 +256,10 @@ namespace hf::inter
         void DestroyAllRenderTextures_i(bool internalOnly = false);
         void DestroyAllShaders_i(bool internalOnly = false);
         void DestroyAllShaderLibraries_i(bool internalOnly = false);
+        void DestroyAllMeshes_i(bool internalOnly = false);
+        void DestroyAllTextures_i(bool internalOnly = false);
+        void DestroyAllCubemaps_i(bool internalOnly = false);
+
     }
 }
 

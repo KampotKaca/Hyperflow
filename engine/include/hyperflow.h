@@ -24,8 +24,6 @@ namespace hf
     void SetAudioVolume(float_t volume);
     float_t GetAudioVolume();
 
-    //Destroy every renderer which is not connected to the window, before you try to change api
-    void ChangeApi(RenderingApiType targetApi);
     RenderingApiType GetApiType();
     RenderingApiType GetBestApiType();
     bool IsValidApi(RenderingApiType targetApi);
@@ -341,11 +339,17 @@ namespace hf
     //endregion
     //region Texture
 
+    Ref<Texture> Create(const TextureCreationInfo& info);
+    void Destroy(const Ref<Texture>& tex);
+    void Destroy(const Ref<Texture>* pTextures, uint32_t count);
 	bool IsLoaded(const Ref<Texture>& tex);
 
     //endregion
     //region Cubemap
 
+    Ref<Cubemap> Create(const CubemapCreationInfo& info);
+    void Destroy(const Ref<Cubemap>& cm);
+    void Destroy(const Ref<Cubemap>* pCubemaps, uint32_t count);
 	bool IsLoaded(const Ref<Cubemap>& cb);
 
     //endregion

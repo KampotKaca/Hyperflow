@@ -107,21 +107,6 @@ namespace app
             DEBUG_INFO.reqCount = cReq;
         }
 
-        if (hf::IsKeyDown(hf::Key::T))
-        {
-            switch (hf::GetApiType())
-            {
-                case hf::RenderingApiType::None:
-                    break;
-                case hf::RenderingApiType::Vulkan:
-                    hf::ChangeApi(hf::RenderingApiType::Direct3D);
-                    break;
-                case hf::RenderingApiType::Direct3D:
-                    hf::ChangeApi(hf::RenderingApiType::Vulkan);
-                    break;
-            }
-        }
-
         if (hf::IsButtonDownContinues(hf::Button::Right))
             APP_DEBUG.camera.Update(hf::GetMainWindow(), (float)hf::GetDeltaTime());
 
