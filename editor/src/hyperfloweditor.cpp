@@ -3,7 +3,7 @@
 #include "hyperflow.h"
 #include "imgui_internal.h"
 
-namespace hf::editor
+namespace hf::ed
 {
     struct RenderApiInfo
     {

@@ -266,4 +266,26 @@ namespace hf
         result.depthBounds.x = std::stof(root["minDepthBounds"].val().str);
         result.depthBounds.y = std::stof(root["maxDepthBounds"].val().str);
     }
+
+    void ReadAudioClipSettings_i(c4::yml::ConstNodeRef root, AudioClipSettings& result)
+    {
+        result.sampleRate = (uint32_t)std::stoi(root["sampleRate"].val().str);
+        {
+            const auto v = root["format"].val();
+            std::string_view vView{v.str, v.len};
+            result.format = STRING_TO_AUDIO_CLIP_FORMAT(vView);
+        }
+
+        {
+            const auto v = root["channelMixMode"].val();
+            std::string_view vView{v.str, v.len};
+            result.channelMixMode = STRING_TO_AUDIO_CLIP_CHANNEL_MIX_MODE(vView);
+        }
+
+        {
+            const auto v = root["ditherMode"].val();
+            std::string_view vView{v.str, v.len};
+            result.ditherMode = STRING_TO_AUDIO_CLIP_DITHER_MODE(vView);
+        }
+    }
 }

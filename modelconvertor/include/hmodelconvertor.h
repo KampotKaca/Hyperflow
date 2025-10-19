@@ -11,7 +11,7 @@
 
 namespace ml
 {
-    struct SubMeshHeader
+    struct MeshHeader
     {
         uint32_t vertexCount = 0;
         uint32_t indexCount = 0;
@@ -49,7 +49,7 @@ namespace ml
         }
     };
 
-    struct SubMeshInfo
+    struct MeshInfo
     {
         static constexpr float_t ToBoneWeight(uint16_t w) { return w / std::numeric_limits<uint16_t>().max(); }
         static constexpr uint16_t ToBoneWeight(float_t w) { return (uint16_t)(w * std::numeric_limits<uint16_t>().max()); }
@@ -67,23 +67,20 @@ namespace ml
         std::vector<char> indices{};
 
         //deformations
-        std::vector<uint8_t> boneCounts{};
         std::vector<BoneWeight> boneWeights{};
-
-        std::vector<uint8_t> blendCounts{};
         std::vector<float> blendOffsets{};
     };
 
-    struct MeshInfo
+    struct ModelInfo
     {
-        std::vector<SubMeshHeader> headers{};
-        std::vector<SubMeshInfo> subMeshes{};
+        std::vector<MeshHeader> headers{};
+        std::vector<MeshInfo> subMeshes{};
     };
 
-    bool LoadModel(const char* path, MeshInfo* meshInfo);
-    bool LoadObj(const char* path, MeshInfo* meshInfo);
-    bool LoadFbx(const char* path, MeshInfo* meshInfo);
-    bool LoadGltf(const char* path, MeshInfo* meshInfo, bool isGltf); //or Glb
+    bool LoadModel(const char* path, ModelInfo* meshInfo);
+    bool LoadObj(const char* path, ModelInfo* meshInfo);
+    bool LoadFbx(const char* path, ModelInfo* meshInfo);
+    bool LoadGltf(const char* path, ModelInfo* meshInfo, bool isGltf); //or Glb
 }
 
 #endif //MESHCONVERTOR_H

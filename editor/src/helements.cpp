@@ -2,7 +2,7 @@
 #include "hyperfloweditor.h"
 #include "hutils.h"
 
-namespace hf::editor
+namespace hf::ed
 {
     bool Draw(const char* label, bool& v, DrawStateFlag flags)
     {

@@ -46,7 +46,7 @@ namespace hf
 			if (inter::HF.internalAudioInfo.audioEnabled) inter::audio::Load_i();
 
 			inter::rendering::LoadApi_i(engineData.renderingApi);
-			inter::primitives::LoadStaticResources_i();
+			inter::general::LoadStaticResources_i();
 			if(inter::HF.lifecycleCallbacks.onResourcesLoad) inter::HF.lifecycleCallbacks.onResourcesLoad();
 			inter::HF.isRunning = true;
 

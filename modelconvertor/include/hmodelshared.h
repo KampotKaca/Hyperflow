@@ -3,11 +3,11 @@
 
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/hash.hpp>
+#include "../config.h"
 
 namespace ml
 {
 #define MAX_DEFORMERS_PER_VERTEX 16
-#define MAX_DEFORMATIONS_PER_VERTEX 4
 
     struct SkinDeformer
     {

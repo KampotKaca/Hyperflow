@@ -176,7 +176,7 @@ target_include_directories(${PROJECT_NAME}
         PRIVATE
         platforms/include
         rendering/include
-        ../meshconvertor/include
+        ../modelconvertor/include
 )
 
 get_target_property(LIBS ${PROJECT_NAME} LINK_LIBRARIES)

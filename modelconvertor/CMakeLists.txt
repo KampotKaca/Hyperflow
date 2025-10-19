@@ -1,11 +1,11 @@
-project(meshconvertor)
+project(modelconvertor)
 
 set(CMAKE_CXX_STANDARD 23)
 
-file(GLOB_RECURSE MESH_CONVERTOR_SRC CONFIGURE_DEPENDS src/*.cpp)
+file(GLOB_RECURSE MODEL_CONVERTOR_SRC CONFIGURE_DEPENDS src/*.cpp)
 add_subdirectory(tinyobjloader)
 
-add_executable(${PROJECT_NAME} ${MESH_CONVERTOR_SRC})
+add_executable(${PROJECT_NAME} ${MODEL_CONVERTOR_SRC})
 
 target_link_libraries(${PROJECT_NAME}
         PRIVATE

@@ -71,39 +71,41 @@ foreach(SHADER_SOURCE_DIR ${SHADER_SOURCE_DIRS})
     endforeach()
 endforeach()
 
-# === Mesh Setup ===
-set(MESH_SOURCE_DIRS
-        "${CMAKE_SOURCE_DIR}/engine/assets/meshes"
-        "${CMAKE_SOURCE_DIR}/application/assets/meshes"
-        # Add more mesh source directories here
+# === Model Setup ===
+set(MODEL_SOURCE_DIRS
+        "${CMAKE_SOURCE_DIR}/engine/assets/models"
+        "${CMAKE_SOURCE_DIR}/application/assets/models"
+        # Add more model source directories here
 )
 
-set(MESH_BINARY_DIR "${CMAKE_BINARY_DIR}/res/meshes")
-file(MAKE_DIRECTORY ${MESH_BINARY_DIR})
-set(MESHCONVERTOR_ARGS)
-set(PROCESSED_MESHES)
+set(MODEL_BINARY_DIR "${CMAKE_BINARY_DIR}/res/models")
+file(MAKE_DIRECTORY ${MODEL_BINARY_DIR})
+set(MODELCONVERTOR_ARGS)
+set(PROCESSED_MODELS)
 
-foreach(MESH_SOURCE_DIR ${MESH_SOURCE_DIRS})
-    file(GLOB_RECURSE MESH_SOURCES_TMP
-            "${MESH_SOURCE_DIR}/*.obj"
-            "${MESH_SOURCE_DIR}/*.gltf"
-            "${MESH_SOURCE_DIR}/*.glb"
-            "${MESH_SOURCE_DIR}/*.fbx"
+foreach(MODEL_SOURCE_DIR ${MODEL_SOURCE_DIRS})
+    file(GLOB_RECURSE MODEL_SOURCES_TMP
+            "${MODEL_SOURCE_DIR}/*.obj"
+            "${MODEL_SOURCE_DIR}/*.gltf"
+            "${MODEL_SOURCE_DIR}/*.glb"
+            "${MODEL_SOURCE_DIR}/*.fbx"
     )
 
-    foreach(MESH ${MESH_SOURCES_TMP})
-        get_filename_component(FILE_NAME ${MESH} NAME)
-        set(OUTPUT_FILE "${MESH_BINARY_DIR}/${FILE_NAME}.mesh")
+    foreach(MODEL ${MODEL_SOURCES_TMP})
+        get_filename_component(FILE_NAME ${MODEL} NAME)
+        set(OUTPUT_FILE "${MODEL_BINARY_DIR}/${FILE_NAME}.model")
 
-        list(APPEND MESHCONVERTOR_ARGS "${MESH}" "${OUTPUT_FILE}")
-        list(APPEND PROCESSED_MESHES "${OUTPUT_FILE}")
+        list(APPEND MODELCONVERTOR_ARGS "${MODEL}" "${OUTPUT_FILE}")
+        list(APPEND PROCESSED_MODELS "${OUTPUT_FILE}")
     endforeach()
 endforeach()
 
 # === Prebuild Target ===
 add_custom_target(Prebuild ALL
-#        ALL DEPENDS ${PROCESSED_MESHES} ${PROCESSED_SHADERS}
-        COMMAND meshconvertor ${MESHCONVERTOR_ARGS}
+#        ALL DEPENDS ${PROCESSED_MODELS} ${PROCESSED_SHADERS}
+        COMMAND ${CMAKE_COMMAND} -E echo "Running modelconvertor..."
+        COMMAND modelconvertor ${MODELCONVERTOR_ARGS}
+        COMMAND ${CMAKE_COMMAND} -E echo "Running shaderconvertor..."
         COMMAND shaderconvertor ${SHADERCONVERTOR_ARGS}
         COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/application/res ${CMAKE_BINARY_DIR}/res
 )

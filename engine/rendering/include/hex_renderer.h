@@ -53,7 +53,7 @@ namespace hf::inter::rendering
     {
         const BufferUploadPacketInfo* pUploadPackets{};
         uint32_t uploadPacketCount{};
-        const uint8_t* pUniformDataBuffer{};
+        const uint8_t* data{};
     };
 
     struct ShaderLibraryPreRasterModuleInfo_i

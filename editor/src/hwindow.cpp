@@ -1,7 +1,7 @@
 #include "hyperfloweditor.h"
 #include "heditorinternal.h"
 
-namespace hf::editor
+namespace hf::ed
 {
     bool StartWindow(const char* name, bool* isOpen, WindowFlags flags)
     {

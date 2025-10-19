@@ -5,16 +5,18 @@
 
 namespace app
 {
-    constexpr char ASSET_VIKING_ROOM_MESH[]           = "viking_room.obj";
+    constexpr char ASSET_VIKING_ROOM_MODEL[]          = "viking_room.obj";
     constexpr char ASSET_VIKING_ROOM_ALBEDO_TEXTURE[] = "viking_room.png";
     constexpr char ASSET_GREEK_HEAD_ALBEDO_TEXTURE[]  = "greek_head.jpg";
+
+    constexpr char ASSET_CARTOON_COMEDY_AUDIO_CLIP[]  = "cartoon_comedy.mp3";
 
     static std::array APPLICATION_SCENE_ASSET_LOCATIONS
     {
         hf::AssetLocation
         {
-            .path = ASSET_VIKING_ROOM_MESH,
-            .type = hf::AssetType::Mesh
+            .path = ASSET_VIKING_ROOM_MODEL,
+            .type = hf::AssetType::Model
         },
         hf::AssetLocation
         {
@@ -25,6 +27,12 @@ namespace app
         {
             .path = ASSET_GREEK_HEAD_ALBEDO_TEXTURE,
             .type = hf::AssetType::Texture
+        },
+
+        hf::AssetLocation
+        {
+            .path = ASSET_CARTOON_COMEDY_AUDIO_CLIP,
+            .type = hf::AssetType::AudioClip
         },
     };
 }

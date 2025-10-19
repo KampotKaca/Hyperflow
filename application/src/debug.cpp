@@ -30,7 +30,7 @@ namespace app
     void DebugRendererInit()
     {
         std::array formats = { hf::TextureFormat::R8G8B8A8_Unorm };
-        hf::editor::LoadInfo editorInfo
+        hf::ed::LoadInfo editorInfo
         {
             .windowHandle = GetHandle(hf::GetMainWindow()),
             .multisampleMode = MSAA_MODE,
@@ -39,12 +39,12 @@ namespace app
             .depthFormat = DEPTH_STENCIL_MODE
         };
         editorInfo.renderApiHandles = hf::GetEditorApiHandles();
-        hf::editor::Load(editorInfo);
+        hf::ed::Load(editorInfo);
     }
 
     void DebugRendererShutdown()
     {
-        hf::editor::Unload();
+        hf::ed::Unload();
     }
 
     void DebugDefine()
@@ -59,8 +59,8 @@ namespace app
 
     void DebugStart()
     {
-        APP_DEBUG.camera.camera3D.position = {0, 0.5, -2};
-        APP_DEBUG.camera.camera3D.direction = {0, 0, 1};
+        APP_DEBUG.camera.camera3D.position = hf::vec3{0, 0.5, -2};
+        APP_DEBUG.camera.camera3D.direction = hf::vec3{0, 0, 1};
         DEBUG_INFO.wn = hf::GetMainWindow();
         hf::SetTargetFrameRate(-1);
         DEBUG_INFO.count = 0;
@@ -107,21 +107,6 @@ namespace app
             DEBUG_INFO.reqCount = cReq;
         }
 
-        if (hf::IsKeyDown(hf::Key::T))
-        {
-            switch (hf::GetApiType())
-            {
-                case hf::RenderingApiType::None:
-                    break;
-                case hf::RenderingApiType::Vulkan:
-                    hf::ChangeApi(hf::RenderingApiType::Direct3D);
-                    break;
-                case hf::RenderingApiType::Direct3D:
-                    hf::ChangeApi(hf::RenderingApiType::Vulkan);
-                    break;
-            }
-        }
-
         if (hf::IsButtonDownContinues(hf::Button::Right))
             APP_DEBUG.camera.Update(hf::GetMainWindow(), (float)hf::GetDeltaTime());
 
@@ -135,60 +120,58 @@ namespace app
 
     void DebugPreRender(const hf::Ref<hf::Renderer>& rn)
     {
-        hf::editor::StartFrame();
+        hf::ed::StartFrame();
 
-        hf::editor::SetNextWindowSize({ 300, 300 }, hf::editor::Condition::FirstUseEver);
-        hf::editor::SetNextWindowPos({ 300, 300 }, hf::editor::Condition::FirstUseEver);
-        if (hf::editor::StartWindow("Project Settings"))
+        hf::ed::SetNextWindowSize(hf::vec2{ 300, 300 }, hf::ed::Condition::FirstUseEver);
+        hf::ed::SetNextWindowPos(hf::vec2{ 300, 300 }, hf::ed::Condition::FirstUseEver);
+        if (hf::ed::StartWindow("Project Settings"))
         {
-            if (hf::editor::StartDropdown("Lights"))
+            if (hf::ed::StartDropdown("Lights"))
             {
-                hf::editor::Draw("Directional", APP_OBJECTS.mainLight);
-                hf::editor::EndDropdown();
+                hf::ed::Draw("Directional", APP_OBJECTS.mainLight);
+                hf::ed::EndDropdown();
             }
 
-            hf::editor::EndWindow();
+            hf::ed::EndWindow();
         }
 
-        hf::editor::DrawMemoryStatisticsWindow("Memory Statistics");
-        hf::editor::DrawRenderStatisticsWindow("Rendering Statistics");
-        hf::editor::DrawAudioSettingsWindow("Audio Settings");
+        hf::ed::DrawMemoryStatisticsWindow("Memory Statistics");
+        hf::ed::DrawRenderStatisticsWindow("Rendering Statistics");
+        hf::ed::DrawAudioSettingsWindow("Audio Settings");
 
-        hf::editor::EditorContextData data{};
+        hf::ed::EditorContextData data{};
         data.camera = &APP_DEBUG.camera.camera3D.core;
         data.drawGridLines = &APP_DEBUG.drawGridLines;
         data.gridLines = &APP_DEBUG.gridLinesInfo;
-        hf::editor::DrawEditorWindow("Editor", data);
+        hf::ed::DrawEditorWindow("Editor", data);
 
-        hf::editor::SetNextWindowSize({ 300, 300 }, hf::editor::Condition::FirstUseEver);
-        hf::editor::SetNextWindowPos({ 100, 100 }, hf::editor::Condition::FirstUseEver);
-        if (hf::editor::StartWindow("Inspector"))
+        hf::ed::SetNextWindowSize(hf::vec2{ 300, 300 }, hf::ed::Condition::FirstUseEver);
+        hf::ed::SetNextWindowPos(hf::vec2{ 100, 100 }, hf::ed::Condition::FirstUseEver);
+        if (hf::ed::StartWindow("Inspector"))
         {
-            if (hf::editor::StartDropdown("Viking Room"))
+            if (hf::ed::StartDropdown("Viking Room"))
             {
                 // hf::editor::Draw("Transform", APP_OBJECTS.vikingRoom.transform);
-                hf::editor::Draw("Audio", APP_AUDIOS.background_music);
-                hf::editor::Draw("Audio3D", APP_AUDIOS.background_music3D);
-                hf::editor::Draw("Listener", APP_AUDIOS.main_listener);
-                hf::editor::EndDropdown();
+                hf::ed::Draw("Listener", APP_OBJECTS.mainListener);
+                hf::ed::EndDropdown();
             }
 
-            if (hf::editor::StartDropdown("Ground"))
+            if (hf::ed::StartDropdown("Ground"))
             {
-                hf::editor::Draw("Transform", APP_OBJECTS.ground.transform);
-                hf::editor::EndDropdown();
+                hf::ed::Draw("Transform", APP_OBJECTS.ground.transform);
+                hf::ed::EndDropdown();
             }
 
-            if (hf::editor::StartDropdown("Sphere"))
+            if (hf::ed::StartDropdown("Sphere"))
             {
-                hf::editor::Draw("Transform", APP_OBJECTS.sphere.transform);
-                hf::editor::EndDropdown();
+                hf::ed::Draw("Transform", APP_OBJECTS.sphere.transform);
+                hf::ed::EndDropdown();
             }
 
-            hf::editor::EndWindow();
+            hf::ed::EndWindow();
         }
 
-        hf::editor::EndFrame();
+        hf::ed::EndFrame();
     }
 
     void DebugPrepass(const hf::Ref<hf::Renderer>& rn)
@@ -198,11 +181,11 @@ namespace app
 
     void GuiDraw(const hf::Ref<hf::Renderer>& rn, void* cmd)
     {
-        hf::editor::DrawFrame(cmd);
+        hf::ed::DrawFrame(cmd);
     }
 
     void DebugRender(const hf::Ref<hf::Renderer>& rn)
     {
-        hf::Set_DrawCallback(rn, GuiDraw);
+        hf::dp::SetDrawCallback(rn, GuiDraw);
     }
 }

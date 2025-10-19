@@ -42,8 +42,11 @@ namespace hf::inter
         unordered_map<uint64_t, Ref<ShaderLibrary>> shaderLibraries{};
         unordered_map<uint64_t, Ref<Shader>> shaders{};
         unordered_map<uint64_t, Ref<RuntimeBufferBase>> buffers{};
+        unordered_map<uint64_t, Ref<Texture>> textures{};
+        unordered_map<uint64_t, Ref<Cubemap>> cubemaps{};
         unordered_map<uint64_t, Ref<RenderTexture>> renderTextures{};
         unordered_map<uint64_t, Ref<TexturePack>> texturePacks{};
+        unordered_map<uint64_t, Ref<Mesh>> meshes{};
 
         unordered_map<std::string, VertexBufferAttribute> vertexAttributes{};
         unordered_map<std::string, TextureLayout> textureLayouts{};
@@ -58,10 +61,14 @@ namespace hf::inter
 
     struct AudioResources
     {
-        unordered_map<std::string, Ref<AudioClip>> clips{};
         unordered_map<uint64_t, Ref<AudioPlayer>> players{};
         unordered_map<uint64_t, Ref<AudioPlayer3D>> player3Ds{};
         unordered_map<uint64_t, Ref<AudioGroup>> groups{};
+    };
+
+    struct GeneralResources
+    {
+        unordered_map<uint64_t, Ref<Animation>> groups{};
     };
 
     struct ResourcesMarkedForDeletion
@@ -136,7 +143,7 @@ namespace hf::inter
 
         StaticVertexAttributes vertexAttributes{};
         StaticResourcesLibraryModules engineShadersLibModules{};
-        Ref<Mesh> primitiveMeshes[(uint32_t)PrimitiveMeshType::Count]{};
+        Ref<Model> primitiveModels[(uint32_t)PrimitiveMeshType::Count]{};
         Ref<Texture> primitiveTextures[(uint32_t)PrimitiveTextureType::Count]{};
         StaticSkyboxResources skyboxResources{};
 
@@ -183,26 +190,26 @@ namespace hf::inter
         void LogThreadMemoryStats_i();
     }
 
-    namespace primitives
-    {
-        void DefineStaticResources_i();
-        void LoadStaticResources_i();
-    }
-
     namespace audio
     {
         void Load_i();
         void Unload_i();
 
-        bool CreateClip_i(AudioClip* clip);
-        bool DestroyClip_i(AudioClip* clip);
+        Ref<AudioClip> CreateAudioClipAsset_i(const char* assetPath);
+        bool DestroyAudioClip_i(AudioClip* clip);
     }
 
-    namespace rendering
+    namespace general
     {
         void LoadScene_i(Scene* scene);
         void UnloadScene_i(Scene* scene);
 
+        void DefineStaticResources_i();
+        void LoadStaticResources_i();
+    }
+
+    namespace rendering
+    {
         void StartRenderPacket_i(const Ref<Renderer>& rn);
         void EndRenderPacket_i(const Ref<Renderer>& rn);
         void PreDraw_i(const Ref<Renderer>& rn);
@@ -233,12 +240,11 @@ namespace hf::inter
 
         bool DestroyBuffer_i(RuntimeBufferBase* buffer);
 
-        Ref<Mesh> CreateMeshAsset_i(const char* assetPath);
-        bool CreateMesh_i(Mesh* mesh);
+        Ref<Model> CreateModelAsset_i(const char* assetPath);
+        bool DestroyModel_i(Model* model);
         bool DestroyMesh_i(Mesh* mesh);
 
         Ref<Texture> CreateTextureAsset_i(const char* assetPath);
-        bool CreateTexture_i(Texture* tex);
         bool DestroyTexture_i(Texture* tex);
 
         Ref<Cubemap> CreateCubemapAsset_i(const char* assetPath);
@@ -254,6 +260,10 @@ namespace hf::inter
         void DestroyAllRenderTextures_i(bool internalOnly = false);
         void DestroyAllShaders_i(bool internalOnly = false);
         void DestroyAllShaderLibraries_i(bool internalOnly = false);
+        void DestroyAllMeshes_i(bool internalOnly = false);
+        void DestroyAllTextures_i(bool internalOnly = false);
+        void DestroyAllCubemaps_i(bool internalOnly = false);
+
     }
 }
 

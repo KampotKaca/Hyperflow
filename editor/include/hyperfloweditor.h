@@ -4,7 +4,7 @@
 #include "hshared.h"
 #include "hcomponents.h"
 
-namespace hf::editor
+namespace hf::ed
 {
     struct LoadInfo
     {

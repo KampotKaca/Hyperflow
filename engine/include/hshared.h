@@ -91,7 +91,6 @@ namespace hf
 #endif
 
 	//endregion
-
 	//region Definitions
 
     struct FilePath
@@ -101,7 +100,6 @@ namespace hf
     };
 
 	//endregion
-
 	//region Rendering
 
 	struct Renderer;
@@ -115,8 +113,10 @@ namespace hf
 	struct VertexBuffer;
 	struct IndexBuffer;
 	struct Mesh;
+	struct Model;
 	struct Material;
 	struct RenderTexture;
+	struct Armature;
 
 	typedef uint32_t VertexBufferAttribute;
 	typedef uint32_t Buffer;
@@ -568,14 +568,25 @@ namespace hf
 		VertexBufferAttribute vertexAttribute{};
 	};
 
-	struct MeshCreationInfo
+	struct ModelCreationInfo
 	{
 		const char* filePath{};
-		MeshStats stats{};
+		MeshStats meshStats{};
 	};
 
-	//endregion
+    struct MeshCreationInfo
+    {
+        VertexBufferCreationInfo vertexBufferCreationInfo{};
+        IndexBufferCreationInfo indexBufferCreationInfo{};
 
+        VertexBufferCreationInfo* pSkinBufferCreationInfos{};
+        uint32_t skinBufferCount{};
+
+        BoundingVolume volume{};
+        MeshStats stats{};
+    };
+
+	//endregion
     //region Audio
 
     struct AudioClip;
@@ -596,17 +607,15 @@ namespace hf
 
     struct AudioClipSettings
     {
-        AudioClipFormat format = AudioClipFormat::Default;
         uint32_t sampleRate = 0;
+        AudioClipFormat format = AudioClipFormat::Default;
         AudioClipChannelMixMode channelMixMode = AudioClipChannelMixMode::Rectangular;
         AudioClipDitherMode ditherMode = AudioClipDitherMode::None;
-        AudioClipEncodingFormat encodingFormat = AudioClipEncodingFormat::Unknown;
     };
 
     struct AudioClipCreationInfo
     {
-        const char* filePath{};
-        bool useAbsolutePath = false;
+        FilePath filePath{};
         AudioClipSettings settings{};
     };
 
@@ -655,7 +664,6 @@ namespace hf
     };
 
     //endregion
-
 	//region Window
 
 	struct Window;
@@ -685,7 +693,6 @@ namespace hf
 	};
 
 	//endregion
-
 	//region Engine
 
 	struct EngineLifecycleCallbacks
@@ -731,7 +738,6 @@ namespace hf
 	};
 
 	//endregion
-
 	//region Global Uniforms
 
 	struct CameraUniformInfo
@@ -781,7 +787,6 @@ namespace hf
 	};
 
 	//endregion
-
 	//region Constant Objects
 
 	struct GridLinesInfo
@@ -797,8 +802,16 @@ namespace hf
 	};
 
 	//endregion
+    //region General
 
     struct Scene;
+    struct Animation;
+    struct AnimationPlayer;
+
+    struct AnimationCreationInfo
+    {
+
+    };
 
     struct AssetLocation
     {
@@ -838,6 +851,13 @@ namespace hf
         uint32_t culledDrawCalls = 0;
     };
 
+    struct AnimationPlayerCallbacks
+    {
+        void (*onAnimationStart)(const Ref<Animation>& anim);
+        void (*onAnimationEnd)(const Ref<Animation>& anim);
+        void (*onAnimationProgress)(const Ref<Animation>& anim, float_t progress);
+    };
+
 	namespace utils
 	{
 		inline uint32_t GetFirstBitOne64(const uint64_t n) { return n ? __builtin_ctzll(n) : 64u; }
@@ -851,6 +871,8 @@ namespace hf
 			return { r, g, b };
 		}
 	}
+
+    //endregion
 }
 
 #endif //HSHARED_H

@@ -15,9 +15,14 @@ namespace app
 
         hf::Ref<hf::Texture> viking_room_albedo_texture{};
         hf::Ref<hf::Texture> greek_head_texture{};
-        hf::Ref<hf::Mesh> viking_room_mesh{};
+        hf::Ref<hf::Model> viking_room_model{};
+
+        hf::Ref<hf::AudioClip> cartoon_comedy{};
 
         hf::Ref<hf::TexturePack> viking_room_pack{};
+        
+        hf::Ref<hf::AudioPlayer> background_music;
+        hf::Ref<hf::AudioPlayer3D> background_music3D;
     };
 }
 

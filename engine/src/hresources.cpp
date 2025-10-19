@@ -12,16 +12,16 @@ namespace hf
         Buffer GetGlobalUniformBuffer()     { return inter::HF.staticResources.globalUniform; }
         void BindGlobalUniformBuffer(const Ref<Renderer>& rn)
         {
-            Start_BufferSet(rn, RenderBindingType::Graphics, 0);
-            BufferSetAdd_Buffer(rn, inter::HF.staticResources.globalUniform);
-            End_BufferSet(rn);
+            dp::StartBufferSet(rn, RenderBindingType::Graphics, 0);
+            dp::BufferSetAddBuffer(rn, inter::HF.staticResources.globalUniform);
+            dp::EndBufferSet(rn);
         }
 
-        Ref<Mesh> GetMesh(PrimitiveMeshType type) { return inter::HF.staticResources.primitiveMeshes[(uint32_t)type]; }
+        Ref<Mesh> GetMesh(PrimitiveMeshType type) { return GetMesh(inter::HF.staticResources.primitiveModels[(uint32_t)type], 0); }
         Ref<Texture> GetTexture(PrimitiveTextureType type) { return inter::HF.staticResources.primitiveTextures[(uint32_t)type]; }
     }
 
-    namespace inter::primitives
+    namespace inter::general
     {
         static void DefineTextureLayouts();
         static void DefineBufferAttribs();
@@ -204,13 +204,13 @@ namespace hf
                 HF.staticResources.instanceBuffer = Create(bufferInfo);
             }
 
-            HF.staticResources.primitiveMeshes[(uint32_t)PrimitiveMeshType::Cube]      = Cast<Mesh>(CreateAsset("__cube.obj",       AssetType::Mesh));
-            HF.staticResources.primitiveMeshes[(uint32_t)PrimitiveMeshType::IcoSphere] = Cast<Mesh>(CreateAsset("__ico_sphere.obj", AssetType::Mesh));
-            HF.staticResources.primitiveMeshes[(uint32_t)PrimitiveMeshType::Plane]     = Cast<Mesh>(CreateAsset("__plane.obj",      AssetType::Mesh));
-            HF.staticResources.primitiveMeshes[(uint32_t)PrimitiveMeshType::UVSphere]  = Cast<Mesh>(CreateAsset("__uv_sphere.obj",  AssetType::Mesh));
-            HF.staticResources.primitiveMeshes[(uint32_t)PrimitiveMeshType::Cone]      = Cast<Mesh>(CreateAsset("__cone.obj",       AssetType::Mesh));
-            HF.staticResources.primitiveMeshes[(uint32_t)PrimitiveMeshType::Cylinder]  = Cast<Mesh>(CreateAsset("__cylinder.obj",   AssetType::Mesh));
-            HF.staticResources.primitiveMeshes[(uint32_t)PrimitiveMeshType::Torus]     = Cast<Mesh>(CreateAsset("__torus.obj",      AssetType::Mesh));
+            HF.staticResources.primitiveModels[(uint32_t)PrimitiveMeshType::Cube]      = Cast<Model>(CreateAsset("__cube.obj",       AssetType::Model));
+            HF.staticResources.primitiveModels[(uint32_t)PrimitiveMeshType::IcoSphere] = Cast<Model>(CreateAsset("__ico_sphere.obj", AssetType::Model));
+            HF.staticResources.primitiveModels[(uint32_t)PrimitiveMeshType::Plane]     = Cast<Model>(CreateAsset("__plane.obj",      AssetType::Model));
+            HF.staticResources.primitiveModels[(uint32_t)PrimitiveMeshType::UVSphere]  = Cast<Model>(CreateAsset("__uv_sphere.obj",  AssetType::Model));
+            HF.staticResources.primitiveModels[(uint32_t)PrimitiveMeshType::Cone]      = Cast<Model>(CreateAsset("__cone.obj",       AssetType::Model));
+            HF.staticResources.primitiveModels[(uint32_t)PrimitiveMeshType::Cylinder]  = Cast<Model>(CreateAsset("__cylinder.obj",   AssetType::Model));
+            HF.staticResources.primitiveModels[(uint32_t)PrimitiveMeshType::Torus]     = Cast<Model>(CreateAsset("__torus.obj",      AssetType::Model));
         }
 
         void LoadTextures()

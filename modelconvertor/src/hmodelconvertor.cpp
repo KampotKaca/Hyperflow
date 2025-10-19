@@ -1,19 +1,19 @@
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/hash.hpp>
-#include "hmeshconvertor.h"
-#include "hmeshinternal.h"
+#include "hmodelconvertor.h"
+#include "hmodelinternal.h"
 #include "hstrconversion.h"
 #include <lz4.h>
 
-#include "hmeshashared.h"
+#include "hmodelshared.h"
 #include "hyperflow.h"
 
 namespace ml
 {
-    bool WriteMesh(const MeshInfo& meshInfo, const std::string& outputFilePath)
+    bool WriteMesh(const ModelInfo& meshInfo, const std::string& outputFilePath)
     {
         uint32_t submeshCount = meshInfo.headers.size();
-        uint32_t headerDataSize = meshInfo.headers.size() * sizeof(SubMeshHeader);
+        uint32_t headerDataSize = meshInfo.headers.size() * sizeof(MeshHeader);
         uint32_t fullHeaderSize = sizeof(uint32_t) + headerDataSize + 1;
         uint32_t offset = 0;
         std::vector<char> headerData = std::vector<char>(fullHeaderSize);
@@ -41,9 +41,7 @@ namespace ml
             uint32_t colorSize = 0;
             uint32_t texcoordSize = 0;
 
-            uint32_t boneCountsSize = 0;
             uint32_t boneWeightsSize = 0;
-            uint32_t blendCountsSize = 0;
             uint32_t blendOffsetsSize = 0;
 
             uint32_t indexSize = subMesh.indices.size();
@@ -68,20 +66,10 @@ namespace ml
                 spacingSize++;
                 texcoordSize = subMesh.texCoords.size() * sizeof(float_t);
             }
-            if (!subMesh.boneCounts.empty())
-            {
-                spacingSize++;
-                boneCountsSize = subMesh.boneCounts.size() * sizeof(uint8_t);
-            }
             if (!subMesh.boneWeights.empty())
             {
                 spacingSize++;
-                boneWeightsSize = subMesh.boneWeights.size() * sizeof(SubMeshInfo::BoneWeight);
-            }
-            if (!subMesh.blendCounts.empty())
-            {
-                spacingSize++;
-                blendCountsSize = subMesh.blendCounts.size() * sizeof(uint8_t);
+                boneWeightsSize = subMesh.boneWeights.size() * sizeof(MeshInfo::BoneWeight);
             }
             if (!subMesh.blendOffsets.empty())
             {
@@ -90,7 +78,7 @@ namespace ml
             }
 
             uint32_t submeshDataSize = positionSize + normalSize + colorSize + texcoordSize + indexSize +
-                                       boneCountsSize + boneWeightsSize + blendCountsSize + blendOffsetsSize +
+                                       boneWeightsSize + blendOffsetsSize +
                                        spacingSize + 1;
             uint64_t oldSize = meshData.size();
             meshData.resize(meshData.size() + submeshDataSize);
@@ -124,24 +112,12 @@ namespace ml
                 STEP(texcoordSize);
             }
 
-            if (boneCountsSize > 0)
-            {
-                memcpy(meshData.data() + oldSize + offset, subMesh.boneCounts.data(), boneCountsSize);
-                STEP(boneCountsSize);
-            }
-
             if (boneWeightsSize > 0)
             {
                 memcpy(meshData.data() + oldSize + offset, subMesh.boneWeights.data(), boneWeightsSize);
                 STEP(boneWeightsSize);
             }
-
-            if (blendCountsSize > 0)
-            {
-                memcpy(meshData.data() + oldSize + offset, subMesh.blendCounts.data(), blendCountsSize);
-                STEP(blendCountsSize);
-            }
-
+            
             if (blendOffsetsSize > 0)
             {
                 memcpy(meshData.data() + oldSize + offset, subMesh.blendOffsets.data(), blendOffsetsSize);
@@ -182,7 +158,7 @@ namespace ml
         return true;
     }
 
-    bool LoadModel(const char* path, MeshInfo* meshInfo)
+    bool LoadModel(const char* path, ModelInfo* meshInfo)
     {
         std::string_view sv(path);
         auto dotPos = sv.find_last_of('.');
@@ -208,17 +184,17 @@ namespace ml
         return modelLoadingResult;
     }
 
-    void WriteData(MeshInfo* meshInfo, const std::vector<Vertex>& vertices, const std::vector<uint32_t>& indices,
+    void WriteData(ModelInfo* meshInfo, const std::vector<Vertex>& vertices, const std::vector<uint32_t>& indices,
         hf::MeshDataType dataFlags, uint16_t skinDeformationCount, uint16_t blendDeformationCount)
     {
-        SubMeshInfo subMeshInfo{};
+        MeshInfo subMeshInfo{};
 
         if ((uint32_t)dataFlags & (uint32_t)hf::MeshDataType::Position) subMeshInfo.positions.resize(vertices.size() * 3);
         if ((uint32_t)dataFlags & (uint32_t)hf::MeshDataType::Normal)   subMeshInfo.normals.resize(vertices.size() * 3);
         if ((uint32_t)dataFlags & (uint32_t)hf::MeshDataType::Color)    subMeshInfo.colors.resize(vertices.size() * 3);
         if ((uint32_t)dataFlags & (uint32_t)hf::MeshDataType::TexCoord) subMeshInfo.texCoords.resize(vertices.size() * 2);
 
-        SubMeshHeader header{};
+        MeshHeader header{};
         header.vertexCount       = (uint32_t)vertices.size();
         header.indexCount        = (uint32_t)indices.size();
         header.dataFlags         = (uint32_t)dataFlags;
@@ -294,27 +270,12 @@ namespace ml
 
         if (skinDeformationCount > 0)
         {
-            subMeshInfo.boneCounts.resize(vertices.size() * skinDeformationCount);
-            uint32_t sumBoneWeightCount = 0;
+            subMeshInfo.boneWeights.resize(vertices.size() * skinDeformationCount * MAX_DEFORMATIONS_PER_VERTEX);
 
             for (size_t b = 0; b < vertices.size(); b++)
             {
                 auto& vertex = vertices[b];
-
-                for (size_t c = 0; c < skinDeformationCount; c++)
-                {
-                    auto& deformer = vertex.skinDeformers[c];
-                    subMeshInfo.boneCounts[b * skinDeformationCount + c] = deformer.deformationCount;
-                    sumBoneWeightCount += deformer.deformationCount;
-                }
-            }
-
-            subMeshInfo.boneWeights.resize(sumBoneWeightCount);
-
-            size_t currentBoneWeight = 0;
-            for (size_t b = 0; b < vertices.size(); b++)
-            {
-                auto& vertex = vertices[b];
+                size_t currentBoneWeight = 0;
 
                 for (size_t c = 0; c < skinDeformationCount; c++)
                 {
@@ -324,11 +285,11 @@ namespace ml
                         auto bone = deformer.bones[d];
                         auto weight = deformer.weights[d];
 
-                        SubMeshInfo::BoneWeight boneWeight{};
+                        MeshInfo::BoneWeight boneWeight{};
                         boneWeight.index = bone;
-                        boneWeight.weight = SubMeshInfo::ToBoneWeight(weight);
+                        boneWeight.weight = MeshInfo::ToBoneWeight(weight);
 
-                        subMeshInfo.boneWeights[currentBoneWeight + d] = boneWeight;
+                        subMeshInfo.boneWeights[(currentBoneWeight + d) * vertices.size() + b] = boneWeight;
                     }
 
                     currentBoneWeight += deformer.deformationCount;
@@ -338,22 +299,7 @@ namespace ml
 
         if (blendDeformationCount > 0)
         {
-            subMeshInfo.blendCounts.resize(vertices.size() * blendDeformationCount);
-            uint32_t sumBlendChannelCount = 0;
-
-            for (size_t b = 0; b < vertices.size(); b++)
-            {
-                auto& vertex = vertices[b];
-
-                for (size_t c = 0; c < blendDeformationCount; c++)
-                {
-                    auto& deformer = vertex.blendDeformers[c];
-                    subMeshInfo.blendCounts[b * blendDeformationCount + c] = deformer.deformationCount;
-                    sumBlendChannelCount += deformer.deformationCount;
-                }
-            }
-
-            subMeshInfo.blendOffsets.resize(sumBlendChannelCount * 3);
+            subMeshInfo.blendOffsets.resize(vertices.size() * blendDeformationCount * MAX_DEFORMATIONS_PER_VERTEX * 3);
 
             size_t currentBlendChannel = 0;
             for (size_t b = 0; b < vertices.size(); b++)
@@ -398,7 +344,7 @@ int main(int argc, char* argv[])
 
         try
         {
-            ml::MeshInfo meshInfo{};
+            ml::ModelInfo meshInfo{};
             ml::LoadModel(inputPath.c_str(), &meshInfo);
 
             if (ml::WriteMesh(meshInfo, outputPath))

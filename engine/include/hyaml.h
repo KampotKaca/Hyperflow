@@ -21,6 +21,7 @@ namespace hf
 
     void ReadBlendingOptions_i      (c4::yml::ConstNodeRef root, BlendingOptions& result);
     void ReadShaderBlendingOptions_i(c4::yml::ConstNodeRef root, ShaderBlendingOptions& result);
+    void ReadAudioClipSettings_i    (c4::yml::ConstNodeRef root, AudioClipSettings& result);
 }
 
 #endif //HYAML_H

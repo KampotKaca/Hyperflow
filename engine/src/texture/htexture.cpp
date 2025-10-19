@@ -8,15 +8,74 @@
 namespace hf
 {
     Texture::Texture(const TextureCreationInfo& info) :
-        path(info.filePath), desiredChannel(info.desiredChannel), details(info.details),
-        mipLevels(info.mipLevels)
+        path(info.filePath), desiredChannel(info.desiredChannel),
+        details(info.details), mipLevels(info.mipLevels)
     {
-        inter::rendering::CreateTexture_i(this);
+        std::string texLoc{};
+
+        if (path.isAbsolute) texLoc = path.path;
+        else texLoc = TO_RES_PATH(std::string("textures/") + path.path);
+
+        if (!utils::FileExists(texLoc.c_str()))
+        {
+            LOG_ERROR("[Hyperflow] Unable to find texture: %s", path.path.c_str());
+            return;
+        }
+
+        if (inter::HF.renderingApi.type == RenderingApiType::Vulkan) stbi_set_flip_vertically_on_load(false);
+
+        ivec3 size{};
+        int32_t texChannels{};
+        pixelCache = stbi_load(texLoc.c_str(), &size.x, &size.y, &texChannels, (int32_t)desiredChannel);
+        size.z = 1;
+        if (pixelCache)
+        {
+            const inter::rendering::TextureCreationInfo_i creationInfo =
+            {
+                .type = inter::rendering::TextureType::Tex2D,
+                .viewType = inter::rendering::TextureViewType::Tex2D,
+                .size = size,
+                .channel = (TextureChannel)texChannels,
+                .mipLevels = mipLevels,
+                .pTextures = pixelCache,
+                .textureCount = 1,
+                .details = details
+            };
+
+            handle = inter::HF.renderingApi.api.CreateTexture(creationInfo);
+        }
+        else
+        {
+            LOG_ERROR("[Hyperflow] Unable to load texture: %s", path.path.c_str());
+            return;
+        }
     }
 
     Texture::~Texture()
     {
         inter::rendering::DestroyTexture_i(this);
+    }
+
+    Ref<Texture> Create(const TextureCreationInfo& info)
+    {
+        auto tex = MakeRef<Texture>(info);
+        inter::HF.graphicsResources.textures[(uint64_t)tex.get()] = tex;
+        return tex;
+    }
+
+    void Destroy(const Ref<Texture>& tex)
+    {
+        inter::rendering::DestroyTexture_i(tex.get());
+        inter::HF.graphicsResources.textures.erase((uint64_t)tex.get());
+    }
+
+    void Destroy(const Ref<Texture>* pTextures, uint32_t count)
+    {
+        for (uint32_t i = 0; i < count; i++)
+        {
+            inter::rendering::DestroyTexture_i(pTextures[i].get());
+            inter::HF.graphicsResources.textures.erase((uint64_t)pTextures[i].get());
+        }
     }
 
     bool IsLoaded(const Ref<Texture>& tex) { return tex->handle; }
@@ -55,53 +114,6 @@ namespace hf
             }
         }
 
-        bool CreateTexture_i(Texture* tex)
-        {
-            if (tex->handle) return false;
-
-            std::string texLoc{};
-
-            if (tex->path.isAbsolute) texLoc = tex->path.path;
-            else texLoc = TO_RES_PATH(std::string("textures/") + tex->path.path);
-
-            if (!utils::FileExists(texLoc.c_str()))
-            {
-                LOG_ERROR("[Hyperflow] Unable to find texture: %s", tex->path.path.c_str());
-                return false;
-            }
-
-            if (HF.renderingApi.type == RenderingApiType::Vulkan) stbi_set_flip_vertically_on_load(false);
-
-            ivec3 size{};
-            int32_t texChannels{};
-            tex->pixelCache = stbi_load(texLoc.c_str(), &size.x, &size.y,
-            &texChannels, (int32_t)tex->desiredChannel);
-            size.z = 1;
-            if (tex->pixelCache)
-            {
-                const TextureCreationInfo_i creationInfo =
-                {
-                    .type = TextureType::Tex2D,
-                    .viewType = TextureViewType::Tex2D,
-                    .size = size,
-                    .channel = (TextureChannel)texChannels,
-                    .mipLevels = tex->mipLevels,
-                    .pTextures = tex->pixelCache,
-                    .textureCount = 1,
-                    .details = tex->details
-                };
-
-                tex->handle = HF.renderingApi.api.CreateTexture(creationInfo);
-            }
-            else
-            {
-                LOG_ERROR("[Hyperflow] Unable to load texture: %s", tex->path.path.c_str());
-                return false;
-            }
-
-            return true;
-        }
-
         bool DestroyTexture_i(Texture* tex)
         {
             if (tex->handle)
@@ -113,10 +125,14 @@ namespace hf
             }
             return false;
         }
-    }
 
-    namespace inter::rendering
-    {
+        void DestroyAllTextures_i(bool internalOnly)
+        {
+            for (const auto& tex : std::ranges::views::values(HF.graphicsResources.textures))
+                DestroyTexture_i(tex.get());
+            if (!internalOnly) HF.graphicsResources.textures.clear();
+        }
+
         bool SetWindowIcons_i(const Window* win, const char* folderPath)
         {
             std::filesystem::path fPath = TO_RES_PATH(folderPath);

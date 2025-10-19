@@ -30,6 +30,8 @@ namespace app
 	{
 		hf::DirectionalLight mainLight{};
 		hf::SkyboxInfo skybox{};
+	    hf::Ref<hf::AudioListener> mainListener;
+	    
 	    hf::Ref<ApplicationScene> mainScene{};
 
 	    VikingRoom vikingRooms[VIKING_ROOM_AXIS_SIZE * VIKING_ROOM_AXIS_SIZE]{};

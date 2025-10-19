@@ -3,7 +3,7 @@
 #include "hyperflow.h"
 #include "hutils.h"
 
-namespace hf::editor
+namespace hf::ed
 {
     template<typename T>
     bool DrawAudioSettings(const Ref<T>& pl, DrawStateFlag flags)
@@ -146,13 +146,13 @@ namespace hf::editor
             ImGui::Text("Thread To Global:        %.1f Mbs", stats.threadToGlobalMbs);
             ImGui::Text("Global To Thread:        %.1f Mbs", stats.globalToThreadMbs);
 
-            ImGui::Text("Current Num Spans:       %llu", stats.currentNumSpans);
-            ImGui::Text("Peak Num Spans:          %llu", stats.peakNumSpans);
+            ImGui::Text("Current Num Spans:       %lu", (uint64_t)stats.currentNumSpans);
+            ImGui::Text("Peak Num Spans:          %lu", (uint64_t)stats.peakNumSpans);
 
-            ImGui::Text("Current Num Allocations: %llu", stats.currentNumAllocations);
-            ImGui::Text("Peak Num Allocations:    %llu", stats.peakNumAllocations);
-            ImGui::Text("Total Num Allocations:   %llu", stats.totalNumAllocations);
-            ImGui::Text("Total Num Frees:         %llu", stats.totalNumFrees);
+            ImGui::Text("Current Num Allocations: %lu", (uint64_t)stats.currentNumAllocations);
+            ImGui::Text("Peak Num Allocations:    %lu", (uint64_t)stats.peakNumAllocations);
+            ImGui::Text("Total Num Allocations:   %lu", (uint64_t)stats.totalNumAllocations);
+            ImGui::Text("Total Num Frees:         %lu", (uint64_t)stats.totalNumFrees);
 
             EndDropdown();
         }

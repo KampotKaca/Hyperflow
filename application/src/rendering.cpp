@@ -41,11 +41,11 @@ namespace app
 
     void AppStartRender(const hf::Ref<hf::Renderer>& rn)
     {
-        hf::Set_Camera(rn, APP_DEBUG.camera.camera3D);
-        hf::Add_Light(rn, APP_OBJECTS.mainLight);
+        hf::dp::SetCamera(rn, APP_DEBUG.camera.camera3D);
+        hf::dp::AddLight(rn, APP_OBJECTS.mainLight);
 
         DebugPrepass(rn);
-        hf::Start_RenderTexture(rn, APP_RENDER_TEXTURES.mainDrawRenderTexture);
+        hf::dp::StartRenderTex(rn, APP_RENDER_TEXTURES.mainDrawRenderTexture);
     }
 
     void AppEndRender(const hf::Ref<hf::Renderer>& rn)
@@ -55,6 +55,6 @@ namespace app
         if (APP_DEBUG.drawGridLines) hf::gridlines::Draw(rn, APP_DEBUG.gridLinesInfo);
         DebugRender(rn);
 
-        hf::End_RenderTexture(rn);
+        hf::dp::EndRenderTex(rn);
     }
 }
