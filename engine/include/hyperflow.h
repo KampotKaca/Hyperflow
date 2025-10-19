@@ -12,59 +12,75 @@ namespace hf
     void Preload();
     void Shutdown();
 
-	bool IsRunning();
+	bool IsRunning(); //Check if the engine is running.
 
-    void Run(const EngineData& engineData);
-    Ref<Window> GetMainWindow();
-    const std::string& GetApplicationTitle();
+    void Run(const EngineData& engineData); //Run the engine.
+    Ref<Window> GetMainWindow(); //Get main window of the application.
+    const std::string& GetApplicationTitle(); //Get title of the application.
 
-    Ref<AudioGroup> Get2DAudioGroup();
-    Ref<AudioGroup> Get3DAudioGroup();
+    Ref<AudioGroup> Get2DAudioGroup(); //Get the Audio Group which handles all the Audio Players.
+    Ref<AudioGroup> Get3DAudioGroup(); //Get the Audio Group which handles all the Audio Player 3Ds.
 
-    void SetAudioVolume(float_t volume);
-    float_t GetAudioVolume();
+    void SetAudioVolume(float_t volume); //Set the global audio volume.
+    float_t GetAudioVolume(); //Get the global audio volume.
 
-    RenderingApiType GetApiType();
-    RenderingApiType GetBestApiType();
-    bool IsValidApi(RenderingApiType targetApi);
+    RenderingApiType GetApiType(); //Get current rendering api.
+    RenderingApiType GetBestApiType(); //Get best rendering api for the platform.
+    bool IsValidApi(RenderingApiType targetApi); //Check if the api can be used on the current platform.
 
+    //When textures are loaded this data needs to get to the gpu memory to be usable by the renderer.
+    //Submitting textures one by one is possible, but it slows down the process,
+    //so engine stores all your upload requests temporarily and is uploaded all at once when you call submit.
+    //Calling this is not mandatory, since this will be called on the next frame, but this might slow down the frame,
+    //since rendering cannot be started if all resources are not present.
+    //So this function is recomended to be used after you load static textures.
     void SubmitAllTextures();
+    //When meshes and other types of objects which require heap of memory are loaded this data needs to get to the gpu memory to be usable by the renderer.
+    //Submitting buffers one by one is possible, but it slows down the process,
+    //so engine stores all your upload requests temporarily and is uploaded all at once when you call submit.
+    //Calling this is not mandatory, since this will be called on the next frame, but this might slow down the frame,
+    //since rendering cannot be started if all resources are not present.
+    //So this function is recomended to be used after you load meshes or other statis buffers.
     void SubmitAllBuffers();
 
-    bool IsKeyDown(Key key);
-    bool IsKeyDownContinues(Key key);
-    bool IsKeyUp(Key key);
+    bool IsKeyDown(Key key); //Check if key was just pressed on main window.
+    bool IsKeyDownContinues(Key key); //Check if key is being pressed across multiple frames on main window.
+    bool IsKeyUp(Key key); //Check if key was just released on main window.
 
-    bool IsButtonDown(Button button);
-    bool IsButtonDownContinues(Button button);
-    bool IsButtonUp(Button button);
+    bool IsButtonDown(Button button); //Check if button was just pressed on main window.
+    bool IsButtonDownContinues(Button button); //Check if button is being pressed across multiple frames on main window.
+    bool IsButtonUp(Button button); //Check if button was just released on main window.
 
-    KeyState GetKeyState(Key key);
-    ButtonState GetButtonState(Button button);
-    const std::string& GetWrite();
+    KeyState GetKeyState(Key key); //Get key state on main window.
+    ButtonState GetButtonState(Button button); //Get button state on main window.
+    const std::string& GetWrite(); //Get last frame's key writes on main window.
 
-    vec2 GetPointerPosition();
-    vec2 GetPointerDelta();
-    vec2 GetScrollDelta();
+    vec2 GetPointerPosition(); //Get mouse position.
+    vec2 GetPointerDelta(); //Get last frames mouse movement on main window.
+    vec2 GetScrollDelta(); //Get last frames scroll on main window.
 
-    uint64_t GetFrameCount();
-    double GetDeltaTime();
-    double GetTimePassed();
-    double GetAbsoluteTimePassed();
-    int16_t GetTargetFrameRate();
-    double GetSystemTime();
-    int32_t GetFrameRate();
-    void SetTargetFrameRate(int16_t targetFrameRate);
+    uint64_t GetFrameCount(); //Get amount of frames since startup.
+    double GetDeltaTime(); //Get time passed since last frame in seconds.
+    double GetTimePassed(); //Get Scaled time passed since startup in seconds.
+    double GetAbsoluteTimePassed(); //Get Unscaled time passed since startup in seconds.
+    int16_t GetTargetFrameRate(); //Get target frame rate of the application.
+    double GetSystemTime(); //Get system time.
+    int32_t GetFrameRate(); //Get current frame rate of the application.
+    void SetTargetFrameRate(int16_t targetFrameRate); //Set the target frame rate of the application.
 
-    void* GetEditorApiHandles();
+    void* GetEditorApiHandles(); //This function is used to get necessary resources to load an editor.
 
-    void Terminate();
-    void UnloadAllScenes();
-    void DestroyAllWindows();
+    void Terminate(); //Terminate the application.
+    void UnloadAllScenes(); //Unload all the scenes used by the application.
+    void DestroyAllWindows(); //Destroy all the windows used by the application.
 
+    //Load an asset from a meta file.
+    //If the asset is already loaded it will not be loaded again, you will just get the Ref to it.
+    //Asset api tracks the create and destroy calls, so if you call twice create and once destroy asset will not be destroyed.
+    //.meta part is not necessary, this is assumed.
     Ref<void> CreateAsset(const char* assetPath, AssetType type);
-    void DestroyAsset(const char* assetPath);
-    Ref<void> GetAsset(const char* assetPath);
+    void DestroyAsset(const char* assetPath); //Destroy the loaded asset.
+    Ref<void> GetAsset(const char* assetPath); //Get asset by the local path it was loaded from.
 
     //endregion
     //region Search
@@ -313,17 +329,19 @@ namespace hf
     double_t GetPlayedInSeconds(const Ref<AnimationPlayer>& player);
     double_t GetPlayedPercent(const Ref<AnimationPlayer>& player);
     bool IsPlaying(const Ref<AnimationPlayer>& player);
-    Ref<Animation> GetAnim(const Ref<AnimationPlayer>& player);
-    void ChangeAnim(const Ref<AnimationPlayer>& player, const Ref<Animation>& anim, float_t startingDuration = -1);
+    Ref<AnimationClip> GetAnim(const Ref<AnimationPlayer>& player);
+    void ChangeAnim(const Ref<AnimationPlayer>& player, const Ref<AnimationClip>& anim, float_t startingDuration = -1);
 
     //endregion
     //region Animation
 
-    void Destroy(const Ref<Animation>& anim);
-    void Destroy(const Ref<Animation>* pAnimations, uint32_t count);
-    bool IsLoaded(const Ref<Animation>& anim);
+    void Destroy(const Ref<AnimationClip>& anim);
+    void Destroy(const Ref<AnimationClip>* pAnimations, uint32_t count);
+    bool IsLoaded(const Ref<AnimationClip>& anim);
 
-    float_t GetDuration(const Ref<Animation>& anim);
+    float_t GetDuration(const Ref<AnimationClip>& anim); //Duration of the animation clip
+    uint16_t GetFrameRate(const Ref<AnimationClip>& anim); //Frame rate of the animation clip
+    uint32_t GetFrameCount(const Ref<AnimationClip>& anim); //Frame count of the animation clip
 
     //endregion
     //region Model
@@ -366,14 +384,15 @@ namespace hf
     //These functions should never be called outside draw process.
     namespace dp
     {
-        void SetDrawCallback(const Ref<Renderer>& rn, void (*callback)(const Ref<Renderer>&, void*));
+		void BindGlobalUniformBuffer(const Ref<Renderer>& rn); //Bind the global uniform buffer to the currently bound shader layout.
+        void SetDrawCallback(const Ref<Renderer>& rn, void (*callback)(const Ref<Renderer>&, void*)); //This callback will be called from rendering thread after every draw, be careful, incorrect use might crash the program.
 
-        void SetCamera(const Ref<Renderer>& rn, const Camera3DAnchored& camera);
-        void SetCamera(const Ref<Renderer>& rn, const Camera3DFreeLook& camera);
+        void SetCamera(const Ref<Renderer>& rn, const Camera3DAnchored& camera); //Set the draw camera. Needs to be called early in drawing process.
+        void SetCamera(const Ref<Renderer>& rn, const Camera3DFreeLook& camera); //Set the draw camera. Needs to be called early in drawing process.
 
-        void AddLight(const Ref<Renderer>& rn, const DirectionalLight& light);
-        void AddLight(const Ref<Renderer>& rn, const SpotLight& light);
-        void AddLight(const Ref<Renderer>& rn, const PointLight& light);
+        void AddLight(const Ref<Renderer>& rn, const DirectionalLight& light); //Add directional light to the renderer.
+        void AddLight(const Ref<Renderer>& rn, const SpotLight& light);        //Add Spot light to the renderer.
+        void AddLight(const Ref<Renderer>& rn, const PointLight& light);       //Add Point light to the renderer.
 
         void UploadBuffer(const Ref<Renderer>& rn, const BufferUploadInfo& info);
 	    void UploadMat(const Ref<Renderer>& rn, const Ref<Material>& mat);
@@ -437,51 +456,52 @@ namespace hf
 	    {
 	        DrawAddInstance(rn, &data, sizeof(T), volume);
 	    }
+
+        //Draw the skybox.
+        //Try to call this draw as late as possible to reduce pixel overdraw.
+        //This function should be called after render texture binding, since it binds it's own shader layout.
+        void Draw(const Ref<Renderer>& rn, const SkyboxInfo& info);
+        //Draw xz line grid.
+        //This function should be called after render texture binding, since it binds it's own shader layout.
+        void Draw(const Ref<Renderer>& rn, const GridLinesInfo& info);
+
+        void SkyboxBindDefaultCubemap(const Ref<Renderer>& rn); //Bind the default cubemap to the skybox.
+        void SkyboxBindCubemap(const Ref<Renderer>& rn, const Ref<Cubemap>& cubemap); //Bind the cubemap to the skybox.
+
+        [[nodiscard]] bool SkyboxIsDefaultCubemapBound(); //Check if default cubemap is bound to the skybox.
     }
-	namespace skybox
-	{
-		void BindDefaultCubemap(const Ref<Renderer>& rn);
-		void BindCubemap(const Ref<Renderer>& rn, const Ref<Cubemap>& cubemap);
-		void Draw(const Ref<Renderer>& rn, const SkyboxInfo& info);
-		[[nodiscard]] bool IsDefaultCubemapBound();
-	}
-	namespace gridlines
-	{
-		void Draw(const Ref<Renderer>& rn, const GridLinesInfo& info);
-	}
 	namespace utils
 	{
-		ivec3 ConvertVersion(const char* version);
-		bool ReadFile(const std::string& filename, std::vector<char>& result);
-		bool WriteFile(const std::string& filename, const std::vector<char>& result);
-		bool FileExists(const char* path);
+		ivec3 ConvertVersion(const char* version); //Convert string version to an integer,
+		bool ReadFile(const std::string& filename, std::vector<char>& result); //Get the data of the file.
+		bool WriteFile(const std::string& filename, const std::vector<char>& data); //Write the data in the file.
+		bool FileExists(const char* path); //Check if file exists.
 
-		[[nodiscard]] void* Allocate(std::size_t n);
-		[[nodiscard]] void* AllocateAligned(std::size_t n, std::align_val_t align);
-		void Deallocate(void* p);
-		void DeallocateAligned(void* p, std::align_val_t align);
-		void* Reallocate(void* p, std::size_t n);
-		void CollectThreadMemoryCache(); //Reduces fragmentation.
+		[[nodiscard]] void* Allocate(std::size_t n); //Allocate n amount of memory.
+		[[nodiscard]] void* AllocateAligned(std::size_t n, std::align_val_t align); //Allocate n amount of aligned memory.
+		void Deallocate(void* p); //Deallocate the memory.
+		void DeallocateAligned(void* p, std::align_val_t align); //Deallocate the aligned memory.
+		void* Reallocate(void* p, std::size_t n); //Reallocate the memory.
+		void CollectThreadMemoryCache(); //Reduces memory fragmentation.
 
-	    GlobalMemoryStatistics GetGlobalMemoryStatistics();
-	    ThreadMemoryStatistics GetThreadMemoryStatistics();
-	    RendererStatistics GetRendererStatistics(const Ref<Renderer>& rn);
+	    GlobalMemoryStatistics GetGlobalMemoryStatistics(); //Get global memory statistics.
+	    ThreadMemoryStatistics GetThreadMemoryStatistics(); //Get memory statistics from the current thread.
+	    RendererStatistics GetRendererStatistics(const Ref<Renderer>& rn); //Get rendering thread memory statistics.
 
-	    void ReadVertexInputModule   (const char* assetPath, ShaderLibraryVertexInputModuleInfo& result);
-	    void ReadPreRasterModule     (const char* assetPath, ShaderLayout layout, ShaderLibraryPreRasterModuleInfo& result);
-	    void ReadFragmentModule      (const char* assetPath, ShaderLayout layout, ShaderLibraryFragmentModuleInfo& result);
-	    void ReadFragmentOutputModule(const char* assetPath, ShaderLibraryFragmentOutputModuleInfo& result);
+	    void ReadVertexInputModule   (const char* assetPath, ShaderLibraryVertexInputModuleInfo& result); //Read the vertex input modul meta file.
+	    void ReadPreRasterModule     (const char* assetPath, ShaderLayout layout, ShaderLibraryPreRasterModuleInfo& result); //Read the pre raster modul meta file.
+	    void ReadFragmentModule      (const char* assetPath, ShaderLayout layout, ShaderLibraryFragmentModuleInfo& result); //Read the fragment modul meta file.
+	    void ReadFragmentOutputModule(const char* assetPath, ShaderLibraryFragmentOutputModuleInfo& result); //Read the fragment output modul meta file.
 	}
 	namespace primitives
 	{
-	    Ref<Mesh> GetMesh(PrimitiveMeshType type);
-        Ref<Texture> GetTexture(PrimitiveTextureType type);
+	    Ref<Mesh> GetMesh(PrimitiveMeshType type); //Get primitive mesh by type.
+        Ref<Texture> GetTexture(PrimitiveTextureType type); //Get primitive texture by type.
 
-		Ref<VertexBuffer> GetQuadBuffer();
-		Ref<VertexBuffer>* GetQuadBufferP();
+		Ref<VertexBuffer> GetQuadBuffer(); //Get vertex buffer which contains vertices for a quad.
+		Ref<VertexBuffer>* GetQuadBufferP(); //Get vertex buffer which contains vertices for a quad.
 
-		Buffer GetGlobalUniformBuffer();
-		void BindGlobalUniformBuffer(const Ref<Renderer>& rn);
+		Buffer GetGlobalUniformBuffer(); //Get global uniform buffer, this buffer store camera and light information of the rendered scene.
 	}
 }
 

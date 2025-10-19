@@ -13,6 +13,13 @@ namespace hf
 {
     namespace dp
     {
+        void BindGlobalUniformBuffer(const Ref<Renderer>& rn)
+        {
+            StartBufferSet(rn, RenderBindingType::Graphics, 0);
+            BufferSetAddBuffer(rn, inter::HF.staticResources.globalUniform);
+            EndBufferSet(rn);
+        }
+
         void SetDrawCallback(const Ref<Renderer>& rn, void (*callback)(const Ref<Renderer>&, void*))
         {
             try

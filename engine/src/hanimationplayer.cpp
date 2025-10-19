@@ -43,9 +43,9 @@ namespace hf
     }
     double_t GetPlayedPercent(const Ref<AnimationPlayer>& player) { return player->animationProgress; }
     bool IsPlaying(const Ref<AnimationPlayer>& player) { return player->isPlaying; }
-    Ref<Animation> GetAnim(const Ref<AnimationPlayer>& player) { return player->animation; }
+    Ref<AnimationClip> GetAnim(const Ref<AnimationPlayer>& player) { return player->animation; }
 
-    void ChangeAnim(const Ref<AnimationPlayer>& player, const Ref<Animation>& anim, float_t startingDuration)
+    void ChangeAnim(const Ref<AnimationPlayer>& player, const Ref<AnimationClip>& anim, float_t startingDuration)
     {
 
     }

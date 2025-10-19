@@ -11,7 +11,7 @@ namespace hf
         ~AnimationPlayer();
 
         AnimationPlayerCallbacks callbacks{};
-        Ref<Animation> animation{};
+        Ref<AnimationClip> animation{};
         double_t animationProgress{};
         bool isPlaying{};
     };

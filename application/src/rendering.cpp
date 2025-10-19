@@ -32,8 +32,8 @@ namespace app
 
         if (hf::IsKeyDown(hf::Key::G))
         {
-            if (hf::skybox::IsDefaultCubemapBound()) hf::skybox::BindCubemap(rn, APP_CUBEMAPS.cosmos);
-            else hf::skybox::BindDefaultCubemap(rn);
+            if (hf::dp::SkyboxIsDefaultCubemapBound()) hf::dp::SkyboxBindCubemap(rn, APP_CUBEMAPS.cosmos);
+            else hf::dp::SkyboxBindDefaultCubemap(rn);
         }
 
         VoxelTerrainPreDraw(rn);
@@ -51,8 +51,8 @@ namespace app
     void AppEndRender(const hf::Ref<hf::Renderer>& rn)
     {
         VoxelTerrainDraw(rn);
-        hf::skybox::Draw(rn, APP_OBJECTS.skybox);
-        if (APP_DEBUG.drawGridLines) hf::gridlines::Draw(rn, APP_DEBUG.gridLinesInfo);
+        hf::dp::Draw(rn, APP_OBJECTS.skybox);
+        if (APP_DEBUG.drawGridLines) hf::dp::Draw(rn, APP_DEBUG.gridLinesInfo);
         DebugRender(rn);
 
         hf::dp::EndRenderTex(rn);

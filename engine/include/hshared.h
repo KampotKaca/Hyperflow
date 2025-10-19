@@ -805,7 +805,7 @@ namespace hf
     //region General
 
     struct Scene;
-    struct Animation;
+    struct AnimationClip;
     struct AnimationPlayer;
 
     struct AnimationCreationInfo
@@ -853,9 +853,9 @@ namespace hf
 
     struct AnimationPlayerCallbacks
     {
-        void (*onAnimationStart)(const Ref<Animation>& anim);
-        void (*onAnimationEnd)(const Ref<Animation>& anim);
-        void (*onAnimationProgress)(const Ref<Animation>& anim, float_t progress);
+        void (*onAnimationStart)(const Ref<AnimationClip>& anim);
+        void (*onAnimationEnd)(const Ref<AnimationClip>& anim);
+        void (*onAnimationProgress)(const Ref<AnimationClip>& anim, float_t progress);
     };
 
 	namespace utils

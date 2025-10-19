@@ -10,12 +10,6 @@ namespace hf
         Ref<VertexBuffer>* GetQuadBufferP() { return &inter::HF.staticResources.quadBuffer; }
 
         Buffer GetGlobalUniformBuffer()     { return inter::HF.staticResources.globalUniform; }
-        void BindGlobalUniformBuffer(const Ref<Renderer>& rn)
-        {
-            dp::StartBufferSet(rn, RenderBindingType::Graphics, 0);
-            dp::BufferSetAddBuffer(rn, inter::HF.staticResources.globalUniform);
-            dp::EndBufferSet(rn);
-        }
 
         Ref<Mesh> GetMesh(PrimitiveMeshType type) { return GetMesh(inter::HF.staticResources.primitiveModels[(uint32_t)type], 0); }
         Ref<Texture> GetTexture(PrimitiveTextureType type) { return inter::HF.staticResources.primitiveTextures[(uint32_t)type]; }

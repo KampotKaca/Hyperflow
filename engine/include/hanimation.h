@@ -5,12 +5,16 @@
 
 namespace hf
 {
-    struct Animation
+    struct AnimationClip
     {
-        explicit Animation();
-        ~Animation();
+        AnimationClip();
+        virtual ~AnimationClip() = 0;
 
-        float_t duration{};
+        virtual void Play() = 0;
+        virtual void Unload() = 0;
+
+        uint32_t frameCount{};
+        uint16_t frameRate{};
         bool isLoaded{};
     };
 }

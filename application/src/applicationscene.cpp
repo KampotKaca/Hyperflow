@@ -65,7 +65,7 @@ namespace app
     {
         hf::dp::StartShaderLayout(rn, APP_SHADER_LAYOUTS.default_lit); //Viking room setup
         {
-            hf::primitives::BindGlobalUniformBuffer(rn);
+            hf::dp::BindGlobalUniformBuffer(rn);
 
             hf::dp::StartShader(rn, APP_SHADERS.default_lit);
             {
@@ -134,7 +134,7 @@ namespace app
 
         hf::dp::StartShaderLayout(rn, APP_SHADER_LAYOUTS.default_unlit); //Ground setup
         {
-            hf::primitives::BindGlobalUniformBuffer(rn);
+            hf::dp::BindGlobalUniformBuffer(rn);
 
             hf::dp::StartShader(rn, APP_SHADERS.default_unlit);
             {

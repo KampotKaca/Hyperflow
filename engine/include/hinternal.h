@@ -68,7 +68,8 @@ namespace hf::inter
 
     struct GeneralResources
     {
-        unordered_map<uint64_t, Ref<Animation>> groups{};
+        unordered_map<uint64_t, Ref<AnimationClip>> animations{};
+        unordered_map<uint64_t, Ref<Armature>> armatures{};
     };
 
     struct ResourcesMarkedForDeletion
@@ -168,6 +169,7 @@ namespace hf::inter
         RenderingApi renderingApi{};
 
         GraphicsResources graphicsResources{};
+        GeneralResources generalResources{};
         ResourcesMarkedForDeletion deletedResources{};
         StaticResources staticResources{};
         AudioResources audioResources{};
@@ -206,6 +208,8 @@ namespace hf::inter
 
         void DefineStaticResources_i();
         void LoadStaticResources_i();
+
+        void DestroyAnimationClip_i(AnimationClip* anim);
     }
 
     namespace rendering

@@ -41,7 +41,7 @@ namespace hf::utils
         return true;
     }
 
-    bool WriteFile(const std::string& filename, const std::vector<char>& result)
+    bool WriteFile(const std::string& filename, const std::vector<char>& data)
     {
         std::ofstream file(filename, std::ios::binary);
         if (!file.is_open())
@@ -49,7 +49,7 @@ namespace hf::utils
             LOG_ERROR("Unable to open file at location %s", filename.c_str());
             return false;
         }
-        file.write(result.data(), result.size());
+        file.write(data.data(), data.size());
         file.close();
         return true;
     }

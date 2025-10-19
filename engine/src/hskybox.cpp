@@ -1,14 +1,14 @@
 #include "hyperflow.h"
 #include "hinternal.h"
 
-namespace hf::skybox
+namespace hf::dp
 {
-    void BindDefaultCubemap(const Ref<Renderer>& rn)
+    void SkyboxBindDefaultCubemap(const Ref<Renderer>& rn)
     {
-        BindCubemap(rn, inter::HF.staticResources.skyboxResources.defaultCubemap);
+        SkyboxBindCubemap(rn, inter::HF.staticResources.skyboxResources.defaultCubemap);
     }
 
-    void BindCubemap(const Ref<Renderer>& rn, const Ref<Cubemap>& cubemap)
+    void SkyboxBindCubemap(const Ref<Renderer>& rn, const Ref<Cubemap>& cubemap)
     {
         inter::HF.staticResources.skyboxResources.boundCubemap = cubemap;
         dp::UploadStartTexPack(rn, inter::HF.staticResources.skyboxResources.texturePack);
@@ -33,27 +33,27 @@ namespace hf::skybox
 
     void Draw(const Ref<Renderer>& rn, const SkyboxInfo& info)
     {
-        dp::StartShaderLayout(rn, inter::HF.staticResources.shaderLayouts.skybox);
+        StartShaderLayout(rn, inter::HF.staticResources.shaderLayouts.skybox);
         {
-            primitives::BindGlobalUniformBuffer(rn);
+            BindGlobalUniformBuffer(rn);
 
-            dp::StartShader(rn, inter::HF.staticResources.shaders.skybox);
+            StartShader(rn, inter::HF.staticResources.shaders.skybox);
             {
-                dp::StartMat(rn, nullptr);
+                StartMat(rn, nullptr);
                 {
-                    dp::StartDrawGroup(rn);
+                    StartDrawGroup(rn);
                     {
-                        dp::DrawGroupAddTexPackBinding(rn, inter::HF.staticResources.skyboxResources.texturePack, 1);
-                        dp::DrawGroupAddDrawCall(rn, primitives::GetMesh(PrimitiveMeshType::Cube));
+                        DrawGroupAddTexPackBinding(rn, inter::HF.staticResources.skyboxResources.texturePack, 1);
+                        DrawGroupAddDrawCall(rn, primitives::GetMesh(PrimitiveMeshType::Cube));
                     }
-                    dp::EndDrawGroup(rn);
+                    EndDrawGroup(rn);
                 }
-                dp::EndMat(rn);
+                EndMat(rn);
             }
-            dp::EndShader(rn);
+            EndShader(rn);
         }
-        dp::EndShaderLayout(rn);
+        EndShaderLayout(rn);
     }
 
-    bool IsDefaultCubemapBound() { return inter::HF.staticResources.skyboxResources.boundCubemap == inter::HF.staticResources.skyboxResources.defaultCubemap; }
+    bool SkyboxIsDefaultCubemapBound() { return inter::HF.staticResources.skyboxResources.boundCubemap == inter::HF.staticResources.skyboxResources.defaultCubemap; }
 }
