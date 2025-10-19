@@ -1,7 +1,6 @@
 #include "hrenderer.h"
 #include <hyperflow.h>
 #include "hinternal.h"
-#include "hrendertexture.h"
 #include "../config.h"
 #include "../../application/appconfig.h"
 #include "../rendering/include/hex_renderer.h"
@@ -110,7 +109,7 @@ namespace hf
                 RunRenderThread_i(win->renderer);
             }
 
-            primitives::DefineStaticResources_i();
+            general::DefineStaticResources_i();
             if (HF.lifecycleCallbacks.onRendererLoad) HF.lifecycleCallbacks.onRendererLoad();
         }
 

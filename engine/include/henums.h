@@ -316,10 +316,9 @@ namespace hf
     //endregion
     //region Audio
 
-    enum class AudioClipFormat { Default = 0, U8 = 1, S16 = 2, S24 = 3, S32 = 4, F32 };
+    enum class AudioClipFormat { Default = 0, U8 = 1, S16 = 2, S24 = 3, S32 = 4, F32 = 5 };
     enum class AudioClipChannelMixMode { Rectangular = 0, Simple = 1, CustomWeights = 2 };
     enum class AudioClipDitherMode { None = 0, Rectangle = 1, Triangle = 2 };
-    enum class AudioClipEncodingFormat { Unknown = 0, Wav = 1, Flac = 2, Mp3 = 3, Vorbis = 4 };
     enum class Audio3DAttenuationModel { None = 0, Inverse = 1, Linear = 2, Exponential = 3 };
     enum class AudioPlayerStateFlags { None = 0, Loaded = 1 << 0, Playing = 1 << 1 };
     DEFINE_ENUM_FLAGS(AudioPlayerStateFlags)
@@ -364,7 +363,7 @@ namespace hf
     //region General
 
 	enum class DataTransferType { DoNotOwn, TransferOwnership, CopyData };
-	enum class AssetType { None, Model, Texture, Cubemap };
+	enum class AssetType { None, Model, Texture, Cubemap, AudioClip };
     enum class ModelType { Unknown, Obj, Fbx, Gltf, Glb };
 
     //endregion

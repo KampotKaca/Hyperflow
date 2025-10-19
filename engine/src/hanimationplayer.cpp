@@ -3,7 +3,7 @@
 
 namespace hf
 {
-    AnimationPlayer::AnimationPlayer(const AnimationPlayerCallbacks& callbacks) : m_Callbacks(callbacks)
+    AnimationPlayer::AnimationPlayer(const AnimationPlayerCallbacks& callbacks) : callbacks(callbacks)
     {
 
     }
@@ -16,13 +16,13 @@ namespace hf
     void Play(const Ref<AnimationPlayer>& player)
     {
         if (IsPlaying(player)) return;
-        player->m_IsPlaying = true;
+        player->isPlaying = true;
     }
 
     void Pause(const Ref<AnimationPlayer>& player)
     {
         if (!IsPlaying(player)) return;
-        player->m_IsPlaying = false;
+        player->isPlaying = false;
     }
 
     void Seek(const Ref<AnimationPlayer>& player, float_t positionInSeconds)
@@ -37,13 +37,13 @@ namespace hf
 
     double_t GetPlayedInSeconds(const Ref<AnimationPlayer>& player)
     {
-        if (player->m_Animation) return player->m_AnimationProgress;
+        if (player->animation) return player->animationProgress;
         LOG_WARN("[Hyperflow] %s", "Cannot compute played in seconds if there is no animation set!");
         return 0.0;
     }
-    double_t GetPlayedPercent(const Ref<AnimationPlayer>& player) { return player->m_AnimationProgress; }
-    bool IsPlaying(const Ref<AnimationPlayer>& player) { return player->m_IsPlaying; }
-    Ref<Animation> GetAnim(const Ref<AnimationPlayer>& player) { return player->m_Animation; }
+    double_t GetPlayedPercent(const Ref<AnimationPlayer>& player) { return player->animationProgress; }
+    bool IsPlaying(const Ref<AnimationPlayer>& player) { return player->isPlaying; }
+    Ref<Animation> GetAnim(const Ref<AnimationPlayer>& player) { return player->animation; }
 
     void ChangeAnim(const Ref<AnimationPlayer>& player, const Ref<Animation>& anim, float_t startingDuration)
     {

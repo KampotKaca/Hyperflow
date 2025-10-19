@@ -8,9 +8,11 @@ namespace app
     ApplicationScene::ApplicationScene() :
     Scene(APPLICATION_SCENE_ASSET_LOCATIONS.data(), APPLICATION_SCENE_ASSET_LOCATIONS.size())
     {
-        viking_room_albedo_texture = hf::Cast<hf::Texture>(hf::GetAsset(ASSET_VIKING_ROOM_ALBEDO_TEXTURE));
-        greek_head_texture         = hf::Cast<hf::Texture>(hf::GetAsset(ASSET_GREEK_HEAD_ALBEDO_TEXTURE));
-        viking_room_model          = hf::Cast<hf::Model>  (hf::GetAsset(ASSET_VIKING_ROOM_MODEL));
+        viking_room_albedo_texture = hf::Cast<hf::Texture>  (hf::GetAsset(ASSET_VIKING_ROOM_ALBEDO_TEXTURE));
+        greek_head_texture         = hf::Cast<hf::Texture>  (hf::GetAsset(ASSET_GREEK_HEAD_ALBEDO_TEXTURE));
+        viking_room_model          = hf::Cast<hf::Model>    (hf::GetAsset(ASSET_VIKING_ROOM_MODEL));
+
+        cartoon_comedy             = hf::Cast<hf::AudioClip>(hf::GetAsset(ASSET_CARTOON_COMEDY_AUDIO_CLIP));
 
         //viking_room_pack
         {
@@ -36,6 +38,21 @@ namespace app
             };
 
             viking_room_pack = hf::Create(texPackInfo);
+        }
+
+        {
+            hf::AudioPlayerCreationInfo info{};
+            info.clip = cartoon_comedy;
+            info.settings.loopingEnabled = true;
+
+            background_music = hf::Create(info);
+        }
+
+        {
+            hf::AudioPlayer3DCreationInfo info{};
+            info.clip = cartoon_comedy;
+
+            background_music3D = hf::Create(info);
         }
     }
 

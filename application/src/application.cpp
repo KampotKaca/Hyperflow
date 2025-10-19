@@ -26,7 +26,12 @@ namespace app
 		TexturePackLoadAll();
 		ShaderLoadAll();
 		MaterialLoadAll();
-		AudioLoadAll();
+
+	    {
+		    const hf::AudioListenerCreationInfo info{};
+		    APP_OBJECTS.mainListener = hf::Create(info);
+	    }
+
 		DebugLoad();
 	}
 

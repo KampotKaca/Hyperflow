@@ -10,10 +10,10 @@ namespace hf
         explicit AnimationPlayer(const AnimationPlayerCallbacks& callbacks);
         ~AnimationPlayer();
 
-        AnimationPlayerCallbacks m_Callbacks{};
-        Ref<Animation> m_Animation{};
-        double_t m_AnimationProgress{};
-        bool m_IsPlaying{};
+        AnimationPlayerCallbacks callbacks{};
+        Ref<Animation> animation{};
+        double_t animationProgress{};
+        bool isPlaying{};
     };
 }
 

@@ -21,7 +21,7 @@ namespace hf
         Ref<Texture> GetTexture(PrimitiveTextureType type) { return inter::HF.staticResources.primitiveTextures[(uint32_t)type]; }
     }
 
-    namespace inter::primitives
+    namespace inter::general
     {
         static void DefineTextureLayouts();
         static void DefineBufferAttribs();

@@ -607,17 +607,15 @@ namespace hf
 
     struct AudioClipSettings
     {
-        AudioClipFormat format = AudioClipFormat::Default;
         uint32_t sampleRate = 0;
+        AudioClipFormat format = AudioClipFormat::Default;
         AudioClipChannelMixMode channelMixMode = AudioClipChannelMixMode::Rectangular;
         AudioClipDitherMode ditherMode = AudioClipDitherMode::None;
-        AudioClipEncodingFormat encodingFormat = AudioClipEncodingFormat::Unknown;
     };
 
     struct AudioClipCreationInfo
     {
-        const char* filePath{};
-        bool useAbsolutePath = false;
+        FilePath filePath{};
         AudioClipSettings settings{};
     };
 
@@ -809,6 +807,11 @@ namespace hf
     struct Scene;
     struct Animation;
     struct AnimationPlayer;
+
+    struct AnimationCreationInfo
+    {
+
+    };
 
     struct AssetLocation
     {

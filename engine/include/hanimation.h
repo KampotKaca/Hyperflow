@@ -10,7 +10,8 @@ namespace hf
         explicit Animation();
         ~Animation();
 
-        float_t m_Duration{};
+        float_t duration{};
+        bool isLoaded{};
     };
 }
 

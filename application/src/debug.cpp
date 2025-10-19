@@ -152,9 +152,7 @@ namespace app
             if (hf::ed::StartDropdown("Viking Room"))
             {
                 // hf::editor::Draw("Transform", APP_OBJECTS.vikingRoom.transform);
-                hf::ed::Draw("Audio", APP_AUDIOS.background_music);
-                hf::ed::Draw("Audio3D", APP_AUDIOS.background_music3D);
-                hf::ed::Draw("Listener", APP_AUDIOS.main_listener);
+                hf::ed::Draw("Listener", APP_OBJECTS.mainListener);
                 hf::ed::EndDropdown();
             }
 

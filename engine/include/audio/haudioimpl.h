@@ -36,7 +36,7 @@ namespace hf::inter
         if (!buffer) buffer = new ma_audio_buffer();
         if (ma_audio_buffer_init(&bufferConfig, buffer) != MA_SUCCESS)
         {
-            LOG_ERROR("Unable create player for the Audio clip -> %s", clip->filePath.c_str());
+            LOG_ERROR("Unable create player for the Audio clip -> %s", clip->filePath.path.c_str());
             return false;
         }
 
@@ -45,7 +45,7 @@ namespace hf::inter
         if (ma_sound_init_from_data_source(&AUDIO_DATA.engine, buffer,
             flags, (ma_sound_group*)player->parent->handle, handle) != MA_SUCCESS)
         {
-            LOG_ERROR("Unable create player for the Audio clip -> %s", clip->filePath.c_str());
+            LOG_ERROR("Unable create player for the Audio clip -> %s", clip->filePath.path.c_str());
             return false;
         }
 

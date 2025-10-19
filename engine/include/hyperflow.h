@@ -187,9 +187,8 @@ namespace hf
     //endregion
     //region Audio Clip
 
-	Ref<AudioClip> Create(const AudioClipCreationInfo& info);
-	void Destroy(const Ref<AudioClip>& clip);
-	void Destroy(const Ref<AudioClip>* pClips, uint32_t count);
+    void Destroy(const Ref<AudioClip>& clip);
+    void Destroy(const Ref<AudioClip>* pClips, uint32_t count);
 	bool IsLoaded(const Ref<AudioClip>& clip);
 
     uint64_t GetFrameCount(const Ref<AudioClip>& clip);
@@ -316,6 +315,15 @@ namespace hf
     bool IsPlaying(const Ref<AnimationPlayer>& player);
     Ref<Animation> GetAnim(const Ref<AnimationPlayer>& player);
     void ChangeAnim(const Ref<AnimationPlayer>& player, const Ref<Animation>& anim, float_t startingDuration = -1);
+
+    //endregion
+    //region Animation
+
+    void Destroy(const Ref<Animation>& anim);
+    void Destroy(const Ref<Animation>* pAnimations, uint32_t count);
+    bool IsLoaded(const Ref<Animation>& anim);
+
+    float_t GetDuration(const Ref<Animation>& anim);
 
     //endregion
     //region Model

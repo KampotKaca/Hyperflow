@@ -61,10 +61,14 @@ namespace hf::inter
 
     struct AudioResources
     {
-        unordered_map<std::string, Ref<AudioClip>> clips{};
         unordered_map<uint64_t, Ref<AudioPlayer>> players{};
         unordered_map<uint64_t, Ref<AudioPlayer3D>> player3Ds{};
         unordered_map<uint64_t, Ref<AudioGroup>> groups{};
+    };
+
+    struct GeneralResources
+    {
+        unordered_map<uint64_t, Ref<Animation>> groups{};
     };
 
     struct ResourcesMarkedForDeletion
@@ -186,26 +190,26 @@ namespace hf::inter
         void LogThreadMemoryStats_i();
     }
 
-    namespace primitives
-    {
-        void DefineStaticResources_i();
-        void LoadStaticResources_i();
-    }
-
     namespace audio
     {
         void Load_i();
         void Unload_i();
 
-        bool CreateClip_i(AudioClip* clip);
-        bool DestroyClip_i(AudioClip* clip);
+        Ref<AudioClip> CreateAudioClipAsset_i(const char* assetPath);
+        bool DestroyAudioClip_i(AudioClip* clip);
     }
 
-    namespace rendering
+    namespace general
     {
         void LoadScene_i(Scene* scene);
         void UnloadScene_i(Scene* scene);
 
+        void DefineStaticResources_i();
+        void LoadStaticResources_i();
+    }
+
+    namespace rendering
+    {
         void StartRenderPacket_i(const Ref<Renderer>& rn);
         void EndRenderPacket_i(const Ref<Renderer>& rn);
         void PreDraw_i(const Ref<Renderer>& rn);

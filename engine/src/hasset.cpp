@@ -24,10 +24,11 @@ namespace hf
         {
             switch (type)
             {
-            case AssetType::Model:   inter::rendering::DestroyModel_i(Cast<Model>(asset).get());         break;
-            case AssetType::Texture: inter::rendering::DestroyTexture_i(Cast<Texture>(asset).get()); break;
-            case AssetType::Cubemap: inter::rendering::DestroyCubemap_i(Cast<Cubemap>(asset).get());     break;
-            default: LOG_ERROR("%s", "Invalid mesh type, cannot be destroyed"); break;
+            case AssetType::Model:     inter::rendering::DestroyModel_i(Cast<Model>(asset).get());         break;
+            case AssetType::Texture:   inter::rendering::DestroyTexture_i(Cast<Texture>(asset).get()); break;
+            case AssetType::Cubemap:   inter::rendering::DestroyCubemap_i(Cast<Cubemap>(asset).get());     break;
+            case AssetType::AudioClip: inter::audio::DestroyAudioClip_i(Cast<AudioClip>(asset).get());          break;
+            default: LOG_ERROR("%s", "Invalid asset type, cannot be destroyed"); break;
             }
 
             asset = nullptr;
@@ -40,10 +41,11 @@ namespace hf
         {
             switch (type)
             {
-            case AssetType::Model:   asset = inter::rendering::CreateModelAsset_i(assetPath);   break;
-            case AssetType::Texture: asset = inter::rendering::CreateTextureAsset_i(assetPath); break;
-            case AssetType::Cubemap: asset = inter::rendering::CreateCubemapAsset_i(assetPath); break;
-            default: LOG_ERROR("%s", "Invalid mesh type, cannot be loaded"); break;
+            case AssetType::Model:     asset = inter::rendering::CreateModelAsset_i(assetPath);   break;
+            case AssetType::Texture:   asset = inter::rendering::CreateTextureAsset_i(assetPath); break;
+            case AssetType::Cubemap:   asset = inter::rendering::CreateCubemapAsset_i(assetPath); break;
+            case AssetType::AudioClip: asset = inter::audio::CreateAudioClipAsset_i(assetPath);   break;
+            default: LOG_ERROR("%s", "Invalid asset type, cannot be loaded"); break;
             }
         }
     }

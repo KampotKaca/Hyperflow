@@ -9,12 +9,12 @@ namespace hf
         this->assets = std::vector<AssetLocation>(assetCount);
         memcpy(this->assets.data(), assets, sizeof(AssetLocation) * assetCount);
 
-        inter::rendering::LoadScene_i(this);
+        inter::general::LoadScene_i(this);
     }
 
     Scene::~Scene()
     {
-        inter::rendering::UnloadScene_i(this);
+        inter::general::UnloadScene_i(this);
     }
 
     void LoadSceneBase(const Ref<Scene>& scene)
@@ -24,7 +24,7 @@ namespace hf
 
     void UnloadScene(const Ref<Scene>& scene)
     {
-        if(inter::HF.scenes.erase((uint64_t)scene.get())) inter::rendering::UnloadScene_i(scene.get());
+        if(inter::HF.scenes.erase((uint64_t)scene.get())) inter::general::UnloadScene_i(scene.get());
     }
 
     void UnloadAllScenes()
@@ -33,7 +33,7 @@ namespace hf
         inter::HF.scenes.clear();
     }
 
-    namespace inter::rendering
+    namespace inter::general
     {
         void LoadScene_i(Scene* scene)
         {

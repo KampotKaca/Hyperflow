@@ -1,55 +1,77 @@
+#include "hyaml.h"
 #include "audio/haudioclip.h"
 #include "hinternal.h"
 #include "hyperflow.h"
 #include "haudiointernal.h"
+#include "hstrconversion.h"
 
 namespace hf
 {
-#define CHECK(x, s)\
-    {\
-        auto r = (x);\
-        if (r != MA_SUCCESS)\
-        {\
-            LOG_ERROR("[Hyperflow] Unable to load the audio, Error Code: %i\n[File] %s", r, s);\
-            return false;\
-        }\
-    }
-
-    AudioClip::AudioClip(const AudioClipCreationInfo& info)
-    : filePath(info.filePath), useAbsolutePath(info.useAbsolutePath), settings(info.settings)
+    AudioClip::AudioClip(const AudioClipCreationInfo& info) : filePath(info.filePath), settings(info.settings)
     {
-        if(!inter::audio::CreateClip_i(this)) inter::audio::DestroyClip_i(this);
+        std::string audioLoc{};
+
+        if (filePath.isAbsolute) audioLoc = filePath.path;
+        else audioLoc = TO_RES_PATH(std::string("audio/") + filePath.path);
+
+        if (!utils::FileExists(audioLoc.c_str()))
+        {
+            LOG_ERROR("[Hyperflow] Unable to find Audio clip: %s", filePath.path.c_str());
+            return;
+        }
+
+        const ma_decoder_config decoderConfig
+        {
+            .format = (ma_format)settings.format,
+            .sampleRate = settings.sampleRate,
+            .channelMixMode = (ma_channel_mix_mode)settings.channelMixMode,
+            .ditherMode = (ma_dither_mode)settings.ditherMode,
+        };
+
+        ma_decoder decoder;
+        if (ma_decoder_init_file(audioLoc.c_str(), &decoderConfig, &decoder) != MA_SUCCESS)
+        {
+            LOG_ERROR("[Hyperflow] Unable to load audio clip: %s", filePath.path.c_str());
+            return;
+        }
+        if (ma_decoder_get_length_in_pcm_frames(&decoder, (ma_uint64*)&frameCount) != MA_SUCCESS)
+        {
+            LOG_ERROR("[Hyperflow] Unable to get length of the audio clip: %s", filePath.path.c_str());
+            return;
+        }
+
+        channels = decoder.outputChannels;
+        sampleRate = decoder.outputSampleRate;
+        format = decoder.outputFormat;
+
+        pcmData = utils::Allocate(frameCount * decoder.outputChannels * sizeof(float_t));
+
+        ma_uint64 fRead;
+        if (ma_decoder_read_pcm_frames(&decoder, pcmData, frameCount, &fRead) != MA_SUCCESS)
+        {
+            LOG_ERROR("[Hyperflow] Unable to audio clip frames: %s", filePath.path.c_str());
+            return;
+        }
+        ma_decoder_uninit(&decoder);
+        framesRead = fRead;
     }
 
     AudioClip::~AudioClip()
     {
-        inter::audio::DestroyClip_i(this);
-    }
-
-    bool IsLoaded(const Ref<AudioClip>& clip) { return clip->pcmData; }
-
-    Ref<AudioClip> Create(const AudioClipCreationInfo& info)
-    {
-        auto audio = MakeRef<AudioClip>(info);
-        inter::HF.audioResources.clips[info.filePath] = audio;
-        return audio;
+        inter::audio::DestroyAudioClip_i(this);
     }
 
     void Destroy(const Ref<AudioClip>& clip)
     {
-        if (inter::audio::DestroyClip_i(clip.get()))
-            inter::HF.audioResources.clips.erase(clip->filePath);
+        inter::audio::DestroyAudioClip_i(clip.get());
     }
 
     void Destroy(const Ref<AudioClip>* pClips, uint32_t count)
     {
-        for (uint32_t i = 0; i < count; i++)
-        {
-            auto clip = pClips[i];
-            if (inter::audio::DestroyClip_i(clip.get()))
-                inter::HF.audioResources.clips.erase(clip->filePath);
-        }
+        for (uint32_t i = 0; i < count; i++) inter::audio::DestroyAudioClip_i(pClips[i].get());
     }
+
+    bool IsLoaded(const Ref<AudioClip>& clip) { return clip->pcmData; }
 
     uint64_t GetFrameCount(const Ref<AudioClip>& clip) { return clip->frameCount; }
     uint32_t GetChannels(const Ref<AudioClip>& clip) { return clip->channels; }
@@ -57,51 +79,30 @@ namespace hf
 
     namespace inter::audio
     {
-        bool CreateClip_i(AudioClip* clip)
+        Ref<AudioClip> CreateAudioClipAsset_i(const char* assetPath)
         {
-            if (clip->pcmData) return false;
+            const auto assetLoc = TO_RES_PATH(std::string("audio/") + assetPath) + ".meta";
+            std::vector<char> metadata{};
+            if (!START_READING(assetLoc.c_str(), metadata)) return nullptr;
 
-            std::string audioLoc{};
-
-            if (clip->useAbsolutePath) audioLoc = clip->filePath;
-            else audioLoc = TO_RES_PATH(std::string("audio/") + clip->filePath);
-
-            if (!utils::FileExists(audioLoc.c_str()))
+            try
             {
-                LOG_ERROR("[Hyperflow] Unable to find Audio clip: %s", clip->filePath.c_str());
-                return false;
+                AudioClipCreationInfo info{};
+                info.filePath = FilePath{ .path = assetPath };
+
+                ryml::Tree tree = ryml::parse_in_place(ryml::to_substr(metadata.data()));
+                ryml::NodeRef root = tree.rootref();
+
+                ReadAudioClipSettings_i(root, info.settings);
+                return MakeRef<AudioClip>(info);
+            }catch (...)
+            {
+                LOG_ERROR("[Hyperflow] Error parsing Audio clip: %s", assetPath);
+                return nullptr;
             }
-
-            auto settings = clip->settings;
-            const ma_decoder_config decoderConfig
-            {
-                .format = (ma_format)settings.format,
-                .sampleRate = settings.sampleRate,
-                .channelMixMode = (ma_channel_mix_mode)settings.channelMixMode,
-                .ditherMode = (ma_dither_mode)settings.ditherMode,
-                .encodingFormat = (ma_encoding_format)settings.encodingFormat,
-            };
-
-            ma_decoder decoder;
-            CHECK(ma_decoder_init_file(audioLoc.c_str(), &decoderConfig, &decoder), clip->filePath.c_str());
-
-            CHECK(ma_decoder_get_length_in_pcm_frames(&decoder, (ma_uint64*)&clip->frameCount), clip->filePath.c_str())
-
-            clip->channels = decoder.outputChannels;
-            clip->sampleRate = decoder.outputSampleRate;
-            clip->format = decoder.outputFormat;
-
-            clip->pcmData = utils::Allocate(clip->frameCount * decoder.outputChannels * sizeof(float));
-
-            ma_uint64 framesRead;
-            CHECK(ma_decoder_read_pcm_frames(&decoder, clip->pcmData, clip->frameCount, &framesRead), clip->filePath.c_str())
-            ma_decoder_uninit(&decoder);
-
-            clip->framesRead = framesRead;
-            return true;
         }
 
-        bool DestroyClip_i(AudioClip* clip)
+        bool DestroyAudioClip_i(AudioClip* clip)
         {
             if (clip->pcmData)
             {

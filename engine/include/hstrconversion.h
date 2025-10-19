@@ -461,6 +461,40 @@ namespace hf
 #undef X
     }
 
+    constexpr AudioClipFormat STRING_TO_AUDIO_CLIP_FORMAT(const std::string_view str)
+    {
+#define X AudioClipFormat
+        switch (fnv1a(str))
+        {
+            DATA_TYPE(Default) DATA_TYPE(U8) DATA_TYPE(S16)
+            DATA_TYPE(S24) DATA_TYPE(S32) DATA_TYPE(F32)
+        default: throw std::invalid_argument("Unknown Audio clip format string");
+        }
+#undef X
+    }
+
+    constexpr AudioClipChannelMixMode STRING_TO_AUDIO_CLIP_CHANNEL_MIX_MODE(const std::string_view str)
+    {
+#define X AudioClipChannelMixMode
+        switch (fnv1a(str))
+        {
+            DATA_TYPE(Rectangular) DATA_TYPE(Simple) DATA_TYPE(CustomWeights)
+        default: throw std::invalid_argument("Unknown Audio clip channel mix mode string");
+        }
+#undef X
+    }
+
+    constexpr AudioClipDitherMode STRING_TO_AUDIO_CLIP_DITHER_MODE(const std::string_view str)
+    {
+#define X AudioClipDitherMode
+        switch (fnv1a(str))
+        {
+            DATA_TYPE(None) DATA_TYPE(Rectangle) DATA_TYPE(Triangle)
+        default: throw std::invalid_argument("Unknown Audio clip dither mode string");
+        }
+#undef X
+    }
+
     inline bool START_READING(const char* assetPath, std::vector<char>& metadata)
     {
         if (!utils::FileExists(assetPath))
