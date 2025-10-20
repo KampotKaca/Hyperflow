@@ -169,7 +169,9 @@ namespace hf
                 info.size = textureSize;
                 info.data = pixels;
 
-                return MakeRef<Cubemap>(info);
+                auto cubemap = MakeRef<Cubemap>(info);
+                if (pixels) utils::Deallocate(pixels);
+                return cubemap;
             }catch (...)
             {
                 LOG_ERROR("[Hyperflow] Error parsing Cubemap: %s", assetPath);

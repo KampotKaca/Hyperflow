@@ -10,11 +10,10 @@ namespace hf
         explicit Texture(const TextureCreationInfo& info);
         ~Texture();
 
-        FilePath path{};
-        TextureChannel desiredChannel = TextureChannel::RGBA;
+        TextureChannel channels = TextureChannel::RGBA;
         TextureDetails details{};
         uint32_t mipLevels{};
-        void* pixelCache{};
+        uvec3 size{};
 
         void* handle{};
     };

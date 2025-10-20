@@ -418,10 +418,11 @@ namespace hf
 
 	struct TextureCreationInfo
 	{
-	    FilePath filePath{};
-		TextureChannel desiredChannel = TextureChannel::RGBA;
+		TextureChannel channels = TextureChannel::RGBA;
 		uint32_t mipLevels = 1;
 		TextureDetails details{};
+	    void* pixels{};
+	    uvec3 size{};
 	};
 
 	struct CubemapTexturePaths
