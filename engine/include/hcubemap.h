@@ -10,10 +10,8 @@ namespace hf
         explicit Cubemap(const CubemapCreationInfo& info);
         ~Cubemap();
 
-        FilePath folderPath{};
-        FilePath texturePaths[6]{};
-        TextureChannel desiredChannel = TextureChannel::RGBA;
         uint32_t mipLevels = 1;
+        ivec3 size{};
         TextureDetails details{};
 
         void* handle{};

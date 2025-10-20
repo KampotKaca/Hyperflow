@@ -436,11 +436,10 @@ namespace hf
 
 	struct CubemapCreationInfo
 	{
-		FilePath folderPath{};
-		TextureChannel desiredChannel = TextureChannel::RGBA;
-		uint32_t mipLevels = 1;
-		CubemapTexturePaths texturePaths{};
-		TextureDetails details{};
+	    uint32_t mipLevels = 1;
+	    TextureDetails details{};
+	    uint8_t* data{};
+	    uvec3 size{};
 	};
 
     template<typename T>
