@@ -2,7 +2,6 @@
 #include "hshared.h"
 #include "hinternal.h"
 #include "hyperflow.h"
-#include "htexturepack.h"
 #include "../rendering/include/hex_renderer.h"
 
 namespace hf

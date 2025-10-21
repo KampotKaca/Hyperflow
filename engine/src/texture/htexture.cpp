@@ -77,14 +77,14 @@ namespace hf
 
                 {
                     const auto v = root["desiredChannel"].val();
-                    std::string_view vView{v.str, v.len};
+                    const std::string_view vView{v.str, v.len};
                     desiredChannel = STRING_TO_TEXTURE_CHANNEL(vView);
                 }
 
                 info.mipLevels = (uint32_t)std::stoi(root["mipLevels"].val().str);
                 ReadTextureDetails_i(root["details"], info.details);
 
-                std::string texLoc = TO_RES_PATH(std::string("textures/") + assetPath);
+                const std::string texLoc = TO_RES_PATH(std::string("textures/") + assetPath);
 
                 if (!utils::FileExists(texLoc.c_str()))
                 {
@@ -163,7 +163,7 @@ namespace hf
                 }
 
                 window::SetIcons(win, images.data(), (uint32_t)images.size());
-                for (auto& image : images) stbi_image_free(image.data);
+                for (const auto& image : images) stbi_image_free(image.data);
                 images.clear();
 
                 return true;

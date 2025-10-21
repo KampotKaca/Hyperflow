@@ -11,7 +11,7 @@ namespace hf::dp
     void SkyboxBindCubemap(const Ref<Renderer>& rn, const Ref<Cubemap>& cubemap)
     {
         inter::HF.staticResources.skyboxResources.boundCubemap = cubemap;
-        dp::UploadStartTexPack(rn, inter::HF.staticResources.skyboxResources.texturePack);
+        UploadStartTexPack(rn, inter::HF.staticResources.skyboxResources.texturePack);
         {
             TexturePackTextureUploadInfo<Cubemap>::TextureInfo tInfo{};
             tInfo.texture = cubemap;
@@ -26,9 +26,9 @@ namespace hf::dp
             bindingInfo.bindingIndex = 0;
             bindingInfo.texInfo = uInfo;
 
-            dp::UploadAddTexPackBindings(rn, bindingInfo);
+            UploadAddTexPackBindings(rn, bindingInfo);
         }
-        dp::UploadEndTexPack(rn);
+        UploadEndTexPack(rn);
     }
 
     void Draw(const Ref<Renderer>& rn, const SkyboxInfo& info)

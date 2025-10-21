@@ -27,7 +27,7 @@ namespace hf
             case AssetType::Model:     inter::rendering::DestroyModel_i(Cast<Model>(asset).get());         break;
             case AssetType::Texture:   inter::rendering::DestroyTexture_i(Cast<Texture>(asset).get()); break;
             case AssetType::Cubemap:   inter::rendering::DestroyCubemap_i(Cast<Cubemap>(asset).get());     break;
-            case AssetType::AudioClip: inter::audio::DestroyAudioClip_i(Cast<AudioClip>(asset).get());          break;
+            case AssetType::AudioClip: inter::audio::DestroyAudioClip_i(Cast<AudioClip>(asset).get());     break;
             default: LOG_ERROR("%s", "Invalid asset type, cannot be destroyed"); break;
             }
 

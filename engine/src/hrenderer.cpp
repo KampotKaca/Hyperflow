@@ -127,9 +127,7 @@ namespace hf
             }
 
             platform::UnloadDll(HF.renderingApi.handle);
-
             HF.renderingApi = RenderingApi{};
-
             HF.graphicsResources.vertexAttributes.clear();
         }
 

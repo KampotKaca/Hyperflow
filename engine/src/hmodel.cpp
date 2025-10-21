@@ -105,20 +105,20 @@ namespace hf
 
                 for (ryml::NodeRef fmt : typeFlags.children())
                 {
-                    auto v = fmt.val();
-                    std::string_view valView{v.str, v.len};
+                    const auto v = fmt.val();
+                    const std::string_view valView{v.str, v.len};
                     info.meshStats.typeFlags |= STRING_TO_MESH_DATA_TYPE(valView);
                 }
 
                 {
-                    auto v = root["memoryType"].val();
-                    std::string_view memTypeView(v.str, v.len);
+                    const auto v = root["memoryType"].val();
+                    const std::string_view memTypeView(v.str, v.len);
                     info.meshStats.memoryType = STRING_TO_BUFFER_MEMORY_TYPE(memTypeView);
                 }
 
                 {
-                    auto v = root["vertexAttribute"].val();
-                    std::string_view memTypeView(v.str, v.len);
+                    const auto v = root["vertexAttribute"].val();
+                    const std::string_view memTypeView(v.str, v.len);
                     info.meshStats.vertexAttribute = HF.graphicsResources.vertexAttributes[memTypeView];
                 }
 

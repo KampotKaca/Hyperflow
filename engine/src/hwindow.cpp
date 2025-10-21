@@ -7,8 +7,8 @@
 namespace hf
 {
 	Window::Window(const WindowCreationInfo& info, const Ref<Window>& parent)
-		: title(info.title), style(info.style), pointerState(info.pointerState), vSyncMode(info.vsyncMode), parent(parent),
-		  rnEventInfo(info.rnEventInfo)
+		: title(info.title), style(info.style), pointerState(info.pointerState),
+          vSyncMode(info.vsyncMode), parent(parent), rnEventInfo(info.rnEventInfo)
 	{
 		rect.position = info.position;
 		rect.size     = info.size;
