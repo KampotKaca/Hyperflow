@@ -238,7 +238,7 @@ namespace hf::inter
         Ref<ShaderLibrary> CreateShaderLibraryAsset_i(const char* assetPath);
         bool DestroyShaderLibrary_i(ShaderLibrary* lib);
 
-        bool CreateShader_i(Shader* shader);
+        Ref<Shader> CreateShaderAsset_i(const char* assetPath);
         bool DestroyShader_i(Shader* shader);
 
         bool CreateVertBuffer_i(VertexBuffer* buffer);

@@ -363,7 +363,7 @@ namespace hf
     //region General
 
 	enum class DataTransferType { DoNotOwn, TransferOwnership, CopyData };
-	enum class AssetType { None, Model, Texture, Cubemap, AudioClip, ShaderLibrary };
+	enum class AssetType { None, Model, Texture, Cubemap, AudioClip, ShaderLibrary, Shader };
     enum class ModelType { Unknown, Obj, Fbx, Gltf, Glb };
 
     //endregion

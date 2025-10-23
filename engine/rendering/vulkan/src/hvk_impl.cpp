@@ -158,9 +158,9 @@ namespace hf::inter::rendering
         return (ShaderLayout)GRAPHICS_DATA.shaderLayouts.size();
     }
 
-    void BindShaderLayout(void* rn, ShaderLayout setup)
+    void BindShaderLayout(void* rn, ShaderLayout layout)
     {
-        hf::BindShaderLayout((VkRenderer*)rn, setup);
+        hf::BindShaderLayout((VkRenderer*)rn, layout);
     }
 
     void UploadPushConstants(void* rn, const PushConstantUploadInfo& info)

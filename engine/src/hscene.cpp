@@ -50,7 +50,7 @@ namespace hf
         {
             if (scene->isLoaded)
             {
-                for (const auto& asset : scene->assets) DestroyAsset(asset.path);
+                for (const auto& asset : scene->assets) DestroyAsset(asset.path, asset.type);
                 scene->isLoaded = false;
             }
         }

@@ -52,7 +52,7 @@ namespace hf
     {
 #if DEBUG
         if (rn->currentLayout != GetShaderLayout(shader->layout)->layout)
-            throw GENERIC_EXCEPT("[Hyperflow]", "Bind correct shader setup first");
+            throw GENERIC_EXCEPT("[Hyperflow]", "Bind correct shader layout first");
 #endif
 
         vkCmdBindPipeline(rn->currentCommand, VK_PIPELINE_BIND_POINT_GRAPHICS, shader->pipeline);

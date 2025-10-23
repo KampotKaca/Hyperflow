@@ -56,20 +56,20 @@ namespace hf
         if (layout) vkDestroyPipelineLayout(GRAPHICS_DATA.device.logicalDevice.device, layout, &GRAPHICS_DATA.platform.allocator);
     }
 
-    bool IsValidShaderLayout(ShaderLayout setup)
+    bool IsValidShaderLayout(ShaderLayout layout)
     {
-        return setup > 0 && setup <= GRAPHICS_DATA.shaderLayouts.size();
+        return layout > 0 && layout <= GRAPHICS_DATA.shaderLayouts.size();
     }
 
-    URef<VkShaderLayout>& GetShaderLayout(ShaderLayout setup)
+    URef<VkShaderLayout>& GetShaderLayout(ShaderLayout layout)
     {
-        if (!IsValidShaderLayout(setup)) throw GENERIC_EXCEPT("[Hyperflow]", "Invalid shader setup");
-        return GRAPHICS_DATA.shaderLayouts[setup - 1];
+        if (!IsValidShaderLayout(layout)) throw GENERIC_EXCEPT("[Hyperflow]", "Invalid shader layout");
+        return GRAPHICS_DATA.shaderLayouts[layout - 1];
     }
 
-    void BindShaderLayout(VkRenderer* rn, ShaderLayout setup)
+    void BindShaderLayout(VkRenderer* rn, ShaderLayout layout)
     {
-        rn->currentLayout = GetShaderLayout(setup)->layout;
+        rn->currentLayout = GetShaderLayout(layout)->layout;
     }
 
     void UploadPushConstants(const VkRenderer* rn, const PushConstantUploadInfo& info)

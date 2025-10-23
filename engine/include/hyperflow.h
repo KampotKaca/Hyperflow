@@ -79,8 +79,10 @@ namespace hf
     //Asset api tracks the create and destroy calls, so if you call twice create and once destroy asset will not be destroyed.
     //.meta part is not necessary, this is assumed.
     Ref<void> CreateAsset(const char* assetPath, AssetType type);
-    void DestroyAsset(const char* assetPath); //Destroy the loaded asset.
-    Ref<void> GetAsset(const char* assetPath); //Get asset by the local path it was loaded from.
+    void DestroyAsset(const char* assetPath, AssetType type); //Destroy the loaded asset.
+    void DestroyAsset(const std::string_view assetPath, AssetType type); //Destroy the loaded asset.
+    Ref<void> GetAsset(const char* assetPath, AssetType type); //Get asset by the local path it was loaded from.
+    Ref<void> GetAsset(const std::string_view assetPath, AssetType type); //Get asset by the local path it was loaded from.
 
     //endregion
     //region Search
@@ -163,9 +165,13 @@ namespace hf
 	bool IsLoaded(const Ref<ShaderLibrary>& lib);
 
     uint32_t GetVertexInputModule(const Ref<ShaderLibrary>& lib, const char* name);
+    uint32_t GetVertexInputModule(const Ref<ShaderLibrary>& lib, const std::string_view name);
     uint32_t GetPreRasterModule(const Ref<ShaderLibrary>& lib, const char* name);
+    uint32_t GetPreRasterModule(const Ref<ShaderLibrary>& lib, const std::string_view name);
     uint32_t GetFragmentModule(const Ref<ShaderLibrary>& lib, const char* name);
+    uint32_t GetFragmentModule(const Ref<ShaderLibrary>& lib, const std::string_view name);
     uint32_t GetFragmentOutputModule(const Ref<ShaderLibrary>& lib, const char* name);
+    uint32_t GetFragmentOutputModule(const Ref<ShaderLibrary>& lib, const std::string_view name);
 
     //endregion
     //region Shader
@@ -489,9 +495,16 @@ namespace hf
 	namespace utils
 	{
 		ivec3 ConvertVersion(const char* version); //Convert string version to an integer,
-		bool ReadFile(const std::string& filename, std::vector<char>& result); //Get the data of the file.
-		bool WriteFile(const std::string& filename, const std::vector<char>& data); //Write the data in the file.
-		bool FileExists(const char* path); //Check if file exists.
+		bool ReadFile(const char* path, std::vector<char>& result); //Get the data of the file.
+		bool ReadFile(const std::string& path, std::vector<char>& result); //Get the data of the file.
+        bool ReadFile(const std::filesystem::path& path, std::vector<char>& result); //Get the data of the file.
+        bool ReadFile(const std::string_view path, std::vector<char>& result); //Get the data of the file.
+        bool WriteFile(const char* path, const std::vector<char>& data); //Write the data in the file.
+        bool WriteFile(const std::string& path, const std::vector<char>& data); //Write the data in the file.
+        bool WriteFile(const std::filesystem::path& path, const std::vector<char>& data); //Write the data in the file.
+        bool WriteFile(const std::string_view path, const std::vector<char>& data); //Write the data in the file.
+        bool FileExists(const char* path); //Check if file exists.
+		bool FileExists(const std::filesystem::path& path); //Check if file exists.
 
 		[[nodiscard]] void* Allocate(std::size_t n); //Allocate n amount of memory.
 		[[nodiscard]] void* AllocateAligned(std::size_t n, std::align_val_t align); //Allocate n amount of aligned memory.

@@ -104,7 +104,7 @@ namespace hf
 
         void DefineShaderLayouts()
         {
-            //Axis Lines Shader Setup
+            //Axis Lines Shader Layout
             {
                 PushConstantInfo pushConstantInfo{};
                 pushConstantInfo.usageFlags = ShaderUsageStageFlags::Vertex |
@@ -119,7 +119,7 @@ namespace hf
                 HF.staticResources.shaderLayouts.axisLines = Define("__axislines", info);
             }
 
-            //Skybox Shader Setup
+            //Skybox Shader Layout
             {
                 PushConstantInfo pushConstantInfo{};
                 pushConstantInfo.usageFlags = ShaderUsageStageFlags::Vertex |
@@ -221,38 +221,8 @@ namespace hf
         void LoadShaders()
         {
             HF.staticResources.engineShadersLib = hf::Cast<ShaderLibrary>(CreateAsset("__engine_shader_lib/__engine_shader_lib", AssetType::ShaderLibrary));
-
-            //Axis Lines Shader
-            {
-                ShaderModulesInfo moduleInfo{};
-                moduleInfo.vertexInputModuleId    = GetVertexInputModule(HF.staticResources.engineShadersLib, "__quad");
-                moduleInfo.preRasterModuleId      = GetPreRasterModule(HF.staticResources.engineShadersLib, "__axislines");
-                moduleInfo.fragmentModuleId       = GetFragmentModule(HF.staticResources.engineShadersLib, "__axislines");
-                moduleInfo.fragmentOutputModuleId = GetFragmentOutputModule(HF.staticResources.engineShadersLib, "__axislines");
-
-                ShaderCreationInfo shaderInfo{};
-                shaderInfo.layout = HF.staticResources.shaderLayouts.axisLines;
-                shaderInfo.library = HF.staticResources.engineShadersLib;
-                shaderInfo.modules = moduleInfo;
-
-                HF.staticResources.shaders.axisLines = Create(shaderInfo);
-            }
-
-            //Skybox Shader
-            {
-                ShaderModulesInfo moduleInfo{};
-                moduleInfo.vertexInputModuleId    = GetVertexInputModule(HF.staticResources.engineShadersLib, "__default");
-                moduleInfo.preRasterModuleId      = GetPreRasterModule(HF.staticResources.engineShadersLib, "__skybox");
-                moduleInfo.fragmentModuleId       = GetFragmentModule(HF.staticResources.engineShadersLib, "__skybox");
-                moduleInfo.fragmentOutputModuleId = GetFragmentOutputModule(HF.staticResources.engineShadersLib, "__skybox");
-
-                ShaderCreationInfo shaderInfo{};
-                shaderInfo.layout = HF.staticResources.shaderLayouts.skybox;
-                shaderInfo.library = HF.staticResources.engineShadersLib;
-                shaderInfo.modules = moduleInfo;
-
-                HF.staticResources.shaders.skybox = Create(shaderInfo);
-            }
+            HF.staticResources.shaders.axisLines = hf::Cast<Shader>(CreateAsset("__axislines", AssetType::Shader));
+            HF.staticResources.shaders.skybox = hf::Cast<Shader>(CreateAsset("__skybox", AssetType::Shader));
         }
     }
 }

@@ -24,33 +24,112 @@ namespace hf::utils
         return v;
     }
 
-    bool ReadFile(const std::string& filename, std::vector<char>& result)
+    static void readFile(std::ifstream& file, std::vector<char>& result)
     {
-        std::ifstream file(filename, std::ios::ate | std::ios::binary);
-        if (!file.is_open())
-        {
-            LOG_ERROR("Unable to open file at location %s", filename.c_str());
-            return false;
-        }
         const size_t fileSize = file.tellg();
         result = std::vector<char>(fileSize);
         file.seekg(0);
         file.read(result.data(), (int64_t)fileSize);
         file.close();
+    }
 
+    bool ReadFile(const char* path, std::vector<char>& result)
+    {
+        std::ifstream file(path, std::ios::ate | std::ios::binary);
+        if (!file.is_open())
+        {
+            LOG_ERROR("Unable to open file at location %s", path);
+            return false;
+        }
+        readFile(file, result);
         return true;
     }
 
-    bool WriteFile(const std::string& filename, const std::vector<char>& data)
+    bool ReadFile(const std::string& path, std::vector<char>& result)
     {
-        std::ofstream file(filename, std::ios::binary);
+        std::ifstream file(path, std::ios::ate | std::ios::binary);
         if (!file.is_open())
         {
-            LOG_ERROR("Unable to open file at location %s", filename.c_str());
+            LOG_ERROR("Unable to open file at location %s", path.c_str());
             return false;
         }
+        readFile(file, result);
+        return true;
+    }
+    bool ReadFile(const std::filesystem::path& path, std::vector<char>& result)
+    {
+        std::ifstream file(path, std::ios::ate | std::ios::binary);
+        if (!file.is_open())
+        {
+            LOG_ERROR("Unable to open file at location %s", path.string().c_str());
+            return false;
+        }
+        readFile(file, result);
+        return true;
+    }
+    bool ReadFile(const std::string_view path, std::vector<char>& result)
+    {
+        std::ifstream file(std::string(path), std::ios::ate | std::ios::binary);
+        if (!file.is_open())
+        {
+            LOG_ERROR("Unable to open file at location %s", path);
+            return false;
+        }
+        readFile(file, result);
+        return true;
+    }
+
+    static void writeFile(std::ofstream& file, const std::vector<char>& data)
+    {
         file.write(data.data(), data.size());
         file.close();
+    }
+
+    bool WriteFile(const char* path, const std::vector<char>& data)
+    {
+        std::ofstream file(path, std::ios::binary);
+        if (!file.is_open())
+        {
+            LOG_ERROR("Unable to open file at location %s", path);
+            return false;
+        }
+        writeFile(file, data);
+        return true;
+    }
+
+    bool WriteFile(const std::string& path, const std::vector<char>& data)
+    {
+        std::ofstream file(path, std::ios::binary);
+        if (!file.is_open())
+        {
+            LOG_ERROR("Unable to open file at location %s", path.c_str());
+            return false;
+        }
+        writeFile(file, data);
+        return true;
+    }
+
+    bool WriteFile(const std::filesystem::path& path, const std::vector<char>& data)
+    {
+        std::ofstream file(path, std::ios::binary);
+        if (!file.is_open())
+        {
+            LOG_ERROR("Unable to open file at location %s", path.string().c_str());
+            return false;
+        }
+        writeFile(file, data);
+        return true;
+    }
+
+    bool WriteFile(const std::string_view path, const std::vector<char>& data)
+    {
+        std::ofstream file(std::string(path), std::ios::binary);
+        if (!file.is_open())
+        {
+            LOG_ERROR("Unable to open file at location %s", path);
+            return false;
+        }
+        writeFile(file, data);
         return true;
     }
 
@@ -58,5 +137,11 @@ namespace hf::utils
     {
         struct stat buffer{};
         return stat(path, &buffer) == 0;
+    }
+
+    bool FileExists(const std::filesystem::path& path)
+    {
+        struct stat buffer{};
+        return stat(path.string().c_str(), &buffer) == 0;
     }
 }

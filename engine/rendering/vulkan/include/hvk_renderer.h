@@ -67,7 +67,7 @@ namespace hf
     void BindBuffer(const VkRenderer* rn, const inter::rendering::BindResourceInfo_i<Buffer>& info);
     void BindTexturePack(const VkRenderer* rn, const inter::rendering::BindResourceInfo_i<VkTexturePack*>& info);
 
-    void BindShaderLayout(VkRenderer* rn, ShaderLayout setup);
+    void BindShaderLayout(VkRenderer* rn, ShaderLayout layout);
     void UploadPushConstants(const VkRenderer* rn, const PushConstantUploadInfo& info);
 
     void FinishObjectBinding(const VkRenderer* rn, VkPipelineBindPoint bindPoint, uint32_t setBindingIndex);

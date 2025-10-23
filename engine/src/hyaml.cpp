@@ -219,6 +219,33 @@ namespace hf
         else LOG_ERROR("[Hyperflow] %s", "Unable to find alpha of the blending options.");
     }
 
+    void ReadShaderModulesInfo_i(c4::yml::ConstNodeRef root, const Ref<ShaderLibrary>& lib, ShaderModulesInfo& result)
+    {
+        {
+            const auto v = root["vertexInputModule"].val();
+            const std::string_view vView{v.str, v.len};
+            result.vertexInputModuleId = GetVertexInputModule(lib, vView);
+        }
+
+        {
+            const auto v = root["preRasterModule"].val();
+            const std::string_view vView{v.str, v.len};
+            result.preRasterModuleId = GetPreRasterModule(lib, vView);
+        }
+
+        {
+            const auto v = root["fragmentModule"].val();
+            const std::string_view vView{v.str, v.len};
+            result.fragmentModuleId = GetFragmentModule(lib, vView);
+        }
+
+        {
+            const auto v = root["fragmentOutputModule"].val();
+            const std::string_view vView{v.str, v.len};
+            result.fragmentOutputModuleId = GetFragmentOutputModule(lib, vView);
+        }
+    }
+
     void ReadDepthStencilOptions_i(ryml::NodeRef root, ShaderDepthStencilOptions& result)
     {
         {

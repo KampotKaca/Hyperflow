@@ -8,11 +8,11 @@ namespace app
     ApplicationScene::ApplicationScene() :
     Scene(APPLICATION_SCENE_ASSET_LOCATIONS.data(), APPLICATION_SCENE_ASSET_LOCATIONS.size())
     {
-        viking_room_albedo_texture = hf::Cast<hf::Texture>  (hf::GetAsset(ASSET_VIKING_ROOM_ALBEDO_TEXTURE));
-        greek_head_texture         = hf::Cast<hf::Texture>  (hf::GetAsset(ASSET_GREEK_HEAD_ALBEDO_TEXTURE));
-        viking_room_model          = hf::Cast<hf::Model>    (hf::GetAsset(ASSET_VIKING_ROOM_MODEL));
+        viking_room_albedo_texture = hf::Cast<hf::Texture>  (hf::GetAsset(ASSET_VIKING_ROOM_ALBEDO_TEXTURE, hf::AssetType::Texture));
+        greek_head_texture         = hf::Cast<hf::Texture>  (hf::GetAsset(ASSET_GREEK_HEAD_ALBEDO_TEXTURE, hf::AssetType::Texture));
+        viking_room_model          = hf::Cast<hf::Model>    (hf::GetAsset(ASSET_VIKING_ROOM_MODEL, hf::AssetType::Model));
 
-        cartoon_comedy             = hf::Cast<hf::AudioClip>(hf::GetAsset(ASSET_CARTOON_COMEDY_AUDIO_CLIP));
+        cartoon_comedy             = hf::Cast<hf::AudioClip>(hf::GetAsset(ASSET_CARTOON_COMEDY_AUDIO_CLIP, hf::AssetType::AudioClip));
 
         //viking_room_pack
         {

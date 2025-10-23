@@ -192,21 +192,25 @@ namespace hf
 
     bool IsLoaded(const Ref<ShaderLibrary>& lib) { return lib->handle; }
 
-    uint32_t GetVertexInputModule(const Ref<ShaderLibrary>& lib, const char* name)    { return lib->vertexInputModules[name]; }
-    uint32_t GetPreRasterModule(const Ref<ShaderLibrary>& lib, const char* name)      { return lib->preRasterModules[name]; }
-    uint32_t GetFragmentModule(const Ref<ShaderLibrary>& lib, const char* name)       { return lib->fragmentModules[name]; }
-    uint32_t GetFragmentOutputModule(const Ref<ShaderLibrary>& lib, const char* name) { return lib->fragmentOutputModules[name]; }
+    uint32_t GetVertexInputModule   (const Ref<ShaderLibrary>& lib, const char* name)            { return lib->vertexInputModules[name]; }
+    uint32_t GetVertexInputModule   (const Ref<ShaderLibrary>& lib, const std::string_view name) { return lib->vertexInputModules[name]; }
+    uint32_t GetPreRasterModule     (const Ref<ShaderLibrary>& lib, const char* name)            { return lib->preRasterModules[name]; }
+    uint32_t GetPreRasterModule     (const Ref<ShaderLibrary>& lib, const std::string_view name) { return lib->preRasterModules[name]; }
+    uint32_t GetFragmentModule      (const Ref<ShaderLibrary>& lib, const char* name)            { return lib->fragmentModules[name]; }
+    uint32_t GetFragmentModule      (const Ref<ShaderLibrary>& lib, const std::string_view name) { return lib->fragmentModules[name]; }
+    uint32_t GetFragmentOutputModule(const Ref<ShaderLibrary>& lib, const char* name)            { return lib->fragmentOutputModules[name]; }
+    uint32_t GetFragmentOutputModule(const Ref<ShaderLibrary>& lib, const std::string_view name) { return lib->fragmentOutputModules[name]; }
 
     namespace inter::rendering
     {
-        static void ReadVertexInputModule   (const char* assetPath, const char* parentFolderPath, ShaderLibraryVertexInputModuleInfo& result);
-        static void ReadPreRasterModule     (const char* assetPath, const char* parentFolderPath, ShaderLibraryPreRasterModuleInfo& result);
-        static void ReadFragmentModule      (const char* assetPath, const char* parentFolderPath, ShaderLibraryFragmentModuleInfo& result);
-        static void ReadFragmentOutputModule(const char* assetPath, const char* parentFolderPath, ShaderLibraryFragmentOutputModuleInfo& result);
+        static void ReadVertexInputModule   (const std::filesystem::path& assetPath, const std::filesystem::path& parentFolderPath, ShaderLibraryVertexInputModuleInfo& result);
+        static void ReadPreRasterModule     (const std::filesystem::path& assetPath, const std::filesystem::path& parentFolderPath, ShaderLibraryPreRasterModuleInfo& result);
+        static void ReadFragmentModule      (const std::filesystem::path& assetPath, const std::filesystem::path& parentFolderPath, ShaderLibraryFragmentModuleInfo& result);
+        static void ReadFragmentOutputModule(const std::filesystem::path& assetPath, const std::filesystem::path& parentFolderPath, ShaderLibraryFragmentOutputModuleInfo& result);
 
         Ref<ShaderLibrary> CreateShaderLibraryAsset_i(const char* assetPath)
         {
-            const auto assetLoc = TO_RES_PATH(std::string("shadermodules/") + assetPath) + ".meta";
+            const auto assetLoc = (TO_RES_PATH_P("shadermodules") / assetPath).string() + ".meta";
             const auto moduleFolder = std::filesystem::path(assetLoc).parent_path();
 
             std::vector<char> metadata{};
@@ -225,10 +229,10 @@ namespace hf
                     info.cacheFileName = vView;
                 }
 
-                const auto vertexInputModuleFolder = moduleFolder.string() + "/vertexinputs";
-                const auto preRasterModuleFolder = moduleFolder.string() + "/prerasters";
-                const auto fragmentModuleFolder = moduleFolder.string() + "/fragments";
-                const auto fragmentOutputModuleFolder = moduleFolder.string() + "/fragmentoutputs";
+                const auto vertexInputModuleFolder = moduleFolder / "vertexinputs";
+                const auto preRasterModuleFolder = moduleFolder / "prerasters";
+                const auto fragmentModuleFolder = moduleFolder / "fragments";
+                const auto fragmentOutputModuleFolder = moduleFolder / "fragmentoutputs";
 
                 std::vector<ShaderLibraryVertexInputModuleInfo> vertexInputModules{};
                 std::vector<ShaderLibraryPreRasterModuleInfo> preRasterModules{};
@@ -240,7 +244,7 @@ namespace hf
                     if (entry.is_regular_file())
                     {
                         ShaderLibraryVertexInputModuleInfo moduleInfo{};
-                        ReadVertexInputModule(entry.path().c_str(), vertexInputModuleFolder.c_str(), moduleInfo);
+                        ReadVertexInputModule(entry.path(), vertexInputModuleFolder.c_str(), moduleInfo);
                         vertexInputModules.push_back(moduleInfo);
                     }
                 }
@@ -250,7 +254,7 @@ namespace hf
                     if (entry.is_regular_file())
                     {
                         ShaderLibraryPreRasterModuleInfo moduleInfo{};
-                        ReadPreRasterModule(entry.path().c_str(), preRasterModuleFolder.c_str(), moduleInfo);
+                        ReadPreRasterModule(entry.path(), preRasterModuleFolder.c_str(), moduleInfo);
                         preRasterModules.push_back(moduleInfo);
                     }
                 }
@@ -260,7 +264,7 @@ namespace hf
                     if (entry.is_regular_file())
                     {
                         ShaderLibraryFragmentModuleInfo moduleInfo{};
-                        ReadFragmentModule(entry.path().c_str(), fragmentModuleFolder.c_str(), moduleInfo);
+                        ReadFragmentModule(entry.path(), fragmentModuleFolder.c_str(), moduleInfo);
                         fragmentModules.push_back(moduleInfo);
                     }
                 }
@@ -270,7 +274,7 @@ namespace hf
                     if (entry.is_regular_file())
                     {
                         ShaderLibraryFragmentOutputModuleInfo moduleInfo{};
-                        ReadFragmentOutputModule(entry.path().c_str(), fragmentOutputModuleFolder.c_str(), moduleInfo);
+                        ReadFragmentOutputModule(entry.path(), fragmentOutputModuleFolder.c_str(), moduleInfo);
                         fragmentOutputModules.push_back(moduleInfo);
                     }
                 }
@@ -284,12 +288,21 @@ namespace hf
                 info.pFragmentOutputModules    = fragmentOutputModules.data();
                 info.fragmentOutputModuleCount = fragmentOutputModules.size();
 
-                return Create(info);
-            }catch (...)
-            {
-                LOG_ERROR("[Hyperflow] Error parsing Shader Library: %s", assetPath);
-                return nullptr;
+                return MakeRef<ShaderLibrary>(info);
             }
+            catch(const HyperException& e)
+            {
+                log_error(e.GetFile().c_str(), e.GetLine(), e.what());
+            }
+            catch(const std::exception& e)
+            {
+                LOG_ERROR("[Hyperflow] Error parsing Shader Library: %s\nError: %s", assetPath, e.what());
+            }
+            catch (...)
+            {
+                LOG_ERROR("[Hyperflow] Unknown error parsing Shader Library: %s", assetPath);
+            }
+            return nullptr;
         }
 
         bool DestroyShaderLibrary_i(ShaderLibrary* lib)
@@ -313,12 +326,12 @@ namespace hf
 
         //region Modules
 
-        void ReadVertexInputModule(const char* assetPath, const char* parentFolderPath, ShaderLibraryVertexInputModuleInfo& result)
+        void ReadVertexInputModule(const std::filesystem::path& assetPath, const std::filesystem::path& parentFolderPath, ShaderLibraryVertexInputModuleInfo& result)
         {
             std::vector<char> metadata{};
             if(!START_READING(assetPath, metadata)) return;
 
-            result.name = std::filesystem::relative(assetPath, parentFolderPath).replace_extension("");;
+            result.name = std::filesystem::relative(assetPath, parentFolderPath).replace_extension("").string();
             try
             {
                 ryml::Tree tree = ryml::parse_in_place(ryml::to_substr(metadata.data()));
@@ -351,16 +364,16 @@ namespace hf
 
             }catch (...)
             {
-                LOG_ERROR("[Hyperflow] Error parsing Vertex Input Module: %s", assetPath);
+                LOG_ERROR("[Hyperflow] Error parsing Vertex Input Module: %s", (const char*)assetPath.c_str());
             }
         }
 
-        void ReadPreRasterModule(const char* assetPath, const char* parentFolderPath, ShaderLibraryPreRasterModuleInfo& result)
+        void ReadPreRasterModule(const std::filesystem::path& assetPath, const std::filesystem::path& parentFolderPath, ShaderLibraryPreRasterModuleInfo& result)
         {
             std::vector<char> metadata{};
             if(!START_READING(assetPath, metadata)) return;
 
-            result.name = std::filesystem::relative(assetPath, parentFolderPath).replace_extension("");;
+            result.name = std::filesystem::relative(assetPath, parentFolderPath).replace_extension("").string();
             try
             {
                 ryml::Tree tree = ryml::parse_in_place(ryml::to_substr(metadata.data()));
@@ -415,16 +428,16 @@ namespace hf
 
             }catch (...)
             {
-                LOG_ERROR("[Hyperflow] Error parsing Pre Raster Module: %s", assetPath);
+                LOG_ERROR("[Hyperflow] Error parsing Pre Raster Module: %s", (const char*)assetPath.c_str());
             }
         }
 
-        void ReadFragmentModule(const char* assetPath, const char* parentFolderPath, ShaderLibraryFragmentModuleInfo& result)
+        void ReadFragmentModule(const std::filesystem::path& assetPath, const std::filesystem::path& parentFolderPath, ShaderLibraryFragmentModuleInfo& result)
         {
             std::vector<char> metadata{};
             if(!START_READING(assetPath, metadata)) return;
 
-            result.name = std::filesystem::relative(assetPath, parentFolderPath).replace_extension("");;
+            result.name = std::filesystem::relative(assetPath, parentFolderPath).replace_extension("").string();
             try
             {
                 ryml::Tree tree = ryml::parse_in_place(ryml::to_substr(metadata.data()));
@@ -446,16 +459,16 @@ namespace hf
 
             }catch (...)
             {
-                LOG_ERROR("[Hyperflow] Error parsing Fragment Module: %s", assetPath);
+                LOG_ERROR("[Hyperflow] Error parsing Fragment Module: %s", (const char*)assetPath.c_str());
             }
         }
 
-        void ReadFragmentOutputModule(const char* assetPath, const char* parentFolderPath, ShaderLibraryFragmentOutputModuleInfo& result)
+        void ReadFragmentOutputModule(const std::filesystem::path& assetPath, const std::filesystem::path& parentFolderPath, ShaderLibraryFragmentOutputModuleInfo& result)
         {
             std::vector<char> metadata{};
             if(!START_READING(assetPath, metadata)) return;
 
-            result.name = std::filesystem::relative(assetPath, parentFolderPath).replace_extension("");;
+            result.name = std::filesystem::relative(assetPath, parentFolderPath).replace_extension("").string();
             try
             {
                 ryml::Tree tree = ryml::parse_in_place(ryml::to_substr(metadata.data()));
@@ -499,7 +512,7 @@ namespace hf
                 }
             }catch (...)
             {
-                LOG_ERROR("[Hyperflow] Error parsing Fragment Output Module: %s", assetPath);
+                LOG_ERROR("[Hyperflow] Error parsing Fragment Output Module: %s", (const char*)assetPath.c_str());
             }
         }
 

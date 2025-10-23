@@ -3,13 +3,20 @@
 #include "hinternal.h"
 #include "hyperflow.h"
 #include "../rendering/include/hex_renderer.h"
+#include "hstrconversion.h"
+#include "hyaml.h"
 
 namespace hf
 {
     Shader::Shader(const ShaderCreationInfo& info)
     : layout(info.layout), library(info.library), modules(info.modules)
     {
-        inter::rendering::CreateShader_i(this);
+        inter::rendering::ShaderCreationInfo_i creationInfo{};
+        creationInfo.layout = layout;
+        creationInfo.library = library->handle;
+        creationInfo.modules = modules;
+
+        handle = inter::HF.renderingApi.api.CreateShader(creationInfo);
     }
 
     Shader::~Shader()
@@ -44,18 +51,50 @@ namespace hf
 
     namespace inter::rendering
     {
-        bool CreateShader_i(Shader* shader)
+        Ref<Shader> CreateShaderAsset_i(const char* assetPath)
         {
-            if (shader->handle) return false;
+            const auto assetLoc = (TO_RES_PATH_P("shaders") / assetPath).string() + ".meta";
 
-            ShaderCreationInfo_i creationInfo{};
-            creationInfo.layout = shader->layout;
-            creationInfo.library = shader->library->handle;
-            creationInfo.modules = shader->modules;
+            std::vector<char> metadata{};
+            if (!START_READING(assetLoc.c_str(), metadata)) return nullptr;
 
-            shader->handle = HF.renderingApi.api.CreateShader(creationInfo);
+            try
+            {
+                ShaderCreationInfo info{};
 
-            return true;
+                ryml::Tree tree = ryml::parse_in_place(ryml::to_substr(metadata.data()));
+                ryml::NodeRef root = tree.rootref();
+
+                {
+                    const auto v = root["layout"].val();
+                    const std::string_view vView{v.str, v.len};
+                    info.layout = FindShaderLayout(vView);
+                }
+
+                {
+                    const auto v = root["library"].val();
+                    const std::string_view vView{v.str, v.len};
+                    info.library = Cast<ShaderLibrary>(GetAsset(vView, AssetType::ShaderLibrary));
+                }
+
+                if (root.has_child("modulesInfo")) ReadShaderModulesInfo_i(root["modulesInfo"], info.library, info.modules);
+                else LOG_ERROR("[Hyperflow] %s", "Unable to find moduleInfo");
+
+                return MakeRef<Shader>(info);
+            }
+            catch(const HyperException& e)
+            {
+                log_error(e.GetFile().c_str(), e.GetLine(), e.what());
+            }
+            catch(const std::exception& e)
+            {
+                LOG_ERROR("[Hyperflow] Error parsing Shader: %s\nError: %s", assetPath, e.what());
+            }
+            catch (...)
+            {
+                LOG_ERROR("[Hyperflow] Unknown error parsing Shader: %s", assetPath);
+            }
+            return nullptr;
         }
 
         bool DestroyShader_i(Shader* shader)

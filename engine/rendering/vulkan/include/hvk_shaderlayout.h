@@ -14,8 +14,8 @@ namespace hf
         PushConstantInfo pushConstantInfo{};
     };
 
-    bool IsValidShaderLayout(ShaderLayout setup);
-    URef<VkShaderLayout>& GetShaderLayout(ShaderLayout setup);
+    bool IsValidShaderLayout(ShaderLayout layout);
+    URef<VkShaderLayout>& GetShaderLayout(ShaderLayout layout);
 }
 
 #endif //HVK_SHADERLAYOUT_H

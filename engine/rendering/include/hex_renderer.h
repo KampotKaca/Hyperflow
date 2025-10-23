@@ -295,10 +295,10 @@ namespace hf::inter::rendering
         void (*DestroyShader)(void* shader);
         void (*BindShader)(const void* rn, const void* shader);
 
-        //shader setup
-        ShaderLayout (*DefineShaderLayout)(const ShaderLayoutDefinitionInfo& info);
-        void (*BindShaderLayout)(void* rn, ShaderLayout setup);
-        void (*UploadPushConstants)(void* rn, const PushConstantUploadInfo& info);
+        //shader layout
+        ShaderLayout (*DefineShaderLayout)(const ShaderLayoutDefinitionInfo& layout);
+        void (*BindShaderLayout)(void* rn, ShaderLayout layout);
+        void (*UploadPushConstants)(void* rn, const PushConstantUploadInfo& layout);
 
         //texture
         void* (*CreateTexture)(const TextureCreationInfo_i& info);

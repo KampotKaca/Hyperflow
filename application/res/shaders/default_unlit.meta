@@ -1,0 +1,8 @@
+layout: default_unlit
+library: app_shader_lib/app_shader_lib
+
+modulesInfo:
+  vertexInputModule: default
+  preRasterModule: default_unlit
+  fragmentModule: default_unlit
+  fragmentOutputModule: default
