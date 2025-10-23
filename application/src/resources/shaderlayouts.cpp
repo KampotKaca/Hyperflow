@@ -11,20 +11,15 @@ namespace app
         //Default Lit
         {
             std::array buffers { hf::primitives::GetGlobalUniformBuffer() };
-            const hf::ShaderLayoutDefinitionInfo info
-            {
-                .pushConstant = hf::PushConstantInfo
-                {
-                    .usageFlags = hf::ShaderUsageStageFlags::Vertex | hf::ShaderUsageStageFlags::Fragment,
-                    .sizeInBytes = sizeof(DefaultPushConstant)
-                },
-                .pBuffers = buffers.data(),
-                .bufferCount = buffers.size(),
-                .pTextureLayouts = &APP_TEXTURE_LAYOUTS.default_lit,
-                .textureLayoutCount = 1
-            };
+            hf::ShaderLayoutDefinitionInfo info{};
+            info.pushConstant.usageFlags = hf::ShaderUsageStageFlags::Vertex | hf::ShaderUsageStageFlags::Fragment;
+            info.pushConstant.sizeInBytes = sizeof(DefaultPushConstant);
+            info.pBuffers = buffers.data();
+            info.bufferCount = buffers.size();
+            info.pTextureLayouts = &APP_TEXTURE_LAYOUTS.default_lit;
+            info.textureLayoutCount = 1;
 
-            APP_SHADER_LAYOUTS.default_lit = hf::Define(info);
+            APP_SHADER_LAYOUTS.default_lit = hf::Define("default_lit", info);
         }
 
         //Default Unlit
@@ -34,7 +29,7 @@ namespace app
             info.pBuffers = buffers.data();
             info.bufferCount = buffers.size();
 
-            APP_SHADER_LAYOUTS.default_unlit = hf::Define(info);
+            APP_SHADER_LAYOUTS.default_unlit = hf::Define("default_unlit", info);
         }
     }
 }

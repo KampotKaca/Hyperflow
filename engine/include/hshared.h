@@ -239,15 +239,9 @@ namespace hf
         std::optional<ShaderBlendingOptions> blendingOptions{};
     };
 
-    template<typename T>
-    struct ShaderLibraryModule
-    {
-        uint32_t* resultId{};
-        T module{};
-    };
-
     struct ShaderLibraryVertexInputModuleInfo
     {
+        std::string name{};
         VertexBufferAttribute pAttributes[MAX_VERTEX_INPUT_BUFFER_ATTRIBUTES]{};
         uint32_t attributeCount{};
         MeshPrimitiveTopologyType topology = MeshPrimitiveTopologyType::TriangleList;
@@ -256,6 +250,7 @@ namespace hf
 
     struct ShaderLibraryPreRasterModuleInfo
     {
+        std::string name{};
         FilePath vertexShaderPath{};
         std::optional<FilePath> tessellationControlShaderPath{};
         std::optional<FilePath> tessellationEvaluationShaderPath{};
@@ -266,6 +261,7 @@ namespace hf
 
     struct ShaderLibraryFragmentModuleInfo
     {
+        std::string name{};
         FilePath fragmentShaderPath{};
         ShaderDepthStencilOptions depthStencilOptions{};
         ShaderLayout layout{};
@@ -273,6 +269,7 @@ namespace hf
 
     struct ShaderLibraryFragmentOutputModuleInfo
     {
+        std::string name{};
         ColorAttachmentSettings pColorAttachmentsSettings[MAX_COLOR_ATTACHMENTS]{};
         uint32_t colorAttachmentCount = 1;
 		std::optional<ShaderBlendOp> blendOp;
@@ -280,16 +277,14 @@ namespace hf
 
     struct ShaderLibraryCreationInfo
     {
-        std::string uniqueLibraryName{};
-        ShaderDrawOutputFormats outputFormats{};
-
-        ShaderLibraryModule<ShaderLibraryVertexInputModuleInfo>* pVertexInputModules{};
+        std::string cacheFileName{};
+        ShaderLibraryVertexInputModuleInfo* pVertexInputModules{};
         uint32_t vertexInputModuleCount{};
-        ShaderLibraryModule<ShaderLibraryPreRasterModuleInfo>* pPreRasterModules{};
+        ShaderLibraryPreRasterModuleInfo* pPreRasterModules{};
         uint32_t preRasterModuleCount{};
-        ShaderLibraryModule<ShaderLibraryFragmentModuleInfo>* pFragmentModules{};
+        ShaderLibraryFragmentModuleInfo* pFragmentModules{};
         uint32_t fragmentModuleCount{};
-        ShaderLibraryModule<ShaderLibraryFragmentOutputModuleInfo>* pFragmentOutputModules{};
+        ShaderLibraryFragmentOutputModuleInfo* pFragmentOutputModules{};
         uint32_t fragmentOutputModuleCount{};
     };
 

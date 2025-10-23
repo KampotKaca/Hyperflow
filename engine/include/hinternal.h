@@ -48,6 +48,8 @@ namespace hf::inter
         unordered_map<uint64_t, Ref<TexturePack>> texturePacks{};
         unordered_map<uint64_t, Ref<Mesh>> meshes{};
 
+        unordered_map<std::string, ShaderLayout> shaderLayouts{};
+        unordered_map<std::string, Buffer> bufferIds{};
         unordered_map<std::string, VertexBufferAttribute> vertexAttributes{};
         unordered_map<std::string, TextureLayout> textureLayouts{};
         unordered_map<std::string, TextureSampler> textureSamplers{};
@@ -233,7 +235,7 @@ namespace hf::inter
         void RendererUpdate_i(const Ref<Renderer>& rn);
         void RendererDraw_i(const Ref<Renderer>& rn, RenderPacket* packet);
 
-        bool CreateShaderLibrary_i(ShaderLibrary* lib);
+        Ref<ShaderLibrary> CreateShaderLibraryAsset_i(const char* assetPath);
         bool DestroyShaderLibrary_i(ShaderLibrary* lib);
 
         bool CreateShader_i(Shader* shader);

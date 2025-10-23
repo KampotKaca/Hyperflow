@@ -174,6 +174,8 @@ namespace hf
 
             rasterizers[i] = rasterInfo;
 
+            auto& layout = GetShaderLayout(moduleInfo.layout);
+
             VkGraphicsPipelineCreateInfo preRasterPipelineInfo{};
             preRasterPipelineInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
             preRasterPipelineInfo.pNext = &preRasterLibInfo;
@@ -183,7 +185,7 @@ namespace hf
             preRasterPipelineInfo.pViewportState = &viewportState;
             preRasterPipelineInfo.pRasterizationState = &rasterizers[i];
             preRasterPipelineInfo.pDynamicState = &SHADER_DYNAMIC;
-            preRasterPipelineInfo.layout = GetShaderLayout(moduleInfo.layout)->layout;
+            preRasterPipelineInfo.layout = layout->layout;
             pipelineCreateInfos[moduleIndex] = preRasterPipelineInfo;
 
             moduleIndex++;

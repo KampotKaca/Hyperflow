@@ -3,6 +3,8 @@ vertexShaderPath: __axislines
 #tessellationEvaluationShaderPath: default_lit   #Optional
 #geometryShaderPath: default_lit                 #Optional
 
+layout: __axislines
+
 options:
   cullMode: None
   faceDirection: Clockwise
@@ -10,7 +12,7 @@ options:
   enableRasterizerDiscard: false
   enableDepthClamping: false
   lineWidth: 1.0
-  biasOptions:            #Optional
+  biasOptions: #Optional
     constantFactor: 1.25
     clamp: 0.0
     slopeFactor: 1.75

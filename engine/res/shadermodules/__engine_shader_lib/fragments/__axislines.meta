@@ -1,9 +1,11 @@
-fragmentShaderPath: __skybox
+fragmentShaderPath: __axislines
+
+layout: __axislines
 
 depthStencilOptions:
   enableDepth: true
-  writeDepth: false
-  comparisonFunc: Less
+  writeDepth: true
+  comparisonFunc: LessOrEqual
   enableDepthBounds: false
   enableStencil: false
 

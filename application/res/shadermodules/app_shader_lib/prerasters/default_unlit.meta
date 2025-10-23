@@ -3,6 +3,8 @@ vertexShaderPath: default_unlit
 #tessellationEvaluationShaderPath: default_unlit   #Optional
 #geometryShaderPath: default_unlit                 #Optional
 
+layout: default_unlit
+
 options:
   cullMode: Back
   faceDirection: Clockwise
@@ -10,7 +12,7 @@ options:
   enableRasterizerDiscard: false
   enableDepthClamping: false
   lineWidth: 1.0
-#  biasOptions:            #Optional
+#  biasOptions: #Optional
 #    constantFactor: 0.0
 #    clamp: 0.0
 #    slopeFactor: 0.0

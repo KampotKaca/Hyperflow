@@ -1,13 +1,15 @@
-fragmentShaderPath: default_lit
+fragmentShaderPath: __skybox
+
+layout: __skybox
 
 depthStencilOptions:
   enableDepth: true
-  writeDepth: true
-  comparisonFunc: LessOrEqual
+  writeDepth: false
+  comparisonFunc: Less
   enableDepthBounds: false
   enableStencil: false
 
   frontStencil: Keep
   backStencil: Zero
-  minDepthBounds: 0
-  maxDepthBounds: 1
+  minDepthBounds: 0.0
+  maxDepthBounds: 1.0

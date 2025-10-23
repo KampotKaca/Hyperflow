@@ -1,5 +1,7 @@
 fragmentShaderPath: default_unlit
 
+layout: default_unlit
+
 depthStencilOptions:
   enableDepth: true
   writeDepth: true

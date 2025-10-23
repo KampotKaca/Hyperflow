@@ -86,8 +86,19 @@ namespace hf
     //region Search
 
     VertexBufferAttribute FindVertexAttribute(const char* id);
+    VertexBufferAttribute FindVertexAttribute(std::string_view id);
+
     TextureLayout FindTextureLayout(const char* id);
+    TextureLayout FindTextureLayout(std::string_view id);
+
     TextureSampler FindTextureSampler(const char* id);
+    TextureSampler FindTextureSampler(std::string_view id);
+
+    ShaderLayout FindShaderLayout(const char* id);
+    ShaderLayout FindShaderLayout(std::string_view id);
+
+    Buffer FindBuffer(const char* id);
+    Buffer FindBuffer(std::string_view id);
 
     //endregion
     //region Window
@@ -151,6 +162,11 @@ namespace hf
 	void Destroy(const Ref<ShaderLibrary>* pLibraries, uint32_t count);
 	bool IsLoaded(const Ref<ShaderLibrary>& lib);
 
+    uint32_t GetVertexInputModule(const Ref<ShaderLibrary>& lib, const char* name);
+    uint32_t GetPreRasterModule(const Ref<ShaderLibrary>& lib, const char* name);
+    uint32_t GetFragmentModule(const Ref<ShaderLibrary>& lib, const char* name);
+    uint32_t GetFragmentOutputModule(const Ref<ShaderLibrary>& lib, const char* name);
+
     //endregion
     //region Shader
 
@@ -187,12 +203,12 @@ namespace hf
     //endregion
     //region Defines
 
-	ShaderLayout Define(const ShaderLayoutDefinitionInfo& info);
+	ShaderLayout Define(const char* name, const ShaderLayoutDefinitionInfo& info);
     TextureSampler Define(const TextureSamplerDefinitionInfo& info);
     TextureLayout Define(const TextureLayoutDefinitionInfo& info);
     VertexBufferAttribute Define(const VertexBufferAttributeDefinitionInfo& info);
-    Buffer Define(const BufferDefinitionInfo& info);
-    Buffer Define(const StorageBufferDefinitionInfo& info);
+    Buffer Define(const char* name, const BufferDefinitionInfo& info);
+    Buffer Define(const char* name, const StorageBufferDefinitionInfo& info);
 
     VertexBufferAttribute DefineVertexAttributeAsset(const char* assetPath);
     TextureLayout DefineTextureLayoutAsset(const char* assetPath);
@@ -487,11 +503,6 @@ namespace hf
 	    GlobalMemoryStatistics GetGlobalMemoryStatistics(); //Get global memory statistics.
 	    ThreadMemoryStatistics GetThreadMemoryStatistics(); //Get memory statistics from the current thread.
 	    RendererStatistics GetRendererStatistics(const Ref<Renderer>& rn); //Get rendering thread memory statistics.
-
-	    void ReadVertexInputModule   (const char* assetPath, ShaderLibraryVertexInputModuleInfo& result); //Read the vertex input modul meta file.
-	    void ReadPreRasterModule     (const char* assetPath, ShaderLayout layout, ShaderLibraryPreRasterModuleInfo& result); //Read the pre raster modul meta file.
-	    void ReadFragmentModule      (const char* assetPath, ShaderLayout layout, ShaderLibraryFragmentModuleInfo& result); //Read the fragment modul meta file.
-	    void ReadFragmentOutputModule(const char* assetPath, ShaderLibraryFragmentOutputModuleInfo& result); //Read the fragment output modul meta file.
 	}
 	namespace primitives
 	{

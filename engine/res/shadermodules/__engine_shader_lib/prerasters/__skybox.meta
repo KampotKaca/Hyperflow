@@ -3,6 +3,8 @@ vertexShaderPath: __skybox
 #tessellationEvaluationShaderPath: default_lit   #Optional
 #geometryShaderPath: default_lit                 #Optional
 
+layout: __skybox
+
 options:
   cullMode: Front
   faceDirection: Clockwise
@@ -10,7 +12,7 @@ options:
   enableRasterizerDiscard: false
   enableDepthClamping: false
   lineWidth: 1.0
-#  biasOptions:            #Optional
+#  biasOptions: #Optional
 #    constantFactor: 0.0
 #    clamp: 0.0
 #    slopeFactor: 0.0

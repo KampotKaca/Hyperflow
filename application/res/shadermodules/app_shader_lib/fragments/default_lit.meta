@@ -1,4 +1,6 @@
-fragmentShaderPath: __axislines
+fragmentShaderPath: default_lit
+
+layout: default_lit
 
 depthStencilOptions:
   enableDepth: true
@@ -9,5 +11,5 @@ depthStencilOptions:
 
   frontStencil: Keep
   backStencil: Zero
-  minDepthBounds: 0.0
-  maxDepthBounds: 1.0
+  minDepthBounds: 0
+  maxDepthBounds: 1

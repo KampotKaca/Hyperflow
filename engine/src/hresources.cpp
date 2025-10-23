@@ -78,7 +78,7 @@ namespace hf
                 uniform.pBindings = &info;
                 uniform.bindingCount = 1;
 
-                HF.staticResources.globalUniform = Define(uniform);
+                HF.staticResources.globalUniform = Define("__global_uniform", uniform);
             }
 
             {
@@ -96,7 +96,7 @@ namespace hf
                 info.bufferInfo = defInfo;
                 info.memoryType = BufferMemoryType::WriteOnly;
 
-                HF.graphicsResources.materialDataStorageBuffer = Define(info);
+                HF.graphicsResources.materialDataStorageBuffer = Define("__material_storage", info);
             }
 
             SubmitAllBuffers();
@@ -116,7 +116,7 @@ namespace hf
                 info.pBuffers = &HF.staticResources.globalUniform;
                 info.bufferCount = 1;
 
-                HF.staticResources.shaderLayouts.axisLines = Define(info);
+                HF.staticResources.shaderLayouts.axisLines = Define("__axislines", info);
             }
 
             //Skybox Shader Setup
@@ -133,7 +133,7 @@ namespace hf
                 info.pTextureLayouts = &HF.staticResources.skyboxLayout;
                 info.textureLayoutCount = 1;
 
-                HF.staticResources.shaderLayouts.skybox = Define(info);
+                HF.staticResources.shaderLayouts.skybox = Define("__skybox", info);
             }
         }
 
@@ -220,119 +220,36 @@ namespace hf
 
         void LoadShaders()
         {
-            //Shader Library!
-            {
-                //--------- Vertex Input ------------------------------------------------
-
-                std::array vertexInputModules
-                {
-                    ShaderLibraryModule<ShaderLibraryVertexInputModuleInfo>
-                    {
-                        .resultId = &HF.staticResources.engineShadersLibModules.quadVertexInput,
-                    },
-                    ShaderLibraryModule<ShaderLibraryVertexInputModuleInfo>
-                    {
-                        .resultId = &HF.staticResources.engineShadersLibModules.defaultVertexInput,
-                    },
-                };
-
-                utils::ReadVertexInputModule("__quad", vertexInputModules[0].module);
-                utils::ReadVertexInputModule("__default", vertexInputModules[1].module);
-
-                //--------- Pre Raster ------------------------------------------------
-
-                std::array preRasterModules
-                {
-                    ShaderLibraryModule<ShaderLibraryPreRasterModuleInfo> //Axis Lines Vertex Shader
-                    {
-                        .resultId = &HF.staticResources.engineShadersLibModules.axisLinesPreRaster,
-                    },
-                    ShaderLibraryModule<ShaderLibraryPreRasterModuleInfo> //Skybox Vertex Shader
-                    {
-                        .resultId = &HF.staticResources.engineShadersLibModules.skyboxPreRaster,
-                    },
-                };
-
-                utils::ReadPreRasterModule("__axislines", HF.staticResources.shaderLayouts.axisLines, preRasterModules[0].module);
-                utils::ReadPreRasterModule("__skybox", HF.staticResources.shaderLayouts.skybox, preRasterModules[1].module);
-
-                //--------- Fragment ------------------------------------------------
-
-                std::array fragmentModules
-                {
-                    ShaderLibraryModule<ShaderLibraryFragmentModuleInfo>
-                    {
-                        .resultId = &HF.staticResources.engineShadersLibModules.axisLinesFragment,
-                    },
-                    ShaderLibraryModule<ShaderLibraryFragmentModuleInfo>
-                    {
-                        .resultId = &HF.staticResources.engineShadersLibModules.skyboxFragment,
-                    },
-                };
-
-                utils::ReadFragmentModule("__axislines", HF.staticResources.shaderLayouts.axisLines, fragmentModules[0].module);
-                utils::ReadFragmentModule("__skybox", HF.staticResources.shaderLayouts.skybox, fragmentModules[1].module);
-
-                //--------- Fragment Output ------------------------------------------------
-
-                std::array fragmentOutputModules
-                {
-                    ShaderLibraryModule<ShaderLibraryFragmentOutputModuleInfo> //Axis lines
-                    {
-                        .resultId = &HF.staticResources.engineShadersLibModules.axisLinesFragmentOutput,
-                    },
-                    ShaderLibraryModule<ShaderLibraryFragmentOutputModuleInfo> //Skybox
-                    {
-                        .resultId = &HF.staticResources.engineShadersLibModules.skyboxFragmentOutput,
-                    },
-                };
-
-                utils::ReadFragmentOutputModule("__axislines", fragmentOutputModules[0].module);
-                utils::ReadFragmentOutputModule("__skybox", fragmentOutputModules[1].module);
-
-                ShaderLibraryCreationInfo info{};
-                info.uniqueLibraryName         = "__engine_shader_lib_cache";
-                info.outputFormats             = HF.internalResourcesFormat.drawOutputFormats;
-                info.pVertexInputModules       = vertexInputModules.data();
-                info.vertexInputModuleCount    = vertexInputModules.size();
-                info.pPreRasterModules         = preRasterModules.data();
-                info.preRasterModuleCount      = preRasterModules.size();
-                info.pFragmentModules          = fragmentModules.data();
-                info.fragmentModuleCount       = fragmentModules.size();
-                info.pFragmentOutputModules    = fragmentOutputModules.data();
-                info.fragmentOutputModuleCount = fragmentOutputModules.size();
-
-                HF.staticResources.engineShadersLib = Create(info);
-            }
+            HF.staticResources.engineShadersLib = hf::Cast<ShaderLibrary>(CreateAsset("__engine_shader_lib/__engine_shader_lib", AssetType::ShaderLibrary));
 
             //Axis Lines Shader
             {
-                ShaderModulesInfo modulesInfo{};
-                modulesInfo.vertexInputModuleId    = HF.staticResources.engineShadersLibModules.quadVertexInput;
-                modulesInfo.preRasterModuleId      = HF.staticResources.engineShadersLibModules.axisLinesPreRaster;
-                modulesInfo.fragmentModuleId       = HF.staticResources.engineShadersLibModules.axisLinesFragment;
-                modulesInfo.fragmentOutputModuleId = HF.staticResources.engineShadersLibModules.axisLinesFragmentOutput;
+                ShaderModulesInfo moduleInfo{};
+                moduleInfo.vertexInputModuleId    = GetVertexInputModule(HF.staticResources.engineShadersLib, "__quad");
+                moduleInfo.preRasterModuleId      = GetPreRasterModule(HF.staticResources.engineShadersLib, "__axislines");
+                moduleInfo.fragmentModuleId       = GetFragmentModule(HF.staticResources.engineShadersLib, "__axislines");
+                moduleInfo.fragmentOutputModuleId = GetFragmentOutputModule(HF.staticResources.engineShadersLib, "__axislines");
 
                 ShaderCreationInfo shaderInfo{};
                 shaderInfo.layout = HF.staticResources.shaderLayouts.axisLines;
                 shaderInfo.library = HF.staticResources.engineShadersLib;
-                shaderInfo.modules = modulesInfo;
+                shaderInfo.modules = moduleInfo;
 
                 HF.staticResources.shaders.axisLines = Create(shaderInfo);
             }
 
             //Skybox Shader
             {
-                ShaderModulesInfo modulesInfo{};
-                modulesInfo.vertexInputModuleId    = HF.staticResources.engineShadersLibModules.defaultVertexInput;
-                modulesInfo.preRasterModuleId      = HF.staticResources.engineShadersLibModules.skyboxPreRaster;
-                modulesInfo.fragmentModuleId       = HF.staticResources.engineShadersLibModules.skyboxFragment;
-                modulesInfo.fragmentOutputModuleId = HF.staticResources.engineShadersLibModules.skyboxFragmentOutput;
+                ShaderModulesInfo moduleInfo{};
+                moduleInfo.vertexInputModuleId    = GetVertexInputModule(HF.staticResources.engineShadersLib, "__default");
+                moduleInfo.preRasterModuleId      = GetPreRasterModule(HF.staticResources.engineShadersLib, "__skybox");
+                moduleInfo.fragmentModuleId       = GetFragmentModule(HF.staticResources.engineShadersLib, "__skybox");
+                moduleInfo.fragmentOutputModuleId = GetFragmentOutputModule(HF.staticResources.engineShadersLib, "__skybox");
 
                 ShaderCreationInfo shaderInfo{};
                 shaderInfo.layout = HF.staticResources.shaderLayouts.skybox;
                 shaderInfo.library = HF.staticResources.engineShadersLib;
-                shaderInfo.modules = modulesInfo;
+                shaderInfo.modules = moduleInfo;
 
                 HF.staticResources.shaders.skybox = Create(shaderInfo);
             }
