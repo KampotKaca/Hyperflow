@@ -18,11 +18,9 @@ namespace app
 
 	void AppLoadResources()
 	{
-		TextureLoadAll();
 		CubemapLoadAll();
 	    CreateRenderTextures();
 
-	    MeshLoadAll();
 		TexturePackLoadAll();
 		ShaderLoadAll();
 		MaterialLoadAll();

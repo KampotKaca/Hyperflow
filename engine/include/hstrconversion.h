@@ -516,13 +516,13 @@ namespace hf
     {
         if (!utils::FileExists(assetPath))
         {
-            LOG_ERROR("[Hyperflow] Unable to find meta file: %s", assetPath);
+            LOG_ERROR("[Hyperflow] Unable to find meta file: %s", assetPath.c_str());
             return false;
         }
 
         if (!utils::ReadFile(assetPath, metadata))
         {
-            LOG_ERROR("[Hyperflow] Unable to read meta: %s", assetPath);
+            LOG_ERROR("[Hyperflow] Unable to read meta: %s", assetPath.c_str());
             return false;
         }
         metadata.push_back('\0');

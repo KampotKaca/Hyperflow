@@ -16,6 +16,7 @@ namespace hf
         case AssetType::AudioClip:     memcpy(&PATH_NAME_BUFFER[size], "_adc", 4); break;
         case AssetType::ShaderLibrary: memcpy(&PATH_NAME_BUFFER[size], "_shl", 4); break;
         case AssetType::Shader:        memcpy(&PATH_NAME_BUFFER[size], "_sha", 4); break;
+        case AssetType::TexturePack:   memcpy(&PATH_NAME_BUFFER[size], "_txp", 4); break;
         default: LOG_ERROR("%s", "Invalid asset type, cannot be destroyed"); break;
         }
         PATH_NAME_BUFFER[size + 4] = '\0';
@@ -61,6 +62,7 @@ namespace hf
             case AssetType::AudioClip:     inter::audio::DestroyAudioClip_i(Cast<AudioClip>(asset).get());                 break;
             case AssetType::ShaderLibrary: inter::rendering::DestroyShaderLibrary_i(Cast<ShaderLibrary>(asset).get()); break;
             case AssetType::Shader:        inter::rendering::DestroyShader_i(Cast<Shader>(asset).get());                   break;
+            case AssetType::TexturePack:   inter::rendering::DestroyTexturePack_i(Cast<TexturePack>(asset).get());         break;
             default: LOG_ERROR("%s", "Invalid asset type, cannot be destroyed"); break;
             }
 
@@ -80,6 +82,7 @@ namespace hf
             case AssetType::AudioClip:     asset = inter::audio::CreateAudioClipAsset_i(assetPath);         break;
             case AssetType::ShaderLibrary: asset = inter::rendering::CreateShaderLibraryAsset_i(assetPath); break;
             case AssetType::Shader:        asset = inter::rendering::CreateShaderAsset_i(assetPath);        break;
+            case AssetType::TexturePack:   asset = inter::rendering::CreateTexPackAsset_i(assetPath);       break;
             default: LOG_ERROR("%s", "Invalid asset type, cannot be loaded"); break;
             }
         }

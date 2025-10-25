@@ -2,8 +2,6 @@
 #define RESOURCES_H
 
 #include "resources/rendertextures.h"
-#include "resources/textures.h"
-#include "resources/meshes.h"
 #include "resources/shaders.h"
 #include "resources/materials.h"
 #include "resources/texturesamplers.h"

@@ -1,0 +1,11 @@
+layout: __skybox
+texBindings:
+
+cubBindings:
+  - sampler: __cubemap
+    bindingIndex: 0
+    textures:
+      - texture: __toony
+        index: 0
+
+rtBindings:

@@ -256,7 +256,7 @@ namespace hf::inter
         Ref<Cubemap> CreateCubemapAsset_i(const char* assetPath);
         bool DestroyCubemap_i(Cubemap* cubemap);
 
-        bool CreateTexturePack_i(TexturePack* texPack);
+        Ref<TexturePack> CreateTexPackAsset_i(const char* assetPath);
         bool DestroyTexturePack_i(TexturePack* texPack);
 
         void DestroyAllBuffers_i(bool internalOnly = false);

@@ -145,25 +145,7 @@ namespace hf
 
         void LoadTexturePacks()
         {
-            //Skybox texturepack
-            {
-                TexturePackBindingInfo<Cubemap>::TextureInfo ti{};
-                ti.texture = HF.staticResources.skyboxResources.defaultCubemap;
-                ti.index = 0;
-
-                TexturePackBindingInfo<Cubemap> binding{};
-                binding.sampler = HF.staticResources.cubemapSampler;
-                binding.textures = &ti;
-                binding.arraySize = 1;
-                binding.bindingIndex = 0;
-
-                TexturePackCreationInfo info{};
-                info.pCubemapBindings = &binding;
-                info.cubemapBindingCount = 1;
-                info.layout = HF.staticResources.skyboxLayout;
-
-                HF.staticResources.skyboxResources.texturePack = Create(info);
-            }
+            HF.staticResources.skyboxResources.texturePack = Cast<TexturePack>(CreateAsset("__skybox", AssetType::TexturePack));
         }
 
         void LoadMeshes()

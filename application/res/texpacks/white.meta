@@ -1,0 +1,11 @@
+layout: default_lit
+texBindings:
+  - sampler: default
+    bindingIndex: 0
+    textures:
+      - texture: __default.png
+        index: 0
+
+cubBindings:
+
+rtBindings:
