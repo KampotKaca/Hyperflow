@@ -129,32 +129,32 @@ namespace hf
         CameraFrustum frustum{};
         Camera3DFreeLook camera{};
 
-        std::vector<DirectionalLight> directionalLights{};
-        std::vector<SpotLight> spotLights{};
-        std::vector<PointLight> pointLights{};
+        List<DirectionalLight> directionalLights{};
+        List<SpotLight> spotLights{};
+        List<PointLight> pointLights{};
 
-        std::vector<RenderAttachmentDependencyInfo> dependencies{};
-        std::vector<RenderTexturePacketInfo> renderTextures{};
-        std::vector<ShaderLayoutPacketInfo> shaderLayouts{};
-        std::vector<ShaderPacketInfo> shaders{};
-        std::vector<MaterialPacketInfo> materials{};
-        std::vector<DrawPacketInfo> drawPackets{};
-        std::vector<TextureBindingInfo> texpacks{};
+        List<RenderAttachmentDependencyInfo> dependencies{};
+        List<RenderTexturePacketInfo> renderTextures{};
+        List<ShaderLayoutPacketInfo> shaderLayouts{};
+        List<ShaderPacketInfo> shaders{};
+        List<MaterialPacketInfo> materials{};
+        List<DrawPacketInfo> drawPackets{};
+        List<TextureBindingInfo> texpacks{};
 
-        std::vector<TexturePackRebindingGroupPacketInfo> textureGroupRebindings{};
-        std::vector<TexturePackRebindingPacketInfo> textureRebindings{};
-        std::vector<TextureInfo> textures{};
+        List<TexturePackRebindingGroupPacketInfo> textureGroupRebindings{};
+        List<TexturePackRebindingPacketInfo> textureRebindings{};
+        List<TextureInfo> textures{};
 
-        std::vector<BufferSetPacketInfo> bufferSets{};
-        std::vector<Buffer> buffers{};
+        List<BufferSetPacketInfo> bufferSets{};
+        List<Buffer> buffers{};
 
-        std::vector<DrawCallPacketInfo> drawCalls{};
-        std::vector<InstancePacketInfo> instances{};
-        std::vector<Ref<VertexBuffer>> vertexBuffers{};
-        std::vector<uint8_t> bufferUploads{};
-        std::vector<uint8_t> pushConstantUploads{};
-        std::vector<uint8_t> instanceUploads{};
-        std::vector<BufferUploadPacketInfo> bufferUploadPackets{};
+        List<DrawCallPacketInfo> drawCalls{};
+        List<InstancePacketInfo> instances{};
+        List<Ref<VertexBuffer>> vertexBuffers{};
+        List<uint8_t> bufferUploads{};
+        List<uint8_t> pushConstantUploads{};
+        List<uint8_t> instanceUploads{};
+        List<BufferUploadPacketInfo> bufferUploadPackets{};
 
         void clear()
         {

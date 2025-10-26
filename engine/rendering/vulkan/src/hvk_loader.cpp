@@ -121,7 +121,7 @@ namespace hf
     {
         uint32_t layerCount = 0;
         VK_HANDLE_EXCEPT(vkEnumerateInstanceLayerProperties(&layerCount, nullptr));
-        GRAPHICS_DATA.availableLayers = std::vector<VkLayerProperties>(layerCount);
+        GRAPHICS_DATA.availableLayers = List<VkLayerProperties>(layerCount);
         VK_HANDLE_EXCEPT(vkEnumerateInstanceLayerProperties(&layerCount, GRAPHICS_DATA.availableLayers.data()));
     }
 
@@ -129,7 +129,7 @@ namespace hf
     {
         uint32_t extensionCount = 0;
         VK_HANDLE_EXCEPT(vkEnumerateInstanceExtensionProperties(nullptr, &extensionCount, nullptr));
-        GRAPHICS_DATA.availableExtensions = std::vector<VkExtensionProperties>(extensionCount);
+        GRAPHICS_DATA.availableExtensions = List<VkExtensionProperties>(extensionCount);
         VK_HANDLE_EXCEPT(vkEnumerateInstanceExtensionProperties(nullptr,
             &extensionCount, GRAPHICS_DATA.availableExtensions.data()));
 

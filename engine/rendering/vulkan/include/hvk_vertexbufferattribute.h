@@ -11,7 +11,7 @@ namespace hf
         ~VkVertexBufferAttribute();
 
         VkVertexInputBindingDescription bindingDescription{};
-        std::vector<VkVertexInputAttributeDescription> attribDescriptions{};
+        List<VkVertexInputAttributeDescription> attribDescriptions{};
         uint32_t attribCount = 0;
         uint32_t vertexSize = 0;
         uint32_t bindingId = 0;

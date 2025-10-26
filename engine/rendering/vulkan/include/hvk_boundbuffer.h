@@ -15,7 +15,7 @@ namespace hf
         ~VkBoundBuffer() override;
 
         VkDescriptorSetLayout layout{};
-        std::vector<BufferBindingInfo> bindings{};
+        List<BufferBindingInfo> bindings{};
         VkDescriptorLocation descriptorBindings[FRAMES_IN_FLIGHT]{};
     };
 

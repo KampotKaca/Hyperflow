@@ -233,7 +233,7 @@ namespace hf
         }
 
         template<typename T>
-        static void UploadTex(const Ref<Renderer>& rn, StaticVector<TexturePack::Binding<T>, MAX_TEXTURES_IN_TEXTURE_PACK>& bindings,
+        static void UploadTex(const Ref<Renderer>& rn, StaticList<TexturePack::Binding<T>, MAX_TEXTURES_IN_TEXTURE_PACK>& bindings,
                                   const TexturePackBindingUploadInfo<T>& info, TexturePackBindingType type)
         {
             const auto packet = rn->currentDraw.packet;
@@ -974,7 +974,7 @@ namespace hf
 
         void PreDraw_i(const Ref<Renderer>& rn)
         {
-            static std::vector<uint64_t> deletedMaterials{};
+            static List<uint64_t> deletedMaterials{};
             deletedMaterials.clear();
             for (auto& material : std::views::values(HF.graphicsResources.materials))
             {

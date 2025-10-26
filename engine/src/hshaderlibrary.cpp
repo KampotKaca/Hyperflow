@@ -20,7 +20,7 @@ namespace hf
                 LOG_ERROR("[Hyperflow] Unable to find %s shader: %s", name, loc.c_str());\
                 return;\
             }\
-            std::vector<char> code{};\
+            List<char> code{};\
             utils::ReadFile(loc, code);\
             moduleCodes.push_back(std::move(code));\
         }

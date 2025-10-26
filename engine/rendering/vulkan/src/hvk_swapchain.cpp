@@ -78,11 +78,11 @@ namespace hf
         VK_HANDLE_EXCEPT(vkGetSwapchainImagesKHR(GRAPHICS_DATA.device.logicalDevice.device,
             result.swapchain, &imageCount, nullptr));
 
-        auto images = std::vector<VkImage>(imageCount);
+        auto images = List<VkImage>(imageCount);
         VK_HANDLE_EXCEPT(vkGetSwapchainImagesKHR(GRAPHICS_DATA.device.logicalDevice.device,
             result.swapchain, &imageCount, images.data()));
 
-        auto imageViews = std::vector<VkImageView>(imageCount);
+        auto imageViews = List<VkImageView>(imageCount);
         for (uint32_t i = 0; i < imageCount; i++)
         {
             VkImageViewCreateInfo createInfo{};

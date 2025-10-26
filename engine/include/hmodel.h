@@ -13,7 +13,7 @@ namespace hf
         std::string filePath{};
         bool isLoaded = false;
 
-        std::vector<Ref<Mesh>> meshes{};
+        List<Ref<Mesh>> meshes{};
         MeshStats meshStats{};
     };
 }

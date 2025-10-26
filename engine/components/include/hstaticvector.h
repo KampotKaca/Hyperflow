@@ -5,18 +5,18 @@
 namespace hf
 {
     template<typename T, size_t N>
-    struct StaticVector
+    struct StaticList
     {
         static_assert(!std::is_reference_v<T>, "StaticVector cannot store reference types");
-        StaticVector() = default;
-        StaticVector(const StaticVector& other)
+        StaticList() = default;
+        StaticList(const StaticList& other)
         {
             m_Size = other.m_Size;
             for (size_t i = 0; i < m_Size; ++i)
                 m_Elements[i] = other.m_Elements[i];
         }
 
-        StaticVector(StaticVector&& other) noexcept
+        StaticList(StaticList&& other) noexcept
         {
             m_Size = other.m_Size;
             for (size_t i = 0; i < m_Size; ++i)
@@ -24,7 +24,7 @@ namespace hf
             other.m_Size = 0;
         }
 
-        StaticVector& operator=(const StaticVector& other)
+        StaticList& operator=(const StaticList& other)
         {
             if (this != &other)
             {

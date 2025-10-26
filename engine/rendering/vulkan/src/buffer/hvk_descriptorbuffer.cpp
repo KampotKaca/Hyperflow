@@ -57,7 +57,7 @@ namespace hf
             typeData.size = type.bufferSize;
             typeData.alignment = type.alignment;
             typeData.typeSize = type.typeSize;
-            typeData.usageMasks = std::vector<uint64_t>((uint32_t)glm::ceil((float_t)type.descriptorCount / 64.0f));
+            typeData.usageMasks = List<uint64_t>((uint32_t)glm::ceil((float_t)type.descriptorCount / 64.0f));
             typeDatas[type.type] = typeData;
             size += type.bufferSize;
         }

@@ -64,7 +64,7 @@ namespace hf
         Ref<Texture> CreateTextureAsset_i(const char* assetPath)
         {
             const auto assetLoc = TO_RES_PATH(std::string("textures/") + assetPath) + ".meta";
-            std::vector<char> metadata{};
+            List<char> metadata{};
             if (!START_READING(assetLoc.c_str(), metadata)) return nullptr;
 
             try

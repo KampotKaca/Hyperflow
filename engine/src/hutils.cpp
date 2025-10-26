@@ -24,7 +24,7 @@ namespace hf::utils
         return v;
     }
 
-    static void readFile(std::ifstream& file, std::vector<char>& result)
+    static void readFile(std::ifstream& file, List<char>& result)
     {
         const size_t fileSize = file.tellg();
         result = std::vector<char>(fileSize);
@@ -33,7 +33,7 @@ namespace hf::utils
         file.close();
     }
 
-    bool ReadFile(const char* path, std::vector<char>& result)
+    bool ReadFile(const char* path, List<char>& result)
     {
         std::ifstream file(path, std::ios::ate | std::ios::binary);
         if (!file.is_open())
@@ -45,7 +45,7 @@ namespace hf::utils
         return true;
     }
 
-    bool ReadFile(const std::string& path, std::vector<char>& result)
+    bool ReadFile(const std::string& path, List<char>& result)
     {
         std::ifstream file(path, std::ios::ate | std::ios::binary);
         if (!file.is_open())
@@ -56,7 +56,7 @@ namespace hf::utils
         readFile(file, result);
         return true;
     }
-    bool ReadFile(const std::filesystem::path& path, std::vector<char>& result)
+    bool ReadFile(const std::filesystem::path& path, List<char>& result)
     {
         std::ifstream file(path, std::ios::ate | std::ios::binary);
         if (!file.is_open())
@@ -67,7 +67,7 @@ namespace hf::utils
         readFile(file, result);
         return true;
     }
-    bool ReadFile(const std::string_view path, std::vector<char>& result)
+    bool ReadFile(const std::string_view path, List<char>& result)
     {
         std::ifstream file(std::string(path), std::ios::ate | std::ios::binary);
         if (!file.is_open())
@@ -79,13 +79,13 @@ namespace hf::utils
         return true;
     }
 
-    static void writeFile(std::ofstream& file, const std::vector<char>& data)
+    static void writeFile(std::ofstream& file, const List<char>& data)
     {
         file.write(data.data(), data.size());
         file.close();
     }
 
-    bool WriteFile(const char* path, const std::vector<char>& data)
+    bool WriteFile(const char* path, const List<char>& data)
     {
         std::ofstream file(path, std::ios::binary);
         if (!file.is_open())
@@ -97,7 +97,7 @@ namespace hf::utils
         return true;
     }
 
-    bool WriteFile(const std::string& path, const std::vector<char>& data)
+    bool WriteFile(const std::string& path, const List<char>& data)
     {
         std::ofstream file(path, std::ios::binary);
         if (!file.is_open())
@@ -109,7 +109,7 @@ namespace hf::utils
         return true;
     }
 
-    bool WriteFile(const std::filesystem::path& path, const std::vector<char>& data)
+    bool WriteFile(const std::filesystem::path& path, const List<char>& data)
     {
         std::ofstream file(path, std::ios::binary);
         if (!file.is_open())
@@ -121,7 +121,7 @@ namespace hf::utils
         return true;
     }
 
-    bool WriteFile(const std::string_view path, const std::vector<char>& data)
+    bool WriteFile(const std::string_view path, const List<char>& data)
     {
         std::ofstream file(std::string(path), std::ios::binary);
         if (!file.is_open())

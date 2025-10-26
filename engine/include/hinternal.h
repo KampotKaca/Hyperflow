@@ -39,39 +39,39 @@ namespace hf::inter
 
     struct GraphicsResources
     {
-        unordered_map<uint64_t, Ref<ShaderLibrary>> shaderLibraries{};
-        unordered_map<uint64_t, Ref<Shader>> shaders{};
-        unordered_map<uint64_t, Ref<RuntimeBufferBase>> buffers{};
-        unordered_map<uint64_t, Ref<Texture>> textures{};
-        unordered_map<uint64_t, Ref<Cubemap>> cubemaps{};
-        unordered_map<uint64_t, Ref<RenderTexture>> renderTextures{};
-        unordered_map<uint64_t, Ref<TexturePack>> texturePacks{};
-        unordered_map<uint64_t, Ref<Mesh>> meshes{};
+        Dictionary<uint64_t, Ref<ShaderLibrary>> shaderLibraries{};
+        Dictionary<uint64_t, Ref<Shader>> shaders{};
+        Dictionary<uint64_t, Ref<RuntimeBufferBase>> buffers{};
+        Dictionary<uint64_t, Ref<Texture>> textures{};
+        Dictionary<uint64_t, Ref<Cubemap>> cubemaps{};
+        Dictionary<uint64_t, Ref<RenderTexture>> renderTextures{};
+        Dictionary<uint64_t, Ref<TexturePack>> texturePacks{};
+        Dictionary<uint64_t, Ref<Mesh>> meshes{};
 
-        unordered_map<std::string, ShaderLayout> shaderLayouts{};
-        unordered_map<std::string, Buffer> bufferIds{};
-        unordered_map<std::string, VertexBufferAttribute> vertexAttributes{};
-        unordered_map<std::string, TextureLayout> textureLayouts{};
-        unordered_map<std::string, TextureSampler> textureSamplers{};
+        Dictionary<std::string, ShaderLayout> shaderLayouts{};
+        Dictionary<std::string, Buffer> bufferIds{};
+        Dictionary<std::string, VertexBufferAttribute> vertexAttributes{};
+        Dictionary<std::string, TextureLayout> textureLayouts{};
+        Dictionary<std::string, TextureSampler> textureSamplers{};
 
-        unordered_map<std::string, Asset> assets{};
+        Dictionary<std::string, Asset> assets{};
 
-        unordered_map<uint64_t, Ref<Material>> materials{};
+        Dictionary<uint64_t, Ref<Material>> materials{};
 
         Buffer materialDataStorageBuffer{};
     };
 
     struct AudioResources
     {
-        unordered_map<uint64_t, Ref<AudioPlayer>> players{};
-        unordered_map<uint64_t, Ref<AudioPlayer3D>> player3Ds{};
-        unordered_map<uint64_t, Ref<AudioGroup>> groups{};
+        Dictionary<uint64_t, Ref<AudioPlayer>> players{};
+        Dictionary<uint64_t, Ref<AudioPlayer3D>> player3Ds{};
+        Dictionary<uint64_t, Ref<AudioGroup>> groups{};
     };
 
     struct GeneralResources
     {
-        unordered_map<uint64_t, Ref<AnimationClip>> animations{};
-        unordered_map<uint64_t, Ref<Armature>> armatures{};
+        Dictionary<uint64_t, Ref<AnimationClip>> animations{};
+        Dictionary<uint64_t, Ref<Armature>> armatures{};
     };
 
     struct ResourcesMarkedForDeletion
@@ -83,12 +83,12 @@ namespace hf::inter
         };
 
         std::mutex syncLock{};
-        std::vector<void*> shaderLibraries{};
-        std::vector<void*> shaders{};
-        std::vector<TypedBuffer> buffers{};
-        std::vector<void*> texturePacks{};
-        std::vector<void*> textures{};
-        std::vector<void*> renderTextures{};
+        List<void*> shaderLibraries{};
+        List<void*> shaders{};
+        List<TypedBuffer> buffers{};
+        List<void*> texturePacks{};
+        List<void*> textures{};
+        List<void*> renderTextures{};
     };
 
     struct StaticVertexAttributes
@@ -164,9 +164,9 @@ namespace hf::inter
         std::string appTitle{};
         Time time{};
         Ref<Window> mainWindow{};
-        std::vector<Ref<Window>> tempWindows{};
-        unordered_map<uint64_t, Ref<Window>> windows{};
-        unordered_map<uint64_t, Ref<Scene>> scenes{};
+        List<Ref<Window>> tempWindows{};
+        Dictionary<uint64_t, Ref<Window>> windows{};
+        Dictionary<uint64_t, Ref<Scene>> scenes{};
         uint32_t rendererCount{};
         RenderingApi renderingApi{};
 

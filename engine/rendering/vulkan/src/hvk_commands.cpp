@@ -27,7 +27,7 @@ namespace hf
         allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
         allocInfo.commandBufferCount = count;
 
-        std::vector<VkCommandBuffer> commandBuffers(count);
+        List<VkCommandBuffer> commandBuffers(count);
         VK_HANDLE_EXCEPT(vkAllocateCommandBuffers(device.logicalDevice.device, &allocInfo, commandBuffers.data()));
         for (uint32_t i = 0; i < count; i++) pool->buffers.push_back(commandBuffers[i]);
     }

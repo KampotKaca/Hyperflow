@@ -11,7 +11,7 @@ namespace hf
         ~VkShaderLibrary();
 
         ShaderDrawOutputFormats outputFormats{};
-        std::vector<VkPipeline> modules{};
+        List<VkPipeline> modules{};
     };
 
     VkPipeline GetShaderLibraryModule(const VkShaderLibrary* lib, uint32_t moduleId);

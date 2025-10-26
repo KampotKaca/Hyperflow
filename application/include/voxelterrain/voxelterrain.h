@@ -36,7 +36,7 @@ namespace app
         Chunk_L2 cl;
         VoxelOctave* octreeRoot{};
         hf::uvec4 octreeRootIndex{};
-        std::vector<Chunk_L2> octreeChunks{};
+        hf::List<Chunk_L2> octreeChunks{};
         uint32_t terrainAxisSize{};
         uint32_t usedOctaves{};
 

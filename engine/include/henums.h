@@ -24,7 +24,9 @@ namespace hf
     }\
 
     template <class K, class V>
-    using unordered_map = phmap::flat_hash_map<K, V>;
+    using Dictionary = phmap::flat_hash_map<K, V>;
+    template <class T>
+    using List = std::vector<T>;
 
     //endregion
     //region Primitives

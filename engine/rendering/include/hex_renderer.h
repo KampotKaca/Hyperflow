@@ -109,8 +109,8 @@ namespace hf::inter::rendering
         uint32_t (*createVulkanSurfaceFunc)(void* windowHandle, void* instance, const void* allocator, void* surfaceResult){};
 
         bool (*fileExistsFunc)(const char* path){};
-        bool (*readFileFunc)(const std::string& filename, std::vector<char>& result){};
-        bool (*writeFileFunc)(const std::string& filename, const std::vector<char>& result){};
+        bool (*readFileFunc)(const std::string& filename, List<char>& result){};
+        bool (*writeFileFunc)(const std::string& filename, const List<char>& result){};
 
         void* (*allocateFunc)(std::size_t n);
         void* (*allocateAlignedFunc)(std::size_t n, std::size_t align);

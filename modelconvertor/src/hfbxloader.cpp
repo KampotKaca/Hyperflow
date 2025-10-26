@@ -19,17 +19,17 @@ namespace ml
         meshInfo->subMeshes.reserve(scene->meshes.count);
         meshInfo->headers.reserve(scene->meshes.count);
 
-        std::vector<uint32_t> faceIndices{};
+        hf::List<uint32_t> faceIndices{};
 
         for (size_t mi = 0; mi < scene->meshes.count; mi++)
         {
             auto* mesh = scene->meshes.data[mi];
 
-            hf::unordered_map<Vertex, uint32_t> uniqueVertices{};
-            std::vector<Vertex> vertices{};
-            std::vector<uint32_t> indices{};
+            hf::Dictionary<Vertex, uint32_t> uniqueVertices{};
+            hf::List<Vertex> vertices{};
+            hf::List<uint32_t> indices{};
 
-            std::vector<uint32_t> tri_indices(mesh->max_face_triangles * 3);
+            hf::List<uint32_t> tri_indices(mesh->max_face_triangles * 3);
 
             auto skinDeformationCount = mesh->skin_deformers.count;
             if (skinDeformationCount > MAX_DEFORMERS_PER_VERTEX) skinDeformationCount = MAX_DEFORMERS_PER_VERTEX;

@@ -19,7 +19,7 @@ namespace hf
         TexturePackBindingType bindingType{};
         uint32_t bindingId = 0;
         TextureSampler sampler{};
-        StaticVector<VkTextureBindingViewData, MAX_TEXTURES_IN_TEXTURE_PACK> bindingArray{};
+        StaticList<VkTextureBindingViewData, MAX_TEXTURES_IN_TEXTURE_PACK> bindingArray{};
     };
 
     struct VkTexturePack
@@ -27,7 +27,7 @@ namespace hf
         explicit VkTexturePack(const inter::rendering::TexturePackCreationInfo_i& info);
         ~VkTexturePack();
 
-        unordered_map<uint32_t, VkTextureBinding> bindings{};
+        Dictionary<uint32_t, VkTextureBinding> bindings{};
         TextureLayout layout = 0;
     };
 

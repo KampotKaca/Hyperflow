@@ -34,7 +34,7 @@ namespace hf
         this->window = window;
         threadInfo.size = inter::window::GetSize(window);
 
-        threadInfo.cachedPackets = std::vector<RenderPacket*>(3);
+        threadInfo.cachedPackets = List<RenderPacket*>(3);
         for (uint32_t i = 0; i < 3; i++)
         {
             threadInfo.cachedPackets[i] = &allPackets[i];

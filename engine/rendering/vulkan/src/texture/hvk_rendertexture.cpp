@@ -339,7 +339,7 @@ namespace hf
             textureInfo.details.aspectFlags = TextureAspectFlags::Color;
             textureInfo.details.finalLayout = TextureResultLayoutType::Color;
 
-            tex->msaaTextures = std::vector<VkTexture*>(tex->colorAttachmentCount);
+            tex->msaaTextures = List<VkTexture*>(tex->colorAttachmentCount);
             for (uint32_t i = 0; i < tex->colorAttachmentCount; i++)
             {
                 auto& info = tex->colorInfos[i];

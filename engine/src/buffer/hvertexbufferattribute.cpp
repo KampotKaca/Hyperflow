@@ -21,7 +21,7 @@ namespace hf
     VertexBufferAttribute DefineVertexAttributeAsset(const char* assetPath)
     {
         const auto assetLoc = TO_RES_PATH(std::string("vertexattributes/") + assetPath) + ".meta";
-        std::vector<char> metadata{};
+        List<char> metadata{};
         if (!START_READING(assetLoc.c_str(), metadata)) return 0;
 
         try
@@ -40,7 +40,7 @@ namespace hf
             }
 
             auto formats = root["formats"];
-            std::vector<BufferAttribFormat> formatList{};
+            List<BufferAttribFormat> formatList{};
             formatList.reserve(formats.num_children());
 
             for (ryml::NodeRef fmt : formats.children())

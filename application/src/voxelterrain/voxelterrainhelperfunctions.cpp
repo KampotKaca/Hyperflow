@@ -163,7 +163,7 @@ namespace app
 
     void CreateVoxelOctreeRoot()
     {
-        VOXEL_TERRAIN.octreeChunks = std::vector<Chunk_L2>(1);
+        VOXEL_TERRAIN.octreeChunks = hf::List<Chunk_L2>(1);
         VOXEL_TERRAIN.terrainAxisSize = (uint32_t)std::pow(2, VOXEL_TERRAIN_MAX_DEPTH);
         VOXEL_TERRAIN.octreeRootIndex = hf::uvec4(0, 0, 1, 0);
 

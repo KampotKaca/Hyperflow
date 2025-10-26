@@ -82,7 +82,7 @@ namespace hf
         Ref<AudioClip> CreateAudioClipAsset_i(const char* assetPath)
         {
             const auto assetLoc = TO_RES_PATH(std::string("audio/") + assetPath) + ".meta";
-            std::vector<char> metadata{};
+            List<char> metadata{};
             if (!START_READING(assetLoc.c_str(), metadata)) return nullptr;
 
             try

@@ -13,7 +13,7 @@ namespace hf
 {
     static bool CheckFileIntegrity(const char* data, uint32_t& offset);
     static uint32_t ComputeVertexStride(MeshDataType dataType);
-    static Ref<Mesh> LoadMesh(const ml::MeshHeader& header, const std::vector<char>& meshData, uint32_t vertexStride, const Model* mesh, uint32_t& offset);
+    static Ref<Mesh> LoadMesh(const ml::MeshHeader& header, const List<char>& meshData, uint32_t vertexStride, const Model* mesh, uint32_t& offset);
 
     Model::Model(const ModelCreationInfo& info) : filePath(info.filePath), meshStats(info.meshStats)
     {

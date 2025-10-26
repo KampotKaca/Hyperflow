@@ -26,7 +26,7 @@ namespace hf
         CreateCommandPool(GRAPHICS_DATA.device, GRAPHICS_DATA.device.familyIndices.graphicsFamily.value(), &commandPool);
         CreateCommandBuffers(GRAPHICS_DATA.device, &commandPool, FRAMES_IN_FLIGHT);
 
-        frames = std::vector<VkFrame>(FRAMES_IN_FLIGHT);
+        frames = List<VkFrame>(FRAMES_IN_FLIGHT);
         for (uint32_t i = 0; i < FRAMES_IN_FLIGHT; ++i)
             CreateSemaphore(GRAPHICS_DATA.device, &frames[i].isImageAvailable);
 
@@ -120,7 +120,7 @@ namespace hf
             device.familyIndices.presentFamily.value(),
             device.familyIndices.transferFamily.value()
         };
-        std::vector<VkDeviceQueueCreateInfo> queueCreateInfos{};
+        List<VkDeviceQueueCreateInfo> queueCreateInfos{};
         queueCreateInfos.reserve(uniqueQueueFamilies.size());
 
         float queuePriority = 1.0f;
@@ -194,7 +194,7 @@ namespace hf
         uint32_t familyCount = 0;
         vkGetPhysicalDeviceQueueFamilyProperties(device, &familyCount, nullptr);
 
-        std::vector<VkQueueFamilyProperties> queueFamilies(familyCount);
+        List<VkQueueFamilyProperties> queueFamilies(familyCount);
         vkGetPhysicalDeviceQueueFamilyProperties(device, &familyCount, queueFamilies.data());
 
         for (uint32_t i = 0; i < queueFamilies.size(); i++)
@@ -225,7 +225,7 @@ namespace hf
         if (indices.graphicsFamily != indices.presentFamily)
         {
             std::set uniqueIndices = { indices.transferFamily.value(), indices.graphicsFamily.value(), indices.presentFamily.value() };
-            deviceData.transferData.indices = std::vector(uniqueIndices.begin(), uniqueIndices.end());
+            deviceData.transferData.indices = List<uint32_t>(uniqueIndices.begin(), uniqueIndices.end());
 
             if (deviceData.transferData.indices.size() > 1) deviceData.transferData.sharingMode = VK_SHARING_MODE_CONCURRENT;
             else deviceData.transferData.sharingMode = VK_SHARING_MODE_EXCLUSIVE;

@@ -14,7 +14,7 @@ namespace hf
             int32_t parentIndex = -1;
         };
 
-        std::vector<Bone> bones{};
+        List<Bone> bones{};
     };
 }
 

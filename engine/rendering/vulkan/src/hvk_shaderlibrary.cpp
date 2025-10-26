@@ -4,40 +4,40 @@
 
 namespace hf
 {
-    static VkShaderModule AddShaderStage(const void* code, uint32_t codeSize, VkShaderStageFlagBits stage, std::vector<VkPipelineShaderStageCreateInfo>& res);
+    static VkShaderModule AddShaderStage(const void* code, uint32_t codeSize, VkShaderStageFlagBits stage, List<VkPipelineShaderStageCreateInfo>& res);
 
     VkShaderLibrary::VkShaderLibrary(const inter::rendering::ShaderLibraryCreationInfo_i& info) : outputFormats(info.outputFormats)
     {
         uint32_t moduleCount = info.vertexInputModuleCount + info.preRasterModuleCount + info.fragmentModuleCount + info.fragmentOutputModuleCount;
         uint32_t maxShadingModules = info.preRasterModuleCount * 4 + info.fragmentModuleCount;
 
-        std::vector<VkShaderModule> shaderModules{};
+        List<VkShaderModule> shaderModules{};
         shaderModules.reserve(maxShadingModules);
-        std::vector<VkPipelineShaderStageCreateInfo> stageCreateInfos{};
+        List<VkPipelineShaderStageCreateInfo> stageCreateInfos{};
         stageCreateInfos.reserve(maxShadingModules);
 
-        std::vector<VkVertexInputBindingDescription> vertexInputDescriptions{};
+        List<VkVertexInputBindingDescription> vertexInputDescriptions{};
         vertexInputDescriptions.reserve(info.vertexInputModuleCount * MAX_VERTEX_INPUT_BUFFER_ATTRIBUTES);
-        std::vector<VkVertexInputAttributeDescription> vertexInputAttributes{};
+        List<VkVertexInputAttributeDescription> vertexInputAttributes{};
         vertexInputAttributes.reserve(info.vertexInputModuleCount * MAX_VERTEX_INPUT_BUFFER_ATTRIBUTES);
 
-        std::vector<VkGraphicsPipelineCreateInfo> pipelineCreateInfos(moduleCount);
+        List<VkGraphicsPipelineCreateInfo> pipelineCreateInfos(moduleCount);
 
-        std::vector<VkPipelineVertexInputStateCreateInfo> vertexInputInfos(info.vertexInputModuleCount);
-        std::vector<VkPipelineInputAssemblyStateCreateInfo> inputAssemblies(info.vertexInputModuleCount);
+        List<VkPipelineVertexInputStateCreateInfo> vertexInputInfos(info.vertexInputModuleCount);
+        List<VkPipelineInputAssemblyStateCreateInfo> inputAssemblies(info.vertexInputModuleCount);
 
-        std::vector<VkPipelineRasterizationStateCreateInfo> rasterizers(info.preRasterModuleCount);
+        List<VkPipelineRasterizationStateCreateInfo> rasterizers(info.preRasterModuleCount);
 
-        std::vector<VkPipelineDepthStencilStateCreateInfo> depthStencilStates(info.fragmentModuleCount);
+        List<VkPipelineDepthStencilStateCreateInfo> depthStencilStates(info.fragmentModuleCount);
 
         uint32_t colorAttachmentCount = 0;
         for (uint32_t i = 0; i < info.fragmentOutputModuleCount; i++)
             colorAttachmentCount += info.pFragmentOutputModules[i].colorAttachmentCount;
 
-        std::vector<VkPipelineColorBlendAttachmentState> colorBlendAttachments(colorAttachmentCount);
-        std::vector<VkPipelineColorBlendStateCreateInfo> colorBlendStateInfos(info.fragmentOutputModuleCount);
+        List<VkPipelineColorBlendAttachmentState> colorBlendAttachments(colorAttachmentCount);
+        List<VkPipelineColorBlendStateCreateInfo> colorBlendStateInfos(info.fragmentOutputModuleCount);
 
-        modules = std::vector<VkPipeline>(moduleCount);
+        modules = List<VkPipeline>(moduleCount);
 
         uint32_t moduleIndex = 0;
         colorAttachmentCount = 0;

@@ -495,14 +495,14 @@ namespace hf
 	namespace utils
 	{
 		ivec3 ConvertVersion(const char* version); //Convert string version to an integer,
-		bool ReadFile(const char* path, std::vector<char>& result); //Get the data of the file.
-		bool ReadFile(const std::string& path, std::vector<char>& result); //Get the data of the file.
-        bool ReadFile(const std::filesystem::path& path, std::vector<char>& result); //Get the data of the file.
-        bool ReadFile(const std::string_view path, std::vector<char>& result); //Get the data of the file.
-        bool WriteFile(const char* path, const std::vector<char>& data); //Write the data in the file.
-        bool WriteFile(const std::string& path, const std::vector<char>& data); //Write the data in the file.
-        bool WriteFile(const std::filesystem::path& path, const std::vector<char>& data); //Write the data in the file.
-        bool WriteFile(const std::string_view path, const std::vector<char>& data); //Write the data in the file.
+		bool ReadFile(const char* path, List<char>& result); //Get the data of the file.
+		bool ReadFile(const std::string& path, List<char>& result); //Get the data of the file.
+        bool ReadFile(const std::filesystem::path& path, List<char>& result); //Get the data of the file.
+        bool ReadFile(const std::string_view path, List<char>& result); //Get the data of the file.
+        bool WriteFile(const char* path, const List<char>& data); //Write the data in the file.
+        bool WriteFile(const std::string& path, const List<char>& data); //Write the data in the file.
+        bool WriteFile(const std::filesystem::path& path, const List<char>& data); //Write the data in the file.
+        bool WriteFile(const std::string_view path, const List<char>& data); //Write the data in the file.
         bool FileExists(const char* path); //Check if file exists.
 		bool FileExists(const std::filesystem::path& path); //Check if file exists.
 

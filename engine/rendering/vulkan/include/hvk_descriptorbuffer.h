@@ -24,7 +24,7 @@ namespace hf
         VkDeviceSize size{};
         VkDeviceSize alignment{};
         VkDeviceSize typeSize{};
-        std::vector<uint64_t> usageMasks{};
+        List<uint64_t> usageMasks{};
 
         int32_t Allocate()
         {

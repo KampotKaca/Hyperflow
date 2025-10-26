@@ -6,7 +6,7 @@ namespace hf
 {
     Scene::Scene(const AssetLocation* assets, uint32_t assetCount)
     {
-        this->assets = std::vector<AssetLocation>(assetCount);
+        this->assets = List<AssetLocation>(assetCount);
         memcpy(this->assets.data(), assets, sizeof(AssetLocation) * assetCount);
 
         inter::general::LoadScene_i(this);

@@ -42,14 +42,14 @@ namespace hf
     struct CommandPool
     {
         VkCommandPool pool{};
-        std::vector<VkCommandBuffer> buffers{};
+        List<VkCommandBuffer> buffers{};
     };
 
     struct SwapChainSupportDetails
     {
         VkSurfaceCapabilitiesKHR capabilities{};
-        std::vector<VkSurfaceFormatKHR> formats{};
-        std::vector<VkPresentModeKHR> presentModes{};
+        List<VkSurfaceFormatKHR> formats{};
+        List<VkPresentModeKHR> presentModes{};
     };
 
     struct QueueFamilyIndices
@@ -73,7 +73,7 @@ namespace hf
 
     struct DeviceTransferData
     {
-        std::vector<uint32_t> indices{};
+        List<uint32_t> indices{};
         VkSharingMode sharingMode{};
     };
 
@@ -157,13 +157,13 @@ namespace hf
 
     struct PreAllocatedBuffers
     {
-        std::vector<VkDescriptorSetLayout> descLayouts{};
-        std::vector<VkDescriptorSetLayoutBinding> descLayoutBindings{};
-        std::vector<VkDescriptorBufferBindingInfoEXT> descBindingInfos{};
-        std::vector<VkImageMemoryBarrier2> imageBarriers{};
-        std::vector<uint32_t> indices{};
-        std::vector<VkDeviceSize> sizes{};
-        std::vector<ImageTransitionInfo> imageTransitions[9]{};
+        List<VkDescriptorSetLayout> descLayouts{};
+        List<VkDescriptorSetLayoutBinding> descLayoutBindings{};
+        List<VkDescriptorBufferBindingInfoEXT> descBindingInfos{};
+        List<VkImageMemoryBarrier2> imageBarriers{};
+        List<uint32_t> indices{};
+        List<VkDeviceSize> sizes{};
+        List<ImageTransitionInfo> imageTransitions[9]{};
     };
 
     struct RenderApiEditorInfo
@@ -181,8 +181,8 @@ namespace hf
     struct GraphicsData
     {
         int32_t rendererCount = 0;
-        std::vector<VkLayerProperties> availableLayers{};
-        std::vector<VkExtensionProperties> availableExtensions{};
+        List<VkLayerProperties> availableLayers{};
+        List<VkExtensionProperties> availableExtensions{};
 
         VkInstance instance{};
         VkPlatform platform{};
@@ -199,14 +199,14 @@ namespace hf
         URef<VkDescriptorBuffer> bufferDescriptorBuffer{};
         URef<VkDescriptorBuffer> imageDescriptorBuffer{};
 
-        std::vector<URef<VkVertexBufferAttribute>> bufferAttribs{};
-        std::vector<URef<VkBoundBuffer>> boundBuffers{};
-        std::vector<URef<VkTextureSampler>> textureSamplers{};
-        std::vector<URef<VkTextureLayout>> textureLayouts{};
-        std::vector<URef<VkShaderLayout>> shaderLayouts{};
+        List<URef<VkVertexBufferAttribute>> bufferAttribs{};
+        List<URef<VkBoundBuffer>> boundBuffers{};
+        List<URef<VkTextureSampler>> textureSamplers{};
+        List<URef<VkTextureLayout>> textureLayouts{};
+        List<URef<VkShaderLayout>> shaderLayouts{};
 
-        std::vector<VkCopyBufferToBufferOperation> bufferToBufferCopyOperations{};
-        std::vector<VkCopyBufferToImageOperation> bufferToImageCopyOperations{};
+        List<VkCopyBufferToBufferOperation> bufferToBufferCopyOperations{};
+        List<VkCopyBufferToImageOperation> bufferToImageCopyOperations{};
 
         PreAllocatedBuffers preAllocBuffers{};
         RenderApiEditorInfo* editorInfo{};
@@ -238,7 +238,7 @@ namespace hf
         VkSurfaceKHR surface = VK_NULL_HANDLE;
         VkSwapchainKHR swapchain = VK_NULL_HANDLE;
         GraphicsSwapchainDetails details{};
-        std::vector<SwapchainImage> images{};
+        List<SwapchainImage> images{};
     };
 
     struct VkFrame

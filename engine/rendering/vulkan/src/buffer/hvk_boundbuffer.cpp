@@ -10,7 +10,7 @@ namespace hf
         VkBufferBase(memoryType, data, 0, 0,
         usage | VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT, ComputeBufferSize(info))
     {
-        bindings = std::vector<BufferBindingInfo>(info.bindingCount);
+        bindings = List<BufferBindingInfo>(info.bindingCount);
         memcpy(bindings.data(), info.pBindings, sizeof(BufferBindingInfo) * info.bindingCount);
 
         GRAPHICS_DATA.preAllocBuffers.descLayoutBindings.resize(info.bindingCount);

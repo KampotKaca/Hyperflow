@@ -17,7 +17,7 @@ namespace ml
         uint32_t headerDataSize = meshInfo.headers.size() * sizeof(MeshHeader);
         uint32_t fullHeaderSize = sizeof(uint32_t) + headerDataSize + 1;
         uint32_t offset = 0;
-        std::vector<char> headerData = std::vector<char>(fullHeaderSize);
+        hf::List<char> headerData = std::vector<char>(fullHeaderSize);
 
         memcpy(headerData.data() + offset, &submeshCount, sizeof(uint32_t));
         offset += sizeof(uint32_t);
@@ -26,7 +26,7 @@ namespace ml
         headerData[offset] = '\0';
 
         offset = 0;
-        std::vector<char> meshData{};
+        hf::List<char> meshData{};
         for (uint32_t i = 0; i < submeshCount; i++)
         {
             auto& subMesh = meshInfo.subMeshes[i];

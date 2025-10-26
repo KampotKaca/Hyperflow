@@ -23,7 +23,7 @@ namespace hf
 
 			bool isRunning{};
 			RenderPacket* drawPacket{};
-			std::vector<RenderPacket*> cachedPackets{};
+			List<RenderPacket*> cachedPackets{};
 		};
 
 	    RenderPacket allPackets[3]{};

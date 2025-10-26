@@ -11,10 +11,10 @@ namespace hf
         ~ShaderLibrary();
 
         std::string name{};
-        unordered_map<std::string, uint32_t> vertexInputModules{};
-        unordered_map<std::string, uint32_t> preRasterModules{};
-        unordered_map<std::string, uint32_t> fragmentModules{};
-        unordered_map<std::string, uint32_t> fragmentOutputModules{};
+        Dictionary<std::string, uint32_t> vertexInputModules{};
+        Dictionary<std::string, uint32_t> preRasterModules{};
+        Dictionary<std::string, uint32_t> fragmentModules{};
+        Dictionary<std::string, uint32_t> fragmentOutputModules{};
         void* handle{};
     };
 }

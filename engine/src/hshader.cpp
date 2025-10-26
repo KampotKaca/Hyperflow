@@ -55,7 +55,7 @@ namespace hf
         {
             const auto assetLoc = (TO_RES_PATH_P("shaders") / assetPath).string() + ".meta";
 
-            std::vector<char> metadata{};
+            List<char> metadata{};
             if (!START_READING(assetLoc.c_str(), metadata)) return nullptr;
 
             try

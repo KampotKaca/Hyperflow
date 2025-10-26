@@ -57,21 +57,21 @@ namespace ml
             uint16_t weight{};
         };
 
-        std::vector<float> positions{};
-        std::vector<float> normals{};
-        std::vector<float> colors{};
-        std::vector<float> texCoords{};
-        std::vector<char> indices{};
+        hf::List<float> positions{};
+        hf::List<float> normals{};
+        hf::List<float> colors{};
+        hf::List<float> texCoords{};
+        hf::List<char> indices{};
 
         //deformations
-        std::vector<BoneWeight> boneWeights{};
-        std::vector<float> blendOffsets{};
+        hf::List<BoneWeight> boneWeights{};
+        hf::List<float> blendOffsets{};
     };
 
     struct ModelInfo
     {
-        std::vector<MeshHeader> headers{};
-        std::vector<MeshInfo> subMeshes{};
+        hf::List<MeshHeader> headers{};
+        hf::List<MeshInfo> subMeshes{};
     };
 
     bool LoadModel(const char* path, ModelInfo* meshInfo);

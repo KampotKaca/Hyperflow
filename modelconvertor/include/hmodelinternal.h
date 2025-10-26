@@ -7,7 +7,7 @@
 
 namespace ml
 {
-    void WriteData(ModelInfo* meshInfo, const std::vector<Vertex>& vertices, const std::vector<uint32_t>& indices,
+    void WriteData(ModelInfo* meshInfo, const hf::List<Vertex>& vertices, const hf::List<uint32_t>& indices,
         hf::MeshDataType dataFlags, uint16_t skinDeformationCount, uint16_t blendDeformationCount);
 }
 

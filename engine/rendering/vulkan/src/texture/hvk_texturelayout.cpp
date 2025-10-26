@@ -6,7 +6,7 @@ namespace hf
 {
     VkTextureLayout::VkTextureLayout(const TextureLayoutDefinitionInfo& info)
     {
-        bindingInfos = std::vector<TextureLayoutBindingInfo>(info.bindingCount);
+        bindingInfos = List<TextureLayoutBindingInfo>(info.bindingCount);
         memcpy(bindingInfos.data(), info.pBindings, sizeof(TextureLayoutBindingInfo) * info.bindingCount);
 
         GRAPHICS_DATA.preAllocBuffers.descLayoutBindings.resize(info.bindingCount);

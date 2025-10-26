@@ -25,7 +25,7 @@ namespace ml
 
         for (const auto& shape : shapes)
         {
-            hf::unordered_map<Vertex, uint32_t> uniqueVertices{};
+            hf::Dictionary<Vertex, uint32_t> uniqueVertices{};
             std::vector<Vertex> vertices{};
             std::vector<uint32_t> indices{};
 

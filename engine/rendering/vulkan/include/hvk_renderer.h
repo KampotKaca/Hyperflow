@@ -24,7 +24,7 @@ namespace hf
         VkCommandBuffer currentCommand{};
         VkPipelineLayout currentLayout{};
 
-        std::vector<VkFrame> frames{};
+        List<VkFrame> frames{};
         uint32_t currentFrame = 0;
         uint32_t imageIndex = UINT32_MAX;
         VsyncMode vSyncMode = VsyncMode::Relaxed;

@@ -11,7 +11,7 @@ namespace hf
         ~VkTextureLayout();
 
         VkDescriptorSetLayout layout{};
-        std::vector<TextureLayoutBindingInfo> bindingInfos{};
+        List<TextureLayoutBindingInfo> bindingInfos{};
     };
 
     bool IsValidLayout(TextureLayout layout);

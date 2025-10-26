@@ -17,7 +17,7 @@ namespace hf
         BoundingVolume volume{};
         uint32_t vertexStride{};
 
-        std::vector<Ref<VertexBuffer>> skinBuffers{};
+        List<Ref<VertexBuffer>> skinBuffers{};
 
         MeshStats stats{};
     };

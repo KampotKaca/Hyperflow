@@ -495,7 +495,7 @@ namespace hf
 #undef X
     }
 
-    inline bool START_READING(const char* assetPath, std::vector<char>& metadata)
+    inline bool START_READING(const char* assetPath, List<char>& metadata)
     {
         if (!utils::FileExists(assetPath))
         {
@@ -512,7 +512,7 @@ namespace hf
         return true;
     }
 
-    inline bool START_READING(const std::filesystem::path& assetPath, std::vector<char>& metadata)
+    inline bool START_READING(const std::filesystem::path& assetPath, List<char>& metadata)
     {
         if (!utils::FileExists(assetPath))
         {

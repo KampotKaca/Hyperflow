@@ -10,7 +10,7 @@
 namespace hf
 {
     template<typename T>
-    static void InitTextures(StaticVector<TexturePack::Binding<T>, MAX_TEXTURES_IN_TEXTURE_PACK>& resultSet,
+    static void InitTextures(StaticList<TexturePack::Binding<T>, MAX_TEXTURES_IN_TEXTURE_PACK>& resultSet,
                              TexturePackBindingInfo<T>* pTextureBindings, uint32_t count)
     {
         for (uint32_t i = 0; i < count; i++)
@@ -36,9 +36,9 @@ namespace hf
     }
 
     template<typename T>
-        static void PassTextures(StaticVector<TexturePack::Binding<T>, 8>& src,
-            StaticVector<inter::rendering::TexturePackBindInfo_i::TextureInfo, MAX_TEXTURES_IN_TEXTURE_PACK * MAX_TEXTURES_IN_TEXTURE_PACK * 3>& texInfos,
-            StaticVector<inter::rendering::TexturePackBindInfo_i, MAX_TEXTURES_IN_TEXTURE_PACK * 3>& texPackBindInfos,
+        static void PassTextures(StaticList<TexturePack::Binding<T>, 8>& src,
+            StaticList<inter::rendering::TexturePackBindInfo_i::TextureInfo, MAX_TEXTURES_IN_TEXTURE_PACK * MAX_TEXTURES_IN_TEXTURE_PACK * 3>& texInfos,
+            StaticList<inter::rendering::TexturePackBindInfo_i, MAX_TEXTURES_IN_TEXTURE_PACK * 3>& texPackBindInfos,
             TexturePackBindingType type)
     {
         for (uint32_t i = 0; i < src.size(); i++)
@@ -83,8 +83,8 @@ namespace hf
         InitTextures(cubemapBindings, info.pCubemapBindings, info.cubemapBindingCount);
         InitTextures(renderTextureBindings, info.pRenderTextureBindings, info.renderTextureBindingCount);
 
-        StaticVector<inter::rendering::TexturePackBindInfo_i::TextureInfo, MAX_TEXTURES_IN_TEXTURE_PACK * MAX_TEXTURES_IN_TEXTURE_PACK * 3> texInfos{};
-        StaticVector<inter::rendering::TexturePackBindInfo_i, MAX_TEXTURES_IN_TEXTURE_PACK * 3> texPackBindInfos{};
+        StaticList<inter::rendering::TexturePackBindInfo_i::TextureInfo, MAX_TEXTURES_IN_TEXTURE_PACK * MAX_TEXTURES_IN_TEXTURE_PACK * 3> texInfos{};
+        StaticList<inter::rendering::TexturePackBindInfo_i, MAX_TEXTURES_IN_TEXTURE_PACK * 3> texPackBindInfos{};
 
         PassTextures(textureBindings, texInfos, texPackBindInfos, TexturePackBindingType::Texture2D);
         PassTextures(cubemapBindings, texInfos, texPackBindInfos, TexturePackBindingType::Cubemap);
@@ -134,7 +134,7 @@ namespace hf
     namespace inter::rendering
     {
         template<typename T>
-        static void LoadBindings(c4::yml::NodeRef root, AssetType assetType, std::vector<TexturePackBindingInfo<T>>& ls, std::vector<typename TexturePackBindingInfo<T>::TextureInfo>& infoLs)
+        static void LoadBindings(c4::yml::NodeRef root, AssetType assetType, List<TexturePackBindingInfo<T>>& ls, List<typename TexturePackBindingInfo<T>::TextureInfo>& infoLs)
         {
             if (root.num_children() > 0)
             {
@@ -199,12 +199,12 @@ namespace hf
                 ryml::Tree tree = ryml::parse_in_place(ryml::to_substr(metadata.data()));
                 ryml::NodeRef root = tree.rootref();
 
-                std::vector<TexturePackBindingInfo<Texture>> texList{};
-                std::vector<TexturePackBindingInfo<Texture>::TextureInfo> texInfoList{};
-                std::vector<TexturePackBindingInfo<Cubemap>> cubList{};
-                std::vector<TexturePackBindingInfo<Cubemap>::TextureInfo> cubInfoList{};
-                std::vector<TexturePackBindingInfo<RenderTexture>> rtList{};
-                std::vector<TexturePackBindingInfo<RenderTexture>::TextureInfo> rtInfoList{};
+                List<TexturePackBindingInfo<Texture>> texList{};
+                List<TexturePackBindingInfo<Texture>::TextureInfo> texInfoList{};
+                List<TexturePackBindingInfo<Cubemap>> cubList{};
+                List<TexturePackBindingInfo<Cubemap>::TextureInfo> cubInfoList{};
+                List<TexturePackBindingInfo<RenderTexture>> rtList{};
+                List<TexturePackBindingInfo<RenderTexture>::TextureInfo> rtInfoList{};
 
                 {
                     const auto v = root["layout"].val();

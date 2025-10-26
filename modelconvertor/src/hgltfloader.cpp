@@ -31,8 +31,8 @@ namespace ml
         {
             for (const auto& prim : mesh.primitives)
             {
-                std::vector<Vertex> vertices;
-                std::vector<uint32_t> indices;
+                hf::List<Vertex> vertices;
+                hf::List<uint32_t> indices;
 
                 // --- extract indices ---
                 if (prim.indices >= 0)
@@ -66,10 +66,10 @@ namespace ml
                 size_t vertexCount = 0;
                 if (prim.attributes.contains("POSITION")) vertexCount = model.accessors[prim.attributes.at("POSITION")].count;
 
-                std::vector positions(vertexCount, hf::vec3{ 0, 0, 0 });
-                std::vector normals  (vertexCount, hf::vec3{ 0, 0, 0 });
-                std::vector colors   (vertexCount, hf::vec3{ 1, 1, 1 });
-                std::vector texcoords(vertexCount, hf::vec2{ 0, 0 });
+                hf::List positions(vertexCount, hf::vec3{ 0, 0, 0 });
+                hf::List normals  (vertexCount, hf::vec3{ 0, 0, 0 });
+                hf::List colors   (vertexCount, hf::vec3{ 1, 1, 1 });
+                hf::List texcoords(vertexCount, hf::vec2{ 0, 0 });
 
                 auto ReadAccessorVec3 = [&](std::vector<hf::vec3>& dst, const tinygltf::Accessor& accessor)
                 {

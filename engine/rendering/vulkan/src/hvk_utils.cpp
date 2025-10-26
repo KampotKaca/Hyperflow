@@ -51,7 +51,7 @@ namespace hf
         uint32_t extensionCount;
         VK_HANDLE_EXCEPT(vkEnumerateDeviceExtensionProperties(device, nullptr, &extensionCount, nullptr));
 
-        std::vector<VkExtensionProperties> availableExtensions(extensionCount);
+        List<VkExtensionProperties> availableExtensions(extensionCount);
         VK_HANDLE_EXCEPT(vkEnumerateDeviceExtensionProperties(device, nullptr, &extensionCount, availableExtensions.data()));
 
         for (const auto ext : DEVICE_EXTENSIONS)

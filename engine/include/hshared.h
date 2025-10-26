@@ -87,7 +87,7 @@ namespace hf
 	}
 
 	template <class K, class V>
-	using unordered_map = phmap::flat_hash_map<K, V>;
+	using Dictionary = phmap::flat_hash_map<K, V>;
 
 #define TO_RES_PATH(x) (std::filesystem::current_path() / (x)).string()
 #define TO_RES_PATH_P(x) (std::filesystem::current_path() / (x))

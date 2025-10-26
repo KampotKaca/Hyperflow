@@ -13,7 +13,7 @@ namespace hf
         virtual void Update() = 0;
         virtual void Render(const Ref<Renderer>& rn) = 0;
 
-        std::vector<AssetLocation> assets{};
+        List<AssetLocation> assets{};
         bool isLoaded = false;
     };
 }
