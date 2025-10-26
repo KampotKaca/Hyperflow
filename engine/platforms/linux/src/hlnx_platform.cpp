@@ -4,7 +4,7 @@
 #include <bits/dlfcn.h>
 #include <ctime>
 #include "hyperflow.h"
-#include "hex_plat"
+#include "hplatformspecific.h"
 
 #if defined(__clang__) || defined(__GNUC__)
     #define builtin_memcpy(destination, source, size) __builtin_memcpy(destination, source, size)

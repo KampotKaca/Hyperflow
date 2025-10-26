@@ -1,8 +1,8 @@
 #ifndef HENUMS_H
 #define HENUMS_H
 
-#include "phmap/btree.h"
-#include "phmap/phmap.h"
+#include "../external/phmap/btree.h"
+#include "../external/phmap/phmap.h"
 
 namespace hf
 {
