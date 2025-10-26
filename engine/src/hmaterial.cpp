@@ -18,7 +18,7 @@ namespace hf
             *MATERIAL_OCTREE.At(octreePosition) = this;
 
             bufferIndex = octreePosition.x * 64 * 64 + octreePosition.y * 64 + octreePosition.z;
-            bufferMemory = (uint8_t*)utils::Allocate(sizeInBytes);
+            bufferMemory = (uint8_t*)utils::Alloc(sizeInBytes);
         }
     }
 

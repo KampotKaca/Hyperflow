@@ -44,7 +44,7 @@ namespace hf
         sampleRate = decoder.outputSampleRate;
         format = decoder.outputFormat;
 
-        pcmData = utils::Allocate(frameCount * decoder.outputChannels * sizeof(float_t));
+        pcmData = utils::Alloc(frameCount * decoder.outputChannels * sizeof(float_t));
 
         ma_uint64 fRead;
         if (ma_decoder_read_pcm_frames(&decoder, pcmData, frameCount, &fRead) != MA_SUCCESS)

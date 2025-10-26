@@ -11,7 +11,7 @@ namespace hf
         GenericException(int32_t lineNum, const char* file, const char* type, const char *err) noexcept;
         const char* what() const noexcept override;
         const char* GetError() const noexcept;
-        const char * GetType() const noexcept override;
+        const char* GetType() const noexcept override;
 
         static GenericException Create(int32_t lineNum, const char* file, const char* type, const char* error, ...);
 

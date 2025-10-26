@@ -173,7 +173,7 @@ namespace hf
         constexpr uint32_t pncStep = sizeof(float_t) * 3;
         constexpr uint32_t tStep = sizeof(float_t) * 2;
 
-        auto* vertices = (unsigned char*)utils::Allocate(header.vertexCount * vertexStride);
+        auto* vertices = (unsigned char*)utils::Alloc(header.vertexCount * vertexStride);
         memset(vertices, 0, header.vertexCount * vertexStride);
 
 #define INTEGRITY_CHECK\
@@ -257,7 +257,7 @@ namespace hf
                 for (uint32_t j = 0; j < header.skinDeformerCount; j++)
                 {
                     uint32_t skinDataSize = header.vertexCount * STRIDE;
-                    auto* skinVertices = (unsigned char*)utils::Allocate(skinDataSize);
+                    auto* skinVertices = (unsigned char*)utils::Alloc(skinDataSize);
                     memcpy(skinVertices, &meshData[offset], skinDataSize);
 
                     VertexBufferCreationInfo info{};
@@ -291,7 +291,7 @@ namespace hf
 #undef INTEGRITY_CHECK
 
         uint32_t iSize = header.indexCount * BUFFER_DATA_SIZE[header.indexFormat];
-        void* indices = utils::Allocate(iSize);
+        void* indices = utils::Alloc(iSize);
         memcpy(indices, &meshData[offset], iSize);
         offset += iSize;
         if (!CheckFileIntegrity(meshData.data(), offset))\

@@ -17,6 +17,9 @@ namespace hf::platform
 
     RenderingApiType GetBestRenderingApi();
     bool IsValidRenderingApi(RenderingApiType api);
+
+    size_t GetMemoryPageSize();
+    size_t GetMemoryPageAllocationGranularity();
 }
 
 #endif //HPLATFORM_H

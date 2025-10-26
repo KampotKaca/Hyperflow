@@ -1,6 +1,9 @@
 #ifndef HENUMS_H
 #define HENUMS_H
 
+#include "phmap/btree.h"
+#include "phmap/phmap.h"
+
 namespace hf
 {
     //region Definitions
@@ -19,6 +22,9 @@ namespace hf
         a = a & b;\
         return a;\
     }\
+
+    template <class K, class V>
+    using unordered_map = phmap::flat_hash_map<K, V>;
 
     //endregion
     //region Primitives

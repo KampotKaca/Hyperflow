@@ -58,7 +58,7 @@ namespace hf
     static void DestroyInstance();
 
     static void* VulkanAllocationCallback(void* pUserData, size_t size, size_t alignment, VkSystemAllocationScope scope)
-    { return GRAPHICS_DATA.platform.functions.allocateAlignedFunc(size, (std::align_val_t)alignment); }
+    { return GRAPHICS_DATA.platform.functions.allocateAlignedFunc(size, alignment); }
 
     static void VulkanDeallocationCallback(void* pUserData, void* pMemory) { GRAPHICS_DATA.platform.functions.deallocateFunc(pMemory); }
 

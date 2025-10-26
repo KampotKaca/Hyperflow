@@ -506,11 +506,15 @@ namespace hf
         bool FileExists(const char* path); //Check if file exists.
 		bool FileExists(const std::filesystem::path& path); //Check if file exists.
 
-		[[nodiscard]] void* Allocate(std::size_t n); //Allocate n amount of memory.
-		[[nodiscard]] void* AllocateAligned(std::size_t n, std::align_val_t align); //Allocate n amount of aligned memory.
+		[[nodiscard]] void* Alloc(std::size_t n); //Allocate n amount of memory.
+		[[nodiscard]] void* AllocAligned(std::size_t n, std::size_t align); //Allocate n amount of aligned memory.
 		void Deallocate(void* p); //Deallocate the memory.
-		void DeallocateAligned(void* p, std::align_val_t align); //Deallocate the aligned memory.
-		void* Reallocate(void* p, std::size_t n); //Reallocate the memory.
+		void DeallocateAligned(void* p, std::size_t align); //Deallocate the aligned memory.
+		void* Realloc(void* p, std::size_t n); //Reallocate the memory.
+        void* ReallocAligned(void* p, std::size_t n, std::size_t align); //Reallocate the memory with alignment.
+		void* Calloc(std::size_t n, std::size_t size); //Allocate and initialize n amount of memory.
+
+        std::size_t AllocUsableSize(void* ptr);
 		void CollectThreadMemoryCache(); //Reduces memory fragmentation.
 
 	    GlobalMemoryStatistics GetGlobalMemoryStatistics(); //Get global memory statistics.

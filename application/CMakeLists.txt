@@ -11,8 +11,6 @@ else()
     project(Hyperflow VERSION 0.0.0)
 endif()
 
-set(CMAKE_CXX_STANDARD 23)
-
 file(GLOB_RECURSE PROJECT_SRC CONFIGURE_DEPENDS src/*.cpp)
 
 add_executable(${PROJECT_NAME} ${PROJECT_SRC})

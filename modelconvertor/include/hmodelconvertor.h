@@ -1,13 +1,10 @@
 #ifndef MESHCONVERTOR_H
 #define MESHCONVERTOR_H
 
-#include <cstring>
 #include <filesystem>
-#include <iostream>
-#include <fstream>
 #include <vector>
-#include "glm/glm.hpp"
-#include "hshared.h"
+#include "henums.h"
+#include "hmath.h"
 
 namespace ml
 {

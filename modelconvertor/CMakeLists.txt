@@ -1,7 +1,5 @@
 project(modelconvertor)
 
-set(CMAKE_CXX_STANDARD 23)
-
 file(GLOB_RECURSE MODEL_CONVERTOR_SRC CONFIGURE_DEPENDS src/*.cpp)
 add_subdirectory(tinyobjloader)
 
@@ -13,6 +11,7 @@ target_link_libraries(${PROJECT_NAME}
         glm
         logc
         lz4_static
+        rpmalloc
         ext
 )
 

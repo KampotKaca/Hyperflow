@@ -113,9 +113,9 @@ namespace hf::inter::rendering
         bool (*writeFileFunc)(const std::string& filename, const std::vector<char>& result){};
 
         void* (*allocateFunc)(std::size_t n);
-        void* (*allocateAlignedFunc)(std::size_t n, std::align_val_t align);
+        void* (*allocateAlignedFunc)(std::size_t n, std::size_t align);
         void (*deallocateFunc)(void* p);
-        void (*deallocateAlignedFunc)(void* p, std::align_val_t align);
+        void (*deallocateAlignedFunc)(void* p, std::size_t align);
         void* (*reallocateFunc)(void* p, std::size_t n);
     };
 

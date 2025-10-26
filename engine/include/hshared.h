@@ -32,13 +32,11 @@ extern "C"
 #include <memory>
 #include <atomic>
 
-#include "phmap/btree.h"
-#include "phmap/phmap.h"
-
 #include "henums.h"
 #include "hmath.h"
 #include "hinput.h"
 #include "../config.h"
+#include "../platforms/include/hplatformspecific.h"
 
 #if PLATFORM_LINUX
 #ifdef None
@@ -48,6 +46,15 @@ extern "C"
 #ifdef Always
 #undef Always
 #endif
+
+#endif
+
+#if defined(HF_ENABLE_ALLOCATOR)
+
+#define malloc(size) hf::utils::Alloc(size)
+#define free(ptr) hf::utils::Deallocate(ptr)
+#define calloc(num, size) hf::utils::Calloc(num, size)
+#define realloc(ptr, size) hf::utils::Realloc(ptr, size)
 
 #endif
 

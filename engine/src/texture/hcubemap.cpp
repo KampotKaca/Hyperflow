@@ -133,7 +133,7 @@ namespace hf
 
                     if (i == 0 && size.x > 0 && size.y > 0)
                     {
-                        pixels = (uint8_t*)utils::Allocate(size.x * size.y * size.z * 4 * 6);
+                        pixels = (uint8_t*)utils::Alloc(size.x * size.y * size.z * 4 * 6);
                         pixelOffset = 0;
                         textureSize = size;
                     }

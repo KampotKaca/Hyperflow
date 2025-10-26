@@ -4,6 +4,7 @@
 #include "hmodelinternal.h"
 #include "hstrconversion.h"
 #include <lz4.h>
+#include <fstream>
 
 #include "hmodelshared.h"
 #include "hyperflow.h"

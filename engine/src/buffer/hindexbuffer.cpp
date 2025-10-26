@@ -13,7 +13,7 @@ namespace hf
         if (transferType == DataTransferType::CopyData)
         {
             const auto bufferSize = info.indexCount * BUFFER_DATA_SIZE[(uint32_t)info.indexFormat];
-            buffer = utils::Allocate(bufferSize);
+            buffer = utils::Alloc(bufferSize);
             memcpy(buffer, info.pIndices, bufferSize);
         }
 

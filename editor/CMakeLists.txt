@@ -1,7 +1,6 @@
 cmake_minimum_required(VERSION 3.30)
 
 project(Hyperflow_Editor)
-set(CMAKE_CXX_STANDARD 23)
 
 file(GLOB_RECURSE EDITOR_SRC CONFIGURE_DEPENDS src/*.cpp)
 

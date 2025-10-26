@@ -12,7 +12,7 @@ namespace hf
         if (transferType == DataTransferType::CopyData && info.pVertices)
         {
             const auto bufferSize = info.vertexCount * info.vertexSize;
-            buffer = utils::Allocate(bufferSize);
+            buffer = utils::Alloc(bufferSize);
             memcpy(buffer, info.pVertices, bufferSize);
         }
         else buffer = info.pVertices;

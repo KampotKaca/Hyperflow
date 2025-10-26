@@ -1,46 +1,16 @@
 #include "hshared.h"
 #include "hgenericexception.h"
 #include "hinternal.h"
+#include "hplatform.h"
 #include "rpmalloc.h"
 #include "hyperflow.h"
 
+#ifdef HF_ENABLE_ALLOCATOR
+#include <stdexcept>
+#endif
+
 namespace hf
 {
-    namespace utils
-    {
-        static std::once_flag ALLOCATOR_INIT_FLAG;
-
-        static void EnsureAllocatorInit()
-        {
-            std::call_once(ALLOCATOR_INIT_FLAG, []
-            {
-                rpmalloc_initialize();
-                rpmalloc_thread_initialize();
-            });
-        }
-
-        void* Allocate(std::size_t n)
-        {
-            EnsureAllocatorInit();
-            void* memory = rpmalloc(n);
-            if (!memory) throw std::bad_alloc();
-            return memory;
-        }
-
-        void* AllocateAligned(std::size_t n, std::align_val_t align)
-        {
-            EnsureAllocatorInit();
-            void* memory = rpaligned_alloc((size_t)align, n);
-            if (!memory) throw std::bad_alloc();
-            return memory;
-        }
-
-        void Deallocate(void* p) { rpfree(p); }
-        void DeallocateAligned(void* p, std::align_val_t align) { rpfree(p); }
-        void* Reallocate(void* p, std::size_t n) { return rprealloc(p, n); }
-        void CollectThreadMemoryCache() { rpmalloc_thread_collect(); }
-    }
-
     namespace inter::alloc
     {
         double ToMB(size_t bytes)
@@ -56,7 +26,7 @@ namespace hf
 
         void LoadAllocatorThread_i()
         {
-            if (!rpmalloc_is_thread_initialized()) rpmalloc_thread_initialize();
+            rpmalloc_thread_initialize();
         }
 
         void UnloadAllocatorThread_i()
@@ -136,49 +106,21 @@ namespace hf
 
 #if defined(HF_ENABLE_ALLOCATOR)
 
+///////////////////////////////////////////////////////////////////////
+// USUAL OVERLOADS
 void* operator new(std::size_t size)
 {
-    return hf::utils::Allocate(size);
+    return hf::utils::Alloc(size);
+}
+
+void operator delete(void* ptr)
+{
+    hf::utils::Deallocate(ptr);
 }
 
 void* operator new[](std::size_t size)
 {
-    return hf::utils::Allocate(size);
-}
-
-void* operator new(std::size_t size, const std::nothrow_t&) noexcept
-{
-    return hf::utils::Allocate(size);
-}
-
-void* operator new[](std::size_t size, const std::nothrow_t&) noexcept
-{
-    return hf::utils::Allocate(size);
-}
-
-void* operator new(std::size_t size, std::align_val_t align)
-{
-    return hf::utils::AllocateAligned(size, align);
-}
-
-void* operator new[](std::size_t size, std::align_val_t align)
-{
-    return hf::utils::AllocateAligned(size, align);
-}
-
-void* operator new(std::size_t size, std::align_val_t align, const std::nothrow_t&) noexcept
-{
-    return hf::utils::AllocateAligned(size, align);
-}
-
-void* operator new[](std::size_t size, std::align_val_t align, const std::nothrow_t&) noexcept
-{
-    return hf::utils::AllocateAligned(size, align);
-}
-
-void operator delete(void* ptr) noexcept
-{
-    hf::utils::Deallocate(ptr);
+    return hf::utils::Alloc(size);
 }
 
 void operator delete[](void* ptr) noexcept
@@ -186,14 +128,11 @@ void operator delete[](void* ptr) noexcept
     hf::utils::Deallocate(ptr);
 }
 
-void operator delete(void* ptr, std::size_t) noexcept
+///////////////////////////////////////////////////////////////////////
+// WITH std::nothrow_t
+void* operator new(std::size_t size, const std::nothrow_t&) noexcept
 {
-    hf::utils::Deallocate(ptr);
-}
-
-void operator delete[](void* ptr, std::size_t) noexcept
-{
-    hf::utils::Deallocate(ptr);
+    return hf::utils::Alloc(size);
 }
 
 void operator delete(void* ptr, const std::nothrow_t&) noexcept
@@ -201,49 +140,124 @@ void operator delete(void* ptr, const std::nothrow_t&) noexcept
     hf::utils::Deallocate(ptr);
 }
 
+void* operator new[](std::size_t size, const std::nothrow_t&) noexcept
+{
+    return hf::utils::Alloc(size);
+}
+
 void operator delete[](void* ptr, const std::nothrow_t&) noexcept
+{
+    hf::utils::Deallocate(ptr);
+}
+
+///////////////////////////////////////////////////////////////////////
+// WITH ALIGNMENT
+void* operator new(std::size_t size, std::align_val_t alignment)
+{
+    return hf::utils::AllocAligned(size, static_cast<std::size_t>(alignment));
+}
+
+void operator delete(void* ptr, std::align_val_t alignment) noexcept
+{
+    hf::utils::Deallocate(ptr);
+}
+
+void* operator new[](std::size_t size, std::align_val_t alignment)
+{
+    return hf::utils::AllocAligned(size, static_cast<std::size_t>(alignment));
+}
+
+void operator delete[](void* ptr, std::align_val_t alignment) noexcept
+{
+    hf::utils::Deallocate(ptr);
+}
+
+///////////////////////////////////////////////////////////////////////
+// WITH ALIGNMENT std::size_t
+void* operator new(std::size_t size, std::size_t alignment)
+{
+    return hf::utils::AllocAligned(size, alignment);
+}
+
+void* operator new[](std::size_t size, std::size_t alignment)
+{
+    return hf::utils::AllocAligned(size, alignment);
+}
+
+///////////////////////////////////////////////////////////////////////
+// WITH ALIGNMENT and std::nothrow_t
+void* operator new(std::size_t size, std::align_val_t alignment, const std::nothrow_t& tag) noexcept
+{
+    return hf::utils::AllocAligned(size, static_cast<std::size_t>(alignment));
+}
+
+void* operator new[](std::size_t size, std::align_val_t alignment, const std::nothrow_t& tag) noexcept
+{
+    return hf::utils::AllocAligned(size, static_cast<std::size_t>(alignment));
+}
+
+void operator delete(void* ptr, std::align_val_t, const std::nothrow_t &) noexcept
+{
+    hf::utils::Deallocate(ptr);
+}
+
+void operator delete[](void* ptr, std::align_val_t, const std::nothrow_t &) noexcept
+{
+    hf::utils::Deallocate(ptr);
+}
+
+///////////////////////////////////////////////////////////////////////
+// WITH ALIGNMENT and std::nothrow_t & std::size_t alignment not std::align_val_t
+void* operator new(std::size_t size, std::size_t alignment, const std::nothrow_t& tag) noexcept
+{
+    return hf::utils::AllocAligned(size, alignment);
+}
+
+void* operator new[](std::size_t size, std::size_t alignment, const std::nothrow_t& tag) noexcept
+{
+    return hf::utils::AllocAligned(size, alignment);
+}
+
+void operator delete(void* ptr, std::size_t, const std::nothrow_t &) noexcept
+{
+    hf::utils::Deallocate(ptr);
+}
+
+void operator delete[](void* ptr, std::size_t, const std::nothrow_t &) noexcept
+{
+    hf::utils::Deallocate(ptr);
+}
+
+///////////////////////////////////////////////////////////////////////
+// DELETES WITH SIZES
+void operator delete(void* ptr, std::size_t size) noexcept
+{
+    hf::utils::Deallocate(ptr);
+}
+
+void operator delete[](void* ptr, std::size_t size) noexcept
 {
     hf::utils::Deallocate(ptr);
 }
 
 void operator delete(void* ptr, std::size_t size, std::align_val_t align) noexcept
 {
-    hf::utils::DeallocateAligned(ptr, align);
+    hf::utils::Deallocate(ptr);
 }
 
 void operator delete[](void* ptr, std::size_t size, std::align_val_t align) noexcept
 {
-    hf::utils::DeallocateAligned(ptr, align);
+    hf::utils::Deallocate(ptr);
 }
 
-void operator delete(void* ptr, std::align_val_t align) noexcept
+void operator delete(void* ptr, std::size_t size, std::size_t align) noexcept
 {
-    hf::utils::DeallocateAligned(ptr, align);
+    hf::utils::Deallocate(ptr);
 }
 
-void operator delete[](void* ptr, std::align_val_t align) noexcept
+void operator delete[](void* ptr, std::size_t size, std::size_t align) noexcept
 {
-    hf::utils::DeallocateAligned(ptr, align);
-}
-
-void operator delete(void* ptr, std::align_val_t align, const std::nothrow_t&) noexcept
-{
-    hf::utils::DeallocateAligned(ptr, align);
-}
-
-void operator delete[](void* ptr, std::align_val_t align, const std::nothrow_t&) noexcept
-{
-    hf::utils::DeallocateAligned(ptr, align);
-}
-
-void operator delete(void* ptr, std::align_val_t align, std::size_t size) noexcept
-{
-    hf::utils::DeallocateAligned(ptr, align);
-}
-
-void operator delete[](void* ptr, std::align_val_t align, std::size_t size) noexcept
-{
-    hf::utils::DeallocateAligned(ptr, align);
+    hf::utils::Deallocate(ptr);
 }
 
 #endif

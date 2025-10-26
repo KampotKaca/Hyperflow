@@ -29,4 +29,14 @@ namespace hf::platform
         default: return false;
         }
     }
+
+    size_t GetMemoryPageSize()
+    {
+        // https://learn.microsoft.com/en-gb/windows/win32/api/sysinfoapi/ns-sysinfoapi-system_info
+        SYSTEM_INFO system_info;
+        GetSystemInfo(&system_info);
+        return system_info.dwPageSize; // TYPICALLY 4096, 2^ 12
+    }
+
+    size_t GetMemoryPageAllocationGranularity() { return 65536; }
 }

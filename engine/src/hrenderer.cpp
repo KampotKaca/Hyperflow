@@ -143,11 +143,11 @@ namespace hf
                 funcs.readFileFunc = utils::ReadFile;
                 funcs.writeFileFunc = utils::WriteFile;
 
-                funcs.allocateFunc = utils::Allocate;
-                funcs.allocateAlignedFunc = utils::AllocateAligned;
+                funcs.allocateFunc = utils::Alloc;
+                funcs.allocateAlignedFunc = utils::AllocAligned;
                 funcs.deallocateFunc = utils::Deallocate;
                 funcs.deallocateAlignedFunc = utils::DeallocateAligned;
-                funcs.reallocateFunc = utils::Reallocate;
+                funcs.reallocateFunc = utils::Realloc;
 
                 RendererLoadInfo_i loadInfo
                 {

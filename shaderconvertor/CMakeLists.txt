@@ -1,7 +1,5 @@
 project(shaderconvertor)
 
-set(CMAKE_CXX_STANDARD 23)
-
 file(GLOB_RECURSE SHADER_CONVERTOR_SRC CONFIGURE_DEPENDS *.cpp)
 
 add_executable(${PROJECT_NAME} ${SHADER_CONVERTOR_SRC})

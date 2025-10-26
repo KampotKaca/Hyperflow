@@ -13,8 +13,6 @@ else()
     project(Hyperflow_Engine VERSION 0.0.0)
 endif()
 
-set(CMAKE_CXX_STANDARD 23)
-
 #region Platforms
 
 if (CMAKE_SYSTEM_NAME STREQUAL "Windows")

@@ -3,6 +3,7 @@
 
 #include "hmodelconvertor.h"
 #include "hmodelshared.h"
+#include <iostream>
 
 namespace ml
 {
