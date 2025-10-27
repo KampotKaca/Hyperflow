@@ -370,7 +370,7 @@ namespace hf
                 if (!rn->currentDraw.currentTexturePackBinding) throw GENERIC_EXCEPT("[Hyperflow]", "Cannot add binding packet without starting texture pack upload");
 #endif
 
-                UploadTex(rn, rn->currentDraw.currentTexturePackBinding->texturePack->cubemapBindings, info, TexturePackBindingType::Cubemap);
+                UploadTex<Cubemap>(rn, rn->currentDraw.currentTexturePackBinding->texturePack->cubemapBindings, info, TexturePackBindingType::Cubemap);
             }
             catch (...)
             {
@@ -387,7 +387,7 @@ namespace hf
                 if (!rn->currentDraw.currentTexturePackBinding) throw GENERIC_EXCEPT("[Hyperflow]", "Cannot add binding packet without starting texture pack upload");
 #endif
 
-                UploadTex(rn, rn->currentDraw.currentTexturePackBinding->texturePack->renderTextureBindings, info, TexturePackBindingType::RenderTexture);
+                UploadTex<RenderTexture>(rn, rn->currentDraw.currentTexturePackBinding->texturePack->renderTextureBindings, info, TexturePackBindingType::RenderTexture);
             }
             catch (...)
             {
@@ -602,7 +602,7 @@ namespace hf
 #endif
 
                 const auto packet = rn->currentDraw.packet;
-                TextureBindingInfo bindingInfo{};
+                TexPackBindingInfo bindingInfo{};
                 bindingInfo.pack = texPack;
                 bindingInfo.setBindingIndex = setBindingIndex;
 
@@ -672,7 +672,7 @@ namespace hf
 
                 const auto packet = rn->currentDraw.packet;
 
-                TextureBindingInfo bindingInfo{};
+                TexPackBindingInfo bindingInfo{};
                 bindingInfo.pack = texPack;
                 bindingInfo.setBindingIndex = setBindingIndex;
 

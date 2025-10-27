@@ -34,10 +34,11 @@ namespace hf
         this->window = window;
         threadInfo.size = inter::window::GetSize(window);
 
-        threadInfo.cachedPackets = List<RenderPacket*>(3);
         for (uint32_t i = 0; i < 3; i++)
         {
-            threadInfo.cachedPackets[i] = &allPackets[i];
+            auto ptr = &allPackets[i];
+            ptr->allocate();
+            threadInfo.cachedPackets.push_back(ptr);
         }
 
         inter::rendering::CreateRenderer_i(this);

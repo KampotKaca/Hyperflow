@@ -224,8 +224,8 @@ namespace hf
 
         if (indices.graphicsFamily != indices.presentFamily)
         {
-            std::set uniqueIndices = { indices.transferFamily.value(), indices.graphicsFamily.value(), indices.presentFamily.value() };
-            deviceData.transferData.indices = List<uint32_t>(uniqueIndices.begin(), uniqueIndices.end());
+            std::set uniqueIndices = { indices.transferFamily.value(), indices.graphicsFamily.value(), indices.presentFamily.value(), indices.computeFamily.value() };
+            deviceData.transferData.indices = SmallList<uint32_t, 4>(uniqueIndices.begin(), uniqueIndices.end());
 
             if (deviceData.transferData.indices.size() > 1) deviceData.transferData.sharingMode = VK_SHARING_MODE_CONCURRENT;
             else deviceData.transferData.sharingMode = VK_SHARING_MODE_EXCLUSIVE;

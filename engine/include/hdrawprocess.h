@@ -14,7 +14,7 @@ namespace hf
         DescriptorType type{};
     };
 
-    struct TextureBindingInfo
+    struct TexPackBindingInfo
     {
         Ref<TexturePack> pack{};
         uint32_t setBindingIndex{};
@@ -129,32 +129,40 @@ namespace hf
         CameraFrustum frustum{};
         Camera3DFreeLook camera{};
 
-        List<DirectionalLight> directionalLights{};
-        List<SpotLight> spotLights{};
-        List<PointLight> pointLights{};
+        SmallList<DirectionalLight, RN_NUM_DIRECTIONAL_LIGHTS> directionalLights{};
+        SmallList<SpotLight, RN_NUM_SPOT_LIGHTS> spotLights{};
+        SmallList<PointLight, RN_NUM_POINT_LIGHTS> pointLights{};
 
-        List<RenderAttachmentDependencyInfo> dependencies{};
-        List<RenderTexturePacketInfo> renderTextures{};
-        List<ShaderLayoutPacketInfo> shaderLayouts{};
-        List<ShaderPacketInfo> shaders{};
-        List<MaterialPacketInfo> materials{};
-        List<DrawPacketInfo> drawPackets{};
-        List<TextureBindingInfo> texpacks{};
+        SmallList<RenderAttachmentDependencyInfo, RN_NUM_RENDER_ATTACHMENT_DEPENDENCIES> dependencies{};
+        SmallList<RenderTexturePacketInfo, RN_NUM_RENDER_TEXTURES> renderTextures{};
+        SmallList<ShaderLayoutPacketInfo, RN_NUM_SHADER_LAYOUTS> shaderLayouts{};
+        SmallList<ShaderPacketInfo, RN_NUM_SHADERS> shaders{};
+        SmallList<MaterialPacketInfo, RN_NUM_MATERIALS> materials{};
+        SmallList<DrawPacketInfo, RN_NUM_DRAW_PACKETS> drawPackets{};
+        SmallList<TexPackBindingInfo, RN_NUM_TEX_PACKS> texpacks{};
 
-        List<TexturePackRebindingGroupPacketInfo> textureGroupRebindings{};
-        List<TexturePackRebindingPacketInfo> textureRebindings{};
-        List<TextureInfo> textures{};
+        SmallList<TexturePackRebindingGroupPacketInfo, RN_NUM_TEX_PACK_GROUP_UPLOADS> textureGroupRebindings{};
+        SmallList<TexturePackRebindingPacketInfo, RN_NUM_TEX_PACK_UPLOADS> textureRebindings{};
+        SmallList<TextureInfo, RN_NUM_TEXTURE_UPLOADS> textures{};
+        SmallList<BufferUploadPacketInfo, RN_NUM_BUFFER_UPLOADS> bufferUploadPackets{};
 
-        List<BufferSetPacketInfo> bufferSets{};
-        List<Buffer> buffers{};
+        SmallList<BufferSetPacketInfo, RN_NUM_BUFFERS_SETS> bufferSets{};
+        SmallList<Buffer, RN_NUM_BUFFERS> buffers{};
 
-        List<DrawCallPacketInfo> drawCalls{};
-        List<InstancePacketInfo> instances{};
-        List<Ref<VertexBuffer>> vertexBuffers{};
+        SmallList<DrawCallPacketInfo, RN_NUM_DRAW_CALLS> drawCalls{};
+        SmallList<InstancePacketInfo, RN_NUM_DRAW_INSTANCES> instances{};
+        SmallList<Ref<VertexBuffer>, RN_NUM_VERTEX_BUFFERS> vertexBuffers{};
+
         List<uint8_t> bufferUploads{};
         List<uint8_t> pushConstantUploads{};
         List<uint8_t> instanceUploads{};
-        List<BufferUploadPacketInfo> bufferUploadPackets{};
+
+        void allocate()
+        {
+            bufferUploads.reserve(RN_NUM_BUFFER_UPLOAD_DATA);
+            pushConstantUploads.reserve(RN_NUM_PUSH_CONSTANT_UPLOAD_DATA);
+            instanceUploads.reserve(RN_NUM_INSTANCE_UPLOAD_DATA);
+        }
 
         void clear()
         {

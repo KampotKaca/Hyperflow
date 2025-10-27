@@ -42,7 +42,7 @@ namespace hf
     struct CommandPool
     {
         VkCommandPool pool{};
-        List<VkCommandBuffer> buffers{};
+        SmallList<VkCommandBuffer, EN_NUM_COMMANDS_COMMAND_POOL> buffers{};
     };
 
     struct SwapChainSupportDetails
@@ -73,7 +73,7 @@ namespace hf
 
     struct DeviceTransferData
     {
-        List<uint32_t> indices{};
+        SmallList<uint32_t, 4> indices{};
         VkSharingMode sharingMode{};
     };
 

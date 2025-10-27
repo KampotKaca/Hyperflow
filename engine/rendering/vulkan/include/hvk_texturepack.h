@@ -19,7 +19,7 @@ namespace hf
         TexturePackBindingType bindingType{};
         uint32_t bindingId = 0;
         TextureSampler sampler{};
-        StaticList<VkTextureBindingViewData, MAX_TEXTURES_IN_TEXTURE_PACK> bindingArray{};
+        SmallList<VkTextureBindingViewData, MAX_TEXTURES_IN_TEXTURE_PACK> bindingArray{};
     };
 
     struct VkTexturePack

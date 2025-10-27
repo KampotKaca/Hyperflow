@@ -49,12 +49,54 @@
 #define MAX_DEFORMATIONS_PER_VERTEX 4
 
 #define HF_ENABLE_ALLOCATOR
-
 // #define VK_ENABLE_PIPELINE_CACHES
 
 #if defined(DEBUG)
 #define VK_ENABLE_VALIDATION
 // #define VK_ENABLE_DEEP_VALIDATION
 #endif
+
+//------------------------------ Engine Preallocations -----------------------------------------------------
+//These numbers are suggestions if the size exceeds, program will still work,
+//but this will call allocation at runtime, so this is not optimal.
+#define EN_NUM_RESOURCES_MARKED_FOR_DELETION 32
+#define EN_NUM_WINDOWS                       8
+
+
+//------------------------------ Renderer Preallocations ---------------------------------------------------
+//These numbers are suggestions if the size exceeds, program will still work,
+//but this will call allocations at runtime, so this is not optimal.
+#define RN_NUM_DIRECTIONAL_LIGHTS 8
+#define RN_NUM_SPOT_LIGHTS        8
+#define RN_NUM_POINT_LIGHTS       8
+
+#define RN_NUM_RENDER_ATTACHMENT_DEPENDENCIES 8
+#define RN_NUM_RENDER_TEXTURES                8
+#define RN_NUM_SHADER_LAYOUTS                 64
+#define RN_NUM_SHADERS                        128
+#define RN_NUM_MATERIALS                      256
+#define RN_NUM_DRAW_PACKETS                   512
+#define RN_NUM_TEX_PACKS                      2 * RN_NUM_DRAW_PACKETS
+
+#define RN_NUM_DRAW_CALLS                     4 * RN_NUM_DRAW_PACKETS
+#define RN_NUM_DRAW_INSTANCES                 4 * RN_NUM_DRAW_CALLS
+
+#define RN_NUM_DRAW_INSTANCES                 4 * RN_NUM_DRAW_CALLS
+#define RN_NUM_VERTEX_BUFFERS                 2 * RN_NUM_DRAW_CALLS
+
+#define RN_NUM_BUFFERS_SETS                   8
+#define RN_NUM_BUFFERS                        4 * RN_NUM_BUFFERS_SETS
+
+#define RN_NUM_BUFFER_UPLOAD_DATA             256 * RN_NUM_BUFFERS
+#define RN_NUM_PUSH_CONSTANT_UPLOAD_DATA      128 * RN_NUM_DRAW_CALLS
+#define RN_NUM_INSTANCE_UPLOAD_DATA           64 * RN_NUM_DRAW_INSTANCES
+
+#define RN_NUM_TEX_PACK_GROUP_UPLOADS         8
+#define RN_NUM_TEX_PACK_UPLOADS               4 * RN_NUM_TEX_PACK_GROUP_UPLOADS
+#define RN_NUM_TEXTURE_UPLOADS                4 * RN_NUM_TEX_PACK_UPLOADS
+#define RN_NUM_BUFFER_UPLOADS                 32
+
+
+#define EN_NUM_COMMANDS_COMMAND_POOL          8
 
 #endif //CONFIG_H

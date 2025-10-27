@@ -83,12 +83,12 @@ namespace hf::inter
         };
 
         std::mutex syncLock{};
-        List<void*> shaderLibraries{};
-        List<void*> shaders{};
-        List<TypedBuffer> buffers{};
-        List<void*> texturePacks{};
-        List<void*> textures{};
-        List<void*> renderTextures{};
+        SmallList<void*, EN_NUM_RESOURCES_MARKED_FOR_DELETION> shaderLibraries{};
+        SmallList<void*, EN_NUM_RESOURCES_MARKED_FOR_DELETION> shaders{};
+        SmallList<TypedBuffer, EN_NUM_RESOURCES_MARKED_FOR_DELETION> buffers{};
+        SmallList<void*, EN_NUM_RESOURCES_MARKED_FOR_DELETION> texturePacks{};
+        SmallList<void*, EN_NUM_RESOURCES_MARKED_FOR_DELETION> textures{};
+        SmallList<void*, EN_NUM_RESOURCES_MARKED_FOR_DELETION> renderTextures{};
     };
 
     struct StaticVertexAttributes
@@ -164,7 +164,7 @@ namespace hf::inter
         std::string appTitle{};
         Time time{};
         Ref<Window> mainWindow{};
-        List<Ref<Window>> tempWindows{};
+        SmallList<Ref<Window>, EN_NUM_WINDOWS> tempWindows{};
         Dictionary<uint64_t, Ref<Window>> windows{};
         Dictionary<uint64_t, Ref<Scene>> scenes{};
         uint32_t rendererCount{};

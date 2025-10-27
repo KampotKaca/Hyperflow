@@ -23,7 +23,7 @@ namespace hf
 
 			bool isRunning{};
 			RenderPacket* drawPacket{};
-			List<RenderPacket*> cachedPackets{};
+			SmallList<RenderPacket*, 3> cachedPackets{};
 		};
 
 	    RenderPacket allPackets[3]{};
