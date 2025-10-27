@@ -31,7 +31,7 @@ namespace hf
         bindingDescription.stride = fullStride;
         bindingDescription.inputRate = (VkVertexInputRate)info.inputRate;
 
-        attribDescriptions = List<VkVertexInputAttributeDescription>(info.formatCount);
+        attribDescriptions = SmallList<VkVertexInputAttributeDescription, RN_NUM_MAX_VERTEX_ATTRIBUTES>(info.formatCount);
 
         uint32_t currentOffset = 0;
         uint32_t location = info.locationOffset;

@@ -8,7 +8,7 @@ namespace hf
 {
     struct VkVertexBuffer final : public VkBufferBase
     {
-        explicit VkVertexBuffer(const inter::rendering::VertexBufferCreationInfo_i& info);
+        explicit VkVertexBuffer(const ir::rdr::VertexBufferCreationInfo_i& info);
         ~VkVertexBuffer() override = default;
     };
 }

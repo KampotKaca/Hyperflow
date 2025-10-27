@@ -8,7 +8,6 @@
 #include "hfreemovecamera3d.h"
 #include "htransform.h"
 #include "hoctree.h"
-#include "hstaticvector.h"
 #include "hdirectionallight.h"
 #include "hspotlight.h"
 #include "hpointlight.h"

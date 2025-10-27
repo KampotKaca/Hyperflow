@@ -20,7 +20,7 @@
 #endif
 #endif
 
-namespace hf::inter
+namespace hf::ir
 {
     struct GlobalUniformInfo
     {
@@ -34,7 +34,7 @@ namespace hf::inter
         RenderingApiType type = RenderingApiType::None;
         void* handle{};
         bool isLoaded = false;
-        rendering::RendererAPI api{};
+        rdr::RendererAPI api{};
     };
 
     struct GraphicsResources
@@ -214,7 +214,7 @@ namespace hf::inter
         void DestroyAnimationClip_i(AnimationClip* anim);
     }
 
-    namespace rendering
+    namespace rdr
     {
         void StartRenderPacket_i(const Ref<Renderer>& rn);
         void EndRenderPacket_i(const Ref<Renderer>& rn);

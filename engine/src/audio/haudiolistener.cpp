@@ -18,10 +18,10 @@ namespace hf
     {
         try
         {
-            auto newId = inter::AUDIO_DATA.definedListenersCount;
-            inter::AUDIO_DATA.definedListenersCount++;
+            auto newId = ir::AUDIO_DATA.definedListenersCount;
+            ir::AUDIO_DATA.definedListenersCount++;
 
-            ma_engine_listener_set_world_up(&inter::AUDIO_DATA.engine, (ma_uint32)newId, 0.0f, 1.0f, 0.0f);
+            ma_engine_listener_set_world_up(&ir::AUDIO_DATA.engine, (ma_uint32)newId, 0.0f, 1.0f, 0.0f);
             auto listener = MakeRef<AudioListener>(info);
             listener->handle = newId;
 
@@ -48,15 +48,15 @@ namespace hf
         if (oldCone.innerAngle != cone.innerAngle ||
             oldCone.outerAngle != cone.outerAngle ||
             oldCone.outerGain != cone.outerGain)
-            ma_engine_listener_set_cone(&inter::AUDIO_DATA.engine, handle, glm::radians(cone.innerAngle), glm::radians(cone.outerAngle), cone.outerGain);
+            ma_engine_listener_set_cone(&ir::AUDIO_DATA.engine, handle, glm::radians(cone.innerAngle), glm::radians(cone.outerAngle), cone.outerGain);
 
         if (oldCone.position != cone.position)
-            ma_engine_listener_set_position(&inter::AUDIO_DATA.engine, handle, cone.position.x, cone.position.y, cone.position.z);
+            ma_engine_listener_set_position(&ir::AUDIO_DATA.engine, handle, cone.position.x, cone.position.y, cone.position.z);
 
         if (oldCone.euler != cone.euler)
         {
             const auto direction = vec3(glm::eulerAngleXYZ(cone.euler.x, cone.euler.y, cone.euler.z) * vec4(0, 0, 1, 0));
-            ma_engine_listener_set_direction(&inter::AUDIO_DATA.engine, handle, direction.x, direction.y, direction.z);
+            ma_engine_listener_set_direction(&ir::AUDIO_DATA.engine, handle, direction.x, direction.y, direction.z);
         }
 
         ls->cone = cone;
@@ -67,7 +67,7 @@ namespace hf
         if (ls->isEnabled != enable)
         {
             ls->isEnabled = enable;
-            ma_engine_listener_set_enabled(&inter::AUDIO_DATA.engine, (ma_uint32)ls->handle, enable);
+            ma_engine_listener_set_enabled(&ir::AUDIO_DATA.engine, (ma_uint32)ls->handle, enable);
         }
     }
 
@@ -76,7 +76,7 @@ namespace hf
         if (ls->velocity != velocity)
         {
             ls->velocity = velocity;
-            ma_engine_listener_set_velocity(&inter::AUDIO_DATA.engine, (ma_uint32)ls->handle, velocity.x, velocity.y, velocity.z);
+            ma_engine_listener_set_velocity(&ir::AUDIO_DATA.engine, (ma_uint32)ls->handle, velocity.x, velocity.y, velocity.z);
         }
     }
 

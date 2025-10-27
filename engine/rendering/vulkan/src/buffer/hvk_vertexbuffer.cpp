@@ -4,7 +4,7 @@
 
 namespace hf
 {
-    VkVertexBuffer::VkVertexBuffer(const inter::rendering::VertexBufferCreationInfo_i& info) :
+    VkVertexBuffer::VkVertexBuffer(const ir::rdr::VertexBufferCreationInfo_i& info) :
         VkBufferBase(info.memoryType, (uint8_t*)info.pVertices, 0, 0,
             VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | (uint32_t)info.usageFlags, info.sizeInBytes)
     {

@@ -9,7 +9,7 @@
 #include "hvk_shaderlibrary.h"
 #include "hvk_boundbuffer.h"
 
-namespace hf::inter::rendering
+namespace hf::ir::rdr
 {
     void Load(const RendererLoadInfo_i& info)
     {

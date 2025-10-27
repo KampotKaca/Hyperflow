@@ -6,25 +6,25 @@ namespace hf
 {
     RenderTexture::RenderTexture(const RenderTextureCreationInfo& info) : createInfo(info)
     {
-        inter::rendering::CreateRenderTexture_i(this);
+        ir::rdr::CreateRenderTexture_i(this);
     }
 
     RenderTexture::~RenderTexture()
     {
-        inter::rendering::DestroyRenderTexture_i(this);
+        ir::rdr::DestroyRenderTexture_i(this);
     }
 
     Ref<RenderTexture> Create(const RenderTextureCreationInfo& info)
     {
         Ref<RenderTexture> texture = MakeRef<RenderTexture>(info);
-        inter::HF.graphicsResources.renderTextures[(uint64_t)texture.get()] = texture;
+        ir::HF.graphicsResources.renderTextures[(uint64_t)texture.get()] = texture;
         return texture;
     }
 
     void Destroy(const Ref<RenderTexture>& tex)
     {
-        if (inter::rendering::DestroyRenderTexture_i(tex.get()))
-            inter::HF.graphicsResources.renderTextures.erase((uint64_t)tex.get());
+        if (ir::rdr::DestroyRenderTexture_i(tex.get()))
+            ir::HF.graphicsResources.renderTextures.erase((uint64_t)tex.get());
     }
 
     void Destroy(const Ref<RenderTexture>* pTextures, uint32_t count)
@@ -32,14 +32,14 @@ namespace hf
         for (uint32_t i = 0; i < count; i++)
         {
             auto tex = pTextures[i];
-            if (inter::rendering::DestroyRenderTexture_i(tex.get()))
-                inter::HF.graphicsResources.renderTextures.erase((uint64_t)tex.get());
+            if (ir::rdr::DestroyRenderTexture_i(tex.get()))
+                ir::HF.graphicsResources.renderTextures.erase((uint64_t)tex.get());
         }
     }
 
     bool IsLoaded(const Ref<RenderTexture>& tex) { return tex->handle; }
 
-    namespace inter::rendering
+    namespace ir::rdr
     {
         bool CreateRenderTexture_i(RenderTexture* tex)
         {

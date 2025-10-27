@@ -103,7 +103,7 @@ namespace hf
         }
 
         DestroySwapchain(result, &oldSwapchain);
-        if (result.images.size() != imageCount) result.images = std::vector<SwapchainImage>(imageCount);
+        if (result.images.size() != imageCount) result.images = SmallList<SwapchainImage, 16>(imageCount);
         for (uint32_t i = 0; i < imageCount; i++)
         {
             auto& resImage = result.images[i];

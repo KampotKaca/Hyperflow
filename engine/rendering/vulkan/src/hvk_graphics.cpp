@@ -12,7 +12,7 @@ namespace hf
 
     //------------------------------------------------------------------------------------
 
-    VkRenderer::VkRenderer(const inter::rendering::RendererInstanceCreationInfo_i& info)
+    VkRenderer::VkRenderer(const ir::rdr::RendererInstanceCreationInfo_i& info)
         : shutdownCallback(info.shutdownCallback), windowHandle(info.handle), targetSize(info.size), vSyncMode(info.vSyncMode)
     {
         if (!GRAPHICS_DATA.deviceIsLoaded) LoadDevice(windowHandle, &swapchain.surface);
@@ -26,7 +26,7 @@ namespace hf
         CreateCommandPool(GRAPHICS_DATA.device, GRAPHICS_DATA.device.familyIndices.graphicsFamily.value(), &commandPool);
         CreateCommandBuffers(GRAPHICS_DATA.device, &commandPool, FRAMES_IN_FLIGHT);
 
-        frames = List<VkFrame>(FRAMES_IN_FLIGHT);
+        frames = SmallList<VkFrame, 8>(FRAMES_IN_FLIGHT);
         for (uint32_t i = 0; i < FRAMES_IN_FLIGHT; ++i)
             CreateSemaphore(GRAPHICS_DATA.device, &frames[i].isImageAvailable);
 
@@ -120,7 +120,7 @@ namespace hf
             device.familyIndices.presentFamily.value(),
             device.familyIndices.transferFamily.value()
         };
-        List<VkDeviceQueueCreateInfo> queueCreateInfos{};
+        SmallList<VkDeviceQueueCreateInfo, 64> queueCreateInfos{};
         queueCreateInfos.reserve(uniqueQueueFamilies.size());
 
         float queuePriority = 1.0f;
@@ -194,7 +194,7 @@ namespace hf
         uint32_t familyCount = 0;
         vkGetPhysicalDeviceQueueFamilyProperties(device, &familyCount, nullptr);
 
-        List<VkQueueFamilyProperties> queueFamilies(familyCount);
+        SmallList<VkQueueFamilyProperties, 64> queueFamilies(familyCount);
         vkGetPhysicalDeviceQueueFamilyProperties(device, &familyCount, queueFamilies.data());
 
         for (uint32_t i = 0; i < queueFamilies.size(); i++)

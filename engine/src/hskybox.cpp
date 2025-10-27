@@ -5,13 +5,13 @@ namespace hf::dp
 {
     void SkyboxBindDefaultCubemap(const Ref<Renderer>& rn)
     {
-        SkyboxBindCubemap(rn, inter::HF.staticResources.skyboxResources.defaultCubemap);
+        SkyboxBindCubemap(rn, ir::HF.staticResources.skyboxResources.defaultCubemap);
     }
 
     void SkyboxBindCubemap(const Ref<Renderer>& rn, const Ref<Cubemap>& cubemap)
     {
-        inter::HF.staticResources.skyboxResources.boundCubemap = cubemap;
-        UploadStartTexPack(rn, inter::HF.staticResources.skyboxResources.texturePack);
+        ir::HF.staticResources.skyboxResources.boundCubemap = cubemap;
+        UploadStartTexPack(rn, ir::HF.staticResources.skyboxResources.texturePack);
         {
             TexturePackTextureUploadInfo<Cubemap>::TextureInfo tInfo{};
             tInfo.texture = cubemap;
@@ -33,17 +33,17 @@ namespace hf::dp
 
     void Draw(const Ref<Renderer>& rn, const SkyboxInfo& info)
     {
-        StartShaderLayout(rn, inter::HF.staticResources.shaderLayouts.skybox);
+        StartShaderLayout(rn, ir::HF.staticResources.shaderLayouts.skybox);
         {
             BindGlobalUniformBuffer(rn);
 
-            StartShader(rn, inter::HF.staticResources.shaders.skybox);
+            StartShader(rn, ir::HF.staticResources.shaders.skybox);
             {
                 StartMat(rn, nullptr);
                 {
                     StartDrawGroup(rn);
                     {
-                        DrawGroupAddTexPackBinding(rn, inter::HF.staticResources.skyboxResources.texturePack, 1);
+                        DrawGroupAddTexPackBinding(rn, ir::HF.staticResources.skyboxResources.texturePack, 1);
                         DrawGroupAddDrawCall(rn, primitives::GetMesh(PrimitiveMeshType::Cube));
                     }
                     EndDrawGroup(rn);
@@ -55,5 +55,5 @@ namespace hf::dp
         EndShaderLayout(rn);
     }
 
-    bool SkyboxIsDefaultCubemapBound() { return inter::HF.staticResources.skyboxResources.boundCubemap == inter::HF.staticResources.skyboxResources.defaultCubemap; }
+    bool SkyboxIsDefaultCubemapBound() { return ir::HF.staticResources.skyboxResources.boundCubemap == ir::HF.staticResources.skyboxResources.defaultCubemap; }
 }

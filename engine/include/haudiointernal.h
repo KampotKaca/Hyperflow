@@ -3,7 +3,7 @@
 
 #include "miniaudio.h"
 
-namespace hf::inter
+namespace hf::ir
 {
     struct AudioData
     {

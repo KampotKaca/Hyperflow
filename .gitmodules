@@ -14,3 +14,6 @@
 	path = editor/external/ImGui
 	url = https://github.com/KampotKaca/ImGui.git
 	branch = docking
+[submodule "engine/external/svector"]
+	path = engine/external/svector
+	url = https://github.com/martinus/svector.git

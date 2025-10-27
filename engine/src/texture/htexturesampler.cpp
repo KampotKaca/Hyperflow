@@ -5,7 +5,7 @@
 
 namespace hf
 {
-    TextureSampler Define(const TextureSamplerDefinitionInfo& info) { return inter::HF.renderingApi.api.DefineTextureSampler(info); }
+    TextureSampler Define(const TextureSamplerDefinitionInfo& info) { return ir::HF.renderingApi.api.DefineTextureSampler(info); }
 
     TextureSampler DefineTextureSamplerAsset(const char* assetPath)
     {
@@ -51,7 +51,7 @@ namespace hf
             }
 
             const auto sampler = Define(info);
-            inter::HF.graphicsResources.textureSamplers[assetPath] = sampler;
+            ir::HF.graphicsResources.textureSamplers[assetPath] = sampler;
             return sampler;
         }catch (...)
         {

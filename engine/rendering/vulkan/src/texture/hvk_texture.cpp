@@ -9,7 +9,7 @@ namespace hf
     static void TextureViewCallback(void* uData);
     static void GenerateMimMaps(VkCommandBuffer command);
 
-    VkTexture::VkTexture(const inter::rendering::TextureCreationInfo_i& info)
+    VkTexture::VkTexture(const ir::rdr::TextureCreationInfo_i& info)
         : type(info.type), viewType(info.viewType), flags(info.flags), channel(info.channel),
           details(info.details), size(info.size), bufferCount(info.textureCount)
     {

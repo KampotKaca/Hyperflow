@@ -7,7 +7,7 @@ namespace hf
 {
     static void CreateDescriptorForBinding(VkTextureBinding& binding, uint32_t from, uint32_t size);
 
-    VkTexturePack::VkTexturePack(const inter::rendering::TexturePackCreationInfo_i& info)
+    VkTexturePack::VkTexturePack(const ir::rdr::TexturePackCreationInfo_i& info)
         : layout(info.layout)
     {
         for (uint32_t i = 0; i < info.bindingCount; i++)
@@ -104,7 +104,7 @@ namespace hf
         bindings.clear();
     }
 
-    void SetTextureBinding(VkTexturePack* pack, const inter::rendering::TexturePackBindingUploadInfo_i* bindings, uint32_t bindingCount)
+    void SetTextureBinding(VkTexturePack* pack, const ir::rdr::TexturePackBindingUploadInfo_i* bindings, uint32_t bindingCount)
     {
         uint32_t count = 0;
         for (uint32_t i = 0; i < bindingCount; i++)
@@ -199,7 +199,7 @@ namespace hf
         }
     }
 
-    void BindTexturePack(const VkRenderer* rn, const inter::rendering::BindResourceInfo_i<VkTexturePack*>& info)
+    void BindTexturePack(const VkRenderer* rn, const ir::rdr::BindResourceInfo_i<VkTexturePack*>& info)
     {
         const auto currentFrame = rn->currentFrame;
         uint32_t bindingCount = 0;

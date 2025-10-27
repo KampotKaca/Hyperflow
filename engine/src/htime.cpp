@@ -23,7 +23,7 @@ namespace hf
 			auto diff = targetFrameDuration - (cTime - currentTime);
 			if(diff > .001)
 			{
-				inter::platform::Sleep(diff);
+				ir::platform::Sleep(diff);
 				cTime = GetSystemTime();
 			}
 		}
@@ -56,13 +56,13 @@ namespace hf
 	    return info;
 	}
 
-	uint64_t GetFrameCount() { return inter::HF.time.frameCount; }
-	double_t GetDeltaTime(){ return inter::HF.time.deltaTime; }
-	double_t GetTimePassed() { return inter::HF.time.GetTimePassed(); }
-	double_t GetAbsoluteTimePassed() { return inter::HF.time.GetAbsoluteTimePassed(); }
-	int16_t GetTargetFrameRate() { return inter::HF.time.targetFrameRate; }
-	int32_t GetFrameRate() { return inter::HF.time.GetFrameRate(); }
-	void SetTargetFrameRate(int16_t targetFrameRate) { return inter::HF.time.SetTargetFrameRate(targetFrameRate); }
+	uint64_t GetFrameCount() { return ir::HF.time.frameCount; }
+	double_t GetDeltaTime(){ return ir::HF.time.deltaTime; }
+	double_t GetTimePassed() { return ir::HF.time.GetTimePassed(); }
+	double_t GetAbsoluteTimePassed() { return ir::HF.time.GetAbsoluteTimePassed(); }
+	int16_t GetTargetFrameRate() { return ir::HF.time.targetFrameRate; }
+	int32_t GetFrameRate() { return ir::HF.time.GetFrameRate(); }
+	void SetTargetFrameRate(int16_t targetFrameRate) { return ir::HF.time.SetTargetFrameRate(targetFrameRate); }
 
 	double_t GetSystemTime()
 	{

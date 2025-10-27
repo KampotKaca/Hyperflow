@@ -5,7 +5,7 @@
 #include "hdrawprocess.h"
 #include "../../others/exception/include/hgenericexception.h"
 
-namespace hf::inter::rendering
+namespace hf::ir::rdr
 {
 #define NUM_DEPTH_STENCIL_FORMATS 3
     constexpr TextureFormat DEPTH_STENCIL_FORMATS[]

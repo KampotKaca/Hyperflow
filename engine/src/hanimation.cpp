@@ -10,13 +10,13 @@ namespace hf
 
     AnimationClip::~AnimationClip()
     {
-        inter::general::DestroyAnimationClip_i(this);
+        ir::general::DestroyAnimationClip_i(this);
     }
 
     void Destroy(const Ref<AnimationClip>& anim)
     {
-        inter::general::DestroyAnimationClip_i(anim.get());
-        inter::HF.generalResources.animations.erase((uint64_t)anim.get());
+        ir::general::DestroyAnimationClip_i(anim.get());
+        ir::HF.generalResources.animations.erase((uint64_t)anim.get());
     }
 
     void Destroy(const Ref<AnimationClip>* pAnimations, uint32_t count)
@@ -24,8 +24,8 @@ namespace hf
         for (uint32_t i = 0; i < count; i++)
         {
             auto anim = pAnimations[i];
-            inter::general::DestroyAnimationClip_i(anim.get());
-            inter::HF.generalResources.animations.erase((uint64_t)anim.get());
+            ir::general::DestroyAnimationClip_i(anim.get());
+            ir::HF.generalResources.animations.erase((uint64_t)anim.get());
         }
     }
 
@@ -34,7 +34,7 @@ namespace hf
     uint16_t GetFrameRate(const Ref<AnimationClip>& anim) { return anim->frameRate; }
     uint32_t GetFrameCount(const Ref<AnimationClip>& anim) { return anim->frameCount; }
 
-    namespace inter::general
+    namespace ir::general
     {
         void DestroyAnimationClip_i(AnimationClip* anim)
         {

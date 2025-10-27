@@ -10,10 +10,10 @@ namespace hf
     Cubemap::Cubemap(const CubemapCreationInfo& info) :
     mipLevels(info.mipLevels), size(info.size), details(info.details)
     {
-        inter::rendering::TextureCreationInfo_i tInfo{};
-        tInfo.type         = inter::rendering::TextureType::Tex2D;
-        tInfo.viewType     = inter::rendering::TextureViewType::TexCube;
-        tInfo.flags        = inter::rendering::TextureFlags::CubeCompatible;
+        ir::rdr::TextureCreationInfo_i tInfo{};
+        tInfo.type         = ir::rdr::TextureType::Tex2D;
+        tInfo.viewType     = ir::rdr::TextureViewType::TexCube;
+        tInfo.flags        = ir::rdr::TextureFlags::CubeCompatible;
         tInfo.size         = info.size;
         tInfo.channel      = TextureChannel::RGBA;
         tInfo.mipLevels    = mipLevels;
@@ -22,39 +22,39 @@ namespace hf
         tInfo.textureCount = 6;
         tInfo.details      = details;
 
-        handle = inter::HF.renderingApi.api.CreateTexture(tInfo);
+        handle = ir::HF.renderingApi.api.CreateTexture(tInfo);
     }
 
     Cubemap::~Cubemap()
     {
-        inter::rendering::DestroyCubemap_i(this);
+        ir::rdr::DestroyCubemap_i(this);
     }
 
     Ref<Cubemap> Create(const CubemapCreationInfo& info)
     {
         auto cm = MakeRef<Cubemap>(info);
-        inter::HF.graphicsResources.cubemaps[(uint64_t)cm.get()] = cm;
+        ir::HF.graphicsResources.cubemaps[(uint64_t)cm.get()] = cm;
         return cm;
     }
 
     void Destroy(const Ref<Cubemap>& cm)
     {
-        inter::rendering::DestroyCubemap_i(cm.get());
-        inter::HF.graphicsResources.cubemaps.erase((uint64_t)cm.get());
+        ir::rdr::DestroyCubemap_i(cm.get());
+        ir::HF.graphicsResources.cubemaps.erase((uint64_t)cm.get());
     }
 
     void Destroy(const Ref<Cubemap>* pCubemaps, uint32_t count)
     {
         for (uint32_t i = 0; i < count; i++)
         {
-            inter::rendering::DestroyCubemap_i(pCubemaps[i].get());
-            inter::HF.graphicsResources.cubemaps.erase((uint64_t)pCubemaps[i].get());
+            ir::rdr::DestroyCubemap_i(pCubemaps[i].get());
+            ir::HF.graphicsResources.cubemaps.erase((uint64_t)pCubemaps[i].get());
         }
     }
 
     bool IsLoaded(const Ref<Cubemap>& cb) { return cb->handle; }
 
-    namespace inter::rendering
+    namespace ir::rdr
     {
         Ref<Cubemap> CreateCubemapAsset_i(const char* assetPath)
         {

@@ -74,7 +74,7 @@ namespace hf
 
     Model::~Model()
     {
-        inter::rendering::DestroyModel_i(this);
+        ir::rdr::DestroyModel_i(this);
     }
 
     bool IsLoaded(const Ref<Model>& model) { return model->isLoaded; }
@@ -82,7 +82,7 @@ namespace hf
     uint32_t GetMeshCount(const Ref<Model>& model) { return (uint32_t)model->meshes.size(); }
     Ref<Mesh> GetMesh(const Ref<Model>& model, uint32_t index) { return model->meshes[index]; }
 
-    namespace inter::rendering
+    namespace ir::rdr
     {
         Ref<Model> CreateModelAsset_i(const char* assetPath)
         {

@@ -6,7 +6,7 @@
 #include "hinternal.h"
 #include "hyperflow.h"
 
-namespace hf::inter
+namespace hf::ir
 {
     namespace platform
     {
@@ -131,7 +131,7 @@ namespace hf::inter
         {
             if (win->handle)
             {
-                rendering::DestroyRenderer_i(win->renderer.get());
+                rdr::DestroyRenderer_i(win->renderer.get());
                 win->renderer = nullptr;
 
                 auto window = (GLFWwindow*)win->handle;

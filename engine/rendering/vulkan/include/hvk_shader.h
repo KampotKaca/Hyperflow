@@ -9,7 +9,7 @@ namespace hf
 {
     struct VkShader
     {
-        explicit VkShader(const inter::rendering::ShaderCreationInfo_i& info);
+        explicit VkShader(const ir::rdr::ShaderCreationInfo_i& info);
         ~VkShader();
 
         ShaderLayout layout{};

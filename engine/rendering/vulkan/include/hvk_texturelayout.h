@@ -11,7 +11,7 @@ namespace hf
         ~VkTextureLayout();
 
         VkDescriptorSetLayout layout{};
-        List<TextureLayoutBindingInfo> bindingInfos{};
+        SmallList<TextureLayoutBindingInfo, RN_NUM_MAX_TEXTURES_IN_LAYOUT> bindingInfos{};
     };
 
     bool IsValidLayout(TextureLayout layout);

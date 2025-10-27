@@ -84,7 +84,7 @@ namespace hf
         }
     }
 
-    void UploadBuffers(const VkRenderer* rn, const inter::rendering::BufferUploadInfo_i& info)
+    void UploadBuffers(const VkRenderer* rn, const ir::rdr::BufferUploadInfo_i& info)
     {
         uint32_t currentFrame = 0;
         if (rn) currentFrame = rn->currentFrame;

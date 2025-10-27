@@ -3,7 +3,7 @@
 #include "haudiointernal.h"
 #include "hyperflow.h"
 
-namespace hf::inter
+namespace hf::ir
 {
     AudioData AUDIO_DATA;
 
@@ -39,15 +39,15 @@ namespace hf
 {
     void SetAudioVolume(float_t volume)
     {
-        if (inter::HF.internalAudioInfo.volume != volume)
+        if (ir::HF.internalAudioInfo.volume != volume)
         {
-            inter::HF.internalAudioInfo.volume = volume;
-            ma_engine_set_volume(&inter::AUDIO_DATA.engine, volume);
+            ir::HF.internalAudioInfo.volume = volume;
+            ma_engine_set_volume(&ir::AUDIO_DATA.engine, volume);
         }
     }
 
-    float_t GetAudioVolume() { return inter::HF.internalAudioInfo.volume; }
+    float_t GetAudioVolume() { return ir::HF.internalAudioInfo.volume; }
 
-    Ref<AudioGroup> Get2DAudioGroup() { return inter::AUDIO_DATA.group2D; }
-    Ref<AudioGroup> Get3DAudioGroup() { return inter::AUDIO_DATA.group3D; }
+    Ref<AudioGroup> Get2DAudioGroup() { return ir::AUDIO_DATA.group2D; }
+    Ref<AudioGroup> Get3DAudioGroup() { return ir::AUDIO_DATA.group3D; }
 }

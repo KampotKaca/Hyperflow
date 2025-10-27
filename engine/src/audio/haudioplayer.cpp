@@ -5,7 +5,7 @@
 
 namespace hf
 {
-    namespace inter
+    namespace ir
     {
         template bool IsLoaded_i(AudioPlayer* player);
         template bool IsPlaying_i(AudioPlayer* player);
@@ -28,20 +28,20 @@ namespace hf
     AudioPlayer::AudioPlayer(const AudioPlayerCreationInfo& info) :
     settings(info.settings), parent(info.parent)
     {
-        if (!parent) parent = inter::AUDIO_DATA.group2D;
-        inter::ChangeClip_i(this, info.clip, MA_SOUND_FLAG_NO_SPATIALIZATION);
+        if (!parent) parent = ir::AUDIO_DATA.group2D;
+        ir::ChangeClip_i(this, info.clip, MA_SOUND_FLAG_NO_SPATIALIZATION);
     }
 
     AudioPlayer::~AudioPlayer()
     {
-        inter::FreeHandle_i(this);
-        inter::Destructor_i(this);
+        ir::FreeHandle_i(this);
+        ir::Destructor_i(this);
     }
 
     Ref<AudioPlayer> Create(const AudioPlayerCreationInfo& info)
     {
         Ref<AudioPlayer> player = MakeRef<AudioPlayer>(info);
-        inter::HF.audioResources.players[(uint64_t)player.get()] = player;
+        ir::HF.audioResources.players[(uint64_t)player.get()] = player;
         player->stateFlags |= AudioPlayerStateFlags::Loaded;
         return player;
     }
@@ -50,8 +50,8 @@ namespace hf
     {
         if (!IsLoaded(player)) throw GENERIC_EXCEPT("[Hyperflow]", "Trying to access destroyed audio player");
 
-        inter::FreeHandle_i(player.get());
-        inter::HF.audioResources.players.erase((uint64_t)player.get());
+        ir::FreeHandle_i(player.get());
+        ir::HF.audioResources.players.erase((uint64_t)player.get());
         player->stateFlags &= (AudioPlayerStateFlags)~(uint32_t)AudioPlayerStateFlags::Loaded;
     }
 
@@ -64,30 +64,30 @@ namespace hf
         }
     }
 
-    bool IsLoaded(const Ref<AudioPlayer>& player) { return inter::IsLoaded_i(player.get()); }
-    bool IsPlaying(const Ref<AudioPlayer>& player) { return inter::IsPlaying_i(player.get()); }
+    bool IsLoaded(const Ref<AudioPlayer>& player) { return ir::IsLoaded_i(player.get()); }
+    bool IsPlaying(const Ref<AudioPlayer>& player) { return ir::IsPlaying_i(player.get()); }
 
     void ChangeClip(const Ref<AudioPlayer>& player, const Ref<AudioClip>& clip, float_t startingDuration)
     {
         if (!IsLoaded(player)) throw GENERIC_EXCEPT("[Hyperflow]", "Trying to access destroyed audio player");
-        inter::ChangeClip_i(player.get(), clip, MA_SOUND_FLAG_NO_SPATIALIZATION, startingDuration);
+        ir::ChangeClip_i(player.get(), clip, MA_SOUND_FLAG_NO_SPATIALIZATION, startingDuration);
 
         if (IsPlaying(player) && ma_sound_start((ma_sound*)player->handle) != MA_SUCCESS)
             LOG_ERROR("Unable to play audio player");
     }
-    void Play(const Ref<AudioPlayer>& player) { inter::Play_i(player.get()); }
-    void Pause(const Ref<AudioPlayer>& player) { inter::Pause_i(player.get()); }
+    void Play(const Ref<AudioPlayer>& player) { ir::Play_i(player.get()); }
+    void Pause(const Ref<AudioPlayer>& player) { ir::Pause_i(player.get()); }
 
-    void SetVolume(const Ref<AudioPlayer>& player, float_t volume) { inter::SetVolume_i(player.get(), volume); }
-    void SetPitch(const Ref<AudioPlayer>& player, float_t pitch) { inter::SetPitch_i(player.get(), pitch); }
-    void SetLoopingMode(const Ref<AudioPlayer>& player, bool loopingEnabled) { inter::SetLoopingMode_i(player.get(), loopingEnabled); }
+    void SetVolume(const Ref<AudioPlayer>& player, float_t volume) { ir::SetVolume_i(player.get(), volume); }
+    void SetPitch(const Ref<AudioPlayer>& player, float_t pitch) { ir::SetPitch_i(player.get(), pitch); }
+    void SetLoopingMode(const Ref<AudioPlayer>& player, bool loopingEnabled) { ir::SetLoopingMode_i(player.get(), loopingEnabled); }
 
-    void Seek(const Ref<AudioPlayer>& player, float_t positionInSeconds) { inter::Seek_i(player.get(), positionInSeconds); }
-    void SeekPercent(const Ref<AudioPlayer>& player, float_t position) { inter::SeekPercent_i(player.get(), position); }
+    void Seek(const Ref<AudioPlayer>& player, float_t positionInSeconds) { ir::Seek_i(player.get(), positionInSeconds); }
+    void SeekPercent(const Ref<AudioPlayer>& player, float_t position) { ir::SeekPercent_i(player.get(), position); }
 
     float GetPitch(const Ref<AudioPlayer>& player) { return player->settings.pitch; }
     float GetVolume(const Ref<AudioPlayer>& player) { return player->settings.volume; }
-    double GetPlayedInSeconds(const Ref<AudioPlayer>& player) { return inter::GetPlayedInSeconds_i(player.get()); }
-    double GetPlayedPercent(const Ref<AudioPlayer>& player) { return inter::GetPlayedPercent_i(player.get()); }
+    double GetPlayedInSeconds(const Ref<AudioPlayer>& player) { return ir::GetPlayedInSeconds_i(player.get()); }
+    double GetPlayedPercent(const Ref<AudioPlayer>& player) { return ir::GetPlayedPercent_i(player.get()); }
     bool IsLoopingEnabled(const Ref<AudioPlayer>& player) { return player->settings.loopingEnabled; }
 }

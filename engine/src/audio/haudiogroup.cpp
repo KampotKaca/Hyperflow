@@ -21,7 +21,7 @@ namespace hf
         if (info.parent) parent = (ma_sound_group*)info.parent->handle;
         auto group = new ma_sound_group();
         handle = group;
-        ma_sound_group_init(&inter::AUDIO_DATA.engine, 0, parent, group);
+        ma_sound_group_init(&ir::AUDIO_DATA.engine, 0, parent, group);
         if (enabled) ma_sound_group_start(group);
         else ma_sound_group_stop(group);
         ma_sound_group_set_volume(group, volume);
@@ -36,7 +36,7 @@ namespace hf
     Ref<AudioGroup> Create(const AudioGroupCreationInfo& info)
     {
         Ref<AudioGroup> group = MakeRef<AudioGroup>(info);
-        inter::HF.audioResources.groups[(uint64_t)group.get()] = group;
+        ir::HF.audioResources.groups[(uint64_t)group.get()] = group;
         return group;
     }
 

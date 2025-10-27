@@ -7,7 +7,7 @@ namespace hf
 {
     struct VkShaderLibrary
     {
-        explicit VkShaderLibrary(const inter::rendering::ShaderLibraryCreationInfo_i& info);
+        explicit VkShaderLibrary(const ir::rdr::ShaderLibraryCreationInfo_i& info);
         ~VkShaderLibrary();
 
         ShaderDrawOutputFormats outputFormats{};

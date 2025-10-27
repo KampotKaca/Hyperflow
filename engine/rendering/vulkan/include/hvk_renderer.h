@@ -10,7 +10,7 @@ namespace hf
 {
     struct VkRenderer
     {
-        explicit VkRenderer(const inter::rendering::RendererInstanceCreationInfo_i& info);
+        explicit VkRenderer(const ir::rdr::RendererInstanceCreationInfo_i& info);
         ~VkRenderer();
 
         void (*shutdownCallback)();
@@ -24,7 +24,7 @@ namespace hf
         VkCommandBuffer currentCommand{};
         VkPipelineLayout currentLayout{};
 
-        List<VkFrame> frames{};
+        SmallList<VkFrame, 8> frames{};
         uint32_t currentFrame = 0;
         uint32_t imageIndex = UINT32_MAX;
         VsyncMode vSyncMode = VsyncMode::Relaxed;
@@ -57,15 +57,15 @@ namespace hf
     uvec2 GetReadyForRendering(VkRenderer* rn, VkRenderTexture** pTextures, uint32_t textureCount);
     void StartFrame(VkRenderer* rn);
     void EndFrame(VkRenderer* rn);
-    void Draw(const VkRenderer* rn, const inter::rendering::IndexedDrawCallInfo_i& info);
-    void Draw(const VkRenderer* rn, const inter::rendering::VertexedDrawCallInfo_i& info);
+    void Draw(const VkRenderer* rn, const ir::rdr::IndexedDrawCallInfo_i& info);
+    void Draw(const VkRenderer* rn, const ir::rdr::VertexedDrawCallInfo_i& info);
 
     void RegisterFrameBufferChange(VkRenderer* rn, uvec2 newSize);
     void SetVSync(VkRenderer* rn, VsyncMode mode);
 
-    void UploadBuffers(const VkRenderer* rn, const inter::rendering::BufferUploadInfo_i& info);
-    void BindBuffer(const VkRenderer* rn, const inter::rendering::BindResourceInfo_i<Buffer>& info);
-    void BindTexturePack(const VkRenderer* rn, const inter::rendering::BindResourceInfo_i<VkTexturePack*>& info);
+    void UploadBuffers(const VkRenderer* rn, const ir::rdr::BufferUploadInfo_i& info);
+    void BindBuffer(const VkRenderer* rn, const ir::rdr::BindResourceInfo_i<Buffer>& info);
+    void BindTexturePack(const VkRenderer* rn, const ir::rdr::BindResourceInfo_i<VkTexturePack*>& info);
 
     void BindShaderLayout(VkRenderer* rn, ShaderLayout layout);
     void UploadPushConstants(const VkRenderer* rn, const PushConstantUploadInfo& info);

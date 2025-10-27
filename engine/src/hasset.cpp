@@ -56,13 +56,13 @@ namespace hf
         {
             switch (type)
             {
-            case AssetType::Model:         inter::rendering::DestroyModel_i(Cast<Model>(asset).get());                     break;
-            case AssetType::Texture:       inter::rendering::DestroyTexture_i(Cast<Texture>(asset).get());             break;
-            case AssetType::Cubemap:       inter::rendering::DestroyCubemap_i(Cast<Cubemap>(asset).get());                 break;
-            case AssetType::AudioClip:     inter::audio::DestroyAudioClip_i(Cast<AudioClip>(asset).get());                 break;
-            case AssetType::ShaderLibrary: inter::rendering::DestroyShaderLibrary_i(Cast<ShaderLibrary>(asset).get()); break;
-            case AssetType::Shader:        inter::rendering::DestroyShader_i(Cast<Shader>(asset).get());                   break;
-            case AssetType::TexturePack:   inter::rendering::DestroyTexturePack_i(Cast<TexturePack>(asset).get());         break;
+            case AssetType::Model:         ir::rdr::DestroyModel_i(Cast<Model>(asset).get());                     break;
+            case AssetType::Texture:       ir::rdr::DestroyTexture_i(Cast<Texture>(asset).get());             break;
+            case AssetType::Cubemap:       ir::rdr::DestroyCubemap_i(Cast<Cubemap>(asset).get());                 break;
+            case AssetType::AudioClip:     ir::audio::DestroyAudioClip_i(Cast<AudioClip>(asset).get());                 break;
+            case AssetType::ShaderLibrary: ir::rdr::DestroyShaderLibrary_i(Cast<ShaderLibrary>(asset).get()); break;
+            case AssetType::Shader:        ir::rdr::DestroyShader_i(Cast<Shader>(asset).get());                   break;
+            case AssetType::TexturePack:   ir::rdr::DestroyTexturePack_i(Cast<TexturePack>(asset).get());         break;
             default: LOG_ERROR("%s", "Invalid asset type, cannot be destroyed"); break;
             }
 
@@ -76,13 +76,13 @@ namespace hf
         {
             switch (type)
             {
-            case AssetType::Model:         asset = inter::rendering::CreateModelAsset_i(assetPath);         break;
-            case AssetType::Texture:       asset = inter::rendering::CreateTextureAsset_i(assetPath);       break;
-            case AssetType::Cubemap:       asset = inter::rendering::CreateCubemapAsset_i(assetPath);       break;
-            case AssetType::AudioClip:     asset = inter::audio::CreateAudioClipAsset_i(assetPath);         break;
-            case AssetType::ShaderLibrary: asset = inter::rendering::CreateShaderLibraryAsset_i(assetPath); break;
-            case AssetType::Shader:        asset = inter::rendering::CreateShaderAsset_i(assetPath);        break;
-            case AssetType::TexturePack:   asset = inter::rendering::CreateTexPackAsset_i(assetPath);       break;
+            case AssetType::Model:         asset = ir::rdr::CreateModelAsset_i(assetPath);         break;
+            case AssetType::Texture:       asset = ir::rdr::CreateTextureAsset_i(assetPath);       break;
+            case AssetType::Cubemap:       asset = ir::rdr::CreateCubemapAsset_i(assetPath);       break;
+            case AssetType::AudioClip:     asset = ir::audio::CreateAudioClipAsset_i(assetPath);         break;
+            case AssetType::ShaderLibrary: asset = ir::rdr::CreateShaderLibraryAsset_i(assetPath); break;
+            case AssetType::Shader:        asset = ir::rdr::CreateShaderAsset_i(assetPath);        break;
+            case AssetType::TexturePack:   asset = ir::rdr::CreateTexPackAsset_i(assetPath);       break;
             default: LOG_ERROR("%s", "Invalid asset type, cannot be loaded"); break;
             }
         }
@@ -90,7 +90,7 @@ namespace hf
 
     Ref<void> CreateAsset(const char* assetPath, AssetType type)
     {
-        auto& assets = inter::HF.graphicsResources.assets;
+        auto& assets = ir::HF.graphicsResources.assets;
         auto [it, inserted] = assets.try_emplace(convertAssetPath(assetPath, type));
 
         if (inserted) it->second.type = type;
@@ -103,8 +103,8 @@ namespace hf
     template <typename T>
     static void destroyAsset(T assetPath, AssetType type)
     {
-        auto it = inter::HF.graphicsResources.assets.find(convertAssetPath(assetPath, type));
-        if (it == inter::HF.graphicsResources.assets.end())
+        auto it = ir::HF.graphicsResources.assets.find(convertAssetPath(assetPath, type));
+        if (it == ir::HF.graphicsResources.assets.end())
         {
             LOG_ERROR("Asset not found %s", assetPath);
             return;
@@ -118,8 +118,8 @@ namespace hf
     template <typename T>
     static Ref<void> getAsset(T assetPath, AssetType type)
     {
-        auto it = inter::HF.graphicsResources.assets.find(convertAssetPath(assetPath, type));
-        if (it == inter::HF.graphicsResources.assets.end())
+        auto it = ir::HF.graphicsResources.assets.find(convertAssetPath(assetPath, type));
+        if (it == ir::HF.graphicsResources.assets.end())
         {
             LOG_ERROR("Asset not found %s", assetPath);
             return nullptr;
@@ -130,7 +130,7 @@ namespace hf
     Ref<void> GetAsset(const char* assetPath, AssetType type) { return getAsset(assetPath, type); }
     Ref<void> GetAsset(const std::string_view assetPath, AssetType type) { return getAsset(assetPath, type); }
 
-    namespace inter::rendering
+    namespace ir::rdr
     {
         void DestroyAllAssets_i(bool internalOnly)
         {

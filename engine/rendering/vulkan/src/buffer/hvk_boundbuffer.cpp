@@ -83,7 +83,7 @@ namespace hf
         }
     }
 
-    void BindBuffer(const VkRenderer* rn, const inter::rendering::BindResourceInfo_i<Buffer>& info)
+    void BindBuffer(const VkRenderer* rn, const ir::rdr::BindResourceInfo_i<Buffer>& info)
     {
         const auto currentFrame = rn->currentFrame;
 

@@ -3,7 +3,7 @@
 
 #include "hshared.h"
 
-namespace hf::inter
+namespace hf::ir
 {
     namespace platform
     {

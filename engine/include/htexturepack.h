@@ -21,13 +21,13 @@ namespace hf
             };
 
             TextureSampler sampler{};
-            StaticList<Info, MAX_TEXTURES_IN_TEXTURE_ARRAY> textures{};
+            SmallList<Info, MAX_TEXTURES_IN_TEXTURE_ARRAY> textures{};
             uint32_t bindingIndex{};
         };
 
-        StaticList<Binding<Texture>, MAX_TEXTURES_IN_TEXTURE_PACK> textureBindings{};
-        StaticList<Binding<Cubemap>, MAX_TEXTURES_IN_TEXTURE_PACK> cubemapBindings{};
-        StaticList<Binding<RenderTexture>, MAX_TEXTURES_IN_TEXTURE_PACK> renderTextureBindings{};
+        SmallList<Binding<Texture>, MAX_TEXTURES_IN_TEXTURE_PACK> textureBindings{};
+        SmallList<Binding<Cubemap>, MAX_TEXTURES_IN_TEXTURE_PACK> cubemapBindings{};
+        SmallList<Binding<RenderTexture>, MAX_TEXTURES_IN_TEXTURE_PACK> renderTextureBindings{};
         TextureLayout layout = 0;
 
         void* handle{};

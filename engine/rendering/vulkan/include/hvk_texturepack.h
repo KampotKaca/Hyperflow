@@ -24,14 +24,14 @@ namespace hf
 
     struct VkTexturePack
     {
-        explicit VkTexturePack(const inter::rendering::TexturePackCreationInfo_i& info);
+        explicit VkTexturePack(const ir::rdr::TexturePackCreationInfo_i& info);
         ~VkTexturePack();
 
         Dictionary<uint32_t, VkTextureBinding> bindings{};
         TextureLayout layout = 0;
     };
 
-    void SetTextureBinding(VkTexturePack* pack, const inter::rendering::TexturePackBindingUploadInfo_i* bindings, uint32_t bindingCount);
+    void SetTextureBinding(VkTexturePack* pack, const ir::rdr::TexturePackBindingUploadInfo_i* bindings, uint32_t bindingCount);
 }
 
 #endif //HVK_TEXTUREPACK_H

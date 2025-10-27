@@ -48,8 +48,8 @@ namespace hf
     struct SwapChainSupportDetails
     {
         VkSurfaceCapabilitiesKHR capabilities{};
-        List<VkSurfaceFormatKHR> formats{};
-        List<VkPresentModeKHR> presentModes{};
+        SmallList<VkSurfaceFormatKHR, 64> formats{};
+        SmallList<VkPresentModeKHR, 64> presentModes{};
     };
 
     struct QueueFamilyIndices
@@ -94,7 +94,7 @@ namespace hf
 
     struct VkPlatform
     {
-        inter::rendering::RendererInternalFunctions_i functions{};
+        ir::rdr::RendererInternalFunctions_i functions{};
         void* platformDll{};
         VulkanPlatformAPI* api{};
         VkAllocationCallbacks allocator{};
@@ -181,8 +181,8 @@ namespace hf
     struct GraphicsData
     {
         int32_t rendererCount = 0;
-        List<VkLayerProperties> availableLayers{};
-        List<VkExtensionProperties> availableExtensions{};
+        SmallList<VkLayerProperties, 32> availableLayers{};
+        SmallList<VkExtensionProperties, 64> availableExtensions{};
 
         VkInstance instance{};
         VkPlatform platform{};
@@ -238,7 +238,7 @@ namespace hf
         VkSurfaceKHR surface = VK_NULL_HANDLE;
         VkSwapchainKHR swapchain = VK_NULL_HANDLE;
         GraphicsSwapchainDetails details{};
-        List<SwapchainImage> images{};
+        SmallList<SwapchainImage, 16> images{};
     };
 
     struct VkFrame
@@ -269,7 +269,7 @@ namespace hf
 
     extern GraphicsData GRAPHICS_DATA;
 
-    void LoadVulkan(const inter::rendering::RendererLoadInfo_i& info);
+    void LoadVulkan(const ir::rdr::RendererLoadInfo_i& info);
     void UnloadVulkan();
 
     void* LoadEditorInfo();

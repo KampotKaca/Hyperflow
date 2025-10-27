@@ -10,7 +10,7 @@
 namespace hf
 {
     template<typename T>
-    static void InitTextures(StaticList<TexturePack::Binding<T>, MAX_TEXTURES_IN_TEXTURE_PACK>& resultSet,
+    static void InitTextures(SmallList<TexturePack::Binding<T>, MAX_TEXTURES_IN_TEXTURE_PACK>& resultSet,
                              TexturePackBindingInfo<T>* pTextureBindings, uint32_t count)
     {
         for (uint32_t i = 0; i < count; i++)
@@ -36,9 +36,9 @@ namespace hf
     }
 
     template<typename T>
-        static void PassTextures(StaticList<TexturePack::Binding<T>, 8>& src,
-            StaticList<inter::rendering::TexturePackBindInfo_i::TextureInfo, MAX_TEXTURES_IN_TEXTURE_PACK * MAX_TEXTURES_IN_TEXTURE_PACK * 3>& texInfos,
-            StaticList<inter::rendering::TexturePackBindInfo_i, MAX_TEXTURES_IN_TEXTURE_PACK * 3>& texPackBindInfos,
+        static void PassTextures(SmallList<TexturePack::Binding<T>, MAX_TEXTURES_IN_TEXTURE_PACK>& src,
+            SmallList<ir::rdr::TexturePackBindInfo_i::TextureInfo, MAX_TEXTURES_IN_TEXTURE_PACK * MAX_TEXTURES_IN_TEXTURE_PACK * 3>& texInfos,
+            SmallList<ir::rdr::TexturePackBindInfo_i, MAX_TEXTURES_IN_TEXTURE_PACK * 3>& texPackBindInfos,
             TexturePackBindingType type)
     {
         for (uint32_t i = 0; i < src.size(); i++)
@@ -47,10 +47,10 @@ namespace hf
             const uint32_t from = texInfos.size();
             for (uint32_t j = 0; j < binding.textures.size(); j++)
             {
-                auto& bi = binding.textures.atC(j);
+                auto& bi = binding.textures[j];
                 if (bi.texture)
                 {
-                    texInfos.push_back(inter::rendering::TexturePackBindInfo_i::TextureInfo
+                    texInfos.push_back(ir::rdr::TexturePackBindInfo_i::TextureInfo
                     {
                         .texture = bi.texture->handle,
                         .index = bi.index
@@ -58,7 +58,7 @@ namespace hf
                 }
                 else
                 {
-                    texInfos.push_back(inter::rendering::TexturePackBindInfo_i::TextureInfo
+                    texInfos.push_back(ir::rdr::TexturePackBindInfo_i::TextureInfo
                     {
                         .texture = nullptr,
                         .index = bi.index
@@ -66,11 +66,11 @@ namespace hf
                 }
             }
 
-            texPackBindInfos.push_back(inter::rendering::TexturePackBindInfo_i
+            texPackBindInfos.push_back(ir::rdr::TexturePackBindInfo_i
             {
                 .type = type,
                 .sampler = binding.sampler,
-                .textures = texInfos.atP(from),
+                .textures = &texInfos[from],
                 .arraySize = (uint32_t)(texInfos.size() - from),
                 .bindingIndex = binding.bindingIndex
             });
@@ -83,19 +83,19 @@ namespace hf
         InitTextures(cubemapBindings, info.pCubemapBindings, info.cubemapBindingCount);
         InitTextures(renderTextureBindings, info.pRenderTextureBindings, info.renderTextureBindingCount);
 
-        StaticList<inter::rendering::TexturePackBindInfo_i::TextureInfo, MAX_TEXTURES_IN_TEXTURE_PACK * MAX_TEXTURES_IN_TEXTURE_PACK * 3> texInfos{};
-        StaticList<inter::rendering::TexturePackBindInfo_i, MAX_TEXTURES_IN_TEXTURE_PACK * 3> texPackBindInfos{};
+        SmallList<ir::rdr::TexturePackBindInfo_i::TextureInfo, MAX_TEXTURES_IN_TEXTURE_PACK * MAX_TEXTURES_IN_TEXTURE_PACK * 3> texInfos{};
+        SmallList<ir::rdr::TexturePackBindInfo_i, MAX_TEXTURES_IN_TEXTURE_PACK * 3> texPackBindInfos{};
 
         PassTextures(textureBindings, texInfos, texPackBindInfos, TexturePackBindingType::Texture2D);
         PassTextures(cubemapBindings, texInfos, texPackBindInfos, TexturePackBindingType::Cubemap);
         PassTextures(renderTextureBindings, texInfos, texPackBindInfos, TexturePackBindingType::RenderTexture);
 
-        inter::rendering::TexturePackCreationInfo_i tcInfo{};
+        ir::rdr::TexturePackCreationInfo_i tcInfo{};
         tcInfo.layout = layout;
         tcInfo.bindingCount = (uint32_t)texPackBindInfos.size();
-        tcInfo.pBindings = texPackBindInfos.atP(0);
+        tcInfo.pBindings = &texPackBindInfos[0];
 
-        handle = inter::HF.renderingApi.api.CreateTexturePack(tcInfo);
+        handle = ir::HF.renderingApi.api.CreateTexturePack(tcInfo);
     }
 
     TexturePack::~TexturePack()
@@ -103,21 +103,21 @@ namespace hf
         textureBindings.clear();
         cubemapBindings.clear();
         renderTextureBindings.clear();
-        inter::rendering::DestroyTexturePack_i(this);
+        ir::rdr::DestroyTexturePack_i(this);
     }
 
     bool IsLoaded(const Ref<TexturePack>& texPack) { return texPack->handle; }
 
     void Destroy(const Ref<TexturePack>& texPack)
     {
-        if (inter::rendering::DestroyTexturePack_i(texPack.get()))
-            inter::HF.graphicsResources.texturePacks.erase((uint64_t)texPack.get());
+        if (ir::rdr::DestroyTexturePack_i(texPack.get()))
+            ir::HF.graphicsResources.texturePacks.erase((uint64_t)texPack.get());
     }
 
     Ref<TexturePack> Create(const TexturePackCreationInfo& info)
     {
         Ref<TexturePack> texPack = MakeRef<TexturePack>(info);
-        inter::HF.graphicsResources.texturePacks[(uint64_t)texPack.get()] = texPack;
+        ir::HF.graphicsResources.texturePacks[(uint64_t)texPack.get()] = texPack;
         return texPack;
     }
 
@@ -126,12 +126,12 @@ namespace hf
         for (uint32_t i = 0; i < count; i++)
         {
             auto pack = pPacks[i];
-            if (inter::rendering::DestroyTexturePack_i(pack.get()))
-                inter::HF.graphicsResources.texturePacks.erase((uint64_t)pack.get());
+            if (ir::rdr::DestroyTexturePack_i(pack.get()))
+                ir::HF.graphicsResources.texturePacks.erase((uint64_t)pack.get());
         }
     }
 
-    namespace inter::rendering
+    namespace ir::rdr
     {
         template<typename T>
         static void LoadBindings(c4::yml::NodeRef root, AssetType assetType, List<TexturePackBindingInfo<T>>& ls, List<typename TexturePackBindingInfo<T>::TextureInfo>& infoLs)

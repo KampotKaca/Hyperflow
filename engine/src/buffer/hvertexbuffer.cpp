@@ -17,19 +17,19 @@ namespace hf
         }
         else buffer = info.pVertices;
 
-        inter::rendering::CreateVertBuffer_i(this);
+        ir::rdr::CreateVertBuffer_i(this);
     }
 
     Ref<VertexBuffer> Create(const VertexBufferCreationInfo& info)
     {
         Ref<VertexBuffer> buffer = MakeRef<VertexBuffer>(info, DataTransferType::CopyData);
-        inter::HF.graphicsResources.buffers[(uint64_t)buffer.get()] = buffer;
+        ir::HF.graphicsResources.buffers[(uint64_t)buffer.get()] = buffer;
         return buffer;
     }
 
     void Upload(const Ref<Renderer>& rn, const Ref<VertexBuffer>& vb, const VertBufferUploadInfo& info)
     {
-        inter::rendering::VertexBufferUploadInfo_i uploadInfo{};
+        ir::rdr::VertexBufferUploadInfo_i uploadInfo{};
         uploadInfo.buffer = vb->handle;
         uploadInfo.data = vb->buffer;
         uploadInfo.offsetInBytes = info.offset * vb->vertexSize;
@@ -37,10 +37,10 @@ namespace hf
 
         void* rnHandle = nullptr;
         if (rn) rnHandle = rn->handle;
-        inter::HF.renderingApi.api.UploadVertexBuffer(rnHandle, uploadInfo);
+        ir::HF.renderingApi.api.UploadVertexBuffer(rnHandle, uploadInfo);
     }
 
-    namespace inter::rendering
+    namespace ir::rdr
     {
         bool CreateVertBuffer_i(VertexBuffer* buffer)
         {

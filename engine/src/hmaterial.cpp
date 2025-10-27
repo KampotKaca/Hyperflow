@@ -35,7 +35,7 @@ namespace hf
     Ref<Material> Create(const MaterialCreationInfo& info)
     {
         auto mat = MakeRef<Material>(info);
-        inter::HF.graphicsResources.materials[(uint64_t)mat.get()] = mat;
+        ir::HF.graphicsResources.materials[(uint64_t)mat.get()] = mat;
         return mat;
     }
 

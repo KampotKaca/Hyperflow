@@ -96,6 +96,7 @@ add_subdirectory(external/stb)
 add_subdirectory(external/logc)
 add_subdirectory(external/rpmalloc)
 add_subdirectory(external/rapidyaml)
+add_subdirectory(external/svector)
 add_subdirectory(external/glfw)
 add_subdirectory(external/lz4/build/cmake)
 add_subdirectory(external/miniaudio)
@@ -120,6 +121,7 @@ target_link_libraries(${PROJECT_NAME}
         lz4_static
         ext
         components
+        svector
         PRIVATE
         ryml
         rpmalloc
@@ -162,6 +164,7 @@ target_include_directories(${PROJECT_NAME}
         include/
         external/glm
         external/logc/include
+        external/svector/include
         PRIVATE
         external/rapidyaml/src
         external/stb/include

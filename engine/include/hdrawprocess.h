@@ -135,23 +135,24 @@ namespace hf
 
         SmallList<RenderAttachmentDependencyInfo, RN_NUM_RENDER_ATTACHMENT_DEPENDENCIES> dependencies{};
         SmallList<RenderTexturePacketInfo, RN_NUM_RENDER_TEXTURES> renderTextures{};
-        SmallList<ShaderLayoutPacketInfo, RN_NUM_SHADER_LAYOUTS> shaderLayouts{};
-        SmallList<ShaderPacketInfo, RN_NUM_SHADERS> shaders{};
-        SmallList<MaterialPacketInfo, RN_NUM_MATERIALS> materials{};
-        SmallList<DrawPacketInfo, RN_NUM_DRAW_PACKETS> drawPackets{};
-        SmallList<TexPackBindingInfo, RN_NUM_TEX_PACKS> texpacks{};
+
+        List<ShaderLayoutPacketInfo> shaderLayouts{};
+        List<ShaderPacketInfo> shaders{};
+        List<MaterialPacketInfo> materials{};
+        List<DrawPacketInfo> drawPackets{};
+        List<TexPackBindingInfo> texpacks{};
+        List<TextureInfo> textures{};
 
         SmallList<TexturePackRebindingGroupPacketInfo, RN_NUM_TEX_PACK_GROUP_UPLOADS> textureGroupRebindings{};
         SmallList<TexturePackRebindingPacketInfo, RN_NUM_TEX_PACK_UPLOADS> textureRebindings{};
-        SmallList<TextureInfo, RN_NUM_TEXTURE_UPLOADS> textures{};
         SmallList<BufferUploadPacketInfo, RN_NUM_BUFFER_UPLOADS> bufferUploadPackets{};
 
         SmallList<BufferSetPacketInfo, RN_NUM_BUFFERS_SETS> bufferSets{};
         SmallList<Buffer, RN_NUM_BUFFERS> buffers{};
 
-        SmallList<DrawCallPacketInfo, RN_NUM_DRAW_CALLS> drawCalls{};
-        SmallList<InstancePacketInfo, RN_NUM_DRAW_INSTANCES> instances{};
-        SmallList<Ref<VertexBuffer>, RN_NUM_VERTEX_BUFFERS> vertexBuffers{};
+        List<DrawCallPacketInfo> drawCalls{};
+        List<InstancePacketInfo> instances{};
+        List<Ref<VertexBuffer>> vertexBuffers{};
 
         List<uint8_t> bufferUploads{};
         List<uint8_t> pushConstantUploads{};
@@ -162,6 +163,15 @@ namespace hf
             bufferUploads.reserve(RN_NUM_BUFFER_UPLOAD_DATA);
             pushConstantUploads.reserve(RN_NUM_PUSH_CONSTANT_UPLOAD_DATA);
             instanceUploads.reserve(RN_NUM_INSTANCE_UPLOAD_DATA);
+            shaderLayouts.reserve(RN_NUM_SHADER_LAYOUTS);
+            shaders.reserve(RN_NUM_SHADERS);
+            materials.reserve(RN_NUM_MATERIALS);
+            drawPackets.reserve(RN_NUM_DRAW_PACKETS);
+            texpacks.reserve(RN_NUM_TEX_PACKS);
+            textures.reserve(RN_NUM_TEXTURE_UPLOADS);
+            drawCalls.reserve(RN_NUM_DRAW_CALLS);
+            instances.reserve(RN_NUM_DRAW_INSTANCES);
+            vertexBuffers.reserve(RN_NUM_VERTEX_BUFFERS);
         }
 
         void clear()

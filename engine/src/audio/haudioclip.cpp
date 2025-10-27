@@ -58,17 +58,17 @@ namespace hf
 
     AudioClip::~AudioClip()
     {
-        inter::audio::DestroyAudioClip_i(this);
+        ir::audio::DestroyAudioClip_i(this);
     }
 
     void Destroy(const Ref<AudioClip>& clip)
     {
-        inter::audio::DestroyAudioClip_i(clip.get());
+        ir::audio::DestroyAudioClip_i(clip.get());
     }
 
     void Destroy(const Ref<AudioClip>* pClips, uint32_t count)
     {
-        for (uint32_t i = 0; i < count; i++) inter::audio::DestroyAudioClip_i(pClips[i].get());
+        for (uint32_t i = 0; i < count; i++) ir::audio::DestroyAudioClip_i(pClips[i].get());
     }
 
     bool IsLoaded(const Ref<AudioClip>& clip) { return clip->pcmData; }
@@ -77,7 +77,7 @@ namespace hf
     uint32_t GetChannels(const Ref<AudioClip>& clip) { return clip->channels; }
     uint32_t GetSampleRate(const Ref<AudioClip>& clip) { return clip->sampleRate; }
 
-    namespace inter::audio
+    namespace ir::audio
     {
         Ref<AudioClip> CreateAudioClipAsset_i(const char* assetPath)
         {

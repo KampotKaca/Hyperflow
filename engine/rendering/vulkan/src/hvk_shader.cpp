@@ -5,7 +5,7 @@
 
 namespace hf
 {
-    VkShader::VkShader(const inter::rendering::ShaderCreationInfo_i& info)
+    VkShader::VkShader(const ir::rdr::ShaderCreationInfo_i& info)
         : layout(info.layout)
     {
         const auto& shaderLayout = GetShaderLayout(info.layout);

@@ -27,8 +27,8 @@ namespace hf
         int32_t presentationAttachmentIndex = -1;
         DepthStencilMode mode = DepthStencilMode::None;
 
-        List<VkTexture*> colorTextures{};
-        List<VkTexture*> msaaTextures{};
+        SmallList<VkTexture*, RN_NUM_MAX_COLOR_ATTACHMENTS> colorTextures{};
+        SmallList<VkTexture*, RN_NUM_MAX_COLOR_ATTACHMENTS> msaaTextures{};
         VkTexture* depthTexture{};
 
         VkExtent2D extent{};

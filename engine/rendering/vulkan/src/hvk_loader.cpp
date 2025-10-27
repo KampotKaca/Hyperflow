@@ -65,7 +65,7 @@ namespace hf
     static void* VulkanReallocationCallback(void* pUserData, void* pOriginal, size_t size, size_t alignment, VkSystemAllocationScope allocationScope)
     { return GRAPHICS_DATA.platform.functions.reallocateFunc(pOriginal, size); }
 
-    void LoadVulkan(const inter::rendering::RendererLoadInfo_i& info)
+    void LoadVulkan(const ir::rdr::RendererLoadInfo_i& info)
     {
         GRAPHICS_DATA.platform.allocator.pUserData = nullptr;
         GRAPHICS_DATA.platform.allocator.pfnAllocation = VulkanAllocationCallback;
@@ -121,7 +121,7 @@ namespace hf
     {
         uint32_t layerCount = 0;
         VK_HANDLE_EXCEPT(vkEnumerateInstanceLayerProperties(&layerCount, nullptr));
-        GRAPHICS_DATA.availableLayers = List<VkLayerProperties>(layerCount);
+        GRAPHICS_DATA.availableLayers = SmallList<VkLayerProperties, 32>(layerCount);
         VK_HANDLE_EXCEPT(vkEnumerateInstanceLayerProperties(&layerCount, GRAPHICS_DATA.availableLayers.data()));
     }
 
@@ -129,7 +129,7 @@ namespace hf
     {
         uint32_t extensionCount = 0;
         VK_HANDLE_EXCEPT(vkEnumerateInstanceExtensionProperties(nullptr, &extensionCount, nullptr));
-        GRAPHICS_DATA.availableExtensions = List<VkExtensionProperties>(extensionCount);
+        GRAPHICS_DATA.availableExtensions = SmallList<VkExtensionProperties, 64>(extensionCount);
         VK_HANDLE_EXCEPT(vkEnumerateInstanceExtensionProperties(nullptr,
             &extensionCount, GRAPHICS_DATA.availableExtensions.data()));
 

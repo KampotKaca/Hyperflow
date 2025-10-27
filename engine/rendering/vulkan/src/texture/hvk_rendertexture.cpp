@@ -192,7 +192,7 @@ namespace hf
         {
         case 1:
 
-            for (auto i : inter::rendering::DEPTH_FORMATS)
+            for (auto i : ir::rdr::DEPTH_FORMATS)
             {
                 const auto format = (VkFormat)i;
                 if (CheckFormatSupport(format, tiling, features))
@@ -209,7 +209,7 @@ namespace hf
             throw GENERIC_EXCEPT("[Hyperflow]", "No suitable depth format found");
         case 2:
 
-            for (auto i : inter::rendering::STENCIL_FORMATS)
+            for (auto i : ir::rdr::STENCIL_FORMATS)
             {
                 const auto format = (VkFormat)i;
                 if (CheckFormatSupport(format, tiling, features))
@@ -225,7 +225,7 @@ namespace hf
             throw GENERIC_EXCEPT("[Hyperflow]", "No suitable stencil format found");
         case 3:
 
-            for (auto i : inter::rendering::DEPTH_STENCIL_FORMATS)
+            for (auto i : ir::rdr::DEPTH_STENCIL_FORMATS)
             {
                 const auto format = (VkFormat)i;
                 if (CheckFormatSupport(format, tiling, features))
@@ -276,9 +276,9 @@ namespace hf
             (newSize.x == (int32_t)tex->extent.width && newSize.y == (int32_t)tex->extent.height)) return;
         ClearRenderTexture(tex);
 
-        inter::rendering::TextureCreationInfo_i textureInfo{};
-        textureInfo.type = inter::rendering::TextureType::Tex2D;
-        textureInfo.viewType = inter::rendering::TextureViewType::Tex2D;
+        ir::rdr::TextureCreationInfo_i textureInfo{};
+        textureInfo.type = ir::rdr::TextureType::Tex2D;
+        textureInfo.viewType = ir::rdr::TextureViewType::Tex2D;
         textureInfo.size = uvec3(newSize, 1);
         textureInfo.channel = TextureChannel::RGBA;
         textureInfo.mipLevels = 1;
@@ -339,7 +339,7 @@ namespace hf
             textureInfo.details.aspectFlags = TextureAspectFlags::Color;
             textureInfo.details.finalLayout = TextureResultLayoutType::Color;
 
-            tex->msaaTextures = List<VkTexture*>(tex->colorAttachmentCount);
+            tex->msaaTextures = SmallList<VkTexture*, RN_NUM_MAX_COLOR_ATTACHMENTS>(tex->colorAttachmentCount);
             for (uint32_t i = 0; i < tex->colorAttachmentCount; i++)
             {
                 auto& info = tex->colorInfos[i];

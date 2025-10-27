@@ -6,7 +6,7 @@ namespace hf
 {
     static VkShaderModule AddShaderStage(const void* code, uint32_t codeSize, VkShaderStageFlagBits stage, List<VkPipelineShaderStageCreateInfo>& res);
 
-    VkShaderLibrary::VkShaderLibrary(const inter::rendering::ShaderLibraryCreationInfo_i& info) : outputFormats(info.outputFormats)
+    VkShaderLibrary::VkShaderLibrary(const ir::rdr::ShaderLibraryCreationInfo_i& info) : outputFormats(info.outputFormats)
     {
         uint32_t moduleCount = info.vertexInputModuleCount + info.preRasterModuleCount + info.fragmentModuleCount + info.fragmentOutputModuleCount;
         uint32_t maxShadingModules = info.preRasterModuleCount * 4 + info.fragmentModuleCount;

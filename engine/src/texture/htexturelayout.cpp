@@ -5,7 +5,7 @@
 
 namespace hf
 {
-    TextureLayout Define(const TextureLayoutDefinitionInfo& info) { return inter::HF.renderingApi.api.DefineTextureLayout(info); }
+    TextureLayout Define(const TextureLayoutDefinitionInfo& info) { return ir::HF.renderingApi.api.DefineTextureLayout(info); }
 
     TextureLayout DefineTextureLayoutAsset(const char* assetPath)
     {
@@ -47,7 +47,7 @@ namespace hf
             info.bindingCount = (uint32_t)texLayoutBindings.size();
 
             const auto layout = Define(info);
-            inter::HF.graphicsResources.textureLayouts[assetPath] = layout;
+            ir::HF.graphicsResources.textureLayouts[assetPath] = layout;
             return layout;
         }catch (...)
         {

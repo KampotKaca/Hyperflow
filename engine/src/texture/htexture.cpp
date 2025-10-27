@@ -13,10 +13,10 @@ namespace hf
     {
         if (info.pixels)
         {
-            const inter::rendering::TextureCreationInfo_i creationInfo =
+            const ir::rdr::TextureCreationInfo_i creationInfo =
             {
-                .type = inter::rendering::TextureType::Tex2D,
-                .viewType = inter::rendering::TextureViewType::Tex2D,
+                .type = ir::rdr::TextureType::Tex2D,
+                .viewType = ir::rdr::TextureViewType::Tex2D,
                 .size = size,
                 .channel = channels,
                 .mipLevels = mipLevels,
@@ -25,41 +25,41 @@ namespace hf
                 .details = details
             };
 
-            handle = inter::HF.renderingApi.api.CreateTexture(creationInfo);
+            handle = ir::HF.renderingApi.api.CreateTexture(creationInfo);
         }
     }
 
     Texture::~Texture()
     {
-        inter::rendering::DestroyTexture_i(this);
+        ir::rdr::DestroyTexture_i(this);
     }
 
     Ref<Texture> Create(const TextureCreationInfo& info)
     {
         auto tex = MakeRef<Texture>(info);
-        inter::HF.graphicsResources.textures[(uint64_t)tex.get()] = tex;
+        ir::HF.graphicsResources.textures[(uint64_t)tex.get()] = tex;
         return tex;
     }
 
     void Destroy(const Ref<Texture>& tex)
     {
-        inter::rendering::DestroyTexture_i(tex.get());
-        inter::HF.graphicsResources.textures.erase((uint64_t)tex.get());
+        ir::rdr::DestroyTexture_i(tex.get());
+        ir::HF.graphicsResources.textures.erase((uint64_t)tex.get());
     }
 
     void Destroy(const Ref<Texture>* pTextures, uint32_t count)
     {
         for (uint32_t i = 0; i < count; i++)
         {
-            inter::rendering::DestroyTexture_i(pTextures[i].get());
-            inter::HF.graphicsResources.textures.erase((uint64_t)pTextures[i].get());
+            ir::rdr::DestroyTexture_i(pTextures[i].get());
+            ir::HF.graphicsResources.textures.erase((uint64_t)pTextures[i].get());
         }
     }
 
     bool IsLoaded(const Ref<Texture>& tex) { return tex->handle; }
-    void SubmitAllTextures() { inter::HF.renderingApi.api.SubmitTextureCopyOperations(); }
+    void SubmitAllTextures() { ir::HF.renderingApi.api.SubmitTextureCopyOperations(); }
 
-    namespace inter::rendering
+    namespace ir::rdr
     {
         Ref<Texture> CreateTextureAsset_i(const char* assetPath)
         {

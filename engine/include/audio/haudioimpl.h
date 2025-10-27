@@ -5,7 +5,7 @@
 #include "audio/haudioclip.h"
 #include "haudiointernal.h"
 
-namespace hf::inter
+namespace hf::ir
 {
     template<typename T>
     bool IsLoaded_i(T* player) { return (uint32_t)(player->stateFlags & AudioPlayerStateFlags::Loaded); }

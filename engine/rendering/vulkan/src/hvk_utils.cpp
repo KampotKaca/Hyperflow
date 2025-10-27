@@ -81,7 +81,7 @@ namespace hf
 
         if (formatCount > 0)
         {
-            supportDetails.formats = std::vector<VkSurfaceFormatKHR>(formatCount);
+            supportDetails.formats = SmallList<VkSurfaceFormatKHR, 64>(formatCount);
             vkGetPhysicalDeviceSurfaceFormatsKHR(device, surface, &formatCount,
                 supportDetails.formats.data());
         }
@@ -91,7 +91,7 @@ namespace hf
 
         if (presentModeCount > 0)
         {
-            supportDetails.presentModes = std::vector<VkPresentModeKHR>(presentModeCount);
+            supportDetails.presentModes = SmallList<VkPresentModeKHR, 64>(presentModeCount);
             VK_HANDLE_EXCEPT(vkGetPhysicalDeviceSurfacePresentModesKHR(device, surface, &presentModeCount,
                 supportDetails.presentModes.data()));
         }

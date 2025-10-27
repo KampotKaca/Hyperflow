@@ -4,7 +4,7 @@
 #include "../external/phmap/btree.h"
 #include "../external/phmap/phmap.h"
 
-#include "../external/gch//small_vector.hpp"
+#include "../external/svector/include/ankerl/svector.h"
 
 namespace hf
 {
@@ -27,7 +27,7 @@ namespace hf
 
     template <class K, class V> using Dictionary = phmap::flat_hash_map<K, V>;
     template <class T> using List = std::vector<T>;
-    template <class T, unsigned Size, class Allocator = std::allocator<T>> using SmallList = gch::small_vector<T, Size, Allocator>;
+    template <class T, unsigned Size, class Allocator = std::allocator<T>> using SmallList = ankerl::svector<T, Size>;
 
     //endregion
     //region Primitives

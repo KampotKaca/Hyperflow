@@ -7,7 +7,7 @@ namespace hf
 {
     struct VkTexture
     {
-        explicit VkTexture(const inter::rendering::TextureCreationInfo_i& info);
+        explicit VkTexture(const ir::rdr::TextureCreationInfo_i& info);
         ~VkTexture();
 
         VkImage image{};
@@ -15,9 +15,9 @@ namespace hf
         VkImageLayout layout{};
         VmaAllocation imageMemory{};
 
-        inter::rendering::TextureType type = inter::rendering::TextureType::Tex2D;
-        inter::rendering::TextureViewType viewType = inter::rendering::TextureViewType::Tex2D;
-        inter::rendering::TextureFlags flags = inter::rendering::TextureFlags::None;
+        ir::rdr::TextureType type = ir::rdr::TextureType::Tex2D;
+        ir::rdr::TextureViewType viewType = ir::rdr::TextureViewType::Tex2D;
+        ir::rdr::TextureFlags flags = ir::rdr::TextureFlags::None;
         TextureChannel channel{};
         TextureDetails details{};
 

@@ -20,12 +20,12 @@ int pthread_create(pthread_t* thread, const pthread_attr_t* attr, void* (*start_
 
     auto thread_wrapper = [](void* wrapper_arg) -> void*
     {
-        hf::inter::alloc::LoadAllocatorThread_i();
+        hf::ir::alloc::LoadAllocatorThread_i();
         auto wrapper = (ThreadWrapper*)wrapper_arg;
         void* result = wrapper->original_start_routine(wrapper->original_arg);
 
         delete wrapper;
-        hf::inter::alloc::UnloadAllocatorThread_i();
+        hf::ir::alloc::UnloadAllocatorThread_i();
         return result;
     };
 

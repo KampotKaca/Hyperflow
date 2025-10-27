@@ -9,13 +9,13 @@ namespace hf
 {
     static void ThreadDraw(const Ref<Renderer>& rn)
     {
-        inter::alloc::LoadAllocatorThread_i();
+        ir::alloc::LoadAllocatorThread_i();
 
         rn->threadInfo.isRunning = true;
         uint64_t renderFrameCount = 0;
         while (rn->threadInfo.isRunning)
         {
-            inter::rendering::RendererUpdate_i(rn);
+            ir::rdr::RendererUpdate_i(rn);
             if (renderFrameCount % 1024 == 0) utils::CollectThreadMemoryCache();
 
             std::lock_guard lock(rn->threadInfo.statLock);
@@ -23,16 +23,16 @@ namespace hf
             renderFrameCount++;
         }
         rn->threadInfo.isRunning = false;
-        inter::HF.renderingApi.api.WaitForDevice();
+        ir::HF.renderingApi.api.WaitForDevice();
 
-        inter::alloc::UnloadAllocatorThread_i();
+        ir::alloc::UnloadAllocatorThread_i();
     }
 
     Renderer::Renderer(const Window* window, const RendererEventInfo& eventInfo)
         : eventInfo(eventInfo)
     {
         this->window = window;
-        threadInfo.size = inter::window::GetSize(window);
+        threadInfo.size = ir::window::GetSize(window);
 
         for (uint32_t i = 0; i < 3; i++)
         {
@@ -41,12 +41,12 @@ namespace hf
             threadInfo.cachedPackets.push_back(ptr);
         }
 
-        inter::rendering::CreateRenderer_i(this);
+        ir::rdr::CreateRenderer_i(this);
     }
 
     Renderer::~Renderer()
     {
-        inter::rendering::DestroyRenderer_i(this);
+        ir::rdr::DestroyRenderer_i(this);
     }
 
     bool IsLoaded(const Ref<Renderer>& rn) { return rn->handle; }
@@ -56,7 +56,7 @@ namespace hf
         std::lock_guard lock(rn->threadInfo.threadLock);
         if (rn->window != nullptr) throw GENERIC_EXCEPT("[Hyperflow]", "Cannot resize renderer connected to the window");
         rn->threadInfo.size = size;
-        inter::HF.renderingApi.api.RegisterFrameBufferChange(rn->handle, size);
+        ir::HF.renderingApi.api.RegisterFrameBufferChange(rn->handle, size);
     }
     ThreadMemoryStatistics GetMemoryStatistics(const Ref<Renderer>& rn)
     {
@@ -68,16 +68,16 @@ namespace hf
         return stats;
     }
 
-    RenderingApiType GetApiType()     { return inter::HF.renderingApi.type; }
-    RenderingApiType GetBestApiType() { return inter::platform::GetBestRenderingApi(); }
+    RenderingApiType GetApiType()     { return ir::HF.renderingApi.type; }
+    RenderingApiType GetBestApiType() { return ir::platform::GetBestRenderingApi(); }
 
     bool IsValidApi(RenderingApiType targetApi)
     {
-        if (targetApi == RenderingApiType::None || targetApi == inter::HF.renderingApi.type) return false;
-        return inter::platform::IsValidRenderingApi(targetApi);
+        if (targetApi == RenderingApiType::None || targetApi == ir::HF.renderingApi.type) return false;
+        return ir::platform::IsValidRenderingApi(targetApi);
     }
 
-    namespace inter::rendering
+    namespace ir::rdr
     {
         void LoadApi_i(RenderingApiType api)
         {

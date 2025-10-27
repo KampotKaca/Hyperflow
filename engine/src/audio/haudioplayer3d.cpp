@@ -5,7 +5,7 @@
 
 namespace hf
 {
-    namespace inter
+    namespace ir
     {
         template bool IsLoaded_i(AudioPlayer3D* player);
         template bool IsPlaying_i(AudioPlayer3D* player);
@@ -30,23 +30,23 @@ namespace hf
     AudioPlayer3D::AudioPlayer3D(const AudioPlayer3DCreationInfo& info)
     : settings(info.settings), settings3d(info.settings3d), cone(info.cone), parent(info.parent)
     {
-        if (!parent) parent = inter::AUDIO_DATA.group3D;
+        if (!parent) parent = ir::AUDIO_DATA.group3D;
         ChangeClip(this, info.clip, -1);
     }
 
     AudioPlayer3D::~AudioPlayer3D()
     {
-        inter::FreeHandle_i(this);
-        inter::Destructor_i(this);
+        ir::FreeHandle_i(this);
+        ir::Destructor_i(this);
     }
 
-    bool IsLoaded(const Ref<AudioPlayer3D>& player) { return inter::IsLoaded_i(player.get()); }
-    bool IsPlaying(const Ref<AudioPlayer3D>& player) { return inter::IsPlaying_i(player.get()); }
+    bool IsLoaded(const Ref<AudioPlayer3D>& player) { return ir::IsLoaded_i(player.get()); }
+    bool IsPlaying(const Ref<AudioPlayer3D>& player) { return ir::IsPlaying_i(player.get()); }
 
     Ref<AudioPlayer3D> Create(const AudioPlayer3DCreationInfo& info)
     {
         Ref<AudioPlayer3D> player = MakeRef<AudioPlayer3D>(info);
-        inter::HF.audioResources.player3Ds[(uint64_t)player.get()] = player;
+        ir::HF.audioResources.player3Ds[(uint64_t)player.get()] = player;
         player->stateFlags |= AudioPlayerStateFlags::Loaded;
         return player;
     }
@@ -55,8 +55,8 @@ namespace hf
     {
         if (!IsLoaded(player)) throw GENERIC_EXCEPT("[Hyperflow]", "Trying to access destroyed audio player");
 
-        inter::FreeHandle_i(player.get());
-        inter::HF.audioResources.player3Ds.erase((uint64_t)player.get());
+        ir::FreeHandle_i(player.get());
+        ir::HF.audioResources.player3Ds.erase((uint64_t)player.get());
         player->stateFlags &= (AudioPlayerStateFlags)~(uint32_t)AudioPlayerStateFlags::Loaded;
     }
 
@@ -78,8 +78,8 @@ namespace hf
             LOG_ERROR("Unable to play audio player");
     }
 
-    void Play(const Ref<AudioPlayer3D>& player) { inter::Play_i(player.get()); }
-    void Pause(const Ref<AudioPlayer3D>& player) { inter::Pause_i(player.get()); }
+    void Play(const Ref<AudioPlayer3D>& player) { ir::Play_i(player.get()); }
+    void Pause(const Ref<AudioPlayer3D>& player) { ir::Pause_i(player.get()); }
 
     void SetRange(const Ref<AudioPlayer3D>& player, float_t maxRange, float_t falloff)
     {
@@ -111,26 +111,26 @@ namespace hf
         }
     }
 
-    void SetVolume(const Ref<AudioPlayer3D>& player, float_t volume) { inter::SetVolume_i(player.get(), volume); }
-    void SetPitch(const Ref<AudioPlayer3D>& player, float_t pitch) { inter::SetPitch_i(player.get(), pitch); }
-    void SetLoopingMode(const Ref<AudioPlayer3D>& player, bool loopingEnabled) { inter::SetLoopingMode_i(player.get(), loopingEnabled); }
+    void SetVolume(const Ref<AudioPlayer3D>& player, float_t volume) { ir::SetVolume_i(player.get(), volume); }
+    void SetPitch(const Ref<AudioPlayer3D>& player, float_t pitch) { ir::SetPitch_i(player.get(), pitch); }
+    void SetLoopingMode(const Ref<AudioPlayer3D>& player, bool loopingEnabled) { ir::SetLoopingMode_i(player.get(), loopingEnabled); }
 
     vec2 GetRange(const Ref<AudioPlayer3D>& player) { return {player->settings3d.maxRange, player->settings3d.falloff}; }
     Audio3DAttenuationModel GetAttenuationModel(const Ref<AudioPlayer3D>& player) { return player->settings3d.attenuationModel; }
 
-    void Seek(const Ref<AudioPlayer3D>& player, float_t positionInSeconds) { inter::Seek_i(player.get(), positionInSeconds); }
-    void SeekPercent(const Ref<AudioPlayer3D>& player, float_t position) { inter::SeekPercent_i(player.get(), position); }
+    void Seek(const Ref<AudioPlayer3D>& player, float_t positionInSeconds) { ir::Seek_i(player.get(), positionInSeconds); }
+    void SeekPercent(const Ref<AudioPlayer3D>& player, float_t position) { ir::SeekPercent_i(player.get(), position); }
 
     float_t GetPitch(const Ref<AudioPlayer3D>& player) { return player->settings.pitch; }
     float_t GetVolume(const Ref<AudioPlayer3D>& player) { return player->settings.volume; }
     bool IsLoopingEnabled(const Ref<AudioPlayer3D>& player) { return player->settings.loopingEnabled; }
 
-    double_t GetPlayedInSeconds(const Ref<AudioPlayer3D>& player) { return inter::GetPlayedInSeconds_i(player.get()); }
-    double_t GetPlayedPercent(const Ref<AudioPlayer3D>& player) { return inter::GetPlayedPercent_i(player.get()); }
+    double_t GetPlayedInSeconds(const Ref<AudioPlayer3D>& player) { return ir::GetPlayedInSeconds_i(player.get()); }
+    double_t GetPlayedPercent(const Ref<AudioPlayer3D>& player) { return ir::GetPlayedPercent_i(player.get()); }
 
     void ChangeClip(AudioPlayer3D* player, const Ref<AudioClip>& clip, float_t startingDuration)
     {
-        if(!inter::ChangeClip_i(player, clip, MA_SOUND_FLAG_DECODE, startingDuration)) return;
+        if(!ir::ChangeClip_i(player, clip, MA_SOUND_FLAG_DECODE, startingDuration)) return;
 
         auto& settings3d = player->settings3d;
         auto handle = (ma_sound*)player->handle;

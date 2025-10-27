@@ -11,23 +11,23 @@ namespace hf
     Shader::Shader(const ShaderCreationInfo& info)
     : layout(info.layout), library(info.library), modules(info.modules)
     {
-        inter::rendering::ShaderCreationInfo_i creationInfo{};
+        ir::rdr::ShaderCreationInfo_i creationInfo{};
         creationInfo.layout = layout;
         creationInfo.library = library->handle;
         creationInfo.modules = modules;
 
-        handle = inter::HF.renderingApi.api.CreateShader(creationInfo);
+        handle = ir::HF.renderingApi.api.CreateShader(creationInfo);
     }
 
     Shader::~Shader()
     {
-        inter::rendering::DestroyShader_i(this);
+        ir::rdr::DestroyShader_i(this);
     }
 
     Ref<Shader> Create(const ShaderCreationInfo& info)
     {
         Ref<Shader> shader = MakeRef<Shader>(info);
-        inter::HF.graphicsResources.shaders[(uint64_t)shader.get()] = shader;
+        ir::HF.graphicsResources.shaders[(uint64_t)shader.get()] = shader;
         return shader;
     }
 
@@ -36,20 +36,20 @@ namespace hf
         for (uint32_t i = 0; i < count; i++)
         {
             auto shader = pShaders[i];
-            if (inter::rendering::DestroyShader_i(shader.get()))
-                inter::HF.graphicsResources.shaders.erase((uint64_t)shader.get());
+            if (ir::rdr::DestroyShader_i(shader.get()))
+                ir::HF.graphicsResources.shaders.erase((uint64_t)shader.get());
         }
     }
 
     void Destroy(const Ref<Shader>& shader)
     {
-        if (inter::rendering::DestroyShader_i(shader.get()))
-            inter::HF.graphicsResources.shaders.erase((uint64_t)shader.get());
+        if (ir::rdr::DestroyShader_i(shader.get()))
+            ir::HF.graphicsResources.shaders.erase((uint64_t)shader.get());
     }
 
     bool IsLoaded(const Ref<Shader>& shader) { return shader->handle; }
 
-    namespace inter::rendering
+    namespace ir::rdr
     {
         Ref<Shader> CreateShaderAsset_i(const char* assetPath)
         {

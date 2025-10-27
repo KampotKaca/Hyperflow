@@ -25,8 +25,8 @@ namespace hf
             moduleCodes.push_back(std::move(code));\
         }
 
-        auto preRastModules = std::vector<inter::rendering::ShaderLibraryPreRasterModuleInfo_i>(info.preRasterModuleCount);
-        auto fragModules = std::vector<inter::rendering::ShaderLibraryFragmentModuleInfo_i>(info.fragmentModuleCount);
+        auto preRastModules = std::vector<ir::rdr::ShaderLibraryPreRasterModuleInfo_i>(info.preRasterModuleCount);
+        auto fragModules = std::vector<ir::rdr::ShaderLibraryFragmentModuleInfo_i>(info.fragmentModuleCount);
 
         auto moduleCodes = std::vector<std::vector<char>>();
 
@@ -43,7 +43,7 @@ namespace hf
             int32_t vertexCodeIndex = -1, tesselationControlCodeIndex = -1,
             tesselationEvaluationCodeIndex = -1, geometryCodeIndex = -1;
 
-            switch (inter::HF.renderingApi.type)
+            switch (ir::HF.renderingApi.type)
             {
             case RenderingApiType::Vulkan:
             {
@@ -73,7 +73,7 @@ namespace hf
             default: throw GENERIC_EXCEPT("[Hyperflow]", "Cannot create shader without loading renderer");
             }
 
-            inter::rendering::ShaderLibraryPreRasterModuleInfo_i prInfo{};
+            ir::rdr::ShaderLibraryPreRasterModuleInfo_i prInfo{};
             prInfo.options = moduleInfo.options;
             prInfo.layout = moduleInfo.layout;
 
@@ -114,7 +114,7 @@ namespace hf
             auto& moduleInfo = info.pFragmentModules[i];
             int32_t fragmentCodeIndex = -1;
 
-            switch (inter::HF.renderingApi.type)
+            switch (ir::HF.renderingApi.type)
             {
             case RenderingApiType::Vulkan:
             {
@@ -126,7 +126,7 @@ namespace hf
             default: throw GENERIC_EXCEPT("[Hyperflow]", "Cannot create shader without loading renderer");
             }
 
-            inter::rendering::ShaderLibraryFragmentModuleInfo_i fmInfo{};
+            ir::rdr::ShaderLibraryFragmentModuleInfo_i fmInfo{};
             fmInfo.depthStencilOptions = moduleInfo.depthStencilOptions;
             fmInfo.layout = moduleInfo.layout;
 
@@ -147,9 +147,9 @@ namespace hf
             moduleId++;
         }
 
-        inter::rendering::ShaderLibraryCreationInfo_i slInfo{};
+        ir::rdr::ShaderLibraryCreationInfo_i slInfo{};
         slInfo.uniqueLibraryName         = name.c_str();
-        slInfo.outputFormats             = inter::HF.internalResourcesFormat.drawOutputFormats;
+        slInfo.outputFormats             = ir::HF.internalResourcesFormat.drawOutputFormats;
         slInfo.pVertexInputModules       = info.pVertexInputModules;
         slInfo.vertexInputModuleCount    = (uint32_t)info.vertexInputModuleCount;
         slInfo.pPreRasterModules         = preRastModules.data();
@@ -159,25 +159,25 @@ namespace hf
         slInfo.pFragmentOutputModules    = info.pFragmentOutputModules;
         slInfo.fragmentOutputModuleCount = (uint32_t)info.fragmentOutputModuleCount;
 
-        handle = inter::HF.renderingApi.api.CreateShaderLibrary(slInfo);
+        handle = ir::HF.renderingApi.api.CreateShaderLibrary(slInfo);
     }
 
     ShaderLibrary::~ShaderLibrary()
     {
-        inter::rendering::DestroyShaderLibrary_i(this);
+        ir::rdr::DestroyShaderLibrary_i(this);
     }
 
     Ref<ShaderLibrary> Create(const ShaderLibraryCreationInfo& info)
     {
         Ref<ShaderLibrary> lib = MakeRef<ShaderLibrary>(info);
-        inter::HF.graphicsResources.shaderLibraries[(uint64_t)lib.get()] = lib;
+        ir::HF.graphicsResources.shaderLibraries[(uint64_t)lib.get()] = lib;
         return lib;
     }
 
     void Destroy(const Ref<ShaderLibrary>& lib)
     {
-        if (inter::rendering::DestroyShaderLibrary_i(lib.get()))
-            inter::HF.graphicsResources.shaderLibraries.erase((uint64_t)lib.get());
+        if (ir::rdr::DestroyShaderLibrary_i(lib.get()))
+            ir::HF.graphicsResources.shaderLibraries.erase((uint64_t)lib.get());
     }
 
     void Destroy(const Ref<ShaderLibrary>* pLibraries, uint32_t count)
@@ -185,8 +185,8 @@ namespace hf
         for (uint32_t i = 0; i < count; i++)
         {
             auto lib = pLibraries[i];
-            if (inter::rendering::DestroyShaderLibrary_i(lib.get()))
-                inter::HF.graphicsResources.shaderLibraries.erase((uint64_t)lib.get());
+            if (ir::rdr::DestroyShaderLibrary_i(lib.get()))
+                ir::HF.graphicsResources.shaderLibraries.erase((uint64_t)lib.get());
         }
     }
 
@@ -201,7 +201,7 @@ namespace hf
     uint32_t GetFragmentOutputModule(const Ref<ShaderLibrary>& lib, const char* name)            { return lib->fragmentOutputModules[name]; }
     uint32_t GetFragmentOutputModule(const Ref<ShaderLibrary>& lib, const std::string_view name) { return lib->fragmentOutputModules[name]; }
 
-    namespace inter::rendering
+    namespace ir::rdr
     {
         static void ReadVertexInputModule   (const std::filesystem::path& assetPath, const std::filesystem::path& parentFolderPath, ShaderLibraryVertexInputModuleInfo& result);
         static void ReadPreRasterModule     (const std::filesystem::path& assetPath, const std::filesystem::path& parentFolderPath, ShaderLibraryPreRasterModuleInfo& result);

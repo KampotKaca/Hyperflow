@@ -51,7 +51,7 @@ namespace hf
         uint32_t instanceCount;
     };
 
-    static DrawStartData DrawStart(const VkRenderer* rn, const inter::rendering::DrawCallInfo_i& info,
+    static DrawStartData DrawStart(const VkRenderer* rn, const ir::rdr::DrawCallInfo_i& info,
                                    VkBuffer* vbCache, VkDeviceSize* offsetsCache)
     {
         uint32_t bufferCount = info.vertexBufferCount;
@@ -77,7 +77,7 @@ namespace hf
         return DrawStartData{ bufferCount, instanceCount };
     }
 
-    void Draw(const VkRenderer* rn, const inter::rendering::IndexedDrawCallInfo_i& info)
+    void Draw(const VkRenderer* rn, const ir::rdr::IndexedDrawCallInfo_i& info)
     {
         VkBuffer vertexBufferCache[MAX_NUM_BUFFER_CACHE]{};
         VkDeviceSize drawOffsets[MAX_NUM_BUFFER_CACHE]{};
@@ -92,7 +92,7 @@ namespace hf
         vkCmdDrawIndexed(command, info.indexBuffer.indexCount, data.instanceCount, 0, 0, 0);
     }
 
-    void Draw(const VkRenderer* rn, const inter::rendering::VertexedDrawCallInfo_i& info)
+    void Draw(const VkRenderer* rn, const ir::rdr::VertexedDrawCallInfo_i& info)
     {
         VkBuffer vertexBufferCache[MAX_NUM_BUFFER_CACHE]{};
         VkDeviceSize drawOffsets[MAX_NUM_BUFFER_CACHE]{};

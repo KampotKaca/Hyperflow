@@ -18,28 +18,28 @@ namespace hf
 
     Mesh::~Mesh()
     {
-        inter::rendering::DestroyMesh_i(this);
+        ir::rdr::DestroyMesh_i(this);
     }
 
     Ref<Mesh> Create(const MeshCreationInfo& info)
     {
         auto mesh = MakeRef<Mesh>(info);
-        inter::HF.graphicsResources.meshes[(uint64_t)mesh.get()] = mesh;
+        ir::HF.graphicsResources.meshes[(uint64_t)mesh.get()] = mesh;
         return mesh;
     }
 
     void Destroy(const Ref<Mesh>& mesh)
     {
-        inter::rendering::DestroyMesh_i(mesh.get());
-        inter::HF.graphicsResources.meshes.erase((uint64_t)mesh.get());
+        ir::rdr::DestroyMesh_i(mesh.get());
+        ir::HF.graphicsResources.meshes.erase((uint64_t)mesh.get());
     }
 
     void Destroy(const Ref<Mesh>* pMeshes, uint32_t count)
     {
         for (uint32_t i = 0; i < count; i++)
         {
-            inter::rendering::DestroyMesh_i(pMeshes[i].get());
-            inter::HF.graphicsResources.meshes.erase((uint64_t)pMeshes[i].get());
+            ir::rdr::DestroyMesh_i(pMeshes[i].get());
+            ir::HF.graphicsResources.meshes.erase((uint64_t)pMeshes[i].get());
         }
     }
 
@@ -49,7 +49,7 @@ namespace hf
     uint32_t GetMeshSkinCount(const Ref<Mesh>& mesh) { return mesh->skinBuffers.size(); }
     const BoundingVolume& GetMeshBoundingVolume(const Ref<Mesh>& mesh) { return mesh->volume; }
 
-    namespace inter::rendering
+    namespace ir::rdr
     {
         bool DestroyMesh_i(Mesh* mesh)
         {

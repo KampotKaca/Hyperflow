@@ -6,16 +6,16 @@ namespace hf
 {
     namespace primitives
     {
-        Ref<VertexBuffer> GetQuadBuffer()   { return inter::HF.staticResources.quadBuffer; }
-        Ref<VertexBuffer>* GetQuadBufferP() { return &inter::HF.staticResources.quadBuffer; }
+        Ref<VertexBuffer> GetQuadBuffer()   { return ir::HF.staticResources.quadBuffer; }
+        Ref<VertexBuffer>* GetQuadBufferP() { return &ir::HF.staticResources.quadBuffer; }
 
-        Buffer GetGlobalUniformBuffer()     { return inter::HF.staticResources.globalUniform; }
+        Buffer GetGlobalUniformBuffer()     { return ir::HF.staticResources.globalUniform; }
 
-        Ref<Mesh> GetMesh(PrimitiveMeshType type) { return GetMesh(inter::HF.staticResources.primitiveModels[(uint32_t)type], 0); }
-        Ref<Texture> GetTexture(PrimitiveTextureType type) { return inter::HF.staticResources.primitiveTextures[(uint32_t)type]; }
+        Ref<Mesh> GetMesh(PrimitiveMeshType type) { return GetMesh(ir::HF.staticResources.primitiveModels[(uint32_t)type], 0); }
+        Ref<Texture> GetTexture(PrimitiveTextureType type) { return ir::HF.staticResources.primitiveTextures[(uint32_t)type]; }
     }
 
-    namespace inter::general
+    namespace ir::general
     {
         static void DefineTextureLayouts();
         static void DefineBufferAttribs();

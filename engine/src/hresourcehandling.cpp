@@ -1,19 +1,19 @@
 #include "hinternal.h"
 
-namespace hf::inter
+namespace hf::ir
 {
     void UnloadAllResources_i(const bool internalOnly)
     {
-        rendering::DestroyAllBuffers_i(internalOnly);
-        rendering::DestroyAllMeshes_i(internalOnly);
-        rendering::DestroyAllTextures_i(internalOnly);
-        rendering::DestroyAllCubemaps_i(internalOnly);
-        rendering::DestroyAllAssets_i(internalOnly);
-        rendering::DestroyAllShaders_i(internalOnly);
-        rendering::DestroyAllShaderLibraries_i(internalOnly);
+        rdr::DestroyAllBuffers_i(internalOnly);
+        rdr::DestroyAllMeshes_i(internalOnly);
+        rdr::DestroyAllTextures_i(internalOnly);
+        rdr::DestroyAllCubemaps_i(internalOnly);
+        rdr::DestroyAllAssets_i(internalOnly);
+        rdr::DestroyAllShaders_i(internalOnly);
+        rdr::DestroyAllShaderLibraries_i(internalOnly);
 
-        rendering::DestroyAllTexturePacks_i(internalOnly);
-        rendering::DestroyAllRenderTextures_i(internalOnly);
+        rdr::DestroyAllTexturePacks_i(internalOnly);
+        rdr::DestroyAllRenderTextures_i(internalOnly);
     }
 
     void CleanMarkedResources_i()

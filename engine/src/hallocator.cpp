@@ -11,7 +11,7 @@
 
 namespace hf
 {
-    namespace inter::alloc
+    namespace ir::alloc
     {
         double ToMB(size_t bytes)
         {
@@ -67,13 +67,13 @@ namespace hf
             rpmalloc_global_statistics(&sts);
 
             GlobalMemoryStatistics stats{};
-            stats.mappedSizeMbs        = inter::alloc::ToMB(sts.mapped);
-            stats.mappedPeakSizeMbs    = inter::alloc::ToMB(sts.mapped_peak);
-            stats.cachedSizeMbs        = inter::alloc::ToMB(sts.cached);
-            stats.hugeAllocSizeMbs     = inter::alloc::ToMB(sts.huge_alloc);
-            stats.hugeAllocPeakSizeMbs = inter::alloc::ToMB(sts.huge_alloc_peak);
-            stats.mappedTotalSizeMbs   = inter::alloc::ToMB(sts.mapped_total);
-            stats.unmappedTotalSizeMbs = inter::alloc::ToMB(sts.unmapped_total);
+            stats.mappedSizeMbs        = ir::alloc::ToMB(sts.mapped);
+            stats.mappedPeakSizeMbs    = ir::alloc::ToMB(sts.mapped_peak);
+            stats.cachedSizeMbs        = ir::alloc::ToMB(sts.cached);
+            stats.hugeAllocSizeMbs     = ir::alloc::ToMB(sts.huge_alloc);
+            stats.hugeAllocPeakSizeMbs = ir::alloc::ToMB(sts.huge_alloc_peak);
+            stats.mappedTotalSizeMbs   = ir::alloc::ToMB(sts.mapped_total);
+            stats.unmappedTotalSizeMbs = ir::alloc::ToMB(sts.unmapped_total);
             return stats;
         }
 
@@ -85,10 +85,10 @@ namespace hf
             const auto& su = *sts.size_use;
 
             ThreadMemoryStatistics stats{};
-            stats.cacheSizeMbs      = inter::alloc::ToMB(sts.sizecache);
-            stats.cacheSpanMbs      = inter::alloc::ToMB(sts.spancache);
-            stats.threadToGlobalMbs = inter::alloc::ToMB(sts.thread_to_global);
-            stats.globalToThreadMbs = inter::alloc::ToMB(sts.global_to_thread);
+            stats.cacheSizeMbs      = ir::alloc::ToMB(sts.sizecache);
+            stats.cacheSpanMbs      = ir::alloc::ToMB(sts.spancache);
+            stats.threadToGlobalMbs = ir::alloc::ToMB(sts.thread_to_global);
+            stats.globalToThreadMbs = ir::alloc::ToMB(sts.global_to_thread);
 
             stats.currentNumSpans = sp.current;
             stats.peakNumSpans    = sp.peak;

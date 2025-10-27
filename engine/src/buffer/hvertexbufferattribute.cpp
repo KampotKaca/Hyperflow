@@ -15,7 +15,7 @@ namespace hf
             fullStride += stride.lSize;
         }
 
-        return inter::HF.renderingApi.api.DefineVertexBufferAttribute(info, fullStride);
+        return ir::HF.renderingApi.api.DefineVertexBufferAttribute(info, fullStride);
     }
 
     VertexBufferAttribute DefineVertexAttributeAsset(const char* assetPath)
@@ -57,7 +57,7 @@ namespace hf
             info.pFormats = formatList.data();
 
             const auto attrib = Define(info);
-            inter::HF.graphicsResources.vertexAttributes[assetPath] = attrib;
+            ir::HF.graphicsResources.vertexAttributes[assetPath] = attrib;
             return attrib;
         }catch (...)
         {
@@ -66,5 +66,5 @@ namespace hf
         }
     }
 
-    uint32_t GetVertexSize(VertexBufferAttribute attribute) { return inter::HF.renderingApi.api.GetVertexBufferAttributeSize(attribute); }
+    uint32_t GetVertexSize(VertexBufferAttribute attribute) { return ir::HF.renderingApi.api.GetVertexBufferAttributeSize(attribute); }
 }

@@ -10,28 +10,28 @@ namespace hf
             (transferType == DataTransferType::CopyData ||
             transferType == DataTransferType::TransferOwnership))
             utils::Deallocate(buffer);
-        inter::rendering::DestroyBuffer_i(this);
+        ir::rdr::DestroyBuffer_i(this);
     }
 
     bool IsLoaded(const Ref<RuntimeBufferBase>& rbb) { return rbb->handle; }
     void Destroy(const Ref<RuntimeBufferBase>& rbb)
     {
-        if (inter::rendering::DestroyBuffer_i(rbb.get()))
-            inter::HF.graphicsResources.buffers.erase((uint64_t)rbb.get());
+        if (ir::rdr::DestroyBuffer_i(rbb.get()))
+            ir::HF.graphicsResources.buffers.erase((uint64_t)rbb.get());
     }
 
-    void SubmitAllBuffers() { inter::HF.renderingApi.api.SubmitBufferCopyOperations(); }
+    void SubmitAllBuffers() { ir::HF.renderingApi.api.SubmitBufferCopyOperations(); }
     void Destroy(const Ref<RuntimeBufferBase>* pBuffers, uint32_t count)
     {
         for (uint32_t i = 0; i < count; i++)
         {
             auto buffer = pBuffers[i];
-            if (inter::rendering::DestroyBuffer_i(buffer.get()))
-                inter::HF.graphicsResources.buffers.erase((uint64_t)buffer.get());
+            if (ir::rdr::DestroyBuffer_i(buffer.get()))
+                ir::HF.graphicsResources.buffers.erase((uint64_t)buffer.get());
         }
     }
 
-    namespace inter::rendering
+    namespace ir::rdr
     {
         bool DestroyBuffer_i(RuntimeBufferBase* buffer)
         {
