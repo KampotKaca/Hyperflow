@@ -8,8 +8,7 @@
 
 namespace hf
 {
-    Shader::Shader(const ShaderCreationInfo& info)
-    : layout(info.layout), library(info.library), modules(info.modules)
+    Shader::Shader(const ShaderCreationInfo& info) : layout(info.layout), library(info.library), modules(info.modules)
     {
         ir::rdr::ShaderCreationInfo_i creationInfo{};
         creationInfo.layout = layout;

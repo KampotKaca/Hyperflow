@@ -27,7 +27,7 @@ namespace hf::utils
     static void readFile(std::ifstream& file, List<char>& result)
     {
         const size_t fileSize = file.tellg();
-        result = std::vector<char>(fileSize);
+        result = List<char>(fileSize);
         file.seekg(0);
         file.read(result.data(), (int64_t)fileSize);
         file.close();

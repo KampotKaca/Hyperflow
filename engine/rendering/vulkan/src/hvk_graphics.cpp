@@ -259,14 +259,14 @@ namespace hf
 
         if (deviceCount == 0) throw GENERIC_EXCEPT("[Vulkan]", "No Graphics device found");
 
-        std::vector<VkPhysicalDevice> availableDevices(deviceCount);
+        SmallList<VkPhysicalDevice, 8> availableDevices(deviceCount);
         VK_HANDLE_EXCEPT(vkEnumeratePhysicalDevices(GRAPHICS_DATA.instance,
         &deviceCount, availableDevices.data()));
 
         VK_HANDLE_EXCEPT((VkResult)GRAPHICS_DATA.platform.functions.createVulkanSurfaceFunc
         (windowHandle, GRAPHICS_DATA.instance, &GRAPHICS_DATA.platform.allocator, resultSurface));
 
-        std::vector<GraphicsDevice> devices{};
+        SmallList<GraphicsDevice, 8> devices{};
 
         for (const auto& device : availableDevices)
         {

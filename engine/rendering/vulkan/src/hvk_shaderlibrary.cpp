@@ -284,7 +284,7 @@ namespace hf
 
 #if defined(VK_ENABLE_PIPELINE_CACHES)
         std::string cachePath = TO_RES_PATH(std::string(info.uniqueLibraryName) + ".cache");
-        std::vector<char> cacheData{};
+        List<char> cacheData{};
 
         {
             VkPipelineCacheCreateInfo pipelineCacheCreateInfo{};
@@ -364,7 +364,7 @@ namespace hf
         modules.clear();
     }
 
-    VkShaderModule AddShaderStage(const void* code, uint32_t codeSize, VkShaderStageFlagBits stage, std::vector<VkPipelineShaderStageCreateInfo>& res)
+    VkShaderModule AddShaderStage(const void* code, uint32_t codeSize, VkShaderStageFlagBits stage, List<VkPipelineShaderStageCreateInfo>& res)
     {
         if (codeSize > 0 && code != nullptr)
         {

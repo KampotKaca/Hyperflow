@@ -158,7 +158,7 @@ namespace hf
         List<uint8_t> pushConstantUploads{};
         List<uint8_t> instanceUploads{};
 
-        void allocate()
+        void preallocate()
         {
             bufferUploads.reserve(RN_NUM_BUFFER_UPLOAD_DATA);
             pushConstantUploads.reserve(RN_NUM_PUSH_CONSTANT_UPLOAD_DATA);

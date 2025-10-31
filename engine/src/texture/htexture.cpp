@@ -136,7 +136,7 @@ namespace hf
             std::filesystem::path fPath = TO_RES_PATH(folderPath);
             if (std::filesystem::exists(fPath) && std::filesystem::is_directory(fPath))
             {
-                std::vector<window::Image> images{};
+                List<window::Image> images{};
                 for (const auto& entry : std::filesystem::recursive_directory_iterator(fPath))
                 {
                     if (entry.is_regular_file())

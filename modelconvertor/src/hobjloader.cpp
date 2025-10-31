@@ -6,8 +6,8 @@ namespace ml
     bool LoadObj(const char* path, ModelInfo* meshInfo)
     {
         tinyobj::attrib_t attrib;
-        std::vector<tinyobj::shape_t> shapes;
-        std::vector<tinyobj::material_t> materials;
+        hf::List<tinyobj::shape_t> shapes;
+        hf::List<tinyobj::material_t> materials;
         std::string warn, err;
         bool objRes = tinyobj::LoadObj(&attrib, &shapes, &materials, &warn, &err, path);
 
@@ -26,8 +26,8 @@ namespace ml
         for (const auto& shape : shapes)
         {
             hf::Dictionary<Vertex, uint32_t> uniqueVertices{};
-            std::vector<Vertex> vertices{};
-            std::vector<uint32_t> indices{};
+            hf::List<Vertex> vertices{};
+            hf::List<uint32_t> indices{};
 
             for (const auto& index : shape.mesh.indices)
             {

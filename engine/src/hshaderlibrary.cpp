@@ -7,8 +7,7 @@
 
 namespace hf
 {
-    ShaderLibrary::ShaderLibrary(const ShaderLibraryCreationInfo& info)
-    : name(info.cacheFileName)
+    ShaderLibrary::ShaderLibrary(const ShaderLibraryCreationInfo& info) : name(info.cacheFileName)
     {
 #define HANDLE_FILE(modulePath, post, name)\
         {\
@@ -25,10 +24,10 @@ namespace hf
             moduleCodes.push_back(std::move(code));\
         }
 
-        auto preRastModules = std::vector<ir::rdr::ShaderLibraryPreRasterModuleInfo_i>(info.preRasterModuleCount);
-        auto fragModules = std::vector<ir::rdr::ShaderLibraryFragmentModuleInfo_i>(info.fragmentModuleCount);
+        auto preRastModules = List<ir::rdr::ShaderLibraryPreRasterModuleInfo_i>(info.preRasterModuleCount);
+        auto fragModules = List<ir::rdr::ShaderLibraryFragmentModuleInfo_i>(info.fragmentModuleCount);
 
-        auto moduleCodes = std::vector<std::vector<char>>();
+        auto moduleCodes = List<List<char>>();
 
         uint32_t moduleId = 0;
         for (uint32_t i = 0; i < info.vertexInputModuleCount; i++)
@@ -213,7 +212,7 @@ namespace hf
             const auto assetLoc = (TO_RES_PATH_P("shadermodules") / assetPath).string() + ".meta";
             const auto moduleFolder = std::filesystem::path(assetLoc).parent_path();
 
-            std::vector<char> metadata{};
+            List<char> metadata{};
             if (!START_READING(assetLoc.c_str(), metadata)) return nullptr;
 
             try
@@ -234,10 +233,10 @@ namespace hf
                 const auto fragmentModuleFolder = moduleFolder / "fragments";
                 const auto fragmentOutputModuleFolder = moduleFolder / "fragmentoutputs";
 
-                std::vector<ShaderLibraryVertexInputModuleInfo> vertexInputModules{};
-                std::vector<ShaderLibraryPreRasterModuleInfo> preRasterModules{};
-                std::vector<ShaderLibraryFragmentModuleInfo> fragmentModules{};
-                std::vector<ShaderLibraryFragmentOutputModuleInfo> fragmentOutputModules{};
+                List<ShaderLibraryVertexInputModuleInfo> vertexInputModules{};
+                List<ShaderLibraryPreRasterModuleInfo> preRasterModules{};
+                List<ShaderLibraryFragmentModuleInfo> fragmentModules{};
+                List<ShaderLibraryFragmentOutputModuleInfo> fragmentOutputModules{};
 
                 for (const auto& entry : std::filesystem::recursive_directory_iterator(vertexInputModuleFolder))
                 {
@@ -328,7 +327,7 @@ namespace hf
 
         void ReadVertexInputModule(const std::filesystem::path& assetPath, const std::filesystem::path& parentFolderPath, ShaderLibraryVertexInputModuleInfo& result)
         {
-            std::vector<char> metadata{};
+            List<char> metadata{};
             if(!START_READING(assetPath, metadata)) return;
 
             result.name = std::filesystem::relative(assetPath, parentFolderPath).replace_extension("").string();
@@ -370,7 +369,7 @@ namespace hf
 
         void ReadPreRasterModule(const std::filesystem::path& assetPath, const std::filesystem::path& parentFolderPath, ShaderLibraryPreRasterModuleInfo& result)
         {
-            std::vector<char> metadata{};
+            List<char> metadata{};
             if(!START_READING(assetPath, metadata)) return;
 
             result.name = std::filesystem::relative(assetPath, parentFolderPath).replace_extension("").string();
@@ -434,7 +433,7 @@ namespace hf
 
         void ReadFragmentModule(const std::filesystem::path& assetPath, const std::filesystem::path& parentFolderPath, ShaderLibraryFragmentModuleInfo& result)
         {
-            std::vector<char> metadata{};
+            List<char> metadata{};
             if(!START_READING(assetPath, metadata)) return;
 
             result.name = std::filesystem::relative(assetPath, parentFolderPath).replace_extension("").string();
@@ -465,7 +464,7 @@ namespace hf
 
         void ReadFragmentOutputModule(const std::filesystem::path& assetPath, const std::filesystem::path& parentFolderPath, ShaderLibraryFragmentOutputModuleInfo& result)
         {
-            std::vector<char> metadata{};
+            List<char> metadata{};
             if(!START_READING(assetPath, metadata)) return;
 
             result.name = std::filesystem::relative(assetPath, parentFolderPath).replace_extension("").string();

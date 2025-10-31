@@ -71,7 +71,7 @@ namespace ml
                 hf::List colors   (vertexCount, hf::vec3{ 1, 1, 1 });
                 hf::List texcoords(vertexCount, hf::vec2{ 0, 0 });
 
-                auto ReadAccessorVec3 = [&](std::vector<hf::vec3>& dst, const tinygltf::Accessor& accessor)
+                auto ReadAccessorVec3 = [&](hf::List<hf::vec3>& dst, const tinygltf::Accessor& accessor)
                 {
                     const tinygltf::BufferView& bv = model.bufferViews[accessor.bufferView];
                     const tinygltf::Buffer& buf = model.buffers[bv.buffer];
@@ -83,7 +83,7 @@ namespace ml
                     }
                 };
 
-                auto ReadAccessorVec2 = [&](std::vector<hf::vec2>& dst, const tinygltf::Accessor& accessor)
+                auto ReadAccessorVec2 = [&](hf::List<hf::vec2>& dst, const tinygltf::Accessor& accessor)
                 {
                     const tinygltf::BufferView& bv = model.bufferViews[accessor.bufferView];
                     const tinygltf::Buffer& buf = model.buffers[bv.buffer];

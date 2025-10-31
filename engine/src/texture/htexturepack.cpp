@@ -189,7 +189,7 @@ namespace hf
             const auto assetLoc = (TO_RES_PATH_P("texpacks") / assetPath).string() + ".meta";
             const auto moduleFolder = std::filesystem::path(assetLoc).parent_path();
 
-            std::vector<char> metadata{};
+            List<char> metadata{};
             if (!START_READING(assetLoc.c_str(), metadata)) return nullptr;
 
             try

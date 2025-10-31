@@ -25,7 +25,7 @@ namespace hf
             return;
         }
 
-        std::vector<char> compressedData{};
+        List<char> compressedData{};
         if (!utils::ReadFile(modelLoc, compressedData))
         {
             LOG_ERROR("[Hyperflow] Unable to read model: %s", filePath.c_str());
@@ -38,7 +38,7 @@ namespace hf
         memcpy(&meshCount, compressedData.data() + offset, sizeof(uint32_t));
         offset += sizeof(uint32_t);
 
-        std::vector<ml::MeshHeader> headers(meshCount);
+        List<ml::MeshHeader> headers(meshCount);
         memcpy(headers.data(), compressedData.data() + offset, meshCount * sizeof(ml::MeshHeader));
         offset += meshCount * sizeof(ml::MeshHeader);
         if (!CheckFileIntegrity(compressedData.data(), offset))
@@ -50,7 +50,7 @@ namespace hf
         uint32_t meshSize = 0;
         for (auto& header : headers) meshSize += header.GetDataSize();
 
-        std::vector<char> meshData(meshSize);
+        List<char> meshData(meshSize);
         const auto maxSize = LZ4_decompress_safe(&compressedData[offset], meshData.data(), (int32_t)compressedData.size() - (int32_t)offset, (int32_t)meshSize);
         offset = 0;
 
@@ -87,7 +87,7 @@ namespace hf
         Ref<Model> CreateModelAsset_i(const char* assetPath)
         {
             const std::string assetLoc = TO_RES_PATH(std::string("models/") + assetPath) + ".meta";
-            std::vector<char> metadata{};
+            List<char> metadata{};
             if (!START_READING(assetLoc.c_str(), metadata)) return nullptr;
 
             try
@@ -165,10 +165,10 @@ namespace hf
 
     Ref<Mesh> LoadMesh(
         const ml::MeshHeader& header,
-        const std::vector<char>& meshData, uint32_t vertexStride, const Model* model,
+        const List<char>& meshData, uint32_t vertexStride, const Model* model,
         uint32_t& offset)
     {
-        std::vector<VertexBufferCreationInfo> skinBuffers{};
+        List<VertexBufferCreationInfo> skinBuffers{};
 
         constexpr uint32_t pncStep = sizeof(float_t) * 3;
         constexpr uint32_t tStep = sizeof(float_t) * 2;

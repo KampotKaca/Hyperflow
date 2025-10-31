@@ -17,7 +17,7 @@ namespace ml
         uint32_t headerDataSize = meshInfo.headers.size() * sizeof(MeshHeader);
         uint32_t fullHeaderSize = sizeof(uint32_t) + headerDataSize + 1;
         uint32_t offset = 0;
-        hf::List<char> headerData = std::vector<char>(fullHeaderSize);
+        hf::List<char> headerData = hf::List<char>(fullHeaderSize);
 
         memcpy(headerData.data() + offset, &submeshCount, sizeof(uint32_t));
         offset += sizeof(uint32_t);
@@ -185,7 +185,7 @@ namespace ml
         return modelLoadingResult;
     }
 
-    void WriteData(ModelInfo* meshInfo, const std::vector<Vertex>& vertices, const std::vector<uint32_t>& indices,
+    void WriteData(ModelInfo* meshInfo, const hf::List<Vertex>& vertices, const hf::List<uint32_t>& indices,
         hf::MeshDataType dataFlags, uint16_t skinDeformationCount, uint16_t blendDeformationCount)
     {
         MeshInfo subMeshInfo{};
@@ -205,7 +205,7 @@ namespace ml
         if (vertices.size() <= 65535)
         {
             header.indexFormat = (uint32_t)hf::MeshIndexFormat::U16;
-            subMeshInfo.indices = std::vector<char>(indices.size() * 2);
+            subMeshInfo.indices = hf::List<char>(indices.size() * 2);
             for (uint32_t i = 0; i < indices.size(); ++i)
             {
                 auto result = (uint16_t)indices[i];
@@ -215,7 +215,7 @@ namespace ml
         else
         {
             header.indexFormat = (uint32_t)hf::MeshIndexFormat::U32;
-            subMeshInfo.indices = std::vector<char>(indices.size() * 4);
+            subMeshInfo.indices = hf::List<char>(indices.size() * 4);
             memcpy(subMeshInfo.indices.data(), indices.data(), sizeof(uint32_t) * indices.size());
         }
 

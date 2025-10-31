@@ -28,8 +28,7 @@ namespace hf
         ir::alloc::UnloadAllocatorThread_i();
     }
 
-    Renderer::Renderer(const Window* window, const RendererEventInfo& eventInfo)
-        : eventInfo(eventInfo)
+    Renderer::Renderer(const Window* window, const RendererEventInfo& eventInfo) : eventInfo(eventInfo)
     {
         this->window = window;
         threadInfo.size = ir::window::GetSize(window);
@@ -37,7 +36,7 @@ namespace hf
         for (uint32_t i = 0; i < 3; i++)
         {
             auto ptr = &allPackets[i];
-            ptr->allocate();
+            ptr->preallocate();
             threadInfo.cachedPackets.push_back(ptr);
         }
 
