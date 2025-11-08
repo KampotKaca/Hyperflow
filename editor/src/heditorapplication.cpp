@@ -125,12 +125,12 @@ namespace app
 
     void EditorStartRender()
     {
-        hf::dp::SetDrawCallback(GuiDraw);
         AppStartRender();
     }
 
     void EditorEndRender()
     {
+        hf::dp::SetDrawCallback(GuiDraw);
         AppEndRender();
     }
 }

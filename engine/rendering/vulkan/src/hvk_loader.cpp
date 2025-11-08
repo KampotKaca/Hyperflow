@@ -252,6 +252,7 @@ namespace hf
         GRAPHICS_DATA.editorInfo->device = GRAPHICS_DATA.device.logicalDevice.device;
         GRAPHICS_DATA.editorInfo->queueFamily = GRAPHICS_DATA.device.familyIndices.graphicsFamily.value();
         GRAPHICS_DATA.editorInfo->queue = GRAPHICS_DATA.device.logicalDevice.graphicsQueue;
+        GRAPHICS_DATA.editorInfo->allocationCallbacks = &GRAPHICS_DATA.platform.allocator;
 
         GRAPHICS_DATA.editorInfo->CheckVkResultFn = [](VkResult err)
         {

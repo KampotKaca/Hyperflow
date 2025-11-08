@@ -176,6 +176,7 @@ namespace hf
         VkQueue queue{};
         VkDescriptorPool descriptorPool{};
         void (*CheckVkResultFn)(VkResult err){};
+        void* allocationCallbacks = nullptr;
     };
 
     struct GraphicsData

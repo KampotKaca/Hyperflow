@@ -15,6 +15,7 @@ namespace hf::ed
         VkQueue queue{};
         VkDescriptorPool descriptorPool{};
         void (*CheckVkResultFn)(VkResult err){};
+        void* allocationCallbacks = nullptr;
     };
 
     struct EditorRenderer
@@ -67,6 +68,21 @@ namespace hf::ed
             .CheckVkResultFn = API_INFO.CheckVkResultFn,
             .MinAllocationSize = 1024 * 1024,
         };
+        initInfo.PipelineInfoMain = ImGui_ImplVulkan_PipelineInfo
+        {
+            .MSAASamples = (VkSampleCountFlagBits)info.multisampleMode,
+            .PipelineRenderingCreateInfo = VkPipelineRenderingCreateInfoKHR
+            {
+                .sType = VK_STRUCTURE_TYPE_PIPELINE_RENDERING_CREATE_INFO_KHR,
+                .pNext = nullptr,
+                .viewMask = 0,
+                .colorAttachmentCount = info.colorFormatCount,
+                .pColorAttachmentFormats = (VkFormat*)info.pColorFormats,
+                .depthAttachmentFormat = (VkFormat)info.depthFormat,
+                .stencilAttachmentFormat = (VkFormat)info.stencilFormat,
+            },
+        };
+        initInfo.Allocator = (VkAllocationCallbacks*)API_INFO.allocationCallbacks;
         ImGui_ImplVulkan_Init(&initInfo);
     }
 

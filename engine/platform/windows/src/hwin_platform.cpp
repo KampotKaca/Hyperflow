@@ -1,5 +1,5 @@
 #include "hwin_shared.h"
-#include "../../platform/include/hplatform.h"
+#include "hplatform.h"
 
 namespace hf::platform
 {
@@ -19,7 +19,11 @@ namespace hf::platform
 
     void* LoadDll(const char* dllName)
     {
-        auto path = std::filesystem::current_path().parent_path() / "application" / (std::string("lib") + dllName + ".dll");
+        char p[MAX_PATH];
+        GetModuleFileNameA(nullptr, p, MAX_PATH);
+        std::filesystem::path exe(p);
+
+        auto path = exe.parent_path() / (std::string("lib") + dllName + ".dll");
         if (!utils::FileExists(path.string().c_str()))
             throw GENERIC_EXCEPT("[Hyperflow]", "Unable to find dll at path %s", path.c_str());
         auto dll = LoadLibraryA(path.string().c_str());
