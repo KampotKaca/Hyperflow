@@ -62,18 +62,8 @@ namespace hf::ed
             .DescriptorPool = API_INFO.descriptorPool,
             .MinImageCount = 3,
             .ImageCount = 3,
-            .MSAASamples = (VkSampleCountFlagBits)info.multisampleMode,
             .PipelineCache = VK_NULL_HANDLE,
             .UseDynamicRendering = true,
-            .PipelineRenderingCreateInfo =
-            {
-                .sType = VK_STRUCTURE_TYPE_PIPELINE_RENDERING_CREATE_INFO_KHR,
-                .pNext = nullptr,
-                .colorAttachmentCount = info.colorFormatCount,
-                .pColorAttachmentFormats = (VkFormat*)info.pColorFormats,
-                .depthAttachmentFormat = (VkFormat)info.depthFormat,
-                .stencilAttachmentFormat = (VkFormat)info.stencilFormat,
-            },
             .CheckVkResultFn = API_INFO.CheckVkResultFn,
             .MinAllocationSize = 1024 * 1024,
         };

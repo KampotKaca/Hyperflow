@@ -2,7 +2,7 @@
 #define VOXELTERRAIN_H
 
 #include "hyperflow.h"
-#include "../../appconfig.h"
+#include "../../../appconfig.h"
 
 namespace app
 {

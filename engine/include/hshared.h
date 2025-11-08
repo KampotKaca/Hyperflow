@@ -1,42 +1,11 @@
 #ifndef HSHARED_H
 #define HSHARED_H
 
-#include <iostream>
-#include <cstdio>
-#include <cstdlib>
-#include <cmath>
-#include <cstring>
-#include <cstdarg>
-#include <vector>
-#include <set>
-
-#include <thread>
-#include <mutex>
-#include <condition_variable>
-#include <atomic>
-#include <ranges>
-#include <algorithm>
-
-#include <bitset>
-#include <queue>
-#include <optional>
-#include <filesystem>
-
-extern "C"
-{
-#include "log.h"
-};
-
-#include <sys/stat.h>
-#include <sys/types.h>
-#include <memory>
-#include <atomic>
-
 #include "henums.h"
-#include "hmath.h"
 #include "hinput.h"
-#include "../config.h"
-#include "../platforms/include/hplatformspecific.h"
+#include "hutilfuncs.h"
+#include "../../config.h"
+#include "../platform/include/hplatformspecific.h"
 
 #if PLATFORM_LINUX
 #ifdef None

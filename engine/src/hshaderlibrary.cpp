@@ -291,7 +291,7 @@ namespace hf
             }
             catch(const HyperException& e)
             {
-                log_error(e.GetFile().c_str(), e.GetLine(), e.what());
+                log_errori(e.GetFile().c_str(), e.GetLine(), e.what());
             }
             catch(const std::exception& e)
             {

@@ -77,7 +77,7 @@ namespace hf
         appInfo.pApplicationName = info.applicationTitle;
         appInfo.applicationVersion = VK_MAKE_VERSION(info.appVersion.x, info.appVersion.y, info.appVersion.z);
         appInfo.pEngineName = HF_ENGINE_TITLE;
-        appInfo.engineVersion = VK_MAKE_VERSION(info.engineVersion.x, info.engineVersion.y, info.engineVersion.z);
+        appInfo.engineVersion = VK_MAKE_VERSION(info.appVersion.x, info.appVersion.y, info.appVersion.z);
         appInfo.apiVersion = VULKAN_API_VERSION;
 
         InitLayers();

@@ -3,6 +3,7 @@ project(shaderconvertor)
 file(GLOB_RECURSE SHADER_CONVERTOR_SRC CONFIGURE_DEPENDS *.cpp)
 
 add_executable(${PROJECT_NAME} ${SHADER_CONVERTOR_SRC})
+include("${CMAKE_SOURCE_DIR}/cmake/General.cmake")
 
 file(COPY ${CMAKE_SOURCE_DIR}/shaderconvertor/includes DESTINATION ${CMAKE_BINARY_DIR}/shaderconvertor)
 find_program(GLSLC_EXECUTABLE glslc REQUIRED)
@@ -13,14 +14,10 @@ endif()
 
 target_link_libraries(${PROJECT_NAME}
         PRIVATE
-        glm
-        logc
         ext
 )
 
 target_include_directories(${PROJECT_NAME}
         PRIVATE
-        include
-#        ${CMAKE_SOURCE_DIR}/engine/include
-#        ${CMAKE_SOURCE_DIR}/engine/external/glm
+        ${CMAKE_SOURCE_DIR}/engine/include
 )

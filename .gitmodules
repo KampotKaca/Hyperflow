@@ -1,19 +1,19 @@
-[submodule "engine/external/glm"]
-	path = engine/external/glm
+[submodule "external/glm"]
+	path = external/glm
 	url = https://github.com/g-truc/glm.git
-[submodule "engine/external/rapidyaml"]
-	path = engine/external/rapidyaml
+[submodule "external/rapidyaml"]
+	path = external/rapidyaml
 	url = https://github.com/biojppm/rapidyaml
-[submodule "engine/external/glfw"]
-	path = engine/external/glfw
+[submodule "external/glfw"]
+	path = external/glfw
 	url = https://github.com/glfw/glfw.git
-[submodule "engine/external/lz4"]
-	path = engine/external/lz4
+[submodule "external/lz4"]
+	path = external/lz4
 	url = https://github.com/lz4/lz4.git
-[submodule "editor/external/ImGui"]
-	path = editor/external/ImGui
+[submodule "external/imgui"]
+	path = external/imgui
 	url = https://github.com/KampotKaca/ImGui.git
 	branch = docking
-[submodule "engine/external/svector"]
-	path = engine/external/svector
+[submodule "external/svector"]
+	path = external/svector
 	url = https://github.com/martinus/svector.git

@@ -1,7 +1,7 @@
 #ifndef HYPERFLOW_H
 #define HYPERFLOW_H
 
-#include "../components/include/hcomponents.h"
+#include "hcomponents.h"
 #include "hshared.h"
 #include "hscene.h"
 
@@ -9,8 +9,8 @@ namespace hf
 {
     //region Engine
 
-	bool IsRunning(); //Check if the engine is running.
-	bool IsRendererRunning();
+    bool IsRunning(); //Check if the engine is running.
+    bool IsRendererRunning();
 
     void Run(const EngineData& engineData); //Run the engine.
     const std::string& GetApplicationTitle(); //Get title of the application.
@@ -136,15 +136,15 @@ namespace hf
     //No need to destroy the material, if it goes out of scope it is automatically freed!
     Ref<Material> Create(const MaterialCreationInfo& info);
     void Upload(const Ref<Material>& mat, const void* data);
-	uint16_t GetBufferIndex(const Ref<Material>& mat);
+    uint16_t GetBufferIndex(const Ref<Material>& mat);
 
     //endregion
     //region Shader Library
 
-	Ref<ShaderLibrary> Create(const ShaderLibraryCreationInfo& info);
-	void Destroy(const Ref<ShaderLibrary>& lib);
-	void Destroy(const Ref<ShaderLibrary>* pLibraries, uint32_t count);
-	bool IsLoaded(const Ref<ShaderLibrary>& lib);
+    Ref<ShaderLibrary> Create(const ShaderLibraryCreationInfo& info);
+    void Destroy(const Ref<ShaderLibrary>& lib);
+    void Destroy(const Ref<ShaderLibrary>* pLibraries, uint32_t count);
+    bool IsLoaded(const Ref<ShaderLibrary>& lib);
 
     uint32_t GetVertexInputModule(const Ref<ShaderLibrary>& lib, const char* name);
     uint32_t GetVertexInputModule(const Ref<ShaderLibrary>& lib, const std::string_view name);
@@ -158,40 +158,40 @@ namespace hf
     //endregion
     //region Shader
 
-	Ref<Shader> Create(const ShaderCreationInfo& info);
-	void Destroy(const Ref<Shader>& shader);
-	void Destroy(const Ref<Shader>* pShaders, uint32_t count);
-	bool IsLoaded(const Ref<Shader>& shader);
+    Ref<Shader> Create(const ShaderCreationInfo& info);
+    void Destroy(const Ref<Shader>& shader);
+    void Destroy(const Ref<Shader>* pShaders, uint32_t count);
+    bool IsLoaded(const Ref<Shader>& shader);
 
     //endregion
     //region RenderTexture
 
-	Ref<RenderTexture> Create(const RenderTextureCreationInfo& info);
-	void Destroy(const Ref<RenderTexture>& tex);
-	void Destroy(const Ref<RenderTexture>* pTextures, uint32_t count);
-	bool IsLoaded(const Ref<RenderTexture>& tex);
+    Ref<RenderTexture> Create(const RenderTextureCreationInfo& info);
+    void Destroy(const Ref<RenderTexture>& tex);
+    void Destroy(const Ref<RenderTexture>* pTextures, uint32_t count);
+    bool IsLoaded(const Ref<RenderTexture>& tex);
 
     //endregion
     //region Texture Pack
 
-	Ref<TexturePack> Create(const TexturePackCreationInfo& info);
-	void Destroy(const Ref<TexturePack>& texPack);
-	void Destroy(const Ref<TexturePack>* pPacks, uint32_t count);
-	bool IsLoaded(const Ref<TexturePack>& texPack);
+    Ref<TexturePack> Create(const TexturePackCreationInfo& info);
+    void Destroy(const Ref<TexturePack>& texPack);
+    void Destroy(const Ref<TexturePack>* pPacks, uint32_t count);
+    bool IsLoaded(const Ref<TexturePack>& texPack);
 
     //endregion
     //region Buffers
 
-	Ref<VertexBuffer> Create(const VertexBufferCreationInfo& info);
-	Ref<IndexBuffer> Create(const IndexBufferCreationInfo& info);
-	void Destroy(const Ref<RuntimeBufferBase>& rbb);
-	void Destroy(const Ref<RuntimeBufferBase>* pBuffers, uint32_t count);
-	bool IsLoaded(const Ref<RuntimeBufferBase>& rbb);
+    Ref<VertexBuffer> Create(const VertexBufferCreationInfo& info);
+    Ref<IndexBuffer> Create(const IndexBufferCreationInfo& info);
+    void Destroy(const Ref<RuntimeBufferBase>& rbb);
+    void Destroy(const Ref<RuntimeBufferBase>* pBuffers, uint32_t count);
+    bool IsLoaded(const Ref<RuntimeBufferBase>& rbb);
 
     //endregion
     //region Defines
 
-	ShaderLayout Define(const char* name, const ShaderLayoutDefinitionInfo& info);
+    ShaderLayout Define(const char* name, const ShaderLayoutDefinitionInfo& info);
     TextureSampler Define(const TextureSamplerDefinitionInfo& info);
     TextureLayout Define(const TextureLayoutDefinitionInfo& info);
     VertexBufferAttribute Define(const VertexBufferAttributeDefinitionInfo& info);
@@ -209,7 +209,7 @@ namespace hf
 
     void Destroy(const Ref<AudioClip>& clip);
     void Destroy(const Ref<AudioClip>* pClips, uint32_t count);
-	bool IsLoaded(const Ref<AudioClip>& clip);
+    bool IsLoaded(const Ref<AudioClip>& clip);
 
     uint64_t GetFrameCount(const Ref<AudioClip>& clip);
     uint32_t GetChannels(const Ref<AudioClip>& clip);
@@ -218,44 +218,44 @@ namespace hf
     //endregion
     //region Audio Player
 
-	Ref<AudioPlayer> Create(const AudioPlayerCreationInfo& info);
-	void Destroy(const Ref<AudioPlayer>& player);
-	void Destroy(const Ref<AudioPlayer>* pPlayers, uint32_t count);
-	bool IsLoaded(const Ref<AudioPlayer>& player);
+    Ref<AudioPlayer> Create(const AudioPlayerCreationInfo& info);
+    void Destroy(const Ref<AudioPlayer>& player);
+    void Destroy(const Ref<AudioPlayer>* pPlayers, uint32_t count);
+    bool IsLoaded(const Ref<AudioPlayer>& player);
 
     void ChangeClip(const Ref<AudioPlayer>& player, const Ref<AudioClip>& clip, float_t startingDuration = -1);
-	void Play(const Ref<AudioPlayer>& player);
-	void Pause(const Ref<AudioPlayer>& player);
-	void SetVolume(const Ref<AudioPlayer>& player, float_t volume);
-	void SetPitch(const Ref<AudioPlayer>& player, float_t pitch);
-	void SetLoopingMode(const Ref<AudioPlayer>& player, bool loopingEnabled);
-	void Seek(const Ref<AudioPlayer>& player, float_t positionInSeconds);
-	void SeekPercent(const Ref<AudioPlayer>& player, float_t position);
-	float_t GetPitch(const Ref<AudioPlayer>& player);
-	float_t GetVolume(const Ref<AudioPlayer>& player);
+    void Play(const Ref<AudioPlayer>& player);
+    void Pause(const Ref<AudioPlayer>& player);
+    void SetVolume(const Ref<AudioPlayer>& player, float_t volume);
+    void SetPitch(const Ref<AudioPlayer>& player, float_t pitch);
+    void SetLoopingMode(const Ref<AudioPlayer>& player, bool loopingEnabled);
+    void Seek(const Ref<AudioPlayer>& player, float_t positionInSeconds);
+    void SeekPercent(const Ref<AudioPlayer>& player, float_t position);
+    float_t GetPitch(const Ref<AudioPlayer>& player);
+    float_t GetVolume(const Ref<AudioPlayer>& player);
     double_t GetPlayedInSeconds(const Ref<AudioPlayer>& player);
     double_t GetPlayedPercent(const Ref<AudioPlayer>& player);
-	bool IsLoopingEnabled(const Ref<AudioPlayer>& player);
+    bool IsLoopingEnabled(const Ref<AudioPlayer>& player);
     bool IsPlaying(const Ref<AudioPlayer>& player);
 
     //endregion
     //region Audio Player 3D
 
-	Ref<AudioPlayer3D> Create(const AudioPlayer3DCreationInfo& info);
+    Ref<AudioPlayer3D> Create(const AudioPlayer3DCreationInfo& info);
     void Destroy(const Ref<AudioPlayer3D>& player);
     void Destroy(const Ref<AudioPlayer3D>* pPlayers, uint32_t count);
-	bool IsLoaded(const Ref<AudioPlayer3D>& player);
+    bool IsLoaded(const Ref<AudioPlayer3D>& player);
 
     void ChangeClip(const Ref<AudioPlayer3D>& player, const Ref<AudioClip>& clip, float_t startingDuration = -1);
     void Play(const Ref<AudioPlayer3D>& player);
-	void Pause(const Ref<AudioPlayer3D>& player);
-	void SetVolume(const Ref<AudioPlayer3D>& player, float_t volume);
-	void SetPitch(const Ref<AudioPlayer3D>& player, float_t pitch);
-	void SetLoopingMode(const Ref<AudioPlayer3D>& player, bool loopingEnabled);
-	void Seek(const Ref<AudioPlayer3D>& player, float_t positionInSeconds);
-	void SeekPercent(const Ref<AudioPlayer3D>& player, float_t position);
-	float_t GetPitch(const Ref<AudioPlayer3D>& player);
-	float_t GetVolume(const Ref<AudioPlayer3D>& player);
+    void Pause(const Ref<AudioPlayer3D>& player);
+    void SetVolume(const Ref<AudioPlayer3D>& player, float_t volume);
+    void SetPitch(const Ref<AudioPlayer3D>& player, float_t pitch);
+    void SetLoopingMode(const Ref<AudioPlayer3D>& player, bool loopingEnabled);
+    void Seek(const Ref<AudioPlayer3D>& player, float_t positionInSeconds);
+    void SeekPercent(const Ref<AudioPlayer3D>& player, float_t position);
+    float_t GetPitch(const Ref<AudioPlayer3D>& player);
+    float_t GetVolume(const Ref<AudioPlayer3D>& player);
     double_t GetPlayedInSeconds(const Ref<AudioPlayer3D>& player);
     double_t GetPlayedPercent(const Ref<AudioPlayer3D>& player);
     bool IsLoopingEnabled(const Ref<AudioPlayer3D>& player);
@@ -289,7 +289,7 @@ namespace hf
     //region Audio Group
 
     Ref<AudioGroup> Create(const AudioGroupCreationInfo& info);
-	bool IsLoaded(const Ref<AudioGroup>& group);
+    bool IsLoaded(const Ref<AudioGroup>& group);
 
     void Enable(const Ref<AudioGroup>& group, bool enable);
     void SetVolume(const Ref<AudioGroup>& group, float_t volume);
@@ -339,7 +339,7 @@ namespace hf
     //endregion
     //region Model
 
-	bool IsLoaded(const Ref<Model>& model);
+    bool IsLoaded(const Ref<Model>& model);
     uint32_t GetMeshCount(const Ref<Model>& model);
     Ref<Mesh> GetMesh(const Ref<Model>& model, uint32_t index);
 
@@ -361,7 +361,7 @@ namespace hf
     Ref<Texture> Create(const TextureCreationInfo& info);
     void Destroy(const Ref<Texture>& tex);
     void Destroy(const Ref<Texture>* pTextures, uint32_t count);
-	bool IsLoaded(const Ref<Texture>& tex);
+    bool IsLoaded(const Ref<Texture>& tex);
 
     //endregion
     //region Cubemap
@@ -369,7 +369,7 @@ namespace hf
     Ref<Cubemap> Create(const CubemapCreationInfo& info);
     void Destroy(const Ref<Cubemap>& cm);
     void Destroy(const Ref<Cubemap>* pCubemaps, uint32_t count);
-	bool IsLoaded(const Ref<Cubemap>& cb);
+    bool IsLoaded(const Ref<Cubemap>& cb);
 
     //endregion
 
@@ -377,7 +377,7 @@ namespace hf
     //These functions should never be called outside draw process.
     namespace dp
     {
-		void BindGlobalUniformBuffer(); //Bind the global uniform buffer to the currently bound shader layout.
+        void BindGlobalUniformBuffer(); //Bind the global uniform buffer to the currently bound shader layout.
         void SetDrawCallback(void (*callback)(void*)); //This callback will be called from rendering thread after every draw, be careful, incorrect use might crash the program.
 
         void SetCamera(const Camera3DAnchored& camera); //Set the draw camera. Needs to be called early in drawing process.
@@ -388,10 +388,10 @@ namespace hf
         void AddLight(const PointLight& light);       //Add Point light to the renderer.
 
         void UploadBuffer(const BufferUploadInfo& info);
-	    void UploadMat(const Ref<Material>& mat);
+        void UploadMat(const Ref<Material>& mat);
 
-	    void UploadStartTexPack(const Ref<TexturePack>& texPack);
-	    void UploadEndTexPack();
+        void UploadStartTexPack(const Ref<TexturePack>& texPack);
+        void UploadEndTexPack();
 
         void UploadAddTexPackBinding(uint32_t bindingIndex, const Ref<Texture>& texture, uint32_t textureIndex = 0);
         void UploadAddTexPackBinding(uint32_t bindingIndex, const Ref<Cubemap>& cubemap, uint32_t textureIndex = 0);
@@ -406,49 +406,49 @@ namespace hf
         void StartRenderTex(const Ref<RenderTexture>& rt);
         void EndRenderTex();
 
-	    void StartShaderLayout(ShaderLayout layout);
-	    void EndShaderLayout();
+        void StartShaderLayout(ShaderLayout layout);
+        void EndShaderLayout();
 
-	    void StartShader(const Ref<Shader>& shader);
-	    void EndShader();
+        void StartShader(const Ref<Shader>& shader);
+        void EndShader();
 
         //material can be null, when you do not use it in the shader!
-	    void StartMat(const Ref<Material>& material);
-	    void EndMat();
+        void StartMat(const Ref<Material>& material);
+        void EndMat();
 
-	    void StartDrawGroup();
-	    void EndDrawGroup();
+        void StartDrawGroup();
+        void EndDrawGroup();
 
-	    void StartBufferSet(RenderBindingType bindingType, uint32_t setBindingIndex);
-	    void EndBufferSet();
-	    void BufferSetAddBuffer(Buffer buffer);
+        void StartBufferSet(RenderBindingType bindingType, uint32_t setBindingIndex);
+        void EndBufferSet();
+        void BufferSetAddBuffer(Buffer buffer);
 
-	    void MatAddTexPackBinding(const Ref<TexturePack>& texPack, uint32_t setBindingIndex);
+        void MatAddTexPackBinding(const Ref<TexturePack>& texPack, uint32_t setBindingIndex);
 
-	    void StartDrawCall(const Ref<IndexBuffer>& indexBuffer);
+        void StartDrawCall(const Ref<IndexBuffer>& indexBuffer);
         void StartDrawCall(const Ref<Mesh>& mesh);
         void StartDrawCall(const Ref<Mesh>& mesh, const Ref<Armature>& armature, uint32_t skinIndex);
         void EndDrawCall();
 
-	    void DrawGroupAddTexPackBinding(const Ref<TexturePack>& texPack, uint32_t setBindingIndex);
+        void DrawGroupAddTexPackBinding(const Ref<TexturePack>& texPack, uint32_t setBindingIndex);
         void DrawGroupAddDrawCall(const Ref<IndexBuffer>& indexBuffer, const Ref<VertexBuffer>& vertexBuffer);
         void DrawGroupAddDrawCall(const Ref<Mesh>& mesh);
 
-	    void DrawGroupSetPushConstant(const void* data, uint32_t dataSize);
-	    void DrawAddInstance(const void* data, uint32_t dataSize, const VolumeTransform& volume);
-	    void DrawAddVertBuffer(const Ref<VertexBuffer>& vb);
+        void DrawGroupSetPushConstant(const void* data, uint32_t dataSize);
+        void DrawAddInstance(const void* data, uint32_t dataSize, const VolumeTransform& volume);
+        void DrawAddVertBuffer(const Ref<VertexBuffer>& vb);
 
-	    template<typename T>
-	    void DrawGroupSetPushConstant(const T& data)
-	    {
-	    	DrawGroupSetPushConstant(&data, sizeof(T));
-	    }
+        template<typename T>
+        void DrawGroupSetPushConstant(const T& data)
+        {
+            DrawGroupSetPushConstant(&data, sizeof(T));
+        }
 
         template<typename T>
         void DrawAddInstance(const T& data, const VolumeTransform& volume)
-	    {
-	        DrawAddInstance(&data, sizeof(T), volume);
-	    }
+        {
+            DrawAddInstance(&data, sizeof(T), volume);
+        }
 
         //Draw the skybox.
         //Try to call this draw as late as possible to reduce pixel overdraw.
@@ -463,35 +463,12 @@ namespace hf
 
         [[nodiscard]] bool SkyboxIsDefaultCubemapBound(); //Check if default cubemap is bound to the skybox.
     }
-	namespace utils
-	{
-		ivec3 ConvertVersion(const char* version); //Convert string version to an integer,
-		bool ReadFile(const char* path, List<char>& result); //Get the data of the file.
-		bool ReadFile(const std::string& path, List<char>& result); //Get the data of the file.
-        bool ReadFile(const std::filesystem::path& path, List<char>& result); //Get the data of the file.
-        bool ReadFile(const std::string_view path, List<char>& result); //Get the data of the file.
-        bool WriteFile(const char* path, const List<char>& data); //Write the data in the file.
-        bool WriteFile(const std::string& path, const List<char>& data); //Write the data in the file.
-        bool WriteFile(const std::filesystem::path& path, const List<char>& data); //Write the data in the file.
-        bool WriteFile(const std::string_view path, const List<char>& data); //Write the data in the file.
-        bool FileExists(const char* path); //Check if file exists.
-		bool FileExists(const std::filesystem::path& path); //Check if file exists.
-
-		[[nodiscard]] void* Alloc(std::size_t n); //Allocate n amount of memory.
-		[[nodiscard]] void* AllocAligned(std::size_t n, std::size_t align); //Allocate n amount of aligned memory.
-		void Deallocate(void* p); //Deallocate the memory.
-		void DeallocateAligned(void* p, std::size_t align); //Deallocate the aligned memory.
-		void* Realloc(void* p, std::size_t n); //Reallocate the memory.
-        void* ReallocAligned(void* p, std::size_t n, std::size_t align); //Reallocate the memory with alignment.
-		void* Calloc(std::size_t n, std::size_t size); //Allocate and initialize n amount of memory.
-
-        std::size_t AllocUsableSize(void* ptr);
-		void CollectThreadMemoryCache(); //Reduces memory fragmentation.
-
-	    GlobalMemoryStatistics GetGlobalMemoryStatistics(); //Get global memory statistics.
-	    ThreadMemoryStatistics GetThreadMemoryStatistics(); //Get memory statistics from the current thread.
-	    RendererStatistics GetRendererStatistics(); //Get rendering thread memory statistics.
-	}
+    namespace utils
+    {
+        GlobalMemoryStatistics GetGlobalMemoryStatistics(); //Get global memory statistics.
+        ThreadMemoryStatistics GetThreadMemoryStatistics(); //Get memory statistics from the current thread.
+        RendererStatistics GetRendererStatistics(); //Get rendering thread memory statistics.
+    }
 	namespace primitives
 	{
 	    Ref<Mesh> GetMesh(PrimitiveMeshType type); //Get primitive mesh by type.

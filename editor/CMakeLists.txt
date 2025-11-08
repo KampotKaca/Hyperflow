@@ -1,41 +1,47 @@
-cmake_minimum_required(VERSION 3.30)
-
 project(Hyperflow_Editor)
 
 file(GLOB_RECURSE EDITOR_SRC CONFIGURE_DEPENDS src/*.cpp)
 
-add_subdirectory(external/ImGui)
-
-add_library(Hyperflow_Editor ${EDITOR_SRC})
-
-target_precompile_headers(Hyperflow_Editor
+add_executable(${PROJECT_NAME} ${EDITOR_SRC} main.cpp)
+target_sources(${PROJECT_NAME}
+        PUBLIC
+        FILE_SET HEADERS
+        BASE_DIRS include
+        FILES include/heditorinternal.h
+)
+include("${CMAKE_SOURCE_DIR}/cmake/General.cmake")
+target_precompile_headers(${PROJECT_NAME}
         PRIVATE
         include/heditorinternal.h
 )
-set_target_properties(Hyperflow_Editor PROPERTIES UNITY_BUILD ON)
+#set_target_properties(${PROJECT_NAME} PROPERTIES UNITY_BUILD ON)
 
 find_package(Vulkan REQUIRED)
 
-target_link_libraries(Hyperflow_Editor
+target_link_libraries(${PROJECT_NAME}
         PUBLIC
         Hyperflow_Engine
-        glm
+        Hyperflow_Application
+
         stb
-        logc
         ryml
         ext
         components
-        PRIVATE
         imgui
+        PRIVATE
         Vulkan::Vulkan
         glfw
 )
 
-target_include_directories(Hyperflow_Editor
+target_include_directories(${PROJECT_NAME}
         PUBLIC
-        src/
-        include/
-        external/ImGui/
-        ../engine/external/glfw/include
+        "${CMAKE_SOURCE_DIR}/application/include"
+        "${CMAKE_SOURCE_DIR}/engine/include"
+        "${CMAKE_SOURCE_DIR}/external/imgui/"
+        "${CMAKE_SOURCE_DIR}/external/glfw/include"
         ${Vulkan_INCLUDE_DIRS}
 )
+
+if(ENABLE_EDITOR)
+    include("${CMAKE_SOURCE_DIR}/cmake/Export.cmake")
+endif ()

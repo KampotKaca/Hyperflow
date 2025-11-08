@@ -3,7 +3,7 @@
 
 #include "../components/include/hcomponents.h"
 #include "hshared.h"
-#include "../config.h"
+#include "../../config.h"
 
 namespace hf
 {

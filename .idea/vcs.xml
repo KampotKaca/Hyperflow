@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="VcsDirectoryMappings">
+    <mapping directory="" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/external/glfw" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/external/glm" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/external/imgui" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/external/lz4" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/external/rapidyaml" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/external/rapidyaml/ext/c4core" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/external/rapidyaml/ext/c4core/cmake" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/external/rapidyaml/ext/c4core/src/c4/ext/debugbreak" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/external/rapidyaml/ext/c4core/src/c4/ext/fast_float" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/external/svector" vcs="Git" />
+  </component>
+</project>

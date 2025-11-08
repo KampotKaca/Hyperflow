@@ -122,7 +122,6 @@ namespace hf::ir::rdr
     struct RendererLoadInfo_i
     {
         uvec3 appVersion{};
-        uvec3 engineVersion{};
         const char* applicationTitle{};
         void* platformDll{};
         RendererInternalFunctions_i functions{};

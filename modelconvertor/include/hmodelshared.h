@@ -3,7 +3,7 @@
 
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/hash.hpp>
-#include "../config.h"
+#include "config.h"
 
 namespace ml
 {
@@ -42,6 +42,31 @@ namespace ml
 
 namespace std
 {
+    template <>
+    struct hash<glm::vec3>
+    {
+        size_t operator()(const glm::vec3& v) const noexcept
+        {
+            std::hash<float> hasher;
+            size_t h1 = hasher(v.x);
+            size_t h2 = hasher(v.y);
+            size_t h3 = hasher(v.z);
+            return ((h1 ^ (h2 << 1)) >> 1) ^ (h3 << 1);
+        }
+    };
+
+    template <>
+    struct hash<glm::vec2>
+    {
+        size_t operator()(const glm::vec2& v) const noexcept
+        {
+            std::hash<float> hasher;
+            size_t h1 = hasher(v.x);
+            size_t h2 = hasher(v.y);
+            return ((h1 ^ (h2 << 1)) >> 1);
+        }
+    };
+
     template<> struct hash<ml::Vertex>
     {
         size_t operator()(ml::Vertex const& vertex) const noexcept

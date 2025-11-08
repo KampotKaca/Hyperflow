@@ -1,7 +1,7 @@
 #include "hd3d_graphics.h"
 #include "hd3d_renderer.h"
 
-namespace hf::inter::rendering
+namespace hf::ir::rdr
 {
     void Load(const RendererLoadInfo_i& info)
     {

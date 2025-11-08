@@ -1,6 +1,7 @@
-/cmake-build-debug
-/cmake-build-release
-/.idea
+/cmake-build-appdebug
+/cmake-build-apprelease
+/cmake-build-editordebug
+/cmake-build-editorrelease
 /build
 /Hyperflow
 *.spv

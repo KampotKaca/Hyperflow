@@ -1,8 +1,8 @@
 #include "hrenderer.h"
 #include <hyperflow.h>
 #include "hinternal.h"
-#include "../config.h"
-#include "../../application/appconfig.h"
+#include "../../config.h"
+#include "../../appconfig.h"
 #include "../rendering/include/hex_renderer.h"
 
 namespace hf
@@ -119,7 +119,6 @@ namespace hf
         {
             if (HF.rendererCount == 0)
             {
-                const auto engineV = utils::ConvertVersion(VERSION);
                 const auto appV = utils::ConvertVersion(APP_VERSION);
 
                 RendererInternalFunctions_i funcs{};
@@ -136,7 +135,6 @@ namespace hf
                 RendererLoadInfo_i loadInfo
                 {
                     .appVersion = appV,
-                    .engineVersion = engineV,
                     .applicationTitle = HF.appTitle.c_str(),
                     .functions = funcs
                 };

@@ -1,10 +1,41 @@
 #ifndef HENUMS_H
 #define HENUMS_H
 
-#include "../external/phmap/btree.h"
-#include "../external/phmap/phmap.h"
+#include <cstdio>
+#include <cstdlib>
+#include <cmath>
+#include <cstring>
+#include <cstdarg>
+#include <vector>
+#include <set>
 
-#include "../external/svector/include/ankerl/svector.h"
+#include <thread>
+#include <mutex>
+#include <condition_variable>
+#include <atomic>
+#include <ranges>
+#include <algorithm>
+
+#include <bitset>
+#include <queue>
+#include <optional>
+#include <filesystem>
+
+extern "C"
+{
+#include "log.h"
+};
+
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <memory>
+#include <atomic>
+
+#include "btree.h"
+#include "phmap.h"
+
+#include "ankerl/svector.h"
+#include "hmath.h"
 
 namespace hf
 {
