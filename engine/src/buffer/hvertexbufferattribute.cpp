@@ -61,7 +61,7 @@ namespace hf
             return attrib;
         }catch (...)
         {
-            LOG_ERROR("[Hyperflow] Error parsing BufferAttribute: %s", assetPath);
+            log_error("[Hyperflow] Error parsing BufferAttribute: %s", assetPath);
             return 0;
         }
     }

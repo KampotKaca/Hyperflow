@@ -231,11 +231,11 @@ namespace hf
             }
             catch(const std::exception& e)
             {
-                LOG_ERROR("[Hyperflow] Error parsing Texture Pack: %s\nError: %s", assetPath, e.what());
+                log_error("[Hyperflow] Error parsing Texture Pack: %s\nError: %s", assetPath, e.what());
             }
             catch (...)
             {
-                LOG_ERROR("[Hyperflow] Unknown error parsing Texture Pack: %s", assetPath);
+                log_error("[Hyperflow] Unknown error parsing Texture Pack: %s", assetPath);
             }
             return nullptr;
         }

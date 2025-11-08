@@ -75,7 +75,7 @@ namespace hf
         ChangeClip(player.get(), clip, startingDuration);
 
         if (IsPlaying(player) && ma_sound_start((ma_sound*)player->handle) != MA_SUCCESS)
-            LOG_ERROR("Unable to play audio player");
+            log_error("Unable to play audio player");
     }
 
     void Play(const Ref<AudioPlayer3D>& player) { ir::Play_i(player.get()); }

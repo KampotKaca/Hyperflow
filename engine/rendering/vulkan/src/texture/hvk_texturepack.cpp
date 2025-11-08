@@ -169,7 +169,7 @@ namespace hf
             }
         }
 
-        if (count == 0) LOG_WARN("Unnecessary set binding call, noting changed");
+        if (count == 0) log_warn("Unnecessary set binding call, noting changed");
     }
 
     void CreateDescriptorForBinding(VkTextureBinding& binding, uint32_t from, uint32_t size)

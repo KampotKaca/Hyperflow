@@ -165,7 +165,7 @@ namespace hf
         const auto result = vkQueuePresentKHR(GRAPHICS_DATA.device.logicalDevice.presentQueue, &presentInfo);
         if (result != VK_SUCCESS && result != VK_ERROR_OUT_OF_DATE_KHR && result != VK_SUBOPTIMAL_KHR)
         {
-            LOG_ERROR("Failed to present swapchain %i", rn->currentFrame);
+            log_error("Failed to present swapchain %i", rn->currentFrame);
             VK_HANDLE_EXCEPT(result);
         }
     }

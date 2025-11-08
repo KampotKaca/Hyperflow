@@ -28,9 +28,7 @@ namespace hf
         uploadInfo.offset = info.offset;
         uploadInfo.indexCount = info.indexCount;
 
-        void* rnHandle = nullptr;
-        if (ir::HF.renderer) rnHandle = ir::HF.renderer->handle;
-        ir::HF.renderingApi.api.UploadIndexBuffer(rnHandle, uploadInfo);
+        ir::HF.renderingApi.api.UploadIndexBuffer(ir::HF.renderer->handle, uploadInfo);
     }
 
     Ref<IndexBuffer> Create(const IndexBufferCreationInfo& info)

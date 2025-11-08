@@ -51,7 +51,7 @@ namespace hf
             return layout;
         }catch (...)
         {
-            LOG_ERROR("[Hyperflow] Error parsing Texture Layout: %s", assetPath);
+            log_error("[Hyperflow] Error parsing Texture Layout: %s", assetPath);
             return 0;
         }
     }

@@ -118,7 +118,7 @@ namespace hf
 
                     if (!utils::FileExists(path.c_str()))
                     {
-                        LOG_ERROR("[Hyperflow] Unable to find texture: %s", texturePaths[i].path.c_str());
+                        log_error("[Hyperflow] Unable to find texture: %s", texturePaths[i].path.c_str());
                         validLoading = false;
                         break;
                     }
@@ -140,7 +140,7 @@ namespace hf
 
                     if (i != 0 && textureSize != (uvec3)size)
                     {
-                        LOG_ERROR("[Hyperflow] Cubemap textures must be the same size!");
+                        log_error("[Hyperflow] Cubemap textures must be the same size!");
                         validLoading = false;
                         break;
                     }
@@ -154,7 +154,7 @@ namespace hf
                     }
                     else
                     {
-                        LOG_ERROR("[Hyperflow] Unable to load cubemap texture!");
+                        log_error("[Hyperflow] Unable to load cubemap texture!");
                         validLoading = false;
                         break;
                     }
@@ -174,7 +174,7 @@ namespace hf
                 return cubemap;
             }catch (...)
             {
-                LOG_ERROR("[Hyperflow] Error parsing Cubemap: %s", assetPath);
+                log_error("[Hyperflow] Error parsing Cubemap: %s", assetPath);
                 return nullptr;
             }
         }

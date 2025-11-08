@@ -77,7 +77,7 @@ namespace hf
                 }
 
                 if (root.has_child("modulesInfo")) ReadShaderModulesInfo_i(root["modulesInfo"], info.library, info.modules);
-                else LOG_ERROR("[Hyperflow] %s", "Unable to find moduleInfo");
+                else log_error("[Hyperflow] %s", "Unable to find moduleInfo");
 
                 return MakeRef<Shader>(info);
             }
@@ -87,11 +87,11 @@ namespace hf
             }
             catch(const std::exception& e)
             {
-                LOG_ERROR("[Hyperflow] Error parsing Shader: %s\nError: %s", assetPath, e.what());
+                log_error("[Hyperflow] Error parsing Shader: %s\nError: %s", assetPath, e.what());
             }
             catch (...)
             {
-                LOG_ERROR("[Hyperflow] Unknown error parsing Shader: %s", assetPath);
+                log_error("[Hyperflow] Unknown error parsing Shader: %s", assetPath);
             }
             return nullptr;
         }

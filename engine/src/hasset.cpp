@@ -17,7 +17,7 @@ namespace hf
         case AssetType::ShaderLibrary: memcpy(&PATH_NAME_BUFFER[size], "_shl", 4); break;
         case AssetType::Shader:        memcpy(&PATH_NAME_BUFFER[size], "_sha", 4); break;
         case AssetType::TexturePack:   memcpy(&PATH_NAME_BUFFER[size], "_txp", 4); break;
-        default: LOG_ERROR("%s", "Invalid asset type, cannot be destroyed"); break;
+        default: log_error("%s", "Invalid asset type, cannot be destroyed"); break;
         }
         PATH_NAME_BUFFER[size + 4] = '\0';
         return PATH_NAME_BUFFER;
@@ -63,7 +63,7 @@ namespace hf
             case AssetType::ShaderLibrary: ir::rdr::DestroyShaderLibrary_i(Cast<ShaderLibrary>(asset).get()); break;
             case AssetType::Shader:        ir::rdr::DestroyShader_i(Cast<Shader>(asset).get());                   break;
             case AssetType::TexturePack:   ir::rdr::DestroyTexturePack_i(Cast<TexturePack>(asset).get());         break;
-            default: LOG_ERROR("%s", "Invalid asset type, cannot be destroyed"); break;
+            default: log_error("%s", "Invalid asset type, cannot be destroyed"); break;
             }
 
             asset = nullptr;
@@ -83,7 +83,7 @@ namespace hf
             case AssetType::ShaderLibrary: asset = ir::rdr::CreateShaderLibraryAsset_i(assetPath); break;
             case AssetType::Shader:        asset = ir::rdr::CreateShaderAsset_i(assetPath);        break;
             case AssetType::TexturePack:   asset = ir::rdr::CreateTexPackAsset_i(assetPath);       break;
-            default: LOG_ERROR("%s", "Invalid asset type, cannot be loaded"); break;
+            default: log_error("%s", "Invalid asset type, cannot be loaded"); break;
             }
         }
     }
@@ -94,7 +94,7 @@ namespace hf
         auto [it, inserted] = assets.try_emplace(convertAssetPath(assetPath, type));
 
         if (inserted) it->second.type = type;
-        else if (it->second.type != type) LOG_ERROR("%s", "Asset type mismatch");
+        else if (it->second.type != type) log_error("%s", "Asset type mismatch");
 
         it->second.Increment(assetPath);
         return it->second.asset;
@@ -106,7 +106,7 @@ namespace hf
         auto it = ir::HF.graphicsResources.assets.find(convertAssetPath(assetPath, type));
         if (it == ir::HF.graphicsResources.assets.end())
         {
-            LOG_ERROR("Asset not found %s", assetPath);
+            log_error("Asset not found %s", assetPath);
             return;
         }
         it->second.Decrement();
@@ -121,7 +121,7 @@ namespace hf
         auto it = ir::HF.graphicsResources.assets.find(convertAssetPath(assetPath, type));
         if (it == ir::HF.graphicsResources.assets.end())
         {
-            LOG_ERROR("Asset not found %s", assetPath);
+            log_error("Asset not found %s", assetPath);
             return nullptr;
         }
         return it->second.asset;

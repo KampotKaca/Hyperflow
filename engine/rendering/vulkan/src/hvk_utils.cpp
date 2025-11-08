@@ -35,12 +35,12 @@ namespace hf
             swapChainSupportDetails.capabilities.maxImageExtent.height);
         result.extent = extents;
 
-        if (!(mask & (1 << 0))) LOG_WARN("[Vulkan] %s", "Unable to choose target swapchain surface format");
+        if (!(mask & (1 << 0))) log_warn("[Vulkan] %s", "Unable to choose target swapchain surface format");
         if (!(mask & (1 << 1)))
         {
             result.presentMode = defaultPresentMode;
             mask |= 1 << 1;
-            LOG_LOG("[Vulkan] %s", "Unable to choose target swapchain present mode, defaulted to FIFO");
+            log_log("[Vulkan] %s", "Unable to choose target swapchain present mode, defaulted to FIFO");
         }
 
         return mask == (1 << 2) - 1;

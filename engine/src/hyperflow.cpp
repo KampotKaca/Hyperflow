@@ -41,7 +41,7 @@ namespace hf
 
 			if(ir::HF.lifecycleCallbacks.onStartCallback) ir::HF.lifecycleCallbacks.onStartCallback();
 
-			LOG_LOG("[Hyperflow] Loading Time: %f", ir::HF.time.GetAbsoluteTimePassed());
+			log_log("[Hyperflow] Loading Time: %f", ir::HF.time.GetAbsoluteTimePassed());
 			while (IsRunning())
 			{
 				ir::HF.time.StartFrame();
@@ -82,11 +82,11 @@ namespace hf
 		}
 		catch(const std::exception& e)
 		{
-			LOG_FATAL(e.what());
+			log_fatal(e.what());
 		}
 		catch(...)
 		{
-			LOG_FATAL("No Details Are Available");
+			log_fatal("No Details Are Available");
 		}
 	}
 

@@ -9,6 +9,7 @@
 #include "hasset.h"
 #include "hshaderlibrary.h"
 #include "htime.h"
+#include "hintertypes.h"
 #include "../rendering/include/hex_renderer.h"
 #include "../platforms/include/hex_platform.h"
 #include "audio/haudioclip.h"

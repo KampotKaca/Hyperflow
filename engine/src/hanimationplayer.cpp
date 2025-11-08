@@ -38,7 +38,7 @@ namespace hf
     double_t GetPlayedInSeconds(const Ref<AnimationPlayer>& player)
     {
         if (player->animation) return player->animationProgress;
-        LOG_WARN("[Hyperflow] %s", "Cannot compute played in seconds if there is no animation set!");
+        log_warn("[Hyperflow] %s", "Cannot compute played in seconds if there is no animation set!");
         return 0.0;
     }
     double_t GetPlayedPercent(const Ref<AnimationPlayer>& player) { return player->animationProgress; }

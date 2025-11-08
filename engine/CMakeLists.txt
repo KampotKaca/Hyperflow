@@ -15,9 +15,7 @@ endif()
 
 #region Platforms
 
-if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
-    add_definitions(-DPLATFORM_WINDOWS)
-    option(WINDOWS "Windows" ON)
+if (WINDOWS)
     add_subdirectory(platforms/windows)
 
     option(VULKAN "vulkan" ON)
@@ -28,9 +26,7 @@ if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
         add_definitions(-DRENDERER_D3D)
     endif ()
 
-elseif (CMAKE_SYSTEM_NAME STREQUAL "Linux")
-    add_definitions(-DPLATFORM_LINUX)
-    option(LINUX "Linux" ON)
+elseif (LINUX)
     add_subdirectory(platforms/linux)
 
     option(VULKAN "vulkan" ON)
@@ -42,35 +38,13 @@ elseif (CMAKE_SYSTEM_NAME STREQUAL "Linux")
             OUTPUT_STRIP_TRAILING_WHITESPACE
     )
 
-    if(NOT DISPLAY_SERVER_TYPE)
-        if(DEFINED ENV{DISPLAY})
-            set(DISPLAY_SERVER_TYPE "x11")
-        else()
-            message(FATAL_ERROR "Could not detect display server type")
-        endif()
-    endif()
-
-    if(DISPLAY_SERVER_TYPE STREQUAL "wayland")
-        find_package(PkgConfig)
-        pkg_check_modules(WAYLAND wayland-client)
-
-        if(WAYLAND_FOUND)
-            message(STATUS "Using Wayland display server")
-            add_definitions(-DWAYLAND)
-            add_subdirectory(platforms/wayland)
-        else()
-            message(FATAL_ERROR "Wayland session detected but wayland-client not found")
-        endif()
-    else()
-        find_package(X11 REQUIRED)
-        if(X11_FOUND)
-            message(STATUS "Using X11 display server")
-            add_definitions(-DX11)
-            add_subdirectory(platforms/x11)
-        else()
-            message(FATAL_ERROR "X11 libraries not found")
-        endif()
-    endif()
+    if(WAYLAND)
+        add_subdirectory(platforms/wayland)
+    elseif (X11)
+        add_subdirectory(platforms/x11)
+    else ()
+        message(FATAL_ERROR "Linux window server not found")
+    endif ()
 
 else()
     message(FATAL_ERROR "Unsupported platform: ${CMAKE_SYSTEM_NAME}")
@@ -106,10 +80,15 @@ add_subdirectory(components)
 add_subdirectory(others/exception)
 
 add_library(${PROJECT_NAME} ${ENGINE_SRC})
-target_precompile_headers(${PROJECT_NAME}
-        PRIVATE
-        "include/hshared.h"
+target_sources(${PROJECT_NAME}
+        PUBLIC
+        FILE_SET HEADERS
+        BASE_DIRS include
+        FILES include/hshared.h
 )
+
+target_precompile_headers(${PROJECT_NAME} PRIVATE "include/hshared.h")
+include(${CMAKE_SOURCE_DIR}/cmake/AssetFolder.cmake)
 set_target_properties(${PROJECT_NAME} PROPERTIES UNITY_BUILD ON)
 
 # Using keyword-based signature consistently
@@ -177,7 +156,7 @@ target_include_directories(${PROJECT_NAME}
         PRIVATE
         platforms/include
         rendering/include
-        ../modelconvertor/include
+        ${CMAKE_SOURCE_DIR}/modelconvertor/include
 )
 
 get_target_property(LIBS ${PROJECT_NAME} LINK_LIBRARIES)

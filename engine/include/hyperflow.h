@@ -10,6 +10,7 @@ namespace hf
     //region Engine
 
 	bool IsRunning(); //Check if the engine is running.
+	bool IsRendererRunning();
 
     void Run(const EngineData& engineData); //Run the engine.
     const std::string& GetApplicationTitle(); //Get title of the application.
@@ -23,21 +24,6 @@ namespace hf
     RenderingApiType GetApiType(); //Get current rendering api.
     RenderingApiType GetBestApiType(); //Get best rendering api for the platform.
     bool IsValidApi(RenderingApiType targetApi); //Check if the api can be used on the current platform.
-
-    //When textures are loaded this data needs to get to the gpu memory to be usable by the renderer.
-    //Submitting textures one by one is possible, but it slows down the process,
-    //so engine stores all your upload requests temporarily and is uploaded all at once when you call submit.
-    //Calling this is not mandatory, since this will be called on the next frame, but this might slow down the frame,
-    //since rendering cannot be started if all resources are not present.
-    //So this function is recomended to be used after you load static textures.
-    void SubmitAllTextures();
-    //When meshes and other types of objects which require heap of memory are loaded this data needs to get to the gpu memory to be usable by the renderer.
-    //Submitting buffers one by one is possible, but it slows down the process,
-    //so engine stores all your upload requests temporarily and is uploaded all at once when you call submit.
-    //Calling this is not mandatory, since this will be called on the next frame, but this might slow down the frame,
-    //since rendering cannot be started if all resources are not present.
-    //So this function is recomended to be used after you load meshes or other statis buffers.
-    void SubmitAllBuffers();
 
     bool IsKeyDown(Key key); //Check if key was just pressed on main window.
     bool IsKeyDownContinues(Key key); //Check if key is being pressed across multiple frames on main window.
@@ -83,25 +69,48 @@ namespace hf
     ivec2 GetWindowSize();
     ivec2 GetWindowPosition();
     IRect GetWindowRect();
-    IRect GetWindowFrameRect();
-    WindowState GetWindowState();
-    WindowStyle GetWindowStyle();
-    WindowPointerState GetWindowPointerState();
-    void* GetWindowHandle();
-    bool IsWindowClosed();
+    WindowFrame GetWindowFrame(); //Get window frame, border size
+    WindowState GetWindowState(); //Get window state
+    WindowStyle GetWindowStyle(); //Get window style
+    WindowPointerState GetWindowPointerState(); //Get window pointer state
+    void* GetWindowHandle(); //Get window platform handle: GLFW_window
+    bool IsWindowClosed(); //Check if window is closed
 
-    void SetWindowTitle(const std::string& title);
-    void SetWindowSize(ivec2 size);
-    void SetWindowPosition(ivec2 position);
-    void SetWindowRect(IRect rect);
-    void SetWindowState(WindowState state);
-    void SetWindowPointerState(WindowPointerState state);
+    void SetWindowTitle(const std::string& title); //Set window title
+    void SetWindowSize(ivec2 size); //Set window size
+    void SetWindowPosition(ivec2 position);  //Set window position
+    void SetWindowRect(IRect rect);  //Set window rectangle (size and position)
+    void SetWindowState(WindowState state);  //Set window state (Maximized, Fullscreen, etc...)
+    void SetWindowPointerState(WindowPointerState state);  //Set mouse state on window (MouseHidden, MouseDisable, etc...)
 
-    void FocusWindow();
-    bool SetWindowIcons(const char* folderPath);
+    void FocusWindow();  //Focus on application window
+    bool SetWindowIcons(const char* folderPath);  //Set window icons
 
-    VsyncMode GetVSyncMode();
-    void SetVSyncMode(VsyncMode mode);
+    VsyncMode GetVSyncMode();  //Get vsync mode
+    void SetVSyncMode(VsyncMode mode);  //Set vsync mode (NoSync, Relaxed, etc...)
+
+    ThreadMemoryStatistics GetRendererMemoryStatistics(); //Get allocator statistics of
+
+    //endregion
+    //region Buffer Uploads
+
+    //When textures are loaded this data needs to get to the gpu memory to be usable by the renderer.
+    //Submitting textures one by one is possible, but it slows down the process,
+    //so engine stores all your upload requests temporarily and is uploaded all at once when you call submit.
+    //Calling this is not mandatory, since this will be called on the next frame, but this might slow down the frame,
+    //since rendering cannot be started if all resources are not present.
+    //So this function is recomended to be used after you load static textures.
+    void SubmitAllTextures();
+    //When meshes and other types of objects which require heap of memory are loaded this data needs to get to the gpu memory to be usable by the renderer.
+    //Submitting buffers one by one is possible, but it slows down the process,
+    //so engine stores all your upload requests temporarily and is uploaded all at once when you call submit.
+    //Calling this is not mandatory, since this will be called on the next frame, but this might slow down the frame,
+    //since rendering cannot be started if all resources are not present.
+    //So this function is recomended to be used after you load meshes or other statis buffers.
+    void SubmitAllBuffers();
+
+    void Upload(const Ref<VertexBuffer>& vb, const VertBufferUploadInfo& info); //Upload vertex buffer
+    void Upload(const Ref<IndexBuffer>& ib, const IndexBufferUploadInfo& info); //Upload index buffer
 
     //endregion
     //region Search
@@ -288,15 +297,6 @@ namespace hf
     float_t GetPitch(const Ref<AudioGroup>& group);
     float_t GetVolume(const Ref<AudioGroup>& group);
     bool IsEnabled(const Ref<AudioGroup>& group);
-
-    //endregion
-    //region Renderer
-
-	bool IsRendererRunning();
-    ThreadMemoryStatistics GetMemoryRendererStatistics();
-
-    void Upload(const Ref<VertexBuffer>& vb, const VertBufferUploadInfo& info); //Renderer is optional!
-    void Upload(const Ref<IndexBuffer>& ib, const IndexBufferUploadInfo& info); //Renderer is optional!
 
     //endregion
     //region Scene

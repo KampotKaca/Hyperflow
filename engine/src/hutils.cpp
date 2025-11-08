@@ -38,7 +38,7 @@ namespace hf::utils
         std::ifstream file(path, std::ios::ate | std::ios::binary);
         if (!file.is_open())
         {
-            LOG_ERROR("Unable to open file at location %s", path);
+            log_error("Unable to open file at location %s", path);
             return false;
         }
         readFile(file, result);
@@ -50,7 +50,7 @@ namespace hf::utils
         std::ifstream file(path, std::ios::ate | std::ios::binary);
         if (!file.is_open())
         {
-            LOG_ERROR("Unable to open file at location %s", path.c_str());
+            log_error("Unable to open file at location %s", path.c_str());
             return false;
         }
         readFile(file, result);
@@ -61,7 +61,7 @@ namespace hf::utils
         std::ifstream file(path, std::ios::ate | std::ios::binary);
         if (!file.is_open())
         {
-            LOG_ERROR("Unable to open file at location %s", path.string().c_str());
+            log_error("Unable to open file at location %s", path.string().c_str());
             return false;
         }
         readFile(file, result);
@@ -72,7 +72,7 @@ namespace hf::utils
         std::ifstream file(std::string(path), std::ios::ate | std::ios::binary);
         if (!file.is_open())
         {
-            LOG_ERROR("Unable to open file at location %s", path);
+            log_error("Unable to open file at location %s", path);
             return false;
         }
         readFile(file, result);
@@ -90,7 +90,7 @@ namespace hf::utils
         std::ofstream file(path, std::ios::binary);
         if (!file.is_open())
         {
-            LOG_ERROR("Unable to open file at location %s", path);
+            log_error("Unable to open file at location %s", path);
             return false;
         }
         writeFile(file, data);
@@ -102,7 +102,7 @@ namespace hf::utils
         std::ofstream file(path, std::ios::binary);
         if (!file.is_open())
         {
-            LOG_ERROR("Unable to open file at location %s", path.c_str());
+            log_error("Unable to open file at location %s", path.c_str());
             return false;
         }
         writeFile(file, data);
@@ -114,7 +114,7 @@ namespace hf::utils
         std::ofstream file(path, std::ios::binary);
         if (!file.is_open())
         {
-            LOG_ERROR("Unable to open file at location %s", path.string().c_str());
+            log_error("Unable to open file at location %s", path.string().c_str());
             return false;
         }
         writeFile(file, data);
@@ -126,7 +126,7 @@ namespace hf::utils
         std::ofstream file(std::string(path), std::ios::binary);
         if (!file.is_open())
         {
-            LOG_ERROR("Unable to open file at location %s", path);
+            log_error("Unable to open file at location %s", path);
             return false;
         }
         writeFile(file, data);

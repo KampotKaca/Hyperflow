@@ -73,7 +73,7 @@ namespace hf
         ir::ChangeClip_i(player.get(), clip, MA_SOUND_FLAG_NO_SPATIALIZATION, startingDuration);
 
         if (IsPlaying(player) && ma_sound_start((ma_sound*)player->handle) != MA_SUCCESS)
-            LOG_ERROR("Unable to play audio player");
+            log_error("Unable to play audio player");
     }
     void Play(const Ref<AudioPlayer>& player) { ir::Play_i(player.get()); }
     void Pause(const Ref<AudioPlayer>& player) { ir::Pause_i(player.get()); }

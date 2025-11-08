@@ -2,6 +2,7 @@
 #define HEX_PLATFORM_H
 
 #include "hshared.h"
+#include "hintertypes.h"
 
 namespace hf::ir
 {
@@ -46,7 +47,7 @@ namespace hf::ir
 
         bool IsFocused(const Window* win);
 
-        IRect GetFrameRect(const Window* win);
+        WindowFrame GetFrame(const Window* win);
         ivec2 GetSize(const Window* win);
         ivec2 GetPosition(const Window* win);
 

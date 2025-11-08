@@ -31,12 +31,12 @@ namespace hf
         }
         catch (const HyperException& e)
         {
-            LOG_ERROR("Unable to define audio listener\n%s", e.what());
+            log_error("Unable to define audio listener\n%s", e.what());
             return nullptr;
         }
         catch (...)
         {
-            LOG_ERROR("Unable to define audio listener!");
+            log_error("Unable to define audio listener!");
             return nullptr;
         }
     }

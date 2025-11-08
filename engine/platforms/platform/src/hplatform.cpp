@@ -296,16 +296,11 @@ namespace hf::ir
             return glfwGetCurrentContext() == (GLFWwindow*)win->handle;
         }
 
-        IRect GetFrameRect(const Window* win)
+        WindowFrame GetFrame(const Window* win)
         {
-            int32_t top = 0, bottom = 0,
-                    right = 0, left = 0;
-            glfwGetWindowFrameSize((GLFWwindow*)win->handle, &left, &top, &right, &bottom);
-            return
-            {
-                .position = { left, top },
-                .size = { right - left, bottom - top },
-            };
+            WindowFrame frame{};
+            glfwGetWindowFrameSize((GLFWwindow*)win->handle, &frame.left, &frame.top, &frame.right, &frame.bottom);
+            return frame;
         }
 
         ivec2 GetSize(const Window* win)

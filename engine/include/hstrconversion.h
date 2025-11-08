@@ -499,13 +499,13 @@ namespace hf
     {
         if (!utils::FileExists(assetPath))
         {
-            LOG_ERROR("[Hyperflow] Unable to find meta file: %s", assetPath);
+            log_error("[Hyperflow] Unable to find meta file: %s", assetPath);
             return false;
         }
 
         if (!utils::ReadFile(assetPath, metadata))
         {
-            LOG_ERROR("[Hyperflow] Unable to read meta: %s", assetPath);
+            log_error("[Hyperflow] Unable to read meta: %s", assetPath);
             return false;
         }
         metadata.push_back('\0');
@@ -516,13 +516,13 @@ namespace hf
     {
         if (!utils::FileExists(assetPath))
         {
-            LOG_ERROR("[Hyperflow] Unable to find meta file: %s", assetPath.c_str());
+            log_error("[Hyperflow] Unable to find meta file: %s", assetPath.c_str());
             return false;
         }
 
         if (!utils::ReadFile(assetPath, metadata))
         {
-            LOG_ERROR("[Hyperflow] Unable to read meta: %s", assetPath.c_str());
+            log_error("[Hyperflow] Unable to read meta: %s", assetPath.c_str());
             return false;
         }
         metadata.push_back('\0');

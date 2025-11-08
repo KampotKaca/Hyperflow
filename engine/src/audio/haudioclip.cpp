@@ -16,7 +16,7 @@ namespace hf
 
         if (!utils::FileExists(audioLoc.c_str()))
         {
-            LOG_ERROR("[Hyperflow] Unable to find Audio clip: %s", filePath.path.c_str());
+            log_error("[Hyperflow] Unable to find Audio clip: %s", filePath.path.c_str());
             return;
         }
 
@@ -31,12 +31,12 @@ namespace hf
         ma_decoder decoder;
         if (ma_decoder_init_file(audioLoc.c_str(), &decoderConfig, &decoder) != MA_SUCCESS)
         {
-            LOG_ERROR("[Hyperflow] Unable to load audio clip: %s", filePath.path.c_str());
+            log_error("[Hyperflow] Unable to load audio clip: %s", filePath.path.c_str());
             return;
         }
         if (ma_decoder_get_length_in_pcm_frames(&decoder, (ma_uint64*)&frameCount) != MA_SUCCESS)
         {
-            LOG_ERROR("[Hyperflow] Unable to get length of the audio clip: %s", filePath.path.c_str());
+            log_error("[Hyperflow] Unable to get length of the audio clip: %s", filePath.path.c_str());
             return;
         }
 
@@ -49,7 +49,7 @@ namespace hf
         ma_uint64 fRead;
         if (ma_decoder_read_pcm_frames(&decoder, pcmData, frameCount, &fRead) != MA_SUCCESS)
         {
-            LOG_ERROR("[Hyperflow] Unable to audio clip frames: %s", filePath.path.c_str());
+            log_error("[Hyperflow] Unable to audio clip frames: %s", filePath.path.c_str());
             return;
         }
         ma_decoder_uninit(&decoder);
@@ -97,7 +97,7 @@ namespace hf
                 return MakeRef<AudioClip>(info);
             }catch (...)
             {
-                LOG_ERROR("[Hyperflow] Error parsing Audio clip: %s", assetPath);
+                log_error("[Hyperflow] Error parsing Audio clip: %s", assetPath);
                 return nullptr;
             }
         }

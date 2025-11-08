@@ -16,7 +16,7 @@ namespace hf
             else loc = TO_RES_PATH(std::string("shaders/vulkan/") + modulePath.path) + post;\
             if (!utils::FileExists(loc.c_str()))\
             {\
-                LOG_ERROR("[Hyperflow] Unable to find %s shader: %s", name, loc.c_str());\
+                log_error("[Hyperflow] Unable to find %s shader: %s", name, loc.c_str());\
                 return;\
             }\
             List<char> code{};\
@@ -295,11 +295,11 @@ namespace hf
             }
             catch(const std::exception& e)
             {
-                LOG_ERROR("[Hyperflow] Error parsing Shader Library: %s\nError: %s", assetPath, e.what());
+                log_error("[Hyperflow] Error parsing Shader Library: %s\nError: %s", assetPath, e.what());
             }
             catch (...)
             {
-                LOG_ERROR("[Hyperflow] Unknown error parsing Shader Library: %s", assetPath);
+                log_error("[Hyperflow] Unknown error parsing Shader Library: %s", assetPath);
             }
             return nullptr;
         }
@@ -363,7 +363,7 @@ namespace hf
 
             }catch (...)
             {
-                LOG_ERROR("[Hyperflow] Error parsing Vertex Input Module: %s", (const char*)assetPath.c_str());
+                log_error("[Hyperflow] Error parsing Vertex Input Module: %s", (const char*)assetPath.c_str());
             }
         }
 
@@ -427,7 +427,7 @@ namespace hf
 
             }catch (...)
             {
-                LOG_ERROR("[Hyperflow] Error parsing Pre Raster Module: %s", (const char*)assetPath.c_str());
+                log_error("[Hyperflow] Error parsing Pre Raster Module: %s", (const char*)assetPath.c_str());
             }
         }
 
@@ -458,7 +458,7 @@ namespace hf
 
             }catch (...)
             {
-                LOG_ERROR("[Hyperflow] Error parsing Fragment Module: %s", (const char*)assetPath.c_str());
+                log_error("[Hyperflow] Error parsing Fragment Module: %s", (const char*)assetPath.c_str());
             }
         }
 
@@ -511,7 +511,7 @@ namespace hf
                 }
             }catch (...)
             {
-                LOG_ERROR("[Hyperflow] Error parsing Fragment Output Module: %s", (const char*)assetPath.c_str());
+                log_error("[Hyperflow] Error parsing Fragment Output Module: %s", (const char*)assetPath.c_str());
             }
         }
 

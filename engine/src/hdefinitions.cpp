@@ -25,56 +25,56 @@ namespace hf
 
     VertexBufferAttribute FindVertexAttribute(const char* id)
     {
-        if(!ir::HF.graphicsResources.vertexAttributes.contains(id)) LOG_ERROR("Vertex Attribute not found %s", id);
+        if(!ir::HF.graphicsResources.vertexAttributes.contains(id)) log_error("Vertex Attribute not found %s", id);
         return ir::HF.graphicsResources.vertexAttributes[id];
     }
     VertexBufferAttribute FindVertexAttribute(const std::string_view id)
     {
-        if(!ir::HF.graphicsResources.vertexAttributes.contains(id)) LOG_ERROR("Vertex Attribute not found %s", std::string(id).c_str());
+        if(!ir::HF.graphicsResources.vertexAttributes.contains(id)) log_error("Vertex Attribute not found %s", std::string(id).c_str());
         return ir::HF.graphicsResources.vertexAttributes[id];
     }
 
     TextureLayout FindTextureLayout(const char* id)
     {
-        if(!ir::HF.graphicsResources.textureLayouts.contains(id)) LOG_ERROR("Texture Layout not found %s", id);
+        if(!ir::HF.graphicsResources.textureLayouts.contains(id)) log_error("Texture Layout not found %s", id);
         return ir::HF.graphicsResources.textureLayouts[id];
     }
     TextureLayout FindTextureLayout(const std::string_view id)
     {
-        if(!ir::HF.graphicsResources.textureLayouts.contains(id)) LOG_ERROR("Texture Layout not found %s", std::string(id).c_str());
+        if(!ir::HF.graphicsResources.textureLayouts.contains(id)) log_error("Texture Layout not found %s", std::string(id).c_str());
         return ir::HF.graphicsResources.textureLayouts[id];
     }
 
     TextureSampler FindTextureSampler(const char* id)
     {
-        if(!ir::HF.graphicsResources.textureSamplers.contains(id)) LOG_ERROR("Texture Sampler not found %s", id);
+        if(!ir::HF.graphicsResources.textureSamplers.contains(id)) log_error("Texture Sampler not found %s", id);
         return ir::HF.graphicsResources.textureSamplers[id];
     }
     TextureSampler FindTextureSampler(const std::string_view id)
     {
-        if(!ir::HF.graphicsResources.textureSamplers.contains(id)) LOG_ERROR("Texture Sampler not found %s", std::string(id).c_str());
+        if(!ir::HF.graphicsResources.textureSamplers.contains(id)) log_error("Texture Sampler not found %s", std::string(id).c_str());
         return ir::HF.graphicsResources.textureSamplers[id];
     }
 
     ShaderLayout FindShaderLayout(const char* id)
     {
-        if(!ir::HF.graphicsResources.shaderLayouts.contains(id)) LOG_ERROR("Shader layout not found %s", id);
+        if(!ir::HF.graphicsResources.shaderLayouts.contains(id)) log_error("Shader layout not found %s", id);
         return ir::HF.graphicsResources.shaderLayouts[id];
     }
     ShaderLayout FindShaderLayout(const std::string_view id)
     {
-        if(!ir::HF.graphicsResources.shaderLayouts.contains(id)) LOG_ERROR("Shader layout not found %s", std::string(id).c_str());
+        if(!ir::HF.graphicsResources.shaderLayouts.contains(id)) log_error("Shader layout not found %s", std::string(id).c_str());
         return ir::HF.graphicsResources.shaderLayouts[id];
     }
 
     Buffer FindBuffer(const char* id)
     {
-        if(!ir::HF.graphicsResources.bufferIds.contains(id)) LOG_ERROR("Buffer not found %s", id);
+        if(!ir::HF.graphicsResources.bufferIds.contains(id)) log_error("Buffer not found %s", id);
         return ir::HF.graphicsResources.bufferIds[id];
     }
     Buffer FindBuffer(const std::string_view id)
     {
-        if(!ir::HF.graphicsResources.bufferIds.contains(id)) LOG_ERROR("Buffer not found %s", std::string(id).c_str());
+        if(!ir::HF.graphicsResources.bufferIds.contains(id)) log_error("Buffer not found %s", std::string(id).c_str());
         return ir::HF.graphicsResources.bufferIds[id];
     }
 }

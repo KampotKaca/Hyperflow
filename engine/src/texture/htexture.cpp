@@ -88,7 +88,7 @@ namespace hf
 
                 if (!utils::FileExists(texLoc.c_str()))
                 {
-                    LOG_ERROR("[Hyperflow] Unable to find texture: %s", assetPath);
+                    log_error("[Hyperflow] Unable to find texture: %s", assetPath);
                     return nullptr;
                 }
 
@@ -107,7 +107,7 @@ namespace hf
                 return tex;
             }catch (...)
             {
-                LOG_ERROR("[Hyperflow] Error parsing Texture: %s", assetPath);
+                log_error("[Hyperflow] Error parsing Texture: %s", assetPath);
                 return nullptr;
             }
         }
@@ -153,7 +153,7 @@ namespace hf
                             &texChannels, (uint32_t)TextureChannel::RGBA);
                             if (!pixels)
                             {
-                                LOG_ERROR("[Hyperflow] Invalid image, unable to load at location: %s", entry.path().string().c_str());
+                                log_error("[Hyperflow] Invalid image, unable to load at location: %s", entry.path().string().c_str());
                                 continue;
                             }
 
@@ -169,7 +169,7 @@ namespace hf
                 return true;
             }
 
-            LOG_ERROR("[Hyperflow] Unable to load image at: %s", folderPath);
+            log_error("[Hyperflow] Unable to load image at: %s", folderPath);
             return false;
         }
     }

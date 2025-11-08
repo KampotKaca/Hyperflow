@@ -43,7 +43,7 @@ namespace hf
 		return result;
 	}
 
-	IRect GetWindowFrameRect()				   { return ir::win::GetFrameRect(ir::HF.window.get()); }
+	WindowFrame GetWindowFrame()			   { return ir::win::GetFrame(ir::HF.window.get()); }
 	WindowState GetWindowState() 			   { return ir::HF.window->state; }
 	WindowStyle GetWindowStyle() 			   { return ir::HF.window->style; }
 	WindowPointerState GetWindowPointerState() { return ir::HF.window->pointerState; }

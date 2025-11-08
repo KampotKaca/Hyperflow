@@ -58,6 +58,14 @@ extern "C"
 
 #endif
 
+#define BIT(x) (1u << x)
+#define cassert(cond, ...)\
+        if(!cond)\
+        {\
+            log_fatal(__VA_ARGS__);\
+            abort();\
+        }
+
 namespace hf
 {
 	//region Aditionalls
@@ -110,7 +118,6 @@ namespace hf
 	//endregion
 	//region Rendering
 
-	struct Renderer;
 	struct ShaderLibrary;
 	struct Shader;
 	struct Texture;
@@ -668,8 +675,6 @@ namespace hf
 
     //endregion
 	//region Window
-
-	struct Window;
 
 	struct RendererEventInfo
 	{

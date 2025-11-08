@@ -48,7 +48,7 @@ namespace hf
     }
 
     bool IsRendererRunning() { return ir::HF.renderer->handle; }
-    ThreadMemoryStatistics GetMemoryRendererStatistics()
+    ThreadMemoryStatistics GetRendererMemoryStatistics()
     {
         ThreadMemoryStatistics stats{};
         {

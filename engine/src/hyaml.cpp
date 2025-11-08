@@ -204,19 +204,19 @@ namespace hf
     void ReadShaderBlendingOptions_i(ryml::NodeRef root, ShaderBlendingOptions& result)
     {
         if (root.has_child("color")) ReadBlendingOptions_i(root["color"], result.color);
-        else LOG_ERROR("[Hyperflow] %s", "Unable to find color of the blending options.");
+        else log_error("[Hyperflow] %s", "Unable to find color of the blending options.");
 
         if (root.has_child("alpha")) ReadBlendingOptions_i(root["alpha"], result.alpha);
-        else LOG_ERROR("[Hyperflow] %s", "Unable to find alpha of the blending options.");
+        else log_error("[Hyperflow] %s", "Unable to find alpha of the blending options.");
     }
 
     void ReadShaderBlendingOptions_i(c4::yml::ConstNodeRef root, ShaderBlendingOptions& result)
     {
         if (root.has_child("color")) ReadBlendingOptions_i(root["color"], result.color);
-        else LOG_ERROR("[Hyperflow] %s", "Unable to find color of the blending options.");
+        else log_error("[Hyperflow] %s", "Unable to find color of the blending options.");
 
         if (root.has_child("alpha")) ReadBlendingOptions_i(root["alpha"], result.alpha);
-        else LOG_ERROR("[Hyperflow] %s", "Unable to find alpha of the blending options.");
+        else log_error("[Hyperflow] %s", "Unable to find alpha of the blending options.");
     }
 
     void ReadShaderModulesInfo_i(c4::yml::ConstNodeRef root, const Ref<ShaderLibrary>& lib, ShaderModulesInfo& result)

@@ -37,7 +37,7 @@ namespace hf
             const auto bindingInfo = info.pBindings[i];
             const auto offset = bindingInfo.elementSizeInBytes * bindingInfo.arraySize;
             if (i != info.bindingCount - 1 && offset % 256 != 0)
-                LOG_ERROR("Invalid buffer alignment!!! "
+                log_error("Invalid buffer alignment!!! "
                           "Some devices only support alignment 256, this is not recommended. "
                           "Alignment is only necessary when uniform has more than one binding");
             size += offset;

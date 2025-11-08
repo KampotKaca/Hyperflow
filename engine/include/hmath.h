@@ -89,6 +89,14 @@ namespace hf
         ivec2 size{};
     };
 
+    struct WindowFrame
+    {
+        int32_t left{};
+        int32_t top{};
+        int32_t right{};
+        int32_t bottom{};
+    };
+
     struct SphereVolume
     {
         vec3 center{};

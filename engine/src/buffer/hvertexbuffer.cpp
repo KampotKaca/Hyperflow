@@ -35,9 +35,7 @@ namespace hf
         uploadInfo.offsetInBytes = info.offset * vb->vertexSize;
         uploadInfo.sizeInBytes = info.vertCount * vb->vertexSize;
 
-        void* rnHandle = nullptr;
-        if (ir::HF.renderer) rnHandle = ir::HF.renderer->handle;
-        ir::HF.renderingApi.api.UploadVertexBuffer(rnHandle, uploadInfo);
+        ir::HF.renderingApi.api.UploadVertexBuffer(ir::HF.renderer->handle, uploadInfo);
     }
 
     namespace ir::rdr

@@ -38,7 +38,7 @@ namespace hf
 
             if (!(GRAPHICS_DATA.device.formatProps[(uint32_t)details.format].optimalTilingFeatures & VK_FORMAT_FEATURE_SAMPLED_IMAGE_FILTER_LINEAR_BIT))
             {
-                LOG_WARN("[Hyperflow]", "texture image format does not support linear blitting, disabling mimmaps!");
+                log_warn("[Hyperflow]", "texture image format does not support linear blitting, disabling mimmaps!");
                 return;
             }
 

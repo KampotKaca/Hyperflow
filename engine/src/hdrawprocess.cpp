@@ -32,7 +32,7 @@ namespace hf
             }
             catch (...)
             {
-                LOG_ERROR("%s", "Unable to set draw callback!");
+                log_error("%s", "Unable to set draw callback!");
                 throw;
             }
         }
@@ -60,7 +60,7 @@ namespace hf
             }
             catch (...)
             {
-                LOG_ERROR("%s", "Unable to set camera!");
+                log_error("%s", "Unable to set camera!");
                 throw;
             }
         }
@@ -79,7 +79,7 @@ namespace hf
             }
             catch (...)
             {
-                LOG_ERROR("%s", "Unable to set camera!");
+                log_error("%s", "Unable to set camera!");
                 throw;
             }
         }
@@ -93,7 +93,7 @@ namespace hf
 
                 if (ir::HF.renderer->currentDraw.packet->directionalLights.size() >= MAX_DIRECTIONAL_LIGHTS)
                 {
-                    LOG_ERROR("Cannot add more than %i directional lights!", MAX_DIRECTIONAL_LIGHTS);
+                    log_error("Cannot add more than %i directional lights!", MAX_DIRECTIONAL_LIGHTS);
                     return;
                 }
 #endif
@@ -102,7 +102,7 @@ namespace hf
             }
             catch (...)
             {
-                LOG_ERROR("%s", "Unable to add light!");
+                log_error("%s", "Unable to add light!");
                 throw;
             }
         }
@@ -116,7 +116,7 @@ namespace hf
 
                 if (ir::HF.renderer->currentDraw.packet->spotLights.size() >= MAX_SPOT_LIGHTS)
                 {
-                    LOG_ERROR("Cannot add more than %i spot lights!", MAX_SPOT_LIGHTS);
+                    log_error("Cannot add more than %i spot lights!", MAX_SPOT_LIGHTS);
                     return;
                 }
 #endif
@@ -125,7 +125,7 @@ namespace hf
             }
             catch (...)
             {
-                LOG_ERROR("%s", "Unable to add light!");
+                log_error("%s", "Unable to add light!");
                 throw;
             }
         }
@@ -139,7 +139,7 @@ namespace hf
 
                 if (ir::HF.renderer->currentDraw.packet->pointLights.size() >= MAX_POINT_LIGHTS)
                 {
-                    LOG_ERROR("Cannot add more than %i point lights!", MAX_POINT_LIGHTS);
+                    log_error("Cannot add more than %i point lights!", MAX_POINT_LIGHTS);
                     return;
                 }
 #endif
@@ -148,7 +148,7 @@ namespace hf
             }
             catch (...)
             {
-                LOG_ERROR("%s", "Unable to add light!");
+                log_error("%s", "Unable to add light!");
                 throw;
             }
         }
@@ -176,7 +176,7 @@ namespace hf
             }
             catch (...)
             {
-                LOG_ERROR("%s", "Unable to upload more more buffers!");
+                log_error("%s", "Unable to upload more more buffers!");
                 throw;
             }
         }
@@ -195,7 +195,7 @@ namespace hf
             }
             catch (...)
             {
-                LOG_ERROR("%s", "Unable to upload material!");
+                log_error("%s", "Unable to upload material!");
                 throw;
             }
         }
@@ -219,7 +219,7 @@ namespace hf
             }
             catch (...)
             {
-                LOG_ERROR("%s", "Unable to upload texture pack!");
+                log_error("%s", "Unable to upload texture pack!");
                 throw;
             }
         }
@@ -287,7 +287,7 @@ namespace hf
                 packet->textureRebindings.push_back(binding);
                 ir::HF.renderer->currentDraw.currentTexturePackBinding->bindingPacketRange.size++;
             }
-            else LOG_WARN("Unnecessary binding upload! nothing changed");
+            else log_warn("Unnecessary binding upload! nothing changed");
         }
 
         static void UploadTex(SmallList<TexturePack::Binding<Cubemap>, MAX_TEXTURES_IN_TEXTURE_PACK>& bindings,
@@ -345,7 +345,7 @@ namespace hf
                 packet->textureRebindings.push_back(binding);
                 ir::HF.renderer->currentDraw.currentTexturePackBinding->bindingPacketRange.size++;
             }
-            else LOG_WARN("Unnecessary binding upload! nothing changed");
+            else log_warn("Unnecessary binding upload! nothing changed");
         }
 
         static void UploadTex(SmallList<TexturePack::Binding<RenderTexture>, MAX_TEXTURES_IN_TEXTURE_PACK>& bindings,
@@ -403,7 +403,7 @@ namespace hf
                 packet->textureRebindings.push_back(binding);
                 ir::HF.renderer->currentDraw.currentTexturePackBinding->bindingPacketRange.size++;
             }
-            else LOG_WARN("Unnecessary binding upload! nothing changed");
+            else log_warn("Unnecessary binding upload! nothing changed");
         }
 
         void UploadAddTexPackBinding(uint32_t bindingIndex, const Ref<Texture>& texture, uint32_t textureIndex)
@@ -472,7 +472,7 @@ namespace hf
             }
             catch (...)
             {
-                LOG_ERROR("%s", "Unable to add texture pack texture2d binding!");
+                log_error("%s", "Unable to add texture pack texture2d binding!");
                 throw;
             }
         }
@@ -489,7 +489,7 @@ namespace hf
             }
             catch (...)
             {
-                LOG_ERROR("%s", "Unable to add texture pack cubemap binding!");
+                log_error("%s", "Unable to add texture pack cubemap binding!");
                 throw;
             }
         }
@@ -506,7 +506,7 @@ namespace hf
             }
             catch (...)
             {
-                LOG_ERROR("%s", "Unable to add texture pack render texture binding!");
+                log_error("%s", "Unable to add texture pack render texture binding!");
                 throw;
             }
         }
@@ -528,7 +528,7 @@ namespace hf
             }
             catch (...)
             {
-                LOG_ERROR("%s", "Unable to add render dependency!");
+                log_error("%s", "Unable to add render dependency!");
                 throw;
             }
         }
@@ -553,7 +553,7 @@ namespace hf
             }
             catch (...)
             {
-                LOG_ERROR("%s", "Unable to start render texture!");
+                log_error("%s", "Unable to start render texture!");
                 throw;
             }
         }
@@ -570,7 +570,7 @@ namespace hf
             }
             catch (...)
             {
-                LOG_ERROR("%s", "Unable to end render texture!");
+                log_error("%s", "Unable to end render texture!");
                 throw;
             }
         }
@@ -600,7 +600,7 @@ namespace hf
             }
             catch (...)
             {
-                LOG_ERROR("%s", "Unable to start shader setup!");
+                log_error("%s", "Unable to start shader setup!");
                 throw;
             }
         }
@@ -641,7 +641,7 @@ namespace hf
             }
             catch (...)
             {
-                LOG_ERROR("%s", "Unable to start shader!");
+                log_error("%s", "Unable to start shader!");
                 throw;
             }
         }
@@ -687,7 +687,7 @@ namespace hf
             }
             catch (...)
             {
-                LOG_ERROR("%s", "Unable to start material!");
+                log_error("%s", "Unable to start material!");
                 throw;
             }
         }
@@ -726,7 +726,7 @@ namespace hf
             }
             catch (...)
             {
-                LOG_ERROR("%s", "Unable to bind texture pack to material!");
+                log_error("%s", "Unable to bind texture pack to material!");
                 throw;
             }
         }
@@ -756,7 +756,7 @@ namespace hf
             }
             catch (...)
             {
-                LOG_ERROR("Unable to start draw! Draw packet buffer usage: %llu", ir::HF.renderer->currentDraw.packet->drawPackets.size());
+                log_error("Unable to start draw! Draw packet buffer usage: %llu", ir::HF.renderer->currentDraw.packet->drawPackets.size());
                 throw;
             }
         }
@@ -796,7 +796,7 @@ namespace hf
             }
             catch (...)
             {
-                LOG_ERROR("%s", "Unable to bind texture pack to draw!");
+                log_error("%s", "Unable to bind texture pack to draw!");
                 throw;
             }
         }
@@ -834,7 +834,7 @@ namespace hf
             }
             catch (...)
             {
-                LOG_ERROR("%s", "Unable to set push constant!");
+                log_error("%s", "Unable to set push constant!");
                 throw;
             }
         }
@@ -863,7 +863,7 @@ namespace hf
             }
             catch (...)
             {
-                LOG_ERROR("%s", "Unable to start bufferSet!");
+                log_error("%s", "Unable to start bufferSet!");
                 throw;
             }
         }
@@ -890,7 +890,7 @@ namespace hf
             }
             catch (...)
             {
-                LOG_ERROR("%s", "Unable to add buffer to buffer set!");
+                log_error("%s", "Unable to add buffer to buffer set!");
                 throw;
             }
         }
@@ -920,7 +920,7 @@ namespace hf
             }
             catch (...)
             {
-                LOG_ERROR("%s", "Unable to Start Draw Call!");
+                log_error("%s", "Unable to Start Draw Call!");
                 throw;
             }
         }
@@ -992,7 +992,7 @@ namespace hf
             }
             catch (...)
             {
-                LOG_ERROR("%s", "Unable add instance!");
+                log_error("%s", "Unable add instance!");
                 throw;
             }
         }
@@ -1012,7 +1012,7 @@ namespace hf
             }
             catch (...)
             {
-                LOG_ERROR("%s", "Unable add vertex buffer!");
+                log_error("%s", "Unable add vertex buffer!");
                 throw;
             }
         }

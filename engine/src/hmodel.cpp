@@ -21,14 +21,14 @@ namespace hf
 
         if (!utils::FileExists(modelLoc.c_str()))
         {
-            LOG_ERROR("[Hyperflow] Unable to find model: %s", filePath.c_str());
+            log_error("[Hyperflow] Unable to find model: %s", filePath.c_str());
             return;
         }
 
         List<char> compressedData{};
         if (!utils::ReadFile(modelLoc, compressedData))
         {
-            LOG_ERROR("[Hyperflow] Unable to read model: %s", filePath.c_str());
+            log_error("[Hyperflow] Unable to read model: %s", filePath.c_str());
             return;
         }
 
@@ -43,7 +43,7 @@ namespace hf
         offset += meshCount * sizeof(ml::MeshHeader);
         if (!CheckFileIntegrity(compressedData.data(), offset))
         {
-            LOG_ERROR("[Hyperflow] Corrupted mesh file, unable to load: %s", filePath.c_str());
+            log_error("[Hyperflow] Corrupted mesh file, unable to load: %s", filePath.c_str());
             return;
         }
 
@@ -56,7 +56,7 @@ namespace hf
 
         if (maxSize < 0)
         {
-            LOG_ERROR("[Hyperflow] Unable to decompress mesh: %s", filePath.c_str());
+            log_error("[Hyperflow] Unable to decompress mesh: %s", filePath.c_str());
             return;
         }
 
@@ -125,7 +125,7 @@ namespace hf
                 return MakeRef<Model>(info);
             }catch (...)
             {
-                LOG_ERROR("[Hyperflow] Error parsing BufferAttribute: %s", assetPath);
+                log_error("[Hyperflow] Error parsing BufferAttribute: %s", assetPath);
                 return nullptr;
             }
         }
@@ -180,7 +180,7 @@ namespace hf
         if (!CheckFileIntegrity(meshData.data(), offset))\
         {\
             utils::Deallocate(vertices);\
-            LOG_ERROR("[Hyperflow] Corrupted mesh file, unable to load: %s", model->filePath.c_str());\
+            log_error("[Hyperflow] Corrupted mesh file, unable to load: %s", model->filePath.c_str());\
             return nullptr;\
         }
 
@@ -298,7 +298,7 @@ namespace hf
         {
             utils::Deallocate(vertices);
             utils::Deallocate(indices);
-            LOG_ERROR("[Hyperflow] Corrupted model file, unable to load: %s", model->filePath.c_str());
+            log_error("[Hyperflow] Corrupted model file, unable to load: %s", model->filePath.c_str());
             return nullptr;
         }
 
