@@ -13,7 +13,7 @@ namespace hf::platform
         timeEndPeriod(1);
     }
 
-    void HandleEvents(EngineUpdateType updateType) {}
+    void HandleEvents() {}
 
     RenderingApiType GetBestRenderingApi()
     {

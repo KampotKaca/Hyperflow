@@ -7,31 +7,30 @@
 
 namespace hf
 {
-    static void ThreadDraw(const Ref<Renderer>& rn)
+    static void ThreadDraw()
     {
         ir::alloc::LoadAllocatorThread_i();
 
-        rn->threadInfo.isRunning = true;
+        ir::HF.renderer->threadInfo.isRunning = true;
         uint64_t renderFrameCount = 0;
-        while (rn->threadInfo.isRunning)
+        while (ir::HF.renderer->threadInfo.isRunning)
         {
-            ir::rdr::RendererUpdate_i(rn);
+            ir::rdr::RendererUpdate_i();
             if (renderFrameCount % 1024 == 0) utils::CollectThreadMemoryCache();
 
-            std::lock_guard lock(rn->threadInfo.statLock);
-            rn->threadInfo.memoryStatistics = utils::GetThreadMemoryStatistics();
+            std::lock_guard lock(ir::HF.renderer->threadInfo.statLock);
+            ir::HF.renderer->threadInfo.memoryStatistics = utils::GetThreadMemoryStatistics();
             renderFrameCount++;
         }
-        rn->threadInfo.isRunning = false;
+        ir::HF.renderer->threadInfo.isRunning = false;
         ir::HF.renderingApi.api.WaitForDevice();
 
         ir::alloc::UnloadAllocatorThread_i();
     }
 
-    Renderer::Renderer(const Window* window, const RendererEventInfo& eventInfo) : eventInfo(eventInfo)
+    Renderer::Renderer(const RendererEventInfo& eventInfo) : eventInfo(eventInfo)
     {
-        this->window = window;
-        threadInfo.size = ir::window::GetSize(window);
+        threadInfo.size = ir::win::GetSize(ir::HF.window.get());
 
         for (uint32_t i = 0; i < 3; i++)
         {
@@ -48,21 +47,13 @@ namespace hf
         ir::rdr::DestroyRenderer_i(this);
     }
 
-    bool IsLoaded(const Ref<Renderer>& rn) { return rn->handle; }
-    uvec2 GetSize(const Ref<Renderer>& rn)  { return rn->threadInfo.size; }
-    void Resize(const Ref<Renderer>& rn, uvec2 size)
-    {
-        std::lock_guard lock(rn->threadInfo.threadLock);
-        if (rn->window != nullptr) throw GENERIC_EXCEPT("[Hyperflow]", "Cannot resize renderer connected to the window");
-        rn->threadInfo.size = size;
-        ir::HF.renderingApi.api.RegisterFrameBufferChange(rn->handle, size);
-    }
-    ThreadMemoryStatistics GetMemoryStatistics(const Ref<Renderer>& rn)
+    bool IsRendererRunning() { return ir::HF.renderer->handle; }
+    ThreadMemoryStatistics GetMemoryRendererStatistics()
     {
         ThreadMemoryStatistics stats{};
         {
-            std::lock_guard lock(rn->threadInfo.statLock);
-            stats = rn->threadInfo.memoryStatistics;
+            std::lock_guard lock(ir::HF.renderer->threadInfo.statLock);
+            stats = ir::HF.renderer->threadInfo.memoryStatistics;
         }
         return stats;
     }
@@ -101,13 +92,9 @@ namespace hf
             newApi.type = api;
             HF.renderingApi = newApi;
 
-            for (auto& win : HF.windows | std::views::values)
-            {
-                if (win->renderer) CreateRenderer_i(win->renderer.get());
-                else win->renderer = MakeRef<Renderer>(win.get(), win->rnEventInfo);
-                auto rn = win->renderer;
-                RunRenderThread_i(win->renderer);
-            }
+            if (HF.renderer) CreateRenderer_i(HF.renderer.get());
+            else HF.renderer = MakeURef<Renderer>(HF.window->rnEventInfo);
+            RunRenderThread_i();
 
             general::DefineStaticResources_i();
             if (HF.lifecycleCallbacks.onRendererLoad) HF.lifecycleCallbacks.onRendererLoad();
@@ -117,13 +104,10 @@ namespace hf
         {
             if (HF.renderingApi.type == RenderingApiType::None) return;
 
-            for (const auto& window : HF.windows | std::views::values)
+            if (HF.renderer)
             {
-                if (window->renderer)
-                {
-                    DestroyRenderer_i(window->renderer.get());
-                    if (!retainReferences) window->renderer = nullptr;
-                }
+                DestroyRenderer_i(HF.renderer.get());
+                if (!retainReferences) HF.renderer = nullptr;
             }
 
             platform::UnloadDll(HF.renderingApi.handle);
@@ -167,10 +151,10 @@ namespace hf
             RendererInstanceCreationInfo_i createInfo{};
             createInfo.size = rn->threadInfo.size;
 
-            if (rn->window)
+            if (HF.window)
             {
-                createInfo.vSyncMode = rn->window->vSyncMode;
-                createInfo.handle = rn->window->handle;
+                createInfo.vSyncMode = HF.window->vSyncMode;
+                createInfo.handle = HF.window->handle;
             }
 
             createInfo.initCallback = rn->eventInfo.onRendererInitCallback;
@@ -208,9 +192,16 @@ namespace hf
             }
         }
 
-        void RunRenderThread_i(const Ref<Renderer>& rn)
+        void RunRenderThread_i()
         {
-            rn->threadInfo.thread = std::thread(ThreadDraw, rn);
+            HF.renderer->threadInfo.thread = std::thread(ThreadDraw);
+        }
+
+        void ResizeRenderer_i(uvec2 size)
+        {
+            std::lock_guard lock(HF.renderer->threadInfo.threadLock);
+            HF.renderer->threadInfo.size = size;
+            HF.renderingApi.api.RegisterFrameBufferChange(HF.renderer->handle, size);
         }
     }
 }

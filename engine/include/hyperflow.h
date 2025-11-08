@@ -9,13 +9,9 @@ namespace hf
 {
     //region Engine
 
-    void Preload();
-    void Shutdown();
-
 	bool IsRunning(); //Check if the engine is running.
 
     void Run(const EngineData& engineData); //Run the engine.
-    Ref<Window> GetMainWindow(); //Get main window of the application.
     const std::string& GetApplicationTitle(); //Get title of the application.
 
     Ref<AudioGroup> Get2DAudioGroup(); //Get the Audio Group which handles all the Audio Players.
@@ -72,7 +68,6 @@ namespace hf
 
     void Terminate(); //Terminate the application.
     void UnloadAllScenes(); //Unload all the scenes used by the application.
-    void DestroyAllWindows(); //Destroy all the windows used by the application.
 
     //Load an asset from a meta file.
     //If the asset is already loaded it will not be loaded again, you will just get the Ref to it.
@@ -83,6 +78,30 @@ namespace hf
     void DestroyAsset(const std::string_view assetPath, AssetType type); //Destroy the loaded asset.
     Ref<void> GetAsset(const char* assetPath, AssetType type); //Get asset by the local path it was loaded from.
     Ref<void> GetAsset(const std::string_view assetPath, AssetType type); //Get asset by the local path it was loaded from.
+
+    const std::string& GetWindowTitle();
+    ivec2 GetWindowSize();
+    ivec2 GetWindowPosition();
+    IRect GetWindowRect();
+    IRect GetWindowFrameRect();
+    WindowState GetWindowState();
+    WindowStyle GetWindowStyle();
+    WindowPointerState GetWindowPointerState();
+    void* GetWindowHandle();
+    bool IsWindowClosed();
+
+    void SetWindowTitle(const std::string& title);
+    void SetWindowSize(ivec2 size);
+    void SetWindowPosition(ivec2 position);
+    void SetWindowRect(IRect rect);
+    void SetWindowState(WindowState state);
+    void SetWindowPointerState(WindowPointerState state);
+
+    void FocusWindow();
+    bool SetWindowIcons(const char* folderPath);
+
+    VsyncMode GetVSyncMode();
+    void SetVSyncMode(VsyncMode mode);
 
     //endregion
     //region Search
@@ -101,52 +120,6 @@ namespace hf
 
     Buffer FindBuffer(const char* id);
     Buffer FindBuffer(std::string_view id);
-
-    //endregion
-    //region Window
-
-	Ref<Window> Create(const WindowCreationInfo &data, const Ref<Window> &parent);
-	void Destroy(const Ref<Window>& win);
-
-    bool IsKeyDown(const Ref<Window>& win, Key key);
-	bool IsKeyDownContinues(const Ref<Window>& win, Key key);
-	bool IsKeyUp(const Ref<Window>& win, Key key);
-
-	bool IsButtonDown(const Ref<Window>& win, Button button);
-	bool IsButtonDownContinues(const Ref<Window>& win, Button button);
-	bool IsButtonUp(const Ref<Window>& win, Button button);
-
-    KeyState GetKeyState(const Ref<Window>& win, Key key);
-    ButtonState GetButtonState(const Ref<Window>& win, Button button);
-    const std::string& GetWrite(const Ref<Window>& win);
-
-    vec2 GetPointerPosition(const Ref<Window>& win);
-    vec2 GetPointerDelta(const Ref<Window>& win);
-    vec2 GetScrollDelta(const Ref<Window>& win);
-
-    const std::string& GetTitle(const Ref<Window>& win);
-    ivec2 GetSize(const Ref<Window>& win);
-    ivec2 GetPosition(const Ref<Window>& win);
-    IRect GetRect(const Ref<Window>& win);
-    IRect GetFrameRect(const Ref<Window>& win);
-    WindowState GetState(const Ref<Window>& win);
-    WindowStyle GetStyle(const Ref<Window>& win);
-    WindowPointerState GetPointerState(const Ref<Window>& win);
-    void* GetHandle(const Ref<Window>& win);
-    Ref<Renderer> GetRenderer(const Ref<Window>& win);
-    bool IsClosed(const Ref<Window>& win);
-    VsyncMode GetVSyncMode(const Ref<Window>& win);
-
-    void SetTitle(const Ref<Window>& win, const std::string& title);
-    void SetSize(const Ref<Window>& win, ivec2 size);
-    void SetPosition(const Ref<Window>& win, ivec2 position);
-    void SetRect(const Ref<Window>& win, IRect rect);
-    void SetState(const Ref<Window>& win, WindowState state);
-    void SetPointerState(const Ref<Window>& win, WindowPointerState state);
-
-    void Focus(const Ref<Window>& win);
-    void SetVSyncMode(const Ref<Window>& win, VsyncMode mode);
-    bool SetIcons(const Ref<Window>& win, const char* folderPath);
 
     //endregion
     //region Material
@@ -319,13 +292,11 @@ namespace hf
     //endregion
     //region Renderer
 
-	bool IsLoaded(const Ref<Renderer>& rn);
-    uvec2 GetSize(const Ref<Renderer>& rn);
-    void Resize(const Ref<Renderer>& rn, uvec2 size);
-    ThreadMemoryStatistics GetMemoryStatistics(const Ref<Renderer>& rn);
+	bool IsRendererRunning();
+    ThreadMemoryStatistics GetMemoryRendererStatistics();
 
-    void Upload(const Ref<Renderer>& rn, const Ref<VertexBuffer>& vb, const VertBufferUploadInfo& info); //Renderer is optional!
-    void Upload(const Ref<Renderer>& rn, const Ref<IndexBuffer>& ib, const IndexBufferUploadInfo& info); //Renderer is optional!
+    void Upload(const Ref<VertexBuffer>& vb, const VertBufferUploadInfo& info); //Renderer is optional!
+    void Upload(const Ref<IndexBuffer>& ib, const IndexBufferUploadInfo& info); //Renderer is optional!
 
     //endregion
     //region Scene
@@ -406,89 +377,89 @@ namespace hf
     //These functions should never be called outside draw process.
     namespace dp
     {
-		void BindGlobalUniformBuffer(const Ref<Renderer>& rn); //Bind the global uniform buffer to the currently bound shader layout.
-        void SetDrawCallback(const Ref<Renderer>& rn, void (*callback)(const Ref<Renderer>&, void*)); //This callback will be called from rendering thread after every draw, be careful, incorrect use might crash the program.
+		void BindGlobalUniformBuffer(); //Bind the global uniform buffer to the currently bound shader layout.
+        void SetDrawCallback(void (*callback)(void*)); //This callback will be called from rendering thread after every draw, be careful, incorrect use might crash the program.
 
-        void SetCamera(const Ref<Renderer>& rn, const Camera3DAnchored& camera); //Set the draw camera. Needs to be called early in drawing process.
-        void SetCamera(const Ref<Renderer>& rn, const Camera3DFreeLook& camera); //Set the draw camera. Needs to be called early in drawing process.
+        void SetCamera(const Camera3DAnchored& camera); //Set the draw camera. Needs to be called early in drawing process.
+        void SetCamera(const Camera3DFreeLook& camera); //Set the draw camera. Needs to be called early in drawing process.
 
-        void AddLight(const Ref<Renderer>& rn, const DirectionalLight& light); //Add directional light to the renderer.
-        void AddLight(const Ref<Renderer>& rn, const SpotLight& light);        //Add Spot light to the renderer.
-        void AddLight(const Ref<Renderer>& rn, const PointLight& light);       //Add Point light to the renderer.
+        void AddLight(const DirectionalLight& light); //Add directional light to the renderer.
+        void AddLight(const SpotLight& light);        //Add Spot light to the renderer.
+        void AddLight(const PointLight& light);       //Add Point light to the renderer.
 
-        void UploadBuffer(const Ref<Renderer>& rn, const BufferUploadInfo& info);
-	    void UploadMat(const Ref<Renderer>& rn, const Ref<Material>& mat);
+        void UploadBuffer(const BufferUploadInfo& info);
+	    void UploadMat(const Ref<Material>& mat);
 
-	    void UploadStartTexPack(const Ref<Renderer>& rn, const Ref<TexturePack>& texPack);
-	    void UploadEndTexPack(const Ref<Renderer>& rn);
+	    void UploadStartTexPack(const Ref<TexturePack>& texPack);
+	    void UploadEndTexPack();
 
-        void UploadAddTexPackBinding(const Ref<Renderer>& rn, uint32_t bindingIndex, const Ref<Texture>& texture, uint32_t textureIndex = 0);
-        void UploadAddTexPackBinding(const Ref<Renderer>& rn, uint32_t bindingIndex, const Ref<Cubemap>& cubemap, uint32_t textureIndex = 0);
-        void UploadAddTexPackBinding(const Ref<Renderer>& rn, uint32_t bindingIndex, const Ref<RenderTexture>& rt, uint32_t attachmentIndex);
+        void UploadAddTexPackBinding(uint32_t bindingIndex, const Ref<Texture>& texture, uint32_t textureIndex = 0);
+        void UploadAddTexPackBinding(uint32_t bindingIndex, const Ref<Cubemap>& cubemap, uint32_t textureIndex = 0);
+        void UploadAddTexPackBinding(uint32_t bindingIndex, const Ref<RenderTexture>& rt, uint32_t attachmentIndex);
 
-        void UploadAddTexPackBindings(const Ref<Renderer>& rn, const TexturePackBindingUploadInfo<Texture>& info);
-        void UploadAddTexPackBindings(const Ref<Renderer>& rn, const TexturePackBindingUploadInfo<Cubemap>& info);
-        void UploadAddTexPackBindings(const Ref<Renderer>& rn, const TexturePackBindingUploadInfo<RenderTexture>& info);
+        void UploadAddTexPackBindings(const TexturePackBindingUploadInfo<Texture>& info);
+        void UploadAddTexPackBindings(const TexturePackBindingUploadInfo<Cubemap>& info);
+        void UploadAddTexPackBindings(const TexturePackBindingUploadInfo<RenderTexture>& info);
 
-        void AddRenderTexDependency(const Ref<Renderer>& rn, const RenderAttachmentDependencyInfo& info);
+        void AddRenderTexDependency(const RenderAttachmentDependencyInfo& info);
 
-        void StartRenderTex(const Ref<Renderer>& rn, const Ref<RenderTexture>& rt);
-        void EndRenderTex(const Ref<Renderer>& rn);
+        void StartRenderTex(const Ref<RenderTexture>& rt);
+        void EndRenderTex();
 
-	    void StartShaderLayout(const Ref<Renderer>& rn, ShaderLayout layout);
-	    void EndShaderLayout(const Ref<Renderer>& rn);
+	    void StartShaderLayout(ShaderLayout layout);
+	    void EndShaderLayout();
 
-	    void StartShader(const Ref<Renderer>& rn, const Ref<Shader>& shader);
-	    void EndShader(const Ref<Renderer>& rn);
+	    void StartShader(const Ref<Shader>& shader);
+	    void EndShader();
 
         //material can be null, when you do not use it in the shader!
-	    void StartMat(const Ref<Renderer>& rn, const Ref<Material>& material);
-	    void EndMat(const Ref<Renderer>& rn);
+	    void StartMat(const Ref<Material>& material);
+	    void EndMat();
 
-	    void StartDrawGroup(const Ref<Renderer>& rn);
-	    void EndDrawGroup(const Ref<Renderer>& rn);
+	    void StartDrawGroup();
+	    void EndDrawGroup();
 
-	    void StartBufferSet(const Ref<Renderer>& rn, RenderBindingType bindingType, uint32_t setBindingIndex);
-	    void EndBufferSet(const Ref<Renderer>& rn);
-	    void BufferSetAddBuffer(const Ref<Renderer>& rn, Buffer buffer);
+	    void StartBufferSet(RenderBindingType bindingType, uint32_t setBindingIndex);
+	    void EndBufferSet();
+	    void BufferSetAddBuffer(Buffer buffer);
 
-	    void MatAddTexPackBinding(const Ref<Renderer>& rn, const Ref<TexturePack>& texPack, uint32_t setBindingIndex);
+	    void MatAddTexPackBinding(const Ref<TexturePack>& texPack, uint32_t setBindingIndex);
 
-	    void StartDrawCall(const Ref<Renderer>& rn, const Ref<IndexBuffer>& indexBuffer);
-        void StartDrawCall(const Ref<Renderer>& rn, const Ref<Mesh>& mesh);
-        void StartDrawCall(const Ref<Renderer>& rn, const Ref<Mesh>& mesh, const Ref<Armature>& armature, uint32_t skinIndex);
-        void EndDrawCall(const Ref<Renderer>& rn);
+	    void StartDrawCall(const Ref<IndexBuffer>& indexBuffer);
+        void StartDrawCall(const Ref<Mesh>& mesh);
+        void StartDrawCall(const Ref<Mesh>& mesh, const Ref<Armature>& armature, uint32_t skinIndex);
+        void EndDrawCall();
 
-	    void DrawGroupAddTexPackBinding(const Ref<Renderer>& rn, const Ref<TexturePack>& texPack, uint32_t setBindingIndex);
-        void DrawGroupAddDrawCall(const Ref<Renderer>& rn, const Ref<IndexBuffer>& indexBuffer, const Ref<VertexBuffer>& vertexBuffer);
-        void DrawGroupAddDrawCall(const Ref<Renderer>& rn, const Ref<Mesh>& mesh);
+	    void DrawGroupAddTexPackBinding(const Ref<TexturePack>& texPack, uint32_t setBindingIndex);
+        void DrawGroupAddDrawCall(const Ref<IndexBuffer>& indexBuffer, const Ref<VertexBuffer>& vertexBuffer);
+        void DrawGroupAddDrawCall(const Ref<Mesh>& mesh);
 
-	    void DrawGroupSetPushConstant(const Ref<Renderer>& rn, const void* data, uint32_t dataSize);
-	    void DrawAddInstance(const Ref<Renderer>& rn, const void* data, uint32_t dataSize, const VolumeTransform& volume);
-	    void DrawAddVertBuffer(const Ref<Renderer>& rn, const Ref<VertexBuffer>& vb);
+	    void DrawGroupSetPushConstant(const void* data, uint32_t dataSize);
+	    void DrawAddInstance(const void* data, uint32_t dataSize, const VolumeTransform& volume);
+	    void DrawAddVertBuffer(const Ref<VertexBuffer>& vb);
 
 	    template<typename T>
-	    void DrawGroupSetPushConstant(const Ref<Renderer>& rn, const T& data)
+	    void DrawGroupSetPushConstant(const T& data)
 	    {
-	    	DrawGroupSetPushConstant(rn, &data, sizeof(T));
+	    	DrawGroupSetPushConstant(&data, sizeof(T));
 	    }
 
         template<typename T>
-        void DrawAddInstance(const Ref<Renderer>& rn, const T& data, const VolumeTransform& volume)
+        void DrawAddInstance(const T& data, const VolumeTransform& volume)
 	    {
-	        DrawAddInstance(rn, &data, sizeof(T), volume);
+	        DrawAddInstance(&data, sizeof(T), volume);
 	    }
 
         //Draw the skybox.
         //Try to call this draw as late as possible to reduce pixel overdraw.
         //This function should be called after render texture binding, since it binds it's own shader layout.
-        void Draw(const Ref<Renderer>& rn, const SkyboxInfo& info);
+        void Draw(const SkyboxInfo& info);
         //Draw xz line grid.
         //This function should be called after render texture binding, since it binds it's own shader layout.
-        void Draw(const Ref<Renderer>& rn, const GridLinesInfo& info);
+        void Draw(const GridLinesInfo& info);
 
-        void SkyboxBindDefaultCubemap(const Ref<Renderer>& rn); //Bind the default cubemap to the skybox.
-        void SkyboxBindCubemap(const Ref<Renderer>& rn, const Ref<Cubemap>& cubemap); //Bind the cubemap to the skybox.
+        void SkyboxBindDefaultCubemap(); //Bind the default cubemap to the skybox.
+        void SkyboxBindCubemap(const Ref<Cubemap>& cubemap); //Bind the cubemap to the skybox.
 
         [[nodiscard]] bool SkyboxIsDefaultCubemapBound(); //Check if default cubemap is bound to the skybox.
     }
@@ -519,7 +490,7 @@ namespace hf
 
 	    GlobalMemoryStatistics GetGlobalMemoryStatistics(); //Get global memory statistics.
 	    ThreadMemoryStatistics GetThreadMemoryStatistics(); //Get memory statistics from the current thread.
-	    RendererStatistics GetRendererStatistics(const Ref<Renderer>& rn); //Get rendering thread memory statistics.
+	    RendererStatistics GetRendererStatistics(); //Get rendering thread memory statistics.
 	}
 	namespace primitives
 	{

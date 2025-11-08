@@ -100,7 +100,7 @@ namespace hf
             return stats;
         }
 
-        RendererStatistics GetRendererStatistics(const Ref<Renderer>& rn) { return rn->lastDrawStatistics; }
+        RendererStatistics GetRendererStatistics() { return ir::HF.renderer->lastDrawStatistics; }
     }
 }
 

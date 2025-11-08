@@ -39,12 +39,12 @@ namespace app
 
     }
 
-    void VoxelTerrainPreDraw(const hf::Ref<hf::Renderer>& rn)
+    void VoxelTerrainPreDraw()
     {
 
     }
 
-    void VoxelTerrainDraw(const hf::Ref<hf::Renderer>& rn)
+    void VoxelTerrainDraw()
     {
 
     }

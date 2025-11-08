@@ -13,22 +13,22 @@ namespace hf
 {
     namespace dp
     {
-        void BindGlobalUniformBuffer(const Ref<Renderer>& rn)
+        void BindGlobalUniformBuffer()
         {
-            StartBufferSet(rn, RenderBindingType::Graphics, 0);
-            BufferSetAddBuffer(rn, ir::HF.staticResources.globalUniform);
-            EndBufferSet(rn);
+            StartBufferSet(RenderBindingType::Graphics, 0);
+            BufferSetAddBuffer(ir::HF.staticResources.globalUniform);
+            EndBufferSet();
         }
 
-        void SetDrawCallback(const Ref<Renderer>& rn, void (*callback)(const Ref<Renderer>&, void*))
+        void SetDrawCallback(void (*callback)(void*))
         {
             try
             {
 #if DEBUG
-                if (!rn->currentDraw.currentRenderTexture) throw GENERIC_EXCEPT("[Hyperflow]", "Cannot draw anything without render texture");
+                if (!ir::HF.renderer->currentDraw.currentRenderTexture) throw GENERIC_EXCEPT("[Hyperflow]", "Cannot draw anything without render texture");
 #endif
 
-                rn->currentDraw.currentRenderTexture->drawCallback = callback;
+                ir::HF.renderer->currentDraw.currentRenderTexture->drawCallback = callback;
             }
             catch (...)
             {
@@ -39,15 +39,15 @@ namespace hf
 
         //region Scene Handling
 
-        void SetCamera(const Ref<Renderer>& rn, const Camera3DAnchored& camera)
+        void SetCamera(const Camera3DAnchored& camera)
         {
             try
             {
 #if DEBUG
-                if (!rn->isDrawing) throw GENERIC_EXCEPT("[Hyperflow]", "Cannot set camera until drawing process starts");
+                if (!ir::HF.renderer->isDrawing) throw GENERIC_EXCEPT("[Hyperflow]", "Cannot set camera until drawing process starts");
 #endif
 
-                const auto packet = rn->currentDraw.packet;
+                const auto packet = ir::HF.renderer->currentDraw.packet;
                 packet->camera = Camera3DFreeLook
                 {
                     .position = camera.GetPosition(),
@@ -56,7 +56,7 @@ namespace hf
                     .core = camera.core,
                 };
 
-                packet->camera.GetFrustum(rn, packet->frustum);
+                packet->camera.GetFrustum(packet->frustum);
             }
             catch (...)
             {
@@ -65,17 +65,17 @@ namespace hf
             }
         }
 
-        void SetCamera(const Ref<Renderer>& rn, const Camera3DFreeLook& camera)
+        void SetCamera(const Camera3DFreeLook& camera)
         {
             try
             {
 #if DEBUG
-                if (!rn->isDrawing) throw GENERIC_EXCEPT("[Hyperflow]", "Cannot set camera until drawing process starts");
+                if (!ir::HF.renderer->isDrawing) throw GENERIC_EXCEPT("[Hyperflow]", "Cannot set camera until drawing process starts");
 #endif
 
-                const auto packet = rn->currentDraw.packet;
+                const auto packet = ir::HF.renderer->currentDraw.packet;
                 packet->camera = camera;
-                packet->camera.GetFrustum(rn, packet->frustum);
+                packet->camera.GetFrustum(packet->frustum);
             }
             catch (...)
             {
@@ -84,21 +84,21 @@ namespace hf
             }
         }
 
-        void AddLight(const Ref<Renderer>& rn, const DirectionalLight& light)
+        void AddLight(const DirectionalLight& light)
         {
             try
             {
 #if DEBUG
-                if (!rn->isDrawing) throw GENERIC_EXCEPT("[Hyperflow]", "Cannot add light until drawing process starts");
+                if (!ir::HF.renderer->isDrawing) throw GENERIC_EXCEPT("[Hyperflow]", "Cannot add light until drawing process starts");
 
-                if (rn->currentDraw.packet->directionalLights.size() >= MAX_DIRECTIONAL_LIGHTS)
+                if (ir::HF.renderer->currentDraw.packet->directionalLights.size() >= MAX_DIRECTIONAL_LIGHTS)
                 {
                     LOG_ERROR("Cannot add more than %i directional lights!", MAX_DIRECTIONAL_LIGHTS);
                     return;
                 }
 #endif
 
-                rn->currentDraw.packet->directionalLights.push_back(light);
+                ir::HF.renderer->currentDraw.packet->directionalLights.push_back(light);
             }
             catch (...)
             {
@@ -107,21 +107,21 @@ namespace hf
             }
         }
 
-        void AddLight(const Ref<Renderer>& rn, const SpotLight& light)
+        void AddLight(const SpotLight& light)
         {
             try
             {
 #if DEBUG
-                if (!rn->isDrawing) throw GENERIC_EXCEPT("[Hyperflow]", "Cannot add light until drawing process starts");
+                if (!ir::HF.renderer->isDrawing) throw GENERIC_EXCEPT("[Hyperflow]", "Cannot add light until drawing process starts");
 
-                if (rn->currentDraw.packet->spotLights.size() >= MAX_SPOT_LIGHTS)
+                if (ir::HF.renderer->currentDraw.packet->spotLights.size() >= MAX_SPOT_LIGHTS)
                 {
                     LOG_ERROR("Cannot add more than %i spot lights!", MAX_SPOT_LIGHTS);
                     return;
                 }
 #endif
 
-                rn->currentDraw.packet->spotLights.push_back(light);
+                ir::HF.renderer->currentDraw.packet->spotLights.push_back(light);
             }
             catch (...)
             {
@@ -130,21 +130,21 @@ namespace hf
             }
         }
 
-        void AddLight(const Ref<Renderer>& rn, const PointLight& light)
+        void AddLight(const PointLight& light)
         {
             try
             {
 #if DEBUG
-                if (!rn->isDrawing) throw GENERIC_EXCEPT("[Hyperflow]", "Cannot add light until drawing process starts");
+                if (!ir::HF.renderer->isDrawing) throw GENERIC_EXCEPT("[Hyperflow]", "Cannot add light until drawing process starts");
 
-                if (rn->currentDraw.packet->pointLights.size() >= MAX_POINT_LIGHTS)
+                if (ir::HF.renderer->currentDraw.packet->pointLights.size() >= MAX_POINT_LIGHTS)
                 {
                     LOG_ERROR("Cannot add more than %i point lights!", MAX_POINT_LIGHTS);
                     return;
                 }
 #endif
 
-                rn->currentDraw.packet->pointLights.push_back(light);
+                ir::HF.renderer->currentDraw.packet->pointLights.push_back(light);
             }
             catch (...)
             {
@@ -156,15 +156,15 @@ namespace hf
         //endregion
         //region Uploads
 
-        void UploadBuffer(const Ref<Renderer>& rn, const BufferUploadInfo& info)
+        void UploadBuffer(const BufferUploadInfo& info)
         {
             try
             {
 #if DEBUG
-                if (!rn->isDrawing) throw GENERIC_EXCEPT("[Hyperflow]", "Cannot upload uniform until drawing process starts");
+                if (!ir::HF.renderer->isDrawing) throw GENERIC_EXCEPT("[Hyperflow]", "Cannot upload uniform until drawing process starts");
 #endif
 
-                const auto packet = rn->currentDraw.packet;
+                const auto packet = ir::HF.renderer->currentDraw.packet;
                 packet->bufferUploadPackets.push_back(BufferUploadPacketInfo
                 {
                     .buffer = info.buffer,
@@ -181,7 +181,7 @@ namespace hf
             }
         }
 
-        void UploadMat(const Ref<Renderer>& rn, const Ref<Material>& mat)
+        void UploadMat(const Ref<Material>& mat)
         {
             try
             {
@@ -191,7 +191,7 @@ namespace hf
                 info.sizeInBytes = mat->sizeInBytes;
                 info.data = mat->bufferMemory;
 
-                UploadBuffer(rn, info);
+                UploadBuffer(info);
             }
             catch (...)
             {
@@ -200,22 +200,22 @@ namespace hf
             }
         }
 
-        void UploadStartTexPack(const Ref<Renderer>& rn, const Ref<TexturePack>& texPack)
+        void UploadStartTexPack(const Ref<TexturePack>& texPack)
         {
             try
             {
 #if DEBUG
-                if (!rn->isDrawing) throw GENERIC_EXCEPT("[Hyperflow]", "Cannot upload texture pack util drawing process starts");
-                if (rn->currentDraw.currentTexturePackBinding) throw GENERIC_EXCEPT("[Hyperflow]", "Cannot start texture pack upload util you end previous one");
+                if (!ir::HF.renderer->isDrawing) throw GENERIC_EXCEPT("[Hyperflow]", "Cannot upload texture pack util drawing process starts");
+                if (ir::HF.renderer->currentDraw.currentTexturePackBinding) throw GENERIC_EXCEPT("[Hyperflow]", "Cannot start texture pack upload util you end previous one");
 #endif
 
-                const auto packet = rn->currentDraw.packet;
+                const auto packet = ir::HF.renderer->currentDraw.packet;
                 packet->textureGroupRebindings.push_back(TexturePackRebindingGroupPacketInfo
                 {
                     .texturePack = texPack,
                     .bindingPacketRange = AssetRange{ .start = (uint16_t)packet->textureRebindings.size(), .size = (uint16_t)0 }
                 });
-                rn->currentDraw.currentTexturePackBinding = &packet->textureGroupRebindings[packet->textureGroupRebindings.size() - 1];
+                ir::HF.renderer->currentDraw.currentTexturePackBinding = &packet->textureGroupRebindings[packet->textureGroupRebindings.size() - 1];
             }
             catch (...)
             {
@@ -224,19 +224,19 @@ namespace hf
             }
         }
 
-        void UploadEndTexPack(const Ref<Renderer>& rn)
+        void UploadEndTexPack()
         {
 #if DEBUG
-            if (!rn->currentDraw.currentTexturePackBinding) throw GENERIC_EXCEPT("[Hyperflow]", "You need to start texture pack first");
+            if (!ir::HF.renderer->currentDraw.currentTexturePackBinding) throw GENERIC_EXCEPT("[Hyperflow]", "You need to start texture pack first");
 #endif
-            rn->currentDraw.currentTexturePackBinding = nullptr;
+            ir::HF.renderer->currentDraw.currentTexturePackBinding = nullptr;
         }
 
         // template<typename T>
-        static void UploadTex(const Ref<Renderer>& rn, SmallList<TexturePack::Binding<Texture>, MAX_TEXTURES_IN_TEXTURE_PACK>& bindings,
+        static void UploadTex(SmallList<TexturePack::Binding<Texture>, MAX_TEXTURES_IN_TEXTURE_PACK>& bindings,
                                   const TexturePackBindingUploadInfo<Texture>& info, TexturePackBindingType type)
         {
-            const auto packet = rn->currentDraw.packet;
+            const auto packet = ir::HF.renderer->currentDraw.packet;
 
             bool wasModified = false;
             auto binding = (TexturePackRebindingPacketInfo)
@@ -285,15 +285,15 @@ namespace hf
             if (wasModified)
             {
                 packet->textureRebindings.push_back(binding);
-                rn->currentDraw.currentTexturePackBinding->bindingPacketRange.size++;
+                ir::HF.renderer->currentDraw.currentTexturePackBinding->bindingPacketRange.size++;
             }
             else LOG_WARN("Unnecessary binding upload! nothing changed");
         }
 
-        static void UploadTex(const Ref<Renderer>& rn, SmallList<TexturePack::Binding<Cubemap>, MAX_TEXTURES_IN_TEXTURE_PACK>& bindings,
+        static void UploadTex(SmallList<TexturePack::Binding<Cubemap>, MAX_TEXTURES_IN_TEXTURE_PACK>& bindings,
                                   const TexturePackBindingUploadInfo<Cubemap>& info, TexturePackBindingType type)
         {
-            const auto packet = rn->currentDraw.packet;
+            const auto packet = ir::HF.renderer->currentDraw.packet;
             auto& b = bindings[info.bindingIndex];
 
             bool wasModified = false;
@@ -343,15 +343,15 @@ namespace hf
             if (wasModified)
             {
                 packet->textureRebindings.push_back(binding);
-                rn->currentDraw.currentTexturePackBinding->bindingPacketRange.size++;
+                ir::HF.renderer->currentDraw.currentTexturePackBinding->bindingPacketRange.size++;
             }
             else LOG_WARN("Unnecessary binding upload! nothing changed");
         }
 
-        static void UploadTex(const Ref<Renderer>& rn, SmallList<TexturePack::Binding<RenderTexture>, MAX_TEXTURES_IN_TEXTURE_PACK>& bindings,
+        static void UploadTex(SmallList<TexturePack::Binding<RenderTexture>, MAX_TEXTURES_IN_TEXTURE_PACK>& bindings,
                                   const TexturePackBindingUploadInfo<RenderTexture>& info, TexturePackBindingType type)
         {
-            const auto packet = rn->currentDraw.packet;
+            const auto packet = ir::HF.renderer->currentDraw.packet;
             auto& b = bindings[info.bindingIndex];
 
             bool wasModified = false;
@@ -401,12 +401,12 @@ namespace hf
             if (wasModified)
             {
                 packet->textureRebindings.push_back(binding);
-                rn->currentDraw.currentTexturePackBinding->bindingPacketRange.size++;
+                ir::HF.renderer->currentDraw.currentTexturePackBinding->bindingPacketRange.size++;
             }
             else LOG_WARN("Unnecessary binding upload! nothing changed");
         }
 
-        void UploadAddTexPackBinding(const Ref<Renderer>& rn, uint32_t bindingIndex, const Ref<Texture>& texture, uint32_t textureIndex)
+        void UploadAddTexPackBinding(uint32_t bindingIndex, const Ref<Texture>& texture, uint32_t textureIndex)
         {
             TexturePackTextureUploadInfo<Texture>::TextureInfo texInfo{};
             texInfo.index = textureIndex;
@@ -421,10 +421,10 @@ namespace hf
             bindingInfo.bindingIndex = bindingIndex;
             bindingInfo.texInfo = bindingTextureInfo;
 
-            UploadAddTexPackBindings(rn, bindingInfo);
+            UploadAddTexPackBindings(bindingInfo);
         }
 
-        void UploadAddTexPackBinding(const Ref<Renderer>& rn, uint32_t bindingIndex, const Ref<Cubemap>& cubemap, uint32_t textureIndex)
+        void UploadAddTexPackBinding(uint32_t bindingIndex, const Ref<Cubemap>& cubemap, uint32_t textureIndex)
         {
             TexturePackTextureUploadInfo<Cubemap>::TextureInfo texInfo{};
             texInfo.index = textureIndex;
@@ -439,10 +439,10 @@ namespace hf
             bindingInfo.bindingIndex = bindingIndex;
             bindingInfo.texInfo = bindingTextureInfo;
 
-            UploadAddTexPackBindings(rn, bindingInfo);
+            UploadAddTexPackBindings(bindingInfo);
         }
 
-        void UploadAddTexPackBinding(const Ref<Renderer>& rn, uint32_t bindingIndex, const Ref<RenderTexture>& rt, uint32_t attachmentIndex)
+        void UploadAddTexPackBinding(uint32_t bindingIndex, const Ref<RenderTexture>& rt, uint32_t attachmentIndex)
         {
             TexturePackTextureUploadInfo<RenderTexture>::TextureInfo texInfo{};
             texInfo.index = attachmentIndex;
@@ -457,18 +457,18 @@ namespace hf
             bindingInfo.bindingIndex = bindingIndex;
             bindingInfo.texInfo = bindingTextureInfo;
 
-            UploadAddTexPackBindings(rn, bindingInfo);
+            UploadAddTexPackBindings(bindingInfo);
         }
 
-        void UploadAddTexPackBindings(const Ref<Renderer>& rn, const TexturePackBindingUploadInfo<Texture>& info)
+        void UploadAddTexPackBindings(const TexturePackBindingUploadInfo<Texture>& info)
         {
             try
             {
 #if DEBUG
-                if (!rn->currentDraw.currentTexturePackBinding) throw GENERIC_EXCEPT("[Hyperflow]", "Cannot add binding packet without starting texture pack upload");
+                if (!ir::HF.renderer->currentDraw.currentTexturePackBinding) throw GENERIC_EXCEPT("[Hyperflow]", "Cannot add binding packet without starting texture pack upload");
 #endif
 
-                UploadTex(rn, rn->currentDraw.currentTexturePackBinding->texturePack->textureBindings, info, TexturePackBindingType::Texture2D);
+                UploadTex(ir::HF.renderer->currentDraw.currentTexturePackBinding->texturePack->textureBindings, info, TexturePackBindingType::Texture2D);
             }
             catch (...)
             {
@@ -477,15 +477,15 @@ namespace hf
             }
         }
 
-        void UploadAddTexPackBindings(const Ref<Renderer>& rn, const TexturePackBindingUploadInfo<Cubemap>& info)
+        void UploadAddTexPackBindings(const TexturePackBindingUploadInfo<Cubemap>& info)
         {
             try
             {
 #if DEBUG
-                if (!rn->currentDraw.currentTexturePackBinding) throw GENERIC_EXCEPT("[Hyperflow]", "Cannot add binding packet without starting texture pack upload");
+                if (!ir::HF.renderer->currentDraw.currentTexturePackBinding) throw GENERIC_EXCEPT("[Hyperflow]", "Cannot add binding packet without starting texture pack upload");
 #endif
 
-                UploadTex(rn, rn->currentDraw.currentTexturePackBinding->texturePack->cubemapBindings, info, TexturePackBindingType::Cubemap);
+                UploadTex(ir::HF.renderer->currentDraw.currentTexturePackBinding->texturePack->cubemapBindings, info, TexturePackBindingType::Cubemap);
             }
             catch (...)
             {
@@ -494,15 +494,15 @@ namespace hf
             }
         }
 
-        void UploadAddTexPackBindings(const Ref<Renderer>& rn, const TexturePackBindingUploadInfo<RenderTexture>& info)
+        void UploadAddTexPackBindings(const TexturePackBindingUploadInfo<RenderTexture>& info)
         {
             try
             {
 #if DEBUG
-                if (!rn->currentDraw.currentTexturePackBinding) throw GENERIC_EXCEPT("[Hyperflow]", "Cannot add binding packet without starting texture pack upload");
+                if (!ir::HF.renderer->currentDraw.currentTexturePackBinding) throw GENERIC_EXCEPT("[Hyperflow]", "Cannot add binding packet without starting texture pack upload");
 #endif
 
-                UploadTex(rn, rn->currentDraw.currentTexturePackBinding->texturePack->renderTextureBindings, info, TexturePackBindingType::RenderTexture);
+                UploadTex(ir::HF.renderer->currentDraw.currentTexturePackBinding->texturePack->renderTextureBindings, info, TexturePackBindingType::RenderTexture);
             }
             catch (...)
             {
@@ -514,17 +514,17 @@ namespace hf
         //endregion
         //region Render Texture
 
-        void AddRenderTexDependency(const Ref<Renderer>& rn, const RenderAttachmentDependencyInfo& info)
+        void AddRenderTexDependency(const RenderAttachmentDependencyInfo& info)
         {
             try
             {
 #if DEBUG
-                if (!rn->currentDraw.currentRenderTexture) throw GENERIC_EXCEPT("[Hyperflow]", "Can't have any dependencies without any render texture!");
+                if (!ir::HF.renderer->currentDraw.currentRenderTexture) throw GENERIC_EXCEPT("[Hyperflow]", "Can't have any dependencies without any render texture!");
 #endif
 
-                const auto packet = rn->currentDraw.packet;
+                const auto packet = ir::HF.renderer->currentDraw.packet;
                 packet->dependencies.push_back(info);
-                rn->currentDraw.currentRenderTexture->dependencyRange.size++;
+                ir::HF.renderer->currentDraw.currentRenderTexture->dependencyRange.size++;
             }
             catch (...)
             {
@@ -533,15 +533,15 @@ namespace hf
             }
         }
 
-        void StartRenderTex(const Ref<Renderer>& rn, const Ref<RenderTexture>& rt)
+        void StartRenderTex(const Ref<RenderTexture>& rt)
         {
             try
             {
 #if DEBUG
-                if (rn->currentDraw.currentRenderTexture) throw GENERIC_EXCEPT("[Hyperflow]", "You are already drawing on render texture!");
+                if (ir::HF.renderer->currentDraw.currentRenderTexture) throw GENERIC_EXCEPT("[Hyperflow]", "You are already drawing on render texture!");
 #endif
 
-                const auto packet = rn->currentDraw.packet;
+                const auto packet = ir::HF.renderer->currentDraw.packet;
                 packet->renderTextures.push_back(RenderTexturePacketInfo
                 {
                     .texture = rt,
@@ -549,7 +549,7 @@ namespace hf
                     .dependencyRange = AssetRange{ .start = (uint8_t)packet->dependencies.size(), .size = (uint8_t)0 }
                 });
 
-                rn->currentDraw.currentRenderTexture = &packet->renderTextures[packet->renderTextures.size() - 1];
+                ir::HF.renderer->currentDraw.currentRenderTexture = &packet->renderTextures[packet->renderTextures.size() - 1];
             }
             catch (...)
             {
@@ -558,15 +558,15 @@ namespace hf
             }
         }
 
-        void EndRenderTex(const Ref<Renderer>& rn)
+        void EndRenderTex()
         {
             try
             {
 #if DEBUG
-                if (!rn->currentDraw.currentRenderTexture) throw GENERIC_EXCEPT("[Hyperflow]", "Can't end render texture drawing without starting it!");
+                if (!ir::HF.renderer->currentDraw.currentRenderTexture) throw GENERIC_EXCEPT("[Hyperflow]", "Can't end render texture drawing without starting it!");
 #endif
 
-                rn->currentDraw.currentRenderTexture = nullptr;
+                ir::HF.renderer->currentDraw.currentRenderTexture = nullptr;
             }
             catch (...)
             {
@@ -578,16 +578,16 @@ namespace hf
         //endregion
         //region Shader
 
-        void StartShaderLayout(const Ref<Renderer>& rn, ShaderLayout layout)
+        void StartShaderLayout(ShaderLayout layout)
         {
             try
             {
 #if DEBUG
-                if (!rn->currentDraw.currentRenderTexture) throw GENERIC_EXCEPT("[Hyperflow]", "Cannot draw anything without starting render texture!");
-                if (rn->currentDraw.currentShaderLayout) throw GENERIC_EXCEPT("[Hyperflow]", "Cannot start ShaderLayout without ending previous one!");
+                if (!ir::HF.renderer->currentDraw.currentRenderTexture) throw GENERIC_EXCEPT("[Hyperflow]", "Cannot draw anything without starting render texture!");
+                if (ir::HF.renderer->currentDraw.currentShaderLayout) throw GENERIC_EXCEPT("[Hyperflow]", "Cannot start ShaderLayout without ending previous one!");
 #endif
 
-                const auto packet = rn->currentDraw.packet;
+                const auto packet = ir::HF.renderer->currentDraw.packet;
                 packet->shaderLayouts.push_back(ShaderLayoutPacketInfo
                 {
                     .layout = layout,
@@ -595,8 +595,8 @@ namespace hf
                     .bufferSetRange = AssetRange{ .start = (uint32_t)packet->bufferSets.size(), .size = (uint32_t)0 },
                 });
 
-                rn->currentDraw.currentShaderLayout = &packet->shaderLayouts[packet->shaderLayouts.size() - 1];
-                rn->currentDraw.currentRenderTexture->shaderLayoutRange.size++;
+                ir::HF.renderer->currentDraw.currentShaderLayout = &packet->shaderLayouts[packet->shaderLayouts.size() - 1];
+                ir::HF.renderer->currentDraw.currentRenderTexture->shaderLayoutRange.size++;
             }
             catch (...)
             {
@@ -605,39 +605,39 @@ namespace hf
             }
         }
 
-        void EndShaderLayout(const Ref<Renderer>& rn)
+        void EndShaderLayout()
         {
 #if DEBUG
-            if (!rn->currentDraw.currentShaderLayout) throw GENERIC_EXCEPT("[Hyperflow]", "Cannot end ShaderLayout without starting it!");
+            if (!ir::HF.renderer->currentDraw.currentShaderLayout) throw GENERIC_EXCEPT("[Hyperflow]", "Cannot end ShaderLayout without starting it!");
 #endif
 
-            if (rn->currentDraw.currentShaderLayout->shaderPacketRange.size == 0)
+            if (ir::HF.renderer->currentDraw.currentShaderLayout->shaderPacketRange.size == 0)
             {
-                rn->currentDraw.currentRenderTexture->shaderLayoutRange.size--;
-                rn->currentDraw.packet->shaderLayouts.pop_back();
+                ir::HF.renderer->currentDraw.currentRenderTexture->shaderLayoutRange.size--;
+                ir::HF.renderer->currentDraw.packet->shaderLayouts.pop_back();
             }
 
-            rn->currentDraw.currentShaderLayout = nullptr;
+            ir::HF.renderer->currentDraw.currentShaderLayout = nullptr;
         }
 
-        void StartShader(const Ref<Renderer>& rn, const Ref<Shader>& shader)
+        void StartShader(const Ref<Shader>& shader)
         {
             try
             {
 #if DEBUG
-                if (!rn->currentDraw.currentShaderLayout) throw GENERIC_EXCEPT("[Hyperflow]", "ShaderLayout must be set!");
-                if (rn->currentDraw.currentShader) throw GENERIC_EXCEPT("[Hyperflow]", "Cannot start Shader without ending previous one!");
+                if (!ir::HF.renderer->currentDraw.currentShaderLayout) throw GENERIC_EXCEPT("[Hyperflow]", "ShaderLayout must be set!");
+                if (ir::HF.renderer->currentDraw.currentShader) throw GENERIC_EXCEPT("[Hyperflow]", "Cannot start Shader without ending previous one!");
 #endif
 
-                const auto packet = rn->currentDraw.packet;
+                const auto packet = ir::HF.renderer->currentDraw.packet;
                 packet->shaders.push_back(ShaderPacketInfo
                 {
                     .shader = shader,
                     .materialPacketRange = AssetRange{ .start = (uint16_t)packet->materials.size(), .size = (uint16_t)0 }
                 });
 
-                rn->currentDraw.currentShader = &packet->shaders[packet->shaders.size() - 1];
-                rn->currentDraw.currentShaderLayout->shaderPacketRange.size++;
+                ir::HF.renderer->currentDraw.currentShader = &packet->shaders[packet->shaders.size() - 1];
+                ir::HF.renderer->currentDraw.currentShaderLayout->shaderPacketRange.size++;
             }
             catch (...)
             {
@@ -646,35 +646,35 @@ namespace hf
             }
         }
 
-        void EndShader(const Ref<Renderer>& rn)
+        void EndShader()
         {
 #if DEBUG
-            if (!rn->currentDraw.currentShaderLayout) throw GENERIC_EXCEPT("[Hyperflow]", "ShaderLayout must be set!");
-            if (!rn->currentDraw.currentShader) throw GENERIC_EXCEPT("[Hyperflow]", "Cannot end Shader without starting it!");
+            if (!ir::HF.renderer->currentDraw.currentShaderLayout) throw GENERIC_EXCEPT("[Hyperflow]", "ShaderLayout must be set!");
+            if (!ir::HF.renderer->currentDraw.currentShader) throw GENERIC_EXCEPT("[Hyperflow]", "Cannot end Shader without starting it!");
 #endif
 
-            if (rn->currentDraw.currentShader->materialPacketRange.size == 0)
+            if (ir::HF.renderer->currentDraw.currentShader->materialPacketRange.size == 0)
             {
-                rn->currentDraw.currentShaderLayout->shaderPacketRange.size--;
-                rn->currentDraw.packet->shaders.pop_back();
+                ir::HF.renderer->currentDraw.currentShaderLayout->shaderPacketRange.size--;
+                ir::HF.renderer->currentDraw.packet->shaders.pop_back();
             }
 
-            rn->currentDraw.currentShader = nullptr;
+            ir::HF.renderer->currentDraw.currentShader = nullptr;
         }
 
         //endregion
         //region Material
 
-        void StartMat(const Ref<Renderer>& rn, const Ref<Material>& material)
+        void StartMat(const Ref<Material>& material)
         {
             try
             {
 #if DEBUG
-                if (!rn->currentDraw.currentShader) throw GENERIC_EXCEPT("[Hyperflow]", "Shader must be set!");
-                if (rn->currentDraw.currentMaterial) throw GENERIC_EXCEPT("[Hyperflow]", "Cannot start Material without ending previous one!");
+                if (!ir::HF.renderer->currentDraw.currentShader) throw GENERIC_EXCEPT("[Hyperflow]", "Shader must be set!");
+                if (ir::HF.renderer->currentDraw.currentMaterial) throw GENERIC_EXCEPT("[Hyperflow]", "Cannot start Material without ending previous one!");
 #endif
 
-                const auto packet = rn->currentDraw.packet;
+                const auto packet = ir::HF.renderer->currentDraw.packet;
                 packet->materials.push_back(MaterialPacketInfo
                 {
                     .material = material,
@@ -682,8 +682,8 @@ namespace hf
                     .texpackRange = AssetRange{ .start = (uint32_t)packet->texpacks.size(), .size = (uint32_t)0 },
                 });
 
-                rn->currentDraw.currentMaterial = &packet->materials[packet->materials.size() - 1];
-                rn->currentDraw.currentShader->materialPacketRange.size++;
+                ir::HF.renderer->currentDraw.currentMaterial = &packet->materials[packet->materials.size() - 1];
+                ir::HF.renderer->currentDraw.currentShader->materialPacketRange.size++;
             }
             catch (...)
             {
@@ -692,37 +692,37 @@ namespace hf
             }
         }
 
-        void EndMat(const Ref<Renderer>& rn)
+        void EndMat()
         {
 #if DEBUG
-            if (!rn->currentDraw.currentShader) throw GENERIC_EXCEPT("[Hyperflow]", "Shader must be set!");
-            if (!rn->currentDraw.currentMaterial) throw GENERIC_EXCEPT("[Hyperflow]", "Cannot end material without starting it!");
+            if (!ir::HF.renderer->currentDraw.currentShader) throw GENERIC_EXCEPT("[Hyperflow]", "Shader must be set!");
+            if (!ir::HF.renderer->currentDraw.currentMaterial) throw GENERIC_EXCEPT("[Hyperflow]", "Cannot end material without starting it!");
 #endif
 
-            if (rn->currentDraw.currentMaterial->drawGroupRange.size == 0)
+            if (ir::HF.renderer->currentDraw.currentMaterial->drawGroupRange.size == 0)
             {
-                rn->currentDraw.currentShader->materialPacketRange.size--;
-                rn->currentDraw.packet->materials.pop_back();
+                ir::HF.renderer->currentDraw.currentShader->materialPacketRange.size--;
+                ir::HF.renderer->currentDraw.packet->materials.pop_back();
             }
 
-            rn->currentDraw.currentMaterial = nullptr;
+            ir::HF.renderer->currentDraw.currentMaterial = nullptr;
         }
 
-        void MatAddTexPackBinding(const Ref<Renderer>& rn, const Ref<TexturePack>& texPack, uint32_t setBindingIndex)
+        void MatAddTexPackBinding(const Ref<TexturePack>& texPack, uint32_t setBindingIndex)
         {
             try
             {
 #if DEBUG
-                if (!rn->currentDraw.currentMaterial) throw GENERIC_EXCEPT("[Hyperflow]", "Material must be set!");
+                if (!ir::HF.renderer->currentDraw.currentMaterial) throw GENERIC_EXCEPT("[Hyperflow]", "Material must be set!");
 #endif
 
-                const auto packet = rn->currentDraw.packet;
+                const auto packet = ir::HF.renderer->currentDraw.packet;
                 TexPackBindingInfo bindingInfo{};
                 bindingInfo.pack = texPack;
                 bindingInfo.setBindingIndex = setBindingIndex;
 
                 packet->texpacks.push_back(bindingInfo);
-                rn->currentDraw.currentMaterial->texpackRange.size++;
+                ir::HF.renderer->currentDraw.currentMaterial->texpackRange.size++;
             }
             catch (...)
             {
@@ -734,16 +734,16 @@ namespace hf
         //endregion
         //region Draw Group
 
-        void StartDrawGroup(const Ref<Renderer>& rn)
+        void StartDrawGroup()
         {
             try
             {
 #if DEBUG
-                if (!rn->currentDraw.currentMaterial) throw GENERIC_EXCEPT("[Hyperflow]", "Material must be set!");
-                if (rn->currentDraw.currentDrawPacket) throw GENERIC_EXCEPT("[Hyperflow]", "Need to end draw before starting new one!");
+                if (!ir::HF.renderer->currentDraw.currentMaterial) throw GENERIC_EXCEPT("[Hyperflow]", "Material must be set!");
+                if (ir::HF.renderer->currentDraw.currentDrawPacket) throw GENERIC_EXCEPT("[Hyperflow]", "Need to end draw before starting new one!");
 #endif
 
-                const auto packet = rn->currentDraw.packet;
+                const auto packet = ir::HF.renderer->currentDraw.packet;
                 packet->drawPackets.push_back(DrawPacketInfo
                 {
                     .texpackRange = AssetRange{ .start = (uint32_t)packet->texpacks.size(), .size = (uint32_t)0 },
@@ -751,48 +751,48 @@ namespace hf
                     .pushConstantRange = AssetRange{ .start = (uint32_t)packet->pushConstantUploads.size(), .size = (uint32_t)0 },
                 });
 
-                rn->currentDraw.currentDrawPacket = &packet->drawPackets[packet->drawPackets.size() - 1];
-                rn->currentDraw.currentMaterial->drawGroupRange.size++;
+                ir::HF.renderer->currentDraw.currentDrawPacket = &packet->drawPackets[packet->drawPackets.size() - 1];
+                ir::HF.renderer->currentDraw.currentMaterial->drawGroupRange.size++;
             }
             catch (...)
             {
-                LOG_ERROR("Unable to start draw! Draw packet buffer usage: %llu", rn->currentDraw.packet->drawPackets.size());
+                LOG_ERROR("Unable to start draw! Draw packet buffer usage: %llu", ir::HF.renderer->currentDraw.packet->drawPackets.size());
                 throw;
             }
         }
 
-        void EndDrawGroup(const Ref<Renderer>& rn)
+        void EndDrawGroup()
         {
 #if DEBUG
-            if (!rn->currentDraw.currentShader) throw GENERIC_EXCEPT("[Hyperflow]", "Shader must be set!");
-            if (!rn->currentDraw.currentDrawPacket) throw GENERIC_EXCEPT("[Hyperflow]", "Need to start draw before ending it!");
+            if (!ir::HF.renderer->currentDraw.currentShader) throw GENERIC_EXCEPT("[Hyperflow]", "Shader must be set!");
+            if (!ir::HF.renderer->currentDraw.currentDrawPacket) throw GENERIC_EXCEPT("[Hyperflow]", "Need to start draw before ending it!");
 #endif
 
-            if (rn->currentDraw.currentDrawPacket->drawCallRange.size == 0)
+            if (ir::HF.renderer->currentDraw.currentDrawPacket->drawCallRange.size == 0)
             {
-                rn->currentDraw.currentMaterial->drawGroupRange.size--;
-                rn->currentDraw.packet->drawPackets.pop_back();
+                ir::HF.renderer->currentDraw.currentMaterial->drawGroupRange.size--;
+                ir::HF.renderer->currentDraw.packet->drawPackets.pop_back();
             }
 
-            rn->currentDraw.currentDrawPacket = nullptr;
+            ir::HF.renderer->currentDraw.currentDrawPacket = nullptr;
         }
 
-        void DrawGroupAddTexPackBinding(const Ref<Renderer>& rn, const Ref<TexturePack>& texPack, uint32_t setBindingIndex)
+        void DrawGroupAddTexPackBinding(const Ref<TexturePack>& texPack, uint32_t setBindingIndex)
         {
             try
             {
 #if DEBUG
-                if (!rn->currentDraw.currentDrawPacket) throw GENERIC_EXCEPT("[Hyperflow]", "DrawPacket must be set!");
+                if (!ir::HF.renderer->currentDraw.currentDrawPacket) throw GENERIC_EXCEPT("[Hyperflow]", "DrawPacket must be set!");
 #endif
 
-                const auto packet = rn->currentDraw.packet;
+                const auto packet = ir::HF.renderer->currentDraw.packet;
 
                 TexPackBindingInfo bindingInfo{};
                 bindingInfo.pack = texPack;
                 bindingInfo.setBindingIndex = setBindingIndex;
 
                 packet->texpacks.push_back(bindingInfo);
-                rn->currentDraw.currentDrawPacket->texpackRange.size++;
+                ir::HF.renderer->currentDraw.currentDrawPacket->texpackRange.size++;
             }
             catch (...)
             {
@@ -801,28 +801,28 @@ namespace hf
             }
         }
 
-        void DrawGroupAddDrawCall(const Ref<Renderer>& rn, const Ref<IndexBuffer>& indexBuffer, const Ref<VertexBuffer>& vertexBuffer)
+        void DrawGroupAddDrawCall(const Ref<IndexBuffer>& indexBuffer, const Ref<VertexBuffer>& vertexBuffer)
         {
-            StartDrawCall(rn, indexBuffer);
-            DrawAddVertBuffer(rn, vertexBuffer);
+            StartDrawCall(indexBuffer);
+            DrawAddVertBuffer(vertexBuffer);
 
-            rn->currentDraw.currentDrawCall->isInstanced = false;
+            ir::HF.renderer->currentDraw.currentDrawCall->isInstanced = false;
 
-            EndDrawCall(rn);
+            EndDrawCall();
         }
 
-        void DrawGroupAddDrawCall(const Ref<Renderer>& rn, const Ref<Mesh>& mesh)
+        void DrawGroupAddDrawCall(const Ref<Mesh>& mesh)
         {
-            StartDrawCall(rn, mesh);
-            rn->currentDraw.currentDrawCall->isInstanced = false;
-            EndDrawCall(rn);
+            StartDrawCall(mesh);
+            ir::HF.renderer->currentDraw.currentDrawCall->isInstanced = false;
+            EndDrawCall();
         }
 
-        void DrawGroupSetPushConstant(const Ref<Renderer>& rn, const void* data, uint32_t dataSize)
+        void DrawGroupSetPushConstant(const void* data, uint32_t dataSize)
         {
             try
             {
-                const auto& currentDraw = rn->currentDraw;
+                const auto& currentDraw = ir::HF.renderer->currentDraw;
 #if DEBUG
                 if (!currentDraw.currentDrawPacket) throw GENERIC_EXCEPT("[Hyperflow]", "DrawPacket must be set!");
                 if (currentDraw.currentDrawPacket->pushConstantRange.size > 0) throw GENERIC_EXCEPT("[Hyperflow]", "Cannot set push constant twice for a single draw packet!");
@@ -842,24 +842,24 @@ namespace hf
         //endregion
         //region Buffer Set
 
-        void StartBufferSet(const Ref<Renderer>& rn, RenderBindingType bindingType, uint32_t setBindingIndex)
+        void StartBufferSet(RenderBindingType bindingType, uint32_t setBindingIndex)
         {
             try
             {
 #if DEBUG
-                if (!rn->currentDraw.currentShaderLayout) throw GENERIC_EXCEPT("[Hyperflow]", "Shader Setup must be set until you set uniform set");
-                if (rn->currentDraw.currentUniformSet) throw GENERIC_EXCEPT("[Hyperflow]", "Cannot start uniform set without ending previous one!");
+                if (!ir::HF.renderer->currentDraw.currentShaderLayout) throw GENERIC_EXCEPT("[Hyperflow]", "Shader Setup must be set until you set uniform set");
+                if (ir::HF.renderer->currentDraw.currentUniformSet) throw GENERIC_EXCEPT("[Hyperflow]", "Cannot start uniform set without ending previous one!");
 #endif
 
-                const auto packet = rn->currentDraw.packet;
+                const auto packet = ir::HF.renderer->currentDraw.packet;
                 packet->bufferSets.push_back(BufferSetPacketInfo
                 {
                     .bindingType = bindingType,
                     .setBindingIndex = setBindingIndex,
                     .bufferRange = AssetRange{ .start = (uint16_t)packet->buffers.size(), .size = (uint16_t)0 },
                 });
-                rn->currentDraw.currentUniformSet = &packet->bufferSets[packet->bufferSets.size() - 1];
-                rn->currentDraw.currentShaderLayout->bufferSetRange.size++;
+                ir::HF.renderer->currentDraw.currentUniformSet = &packet->bufferSets[packet->bufferSets.size() - 1];
+                ir::HF.renderer->currentDraw.currentShaderLayout->bufferSetRange.size++;
             }
             catch (...)
             {
@@ -868,25 +868,25 @@ namespace hf
             }
         }
 
-        void EndBufferSet(const Ref<Renderer>& rn)
+        void EndBufferSet()
         {
 #if DEBUG
-            if (!rn->currentDraw.currentUniformSet) throw GENERIC_EXCEPT("[Hyperflow]", "Cannot end uniform set without starting it!");
+            if (!ir::HF.renderer->currentDraw.currentUniformSet) throw GENERIC_EXCEPT("[Hyperflow]", "Cannot end uniform set without starting it!");
 #endif
-            rn->currentDraw.currentUniformSet = nullptr;
+            ir::HF.renderer->currentDraw.currentUniformSet = nullptr;
         }
 
-        void BufferSetAddBuffer(const Ref<Renderer>& rn, Buffer buffer)
+        void BufferSetAddBuffer(Buffer buffer)
         {
             try
             {
 #if DEBUG
-                if (!rn->currentDraw.currentUniformSet) throw GENERIC_EXCEPT("[Hyperflow]", "Uniform Set must be set!");
+                if (!ir::HF.renderer->currentDraw.currentUniformSet) throw GENERIC_EXCEPT("[Hyperflow]", "Uniform Set must be set!");
 #endif
 
-                const auto packet = rn->currentDraw.packet;
+                const auto packet = ir::HF.renderer->currentDraw.packet;
                 packet->buffers.push_back(buffer);
-                rn->currentDraw.currentUniformSet->bufferRange.size++;
+                ir::HF.renderer->currentDraw.currentUniformSet->bufferRange.size++;
             }
             catch (...)
             {
@@ -898,16 +898,16 @@ namespace hf
         //endregion
         //region DrawCall
 
-        void StartDrawCall(const Ref<Renderer>& rn, const Ref<IndexBuffer>& indexBuffer)
+        void StartDrawCall(const Ref<IndexBuffer>& indexBuffer)
         {
             try
             {
 #if DEBUG
-                if (!rn->currentDraw.currentDrawPacket) throw GENERIC_EXCEPT("[Hyperflow]", "DrawPacket must be set!");
-                if (rn->currentDraw.currentDrawCall) throw GENERIC_EXCEPT("[Hyperflow]", "Cannot start draw call without ending previous one!");
+                if (!ir::HF.renderer->currentDraw.currentDrawPacket) throw GENERIC_EXCEPT("[Hyperflow]", "DrawPacket must be set!");
+                if (ir::HF.renderer->currentDraw.currentDrawCall) throw GENERIC_EXCEPT("[Hyperflow]", "Cannot start draw call without ending previous one!");
 #endif
 
-                const auto packet = rn->currentDraw.packet;
+                const auto packet = ir::HF.renderer->currentDraw.packet;
                 DrawCallPacketInfo packetInfo{};
                 packetInfo.vertexBufferRange = AssetRange{ .start = (uint32_t)packet->vertexBuffers.size(), .size = (uint32_t)0 };
                 packetInfo.instanceRange = AssetRange{ .start = (uint32_t)packet->instances.size(), .size = (uint32_t)0 };
@@ -915,8 +915,8 @@ namespace hf
                 packetInfo.instanceBufferOffset = (uint32_t)packet->instanceUploads.size();
 
                 packet->drawCalls.push_back(packetInfo);
-                rn->currentDraw.currentDrawPacket->drawCallRange.size++;
-                rn->currentDraw.currentDrawCall = &packet->drawCalls[packet->drawCalls.size() - 1];
+                ir::HF.renderer->currentDraw.currentDrawPacket->drawCallRange.size++;
+                ir::HF.renderer->currentDraw.currentDrawCall = &packet->drawCalls[packet->drawCalls.size() - 1];
             }
             catch (...)
             {
@@ -925,50 +925,50 @@ namespace hf
             }
         }
 
-        void StartDrawCall(const Ref<Renderer>& rn, const Ref<Mesh>& mesh)
+        void StartDrawCall(const Ref<Mesh>& mesh)
         {
-            StartDrawCall(rn, mesh->indexBuffer);
-            DrawAddVertBuffer(rn, mesh->vertBuffer);
+            StartDrawCall(mesh->indexBuffer);
+            DrawAddVertBuffer(mesh->vertBuffer);
 #if DEBUG
-            strcpy(rn->currentDraw.currentDrawCall->debugName, mesh->name.c_str());
+            strcpy(ir::HF.renderer->currentDraw.currentDrawCall->debugName, mesh->name.c_str());
 #endif
         }
 
-        void StartDrawCall(const Ref<Renderer>& rn, const Ref<Mesh>& mesh, const Ref<Armature>& armature, uint32_t skinIndex)
+        void StartDrawCall(const Ref<Mesh>& mesh, const Ref<Armature>& armature, uint32_t skinIndex)
         {
-            StartDrawCall(rn, mesh->indexBuffer);
-            DrawAddVertBuffer(rn, mesh->vertBuffer);
+            StartDrawCall(mesh->indexBuffer);
+            DrawAddVertBuffer(mesh->vertBuffer);
 
             if (skinIndex >= 0)
             {
                 if (mesh->skinBuffers.size() <= skinIndex) throw GENERIC_EXCEPT("[Hyperflow]", "Skin index is out of bounds!");
-                DrawAddVertBuffer(rn, mesh->skinBuffers[skinIndex]);
+                DrawAddVertBuffer(mesh->skinBuffers[skinIndex]);
             }
 #if DEBUG
-            strcpy(rn->currentDraw.currentDrawCall->debugName, mesh->name.c_str());
+            strcpy(ir::HF.renderer->currentDraw.currentDrawCall->debugName, mesh->name.c_str());
 #endif
         }
 
-        void EndDrawCall(const Ref<Renderer>& rn)
+        void EndDrawCall()
         {
 #if DEBUG
-            if (!rn->currentDraw.currentDrawCall) throw GENERIC_EXCEPT("[Hyperflow]", "Cannot start draw call without ending previous one!");
+            if (!ir::HF.renderer->currentDraw.currentDrawCall) throw GENERIC_EXCEPT("[Hyperflow]", "Cannot start draw call without ending previous one!");
 #endif
 
-            if (rn->currentDraw.currentDrawCall->isInstanced && rn->currentDraw.currentDrawCall->instanceRange.size == 0)
+            if (ir::HF.renderer->currentDraw.currentDrawCall->isInstanced && ir::HF.renderer->currentDraw.currentDrawCall->instanceRange.size == 0)
             {
-                rn->currentDraw.currentDrawPacket->drawCallRange.size--;
-                rn->currentDraw.packet->drawCalls.pop_back();
+                ir::HF.renderer->currentDraw.currentDrawPacket->drawCallRange.size--;
+                ir::HF.renderer->currentDraw.packet->drawCalls.pop_back();
             }
 
-            rn->currentDraw.currentDrawCall = nullptr;
+            ir::HF.renderer->currentDraw.currentDrawCall = nullptr;
         }
 
-        void DrawAddInstance(const Ref<Renderer>& rn, const void* data, uint32_t dataSize, const VolumeTransform& volume)
+        void DrawAddInstance(const void* data, uint32_t dataSize, const VolumeTransform& volume)
         {
             try
             {
-                const auto& currentDraw = rn->currentDraw;
+                const auto& currentDraw = ir::HF.renderer->currentDraw;
 #if DEBUG
                 if (!currentDraw.currentDrawPacket) throw GENERIC_EXCEPT("[Hyperflow]", "DrawPacket must be set!");
                 if (dataSize > MAX_PER_INSTANCE_BUFFER_SIZE) throw GENERIC_EXCEPT("[Hyperflow]", "Instance data cannot be more the %i bytes!", MAX_PER_INSTANCE_BUFFER_SIZE);
@@ -997,11 +997,11 @@ namespace hf
             }
         }
 
-        void DrawAddVertBuffer(const Ref<Renderer>& rn, const Ref<VertexBuffer>& vb)
+        void DrawAddVertBuffer(const Ref<VertexBuffer>& vb)
         {
             try
             {
-                const auto& currentDraw = rn->currentDraw;
+                const auto& currentDraw = ir::HF.renderer->currentDraw;
 #if DEBUG
                 if (!currentDraw.currentDrawCall) throw GENERIC_EXCEPT("[Hyperflow]", "You must be start draw call first!");
 #endif
@@ -1022,31 +1022,31 @@ namespace hf
 
     namespace ir::rdr
     {
-        void StartRenderPacket_i(const Ref<Renderer>& rn)
+        void StartRenderPacket_i()
         {
 #if DEBUG
-            if (rn->currentDraw.packet) throw GENERIC_EXCEPT("[Hyperflow]", "Cannot start RenderPacket, without submitting previous one!");
+            if (HF.renderer->currentDraw.packet) throw GENERIC_EXCEPT("[Hyperflow]", "Cannot start RenderPacket, without submitting previous one!");
 #endif
 
-            std::lock_guard lock(rn->threadInfo.threadLock);
-            rn->currentDraw.packet = rn->threadInfo.cachedPackets.back();
-            rn->threadInfo.cachedPackets.pop_back();
-            rn->currentDraw.packet->clear();
-            rn->isDrawing = true;
+            std::lock_guard lock(HF.renderer->threadInfo.threadLock);
+            HF.renderer->currentDraw.packet = HF.renderer->threadInfo.cachedPackets.back();
+            HF.renderer->threadInfo.cachedPackets.pop_back();
+            HF.renderer->currentDraw.packet->clear();
+            HF.renderer->isDrawing = true;
         }
 
-        void EndRenderPacket_i(const Ref<Renderer>& rn)
+        void EndRenderPacket_i()
         {
 #if DEBUG
-            if (!rn->isDrawing) throw GENERIC_EXCEPT("[Hyperflow]", "Cannot end RenderPacket, without starting it!");
+            if (!HF.renderer->isDrawing) throw GENERIC_EXCEPT("[Hyperflow]", "Cannot end RenderPacket, without starting it!");
 #endif
 
             {
-                const auto packet = rn->currentDraw.packet;
-                rn->lastDrawStatistics = packet->statistics;
+                const auto packet = HF.renderer->currentDraw.packet;
+                HF.renderer->lastDrawStatistics = packet->statistics;
 
                 GlobalUniformInfo uniformInfo{};
-                uniformInfo.camera = packet->camera.GetUniformInfo(rn);
+                uniformInfo.camera = packet->camera.GetUniformInfo();
                 uniformInfo.time = HF.time.GetUniformInfo();
 
                 for (uint32_t i = 0; i < packet->directionalLights.size(); i++)
@@ -1071,23 +1071,23 @@ namespace hf
                 uniformUpload.sizeInBytes = sizeof(GlobalUniformInfo);
                 uniformUpload.data = &uniformInfo;
 
-                dp::UploadBuffer(rn, uniformUpload);
+                dp::UploadBuffer(uniformUpload);
             }
 
             {
-                std::lock_guard lock(rn->threadInfo.threadLock);;
+                std::lock_guard lock(HF.renderer->threadInfo.threadLock);;
 
-                if (rn->threadInfo.drawPacket) rn->threadInfo.cachedPackets.push_back(rn->threadInfo.drawPacket);
-                rn->threadInfo.drawPacket = rn->currentDraw.packet;
-                rn->currentDraw.packet = nullptr;
-                rn->threadInfo.renderCondition.notify_one();
+                if (HF.renderer->threadInfo.drawPacket) HF.renderer->threadInfo.cachedPackets.push_back(HF.renderer->threadInfo.drawPacket);
+                HF.renderer->threadInfo.drawPacket = HF.renderer->currentDraw.packet;
+                HF.renderer->currentDraw.packet = nullptr;
+                HF.renderer->threadInfo.renderCondition.notify_one();
             }
 
-            rn->currentDraw.clear();
-            rn->isDrawing = false;
+            HF.renderer->currentDraw.clear();
+            HF.renderer->isDrawing = false;
         }
 
-        void PreDraw_i(const Ref<Renderer>& rn)
+        void PreDraw_i()
         {
             static List<uint64_t> deletedMaterials{};
             deletedMaterials.clear();
@@ -1098,7 +1098,7 @@ namespace hf
                 {
                     if (material->isMarkedAsModified)
                     {
-                        dp::UploadMat(rn, material);
+                        dp::UploadMat(material);
                         material->isMarkedAsModified = false;
                     }
                 }
@@ -1107,12 +1107,12 @@ namespace hf
             for (auto& material : deletedMaterials) HF.graphicsResources.materials.erase(material);
         }
 
-        void RendererUpdate_i(const Ref<Renderer>& rn)
+        void RendererUpdate_i()
         {
-            HF.renderingApi.api.WaitForPreviousFrame(rn->handle);
+            HF.renderingApi.api.WaitForPreviousFrame(HF.renderer->handle);
             CleanMarkedResources_i();
 
-            auto& tInfo = rn->threadInfo;
+            auto& tInfo = HF.renderer->threadInfo;
             RenderPacket* packet;
             {
                 std::unique_lock lock(tInfo.threadLock);
@@ -1126,14 +1126,14 @@ namespace hf
             for (uint8_t rtIndex = 0; rtIndex < (uint8_t)packet->renderTextures.size(); rtIndex++)
                 renderTextures[rtIndex] = packet->renderTextures[rtIndex].texture->handle;
 
-            uvec2 size = HF.renderingApi.api.GetReadyForRendering(rn->handle, renderTextures, packet->renderTextures.size());
+            uvec2 size = HF.renderingApi.api.GetReadyForRendering(HF.renderer->handle, renderTextures, packet->renderTextures.size());
             if (size != uvec2(0, 0))
             {
                 for (const auto& rtPacket : packet->renderTextures) rtPacket.texture->createInfo.size = size;
 
-                HF.renderingApi.api.StartFrame(rn->handle);
-                RendererDraw_i(rn, packet);
-                HF.renderingApi.api.EndFrame(rn->handle);
+                HF.renderingApi.api.StartFrame(HF.renderer->handle);
+                RendererDraw_i(packet);
+                HF.renderingApi.api.EndFrame(HF.renderer->handle);
             }
 
             std::lock_guard lock(tInfo.threadLock);
@@ -1144,9 +1144,9 @@ namespace hf
         static void BindBuffers(const void* handle, const RenderPacket* packet, const AssetRange<uint32_t>& range, DescriptorBindingInfo* descBindings);
         static void CollectTexPacks(const RenderPacket* packet, const AssetRange<uint32_t>& range, DescriptorBindingInfo* descBindings);
 
-        void RendererDraw_i(const Ref<Renderer>& rn, RenderPacket* packet)
+        void RendererDraw_i(RenderPacket* packet)
         {
-            const auto handle = rn->handle;
+            const auto handle = HF.renderer->handle;
             RendererDrawUploads(handle, packet);
 
             for (uint8_t rtIndex = 0; rtIndex < (uint8_t)packet->renderTextures.size(); rtIndex++)
@@ -1307,7 +1307,7 @@ namespace hf
                     }
                 }
 
-                if (rt.drawCallback) rt.drawCallback(rn, HF.renderingApi.api.GetCmd(handle));
+                if (rt.drawCallback) rt.drawCallback(HF.renderingApi.api.GetCmd(handle));
                 HF.renderingApi.api.EndRendering(handle);
             }
         }

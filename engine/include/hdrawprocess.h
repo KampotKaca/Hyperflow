@@ -108,7 +108,7 @@ namespace hf
         AssetRange<uint16_t> shaderLayoutRange{};
         AssetRange<uint8_t> dependencyRange{};
 
-        void (*drawCallback)(const Ref<Renderer>& rn, void* cmd){};
+        void (*drawCallback)(void* cmd){};
     };
 
     struct TextureInfo

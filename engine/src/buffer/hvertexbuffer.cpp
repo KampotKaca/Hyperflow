@@ -27,7 +27,7 @@ namespace hf
         return buffer;
     }
 
-    void Upload(const Ref<Renderer>& rn, const Ref<VertexBuffer>& vb, const VertBufferUploadInfo& info)
+    void Upload(const Ref<VertexBuffer>& vb, const VertBufferUploadInfo& info)
     {
         ir::rdr::VertexBufferUploadInfo_i uploadInfo{};
         uploadInfo.buffer = vb->handle;
@@ -36,7 +36,7 @@ namespace hf
         uploadInfo.sizeInBytes = info.vertCount * vb->vertexSize;
 
         void* rnHandle = nullptr;
-        if (rn) rnHandle = rn->handle;
+        if (ir::HF.renderer) rnHandle = ir::HF.renderer->handle;
         ir::HF.renderingApi.api.UploadVertexBuffer(rnHandle, uploadInfo);
     }
 

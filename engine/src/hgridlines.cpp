@@ -3,27 +3,27 @@
 
 namespace hf::dp
 {
-    void Draw(const Ref<Renderer>& rn, const GridLinesInfo& info)
+    void Draw(const GridLinesInfo& info)
     {
-        StartShaderLayout(rn, ir::HF.staticResources.shaderLayouts.axisLines);
+        StartShaderLayout(ir::HF.staticResources.shaderLayouts.axisLines);
         {
-            BindGlobalUniformBuffer(rn);
+            BindGlobalUniformBuffer();
 
-            StartShader(rn, ir::HF.staticResources.shaders.axisLines);
+            StartShader(ir::HF.staticResources.shaders.axisLines);
             {
-                StartMat(rn, nullptr);
+                StartMat(nullptr);
                 {
-                    StartDrawGroup(rn);
+                    StartDrawGroup();
                     {
-                        DrawGroupSetPushConstant(rn, info);
-                        DrawGroupAddDrawCall(rn, nullptr, ir::HF.staticResources.quadBuffer);
+                        DrawGroupSetPushConstant(info);
+                        DrawGroupAddDrawCall(nullptr, ir::HF.staticResources.quadBuffer);
                     }
-                    EndDrawGroup(rn);
+                    EndDrawGroup();
                 }
-                EndMat(rn);
+                EndMat();
             }
-            EndShader(rn);
+            EndShader();
         }
-        EndShaderLayout(rn);
+        EndShaderLayout();
     }
 }

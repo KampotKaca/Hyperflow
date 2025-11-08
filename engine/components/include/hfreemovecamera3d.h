@@ -29,7 +29,7 @@ namespace hf
         FreeMoveCamera3D() = default;
         ~FreeMoveCamera3D() = default;
 
-        void Update(const Ref<Window>& window, float_t deltaTime);
+        void Update(float_t deltaTime);
 
         Camera3DFreeLook camera3D{};
         FreeMoveCameraDirection moveFlags = FreeMoveCameraDirection::All;

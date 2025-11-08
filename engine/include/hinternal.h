@@ -157,15 +157,14 @@ namespace hf::ir
     struct Hyperflow
     {
         EngineLifecycleCallbacks lifecycleCallbacks{};
-        EngineUpdateType updateType = EngineUpdateType::Continues;
         EngineInternalResourceFormatInfo internalResourcesFormat{};
         EngineInternalAudioInfo internalAudioInfo{};
         std::atomic_bool isRunning{};
         std::string appTitle{};
         Time time{};
-        Ref<Window> mainWindow{};
-        SmallList<Ref<Window>, EN_NUM_WINDOWS> tempWindows{};
-        Dictionary<uint64_t, Ref<Window>> windows{};
+        URef<Window> window{};
+		URef<Renderer> renderer{};
+
         Dictionary<uint64_t, Ref<Scene>> scenes{};
         uint32_t rendererCount{};
         RenderingApi renderingApi{};
@@ -216,9 +215,9 @@ namespace hf::ir
 
     namespace rdr
     {
-        void StartRenderPacket_i(const Ref<Renderer>& rn);
-        void EndRenderPacket_i(const Ref<Renderer>& rn);
-        void PreDraw_i(const Ref<Renderer>& rn);
+        void StartRenderPacket_i();
+        void EndRenderPacket_i();
+        void PreDraw_i();
 
         void LoadApi_i(RenderingApiType api);
         void UnloadCurrentApi_i(bool retainReferences);
@@ -228,12 +227,13 @@ namespace hf::ir
 
         void CreateRenderer_i(Renderer* rn);
         void DestroyRenderer_i(Renderer* rn);
-        void RunRenderThread_i(const Ref<Renderer>& rn);
+        void RunRenderThread_i();
+        void ResizeRenderer_i(uvec2 size);
 
         bool SetWindowIcons_i(const Window* win, const char* folderPath);
 
-        void RendererUpdate_i(const Ref<Renderer>& rn);
-        void RendererDraw_i(const Ref<Renderer>& rn, RenderPacket* packet);
+        void RendererUpdate_i();
+        void RendererDraw_i(RenderPacket* packet);
 
         Ref<ShaderLibrary> CreateShaderLibraryAsset_i(const char* assetPath);
         bool DestroyShaderLibrary_i(ShaderLibrary* lib);

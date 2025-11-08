@@ -8,7 +8,7 @@ namespace hf
 {
 	struct Window
 	{
-		Window(const WindowCreationInfo& info, const Ref<Window>& parent);
+		Window(const WindowCreationInfo& info);
 		~Window();
 
 		struct EventData
@@ -29,11 +29,8 @@ namespace hf
 		WindowPointerState pointerState = WindowPointerState::Normal;
 		WindowEventFlags eventFlags{};
 		VsyncMode vSyncMode = VsyncMode::Relaxed;
-		Ref<Window> parent{};
 
 		EventData eventData{};
-		Ref<Renderer> renderer{};
-
 		RendererEventInfo rnEventInfo{};
 	};
 }

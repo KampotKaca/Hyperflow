@@ -34,45 +34,37 @@ namespace hf::ir
             return { px, py };
         }
 
-        void HandleEvents(EngineUpdateType updateType)
+        void HandleEvents()
         {
-            for(const auto& window : HF.windows | std::views::values)
+            if (IsWindowClosed()) return;
+            auto& eventData = HF.window->eventData;
+            for (auto& currentState : eventData.keyStates)
             {
-                if (IsClosed(window)) continue;
-                auto& eventData = window->eventData;
-                for (auto& currentState : eventData.keyStates)
+                switch (currentState)
                 {
-                    switch (currentState)
-                    {
-                        case KeyState::None: continue;
-                        case KeyState::Up: currentState = KeyState::None; continue;
-                        case KeyState::Down: currentState = KeyState::DownContinues; break;
-                        case KeyState::DownContinues: break;
-                    }
+                case KeyState::None: continue;
+                case KeyState::Up: currentState = KeyState::None; continue;
+                case KeyState::Down: currentState = KeyState::DownContinues; break;
+                case KeyState::DownContinues: break;
                 }
-
-                for (auto& currentState : eventData.buttonStates)
-                {
-                    switch (currentState)
-                    {
-                        case KeyState::None: continue;
-                        case KeyState::Up: currentState = KeyState::None; continue;
-                        case KeyState::Down: currentState = KeyState::DownContinues; break;
-                        case KeyState::DownContinues: break;
-                    }
-                }
-
-                eventData.pointerDelta = {};
-                eventData.scrollDelta = {};
             }
 
-            switch (updateType)
+            for (auto& currentState : eventData.buttonStates)
             {
-                case EngineUpdateType::Continues: glfwPollEvents(); break;
-                case EngineUpdateType::EventRaised: glfwWaitEvents(); break;
+                switch (currentState)
+                {
+                case KeyState::None: continue;
+                case KeyState::Up: currentState = KeyState::None; continue;
+                case KeyState::Down: currentState = KeyState::DownContinues; break;
+                case KeyState::DownContinues: break;
+                }
             }
 
-            hf::platform::HandleEvents(updateType);
+            eventData.pointerDelta = {};
+            eventData.scrollDelta = {};
+            glfwPollEvents();
+
+            hf::platform::HandleEvents();
         }
 
         void* LoadDll(const char* dllName)
@@ -111,7 +103,7 @@ namespace hf::ir
         }
     }
 
-    namespace window
+    namespace win
     {
         void Open(Window* win, const WindowCreationInfo& info)
         {
@@ -131,13 +123,12 @@ namespace hf::ir
         {
             if (win->handle)
             {
-                rdr::DestroyRenderer_i(win->renderer.get());
-                win->renderer = nullptr;
+                rdr::DestroyRenderer_i(HF.renderer.get());
+                HF.renderer = nullptr;
 
                 auto window = (GLFWwindow*)win->handle;
                 glfwDestroyWindow(window);
                 win->handle = nullptr;
-                win->parent = nullptr;
 
                 return true;
             }

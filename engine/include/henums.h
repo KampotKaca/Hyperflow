@@ -362,12 +362,6 @@ namespace hf
     enum class VsyncMode { NoSync, Relaxed, Full, Count };
 	enum class WindowPointerState { Normal, Hidden, Disabled, Captured };
 
-    enum class EngineUpdateType
-    {
-        Continues,   //Updates as often as is allowed, good for games or simulations, try to avoid it if you it's possible
-        EventRaised  //Waits updates only on OS events, good for apps which doesn't change without user interaction
-    };
-
     //endregion
     //region General
 

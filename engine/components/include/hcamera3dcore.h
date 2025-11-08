@@ -12,7 +12,7 @@ namespace hf
         float_t farPlane = 1000.0f;
 
         void SetFov(const float_t newValue) { fov = glm::clamp(newValue, 1.0f, 179.0f); }
-        [[nodiscard]] mat4 ToProjectionMat4(const Ref<Renderer>& rn) const;
+        [[nodiscard]] mat4 ToProjectionMat4() const;
     };
 }
 

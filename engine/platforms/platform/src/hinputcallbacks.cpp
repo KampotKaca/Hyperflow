@@ -7,8 +7,7 @@ namespace hf::callbacks
     void KeyCallback(GLFWwindow* win, int32_t key, int32_t scancode, int32_t action, int32_t mods)
     {
         if (action == GLFW_REPEAT) return;
-        auto window = ir::HF.windows[(uint64_t)win];
-        auto& eventData = window->eventData;
+        auto& eventData = ir::HF.window->eventData;
 
         if (action == GLFW_PRESS) eventData.keyStates[key] = KeyState::Down;
         else eventData.keyStates[key] = KeyState::Up;
@@ -16,14 +15,12 @@ namespace hf::callbacks
 
     void CharCallback(GLFWwindow* win, uint32_t codepoint)
     {
-        auto window = ir::HF.windows[(uint64_t)win];
-        window->eventData.charData += codepoint;
+        ir::HF.window->eventData.charData += codepoint;
     }
 
     void PointerMoveCallback(GLFWwindow* win, double xpos, double ypos)
     {
-        auto window = ir::HF.windows[(uint64_t)win];
-        auto& eventData = window->eventData;
+        auto& eventData = ir::HF.window->eventData;
         vec2 newPos = { (float)xpos, (float)ypos };
         eventData.pointerDelta = newPos - eventData.pointerPosition;
         eventData.pointerPosition = newPos;
@@ -37,16 +34,14 @@ namespace hf::callbacks
     void ButtonCallback(GLFWwindow* win, int32_t button, int32_t action, int32_t mods)
     {
         if (action == GLFW_REPEAT) return;
-        auto window = ir::HF.windows[(uint64_t)win];
-        auto& eventData = window->eventData;
+        auto& eventData = ir::HF.window->eventData;
         if (action == GLFW_PRESS) eventData.buttonStates[button] = ButtonState::Down;
         else eventData.buttonStates[button] = ButtonState::Up;
     }
 
     void ScrollCallback(GLFWwindow* win, double xoffset, double yoffset)
     {
-        auto window = ir::HF.windows[(uint64_t)win];
-        window->eventData.scrollDelta = { (float)xoffset, (float)yoffset };
+        ir::HF.window->eventData.scrollDelta = { (float)xoffset, (float)yoffset };
     }
 
     void DragAndDropCallback(GLFWwindow* win, int32_t count, const char** paths)
@@ -61,20 +56,18 @@ namespace hf::callbacks
 
     void WindowMinimizedCallback(GLFWwindow* win, int minimized)
     {
-        auto window = ir::HF.windows[(uint64_t)win];
-        if (minimized) window->state = WindowState::Minimized;
-        else window->state = WindowState::Restored;
+        if (minimized) ir::HF.window->state = WindowState::Minimized;
+        else ir::HF.window->state = WindowState::Restored;
 
-        ForceUpdateFrameBuffer(window.get());
+        ForceUpdateFrameBuffer(ir::HF.window.get());
     }
 
     void WindowMaximizedCallback(GLFWwindow* win, int maximized)
     {
-        auto window = ir::HF.windows[(uint64_t)win];
-        if (maximized) window->state = WindowState::Maximized;
-        else window->state = WindowState::Restored;
+        if (maximized) ir::HF.window->state = WindowState::Maximized;
+        else ir::HF.window->state = WindowState::Restored;
 
-        ForceUpdateFrameBuffer(window.get());
+        ForceUpdateFrameBuffer(ir::HF.window.get());
     }
 
     void WindowMoveCallback(GLFWwindow* win, int xpos, int ypos)
@@ -84,8 +77,7 @@ namespace hf::callbacks
 
     void WindowSizeCallback(GLFWwindow* win, int width, int height)
     {
-        auto window = ir::HF.windows[(uint64_t)win];
-        ForceUpdateFrameBuffer(window.get());
+        ForceUpdateFrameBuffer(ir::HF.window.get());
     }
 
     void WindowRefreshCallback(GLFWwindow* win)
@@ -95,7 +87,7 @@ namespace hf::callbacks
 
     void WindowCloseCallback(GLFWwindow* win)
     {
-        Destroy(ir::HF.windows[(uint64_t)win]);
+        ir::win::Close(ir::HF.window.get());
     }
 
     void JoystickEventCallback(int32_t jid, int32_t event)
@@ -105,13 +97,12 @@ namespace hf::callbacks
 
     void ForceUpdateFrameBuffer(Window* win)
     {
-        auto rn = win->renderer;
-        if (rn)
+        if (ir::HF.renderer)
         {
-            std::lock_guard lock(rn->threadInfo.threadLock);
-            auto size = ir::window::GetSize(win);
-            rn->threadInfo.size = size;
-            ir::HF.renderingApi.api.RegisterFrameBufferChange(rn->handle, size);
+            std::lock_guard lock(ir::HF.renderer->threadInfo.threadLock);
+            auto size = ir::win::GetSize(win);
+            ir::HF.renderer->threadInfo.size = size;
+            ir::HF.renderingApi.api.RegisterFrameBufferChange(ir::HF.renderer->handle, size);
         }
     }
 }

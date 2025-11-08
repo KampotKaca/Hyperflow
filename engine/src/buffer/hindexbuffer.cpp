@@ -20,7 +20,7 @@ namespace hf
         ir::rdr::CreateIndexBuffer_i(this);
     }
 
-    void Upload(const Ref<Renderer>& rn, const Ref<IndexBuffer>& ib, const IndexBufferUploadInfo& info)
+    void Upload(const Ref<IndexBuffer>& ib, const IndexBufferUploadInfo& info)
     {
         ir::rdr::IndexBufferUploadInfo_i uploadInfo{};
         uploadInfo.buffer = ib->handle;
@@ -29,7 +29,7 @@ namespace hf
         uploadInfo.indexCount = info.indexCount;
 
         void* rnHandle = nullptr;
-        if (rn) rnHandle = rn->handle;
+        if (ir::HF.renderer) rnHandle = ir::HF.renderer->handle;
         ir::HF.renderingApi.api.UploadIndexBuffer(rnHandle, uploadInfo);
     }
 

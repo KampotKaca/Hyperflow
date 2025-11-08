@@ -23,9 +23,9 @@ namespace app
     void DebugUpdate();
     void DebugQuit();
 
-    void DebugPreRender(const hf::Ref<hf::Renderer>& rn);
-    void DebugPrepass(const hf::Ref<hf::Renderer>& rn);
-    void DebugRender(const hf::Ref<hf::Renderer>& rn);
+    void DebugPreRender();
+    void DebugPrepass();
+    void DebugRender();
 }
 
 #endif //DEBUG_H

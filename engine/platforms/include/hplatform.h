@@ -9,7 +9,7 @@ namespace hf::platform
     void Unload();
     void Sleep(double seconds);
 
-    void HandleEvents(EngineUpdateType updateType);
+    void HandleEvents();
 
     void* LoadDll(const char* dllName);
     void UnloadDll(void* dll);

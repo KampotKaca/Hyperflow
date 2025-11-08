@@ -172,7 +172,7 @@ namespace hf::ed
             ImGui::Text("Unmapped Size:   %.1f Mbs", globalStats.unmappedTotalSizeMbs);
 
             DrawThreadStats("Update Thread", utils::GetThreadMemoryStatistics());
-            DrawThreadStats("Render Thread", GetMemoryStatistics(GetRenderer(GetMainWindow())));
+            DrawThreadStats("Render Thread", GetMemoryRendererStatistics());
 
             EndWindow();
             return true;
@@ -184,7 +184,7 @@ namespace hf::ed
     {
         if(StartWindow(label, isOpen, flags))
         {
-            const auto stats = utils::GetRendererStatistics(GetRenderer(GetMainWindow()));
+            const auto stats = utils::GetRendererStatistics();
             ImGui::Text("Culled DrawCalls: %i", stats.culledDrawCalls);
 
             EndWindow();

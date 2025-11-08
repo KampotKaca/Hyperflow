@@ -14,7 +14,6 @@ namespace app
         uint32_t count = 0;
         uint32_t reqCount = 0;
         int32_t lastReq = -1;
-        hf::Ref<hf::Window> wn{};
     };
 
     static DebugInfo DEBUG_INFO{};
@@ -32,7 +31,7 @@ namespace app
         std::array formats = { hf::TextureFormat::R8G8B8A8_Unorm };
         hf::ed::LoadInfo editorInfo
         {
-            .windowHandle = GetHandle(hf::GetMainWindow()),
+            .windowHandle = hf::GetWindowHandle(),
             .multisampleMode = MSAA_MODE,
             .pColorFormats = formats.data(),
             .colorFormatCount = formats.size(),
@@ -61,7 +60,6 @@ namespace app
     {
         APP_DEBUG.camera.camera3D.position = hf::vec3{0, 0.5, -2};
         APP_DEBUG.camera.camera3D.direction = hf::vec3{0, 0, 1};
-        DEBUG_INFO.wn = hf::GetMainWindow();
         hf::SetTargetFrameRate(-1);
         DEBUG_INFO.count = 0;
     }
@@ -70,25 +68,25 @@ namespace app
     {
         if (hf::IsKeyDown(hf::Key::L))
         {
-            auto state = (hf::WindowState)std::max(1, ((int32_t)hf::GetState(DEBUG_INFO.wn) + 1) % (int32_t)hf::WindowState::FullscreenBorderless);
+            auto state = (hf::WindowState)std::max(1, ((int32_t)hf::GetWindowState() + 1) % (int32_t)hf::WindowState::FullscreenBorderless);
             if (state == hf::WindowState::Hidden) state = hf::WindowState::Fullscreen;
-            hf::SetState(DEBUG_INFO.wn, state);
+            hf::SetWindowState(state);
         }
 
         if (hf::IsKeyDown(hf::Key::M))
         {
-            hf::SetState(DEBUG_INFO.wn, hf::WindowState::FullscreenBorderless);
+            hf::SetWindowState(hf::WindowState::FullscreenBorderless);
         }
 
         if (hf::IsKeyDown(hf::Key::B))
         {
-            auto state = (hf::WindowPointerState)(((uint32_t)hf::GetPointerState(DEBUG_INFO.wn) + 1) % 4);
-            hf::SetPointerState(DEBUG_INFO.wn, state);
+            auto state = (hf::WindowPointerState)(((uint32_t)hf::GetWindowPointerState() + 1) % 4);
+            hf::SetWindowPointerState(state);
         }
 
         if (hf::IsKeyDown(hf::Key::K))
         {
-            hf::SetVSyncMode(DEBUG_INFO.wn, (hf::VsyncMode)(((uint32_t)hf::GetVSyncMode(DEBUG_INFO.wn) + 1) % (uint32_t)hf::VsyncMode::Count));
+            hf::SetVSyncMode((hf::VsyncMode)(((uint32_t)hf::GetVSyncMode() + 1) % (uint32_t)hf::VsyncMode::Count));
         }
 
         // auto delta = hf::input::GetScrollDelta();
@@ -103,12 +101,12 @@ namespace app
             // oss << "[Hyperflow] " << hf::time::GetFrameRate();
             // oss << "[Hyperflow] " << hf::Time::GetTimePassed();
             const std::string str = std::string("[Hyperflow] ") + std::to_string(hf::GetFrameRate());
-            hf::SetTitle(DEBUG_INFO.wn, str);
+            hf::SetWindowTitle(str);
             DEBUG_INFO.reqCount = cReq;
         }
 
         if (hf::IsButtonDownContinues(hf::Button::Right))
-            APP_DEBUG.camera.Update(hf::GetMainWindow(), (float)hf::GetDeltaTime());
+            APP_DEBUG.camera.Update((float)hf::GetDeltaTime());
 
         if (hf::IsKeyDown(hf::Key::N)) APP_DEBUG.drawGridLines = !APP_DEBUG.drawGridLines;
     }
@@ -118,7 +116,7 @@ namespace app
 
     }
 
-    void DebugPreRender(const hf::Ref<hf::Renderer>& rn)
+    void DebugPreRender()
     {
         hf::ed::StartFrame();
 
@@ -174,18 +172,18 @@ namespace app
         hf::ed::EndFrame();
     }
 
-    void DebugPrepass(const hf::Ref<hf::Renderer>& rn)
+    void DebugPrepass()
     {
 
     }
 
-    void GuiDraw(const hf::Ref<hf::Renderer>& rn, void* cmd)
+    void GuiDraw(void* cmd)
     {
         hf::ed::DrawFrame(cmd);
     }
 
-    void DebugRender(const hf::Ref<hf::Renderer>& rn)
+    void DebugRender()
     {
-        hf::dp::SetDrawCallback(rn, GuiDraw);
+        hf::dp::SetDrawCallback(GuiDraw);
     }
 }

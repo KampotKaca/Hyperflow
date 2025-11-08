@@ -11,7 +11,7 @@ namespace hf
         virtual ~Scene();
 
         virtual void Update() = 0;
-        virtual void Render(const Ref<Renderer>& rn) = 0;
+        virtual void Render() = 0;
 
         List<AssetLocation> assets{};
         bool isLoaded = false;

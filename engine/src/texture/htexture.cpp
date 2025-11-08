@@ -136,7 +136,7 @@ namespace hf
             std::filesystem::path fPath = TO_RES_PATH(folderPath);
             if (std::filesystem::exists(fPath) && std::filesystem::is_directory(fPath))
             {
-                List<window::Image> images{};
+                List<win::Image> images{};
                 for (const auto& entry : std::filesystem::recursive_directory_iterator(fPath))
                 {
                     if (entry.is_regular_file())
@@ -162,7 +162,7 @@ namespace hf
                     }
                 }
 
-                window::SetIcons(win, images.data(), (uint32_t)images.size());
+                win::SetIcons(win, images.data(), (uint32_t)images.size());
                 for (const auto& image : images) stbi_image_free(image.data);
                 images.clear();
 

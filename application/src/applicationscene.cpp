@@ -61,109 +61,109 @@ namespace app
 
     }
 
-    void ApplicationScene::Render(const hf::Ref<hf::Renderer>& rn)
+    void ApplicationScene::Render()
     {
-        hf::dp::StartShaderLayout(rn, APP_SHADER_LAYOUTS.default_lit); //Viking room setup
+        hf::dp::StartShaderLayout(APP_SHADER_LAYOUTS.default_lit); //Viking room setup
         {
-            hf::dp::BindGlobalUniformBuffer(rn);
+            hf::dp::BindGlobalUniformBuffer();
 
-            hf::dp::StartShader(rn, APP_SHADERS.default_lit);
+            hf::dp::StartShader(APP_SHADERS.default_lit);
             {
-                hf::dp::StartMat(rn, nullptr);
+                hf::dp::StartMat(nullptr);
                 {
-                    hf::dp::MatAddTexPackBinding(rn, viking_room_pack, 1);
+                    hf::dp::MatAddTexPackBinding(viking_room_pack, 1);
 
-                    hf::dp::StartDrawGroup(rn);
+                    hf::dp::StartDrawGroup();
                     {
                         auto mesh = hf::GetMesh(viking_room_model, 0);
                         const auto meshVolume = hf::GetMeshBoundingVolume(mesh);
                         DefaultPushConstant pc{};
                         pc.phongData = hf::vec4{ hf::utils::ColorFromHash(0x9B9B9B), 0.8 };
 
-                        hf::dp::DrawGroupSetPushConstant(rn, pc);
-                        hf::dp::StartDrawCall(rn, mesh);
+                        hf::dp::DrawGroupSetPushConstant(pc);
+                        hf::dp::StartDrawCall(mesh);
 
                         for (uint32_t x = 0; x < VIKING_ROOM_AXIS_SIZE; x++)
                             for (uint32_t z = 0; z < VIKING_ROOM_AXIS_SIZE; z++)
                             {
                                 auto& vikingRoom = APP_OBJECTS.vikingRooms[x * VIKING_ROOM_AXIS_SIZE + z];
                                 vikingRoom.cullingVolume.Update(vikingRoom.transform, meshVolume);
-                                hf::dp::DrawAddInstance(rn, DefaultInstanceData
+                                hf::dp::DrawAddInstance(DefaultInstanceData
                                 {
                                     .modelMatrix = vikingRoom.cullingVolume.matrix,
                                     .color = hf::vec4{ hf::utils::ColorFromHash(0xFFFFFF), 1 },
                                 }, vikingRoom.cullingVolume);
                             }
 
-                        hf::dp::EndDrawCall(rn);
+                        hf::dp::EndDrawCall();
                     }
-                    hf::dp::EndDrawGroup(rn);
+                    hf::dp::EndDrawGroup();
 
-                    hf::dp::StartDrawGroup(rn);
+                    hf::dp::StartDrawGroup();
                     {
                         auto mesh = hf::primitives::GetMesh(hf::PrimitiveMeshType::IcoSphere);
                         const auto meshVolume = hf::GetMeshBoundingVolume(mesh);
 
-                        hf::dp::DrawGroupAddTexPackBinding(rn, APP_TEXTURE_PACKS.white_pack, 1);
+                        hf::dp::DrawGroupAddTexPackBinding(APP_TEXTURE_PACKS.white_pack, 1);
                         DefaultPushConstant pc{};
                         pc.phongData = hf::vec4{ hf::utils::ColorFromHash(0x9B9B9B), 1.0 };
 
-                        hf::dp::DrawGroupSetPushConstant(rn, pc);
-                        hf::dp::StartDrawCall(rn, mesh);
+                        hf::dp::DrawGroupSetPushConstant(pc);
+                        hf::dp::StartDrawCall(mesh);
 
                         {
                             auto& sphere = APP_OBJECTS.sphere;
                             sphere.cullingVolume.Update(sphere.transform, meshVolume);
 
-                            hf::dp::DrawAddInstance(rn, DefaultInstanceData
+                            hf::dp::DrawAddInstance(DefaultInstanceData
                             {
                                 .modelMatrix = sphere.cullingVolume.matrix,
                                 .color = hf::vec4{ hf::utils::ColorFromHash(0x9E0505), 1 },
                             }, sphere.cullingVolume);
                         }
 
-                        hf::dp::EndDrawCall(rn);
+                        hf::dp::EndDrawCall();
                     }
-                    hf::dp::EndDrawGroup(rn);
+                    hf::dp::EndDrawGroup();
                 }
-                hf::dp::EndMat(rn);
+                hf::dp::EndMat();
             }
-            hf::dp::EndShader(rn);
+            hf::dp::EndShader();
         }
-        hf::dp::EndShaderLayout(rn);
+        hf::dp::EndShaderLayout();
 
-        hf::dp::StartShaderLayout(rn, APP_SHADER_LAYOUTS.default_unlit); //Ground setup
+        hf::dp::StartShaderLayout(APP_SHADER_LAYOUTS.default_unlit); //Ground setup
         {
-            hf::dp::BindGlobalUniformBuffer(rn);
+            hf::dp::BindGlobalUniformBuffer();
 
-            hf::dp::StartShader(rn, APP_SHADERS.default_unlit);
+            hf::dp::StartShader(APP_SHADERS.default_unlit);
             {
-                hf::dp::StartMat(rn, nullptr);
+                hf::dp::StartMat(nullptr);
                 {
-                    hf::dp::StartDrawGroup(rn);
+                    hf::dp::StartDrawGroup();
                     {
                         const auto meshVolume = hf::GetMeshBoundingVolume(hf::primitives::GetMesh(hf::PrimitiveMeshType::Plane));
-                        hf::dp::StartDrawCall(rn, hf::primitives::GetMesh(hf::PrimitiveMeshType::Plane));
+                        hf::dp::StartDrawCall(hf::primitives::GetMesh(hf::PrimitiveMeshType::Plane));
 
                         {
                             auto& ground = APP_OBJECTS.ground;
                             ground.cullingVolume.Update(ground.transform, meshVolume);
 
-                            hf::dp::DrawAddInstance(rn, DefaultInstanceData
+                            hf::dp::DrawAddInstance(DefaultInstanceData
                             {
                                 .modelMatrix = ground.cullingVolume.matrix,
                                 .color = hf::vec4{ hf::utils::ColorFromHash(0x19CB1E), 1 }
                             }, ground.cullingVolume);
                         }
 
-                        hf::dp::EndDrawCall(rn);
+                        hf::dp::EndDrawCall();
                     }
-                    hf::dp::EndDrawGroup(rn);
+                    hf::dp::EndDrawGroup();
                 }
-                hf::dp::EndMat(rn);
+                hf::dp::EndMat();
             }
-            hf::dp::EndShader(rn);
+            hf::dp::EndShader();
         }
-        hf::dp::EndShaderLayout(rn);
+        hf::dp::EndShaderLayout();
     }
 }

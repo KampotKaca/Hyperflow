@@ -3,11 +3,6 @@
 #include "resources.h"
 #include "../appconfig.h"
 
-static void __attribute__((constructor)) global_init()
-{
-	hf::Preload();
-}
-
 int main()
 {
 #if !DEBUG
@@ -18,9 +13,7 @@ int main()
 	hf::EngineData engineData =
 	{
 		.appTitle = "Hyperflow",
-		// .renderingApi = hf::renderer::GetBestApiType(),
 		.renderingApi = hf::RenderingApiType::Vulkan,
-		.updateType = hf::EngineUpdateType::Continues,
 	    .internalResourcesFormat = hf::EngineInternalResourceFormatInfo
 	    {
 		    .drawOutputFormats = hf::ShaderDrawOutputFormats

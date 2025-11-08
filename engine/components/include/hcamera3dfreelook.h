@@ -57,11 +57,11 @@ namespace hf
             return glm::lookAt(position, position + direction, -up);
         }
 
-        CameraUniformInfo GetUniformInfo(const Ref<Renderer>& rn) const;
-        [[nodiscard]] mat4 ToViewProjectionMat4(const Ref<Renderer>& rn) const;
-        void GetFrustum(const Ref<Renderer>& rn, CameraFrustum& result) const
+        CameraUniformInfo GetUniformInfo() const;
+        [[nodiscard]] mat4 ToViewProjectionMat4() const;
+        void GetFrustum(CameraFrustum& result) const
         {
-            ExtractFrustum(ToViewProjectionMat4(rn), result);
+            ExtractFrustum(ToViewProjectionMat4(), result);
         }
     };
 }

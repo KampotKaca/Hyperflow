@@ -48,8 +48,8 @@ namespace app
     void VoxelTerrainGenerate();
     void VoxelTerrainUpdate();
 
-    void VoxelTerrainPreDraw(const hf::Ref<hf::Renderer>& rn);
-    void VoxelTerrainDraw(const hf::Ref<hf::Renderer>& rn);
+    void VoxelTerrainPreDraw();
+    void VoxelTerrainDraw();
 
     void VoxelTerrainDispose();
 }

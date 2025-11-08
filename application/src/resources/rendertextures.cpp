@@ -30,7 +30,7 @@ namespace app
                 .colorAttachmentCount = 1,
                 .depthAttachment = depthAttachment,
                 .multisampleMode = MSAA_MODE,
-                .size = hf::GetSize(hf::GetMainWindow()),
+                .size = hf::GetWindowSize(),
                 .offset = { 0, 0 }
             };
 

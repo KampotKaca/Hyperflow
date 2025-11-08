@@ -3,19 +3,19 @@
 
 namespace hf
 {
-    void FreeMoveCamera3D::Update(const Ref<Window>& window, const float_t deltaTime)
+    void FreeMoveCamera3D::Update(const float_t deltaTime)
     {
         auto motion = vec3(0.0f);
-        if ((uint32_t)(moveFlags & FreeMoveCameraDirection::Forward) > 0  && IsKeyDownContinues(window, Key::W))         motion.z += 1.0f;
-        if ((uint32_t)(moveFlags & FreeMoveCameraDirection::Backward) > 0 && IsKeyDownContinues(window, Key::S))         motion.z -= 1.0f;
-        if ((uint32_t)(moveFlags & FreeMoveCameraDirection::Right) > 0    && IsKeyDownContinues(window, Key::D))         motion.x += 1.0f;
-        if ((uint32_t)(moveFlags & FreeMoveCameraDirection::Left) > 0     && IsKeyDownContinues(window, Key::A))         motion.x -= 1.0f;
-        if ((uint32_t)(moveFlags & FreeMoveCameraDirection::Up) > 0       && IsKeyDownContinues(window, Key::Space))     motion.y += 1.0f;
-        if ((uint32_t)(moveFlags & FreeMoveCameraDirection::Down) > 0     && IsKeyDownContinues(window, Key::LeftShift)) motion.y -= 1.0f;
+        if ((uint32_t)(moveFlags & FreeMoveCameraDirection::Forward) > 0  && IsKeyDownContinues(Key::W))         motion.z += 1.0f;
+        if ((uint32_t)(moveFlags & FreeMoveCameraDirection::Backward) > 0 && IsKeyDownContinues(Key::S))         motion.z -= 1.0f;
+        if ((uint32_t)(moveFlags & FreeMoveCameraDirection::Right) > 0    && IsKeyDownContinues(Key::D))         motion.x += 1.0f;
+        if ((uint32_t)(moveFlags & FreeMoveCameraDirection::Left) > 0     && IsKeyDownContinues(Key::A))         motion.x -= 1.0f;
+        if ((uint32_t)(moveFlags & FreeMoveCameraDirection::Up) > 0       && IsKeyDownContinues(Key::Space))     motion.y += 1.0f;
+        if ((uint32_t)(moveFlags & FreeMoveCameraDirection::Down) > 0     && IsKeyDownContinues(Key::LeftShift)) motion.y -= 1.0f;
 
         auto lookAmount = vec2((bool)(lookFlags & FreeMoveCameraLookAxis::Horizontal), (bool)(lookFlags & FreeMoveCameraLookAxis::Vertical));
-        const auto delta = GetPointerDelta(window);
-        const auto windowSize = GetSize(window);
+        const auto delta = GetPointerDelta();
+        const auto windowSize = GetWindowSize();
         lookAmount.x *= delta.x / (float_t)windowSize.x;
         lookAmount.y *= delta.y / (float_t)windowSize.y;
 

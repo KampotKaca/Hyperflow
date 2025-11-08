@@ -12,7 +12,7 @@ namespace hf::ir
         void Sleep(double seconds);
 
         ivec2 GetPointerPosition(const Window* window);
-        void HandleEvents(EngineUpdateType updateType);
+        void HandleEvents();
 
         void* LoadDll(const char* dllName);
         void UnloadDll(void* dll);
@@ -23,7 +23,7 @@ namespace hf::ir
         uint32_t CreateVulkanSurface(void* windowHandle, void* instance, const void* allocator, void* surfaceResult);
     }
 
-    namespace window
+    namespace win
     {
         struct Image
         {

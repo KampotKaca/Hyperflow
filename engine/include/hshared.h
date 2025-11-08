@@ -676,9 +676,9 @@ namespace hf
 		void (*onRendererInitCallback)(){};
 		void (*onRendererShutdownCallback)(){};
 
-		void (*onPreRenderCallback)(const Ref<Renderer>&){};
-		void (*onRenderStartCallback)(const Ref<Renderer>&){};
-		void (*onRenderEndCallback)(const Ref<Renderer>&){};
+		void (*onPreRenderCallback)(){};
+		void (*onRenderStartCallback)(){};
+		void (*onRenderEndCallback)(){};
 	};
 
 	struct WindowCreationInfo
@@ -733,7 +733,6 @@ namespace hf
 	{
 		std::string appTitle = "Hyperflow";
 		RenderingApiType renderingApi = RenderingApiType::Vulkan; // type of initial api, can be changed later
-		EngineUpdateType updateType = EngineUpdateType::EventRaised; // type of application updates
 	    EngineInternalResourceFormatInfo internalResourcesFormat{}; //format of internal resources which are used by the engine
 	    EngineLifecycleCallbacks lifecycleCallbacks{}; //passed engine callbacks to interact with the engine
 	    EngineInternalAudioInfo audioInfo{}; //audio info which is used by the engine

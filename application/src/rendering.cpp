@@ -16,9 +16,9 @@ namespace app
         DebugRendererShutdown();
     }
 
-    void AppPreRender(const hf::Ref<hf::Renderer>& rn)
+    void AppPreRender()
     {
-        DebugPreRender(rn);
+        DebugPreRender();
 
         // if (hf::IsKeyDown(hf::Key::P) || hf::IsKeyDown(hf::Key::O))
         // {
@@ -32,29 +32,29 @@ namespace app
 
         if (hf::IsKeyDown(hf::Key::G))
         {
-            if (hf::dp::SkyboxIsDefaultCubemapBound()) hf::dp::SkyboxBindCubemap(rn, APP_CUBEMAPS.cosmos);
-            else hf::dp::SkyboxBindDefaultCubemap(rn);
+            if (hf::dp::SkyboxIsDefaultCubemapBound()) hf::dp::SkyboxBindCubemap(APP_CUBEMAPS.cosmos);
+            else hf::dp::SkyboxBindDefaultCubemap();
         }
 
-        VoxelTerrainPreDraw(rn);
+        VoxelTerrainPreDraw();
     }
 
-    void AppStartRender(const hf::Ref<hf::Renderer>& rn)
+    void AppStartRender()
     {
-        hf::dp::SetCamera(rn, APP_DEBUG.camera.camera3D);
-        hf::dp::AddLight(rn, APP_OBJECTS.mainLight);
+        hf::dp::SetCamera(APP_DEBUG.camera.camera3D);
+        hf::dp::AddLight(APP_OBJECTS.mainLight);
 
-        DebugPrepass(rn);
-        hf::dp::StartRenderTex(rn, APP_RENDER_TEXTURES.mainDrawRenderTexture);
+        DebugPrepass();
+        hf::dp::StartRenderTex(APP_RENDER_TEXTURES.mainDrawRenderTexture);
     }
 
-    void AppEndRender(const hf::Ref<hf::Renderer>& rn)
+    void AppEndRender()
     {
-        VoxelTerrainDraw(rn);
-        hf::dp::Draw(rn, APP_OBJECTS.skybox);
-        if (APP_DEBUG.drawGridLines) hf::dp::Draw(rn, APP_DEBUG.gridLinesInfo);
-        DebugRender(rn);
+        VoxelTerrainDraw();
+        hf::dp::Draw(APP_OBJECTS.skybox);
+        if (APP_DEBUG.drawGridLines) hf::dp::Draw(APP_DEBUG.gridLinesInfo);
+        DebugRender();
 
-        hf::dp::EndRenderTex(rn);
+        hf::dp::EndRenderTex();
     }
 }

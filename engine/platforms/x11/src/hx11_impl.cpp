@@ -6,5 +6,5 @@ namespace hf::platform
     void Load(){}
     void Unload(){}
 
-    void HandleEvents(EngineUpdateType updateType){}
+    void HandleEvents(){}
 }

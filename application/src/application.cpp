@@ -46,7 +46,7 @@ namespace app
 
 		VoxelTerrainGenerate();
 		hf::SetTargetFrameRate(170);
-	    SetState(hf::GetMainWindow(), hf::WindowState::Maximized);
+	    SetWindowState(hf::WindowState::Maximized);
 	    APP_OBJECTS.mainScene = hf::LoadScene<ApplicationScene>();
 	}
 

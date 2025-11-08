@@ -3,15 +3,15 @@
 
 namespace hf::dp
 {
-    void SkyboxBindDefaultCubemap(const Ref<Renderer>& rn)
+    void SkyboxBindDefaultCubemap()
     {
-        SkyboxBindCubemap(rn, ir::HF.staticResources.skyboxResources.defaultCubemap);
+        SkyboxBindCubemap(ir::HF.staticResources.skyboxResources.defaultCubemap);
     }
 
-    void SkyboxBindCubemap(const Ref<Renderer>& rn, const Ref<Cubemap>& cubemap)
+    void SkyboxBindCubemap(const Ref<Cubemap>& cubemap)
     {
         ir::HF.staticResources.skyboxResources.boundCubemap = cubemap;
-        UploadStartTexPack(rn, ir::HF.staticResources.skyboxResources.texturePack);
+        UploadStartTexPack(ir::HF.staticResources.skyboxResources.texturePack);
         {
             TexturePackTextureUploadInfo<Cubemap>::TextureInfo tInfo{};
             tInfo.texture = cubemap;
@@ -26,33 +26,33 @@ namespace hf::dp
             bindingInfo.bindingIndex = 0;
             bindingInfo.texInfo = uInfo;
 
-            UploadAddTexPackBindings(rn, bindingInfo);
+            UploadAddTexPackBindings(bindingInfo);
         }
-        UploadEndTexPack(rn);
+        UploadEndTexPack();
     }
 
-    void Draw(const Ref<Renderer>& rn, const SkyboxInfo& info)
+    void Draw(const SkyboxInfo& info)
     {
-        StartShaderLayout(rn, ir::HF.staticResources.shaderLayouts.skybox);
+        StartShaderLayout(ir::HF.staticResources.shaderLayouts.skybox);
         {
-            BindGlobalUniformBuffer(rn);
+            BindGlobalUniformBuffer();
 
-            StartShader(rn, ir::HF.staticResources.shaders.skybox);
+            StartShader(ir::HF.staticResources.shaders.skybox);
             {
-                StartMat(rn, nullptr);
+                StartMat(nullptr);
                 {
-                    StartDrawGroup(rn);
+                    StartDrawGroup();
                     {
-                        DrawGroupAddTexPackBinding(rn, ir::HF.staticResources.skyboxResources.texturePack, 1);
-                        DrawGroupAddDrawCall(rn, primitives::GetMesh(PrimitiveMeshType::Cube));
+                        DrawGroupAddTexPackBinding(ir::HF.staticResources.skyboxResources.texturePack, 1);
+                        DrawGroupAddDrawCall(primitives::GetMesh(PrimitiveMeshType::Cube));
                     }
-                    EndDrawGroup(rn);
+                    EndDrawGroup();
                 }
-                EndMat(rn);
+                EndMat();
             }
-            EndShader(rn);
+            EndShader();
         }
-        EndShaderLayout(rn);
+        EndShaderLayout();
     }
 
     bool SkyboxIsDefaultCubemapBound() { return ir::HF.staticResources.skyboxResources.boundCubemap == ir::HF.staticResources.skyboxResources.defaultCubemap; }

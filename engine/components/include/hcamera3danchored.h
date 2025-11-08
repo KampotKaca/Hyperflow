@@ -32,8 +32,8 @@ namespace hf
             return glm::lookAt(GetPosition(), anchor, -up);
         }
 
-        [[nodiscard]] CameraUniformInfo GetUniformInfo(const Ref<Renderer>& rn) const;
-        [[nodiscard]] mat4 ToViewProjectionMat4(const Ref<Renderer>& rn) const;
+        [[nodiscard]] CameraUniformInfo GetUniformInfo() const;
+        [[nodiscard]] mat4 ToViewProjectionMat4() const;
     };
 }
 

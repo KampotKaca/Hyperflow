@@ -8,7 +8,7 @@ namespace hf
 {
 	struct Renderer
 	{
-		explicit Renderer(const Window* window, const RendererEventInfo& eventInfo);
+		explicit Renderer(const RendererEventInfo& eventInfo);
 		~Renderer();
 
 		struct ThreadInfo
@@ -32,7 +32,6 @@ namespace hf
 
 		bool isDrawing = false;
 		ThreadInfo threadInfo{};
-		const Window* window{};
 		void* handle{};
 		RendererEventInfo eventInfo{};
 	};

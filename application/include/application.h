@@ -50,9 +50,9 @@ namespace app
 	void AppRendererInit();
 	void AppRendererShutdown();
 
-    void AppPreRender(const hf::Ref<hf::Renderer>& rn);
-	void AppStartRender(const hf::Ref<hf::Renderer>& rn);
-	void AppEndRender(const hf::Ref<hf::Renderer>& rn);
+    void AppPreRender();
+	void AppStartRender();
+	void AppEndRender();
 }
 
 #endif //APPLICATION_H

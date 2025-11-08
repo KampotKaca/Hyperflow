@@ -11,7 +11,7 @@ namespace app
         ~ApplicationScene() override = default;
 
         void Update() override;
-        void Render(const hf::Ref<hf::Renderer>& rn) override;
+        void Render() override;
 
         hf::Ref<hf::Texture> viking_room_albedo_texture{};
         hf::Ref<hf::Texture> greek_head_texture{};
