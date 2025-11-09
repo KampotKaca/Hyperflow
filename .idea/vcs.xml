@@ -12,6 +12,13 @@
     <mapping directory="$PROJECT_DIR$/external/rapidyaml/ext/c4core/src/c4/ext/debugbreak" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/external/rapidyaml/ext/c4core/src/c4/ext/fast_float" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/external/shaderc" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/external/shaderc/third_party/abseil_cpp" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/external/shaderc/third_party/effcee" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/external/shaderc/third_party/glslang" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/external/shaderc/third_party/googletest" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/external/shaderc/third_party/re2" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/external/shaderc/third_party/spirv-headers" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/external/shaderc/third_party/spirv-tools" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/external/svector" vcs="Git" />
   </component>
 </project>
