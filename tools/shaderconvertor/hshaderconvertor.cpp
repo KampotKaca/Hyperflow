@@ -71,7 +71,7 @@ int main(int argc, char* argv[])
         return 1;
     }
 
-    auto includePath = fs::current_path().parent_path() / fs::path("shaderconvertor/includes/");
+    auto includePath = fs::current_path().parent_path() / fs::path("tools/shaderconvertor/includes/");
     LoadIncludeMap(includePath);
     for (int i = 1; i < argc; i += 2)
     {

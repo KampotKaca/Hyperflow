@@ -4,8 +4,8 @@
 #include "henums.h"
 #include "hinput.h"
 #include "hutilfuncs.h"
-#include "../../config.h"
-#include "../platform/include/hplatformspecific.h"
+#include "config.h"
+#include "hplatformspecific.h"
 
 #if PLATFORM_LINUX
 #ifdef None
@@ -26,14 +26,6 @@
 #define realloc(ptr, size) hf::utils::Realloc(ptr, size)
 
 #endif
-
-#define BIT(x) (1u << x)
-#define cassert(cond, ...)\
-        if(!cond)\
-        {\
-            log_fatal(__VA_ARGS__);\
-            abort();\
-        }
 
 namespace hf
 {

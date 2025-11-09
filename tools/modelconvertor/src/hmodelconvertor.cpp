@@ -131,7 +131,7 @@ namespace ml
         }
 
         const int maxCompressedSize = LZ4_compressBound((int)meshData.size());
-        auto compressedBuffer = (char*)malloc(maxCompressedSize);
+        auto compressedBuffer = (char*)hf::utils::Alloc(maxCompressedSize);
         if (!compressedBuffer) std::cerr << "Failed to allocate memory" << std::endl;
 
         auto dataSize = LZ4_compress_default(meshData.data(), compressedBuffer, (int)meshData.size(), maxCompressedSize);
@@ -139,7 +139,7 @@ namespace ml
         if (dataSize <= 0)
         {
             std::cerr << "Failed to compress file" << std::endl;
-            free(compressedBuffer);
+            hf::utils::Free(compressedBuffer);
             return false;
         }
 
@@ -147,7 +147,7 @@ namespace ml
         if (!outFile)
         {
             std::cerr << "Failed to open output file" << std::endl;
-            free(compressedBuffer);
+            hf::utils::Free(compressedBuffer);
             return false;
         }
 
@@ -155,7 +155,7 @@ namespace ml
         outFile.write(compressedBuffer, dataSize);
         outFile.close();
 
-        free(compressedBuffer);
+        hf::utils::Free(compressedBuffer);
         return true;
     }
 

@@ -1,15 +1,17 @@
-file(GLOB_RECURSE WAYLAND_SRC CONFIGURE_DEPENDS src/*.cpp)
-add_library(lnxwayland ${WAYLAND_SRC})
+project(lnxwayland)
 
-target_link_libraries(lnxwayland
+file(GLOB_RECURSE WAYLAND_SRC CONFIGURE_DEPENDS src/*.cpp)
+add_library(${PROJECT_NAME} ${WAYLAND_SRC})
+include("${CMAKE_SOURCE_DIR}/cmake/General.cmake")
+
+target_link_libraries(${PROJECT_NAME}
         PUBLIC
-        glm
         stb
-        logc
-        rpmalloc
         ext
 )
 
-target_include_directories(lnxwayland PUBLIC include)
-target_include_directories(lnxwayland PUBLIC ../include)
-target_include_directories(lnxwayland PUBLIC ../../include)
+target_include_directories(${PROJECT_NAME} PUBLIC
+        ../include
+        "${CMAKE_SOURCE_DIR}/engine/platform/include"
+        "${CMAKE_SOURCE_DIR}/engine/include"
+)

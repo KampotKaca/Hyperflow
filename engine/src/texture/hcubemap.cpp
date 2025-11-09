@@ -162,7 +162,7 @@ namespace hf
 
                 if (!validLoading)
                 {
-                    if (pixels) utils::Deallocate(pixels);
+                    if (pixels) utils::Free(pixels);
                     return nullptr;
                 }
 
@@ -170,7 +170,7 @@ namespace hf
                 info.data = pixels;
 
                 auto cubemap = MakeRef<Cubemap>(info);
-                if (pixels) utils::Deallocate(pixels);
+                if (pixels) utils::Free(pixels);
                 return cubemap;
             }catch (...)
             {

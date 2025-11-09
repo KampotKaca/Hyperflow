@@ -465,6 +465,7 @@ namespace hf
     }
     namespace utils
     {
+        ivec3 ConvertVersion(const char* version); //Convert string version to an integer,
         GlobalMemoryStatistics GetGlobalMemoryStatistics(); //Get global memory statistics.
         ThreadMemoryStatistics GetThreadMemoryStatistics(); //Get memory statistics from the current thread.
         RendererStatistics GetRendererStatistics(); //Get rendering thread memory statistics.

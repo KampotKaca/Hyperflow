@@ -106,7 +106,7 @@ namespace hf
         {
             if (clip->pcmData)
             {
-                utils::Deallocate(clip->pcmData);
+                utils::Free(clip->pcmData);
                 clip->pcmData = nullptr;
                 return true;
             }

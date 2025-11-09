@@ -8,7 +8,6 @@ target_link_libraries(${PROJECT_NAME}
         PUBLIC
         stb
         logc
-        rpmalloc
         ext
 )
 

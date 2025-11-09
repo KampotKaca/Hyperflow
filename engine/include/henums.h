@@ -60,6 +60,14 @@ namespace hf
     template <class T> using List = std::vector<T>;
     template <class T, unsigned Size, class Allocator = std::allocator<T>> using SmallList = ankerl::svector<T, Size>;
 
+#define BIT(x) (1u << x)
+#define hassert(cond, ...)\
+        if(!cond)\
+        {\
+            log_fatal(__VA_ARGS__);\
+            abort();\
+        }
+
     //endregion
     //region Primitives
 

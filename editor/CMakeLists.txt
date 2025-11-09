@@ -33,6 +33,11 @@ target_link_libraries(${PROJECT_NAME}
         glfw
 )
 
+if(LINUX)
+    find_package(X11 REQUIRED)
+    target_link_libraries(${PROJECT_NAME} PRIVATE ${X11_LIBRARIES})
+endif ()
+
 target_include_directories(${PROJECT_NAME}
         PUBLIC
         "${CMAKE_SOURCE_DIR}/application/include"

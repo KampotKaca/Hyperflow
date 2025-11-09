@@ -1,5 +1,5 @@
 #include "hmodelinternal.h"
-#include "tiny_obj_loader.h"
+#include "../../../external/tinyobj/include/tiny_obj_loader.h"
 
 namespace ml
 {

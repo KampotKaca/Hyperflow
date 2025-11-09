@@ -1,40 +1,45 @@
-#include "hyperflow.h"
 #include "rpmalloc.h"
+#include "hutilfuncs.h"
 
 namespace hf::utils
 {
     void* Alloc(std::size_t n)
     {
         rpmalloc_initialize();
-        void* memory = rpmalloc(n);
-        if (!memory) throw std::bad_alloc();
+        const auto memory = rpmalloc(n);
+        hassert(memory, "Failed to allocate memory");
         return memory;
     }
 
     void* AllocAligned(std::size_t n, std::size_t align)
     {
         rpmalloc_initialize();
-        void* memory = rpaligned_alloc(align, n);
-        if (!memory) throw std::bad_alloc();
+        const auto memory = rpaligned_alloc(align, n);
+        hassert(memory, "Failed to allocate aligned memory");
         return memory;
     }
 
-    void Deallocate(void* p) { rpfree(p); }
-    void DeallocateAligned(void* p, std::size_t align) { rpfree(p); }
+    void Free(void* p) { rpfree(p); }
     void* Realloc(void* p, std::size_t n)
     {
         rpmalloc_initialize();
-        return rprealloc(p, n);
+        const auto mem = rprealloc(p, n);
+        hassert(mem, "Failed to reallocate memory");
+        return mem;
     }
     void* ReallocAligned(void* p, std::size_t n, std::size_t align)
     {
         rpmalloc_initialize();
-        return rpaligned_realloc(p, align, n, 0, 0);
+        const auto mem = rpaligned_realloc(p, align, n, 0, 0);
+        hassert(mem, "Failed to reallocate aligned memory");
+        return mem;
     }
     void* Calloc(std::size_t n, std::size_t size)
     {
         rpmalloc_initialize();
-        return rpcalloc(n, size);
+        const auto mem =  rpcalloc(n, size);
+        hassert(mem, "Failed to callocate memory");
+        return mem;
     }
 
     std::size_t AllocUsableSize(void* ptr) { return rpmalloc_usable_size(ptr); }

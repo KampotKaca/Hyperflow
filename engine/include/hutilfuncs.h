@@ -9,7 +9,6 @@
 
 namespace hf::utils
 {
-    ivec3 ConvertVersion(const char* version); //Convert string version to an integer,
     bool ReadFile(const char* path, List<char>& result); //Get the data of the file.
     bool ReadFile(const std::string& path, List<char>& result); //Get the data of the file.
     bool ReadFile(const std::filesystem::path& path, List<char>& result); //Get the data of the file.
@@ -23,8 +22,7 @@ namespace hf::utils
 
     [[nodiscard]] void* Alloc(std::size_t n); //Allocate n amount of memory.
     [[nodiscard]] void* AllocAligned(std::size_t n, std::size_t align); //Allocate n amount of aligned memory.
-    void Deallocate(void* p); //Deallocate the memory.
-    void DeallocateAligned(void* p, std::size_t align); //Deallocate the aligned memory.
+    void Free(void* p); //Deallocate the memory.
     void* Realloc(void* p, std::size_t n); //Reallocate the memory.
     void* ReallocAligned(void* p, std::size_t n, std::size_t align); //Reallocate the memory with alignment.
     void* Calloc(std::size_t n, std::size_t size); //Allocate and initialize n amount of memory.

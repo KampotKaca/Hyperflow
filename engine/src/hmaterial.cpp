@@ -26,7 +26,7 @@ namespace hf
     {
         if (sizeInBytes)
         {
-            utils::Deallocate(bufferMemory);
+            utils::Free(bufferMemory);
             *MATERIAL_OCTREE.At(octreePosition) = nullptr;
             MATERIAL_OCTREE.FreeNode(octreePosition);
         }

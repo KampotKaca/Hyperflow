@@ -114,7 +114,7 @@ void* operator new(std::size_t size)
 
 void operator delete(void* ptr)
 {
-    hf::utils::Deallocate(ptr);
+    hf::utils::Free(ptr);
 }
 
 void* operator new[](std::size_t size)
@@ -124,7 +124,7 @@ void* operator new[](std::size_t size)
 
 void operator delete[](void* ptr) noexcept
 {
-    hf::utils::Deallocate(ptr);
+    hf::utils::Free(ptr);
 }
 
 ///////////////////////////////////////////////////////////////////////
@@ -136,7 +136,7 @@ void* operator new(std::size_t size, const std::nothrow_t&) noexcept
 
 void operator delete(void* ptr, const std::nothrow_t&) noexcept
 {
-    hf::utils::Deallocate(ptr);
+    hf::utils::Free(ptr);
 }
 
 void* operator new[](std::size_t size, const std::nothrow_t&) noexcept
@@ -146,7 +146,7 @@ void* operator new[](std::size_t size, const std::nothrow_t&) noexcept
 
 void operator delete[](void* ptr, const std::nothrow_t&) noexcept
 {
-    hf::utils::Deallocate(ptr);
+    hf::utils::Free(ptr);
 }
 
 ///////////////////////////////////////////////////////////////////////
@@ -158,7 +158,7 @@ void* operator new(std::size_t size, std::align_val_t alignment)
 
 void operator delete(void* ptr, std::align_val_t alignment) noexcept
 {
-    hf::utils::Deallocate(ptr);
+    hf::utils::Free(ptr);
 }
 
 void* operator new[](std::size_t size, std::align_val_t alignment)
@@ -168,7 +168,7 @@ void* operator new[](std::size_t size, std::align_val_t alignment)
 
 void operator delete[](void* ptr, std::align_val_t alignment) noexcept
 {
-    hf::utils::Deallocate(ptr);
+    hf::utils::Free(ptr);
 }
 
 ///////////////////////////////////////////////////////////////////////
@@ -197,12 +197,12 @@ void* operator new[](std::size_t size, std::align_val_t alignment, const std::no
 
 void operator delete(void* ptr, std::align_val_t, const std::nothrow_t &) noexcept
 {
-    hf::utils::Deallocate(ptr);
+    hf::utils::Free(ptr);
 }
 
 void operator delete[](void* ptr, std::align_val_t, const std::nothrow_t &) noexcept
 {
-    hf::utils::Deallocate(ptr);
+    hf::utils::Free(ptr);
 }
 
 ///////////////////////////////////////////////////////////////////////
@@ -219,44 +219,44 @@ void* operator new[](std::size_t size, std::size_t alignment, const std::nothrow
 
 void operator delete(void* ptr, std::size_t, const std::nothrow_t &) noexcept
 {
-    hf::utils::Deallocate(ptr);
+    hf::utils::Free(ptr);
 }
 
 void operator delete[](void* ptr, std::size_t, const std::nothrow_t &) noexcept
 {
-    hf::utils::Deallocate(ptr);
+    hf::utils::Free(ptr);
 }
 
 ///////////////////////////////////////////////////////////////////////
 // DELETES WITH SIZES
 void operator delete(void* ptr, std::size_t size) noexcept
 {
-    hf::utils::Deallocate(ptr);
+    hf::utils::Free(ptr);
 }
 
 void operator delete[](void* ptr, std::size_t size) noexcept
 {
-    hf::utils::Deallocate(ptr);
+    hf::utils::Free(ptr);
 }
 
 void operator delete(void* ptr, std::size_t size, std::align_val_t align) noexcept
 {
-    hf::utils::Deallocate(ptr);
+    hf::utils::Free(ptr);
 }
 
 void operator delete[](void* ptr, std::size_t size, std::align_val_t align) noexcept
 {
-    hf::utils::Deallocate(ptr);
+    hf::utils::Free(ptr);
 }
 
 void operator delete(void* ptr, std::size_t size, std::size_t align) noexcept
 {
-    hf::utils::Deallocate(ptr);
+    hf::utils::Free(ptr);
 }
 
 void operator delete[](void* ptr, std::size_t size, std::size_t align) noexcept
 {
-    hf::utils::Deallocate(ptr);
+    hf::utils::Free(ptr);
 }
 
 #endif

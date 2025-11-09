@@ -1,4 +1,5 @@
 cmake_minimum_required(VERSION 4.0)
+set(CMAKE_CXX_STANDARD 23)
 
 file(READ "appconfig.h" CONFIG_HEADER_CONTENTS)
 string(REGEX MATCH "#define VERSION \"([0-9]+\\.[0-9]+\\.[0-9]+)\"" VERSION_MATCH "${CONFIG_H_CONTENTS}")
@@ -10,7 +11,6 @@ else()
     project(Hyperflow VERSION 0.0.0)
 endif()
 
-set(CMAKE_CXX_STANDARD 23)
 set(PRODUCTION_BUILD_DIR "" CACHE STRING "Path to export stripped build")
 
 if(NOT CMAKE_BUILD_TYPE)
@@ -18,6 +18,11 @@ if(NOT CMAKE_BUILD_TYPE)
 endif()
 
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+    add_definitions(-DDEBUG)
+    set(ENV{DISABLE_RTSS_LAYER} "1")
+    set(ENV{MANGOHUD} "0")
+    message(STATUS DebugMode!)
+
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Og")
 #    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Wpedantic -Wshadow -Wconversion -Wnull-dereference")
 
@@ -30,6 +35,9 @@ if(CMAKE_BUILD_TYPE STREQUAL "Debug")
     endif()
 
 elseif(CMAKE_BUILD_TYPE STREQUAL "Release")
+    add_definitions(-DRELEASE)
+    set(ENV{MANGOHUD} "1")
+    message(STATUS ReleaseMode!)
 
     if(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
         set(CMAKE_CXX_FLAGS_RELEASE "-O3 -march=native -flto -funroll-loops")
@@ -90,16 +98,7 @@ else()
     message(FATAL_ERROR "Unsupported platform: ${CMAKE_SYSTEM_NAME}")
 endif()
 
-if(CMAKE_BUILD_TYPE STREQUAL "Debug")
-    add_definitions(-DDEBUG)
-    set(ENV{DISABLE_RTSS_LAYER} "1")
-    set(ENV{MANGOHUD} "0")
-    add_definitions(-DENABLE_STATISTICS=1)
-
-elseif(CMAKE_BUILD_TYPE STREQUAL "Release")
-    add_definitions(-DRELEASE)
-    set(ENV{MANGOHUD} "1")
-endif()
+add_definitions(-DENABLE_STATISTICS=1)
 
 option(BUILD_D3D "build_d3d" ON)
 option(BUILD_VULKAN "build_vulkan" ON)
@@ -134,8 +133,13 @@ add_subdirectory(external/svector)
 add_subdirectory(external/lz4/build/cmake)
 add_subdirectory(external/miniaudio)
 
-add_subdirectory(modelconvertor)
-add_subdirectory(shaderconvertor)
+add_subdirectory(external/tinyobj)
+add_subdirectory(external/tinygltf)
+add_subdirectory(external/ufbx)
+
+add_subdirectory(tools/modelconvertor)
+add_subdirectory(tools/shaderconvertor)
+
 add_subdirectory(engine)
 add_subdirectory(application)
 
@@ -143,9 +147,8 @@ if(ENABLE_EDITOR)
     add_subdirectory(external/imgui)
     add_subdirectory(editor)
     add_definitions(-DEDITOR)
-    set_target_properties(Hyperflow_Editor PROPERTIES LINK_SEARCH_START_STATIC ON LINK_SEARCH_END_STATIC ON)
-    set(EXECUTABLE_TARGET Hyperflow_Editor)
+#    set_target_properties(Hyperflow_Editor PROPERTIES LINK_SEARCH_START_STATIC ON LINK_SEARCH_END_STATIC ON)
     message(STATUS "Editor enabled!")
 else ()
-    set(EXECUTABLE_TARGET Hyperflow)
+
 endif ()

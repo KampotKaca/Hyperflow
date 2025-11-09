@@ -115,6 +115,8 @@ namespace hf
             HF.graphicsResources.vertexAttributes.clear();
         }
 
+        void FreeAligned(void* p, std::size_t align) { utils::Free(p); }
+
         void CreateRenderer_i(Renderer* rn)
         {
             if (HF.rendererCount == 0)
@@ -128,8 +130,8 @@ namespace hf
 
                 funcs.allocateFunc = utils::Alloc;
                 funcs.allocateAlignedFunc = utils::AllocAligned;
-                funcs.deallocateFunc = utils::Deallocate;
-                funcs.deallocateAlignedFunc = utils::DeallocateAligned;
+                funcs.deallocateFunc = utils::Free;
+                funcs.deallocateAlignedFunc = FreeAligned;
                 funcs.reallocateFunc = utils::Realloc;
 
                 RendererLoadInfo_i loadInfo

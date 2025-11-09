@@ -179,7 +179,7 @@ namespace hf
 #define INTEGRITY_CHECK\
         if (!CheckFileIntegrity(meshData.data(), offset))\
         {\
-            utils::Deallocate(vertices);\
+            utils::Free(vertices);\
             log_error("[Hyperflow] Corrupted mesh file, unable to load: %s", model->filePath.c_str());\
             return nullptr;\
         }
@@ -296,8 +296,8 @@ namespace hf
         offset += iSize;
         if (!CheckFileIntegrity(meshData.data(), offset))\
         {
-            utils::Deallocate(vertices);
-            utils::Deallocate(indices);
+            utils::Free(vertices);
+            utils::Free(indices);
             log_error("[Hyperflow] Corrupted model file, unable to load: %s", model->filePath.c_str());
             return nullptr;
         }

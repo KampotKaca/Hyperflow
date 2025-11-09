@@ -1,5 +1,6 @@
 #include "hyperflow.h"
 #include "application.h"
+#include "appconfig.h"
 
 int main()
 {

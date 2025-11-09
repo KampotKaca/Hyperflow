@@ -9,7 +9,7 @@ namespace hf
         if (buffer &&
             (transferType == DataTransferType::CopyData ||
             transferType == DataTransferType::TransferOwnership))
-            utils::Deallocate(buffer);
+            utils::Free(buffer);
         ir::rdr::DestroyBuffer_i(this);
     }
 

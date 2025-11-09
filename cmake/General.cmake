@@ -4,6 +4,7 @@ target_link_libraries(${PROJECT_NAME}
         glm
         logc
         svector
+        rpmalloc
 )
 
 target_include_directories(${PROJECT_NAME}
@@ -16,6 +17,7 @@ target_include_directories(${PROJECT_NAME}
         "${CMAKE_SOURCE_DIR}/engine/platform/include"
         "${CMAKE_SOURCE_DIR}/engine/rendering/include"
         "${CMAKE_SOURCE_DIR}/engine/components/include"
+        "${CMAKE_SOURCE_DIR}/external/rpmalloc"
         ${CMAKE_SOURCE_DIR}
 )
 

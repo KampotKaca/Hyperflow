@@ -36,7 +36,6 @@ target_link_libraries(${PROJECT_NAME}
         components
         PRIVATE
         ryml
-        rpmalloc
         platform
         miniaudio
 )
@@ -59,13 +58,12 @@ target_include_directories(${PROJECT_NAME}
         PRIVATE
         "${CMAKE_SOURCE_DIR}/external/rapidyaml/src"
         "${CMAKE_SOURCE_DIR}/external/stb/include"
-        "${CMAKE_SOURCE_DIR}/external/rpmalloc"
         "${CMAKE_SOURCE_DIR}/external/glfw/include"
         "${CMAKE_SOURCE_DIR}/external/miniaudio"
 
         platform/include
         rendering/include
-        "${CMAKE_SOURCE_DIR}/modelconvertor/include"
+        "${CMAKE_SOURCE_DIR}/tools/modelconvertor/include"
 )
 
 get_target_property(LIBS ${PROJECT_NAME} LINK_LIBRARIES)
