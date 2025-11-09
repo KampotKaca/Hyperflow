@@ -5,6 +5,9 @@
 #include <string>
 #include <unordered_map>
 #include <regex>
+#include <shaderc/shaderc.hpp>
+#include "henums.h"
+#include "hstrconversion.h"
 
 namespace fs = std::filesystem;
 
@@ -13,10 +16,25 @@ static std::unordered_map<std::string, std::string> includeMap{};
 void LoadIncludeMap(const fs::path& rootDir);
 std::string ProcessIncludes(const std::string& inputContent);
 
-bool CompileVulkanShader(const std::string& inputPath, const std::string& outputPath)
+shaderc::SpvCompilationResult CompileVulkanShader(const std::string& inputPath, shaderc_shader_kind kind, const std::string& outputPath)
 {
-    std::string command = "glslc " + inputPath + " -o " + outputPath;
-    return std::system(command.c_str()) == 0;
+    std::ifstream file(inputPath);
+    std::stringstream buffer;
+    buffer << file.rdbuf();
+    std::string source = buffer.str();
+
+    shaderc::Compiler compiler;
+    shaderc::CompileOptions options;
+    options.SetOptimizationLevel(shaderc_optimization_level_performance);
+
+    shaderc::SpvCompilationResult result = compiler.CompileGlslToSpv(source, kind, inputPath.c_str(), options);
+    file.close();
+    hassert(result.GetCompilationStatus() == shaderc_compilation_status_success, "Shader compile error: %s", result.GetErrorMessage().c_str());
+    std::ofstream out(outputPath, std::ios::binary);
+    out.write(reinterpret_cast<const char*>(result.cbegin()),
+              std::distance(result.cbegin(), result.cend()) * sizeof(uint32_t));
+
+    return result;
 }
 
 void ConvertVulkanShader(const std::string& inputPath, const std::string& outputPath)
@@ -24,11 +42,7 @@ void ConvertVulkanShader(const std::string& inputPath, const std::string& output
     std::string processed;
     {
         std::ifstream inFile(inputPath);
-        if (!inFile)
-        {
-            std::cerr << "Failed to open input: " << inputPath << "\n";
-            return;
-        }
+        hassert(inFile, "Failed to open input: %s", inputPath.c_str());
 
         std::ostringstream buffer;
         buffer << inFile.rdbuf();
@@ -41,35 +55,35 @@ void ConvertVulkanShader(const std::string& inputPath, const std::string& output
 
     {
         std::ofstream outFile(tempPath);
-        if (!outFile)
-        {
-            std::cerr << "Failed to write output: " << tempPath << "\n";
-            return;
-        }
+        hassert(outFile, "Failed to write output: %s", tempPath.c_str());
 
         outFile << processed;
-        std::cout << "Processed: " << inputPath << " -> " << tempPath << "\n";
+        log_log("Processed: %s -> %s", inputPath.c_str(), tempPath.c_str());
     }
 
-    if (!CompileVulkanShader(tempPath, outputPath))
+    shaderc_shader_kind kind;
+    auto ext = fs::path(inputPath).extension();
+    switch (hf::fnv1a(ext.string()))
     {
-        std::cerr << "Failed to compile shader: " << tempPath << "\n";
-        fs::remove(tempPath);
-        return;
+        case hf::fnv1a(".vert"): kind = shaderc_vertex_shader; break;
+        case hf::fnv1a(".frag"): kind = shaderc_fragment_shader; break;
+        case hf::fnv1a(".comp"): kind = shaderc_compute_shader; break;
+        case hf::fnv1a(".geom"): kind = shaderc_geometry_shader; break;
+        case hf::fnv1a(".tesc"): kind = shaderc_tess_control_shader; break;
+        case hf::fnv1a(".tese"): kind = shaderc_tess_evaluation_shader; break;
+        default: hassert(false, "Unknown shader type: %s", inputPath.c_str());
     }
 
+    CompileVulkanShader(tempPath, kind, outputPath);
     fs::remove(tempPath);
-    std::cout << "Compiled: " << tempPath << " -> " << outputPath << "\n";
+
+    log_log("Compiled: %s -> %s", tempPath.c_str(), outputPath.c_str());
 
 }
 
 int main(int argc, char* argv[])
 {
-    if (argc < 3 || (argc - 1) % 2 != 0)
-    {
-        std::cerr << "Usage: " << argv[0] << " <input1> <output1> [<input2> <output2> ...]\n";
-        return 1;
-    }
+    hassert(argc > 3 && (argc - 1) % 2 == 0, "Usage: %s <input1> <output1> [<input2> <output2> ...]", argv[0])
 
     auto includePath = fs::current_path().parent_path() / fs::path("tools/shaderconvertor/includes/");
     LoadIncludeMap(includePath);
@@ -83,7 +97,7 @@ int main(int argc, char* argv[])
 
 void LoadIncludeMap(const fs::path& rootDir)
 {
-    std::cout << "Include Path: " << rootDir << "\n";
+    log_log("Include Path: %s", rootDir.c_str());
     std::regex nameRegex(R"(#name\s+(\w+))");
 
     for (const auto& entry : fs::recursive_directory_iterator(rootDir))
@@ -92,11 +106,7 @@ void LoadIncludeMap(const fs::path& rootDir)
             continue;
 
         std::ifstream file(entry.path());
-        if (!file)
-        {
-            std::cerr << "Failed to open: " << entry.path() << "\n";
-            continue;
-        }
+        hassert(file, "Failed to open: %s", entry.path().c_str());
 
         std::string line;
         std::ostringstream fullSource;
@@ -116,7 +126,7 @@ void LoadIncludeMap(const fs::path& rootDir)
         }
 
         if (nameFound) includeMap[std::move(nameKey)] = std::move(fullSource).str();
-        else std::cerr << "Warning: No '#name' directive found in " << entry.path() << "\n";
+        else log_error("Warning: No '#name' directive found in %s", entry.path().c_str());
     }
 }
 
@@ -143,7 +153,7 @@ std::string ProcessIncludes(const std::string& inputContent)
             }
             else
             {
-                std::cerr << "Warning: No include found for key '" << includeKey << "'\n";
+                log_error("Warning: No include found for key '%s'", includeKey.c_str());
                 outputStream << line << '\n';
             }
         }

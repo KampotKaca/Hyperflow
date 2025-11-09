@@ -6,19 +6,16 @@ add_executable(${PROJECT_NAME} ${SHADER_CONVERTOR_SRC})
 include("${CMAKE_SOURCE_DIR}/cmake/General.cmake")
 
 file(COPY ${CMAKE_SOURCE_DIR}/tools/shaderconvertor/includes DESTINATION ${CMAKE_BINARY_DIR}/tools/shaderconvertor)
-find_program(GLSLC_EXECUTABLE glslc REQUIRED)
-
-if(NOT GLSLC_EXECUTABLE)
-    message(FATAL_ERROR "glslc not found! Please install Vulkan SDK or add glslc to PATH.")
-endif()
 
 target_link_libraries(${PROJECT_NAME}
         PRIVATE
         ext
+        glslc
 )
 
 target_include_directories(${PROJECT_NAME}
         PRIVATE
         includes/
         ${CMAKE_SOURCE_DIR}/engine/include
+        ${CMAKE_SOURCE_DIR}/external/shaderc/glslc/src
 )

@@ -117,9 +117,10 @@ The renderer runs on a seperate thread, so the rendering process consists of fil
 ### Building the Project
 ### 1. Clion
       1. Clone the repository.
-      2. Open the project in CLion.
-      3. Configure the appropriate CMake build settings.
-      4. Build and run the project.
+      2. Run setup.py (python3 setup.py) to download all the submodules and dependencies.
+      3. Open the project in CLion.
+      4. Configure the appropriate CMake build settings.
+      5. Build and run the project.
 
 ### 2. Cmake, Linux + Clang
 1. Clone the repository.

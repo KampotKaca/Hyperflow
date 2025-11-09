@@ -17,3 +17,6 @@
 [submodule "external/svector"]
 	path = external/svector
 	url = https://github.com/martinus/svector.git
+[submodule "external/shaderc"]
+	path = external/shaderc
+	url = https://github.com/google/shaderc.git

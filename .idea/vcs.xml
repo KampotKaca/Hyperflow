@@ -11,6 +11,7 @@
     <mapping directory="$PROJECT_DIR$/external/rapidyaml/ext/c4core/cmake" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/external/rapidyaml/ext/c4core/src/c4/ext/debugbreak" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/external/rapidyaml/ext/c4core/src/c4/ext/fast_float" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/external/shaderc" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/external/svector" vcs="Git" />
   </component>
 </project>

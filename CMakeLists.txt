@@ -114,6 +114,12 @@ if(BUILD_VULKAN)
     option(VULKAN "vulkan" ON)
     add_definitions(-DRENDERER_VULKAN)
     add_subdirectory(external/vma)
+
+    set(SHADERC_SKIP_TESTS ON)
+    set(SHADERC_ENABLE_TESTS OFF)
+    set(SHADERC_ENABLE_EXAMPLES OFF)
+    set(SHADERC_ENABLE_TOOLS ON)
+    add_subdirectory(external/shaderc)
 endif ()
 
 option(ENABLE_EDITOR "Build the editor instead of the application" OFF)
