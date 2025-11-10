@@ -88,9 +88,10 @@ namespace app
                             {
                                 auto& vikingRoom = APP_OBJECTS.vikingRooms[x * VIKING_ROOM_AXIS_SIZE + z];
                                 vikingRoom.cullingVolume.Update(vikingRoom.transform, meshVolume);
-                                hf::dp::DrawAddInstance(DefaultInstanceData
+                                hf::dp::DrawAddInstance(LitInstanceData
                                 {
-                                    .modelMatrix = vikingRoom.cullingVolume.matrix,
+                                    .modelMatrix = vikingRoom.cullingVolume.trsMatrix,
+                                    .normalMatrix = vikingRoom.cullingVolume.normalMatrix,
                                     .color = hf::vec4{ hf::utils::ColorFromHash(0xFFFFFF), 1 },
                                 }, vikingRoom.cullingVolume);
                             }
@@ -115,9 +116,10 @@ namespace app
                             auto& sphere = APP_OBJECTS.sphere;
                             sphere.cullingVolume.Update(sphere.transform, meshVolume);
 
-                            hf::dp::DrawAddInstance(DefaultInstanceData
+                            hf::dp::DrawAddInstance(LitInstanceData
                             {
-                                .modelMatrix = sphere.cullingVolume.matrix,
+                                .modelMatrix = sphere.cullingVolume.trsMatrix,
+                                .normalMatrix = sphere.cullingVolume.normalMatrix,
                                 .color = hf::vec4{ hf::utils::ColorFromHash(0x9E0505), 1 },
                             }, sphere.cullingVolume);
                         }
@@ -151,7 +153,7 @@ namespace app
 
                             hf::dp::DrawAddInstance(DefaultInstanceData
                             {
-                                .modelMatrix = ground.cullingVolume.matrix,
+                                .modelMatrix = ground.cullingVolume.trsMatrix,
                                 .color = hf::vec4{ hf::utils::ColorFromHash(0x19CB1E), 1 }
                             }, ground.cullingVolume);
                         }

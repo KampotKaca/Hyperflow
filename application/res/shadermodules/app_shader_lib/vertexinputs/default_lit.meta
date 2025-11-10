@@ -1,0 +1,6 @@
+attributes:
+  - __pos_nor_tex
+  - lit_default
+
+topology: TriangleList
+enablePrimitiveRestart: false

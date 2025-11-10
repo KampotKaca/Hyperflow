@@ -88,18 +88,20 @@ namespace hf
         fragmentOutputLibInfo.pNext = &renderingInfo;
         fragmentOutputLibInfo.flags = VK_GRAPHICS_PIPELINE_LIBRARY_FRAGMENT_OUTPUT_INTERFACE_BIT_EXT;
 
+        struct VertexInputData
+        {
+            uint32_t descFrom{};
+            uint32_t attribFrom{};
+            uint32_t attribCount{};
+        };
+
+        List<VertexInputData> attribCounts(info.vertexInputModuleCount);
         for (uint32_t i = 0; i < info.vertexInputModuleCount; i++)
         {
             uint32_t descFrom = vertexInputDescriptions.size(),
                      attribFrom = vertexInputAttributes.size();
-
             uint32_t attribCount = 0;
             auto& moduleInfo = info.pVertexInputModules[i];
-
-            VkPipelineVertexInputStateCreateInfo vInfo{};
-            vInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
-            vInfo.vertexBindingDescriptionCount = moduleInfo.attributeCount;
-
             for (uint32_t k = 0; k < moduleInfo.attributeCount; k++)
             {
                 const auto& attribute = GetAttrib(moduleInfo.pAttributes[k]);
@@ -109,10 +111,21 @@ namespace hf
                     vertexInputAttributes.push_back(attribDescription);
                 attribCount += attribute->attribDescriptions.size();
             }
+            attribCounts[i] = VertexInputData{descFrom, attribFrom, attribCount};
+        }
 
-            vInfo.pVertexBindingDescriptions = &vertexInputDescriptions[descFrom];
-            vInfo.vertexAttributeDescriptionCount = attribCount;
-            vInfo.pVertexAttributeDescriptions = &vertexInputAttributes[attribFrom];
+        for (uint32_t i = 0; i < info.vertexInputModuleCount; i++)
+        {
+            auto& moduleInfo = info.pVertexInputModules[i];
+
+            VkPipelineVertexInputStateCreateInfo vInfo{};
+            vInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
+            vInfo.vertexBindingDescriptionCount = moduleInfo.attributeCount;
+
+            auto data = attribCounts[i];
+            vInfo.pVertexBindingDescriptions = &vertexInputDescriptions[data.descFrom];
+            vInfo.vertexAttributeDescriptionCount = data.attribCount;
+            vInfo.pVertexAttributeDescriptions = &vertexInputAttributes[data.attribFrom];
             vertexInputInfos[i] = vInfo;
 
             VkPipelineInputAssemblyStateCreateInfo inputAssembly{};

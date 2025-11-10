@@ -1,4 +1,4 @@
-#name global
+//#name global
 
 struct Camera
 {

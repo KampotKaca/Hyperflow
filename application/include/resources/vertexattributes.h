@@ -7,7 +7,8 @@ namespace app
 {
     struct AppVertexAttributes
     {
-        hf::VertexBufferAttribute instanceAttribute{};
+        hf::VertexBufferAttribute defaultInstanceAttribute{};
+        hf::VertexBufferAttribute litInstanceAttribute{};
     };
 
     extern AppVertexAttributes APP_VERTEX_ATTRIBUTES;

@@ -15,27 +15,28 @@ layout(location = 8)  in vec4 instance_model_col0;
 layout(location = 9)  in vec4 instance_model_col1;
 layout(location = 10) in vec4 instance_model_col2;
 layout(location = 11) in vec4 instance_model_col3;
-layout(location = 12) in vec4 instance_albedo;
+layout(location = 12) in vec4 instance_normal_col0;
+layout(location = 13) in vec4 instance_normal_col1;
+layout(location = 14) in vec4 instance_normal_col2;
+layout(location = 15) in vec4 instance_albedo;
 
 layout(location = 0) out vec2 o_TexCoord;
 layout(location = 1) out vec3 o_Color;
-layout(location = 2) out vec3 o_lightColor;
+layout(location = 2) out vec3 o_WNormal;
+layout(location = 3) out vec3 o_FragPosition;
 
 void main()
 {
     mat4 modelMatrix = mat4(instance_model_col0, instance_model_col1, instance_model_col2, instance_model_col3);
+    mat3 normalMatrix = mat3(instance_normal_col0.xyz, instance_normal_col1.xyz, instance_normal_col2.xyz);
 
     mat4 modelView    = GLOBAL.CAMERA.view * modelMatrix;
-    vec3 worldNormal  = mat3(modelMatrix) * inNormal;
-
-    PhongLightInfo lightInfo;
-    lightInfo.ambient = 0.3f;
-    lightInfo.smoothness = PUSH_CONSTANT.phongData.w;
-    lightInfo.specularColor = PUSH_CONSTANT.phongData.xyz;
+    vec4 pos = GLOBAL.CAMERA.viewProj * modelMatrix * vec4(inPosition, 1.0);
 
     o_Color = vec3(instance_albedo);
     o_TexCoord = inTexCoord;
-    o_lightColor = GetPhongLighting(vec3(1, 0, 0), worldNormal, lightInfo);
+    o_WNormal = normalize(normalMatrix * inNormal);
+    o_FragPosition = pos.xyz;
 
-    gl_Position = GLOBAL.CAMERA.viewProj * modelMatrix * vec4(inPosition, 1.0);
+    gl_Position = pos;
 }
