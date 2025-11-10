@@ -7,7 +7,7 @@ namespace hf
 {
     struct DirectionalLight
     {
-        vec3 euler { -90, 0, 0 };
+        vec3 euler { 90, 0, 0 };
         vec3 color { 1, 1, 1 };
 
         [[nodiscard]] LightUniformInfo::Directional GetUniformInfo() const

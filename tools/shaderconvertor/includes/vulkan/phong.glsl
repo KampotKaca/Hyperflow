@@ -1,4 +1,4 @@
-#name phonglighting
+//#name phonglighting
 
 struct PhongLightInfo
 {
@@ -7,22 +7,17 @@ struct PhongLightInfo
     vec3 specularColor;
 };
 
-vec3 GetPhongLighting(vec3 albedo, vec3 viewPos, vec3 viewNormal, PhongLightInfo info)
+vec3 GetPhongLighting(vec3 albedo, vec3 wNormal, PhongLightInfo info)
 {
-    vec3 n = normalize(viewNormal);
-    vec3 v = normalize(-viewPos);
+    float intensity = 0;
     vec3 result = albedo * info.ambient;
-    float shininess = mix(1.0, 256.0, info.smoothness);
 
     //Directional Lights
     for (uint i = 0; i < GLOBAL.LIGHT.lightCounts.x; i++)
     {
         DirectionalLight light = GLOBAL.LIGHT.directionalLights[i];
-        float diff = max(dot(n, -light.direction), 0.0);
-
-        vec3 r = reflect(light.direction, n);
-        float spec = (diff > 0.0) ? pow(max(dot(r, v), 0.0), shininess) : 0.0;
-        result += (albedo * diff + info.specularColor * spec) * light.color;
+        float intensity = max(dot(wNormal, light.direction), 0);
+        result += info.smoothness * intensity * light.color;
     }
 
     //Spot Lights

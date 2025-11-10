@@ -7,21 +7,22 @@
 #define GLM_ENABLE_EXPERIMENTAL
 #include <cinttypes>
 
-#include "glm/vec2.hpp"
-#include "glm/vec3.hpp"
-#include "glm/vec4.hpp"
+#include <glm/vec2.hpp>
+#include <glm/vec3.hpp>
+#include <glm/vec4.hpp>
 
-#include "glm/mat4x4.hpp"
-#include "glm/common.hpp"
-#include "glm/fwd.hpp"
-#include "glm/ext/matrix_clip_space.hpp"
-#include "glm/ext/matrix_transform.hpp"
-#include "glm/detail/type_quat.hpp"
-#include "glm/gtc/quaternion.hpp"
-#include "glm/gtx/quaternion.hpp"
-#include "glm/gtx/rotate_vector.hpp"
-#include "glm/gtx/euler_angles.hpp"
-#include "glm/gtc/matrix_access.hpp"
+#include <glm/mat4x4.hpp>
+#include <glm/common.hpp>
+#include <glm/fwd.hpp>
+#include <glm/ext/matrix_clip_space.hpp>
+#include <glm/ext/matrix_transform.hpp>
+#include <glm/detail/type_quat.hpp>
+#include <glm/gtc/quaternion.hpp>
+#include <glm/gtx/quaternion.hpp>
+#include <glm/gtx/rotate_vector.hpp>
+#include <glm/gtc/matrix_access.hpp>
+#include <glm/trigonometric.hpp>
+#include <glm/gtx/euler_angles.hpp>
 
 namespace hf
 {

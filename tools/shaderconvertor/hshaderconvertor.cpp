@@ -116,7 +116,7 @@ void LoadIncludeMap(const fs::path& rootDir)
         while (std::getline(file, line))
         {
             std::smatch match;
-            if (!nameFound && std::regex_match(line, match, nameRegex))
+            if (!nameFound && std::regex_search(line, match, nameRegex))
             {
                 nameKey = match[1];
                 nameFound = true;
