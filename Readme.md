@@ -127,9 +127,10 @@ The renderer runs on a seperate thread, so the rendering process consists of fil
 2. Change the terminal directory to the Hyperflow.
 3. Run the command to create cmake build folder, 
    (On linux Clang is necessary!)
+   (Adding -DENABLE_EDITOR=ON will enable the editor otherwise you only get application executable)
    (adding -DPRODUCTION_BUILD_DIR=Hyperflow will create stripped production ready build beside the basic cmake build folder):
 
-       cmake -S . -B build -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_BUILD_TYPE=Release -DPRODUCTION_BUILD_DIR=Hyperflow
+       cmake -B build -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_BUILD_TYPE=Release -DPRODUCTION_BUILD_DIR=Hyperflow -DENABLE_EDITOR=ON
       
 4. Build the project. (-j flag simply runs build process on multiple thread, very helpful if you want to build quickly.)  
    
@@ -140,9 +141,10 @@ The renderer runs on a seperate thread, so the rendering process consists of fil
 2. Change the terminal directory to the Hyperflow.
 3. Run the command to create cmake build folder,
    (On windows gcc, g++, and ninja are necessary!)
+   (Adding -DENABLE_EDITOR=ON will enable the editor otherwise you only get application executable)
    (adding -DPRODUCTION_BUILD_DIR=Hyperflow will create stripped production ready build beside the basic cmake build folder):
 
-       cmake -S . -B build -G Ninja -DCMAKE_MAKE_PROGRAM=ninja -DCMAKE_C_COMPILER=gcc -DCMAKE_CXX_COMPILER=g++ -DCMAKE_BUILD_TYPE=Release -DPRODUCTION_BUILD_DIR=Hyperflow
+       cmake -B build -G Ninja -DCMAKE_MAKE_PROGRAM=ninja -DCMAKE_C_COMPILER=gcc -DCMAKE_CXX_COMPILER=g++ -DCMAKE_BUILD_TYPE=Release -DPRODUCTION_BUILD_DIR=Hyperflow -DENABLE_EDITOR=ON
 
 4. Build the project. (-j flag simply runs build process on multiple thread, very helpful if you want to build quickly.)
 
