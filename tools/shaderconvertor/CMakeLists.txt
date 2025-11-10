@@ -18,4 +18,5 @@ target_include_directories(${PROJECT_NAME}
         includes/
         ${CMAKE_SOURCE_DIR}/engine/include
         ${CMAKE_SOURCE_DIR}/external/shaderc/glslc/src
+        ${CMAKE_SOURCE_DIR}/external/shaderc/libshaderc/include
 )
