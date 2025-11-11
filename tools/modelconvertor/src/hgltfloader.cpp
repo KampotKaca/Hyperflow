@@ -1,5 +1,5 @@
 #include "hmodelinternal.h"
-#include "../../../external/tinygltf/include/tiny_gltf.h"
+#include "tiny_gltf.h"
 
 namespace ml
 {

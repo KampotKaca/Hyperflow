@@ -138,6 +138,7 @@ add_subdirectory(external/rapidyaml)
 add_subdirectory(external/svector)
 add_subdirectory(external/lz4/build/cmake)
 add_subdirectory(external/miniaudio)
+add_subdirectory(external/phmap)
 
 add_subdirectory(external/tinyobj)
 add_subdirectory(external/tinygltf)

@@ -5,8 +5,11 @@ add_library(${PROJECT_NAME} ${TINY_GLTF_SRC})
 target_sources(${PROJECT_NAME}
         PUBLIC
         FILE_SET HEADERS
-        BASE_DIRS include
-        FILES include/tiny_gltf.h
+        BASE_DIRS
+        FILES tiny_gltf.h
 )
 
-target_include_directories(${PROJECT_NAME} PUBLIC include)
+target_include_directories(${PROJECT_NAME}
+        PUBLIC
+        ${CMAKE_SOURCE_DIR}/external/stb/include
+)

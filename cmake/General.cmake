@@ -5,6 +5,7 @@ target_link_libraries(${PROJECT_NAME}
         logc
         svector
         rpmalloc
+        phmap
 )
 
 target_include_directories(${PROJECT_NAME}
@@ -13,7 +14,6 @@ target_include_directories(${PROJECT_NAME}
         "${CMAKE_SOURCE_DIR}/external/glm"
         "${CMAKE_SOURCE_DIR}/external/logc/include"
         "${CMAKE_SOURCE_DIR}/external/svector/include"
-        "${CMAKE_SOURCE_DIR}/external/phmap"
         "${CMAKE_SOURCE_DIR}/engine/platform/include"
         "${CMAKE_SOURCE_DIR}/engine/rendering/include"
         "${CMAKE_SOURCE_DIR}/engine/components/include"
@@ -25,10 +25,7 @@ target_sources(${PROJECT_NAME}
         PUBLIC
         FILE_SET HEADERS
         BASE_DIRS
-        "${CMAKE_SOURCE_DIR}/external/phmap"
         "${CMAKE_SOURCE_DIR}/external/svector/include"
         FILES
-        "${CMAKE_SOURCE_DIR}/external/phmap/btree.h"
-        "${CMAKE_SOURCE_DIR}/external/phmap/phmap.h"
         "${CMAKE_SOURCE_DIR}/external/svector/include/ankerl/svector.h"
 )
