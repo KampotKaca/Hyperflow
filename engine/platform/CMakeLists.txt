@@ -26,12 +26,7 @@ elseif (LINUX)
     target_link_libraries(${PROJECT_NAME} PRIVATE lnx)
 endif ()
 
-find_package(Vulkan REQUIRED)
-if(VULKAN_FOUND)
-    message(STATUS "VULKAN PLATFORM ADDED")
-    add_definitions(-DVULKAN)
-    target_link_libraries(${PROJECT_NAME} PRIVATE Vulkan::Vulkan)
-endif ()
+include("${CMAKE_SOURCE_DIR}/cmake/Vulkan.cmake")
 
 target_include_directories(${PROJECT_NAME}
         PUBLIC

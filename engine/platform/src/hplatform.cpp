@@ -1,4 +1,6 @@
+#if RENDERER_VULKAN
 #define GLFW_INCLUDE_VULKAN
+#endif
 #include <GLFW/glfw3.h>
 #include "hinputcallbacks.h"
 #include "hplatform.h"
@@ -93,7 +95,7 @@ namespace hf::ir
 
         uint32_t CreateVulkanSurface(void* windowHandle, void* instance, const void* allocator, void* surfaceResult)
         {
-#if defined(VULKAN)
+#if RENDERER_VULKAN
             auto* winHandle = (GLFWwindow*)windowHandle;
             return glfwCreateWindowSurface((VkInstance)instance, winHandle, (VkAllocationCallbacks*)allocator, (VkSurfaceKHR*)surfaceResult);
 #else

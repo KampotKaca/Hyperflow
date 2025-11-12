@@ -9,3 +9,4 @@ target_sources(${PROJECT_NAME}
         FILES vk_mem_alloc.h
 )
 target_compile_options(${PROJECT_NAME} PRIVATE -fPIC)
+include("${CMAKE_SOURCE_DIR}/cmake/Vulkan.cmake")

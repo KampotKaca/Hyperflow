@@ -16,8 +16,6 @@ target_precompile_headers(${PROJECT_NAME}
 )
 #set_target_properties(${PROJECT_NAME} PROPERTIES UNITY_BUILD ON)
 
-find_package(Vulkan REQUIRED)
-
 target_link_libraries(${PROJECT_NAME}
         PUBLIC
         Hyperflow_Engine
@@ -29,7 +27,6 @@ target_link_libraries(${PROJECT_NAME}
         components
         imgui
         PRIVATE
-        Vulkan::Vulkan
         glfw
 )
 
@@ -38,13 +35,14 @@ if(LINUX)
     target_link_libraries(${PROJECT_NAME} PRIVATE ${X11_LIBRARIES})
 endif ()
 
+include("${CMAKE_SOURCE_DIR}/cmake/Vulkan.cmake")
+
 target_include_directories(${PROJECT_NAME}
         PUBLIC
         "${CMAKE_SOURCE_DIR}/application/include"
         "${CMAKE_SOURCE_DIR}/engine/include"
         "${CMAKE_SOURCE_DIR}/external/imgui/"
         "${CMAKE_SOURCE_DIR}/external/glfw/include"
-        ${Vulkan_INCLUDE_DIRS}
 )
 
 if(ENABLE_EDITOR)

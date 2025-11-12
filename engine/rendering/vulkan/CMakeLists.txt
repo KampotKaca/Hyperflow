@@ -24,17 +24,7 @@ target_link_libraries(${PROJECT_NAME}
         vma
 )
 
-find_package(Vulkan REQUIRED)
-
-if(WINDOWS)
-    if (GNU)
-        target_link_libraries(${PROJECT_NAME} PRIVATE Vulkan::Vulkan)
-    else ()
-        message(FATAL_ERROR "Vulkan libraries on windows can only be compiled with gcc")
-    endif()
-else ()
-    target_link_libraries(${PROJECT_NAME} PRIVATE Vulkan::Vulkan)
-endif ()
+include("${CMAKE_SOURCE_DIR}/cmake/Vulkan.cmake")
 
 target_include_directories(${PROJECT_NAME} PUBLIC ../../include)
 target_compile_definitions(${PROJECT_NAME} PRIVATE RENDERER_DLL)
