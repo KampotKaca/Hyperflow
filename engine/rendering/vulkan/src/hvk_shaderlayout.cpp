@@ -47,8 +47,8 @@ namespace hf
             pipelineLayoutInfo.setLayoutCount = 0;
         }
 
-        VK_HANDLE_EXCEPT(vkCreatePipelineLayout(GRAPHICS_DATA.device.logicalDevice.device,
-                         &pipelineLayoutInfo, &GRAPHICS_DATA.platform.allocator, &layout));
+        hvk_assert(vkCreatePipelineLayout(GRAPHICS_DATA.device.logicalDevice.device,
+                 &pipelineLayoutInfo, &GRAPHICS_DATA.platform.allocator, &layout), "vkCreatePipelineLayout Failed!");
     }
 
     VkShaderLayout::~VkShaderLayout()
@@ -63,7 +63,7 @@ namespace hf
 
     URef<VkShaderLayout>& GetShaderLayout(ShaderLayout layout)
     {
-        if (!IsValidShaderLayout(layout)) throw GENERIC_EXCEPT("[Hyperflow]", "Invalid shader layout");
+        hassert(IsValidShaderLayout(layout), "[Hyperflow] Invalid shader layout: %i", layout);
         return GRAPHICS_DATA.shaderLayouts[layout - 1];
     }
 

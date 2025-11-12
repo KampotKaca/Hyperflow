@@ -10,7 +10,7 @@ namespace hf
         poolCreateInfo.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
         poolCreateInfo.queueFamilyIndex = familyIndex;
 
-        VK_HANDLE_EXCEPT(vkCreateCommandPool(device.logicalDevice.device, &poolCreateInfo, &GRAPHICS_DATA.platform.allocator, &result->pool));
+        hvk_assert(vkCreateCommandPool(device.logicalDevice.device, &poolCreateInfo, &GRAPHICS_DATA.platform.allocator, &result->pool), "vkCreateCommandPool Failed!");
     }
 
     void DestroyCommandPool(const GraphicsDevice& device, CommandPool& pool)
@@ -28,21 +28,20 @@ namespace hf
         allocInfo.commandBufferCount = count;
 
         List<VkCommandBuffer> commandBuffers(count);
-        VK_HANDLE_EXCEPT(vkAllocateCommandBuffers(device.logicalDevice.device, &allocInfo, commandBuffers.data()));
+        hvk_assert(vkAllocateCommandBuffers(device.logicalDevice.device, &allocInfo, commandBuffers.data()), "vkAllocateCommandBuffers Failed!");
         for (uint32_t i = 0; i < count; i++) pool->buffers.push_back(commandBuffers[i]);
     }
 
     void BeginCommandBuffer(VkRenderer* rn, VkCommandBuffer buffer)
     {
         auto& frame = rn->frames[rn->currentFrame];
-        if (frame.usedCommandCount >= VULKAN_API_MAX_COMMANDS_PER_FRAME)
-            throw GENERIC_EXCEPT("[Vulkan]", "Please increase MAX_COMMANDS_PER_FRAME");
+        hassert(frame.usedCommandCount < VULKAN_API_MAX_COMMANDS_PER_FRAME, "[Vulkan] Please increase MAX_COMMANDS_PER_FRAME")
 
         VkCommandBufferBeginInfo beginInfo{};
         beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
 
-        VK_HANDLE_EXCEPT(vkResetCommandBuffer(buffer, 0));
-        VK_HANDLE_EXCEPT(vkBeginCommandBuffer(buffer, &beginInfo));
+        hvk_assert(vkResetCommandBuffer(buffer, 0), "vkResetCommandBuffer Failed!");
+        hvk_assert(vkBeginCommandBuffer(buffer, &beginInfo), "vkBeginCommandBuffer Failed!");
         rn->currentCommand = buffer;
     }
 
@@ -53,7 +52,7 @@ namespace hf
             auto& frame = rn->frames[rn->currentFrame];
             frame.usedCommands[frame.usedCommandCount] = rn->currentCommand;
             frame.usedCommandCount++;
-            VK_HANDLE_EXCEPT(vkEndCommandBuffer(rn->currentCommand));
+            hvk_assert(vkEndCommandBuffer(rn->currentCommand), "vkEndCommandBuffer Failed!");
             rn->currentCommand = VK_NULL_HANDLE;
         }
     }
@@ -75,7 +74,7 @@ namespace hf
         submitInfo.pSignalSemaphores = &image.isRenderingFinished;
 
         const auto& device = GRAPHICS_DATA.device.logicalDevice;
-        VK_HANDLE_EXCEPT(vkResetFences(device.device, 1, &image.isInFlight));
-        VK_HANDLE_EXCEPT(vkQueueSubmit(device.graphicsQueue, 1, &submitInfo, image.isInFlight));
+        hvk_assert(vkResetFences(device.device, 1, &image.isInFlight), "vkResetFences Failed!");
+        hvk_assert(vkQueueSubmit(device.graphicsQueue, 1, &submitInfo, image.isInFlight), "vkQueueSubmit Failed!");
     }
 }

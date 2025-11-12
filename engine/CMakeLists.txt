@@ -13,8 +13,6 @@ file(GLOB_RECURSE ENGINE_SRC CONFIGURE_DEPENDS src/*.cpp)
 add_subdirectory(platform)
 add_subdirectory(components)
 
-add_subdirectory(others/exception)
-
 add_library(${PROJECT_NAME} ${ENGINE_SRC})
 target_sources(${PROJECT_NAME}
         PUBLIC
@@ -32,7 +30,6 @@ target_link_libraries(${PROJECT_NAME}
         PUBLIC
         stb
         lz4_static
-        ext
         components
         PRIVATE
         ryml

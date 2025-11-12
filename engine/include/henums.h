@@ -89,23 +89,23 @@ namespace hf
 	enum class AccessType
 	{
 		None = 0,
-		IndirectCommandRead = (1 << 0),
-		IndexRead = (1 << 1), VertAttribRead = (1 << 2),
-		UniformRead = (1 << 3), AttachmentRead = (1 << 4),
-		ShaderRead = (1 << 5), ShaderWrite = (1 << 6),
-		ColorAttachmentRead = (1 << 7), ColorAttachmentWrite = (1 << 8),
-		DepthStencilAttachmentRead = (1 << 9), DepthStencilAttachmentWrite	= (1 << 10),
-		TransferRead = (1 << 11), TransferWrite = (1 << 12),
-		HostRead = (1 << 13), HostWrite = (1 << 14),
-		MemoryRead = (1 << 15), MemoryWrite = (1 << 16),
+		IndirectCommandRead = BIT(0),
+		IndexRead = BIT(1), VertAttribRead = BIT(2),
+		UniformRead = BIT(3), AttachmentRead = BIT(4),
+		ShaderRead = BIT(5), ShaderWrite = BIT(6),
+		ColorAttachmentRead = BIT(7), ColorAttachmentWrite = BIT(8),
+		DepthStencilAttachmentRead = BIT(9), DepthStencilAttachmentWrite = BIT(10),
+		TransferRead = BIT(11), TransferWrite = BIT(12),
+		HostRead = BIT(13), HostWrite = BIT(14),
+		MemoryRead = BIT(15), MemoryWrite = BIT(16),
 	};
 	DEFINE_ENUM_FLAGS(AccessType)
 
 	enum class ShaderUsageStageFlags
 	{
 		None = 0,
-		Vertex = (1u << 0), TessellationControl = (1u << 1), TessellationEvaluation = (1u << 2),
-		Geometry = (1u << 3), Fragment = (1u << 4), Compute = (1u << 5),
+		Vertex = BIT(0), TessellationControl = BIT(1), TessellationEvaluation = BIT(2),
+		Geometry = BIT(3), Fragment = BIT(4), Compute = BIT(5),
 		Default = Vertex | Fragment,
 		AllGraphics = Vertex | TessellationControl | TessellationEvaluation | Geometry | Fragment,
 		All = Vertex | TessellationControl | TessellationEvaluation | Geometry | Fragment | Compute,
@@ -115,14 +115,14 @@ namespace hf
 	enum class RenderPipelineStageFlags
 	{
 		None = 0,
-		PreDraw = (1 << 0),
-		DrawIndirect = (1 << 1), VertexInput = (1 << 2), Vertex = (1 << 3),
-		TessellationControl = (1 << 4), TessellationEvaluation = (1 << 5),
-		Geometry = (1 << 6), Fragment = (1 << 7),
-		EarlyFragmentTest = (1 << 8), LateFragmentTest = (1 << 9), ColorAttachmentOutput = (1 << 10),
-		Compute = (1 << 11), Transfer = (1 << 12),
-		PostDraw = (1 << 13),
-		Host = (1 << 14), AllGraphics = (1 << 15), AllCommands = (1 << 16),
+		PreDraw = BIT(0),
+		DrawIndirect = BIT(1), VertexInput = BIT(2), Vertex = BIT(3),
+		TessellationControl = BIT(4), TessellationEvaluation = BIT(5),
+		Geometry = BIT(6), Fragment = BIT(7),
+		EarlyFragmentTest = BIT(8), LateFragmentTest = BIT(9), ColorAttachmentOutput = BIT(10),
+		Compute = BIT(11), Transfer = BIT(12),
+		PostDraw = BIT(13),
+		Host = BIT(14), AllGraphics = BIT(15), AllCommands = BIT(16),
 		Default = Vertex | Fragment,
 	};
 	DEFINE_ENUM_FLAGS(RenderPipelineStageFlags)
@@ -131,8 +131,8 @@ namespace hf
 
 	enum class BufferUsageTypeFlags
 	{
-		TransferSrc = 1 << 0, TransferDst = 1 << 1, UniformTexel = 1 << 2, StorageTexel = 1 << 3,
-		Uniform = 1 << 4, Storage = 1 << 5, Index = 1 << 6, Vertex = 1 << 7, Indirect = 1 << 8,
+		TransferSrc = BIT(0), TransferDst = BIT(1), UniformTexel = BIT(2), StorageTexel = BIT(3),
+		Uniform = BIT(4), Storage = BIT(5), Index = BIT(6), Vertex = BIT(7), Indirect = BIT(8),
 		Default = TransferSrc | TransferDst | Vertex | Index | Storage,
 		All = TransferSrc | TransferDst | UniformTexel | StorageTexel | Uniform | Storage | Index | Vertex | Indirect,
 	};
@@ -263,8 +263,8 @@ namespace hf
 
     enum class TextureAspectFlags
     {
-        None = 0, Color = 1 << 0, Depth = 1 << 1, Stencil = 1 << 2, MetaData = 1 << 3,
-        Plane0 = 1 << 4, Plane1 = 1 << 5, Plane2 = 1 << 6,
+        None = 0, Color = BIT(0), Depth = BIT(1), Stencil = BIT(2), MetaData = BIT(3),
+        Plane0 = BIT(4), Plane1 = BIT(5), Plane2 = BIT(6),
     };
     DEFINE_ENUM_FLAGS(TextureAspectFlags)
 
@@ -308,7 +308,7 @@ namespace hf
     enum class MeshDataType
     {
         None = 0,
-        Position = 1 << 0, Normal = 1 << 1, Color = 1 << 2, TexCoord = 1 << 3,
+        Position = BIT(0), Normal = BIT(1), Color = BIT(2), TexCoord = BIT(3),
         Default = Position | TexCoord,
         All = Position | Normal | TexCoord | Color,
     };
@@ -346,7 +346,7 @@ namespace hf
 
     enum class ColorMaskingFlags
     {
-        Red = 1 << 0, Green = 1 << 1, Blue = 1 << 2, Alpha = 1 << 3,
+        Red = BIT(0), Green = BIT(1), Blue = BIT(2), Alpha = BIT(3),
         All = Red | Green | Blue | Alpha,
     };
     DEFINE_ENUM_FLAGS(ColorMaskingFlags)
@@ -387,10 +387,10 @@ namespace hf
 
     enum class WindowEventFlags
     {
-        Key = 1 << 0, Char = 1 << 1, PointerMove = 1 << 2, PointerState = 1 << 3,
-        Button = 1 << 4, Scroll = 1 << 5, DragAndDrop = 1 << 6, Close = 1 << 7,
-        Focus = 1 << 8, Minimize = 1 << 9, Maximize = 1 << 10,
-        Move = 1 << 11, Resize = 1 << 12, Refresh = 1 << 13,
+        Key = BIT(0), Char = BIT(1), PointerMove = BIT(2), PointerState = BIT(3),
+        Button = BIT(4), Scroll = BIT(5), DragAndDrop = BIT(6), Close = BIT(7),
+        Focus = BIT(8), Minimize = BIT(9), Maximize = BIT(10),
+        Move = BIT(11), Resize = BIT(12), Refresh = BIT(13),
         Default = Key | Char | PointerMove | PointerState | Button | Scroll | DragAndDrop |
                   Close | Focus | Minimize | Maximize | Move | Resize,
         All = Default | Refresh,

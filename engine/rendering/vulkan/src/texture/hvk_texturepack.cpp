@@ -23,60 +23,58 @@ namespace hf
 
             switch (bInfo.type)
             {
-                case TexturePackBindingType::Texture2D:
-                case TexturePackBindingType::Cubemap:
+            case TexturePackBindingType::Texture2D:
+            case TexturePackBindingType::Cubemap:
+            {
+                for (uint32_t j = 0; j < bInfo.arraySize; j++)
                 {
-                    for (uint32_t j = 0; j < bInfo.arraySize; j++)
-                    {
-                        auto& tInfo = bInfo.textures[j];
+                    auto& tInfo = bInfo.textures[j];
 
-                        if (tInfo.texture)
+                    if (tInfo.texture)
+                    {
+                        const auto* tex = (VkTexture*)tInfo.texture;
+                        auto newBinding = VkTextureBindingViewData{};
+                        newBinding.view = tex->view;
+                        newBinding.layout = tex->layout;
+
+                        binding.bindingArray.push_back(newBinding);
+                    }
+                    else binding.bindingArray.push_back(VkTextureBindingViewData{});
+                }
+            }break;
+            case TexturePackBindingType::RenderTexture:
+            {
+                for (uint32_t j = 0; j < bInfo.arraySize; j++)
+                {
+                    auto& tInfo = bInfo.textures[j];
+
+                    if (tInfo.texture)
+                    {
+                        auto* tex = (VkRenderTexture*)tInfo.texture;
+
+                        if (tInfo.index >= tex->colorAttachmentCount)
                         {
-                            const auto* tex = (VkTexture*)tInfo.texture;
+                            hassert(tex->depthTexture, "[Hyperflow] Render texture invalid attachment index!");
+
                             auto newBinding = VkTextureBindingViewData{};
-                            newBinding.view = tex->view;
-                            newBinding.layout = tex->layout;
+                            newBinding.view = tex->depthTexture->view;
+                            newBinding.layout = tex->depthTexture->layout;
 
                             binding.bindingArray.push_back(newBinding);
                         }
-                        else binding.bindingArray.push_back(VkTextureBindingViewData{});
-                    }
-                }
-                break;
-                case TexturePackBindingType::RenderTexture:
-                {
-                    for (uint32_t j = 0; j < bInfo.arraySize; j++)
-                    {
-                        auto& tInfo = bInfo.textures[j];
-
-                        if (tInfo.texture)
+                        else
                         {
-                            auto* tex = (VkRenderTexture*)tInfo.texture;
+                            const VkTexture* viewTex = tex->colorTextures[tInfo.index];
+                            auto newBinding = VkTextureBindingViewData{};
+                            newBinding.view = viewTex->view;
+                            newBinding.layout = viewTex->layout;
 
-                            if (tInfo.index >= tex->colorAttachmentCount)
-                            {
-                                if (!tex->depthTexture) throw GENERIC_EXCEPT("[Hyperflow]", "Render texture invalid attachment index!");
-
-                                auto newBinding = VkTextureBindingViewData{};
-                                newBinding.view = tex->depthTexture->view;
-                                newBinding.layout = tex->depthTexture->layout;
-
-                                binding.bindingArray.push_back(newBinding);
-                            }
-                            else
-                            {
-                                const VkTexture* viewTex = tex->colorTextures[tInfo.index];
-                                auto newBinding = VkTextureBindingViewData{};
-                                newBinding.view = viewTex->view;
-                                newBinding.layout = viewTex->layout;
-
-                                binding.bindingArray.push_back(newBinding);
-                            }
+                            binding.bindingArray.push_back(newBinding);
                         }
-                        else binding.bindingArray.push_back(VkTextureBindingViewData{});
                     }
+                    else binding.bindingArray.push_back(VkTextureBindingViewData{});
                 }
-                break;
+            }break;
             }
 
             bindings[bInfo.bindingIndex] = binding;
@@ -127,33 +125,31 @@ namespace hf
 
                     switch (binding.bindingType)
                     {
-                        case TexturePackBindingType::Texture2D:
-                        case TexturePackBindingType::Cubemap:
+                    case TexturePackBindingType::Texture2D:
+                    case TexturePackBindingType::Cubemap:
+                    {
+                        const auto* tex = (VkTexture*)texInfo.texture;
+                        texBinding.view = tex->view;
+                        texBinding.layout = tex->layout;
+                    }break;
+                    case TexturePackBindingType::RenderTexture:
+                    {
+                        auto* tex = (VkRenderTexture*)texInfo.texture;
+                        if (texInfo.index >= tex->colorAttachmentCount)
                         {
-                            const auto* tex = (VkTexture*)texInfo.texture;
-                            texBinding.view = tex->view;
-                            texBinding.layout = tex->layout;
-                        }
-                        break;
-                        case TexturePackBindingType::RenderTexture:
-                        {
-                            auto* tex = (VkRenderTexture*)texInfo.texture;
-                            if (texInfo.index >= tex->colorAttachmentCount)
-                            {
-                                if (!tex->depthTexture) throw GENERIC_EXCEPT("[Hyperflow]", "Render texture invalid attachment index!");
+                            hassert(tex->depthTexture, "[Hyperflow] Render texture invalid attachment index!");
 
-                                const auto dt = tex->depthTexture;
-                                texBinding.view = dt->view;
-                                texBinding.layout = dt->layout;
-                            }
-                            else
-                            {
-                                const auto ct = tex->colorTextures[texInfo.index];
-                                texBinding.view = ct->view;
-                                texBinding.layout = ct->layout;
-                            }
+                            const auto dt = tex->depthTexture;
+                            texBinding.view = dt->view;
+                            texBinding.layout = dt->layout;
                         }
-                        break;
+                        else
+                        {
+                            const auto ct = tex->colorTextures[texInfo.index];
+                            texBinding.view = ct->view;
+                            texBinding.layout = ct->layout;
+                        }
+                    }break;
                     }
 
                     CreateDescriptorForBinding(binding, current.texInfo->offset, current.texInfo->count);

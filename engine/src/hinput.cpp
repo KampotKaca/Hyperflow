@@ -1,5 +1,4 @@
 #include "hwindow.h"
-#include "hexception.h"
 #include "hyperflow.h"
 #include "hinternal.h"
 

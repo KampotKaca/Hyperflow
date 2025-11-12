@@ -1,5 +1,4 @@
 #include "hmaterial.h"
-#include "hgenericexception.h"
 #include "hinternal.h"
 #include "hyperflow.h"
 
@@ -9,8 +8,7 @@ namespace hf
 
     Material::Material(const MaterialCreationInfo& info) : sizeInBytes(info.sizeInBytes)
     {
-        if (sizeInBytes > RENDERING_MAX_MATERIAL_MEMORY_BADGET)
-            throw GENERIC_EXCEPT("[Hyperflow]", "Size is over the maximum material badget!");
+        hassert(sizeInBytes <= RENDERING_MAX_MATERIAL_MEMORY_BADGET, "[Hyperflow] Size is over the maximum material badget!")
 
         if (sizeInBytes > 0)
         {
@@ -43,11 +41,8 @@ namespace hf
 
     void Upload(const Ref<Material>& mat, const void* data)
     {
-        if (mat->sizeInBytes > 0)
-        {
-            memcpy(mat->bufferMemory, data, mat->sizeInBytes);
-            mat->isMarkedAsModified = true;
-        }
-        else throw GENERIC_EXCEPT("[Hyperflow]", "Cannot upload in empty material!");
+        hassert(mat->sizeInBytes > 0, "[Hyperflow] Cannot upload in empty material!");
+        memcpy(mat->bufferMemory, data, mat->sizeInBytes);
+        mat->isMarkedAsModified = true;
     }
 }

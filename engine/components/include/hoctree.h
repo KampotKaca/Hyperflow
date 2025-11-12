@@ -56,7 +56,8 @@ namespace hf
                 return result;
             }
 
-            throw GENERIC_EXCEPT("[Hyperflow]", "Chunk is filled!!!");
+            log_fatal_s("[Hyperflow] Chunk is filled!!!");
+            abort();
         }
 
         void FreeNode(uvec3 index)

@@ -40,8 +40,8 @@ namespace hf
         layoutInfo.pBindings = GRAPHICS_DATA.preAllocBuffers.descLayoutBindings.data();
         layoutInfo.flags = VK_DESCRIPTOR_SET_LAYOUT_CREATE_DESCRIPTOR_BUFFER_BIT_EXT;
 
-        VK_HANDLE_EXCEPT(vkCreateDescriptorSetLayout(GRAPHICS_DATA.device.logicalDevice.device,
-            &layoutInfo, &GRAPHICS_DATA.platform.allocator, &layout));
+        hvk_assert(vkCreateDescriptorSetLayout(GRAPHICS_DATA.device.logicalDevice.device,
+            &layoutInfo, &GRAPHICS_DATA.platform.allocator, &layout), "vkCreateDescriptorSetLayout Failed!");
 
         VkBufferDeviceAddressInfoEXT addressInfo{};
         addressInfo.sType = VK_STRUCTURE_TYPE_BUFFER_DEVICE_ADDRESS_INFO_EXT;
@@ -70,7 +70,9 @@ namespace hf
             }
 
         }break;
-            default: throw GENERIC_EXCEPT("[Hyperflow]", "Unknown memory type");
+        default:
+            log_fatal("[Hyperflow] Unknown memory type");
+            abort();
         }
     }
 
@@ -130,7 +132,7 @@ namespace hf
 
     URef<VkBoundBuffer>& GetBuffer(const Buffer buffer)
     {
-        if (!IsValidBuffer(buffer)) throw GENERIC_EXCEPT("[Hyperflow]", "Invalid buffer");
+        hassert(IsValidBuffer(buffer), "[Hyperflow] Invalid buffer: %i", buffer);
         return GRAPHICS_DATA.boundBuffers[buffer - 1];
     }
 }

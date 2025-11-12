@@ -19,6 +19,9 @@ namespace hf
     }
 
 #define DATA_TYPE(v) case fnv1a(#v): return X::v;
+#define DEFAULT_TYPE(v, t)\
+    default: log_warn_s("Unknown %s string: %s", #t, str);\
+    return X::v;
 
     constexpr BufferDataType STRING_TO_BUFFER_DATA_TYPE(const std::string_view str)
     {
@@ -30,7 +33,7 @@ namespace hf
             DATA_TYPE(U32) DATA_TYPE(I32)
             DATA_TYPE(U64) DATA_TYPE(I64)
             DATA_TYPE(F16) DATA_TYPE(F32) DATA_TYPE(F64)
-        default: throw std::invalid_argument("Unknown BufferDataType string");
+            DEFAULT_TYPE(F32, BufferDataType)
         }
 #undef X
     }
@@ -41,7 +44,7 @@ namespace hf
         switch (fnv1a(str))
         {
             DATA_TYPE(Static) DATA_TYPE(WriteOnly) DATA_TYPE(ReadWrite)
-        default: throw std::invalid_argument("Unknown BufferMemoryType string");
+            DEFAULT_TYPE(Static, BufferMemoryType)
         }
 #undef X
     }
@@ -52,7 +55,7 @@ namespace hf
         switch (fnv1a(str))
         {
             DATA_TYPE(Position) DATA_TYPE(Normal) DATA_TYPE(Color) DATA_TYPE(TexCoord)
-        default: throw std::invalid_argument("Unknown MeshDataType string");
+            DEFAULT_TYPE(Position, MeshDataType)
         }
 #undef X
     }
@@ -63,7 +66,7 @@ namespace hf
         switch (fnv1a(str))
         {
             DATA_TYPE(Default) DATA_TYPE(Gray) DATA_TYPE(GrayAlpha) DATA_TYPE(RGB) DATA_TYPE(RGBA)
-        default: throw std::invalid_argument("Unknown TextureChannel string");
+            DEFAULT_TYPE(Default, TextureChannel)
         }
 #undef X
     }
@@ -76,7 +79,7 @@ namespace hf
             DATA_TYPE(None) DATA_TYPE(Color) DATA_TYPE(Depth)
             DATA_TYPE(Stencil) DATA_TYPE(MetaData)
             DATA_TYPE(Plane0) DATA_TYPE(Plane1) DATA_TYPE(Plane2)
-        default: throw std::invalid_argument("Unknown TextureAspectFlags string");
+            DEFAULT_TYPE(Color, TextureAspectFlags)
         }
 #undef X
     }
@@ -180,8 +183,7 @@ namespace hf
             DATA_TYPE(ASTC_10x10_Unorm_Block) DATA_TYPE(ASTC_10x10_Srgb_Block)
             DATA_TYPE(ASTC_12x10_Unorm_Block) DATA_TYPE(ASTC_12x10_Srgb_Block)
             DATA_TYPE(ASTC_12x12_Unorm_Block) DATA_TYPE(ASTC_12x12_Srgb_Block)
-
-        default: throw std::invalid_argument("Unknown TextureFormat string");
+            DEFAULT_TYPE(R8G8B8A8_Unorm, TextureFormat)
         }
 #undef X
     }
@@ -192,7 +194,7 @@ namespace hf
         switch (fnv1a(str))
         {
             DATA_TYPE(Optimal) DATA_TYPE(Linear)
-        default: throw std::invalid_argument("Unknown TextureChannel string");
+            DEFAULT_TYPE(Optimal, TextureTiling)
         }
 #undef X
     }
@@ -205,7 +207,7 @@ namespace hf
             DATA_TYPE(None) DATA_TYPE(TransferSrc) DATA_TYPE(TransferDst)
             DATA_TYPE(Sampled) DATA_TYPE(Storage) DATA_TYPE(Color)
             DATA_TYPE(DepthStencil) DATA_TYPE(Transient) DATA_TYPE(Input) DATA_TYPE(Host)
-        default: throw std::invalid_argument("Unknown TextureUsageFlags string");
+            DEFAULT_TYPE(Color, TextureUsageFlags)
         }
 #undef X
     }
@@ -219,7 +221,7 @@ namespace hf
             DATA_TYPE(TessellationControl) DATA_TYPE(TessellationEvaluation)
             DATA_TYPE(Geometry) DATA_TYPE(Fragment) DATA_TYPE(Compute)
             DATA_TYPE(Default) DATA_TYPE(AllGraphics) DATA_TYPE(All)
-        default: throw std::invalid_argument("Unknown TextureUsageFlags string");
+            DEFAULT_TYPE(None, ShaderUsageStageFlags)
         }
 #undef X
     }
@@ -235,7 +237,7 @@ namespace hf
             DATA_TYPE(DepthReadOnly_Stencil) DATA_TYPE(Depth_StencilReadOnly) DATA_TYPE(Depth)
             DATA_TYPE(DepthReadOnly) DATA_TYPE(Stencil) DATA_TYPE(StencilReadOnly)
             DATA_TYPE(ReadOnly) DATA_TYPE(Attachment) DATA_TYPE(RenderingLocalRead)
-        default: throw std::invalid_argument("Unknown TextureUsageFlags string");
+            DEFAULT_TYPE(ShaderReadOnly, TextureResultLayoutType)
         }
 #undef X
     }
@@ -246,7 +248,7 @@ namespace hf
         switch (fnv1a(str))
         {
             DATA_TYPE(Nearest) DATA_TYPE(Linear)
-        default: throw std::invalid_argument("Unknown MipMap mode string");
+            DEFAULT_TYPE(Nearest, MipMapMode)
         }
 #undef X
     }
@@ -257,7 +259,7 @@ namespace hf
         switch (fnv1a(str))
         {
             DATA_TYPE(Point) DATA_TYPE(Bilinear)
-        default: throw std::invalid_argument("Unknown MipMap mode string");
+            DEFAULT_TYPE(Bilinear, TextureFilter)
         }
 #undef X
     }
@@ -269,7 +271,7 @@ namespace hf
         {
             DATA_TYPE(Repeat) DATA_TYPE(MirroredRepeat) DATA_TYPE(ClampToEdge)
             DATA_TYPE(ClampToBorder) DATA_TYPE(MirrorClampToEdge)
-        default: throw std::invalid_argument("Unknown Texture Repeat Mode string");
+            DEFAULT_TYPE(Repeat, TextureRepeatMode)
         }
 #undef X
     }
@@ -283,7 +285,7 @@ namespace hf
             DATA_TYPE(Equal) DATA_TYPE(LessOrEqual)
             DATA_TYPE(Greater) DATA_TYPE(NotEqual)
             DATA_TYPE(GreaterOrEqual) DATA_TYPE(Always)
-        default: throw std::invalid_argument("Unknown Comparison Operation string");
+            DEFAULT_TYPE(LessOrEqual, ComparisonOperation)
         }
 #undef X
     }
@@ -296,7 +298,7 @@ namespace hf
             DATA_TYPE(Never) DATA_TYPE(Less) DATA_TYPE(Equal)
             DATA_TYPE(LessOrEqual) DATA_TYPE(Greater) DATA_TYPE(NotEqual)
             DATA_TYPE(GreaterOrEqual) DATA_TYPE(Always)
-        default: throw std::invalid_argument("Unknown Depth Comparison Function string");
+            DEFAULT_TYPE(LessOrEqual, DepthComparisonFunction)
         }
 #undef X
     }
@@ -309,7 +311,7 @@ namespace hf
             DATA_TYPE(Keep) DATA_TYPE(Zero) DATA_TYPE(Replace)
             DATA_TYPE(IncrementAndClamp) DATA_TYPE(DecrementAndClamp) DATA_TYPE(Invert)
             DATA_TYPE(IncrementAndWrap) DATA_TYPE(DecrementAndWrap)
-        default: throw std::invalid_argument("Unknown Stencil Operation string");
+            DEFAULT_TYPE(Keep, StencilOperation)
         }
 #undef X
     }
@@ -324,7 +326,7 @@ namespace hf
             DATA_TYPE(LineListWithAdjacency) DATA_TYPE(LineStripWithAdjacency)
             DATA_TYPE(TriangleListWithAdjacency) DATA_TYPE(TriangleStripWithAdjacency)
             DATA_TYPE(PatchList)
-        default: throw std::invalid_argument("Unknown Mesh Primitive Topology Type string");
+            DEFAULT_TYPE(TriangleList, MeshPrimitiveTopologyType)
         }
 #undef X
     }
@@ -335,7 +337,7 @@ namespace hf
         switch (fnv1a(str))
         {
             DATA_TYPE(None) DATA_TYPE(Front) DATA_TYPE(Back) DATA_TYPE(Both)
-        default: throw std::invalid_argument("Unknown Shader Cull Mode string");
+            DEFAULT_TYPE(Back, ShaderCullMode)
         }
 #undef X
     }
@@ -346,7 +348,7 @@ namespace hf
         switch (fnv1a(str))
         {
             DATA_TYPE(CounterClockwise) DATA_TYPE(Clockwise)
-        default: throw std::invalid_argument("Unknown Shader Face Direction string");
+            DEFAULT_TYPE(CounterClockwise, ShaderFaceDirection)
         }
 #undef X
     }
@@ -357,7 +359,7 @@ namespace hf
         switch (fnv1a(str))
         {
             DATA_TYPE(Fill) DATA_TYPE(Line) DATA_TYPE(Point) DATA_TYPE(FillRectangleNV)
-        default: throw std::invalid_argument("Unknown Mesh Polygon Mode string");
+            DEFAULT_TYPE(Fill, MeshPolygonMode)
         }
 #undef X
     }
@@ -368,7 +370,7 @@ namespace hf
         switch (fnv1a(str))
         {
             DATA_TYPE(Red) DATA_TYPE(Green) DATA_TYPE(Blue) DATA_TYPE(Alpha) DATA_TYPE(All)
-        default: throw std::invalid_argument("Unknown Color Masking Flags string");
+            DEFAULT_TYPE(All, ColorMaskingFlags)
         }
 #undef X
     }
@@ -384,7 +386,7 @@ namespace hf
             DATA_TYPE(Equivalent) DATA_TYPE(Invert) DATA_TYPE(OrReverse)
             DATA_TYPE(CopyInverted) DATA_TYPE(OrInverted)
             DATA_TYPE(Nand) DATA_TYPE(Set)
-        default: throw std::invalid_argument("Unknown Shader Blend Operation string");
+            DEFAULT_TYPE(Clear, ShaderBlendOp)
         }
 #undef X
     }
@@ -402,7 +404,7 @@ namespace hf
             DATA_TYPE(ConstantColor) DATA_TYPE(OneMinusConstantColor) DATA_TYPE(ConstantAlpha)
             DATA_TYPE(OneMinusConstantAlpha) DATA_TYPE(SrcAlphaSaturate) DATA_TYPE(Src1Color)
             DATA_TYPE(OneMinusSrc1Color) DATA_TYPE(Src1Alpha) DATA_TYPE(OneMinusSrc1Alpha)
-        default: throw std::invalid_argument("Unknown Color Masking Flags string");
+            DEFAULT_TYPE(Zero, ColorBlendFactorType)
         }
 #undef X
     }
@@ -434,7 +436,7 @@ namespace hf
             DATA_TYPE(Minus) DATA_TYPE(MinusClamped)
             DATA_TYPE(Contrast) DATA_TYPE(InvertOVG)
             DATA_TYPE(Red) DATA_TYPE(Green) DATA_TYPE(Blue)
-        default: throw std::invalid_argument("Unknown Color Masking Flags string");
+            DEFAULT_TYPE(Add, ColorBlendOp)
         }
 #undef X
     }
@@ -445,7 +447,7 @@ namespace hf
         switch (fnv1a(str))
         {
             DATA_TYPE(Unknown) DATA_TYPE(Obj) DATA_TYPE(Fbx) DATA_TYPE(Gltf) DATA_TYPE(Glb)
-        default: throw std::invalid_argument("Unknown Model types string");
+            DEFAULT_TYPE(Unknown, ModelType)
         }
 #undef X
     }
@@ -456,7 +458,7 @@ namespace hf
         switch (fnv1a(str))
         {
             DATA_TYPE(Vertex) DATA_TYPE(Instance)
-        default: throw std::invalid_argument("Unknown Buffer input rate string");
+            DEFAULT_TYPE(Vertex, BufferInputRate)
         }
 #undef X
     }
@@ -468,7 +470,7 @@ namespace hf
         {
             DATA_TYPE(Default) DATA_TYPE(U8) DATA_TYPE(S16)
             DATA_TYPE(S24) DATA_TYPE(S32) DATA_TYPE(F32)
-        default: throw std::invalid_argument("Unknown Audio clip format string");
+            DEFAULT_TYPE(Default, AudioClipFormat)
         }
 #undef X
     }
@@ -479,7 +481,7 @@ namespace hf
         switch (fnv1a(str))
         {
             DATA_TYPE(Rectangular) DATA_TYPE(Simple) DATA_TYPE(CustomWeights)
-        default: throw std::invalid_argument("Unknown Audio clip channel mix mode string");
+            DEFAULT_TYPE(Rectangular, AudioClipChannelMixMode)
         }
 #undef X
     }
@@ -490,7 +492,7 @@ namespace hf
         switch (fnv1a(str))
         {
             DATA_TYPE(None) DATA_TYPE(Rectangle) DATA_TYPE(Triangle)
-        default: throw std::invalid_argument("Unknown Audio clip dither mode string");
+            DEFAULT_TYPE(None, AudioClipDitherMode)
         }
 #undef X
     }
@@ -504,8 +506,8 @@ namespace hf
 
     inline void START_READING(const std::filesystem::path& assetPath, List<char>& metadata)
     {
-        hassert(utils::FileExists(assetPath), "[Hyperflow] Unable to find meta file: %s", assetPath)
-        hassert(utils::ReadFile(assetPath, metadata), "[Hyperflow] Unable to read meta: %s", assetPath)
+        hassert(utils::FileExists(assetPath), "[Hyperflow] Unable to find meta file: %s", assetPath.string().c_str())
+        hassert(utils::ReadFile(assetPath, metadata), "[Hyperflow] Unable to read meta: %s", assetPath.string().c_str())
         metadata.push_back('\0');
     }
 

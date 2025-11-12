@@ -329,9 +329,9 @@ namespace hf
         }
 #endif
 
-        VK_HANDLE_EXCEPT(vkCreateGraphicsPipelines(GRAPHICS_DATA.device.logicalDevice.device,
+        hvk_assert(vkCreateGraphicsPipelines(GRAPHICS_DATA.device.logicalDevice.device,
                              cache, (uint32_t)pipelineCreateInfos.size(), pipelineCreateInfos.data(),
-                             &GRAPHICS_DATA.platform.allocator, modules.data()));
+                             &GRAPHICS_DATA.platform.allocator, modules.data()), "vkCreateGraphicsPipelines Failed!");
 
 #if defined(VK_ENABLE_PIPELINE_CACHES)
         {
@@ -386,7 +386,7 @@ namespace hf
             createInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
             createInfo.codeSize = codeSize;
             createInfo.pCode = (uint32_t*)code;
-            VK_HANDLE_EXCEPT(vkCreateShaderModule(GRAPHICS_DATA.device.logicalDevice.device, &createInfo, &GRAPHICS_DATA.platform.allocator, &module));
+            hvk_assert(vkCreateShaderModule(GRAPHICS_DATA.device.logicalDevice.device, &createInfo, &GRAPHICS_DATA.platform.allocator, &module), "vkCreateShaderModule Failed!");
 
             VkPipelineShaderStageCreateInfo stageInfo{};
             stageInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
@@ -403,7 +403,7 @@ namespace hf
 
     VkPipeline GetShaderLibraryModule(const VkShaderLibrary* lib, uint32_t moduleId)
     {
-        if (lib->modules.size() > moduleId) return lib->modules[moduleId];
-        throw GENERIC_EXCEPT("[Hyperflow]", "Trying to access out of bounds shader module! ID: %i", moduleId);
+        hassert(lib->modules.size() > moduleId, "[Hyperflow] Trying to access out of bounds shader module! ID: %i", moduleId)
+        return lib->modules[moduleId];
     }
 }

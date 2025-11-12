@@ -71,11 +71,13 @@ namespace hf
     {
         void LoadApi_i(RenderingApiType api)
         {
-            if (HF.renderingApi.type != RenderingApiType::None) throw GENERIC_EXCEPT("[Hyperflow]", "Cannot load multiple rendering APIs, need unload current one first");
+            hassert(HF.renderingApi.type == RenderingApiType::None, "[Hyperflow] Cannot load multiple rendering APIs, need unload current one first");
             RenderingApi newApi{};
             switch (api)
             {
-                case RenderingApiType::None: throw GENERIC_EXCEPT("[Hyperflow]", "Cannot run the engine without rendering");
+                case RenderingApiType::None:
+                log_fatal("[Hyperflow]", "Cannot run the engine without rendering");
+                abort();
                 case RenderingApiType::Vulkan:
                     newApi.handle = platform::LoadDll("vk");
                     break;
@@ -85,9 +87,9 @@ namespace hf
                 default: break;
             }
 
-            if (!newApi.handle) throw GENERIC_EXCEPT("[Hyperflow]", "Cannot load rendering API");
+            hassert(newApi.handle, "[Hyperflow] Cannot load rendering API");
             auto func = (RendererAPI*(*)())platform::GetFuncPtr(newApi.handle, "GetAPI");
-            if (!func) throw GENERIC_EXCEPT("[Hyperflow]", "Unable to fund GetAPI function in the rendering dll");
+            hassert(func, "[Hyperflow] Unable to fund GetAPI function in the rendering dll");
             newApi.api = *func();
             newApi.type = api;
             HF.renderingApi = newApi;

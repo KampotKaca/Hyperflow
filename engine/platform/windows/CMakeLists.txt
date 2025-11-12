@@ -8,7 +8,6 @@ target_link_libraries(${PROJECT_NAME}
         PUBLIC
         stb
         logc
-        ext
 )
 
 target_link_libraries(${PROJECT_NAME} PRIVATE winmm Dbghelp)

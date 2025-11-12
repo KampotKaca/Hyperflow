@@ -58,7 +58,7 @@ namespace hf
 
         imageInfo.mipLevels = mipLevels;
 
-        VK_HANDLE_EXCEPT(vkCreateImage(device, &imageInfo, &GRAPHICS_DATA.platform.allocator, &image));
+        hvk_assert(vkCreateImage(device, &imageInfo, &GRAPHICS_DATA.platform.allocator, &image), "vkCreateImage Failed!");
         AllocateImage(details.memoryType, image, &imageMemory);
 
         if (info.pTextures) QueueTextureUpload(this, info.pTextures, (VkImageAspectFlags)info.details.aspectFlags);
@@ -136,7 +136,11 @@ namespace hf
             sourceStage = VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT;
             destinationStage = VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
         }
-        else throw GENERIC_EXCEPT("[Hyperflow]", "Unsupported layout transition!");
+        else
+        {
+            log_fatal("[Hyperflow] Unsupported layout transition!");
+            abort();
+        }
 
         GRAPHICS_DATA.preAllocBuffers.imageBarriers.reserve(imageInfoCount);
         GRAPHICS_DATA.preAllocBuffers.imageBarriers.clear();
@@ -242,7 +246,7 @@ namespace hf
         viewInfo.subresourceRange.layerCount = texture->bufferCount;
 
         const auto device = GRAPHICS_DATA.device.logicalDevice.device;
-        VK_HANDLE_EXCEPT(vkCreateImageView(device, &viewInfo, &GRAPHICS_DATA.platform.allocator, &texture->view));
+        hvk_assert(vkCreateImageView(device, &viewInfo, &GRAPHICS_DATA.platform.allocator, &texture->view), "vkCreateImageView Failed!");
     }
 
     void GenerateMimMaps(VkCommandBuffer command)

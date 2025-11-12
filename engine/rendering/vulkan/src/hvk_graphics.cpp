@@ -16,8 +16,8 @@ namespace hf
         : shutdownCallback(info.shutdownCallback), windowHandle(info.handle), targetSize(info.size), vSyncMode(info.vSyncMode)
     {
         if (!GRAPHICS_DATA.deviceIsLoaded) LoadDevice(windowHandle, &swapchain.surface);
-        else VK_HANDLE_EXCEPT((VkResult)GRAPHICS_DATA.platform.functions.createVulkanSurfaceFunc
-            (windowHandle, GRAPHICS_DATA.instance, &GRAPHICS_DATA.platform.allocator, &swapchain.surface));
+        else hvk_assert((VkResult)GRAPHICS_DATA.platform.functions.createVulkanSurfaceFunc
+            (windowHandle, GRAPHICS_DATA.instance, &GRAPHICS_DATA.platform.allocator, &swapchain.surface), "createVulkanSurfaceFunc Failed!");
 
         if (info.initCallback) info.initCallback();
         CreateSwapchain(swapchain.surface, targetSize, vSyncMode,  swapchain);
@@ -152,7 +152,7 @@ namespace hf
         createInfo.enabledLayerCount = NUM_VK_VALIDATION_LAYERS;
 #endif
 
-        VK_HANDLE_EXCEPT(vkCreateDevice(device.device, &createInfo, &GRAPHICS_DATA.platform.allocator, &device.logicalDevice.device));
+        hvk_assert(vkCreateDevice(device.device, &createInfo, &GRAPHICS_DATA.platform.allocator, &device.logicalDevice.device), "vkCreateDevice Failed!");
 
         auto& indices = device.familyIndices;
         vkGetDeviceQueue(device.logicalDevice.device, indices.graphicsFamily.value(),
@@ -205,7 +205,7 @@ namespace hf
             else if (flags & VK_QUEUE_COMPUTE_BIT)  deviceData.familyIndices.computeFamily = i;
 
             VkBool32 presentSupport = false;
-            VK_HANDLE_EXCEPT(vkGetPhysicalDeviceSurfaceSupportKHR(device, i, surface, &presentSupport));
+            hvk_assert(vkGetPhysicalDeviceSurfaceSupportKHR(device, i, surface, &presentSupport), "vkGetPhysicalDeviceSurfaceSupportKHR Failed!");
 
             if (presentSupport) deviceData.familyIndices.presentFamily = i;
             if (deviceData.familyIndices.IsComplete()) break;
@@ -255,16 +255,15 @@ namespace hf
     void LoadDevice(void* windowHandle, VkSurfaceKHR* resultSurface)
     {
         uint32_t deviceCount = 0;
-        VK_HANDLE_EXCEPT(vkEnumeratePhysicalDevices(GRAPHICS_DATA.instance, &deviceCount, nullptr));
-
-        if (deviceCount == 0) throw GENERIC_EXCEPT("[Vulkan]", "No Graphics device found");
+        hvk_assert(vkEnumeratePhysicalDevices(GRAPHICS_DATA.instance, &deviceCount, nullptr), "vkEnumeratePhysicalDevices Failed!");
+        hassert(deviceCount > 0, "[Vulkan] No Graphics device found");
 
         SmallList<VkPhysicalDevice, 8> availableDevices(deviceCount);
-        VK_HANDLE_EXCEPT(vkEnumeratePhysicalDevices(GRAPHICS_DATA.instance,
-        &deviceCount, availableDevices.data()));
+        hvk_assert(vkEnumeratePhysicalDevices(GRAPHICS_DATA.instance,
+        &deviceCount, availableDevices.data()), "vkEnumeratePhysicalDevices Failed!");
 
-        VK_HANDLE_EXCEPT((VkResult)GRAPHICS_DATA.platform.functions.createVulkanSurfaceFunc
-        (windowHandle, GRAPHICS_DATA.instance, &GRAPHICS_DATA.platform.allocator, resultSurface));
+        hvk_assert((VkResult)GRAPHICS_DATA.platform.functions.createVulkanSurfaceFunc
+        (windowHandle, GRAPHICS_DATA.instance, &GRAPHICS_DATA.platform.allocator, resultSurface), "createVulkanSurfaceFunc Failed!");
 
         SmallList<GraphicsDevice, 8> devices{};
 
@@ -280,7 +279,7 @@ namespace hf
             }
         }
 
-        if (devices.empty()) throw GENERIC_EXCEPT("[Vulkan]", "No suitable graphics device found");
+        hassert(!devices.empty(), "[Vulkan] No suitable graphics device found");
 
         uint32_t chosenDevice = 0;
         {
@@ -311,7 +310,7 @@ namespace hf
         allocatorInfo.flags = VMA_ALLOCATOR_CREATE_BUFFER_DEVICE_ADDRESS_BIT;
         allocatorInfo.pAllocationCallbacks = &GRAPHICS_DATA.platform.allocator;
 
-        VK_HANDLE_EXCEPT(vmaCreateAllocator(&allocatorInfo, &GRAPHICS_DATA.allocator));
+        hvk_assert(vmaCreateAllocator(&allocatorInfo, &GRAPHICS_DATA.allocator), "vmaCreateAllocator Failed!");
 
         CreateCommandPool(GRAPHICS_DATA.device, GRAPHICS_DATA.device.familyIndices.transferFamily.value(), &GRAPHICS_DATA.transferPool);
         CreateCommandBuffers(GRAPHICS_DATA.device, &GRAPHICS_DATA.transferPool, 1);
@@ -379,14 +378,14 @@ namespace hf
         GRAPHICS_DATA.extensionFunctions.vkGetDescriptorSetLayoutSizeEXT    = (PFN_vkGetDescriptorSetLayoutSizeEXT)vkGetDeviceProcAddr(device, "vkGetDescriptorSetLayoutSizeEXT");
         GRAPHICS_DATA.extensionFunctions.vkGetBufferDeviceAddressKHR        = (PFN_vkGetBufferDeviceAddressEXT)vkGetDeviceProcAddr(device, "vkGetBufferDeviceAddressKHR");
 
-        if (!GRAPHICS_DATA.extensionFunctions.vkCmdBeginRenderingKHR             ||
-            !GRAPHICS_DATA.extensionFunctions.vkCmdEndRenderingKHR               ||
-            !GRAPHICS_DATA.extensionFunctions.vkCmdPipelineBarrier2KHR           ||
-            !GRAPHICS_DATA.extensionFunctions.vkCmdBindDescriptorBuffersEXT      ||
-            !GRAPHICS_DATA.extensionFunctions.vkCmdSetDescriptorBufferOffsetsEXT ||
-            !GRAPHICS_DATA.extensionFunctions.vkGetDescriptorEXT                 ||
-            !GRAPHICS_DATA.extensionFunctions.vkGetDescriptorSetLayoutSizeEXT    ||
-            !GRAPHICS_DATA.extensionFunctions.vkGetBufferDeviceAddressKHR)
-            throw GENERIC_EXCEPT("[Vulkan]", "Failed to load extension functions");
+        hassert(GRAPHICS_DATA.extensionFunctions.vkCmdBeginRenderingKHR             &&
+                GRAPHICS_DATA.extensionFunctions.vkCmdEndRenderingKHR               &&
+                GRAPHICS_DATA.extensionFunctions.vkCmdPipelineBarrier2KHR           &&
+                GRAPHICS_DATA.extensionFunctions.vkCmdBindDescriptorBuffersEXT      &&
+                GRAPHICS_DATA.extensionFunctions.vkCmdSetDescriptorBufferOffsetsEXT &&
+                GRAPHICS_DATA.extensionFunctions.vkGetDescriptorEXT                 &&
+                GRAPHICS_DATA.extensionFunctions.vkGetDescriptorSetLayoutSizeEXT    &&
+                GRAPHICS_DATA.extensionFunctions.vkGetBufferDeviceAddressKHR,
+                "[Vulkan] Failed to load extension functions");
     }
 }

@@ -13,7 +13,7 @@ namespace hf::ir
     {
         void Load()
         {
-            if(!glfwInit()) throw GENERIC_EXCEPT("[Hyperflow]", "Error: Failed to initialize GLFW!");
+            hassert(glfwInit(), "[Hyperflow] Error: Failed to initialize GLFW!");
             hf::platform::Load();
         }
 
@@ -115,7 +115,7 @@ namespace hf::ir
 
             auto newWindow = glfwCreateWindow(win->rect.size.x, win->rect.size.y,
                 info.title.c_str(), nullptr, nullptr);
-            if (!newWindow) throw GENERIC_EXCEPT("[Hyperflow]", "Failed to create window!");
+            hassert(newWindow, "[Hyperflow] Failed to create window!")
 
             win->handle = newWindow;
         }
@@ -188,54 +188,51 @@ namespace hf::ir
             switch (state)
             {
             case WindowState::Restored:
-                {
-                    glfwRestoreWindow(window);
-                    glfwShowWindow(window);
-                    glfwSetWindowMonitor(window, nullptr,
-                        rect.position.x, rect.position.y,
-                        rect.size.x, rect.size.y, 0);
-                    break;
-                }
+            {
+                glfwRestoreWindow(window);
+                glfwShowWindow(window);
+                glfwSetWindowMonitor(window, nullptr,
+                rect.position.x, rect.position.y,
+                rect.size.x, rect.size.y, 0);
+            }break;
             case WindowState::Minimized: glfwIconifyWindow(window);  break;
             case WindowState::Maximized: glfwMaximizeWindow(window); break;
             case WindowState::Hidden:    glfwHideWindow(window);     break;
             case WindowState::Fullscreen:
+            {
+                GLFWmonitor* monitor = glfwGetWindowMonitor(window);
+                if (!monitor) monitor = glfwGetPrimaryMonitor();
+
+                if (win->state != WindowState::FullscreenBorderless)
                 {
-                    GLFWmonitor* monitor = glfwGetWindowMonitor(window);
-                    if (!monitor) monitor = glfwGetPrimaryMonitor();
-
-                    if (win->state != WindowState::FullscreenBorderless)
-                    {
-                        win->rect.position = GetPosition(win);
-                        win->rect.size = GetSize(win);
-                    }
-
-                    const GLFWvidmode* mode = glfwGetVideoMode(monitor);
-                    glfwSetWindowMonitor(window, monitor, 0, 0, mode->width, mode->height, mode->refreshRate);
-                    break;
+                    win->rect.position = GetPosition(win);
+                    win->rect.size = GetSize(win);
                 }
+
+                const GLFWvidmode* mode = glfwGetVideoMode(monitor);
+                glfwSetWindowMonitor(window, monitor, 0, 0, mode->width, mode->height, mode->refreshRate);
+            }break;
             case WindowState::FullscreenBorderless:
+            {
+                GLFWmonitor* monitor = glfwGetWindowMonitor(window);
+                if (!monitor) monitor = glfwGetPrimaryMonitor();
+                const GLFWvidmode* mode = glfwGetVideoMode(monitor);
+
+                if (win->state != WindowState::Fullscreen)
                 {
-                    GLFWmonitor* monitor = glfwGetWindowMonitor(window);
-                    if (!monitor) monitor = glfwGetPrimaryMonitor();
-                    const GLFWvidmode* mode = glfwGetVideoMode(monitor);
-
-                    if (win->state != WindowState::Fullscreen)
-                    {
-                        win->rect.position = GetPosition(win);
-                        win->rect.size = GetSize(win);
-                    }
-
-                    glfwSetWindowAttrib(window, GLFW_DECORATED, GLFW_FALSE);
-                    glfwSetWindowMonitor(window, nullptr, 0, 0, mode->width, mode->height, 0);
-                    break;
+                    win->rect.position = GetPosition(win);
+                    win->rect.size = GetSize(win);
                 }
-            default: throw GENERIC_EXCEPT("[Hyperflow]", "Invalid window state!");
+
+                glfwSetWindowAttrib(window, GLFW_DECORATED, GLFW_FALSE);
+                glfwSetWindowMonitor(window, nullptr, 0, 0, mode->width, mode->height, 0);
+            }break;
+            default:
+                log_fatal("[Hyperflow] Invalid window state!");
+                abort();
             }
 
-            if (win->state == WindowState::FullscreenBorderless)
-                glfwSetWindowAttrib(window, GLFW_DECORATED, GLFW_TRUE);
-
+            if (win->state == WindowState::FullscreenBorderless) glfwSetWindowAttrib(window, GLFW_DECORATED, GLFW_TRUE);
             win->state = state;
         }
 

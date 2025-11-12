@@ -14,12 +14,10 @@ namespace hf
     void UploadBuffer(const VkRenderer* rn, const VkVertexBuffer* buffer, const void* data,
         uint32_t offsetInBytes, uint32_t sizeInBytes)
     {
+        hassert(buffer->memoryType != BufferMemoryType::Static, "[Hyperflow] Cannot modify static buffer")
+
         uint32_t currentFrame = 0;
         if (rn) currentFrame = rn->currentFrame;
-
-        if (buffer->memoryType == BufferMemoryType::Static)
-            throw GENERIC_EXCEPT("[Hyperflow]", "Cannot modify static buffer");
-
         memcpy((uint8_t*)buffer->memoryMappings[currentFrame] + offsetInBytes, data, sizeInBytes);
     }
 }

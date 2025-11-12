@@ -46,8 +46,7 @@ namespace hf
             description.offset = currentOffset;
 
             attribDescriptions[i] = description;
-            if (stride.lSize % 4 != 0)
-                throw GENERIC_EXCEPT("[Hyperflow]", "Vertex buffer attribute size should be multiple of 4");
+            hassert(stride.lSize % 4 == 0, "[Hyperflow] Vertex buffer attribute size should be multiple of 4")
 
             location += ((stride.lSize - 1) / 16) + 1;
             currentOffset += stride.lSize;
@@ -66,7 +65,7 @@ namespace hf
 
     URef<VkVertexBufferAttribute>& GetAttrib(VertexBufferAttribute attrib)
     {
-        if (!IsValidAttrib(attrib)) throw GENERIC_EXCEPT("[Hyperflow]", "Invalid buffer attribute");
+        hassert(IsValidAttrib(attrib), "[Hyperflow] Invalid buffer attribute: %i", attrib);
         return GRAPHICS_DATA.bufferAttribs[attrib - 1];
     }
 }

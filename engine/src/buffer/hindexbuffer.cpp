@@ -7,7 +7,7 @@ namespace hf
 {
     IndexBuffer::IndexBuffer(const IndexBufferCreationInfo& info, DataTransferType transferType) : details(info)
     {
-        if (info.indexCount % 3 != 0) throw GENERIC_EXCEPT("[Hyperflow]", "index count must be a multiple of 3");
+        hassert(info.indexCount % 3 == 0, "[Hyperflow] index count must be a multiple of 3");
 
         this->transferType = transferType;
         if (transferType == DataTransferType::CopyData)

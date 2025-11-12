@@ -25,7 +25,9 @@ namespace hf
             case VK_DESCRIPTOR_TYPE_STORAGE_TEXEL_BUFFER:   type.typeSize = props.storageTexelBufferDescriptorSize;   break;
             case VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER:         type.typeSize = props.uniformBufferDescriptorSize;        break;
             case VK_DESCRIPTOR_TYPE_STORAGE_BUFFER:         type.typeSize = props.storageBufferDescriptorSize;        break;
-                default: throw GENERIC_EXCEPT("[Hyperflow]", "Unsupported descriptor type %i", type);
+            default:
+                log_fatal("[Hyperflow] Unsupported descriptor type %i", type);
+                abort();
             }
 
             type.alignment = AlignUp(type.typeSize, alignment);
@@ -102,7 +104,9 @@ namespace hf
         case VkDescriptorBufferType::StorageTexelBuffer:   getInfo.data.pStorageTexelBuffer   = &addressInfo; break;
         case VkDescriptorBufferType::UniformBuffer:        getInfo.data.pUniformBuffer        = &addressInfo; break;
         case VkDescriptorBufferType::StorageBuffer:        getInfo.data.pStorageBuffer        = &addressInfo; break;
-        default: throw GENERIC_EXCEPT("[Hyperflow]", "Unsupported descriptor buffer type %i", info.type);
+        default:
+            log_fatal("[Hyperflow] Unsupported descriptor buffer type %i", info.type);
+            abort();
         }
 
         descriptor.usageFlags = VK_BUFFER_USAGE_RESOURCE_DESCRIPTOR_BUFFER_BIT_EXT;
@@ -120,7 +124,9 @@ namespace hf
         case VkDescriptorImageType::CombinedImageSampler: getInfo.data.pCombinedImageSampler = &info.imageInfo; break;
         case VkDescriptorImageType::SampledImage:         getInfo.data.pSampledImage         = &info.imageInfo; break;
         case VkDescriptorImageType::StorageImage:         getInfo.data.pStorageImage         = &info.imageInfo; break;
-        default: throw GENERIC_EXCEPT("[Hyperflow]", "Unsupported descriptor image type %i", info.type);
+        default:
+            log_fatal("[Hyperflow] Unsupported descriptor image type %i", info.type);
+            abort();
         }
 
         descriptor.usageFlags = VK_BUFFER_USAGE_SAMPLER_DESCRIPTOR_BUFFER_BIT_EXT;

@@ -39,8 +39,7 @@ namespace hf
 
             if (attachmentInfo.isUsedForPresentation)
             {
-                if (presentationAttachmentIndex != -1)
-                    throw GENERIC_EXCEPT("[Hyperflow]", "Only one color attachment can be used for presentation");
+                hassert(presentationAttachmentIndex == -1, "[Hyperflow] Only one color attachment can be used for presentation");
                 presentationAttachmentIndex = (int32_t)i;
             }
         }
@@ -191,7 +190,7 @@ namespace hf
         switch ((int)mode)
         {
         case 1:
-
+        {
             for (auto i : ir::rdr::DEPTH_FORMATS)
             {
                 const auto format = (VkFormat)i;
@@ -205,10 +204,11 @@ namespace hf
                     return info;
                 }
             }
-
-            throw GENERIC_EXCEPT("[Hyperflow]", "No suitable depth format found");
+            log_fatal("[Hyperflow] No suitable depth format found");
+            abort();
+        }
         case 2:
-
+        {
             for (auto i : ir::rdr::STENCIL_FORMATS)
             {
                 const auto format = (VkFormat)i;
@@ -221,10 +221,11 @@ namespace hf
                     return info;
                 }
             }
-
-            throw GENERIC_EXCEPT("[Hyperflow]", "No suitable stencil format found");
+            log_fatal("[Hyperflow] No suitable stencil format found");
+            abort();
+        }
         case 3:
-
+        {
             for (auto i : ir::rdr::DEPTH_STENCIL_FORMATS)
             {
                 const auto format = (VkFormat)i;
@@ -237,8 +238,12 @@ namespace hf
                 }
             }
 
-            throw GENERIC_EXCEPT("[Hyperflow]", "No suitable depthStencil format found");
-        default: throw GENERIC_EXCEPT("[Hyperflow]", "Unused renderPass depthStencil attachment!!!");
+            log_fatal("[Hyperflow] No suitable depthStencil format found");
+            abort();
+        }
+        default:
+            log_fatal("[Hyperflow] Unused renderPass depthStencil attachment!!!");
+            abort();
         }
     }
 
@@ -253,7 +258,9 @@ namespace hf
         case VK_IMAGE_TILING_OPTIMAL:
             if ((prop.optimalTilingFeatures & features) == features) return true;
             break;
-        default: throw GENERIC_EXCEPT("[Hyperflow]", "Unused tiling type");
+        default:
+            log_fatal("[Hyperflow] Unused tiling type");
+            abort();
         }
         return false;
     }

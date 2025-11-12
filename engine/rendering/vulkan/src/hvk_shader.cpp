@@ -35,8 +35,8 @@ namespace hf
         pipelineInfo.pDynamicState = &SHADER_DYNAMIC;
         pipelineInfo.layout = shaderLayout->layout;
 
-        VK_HANDLE_EXCEPT(vkCreateGraphicsPipelines(GRAPHICS_DATA.device.logicalDevice.device,
-            VK_NULL_HANDLE, 1, &pipelineInfo, &GRAPHICS_DATA.platform.allocator, &pipeline));
+        hvk_assert(vkCreateGraphicsPipelines(GRAPHICS_DATA.device.logicalDevice.device,
+            VK_NULL_HANDLE, 1, &pipelineInfo, &GRAPHICS_DATA.platform.allocator, &pipeline), "vkCreateGraphicsPipelines Failed!");
     }
 
     VkShader::~VkShader()
@@ -51,8 +51,7 @@ namespace hf
     void BindShader(const VkRenderer* rn, const VkShader* shader)
     {
 #if DEBUG
-        if (rn->currentLayout != GetShaderLayout(shader->layout)->layout)
-            throw GENERIC_EXCEPT("[Hyperflow]", "Bind correct shader layout first");
+        hassert(rn->currentLayout == GetShaderLayout(shader->layout)->layout, "[Hyperflow] Bind correct shader layout first")
 #endif
 
         vkCmdBindPipeline(rn->currentCommand, VK_PIPELINE_BIND_POINT_GRAPHICS, shader->pipeline);

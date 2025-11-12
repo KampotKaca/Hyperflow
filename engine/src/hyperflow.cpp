@@ -76,10 +76,6 @@ namespace hf
 		    if (!IsWindowClosed()) ir::win::Close(ir::HF.window.get());
 			ir::platform::Unload();
 		}
-		catch(const HyperException& e)
-		{
-			log_fatal_i(e.GetFile().c_str(), e.GetLine(), e.what());
-		}
 		catch(const std::exception& e)
 		{
 			log_fatal(e.what());

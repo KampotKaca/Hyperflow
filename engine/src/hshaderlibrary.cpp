@@ -69,7 +69,9 @@ namespace hf
             }
             break;
             case RenderingApiType::Direct3D: break;
-            default: throw GENERIC_EXCEPT("[Hyperflow]", "Cannot create shader without loading renderer");
+            default:
+                log_fatal("[Hyperflow] Cannot create shader without loading renderer");
+                abort();
             }
 
             ir::rdr::ShaderLibraryPreRasterModuleInfo_i prInfo{};
@@ -122,7 +124,9 @@ namespace hf
             }
                 break;
             case RenderingApiType::Direct3D: break;
-            default: throw GENERIC_EXCEPT("[Hyperflow]", "Cannot create shader without loading renderer");
+            default:
+                log_fatal("[Hyperflow] Cannot create shader without loading renderer");
+                abort();
             }
 
             ir::rdr::ShaderLibraryFragmentModuleInfo_i fmInfo{};
@@ -288,10 +292,6 @@ namespace hf
                 info.fragmentOutputModuleCount = fragmentOutputModules.size();
 
                 return MakeRef<ShaderLibrary>(info);
-            }
-            catch(const HyperException& e)
-            {
-                log_error_i(e.GetFile().c_str(), e.GetLine(), e.what());
             }
             catch(const std::exception& e)
             {

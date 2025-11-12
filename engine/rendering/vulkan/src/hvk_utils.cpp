@@ -49,10 +49,10 @@ namespace hf
     bool CheckDeviceExtensionSupport(const VkPhysicalDevice& device)
     {
         uint32_t extensionCount;
-        VK_HANDLE_EXCEPT(vkEnumerateDeviceExtensionProperties(device, nullptr, &extensionCount, nullptr));
+        hvk_assert(vkEnumerateDeviceExtensionProperties(device, nullptr, &extensionCount, nullptr), "vkEnumerateDeviceExtensionProperties Failed!");
 
         List<VkExtensionProperties> availableExtensions(extensionCount);
-        VK_HANDLE_EXCEPT(vkEnumerateDeviceExtensionProperties(device, nullptr, &extensionCount, availableExtensions.data()));
+        hvk_assert(vkEnumerateDeviceExtensionProperties(device, nullptr, &extensionCount, availableExtensions.data()), "vkEnumerateDeviceExtensionProperties Failed!");
 
         for (const auto ext : DEVICE_EXTENSIONS)
         {
@@ -74,10 +74,10 @@ namespace hf
 
     void QuerySwapChainSupport(const VkPhysicalDevice& device, const VkSurfaceKHR& surface, SwapChainSupportDetails& supportDetails)
     {
-        VK_HANDLE_EXCEPT(vkGetPhysicalDeviceSurfaceCapabilitiesKHR(device, surface, &supportDetails.capabilities));
+        hvk_assert(vkGetPhysicalDeviceSurfaceCapabilitiesKHR(device, surface, &supportDetails.capabilities), "vkGetPhysicalDeviceSurfaceCapabilitiesKHR Failed!");
 
         uint32_t formatCount;
-        VK_HANDLE_EXCEPT(vkGetPhysicalDeviceSurfaceFormatsKHR(device, surface, &formatCount, nullptr));
+        hvk_assert(vkGetPhysicalDeviceSurfaceFormatsKHR(device, surface, &formatCount, nullptr), "vkGetPhysicalDeviceSurfaceFormatsKHR Failed!");
 
         if (formatCount > 0)
         {
@@ -87,13 +87,13 @@ namespace hf
         }
 
         uint32_t presentModeCount;
-        VK_HANDLE_EXCEPT(vkGetPhysicalDeviceSurfacePresentModesKHR(device, surface, &presentModeCount, nullptr));
+        hvk_assert(vkGetPhysicalDeviceSurfacePresentModesKHR(device, surface, &presentModeCount, nullptr), "vkGetPhysicalDeviceSurfacePresentModesKHR Failed!");
 
         if (presentModeCount > 0)
         {
             supportDetails.presentModes = SmallList<VkPresentModeKHR, 64>(presentModeCount);
-            VK_HANDLE_EXCEPT(vkGetPhysicalDeviceSurfacePresentModesKHR(device, surface, &presentModeCount,
-                supportDetails.presentModes.data()));
+            hvk_assert(vkGetPhysicalDeviceSurfacePresentModesKHR(device, surface, &presentModeCount,
+                supportDetails.presentModes.data()), "vkGetPhysicalDeviceSurfacePresentModesKHR Failed!");
         }
     }
 

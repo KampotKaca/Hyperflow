@@ -15,7 +15,6 @@ target_precompile_headers(${PROJECT_NAME} PRIVATE "include/hex_platform.h")
 target_link_libraries(${PROJECT_NAME}
         PUBLIC
         stb
-        ext
         PRIVATE
         glfw
 )

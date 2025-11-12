@@ -89,7 +89,7 @@ namespace hf::ir
     template<typename T>
     double_t GetPlayedInSeconds_i(T* player)
     {
-        if (!player->clip) throw GENERIC_EXCEPT("[Hyperflow]", "Cannot get the position without clip.");
+        hassert(player->clip, "[Hyperflow] Cannot get the position without clip.");
 
         uint64_t position = 0;
         if(ma_sound_get_cursor_in_pcm_frames((ma_sound*)player->handle, (ma_uint64*)&position) != MA_SUCCESS)
@@ -100,7 +100,7 @@ namespace hf::ir
     template<typename T>
     double_t GetPlayedPercent_i(T* player)
     {
-        if (!player->clip) throw GENERIC_EXCEPT("[Hyperflow]", "Cannot seek the player without clip.");
+        hassert(player->clip, "[Hyperflow] Cannot seek the player without clip.");
         const auto length = (double_t)player->clip->frameCount / (double_t)player->clip->sampleRate;
         return GetPlayedInSeconds_i(player) / length;
     }
@@ -108,8 +108,8 @@ namespace hf::ir
     template<typename T>
     void Seek_i(T* player, float_t positionInSeconds)
     {
-        if (!IsLoaded_i(player)) throw GENERIC_EXCEPT("[Hyperflow]", "Trying to access destroyed audio player");
-        if (!player->clip) throw GENERIC_EXCEPT("[Hyperflow]", "Cannot seek the player without clip.");
+        hassert(IsLoaded_i(player), "[Hyperflow] Trying to access destroyed audio player");
+        hassert(player->clip, "[Hyperflow] Cannot seek the player without clip.");
 
         if (ma_sound_seek_to_second((ma_sound*)player->handle, positionInSeconds) != MA_SUCCESS)
             log_error("Unable to seek audio to position %f", positionInSeconds);
@@ -118,8 +118,9 @@ namespace hf::ir
     template<typename T>
     void SeekPercent_i(T* player, float_t position)
     {
-        if (!IsLoaded_i(player)) throw GENERIC_EXCEPT("[Hyperflow]", "Trying to access destroyed audio player");
-        if (!player->clip) throw GENERIC_EXCEPT("[Hyperflow]", "Cannot seek the player without clip.");
+        hassert(IsLoaded_i(player), "[Hyperflow] Trying to access destroyed audio player");
+        hassert(player->clip, "[Hyperflow] Cannot seek the player without clip.");
+
         auto p = (uint64_t)((double_t)player->clip->frameCount * position);
         if (ma_sound_seek_to_pcm_frame((ma_sound*)player->handle, p) != MA_SUCCESS)
             log_error("Unable to seek audio to position %f", p);
@@ -128,25 +129,23 @@ namespace hf::ir
     template<typename T>
     void Play_i(T* player)
     {
-        if (!IsLoaded_i(player)) throw GENERIC_EXCEPT("[Hyperflow]", "Trying to access destroyed audio player");
+        hassert(IsLoaded_i(player), "[Hyperflow] Trying to access destroyed audio player");
         player->stateFlags |= AudioPlayerStateFlags::Playing;
-        if (ma_sound_start((ma_sound*)player->handle) != MA_SUCCESS)
-            log_error("Unable to play audio player");
+        if (ma_sound_start((ma_sound*)player->handle) != MA_SUCCESS) log_error("Unable to play audio player");
     }
 
     template<typename T>
     void Pause_i(T* player)
     {
-        if (!IsLoaded_i(player)) throw GENERIC_EXCEPT("[Hyperflow]", "Trying to access destroyed audio player");
+        hassert(IsLoaded_i(player), "[Hyperflow] Trying to access destroyed audio player");
         player->stateFlags &= (AudioPlayerStateFlags)~(uint32_t)AudioPlayerStateFlags::Playing;
-        if (ma_sound_stop((ma_sound*)player->handle) != MA_SUCCESS)
-            log_error("Unable to pause audio player");
+        if (ma_sound_stop((ma_sound*)player->handle) != MA_SUCCESS) log_error("Unable to pause audio player");
     }
 
     template<typename T>
     void SetVolume_i(T* player, float_t volume)
     {
-        if (!IsLoaded_i(player)) throw GENERIC_EXCEPT("[Hyperflow]", "Trying to access destroyed audio player");
+        hassert(IsLoaded_i(player), "[Hyperflow] Trying to access destroyed audio player");
         auto& settings = player->settings;
         if (settings.volume != volume)
         {
@@ -158,7 +157,7 @@ namespace hf::ir
     template<typename T>
     void SetPitch_i(T* player, float_t pitch)
     {
-        if (!IsLoaded_i(player)) throw GENERIC_EXCEPT("[Hyperflow]", "Trying to access destroyed audio player");
+        hassert(IsLoaded_i(player), "[Hyperflow] Trying to access destroyed audio player");
         auto& settings = player->settings;
         if (settings.pitch != pitch)
         {
@@ -170,7 +169,7 @@ namespace hf::ir
     template<typename T>
     void SetLoopingMode_i(T* player, bool loopingEnabled)
     {
-        if (!IsLoaded_i(player)) throw GENERIC_EXCEPT("[Hyperflow]", "Trying to access destroyed audio player");
+        hassert(IsLoaded_i(player), "[Hyperflow] Trying to access destroyed audio player");
         auto& settings = player->settings;
         if (settings.loopingEnabled != loopingEnabled)
         {

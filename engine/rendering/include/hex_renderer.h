@@ -3,7 +3,6 @@
 
 #include "hshared.h"
 #include "hdrawprocess.h"
-#include "../../others/exception/include/hgenericexception.h"
 
 namespace hf::ir::rdr
 {

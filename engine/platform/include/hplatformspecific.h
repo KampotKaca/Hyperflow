@@ -1,7 +1,7 @@
 #ifndef HYPERFLOW_HPLATFORMSPECIFIC_H
 #define HYPERFLOW_HPLATFORMSPECIFIC_H
 
-#include "../../../../config.h"
+#include "config.h"
 #include <cstddef>
 
 #if defined(HF_ENABLE_ALLOCATOR)

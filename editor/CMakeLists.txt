@@ -23,7 +23,6 @@ target_link_libraries(${PROJECT_NAME}
 
         stb
         ryml
-        ext
         components
         imgui
         PRIVATE

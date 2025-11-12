@@ -86,10 +86,7 @@ namespace hf
 
 #if defined(VK_ENABLE_VALIDATION)
         for (const char* layer : DEBUG_VALIDATION_LAYERS)
-        {
-            if (!IsLayerSupported(layer))
-                throw GENERIC_EXCEPT("[Vulkan Debug]", "Unsupported validation layer [%s]", layer);
-        }
+            hassert(IsLayerSupported(layer), "[Vulkan Debug] Unsupported validation layer [%s]", layer);
 #endif
 
         CreateInstance(appInfo);
@@ -114,24 +111,24 @@ namespace hf
 
     void WaitForDevice()
     {
-        VK_HANDLE_EXCEPT(vkDeviceWaitIdle(GRAPHICS_DATA.device.logicalDevice.device));
+        hvk_assert(vkDeviceWaitIdle(GRAPHICS_DATA.device.logicalDevice.device), "vkDeviceWaitIdle Failed!");
     }
 
     void InitLayers()
     {
         uint32_t layerCount = 0;
-        VK_HANDLE_EXCEPT(vkEnumerateInstanceLayerProperties(&layerCount, nullptr));
+        hvk_assert(vkEnumerateInstanceLayerProperties(&layerCount, nullptr), "vkEnumerateInstanceLayerProperties Failed!");
         GRAPHICS_DATA.availableLayers = SmallList<VkLayerProperties, 32>(layerCount);
-        VK_HANDLE_EXCEPT(vkEnumerateInstanceLayerProperties(&layerCount, GRAPHICS_DATA.availableLayers.data()));
+        hvk_assert(vkEnumerateInstanceLayerProperties(&layerCount, GRAPHICS_DATA.availableLayers.data()), "vkEnumerateInstanceLayerProperties Failed!");
     }
 
     void InitExtensions()
     {
         uint32_t extensionCount = 0;
-        VK_HANDLE_EXCEPT(vkEnumerateInstanceExtensionProperties(nullptr, &extensionCount, nullptr));
+        hvk_assert(vkEnumerateInstanceExtensionProperties(nullptr, &extensionCount, nullptr), "vkEnumerateInstanceExtensionProperties Failed!");
         GRAPHICS_DATA.availableExtensions = SmallList<VkExtensionProperties, 64>(extensionCount);
-        VK_HANDLE_EXCEPT(vkEnumerateInstanceExtensionProperties(nullptr,
-            &extensionCount, GRAPHICS_DATA.availableExtensions.data()));
+        hvk_assert(vkEnumerateInstanceExtensionProperties(nullptr,
+            &extensionCount, GRAPHICS_DATA.availableExtensions.data()), "vkEnumerateInstanceExtensionProperties Failed!");
 
         for (const auto& ext : GRAPHICS_DATA.availableExtensions)
             GRAPHICS_DATA.availableExtensionNames.insert(ext.extensionName);
@@ -139,14 +136,13 @@ namespace hf
         for (uint32_t i = 0; i < GRAPHICS_DATA.platform.api->requiredExtensionCount; ++i)
         {
             auto& ext = GRAPHICS_DATA.platform.api->requiredExtension[i];
-            if (!IsExtensionSupported(ext))
-                throw GENERIC_EXCEPT("[Vulkan]", "[Required extension not supported]\n%s", ext);
+            hassert(IsExtensionSupported(ext), "[Vulkan] [Required extension not supported]\n%s", ext)
         }
     }
 
     void InitInstanceVersion()
     {
-        VK_HANDLE_EXCEPT(vkEnumerateInstanceVersion(&GRAPHICS_DATA.supportedVersion));
+        hvk_assert(vkEnumerateInstanceVersion(&GRAPHICS_DATA.supportedVersion), "vkEnumerateInstanceVersion Failed!");
         log_info_s("[Vulkan] Supported Vulkan API Version: (%i.%i.%i)",
             VK_VERSION_MAJOR(GRAPHICS_DATA.supportedVersion),
             VK_VERSION_MINOR(GRAPHICS_DATA.supportedVersion),
@@ -200,11 +196,11 @@ namespace hf
         createInfo.enabledLayerCount = NUM_VK_VALIDATION_LAYERS;
         createInfo.pNext = &debugCreateInfo;
 #endif
-        VK_HANDLE_EXCEPT(vkCreateInstance(&createInfo, &GRAPHICS_DATA.platform.allocator, &GRAPHICS_DATA.instance));
+        hvk_assert(vkCreateInstance(&createInfo, &GRAPHICS_DATA.platform.allocator, &GRAPHICS_DATA.instance), "vkCreateInstance Failed!");
 
 #if defined(VK_ENABLE_VALIDATION)
-        VK_HANDLE_EXCEPT(Debug_CreateUtilsMessengerEXT(GRAPHICS_DATA.instance, &debugCreateInfo,
-                            &GRAPHICS_DATA.platform.allocator, &GRAPHICS_DATA.debugMessenger));
+        hvk_assert(Debug_CreateUtilsMessengerEXT(GRAPHICS_DATA.instance, &debugCreateInfo,
+                            &GRAPHICS_DATA.platform.allocator, &GRAPHICS_DATA.debugMessenger), "Debug_CreateUtilsMessengerEXT Failed!");
 #endif
     }
 
@@ -243,8 +239,8 @@ namespace hf
         pool_info.poolSizeCount = (uint32_t)std::size(pool_sizes);
         pool_info.pPoolSizes = pool_sizes;
 
-        VK_HANDLE_EXCEPT(vkCreateDescriptorPool(GRAPHICS_DATA.device.logicalDevice.device,
-            &pool_info, &GRAPHICS_DATA.platform.allocator, &GRAPHICS_DATA.editorInfo->descriptorPool));
+        hvk_assert(vkCreateDescriptorPool(GRAPHICS_DATA.device.logicalDevice.device,
+            &pool_info, &GRAPHICS_DATA.platform.allocator, &GRAPHICS_DATA.editorInfo->descriptorPool), "vkCreateDescriptorPool Failed!");
 
         GRAPHICS_DATA.editorInfo->version = GRAPHICS_DATA.supportedVersion;
         GRAPHICS_DATA.editorInfo->instance = GRAPHICS_DATA.instance;
@@ -256,7 +252,7 @@ namespace hf
 
         GRAPHICS_DATA.editorInfo->CheckVkResultFn = [](VkResult err)
         {
-            VK_HANDLE_EXCEPT(err);
+            hvk_assert(err, "Editor Callback Failure!");
         };
 
         return GRAPHICS_DATA.editorInfo;

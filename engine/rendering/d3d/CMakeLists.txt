@@ -11,7 +11,6 @@ target_link_libraries(${PROJECT_NAME}
         PRIVATE
         d3d11
         dxgi
-        ext
 )
 
 target_include_directories(${PROJECT_NAME}

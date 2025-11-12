@@ -1,7 +1,6 @@
 #ifndef HCOMPONENTS_H
 #define HCOMPONENTS_H
 
-#include "hgenericexception.h"
 #include "hcamera3dcore.h"
 #include "hcamera3dfreelook.h"
 #include "hcamera3danchored.h"

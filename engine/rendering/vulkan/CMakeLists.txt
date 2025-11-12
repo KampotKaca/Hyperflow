@@ -20,7 +20,6 @@ set_target_properties(${PROJECT_NAME} PROPERTIES UNITY_BUILD ON)
 
 target_link_libraries(${PROJECT_NAME}
         PRIVATE
-        ext
         vma
 )
 

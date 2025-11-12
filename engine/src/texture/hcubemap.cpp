@@ -85,7 +85,9 @@ namespace hf
 
             switch (HF.renderingApi.type)
             {
-            case RenderingApiType::None: throw GENERIC_EXCEPT("[Hyperflow]", "No rendering api to use the texture for!");
+            case RenderingApiType::None:
+                log_fatal("[Hyperflow]", "No rendering api to use the texture for!");
+                abort();
             case RenderingApiType::Vulkan:
             {
                 texturePaths[0] = texPaths.front;

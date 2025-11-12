@@ -44,8 +44,8 @@ namespace hf
             samplerInfo.compareOp = VK_COMPARE_OP_ALWAYS;
         }
 
-        VK_HANDLE_EXCEPT(vkCreateSampler(GRAPHICS_DATA.device.logicalDevice.device,
-            &samplerInfo, &GRAPHICS_DATA.platform.allocator, &sampler));
+        hvk_assert(vkCreateSampler(GRAPHICS_DATA.device.logicalDevice.device,
+            &samplerInfo, &GRAPHICS_DATA.platform.allocator, &sampler), "vkCreateSampler Failed!");
     }
 
     VkTextureSampler::~VkTextureSampler()
@@ -60,7 +60,7 @@ namespace hf
 
     URef<VkTextureSampler>& GetSampler(TextureSampler sampler)
     {
-        if (!IsValidSampler(sampler)) throw GENERIC_EXCEPT("[Hyperflow]", "Invalid sampler");
+        hassert(IsValidSampler(sampler), "[Hyperflow] Invalid sampler: %i", sampler);
         return GRAPHICS_DATA.textureSamplers[sampler - 1];
     }
 }

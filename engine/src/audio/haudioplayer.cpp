@@ -48,7 +48,7 @@ namespace hf
 
     void Destroy(const Ref<AudioPlayer>& player)
     {
-        if (!IsLoaded(player)) throw GENERIC_EXCEPT("[Hyperflow]", "Trying to access destroyed audio player");
+        hassert(IsLoaded(player), "[Hyperflow] Trying to access destroyed audio player");
 
         ir::FreeHandle_i(player.get());
         ir::HF.audioResources.players.erase((uint64_t)player.get());
@@ -69,7 +69,7 @@ namespace hf
 
     void ChangeClip(const Ref<AudioPlayer>& player, const Ref<AudioClip>& clip, float_t startingDuration)
     {
-        if (!IsLoaded(player)) throw GENERIC_EXCEPT("[Hyperflow]", "Trying to access destroyed audio player");
+        hassert(IsLoaded(player), "[Hyperflow] Trying to access destroyed audio player");
         ir::ChangeClip_i(player.get(), clip, MA_SOUND_FLAG_NO_SPATIALIZATION, startingDuration);
 
         if (IsPlaying(player) && ma_sound_start((ma_sound*)player->handle) != MA_SUCCESS)

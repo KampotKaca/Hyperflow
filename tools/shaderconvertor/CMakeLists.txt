@@ -9,7 +9,6 @@ file(COPY ${CMAKE_SOURCE_DIR}/tools/shaderconvertor/includes DESTINATION ${CMAKE
 
 target_link_libraries(${PROJECT_NAME}
         PRIVATE
-        ext
         glslc
 )
 

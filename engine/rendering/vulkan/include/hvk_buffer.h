@@ -25,7 +25,9 @@ namespace hf
         {
             case BufferMemoryType::Static: case BufferMemoryType::WriteOnly: return 1;
             case BufferMemoryType::PerFrameWriteOnly: return FRAMES_IN_FLIGHT;
-            default: throw GENERIC_EXCEPT("[Hyperflow]", "Unimplemented buffer memory type");
+            default:
+            log_error_s("[Hyperflow] Unimplemented buffer memory type");
+            return FRAMES_IN_FLIGHT;
         }
     }
 

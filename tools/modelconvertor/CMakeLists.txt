@@ -11,7 +11,6 @@ target_link_libraries(${PROJECT_NAME}
         tinygltf
         ufbx
         lz4_static
-        ext
 )
 
 target_include_directories(${PROJECT_NAME}

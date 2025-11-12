@@ -20,7 +20,10 @@ namespace hf
             case BufferDataType::U8:  indexType = VK_INDEX_TYPE_UINT8;  break;
             case BufferDataType::U16: indexType = VK_INDEX_TYPE_UINT16; break;
             case BufferDataType::U32: indexType = VK_INDEX_TYPE_UINT32; break;
-            default: throw GENERIC_EXCEPT("[Hyperflow]", "Invalid index format!!!");
+            default:
+            log_error_s("[Hyperflow] Invalid index format!!!");
+            indexType = VK_INDEX_TYPE_UINT8;
+            break;
         }
     }
 
@@ -30,8 +33,7 @@ namespace hf
         uint32_t currentFrame = 0;
         if (rn) currentFrame = rn->currentFrame;
 
-        if (buffer->memoryType == BufferMemoryType::Static)
-            throw GENERIC_EXCEPT("[Hyperflow]", "Cannot modify static buffer");
+        hassert(buffer->memoryType != BufferMemoryType::Static, "[Hyperflow] Cannot modify static buffer")
 
         const auto fullSize = (uint64_t)BUFFER_DATA_SIZE[(uint32_t)buffer->indexFormat] * indexCount;
         const auto fullOffset = (uint64_t)offset * indexCount;

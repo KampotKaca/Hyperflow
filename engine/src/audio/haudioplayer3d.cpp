@@ -53,8 +53,7 @@ namespace hf
 
     void Destroy(const Ref<AudioPlayer3D>& player)
     {
-        if (!IsLoaded(player)) throw GENERIC_EXCEPT("[Hyperflow]", "Trying to access destroyed audio player");
-
+        hassert(IsLoaded(player), "[Hyperflow] Trying to access destroyed audio player");
         ir::FreeHandle_i(player.get());
         ir::HF.audioResources.player3Ds.erase((uint64_t)player.get());
         player->stateFlags &= (AudioPlayerStateFlags)~(uint32_t)AudioPlayerStateFlags::Loaded;
@@ -71,7 +70,7 @@ namespace hf
 
     void ChangeClip(const Ref<AudioPlayer3D>& player, const Ref<AudioClip>& clip, float_t startingDuration)
     {
-        if (!IsLoaded(player)) throw GENERIC_EXCEPT("[Hyperflow]", "Trying to access destroyed audio player");
+        hassert(IsLoaded(player), "[Hyperflow] Trying to access destroyed audio player");
         ChangeClip(player.get(), clip, startingDuration);
 
         if (IsPlaying(player) && ma_sound_start((ma_sound*)player->handle) != MA_SUCCESS)
@@ -83,7 +82,7 @@ namespace hf
 
     void SetRange(const Ref<AudioPlayer3D>& player, float_t maxRange, float_t falloff)
     {
-        if (!IsLoaded(player)) throw GENERIC_EXCEPT("[Hyperflow]", "Trying to access destroyed audio player");
+        hassert(IsLoaded(player), "[Hyperflow] Trying to access destroyed audio player");
         auto& settings = player->settings3d;
         falloff = glm::min(maxRange, falloff);
         if (settings.maxRange != maxRange)
@@ -102,7 +101,7 @@ namespace hf
 
     void SetAttenuationModel(const Ref<AudioPlayer3D>& player, Audio3DAttenuationModel atten)
     {
-        if (!IsLoaded(player)) throw GENERIC_EXCEPT("[Hyperflow]", "Trying to access destroyed audio player");
+        hassert(IsLoaded(player), "[Hyperflow] Trying to access destroyed audio player");
         auto& config = player->settings3d;
         if (config.attenuationModel != atten)
         {
@@ -142,7 +141,7 @@ namespace hf
 
     void Set(const Ref<AudioPlayer3D>& pl, const AudioCone& cone)
     {
-        if (!IsLoaded(pl)) throw GENERIC_EXCEPT("[Hyperflow]", "Trying to access destroyed audio player");
+        hassert(IsLoaded(pl), "[Hyperflow] Trying to access destroyed audio player");
 
         auto handle = (ma_sound*)pl->handle;
         auto coneRef = pl->cone;
@@ -162,7 +161,7 @@ namespace hf
 
     void SetVelocity(const Ref<AudioPlayer3D>& pl, vec3 velocity)
     {
-        if (!IsLoaded(pl)) throw GENERIC_EXCEPT("[Hyperflow]", "Trying to access destroyed audio player");
+        hassert(IsLoaded(pl), "[Hyperflow] Trying to access destroyed audio player");
 
         if (velocity != pl->velocity)
         {

@@ -10,9 +10,7 @@ namespace hf
         SwapChainSupportDetails scs{};
         QuerySwapChainSupport(GRAPHICS_DATA.device.device, surface, scs);
 
-        if (scs.formats.empty() ||
-            scs.presentModes.empty())
-            throw GENERIC_EXCEPT("[Vulkan]", "Device is not suitable!!!");
+        hassert(!scs.formats.empty() && !scs.presentModes.empty(), "[Vulkan] Device is not suitable!!!")
 
         auto oldSwapchain = result.swapchain;
         GraphicsSwapchainDetails details{};
@@ -22,84 +20,81 @@ namespace hf
         switch (vsyncMode)
         {
         case VsyncMode::NoSync:
-            {
-                targetPresentMode = VK_PRESENT_MODE_IMMEDIATE_KHR;
-                defaultPresentMode = VK_PRESENT_MODE_IMMEDIATE_KHR;
-            }
-            break;
-        case VsyncMode::Relaxed:
-            {
-                targetPresentMode = VK_PRESENT_MODE_MAILBOX_KHR;
-                defaultPresentMode = VK_PRESENT_MODE_IMMEDIATE_KHR;
-            }
-            break;
-        case VsyncMode::Full:
-            {
-                targetPresentMode = VK_PRESENT_MODE_FIFO_KHR;
-                defaultPresentMode = VK_PRESENT_MODE_FIFO_KHR;
-            }
-            break;
-        default: throw GENERIC_EXCEPT("[Vulkan]", "Unsupported vsync mode!");
-        }
-
-        if (GetAvailableSurfaceDetails(scs, (VkFormat)VULKAN_API_COLOR_FORMAT,
-            targetPresentMode, defaultPresentMode, targetSize, details))
         {
-            uint32_t imageCount = scs.capabilities.minImageCount + 1;
-            uint32_t maxImageCount = scs.capabilities.maxImageCount;
-            if (maxImageCount > 0 && imageCount > maxImageCount) imageCount = maxImageCount;
-
-            auto& transferData = GRAPHICS_DATA.device.transferData;
-            VkSwapchainCreateInfoKHR createInfo{};
-            createInfo.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
-            createInfo.surface = surface;
-            createInfo.minImageCount = imageCount;
-            createInfo.imageFormat = details.format.format;
-            createInfo.imageColorSpace = details.format.colorSpace;
-            createInfo.imageExtent = details.extent;
-            createInfo.imageArrayLayers = 1;
-            createInfo.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
-            createInfo.imageSharingMode = transferData.sharingMode;
-            createInfo.queueFamilyIndexCount = (uint32_t)transferData.indices.size();
-            createInfo.pQueueFamilyIndices = transferData.indices.data();
-            createInfo.preTransform = scs.capabilities.currentTransform;
-            createInfo.compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
-            createInfo.presentMode = details.presentMode;
-            createInfo.clipped = VK_TRUE;
-            createInfo.oldSwapchain = oldSwapchain;
-
-            VK_HANDLE_EXCEPT(vkCreateSwapchainKHR(GRAPHICS_DATA.device.logicalDevice.device, &createInfo,
-                &GRAPHICS_DATA.platform.allocator, &result.swapchain));
-            result.details = details;
+            targetPresentMode = VK_PRESENT_MODE_IMMEDIATE_KHR;
+            defaultPresentMode = VK_PRESENT_MODE_IMMEDIATE_KHR;
+        }break;
+        case VsyncMode::Relaxed:
+        {
+            targetPresentMode = VK_PRESENT_MODE_MAILBOX_KHR;
+            defaultPresentMode = VK_PRESENT_MODE_IMMEDIATE_KHR;
+        }break;
+        case VsyncMode::Full:
+        {
+            targetPresentMode = VK_PRESENT_MODE_FIFO_KHR;
+            defaultPresentMode = VK_PRESENT_MODE_FIFO_KHR;
+        }break;
+        default:
+            log_fatal("[Vulkan] Unsupported vsync mode!");
+            abort();
         }
-        else throw GENERIC_EXCEPT("[Vulkan]", "Unable to create swapchain");
 
-        uint32_t imageCount;
-        VK_HANDLE_EXCEPT(vkGetSwapchainImagesKHR(GRAPHICS_DATA.device.logicalDevice.device,
-            result.swapchain, &imageCount, nullptr));
+        hassert(GetAvailableSurfaceDetails(scs, (VkFormat)VULKAN_API_COLOR_FORMAT,
+            targetPresentMode, defaultPresentMode, targetSize, details), "[Vulkan] Unable to create swapchain");
+
+        uint32_t imageCount = scs.capabilities.minImageCount + 1;
+        uint32_t maxImageCount = scs.capabilities.maxImageCount;
+        if (maxImageCount > 0 && imageCount > maxImageCount) imageCount = maxImageCount;
+
+        auto& transferData = GRAPHICS_DATA.device.transferData;
+        VkSwapchainCreateInfoKHR createInfo{};
+        createInfo.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
+        createInfo.surface = surface;
+        createInfo.minImageCount = imageCount;
+        createInfo.imageFormat = details.format.format;
+        createInfo.imageColorSpace = details.format.colorSpace;
+        createInfo.imageExtent = details.extent;
+        createInfo.imageArrayLayers = 1;
+        createInfo.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
+        createInfo.imageSharingMode = transferData.sharingMode;
+        createInfo.queueFamilyIndexCount = (uint32_t)transferData.indices.size();
+        createInfo.pQueueFamilyIndices = transferData.indices.data();
+        createInfo.preTransform = scs.capabilities.currentTransform;
+        createInfo.compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
+        createInfo.presentMode = details.presentMode;
+        createInfo.clipped = VK_TRUE;
+        createInfo.oldSwapchain = oldSwapchain;
+
+        hvk_assert(vkCreateSwapchainKHR(GRAPHICS_DATA.device.logicalDevice.device, &createInfo,
+            &GRAPHICS_DATA.platform.allocator, &result.swapchain), "vkCreateSwapchainKHR Failed!");
+        result.details = details;
+
+        imageCount = 0;
+        hvk_assert(vkGetSwapchainImagesKHR(GRAPHICS_DATA.device.logicalDevice.device,
+            result.swapchain, &imageCount, nullptr), "vkGetSwapchainImagesKHR Failed!");
 
         auto images = List<VkImage>(imageCount);
-        VK_HANDLE_EXCEPT(vkGetSwapchainImagesKHR(GRAPHICS_DATA.device.logicalDevice.device,
-            result.swapchain, &imageCount, images.data()));
+        hvk_assert(vkGetSwapchainImagesKHR(GRAPHICS_DATA.device.logicalDevice.device,
+            result.swapchain, &imageCount, images.data()), "vkGetSwapchainImagesKHR Failed!");
 
         auto imageViews = List<VkImageView>(imageCount);
         for (uint32_t i = 0; i < imageCount; i++)
         {
-            VkImageViewCreateInfo createInfo{};
-            createInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
-            createInfo.image = images[i];
-            createInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
-            createInfo.format = details.format.format;
-            createInfo.components.r = VK_COMPONENT_SWIZZLE_IDENTITY;
-            createInfo.components.g = VK_COMPONENT_SWIZZLE_IDENTITY;
-            createInfo.components.b = VK_COMPONENT_SWIZZLE_IDENTITY;
-            createInfo.components.a = VK_COMPONENT_SWIZZLE_IDENTITY;
-            createInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-            createInfo.subresourceRange.levelCount = 1;
-            createInfo.subresourceRange.layerCount = 1;
+            VkImageViewCreateInfo vCreateInfo{};
+            vCreateInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
+            vCreateInfo.image = images[i];
+            vCreateInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
+            vCreateInfo.format = details.format.format;
+            vCreateInfo.components.r = VK_COMPONENT_SWIZZLE_IDENTITY;
+            vCreateInfo.components.g = VK_COMPONENT_SWIZZLE_IDENTITY;
+            vCreateInfo.components.b = VK_COMPONENT_SWIZZLE_IDENTITY;
+            vCreateInfo.components.a = VK_COMPONENT_SWIZZLE_IDENTITY;
+            vCreateInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+            vCreateInfo.subresourceRange.levelCount = 1;
+            vCreateInfo.subresourceRange.layerCount = 1;
 
-            VK_HANDLE_EXCEPT(vkCreateImageView(GRAPHICS_DATA.device.logicalDevice.device,
-                &createInfo, &GRAPHICS_DATA.platform.allocator, &imageViews[i]));
+            hvk_assert(vkCreateImageView(GRAPHICS_DATA.device.logicalDevice.device,
+                &vCreateInfo, &GRAPHICS_DATA.platform.allocator, &imageViews[i]), "vkCreateImageView Failed!");
         }
 
         DestroySwapchain(result, &oldSwapchain);
@@ -166,7 +161,7 @@ namespace hf
         if (result != VK_SUCCESS && result != VK_ERROR_OUT_OF_DATE_KHR && result != VK_SUBOPTIMAL_KHR)
         {
             log_error("Failed to present swapchain %i", rn->currentFrame);
-            VK_HANDLE_EXCEPT(result);
+            hvk_assert(result, "vkQueuePresentKHR Failed!");
         }
     }
 
@@ -187,11 +182,11 @@ namespace hf
             LockedRecreateSwapchain(rn);
             tryCount++;
             if (tryCount < 144) goto tryAgain;
-            throw GENERIC_EXCEPT("[Vulkan]", "Unable to acquire image from swapchain!");
+            log_fatal("[Vulkan] Unable to acquire image from swapchain!");
+            abort();
         }
 
-        if (result != VK_SUCCESS && result != VK_SUBOPTIMAL_KHR)
-            throw GENERIC_EXCEPT("[Vulkan]", "Unable to acquire image from swapchain!");
+        hassert(result == VK_SUCCESS || result == VK_SUBOPTIMAL_KHR, "[Vulkan] Unable to acquire image from swapchain!");
 
         for (uint32_t i = 0; i < textureCount; i++) ResizeRenderTexture(pTextures[i], rn->targetSize);
         return rn->targetSize;
@@ -203,8 +198,8 @@ namespace hf
         {
             const auto& device = GRAPHICS_DATA.device.logicalDevice.device;
             const auto& previousImage = rn->swapchain.images[rn->imageIndex];
-            VK_HANDLE_EXCEPT(vkWaitForFences(device, 1, &previousImage.isInFlight, true, VULKAN_API_MAX_TIMEOUT));
-            VK_HANDLE_EXCEPT(vkResetFences(device, 1, &previousImage.isInFlight));
+            hvk_assert(vkWaitForFences(device, 1, &previousImage.isInFlight, true, VULKAN_API_MAX_TIMEOUT), "vkWaitForFences Failed!");
+            hvk_assert(vkResetFences(device, 1, &previousImage.isInFlight), "vkResetFences Failed!");
         }
         else rn->imageIndex = rn->swapchain.images.size() - 1;
     }

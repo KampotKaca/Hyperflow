@@ -7,7 +7,7 @@ namespace hf
         VkSemaphoreCreateInfo semaphoreInfo{};
         semaphoreInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
 
-        VK_HANDLE_EXCEPT(vkCreateSemaphore(device.logicalDevice.device, &semaphoreInfo, &GRAPHICS_DATA.platform.allocator, semaphore));
+        hvk_assert(vkCreateSemaphore(device.logicalDevice.device, &semaphoreInfo, &GRAPHICS_DATA.platform.allocator, semaphore), "vkCreateSemaphore Failed!");
     }
 
     void DestroySemaphore(const GraphicsDevice& device, VkSemaphore& semaphore)
@@ -23,7 +23,7 @@ namespace hf
 
         if (startSignaled) fenceInfo.flags = VK_FENCE_CREATE_SIGNALED_BIT;
 
-        VK_HANDLE_EXCEPT(vkCreateFence(device.logicalDevice.device, &fenceInfo, &GRAPHICS_DATA.platform.allocator, fence));
+        hvk_assert(vkCreateFence(device.logicalDevice.device, &fenceInfo, &GRAPHICS_DATA.platform.allocator, fence), "vkCreateFence Failed!");
     }
 
     void DestroyFence(const GraphicsDevice& device, VkFence& fence)

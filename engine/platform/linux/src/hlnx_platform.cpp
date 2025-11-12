@@ -26,11 +26,10 @@ namespace hf::platform
         std::string exeDir = baseDir.substr(0, lastSlash + 1);
 
         std::string path = exeDir + "lib" + dllName + ".so";
-        if (!utils::FileExists(path.c_str()))
-            throw GENERIC_EXCEPT("[Hyperflow]", "Unable to find dll at path %s", path.c_str());
+        hassert(utils::FileExists(path.c_str()), "[Hyperflow] Unable to find dll at path %s", path.c_str());
 
         void* dll = dlopen(path.c_str(), RTLD_NOW);
-        if (!dll) throw GENERIC_EXCEPT("[Hyperflow]", "Unable to load dll\n[Error] %s", dlerror());
+        hassert(dll, "[Hyperflow] Unable to load dll\n[Error] %s", dlerror())
         return dll;
     }
 

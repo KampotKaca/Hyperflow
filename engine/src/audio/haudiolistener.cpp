@@ -16,29 +16,16 @@ namespace hf
 
     Ref<AudioListener> Create(const AudioListenerCreationInfo& info)
     {
-        try
-        {
-            auto newId = ir::AUDIO_DATA.definedListenersCount;
-            ir::AUDIO_DATA.definedListenersCount++;
+        auto newId = ir::AUDIO_DATA.definedListenersCount;
+        ir::AUDIO_DATA.definedListenersCount++;
 
-            ma_engine_listener_set_world_up(&ir::AUDIO_DATA.engine, (ma_uint32)newId, 0.0f, 1.0f, 0.0f);
-            auto listener = MakeRef<AudioListener>(info);
-            listener->handle = newId;
+        ma_engine_listener_set_world_up(&ir::AUDIO_DATA.engine, (ma_uint32)newId, 0.0f, 1.0f, 0.0f);
+        auto listener = MakeRef<AudioListener>(info);
+        listener->handle = newId;
 
-            Set(listener, info.cone);
-            Enable(listener, info.isEnabled);
-            return listener;
-        }
-        catch (const HyperException& e)
-        {
-            log_error("Unable to define audio listener\n%s", e.what());
-            return nullptr;
-        }
-        catch (...)
-        {
-            log_error("Unable to define audio listener!");
-            return nullptr;
-        }
+        Set(listener, info.cone);
+        Enable(listener, info.isEnabled);
+        return listener;
     }
 
     void Set(const Ref<AudioListener>& ls, const AudioCone& cone)

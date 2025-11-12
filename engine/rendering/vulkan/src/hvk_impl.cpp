@@ -284,9 +284,7 @@ namespace hf::ir::rdr
     void BeginRendering(void* rn, void* tex)
     {
         const auto vrn = (VkRenderer*)rn;
-
-        if (vrn->currentRenderTexture)
-            throw GENERIC_EXCEPT("[Hyperflow]", "Cannot begin rendering while rendering is in progress");
+        hassert(!vrn->currentRenderTexture, "[Hyperflow] Cannot begin rendering while rendering is in progress");
 
         vrn->currentRenderTexture = (VkRenderTexture*)tex;
         hf::BeginRendering(vrn);
@@ -295,9 +293,7 @@ namespace hf::ir::rdr
     void EndRendering(void* rn)
     {
         const auto vrn = (VkRenderer*)rn;
-
-        if (!vrn->currentRenderTexture)
-            throw GENERIC_EXCEPT("[Hyperflow]", "Cannot end rendering if rendering is not in progress");
+        hassert(vrn->currentRenderTexture, "[Hyperflow] Cannot end rendering if rendering is not in progress");
 
         vrn->prevRenderTexture = vrn->currentRenderTexture;
         vrn->currentRenderTexture = nullptr;

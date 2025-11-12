@@ -9,7 +9,6 @@ set_target_properties(${PROJECT_NAME} PROPERTIES UNITY_BUILD ON)
 target_link_libraries(${PROJECT_NAME}
         PUBLIC
         stb
-        ext
 )
 
 target_include_directories(${PROJECT_NAME} PUBLIC ../include)

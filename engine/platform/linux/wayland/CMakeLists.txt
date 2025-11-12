@@ -7,7 +7,6 @@ include("${CMAKE_SOURCE_DIR}/cmake/General.cmake")
 target_link_libraries(${PROJECT_NAME}
         PUBLIC
         stb
-        ext
 )
 
 target_include_directories(${PROJECT_NAME} PUBLIC

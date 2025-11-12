@@ -19,8 +19,7 @@ namespace hf::ir
                 .listenerCount = HF.internalAudioInfo.usedListenersCount,
             };
             auto result = ma_engine_init(&config, &AUDIO_DATA.engine);
-
-            if (result != MA_SUCCESS) throw GENERIC_EXCEPT("[Hyperflow]", "Unable to load audio engine!");
+            hassert(result == MA_SUCCESS, "[Hyperflow] Unable to load audio engine!");
 
             ma_engine_set_volume(&AUDIO_DATA.engine, HF.internalAudioInfo.volume);
 
