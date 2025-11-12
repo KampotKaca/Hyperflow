@@ -62,7 +62,7 @@ namespace hf
 
 #define BIT(x) (1u << x)
 #define hassert(cond, ...)\
-        if(!cond)\
+        if(!(cond))\
         {\
             log_fatal(__VA_ARGS__);\
             abort();\

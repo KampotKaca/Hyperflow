@@ -41,7 +41,7 @@ namespace hf
 
 			if(ir::HF.lifecycleCallbacks.onStartCallback) ir::HF.lifecycleCallbacks.onStartCallback();
 
-			log_log("[Hyperflow] Loading Time: %f", ir::HF.time.GetAbsoluteTimePassed());
+			log_info_s("[Hyperflow] Loading Time: %f", ir::HF.time.GetAbsoluteTimePassed());
 			while (IsRunning())
 			{
 				ir::HF.time.StartFrame();
@@ -78,7 +78,7 @@ namespace hf
 		}
 		catch(const HyperException& e)
 		{
-			log_fatali(e.GetFile().c_str(), e.GetLine(), e.what());
+			log_fatal_i(e.GetFile().c_str(), e.GetLine(), e.what());
 		}
 		catch(const std::exception& e)
 		{

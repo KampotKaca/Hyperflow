@@ -232,9 +232,9 @@ namespace hf
             ir::HF.renderer->currentDraw.currentTexturePackBinding = nullptr;
         }
 
-        // template<typename T>
-        static void UploadTex(SmallList<TexturePack::Binding<Texture>, MAX_TEXTURES_IN_TEXTURE_PACK>& bindings,
-                                  const TexturePackBindingUploadInfo<Texture>& info, TexturePackBindingType type)
+        template<typename T>
+        static void UploadTex(SmallList<TexturePack::Binding<T>, MAX_TEXTURES_IN_TEXTURE_PACK>& bindings,
+                              const TexturePackBindingUploadInfo<T>& info, TexturePackBindingType type)
         {
             const auto packet = ir::HF.renderer->currentDraw.packet;
 
@@ -287,123 +287,7 @@ namespace hf
                 packet->textureRebindings.push_back(binding);
                 ir::HF.renderer->currentDraw.currentTexturePackBinding->bindingPacketRange.size++;
             }
-            else log_warn("Unnecessary binding upload! nothing changed");
-        }
-
-        static void UploadTex(SmallList<TexturePack::Binding<Cubemap>, MAX_TEXTURES_IN_TEXTURE_PACK>& bindings,
-                                  const TexturePackBindingUploadInfo<Cubemap>& info, TexturePackBindingType type)
-        {
-            const auto packet = ir::HF.renderer->currentDraw.packet;
-            auto& b = bindings[info.bindingIndex];
-
-            bool wasModified = false;
-            auto binding = (TexturePackRebindingPacketInfo)
-            {
-                .bindingIndex = info.bindingIndex,
-                .sampler = info.sampler,
-            };
-
-            if (info.sampler.has_value())
-            {
-                b.sampler = info.sampler.value();
-                wasModified = true;
-            }
-
-            if (info.texInfo.has_value())
-            {
-                auto textures = info.texInfo.value();
-                for (uint32_t i = 0; i < textures.count; i++)
-                {
-                    auto texInfo = textures.pTextures[i];
-                    b.textures[textures.offset + i] =
-                    {
-                        .texture = texInfo.texture,
-                        .index = texInfo.index
-                    };
-                }
-
-                binding.textures = (TexturePackRebindingPacketInfo::TextureBinding)
-                {
-                    .offset = textures.offset,
-                    .type = type,
-                    .range = AssetRange{ .start = (uint16_t)packet->textures.size(), .size = (uint16_t)textures.count }
-                };
-
-                for (uint32_t i = 0; i < textures.count; i++)
-                {
-                    auto texture = textures.pTextures[i];
-                    packet->textures.push_back({
-                        .texture = texture.texture->handle,
-                        .index = texture.index
-                    });
-                }
-                if (textures.count > 0) wasModified = true;
-            }
-
-            if (wasModified)
-            {
-                packet->textureRebindings.push_back(binding);
-                ir::HF.renderer->currentDraw.currentTexturePackBinding->bindingPacketRange.size++;
-            }
-            else log_warn("Unnecessary binding upload! nothing changed");
-        }
-
-        static void UploadTex(SmallList<TexturePack::Binding<RenderTexture>, MAX_TEXTURES_IN_TEXTURE_PACK>& bindings,
-                                  const TexturePackBindingUploadInfo<RenderTexture>& info, TexturePackBindingType type)
-        {
-            const auto packet = ir::HF.renderer->currentDraw.packet;
-            auto& b = bindings[info.bindingIndex];
-
-            bool wasModified = false;
-            auto binding = (TexturePackRebindingPacketInfo)
-            {
-                .bindingIndex = info.bindingIndex,
-                .sampler = info.sampler,
-            };
-
-            if (info.sampler.has_value())
-            {
-                b.sampler = info.sampler.value();
-                wasModified = true;
-            }
-
-            if (info.texInfo.has_value())
-            {
-                auto textures = info.texInfo.value();
-                for (uint32_t i = 0; i < textures.count; i++)
-                {
-                    auto texInfo = textures.pTextures[i];
-                    b.textures[textures.offset + i] =
-                    {
-                        .texture = texInfo.texture,
-                        .index = texInfo.index
-                    };
-                }
-
-                binding.textures = (TexturePackRebindingPacketInfo::TextureBinding)
-                {
-                    .offset = textures.offset,
-                    .type = type,
-                    .range = AssetRange{ .start = (uint16_t)packet->textures.size(), .size = (uint16_t)textures.count }
-                };
-
-                for (uint32_t i = 0; i < textures.count; i++)
-                {
-                    auto texture = textures.pTextures[i];
-                    packet->textures.push_back({
-                        .texture = texture.texture->handle,
-                        .index = texture.index
-                    });
-                }
-                if (textures.count > 0) wasModified = true;
-            }
-
-            if (wasModified)
-            {
-                packet->textureRebindings.push_back(binding);
-                ir::HF.renderer->currentDraw.currentTexturePackBinding->bindingPacketRange.size++;
-            }
-            else log_warn("Unnecessary binding upload! nothing changed");
+            else log_warn_s("Unnecessary binding upload! nothing changed");
         }
 
         void UploadAddTexPackBinding(uint32_t bindingIndex, const Ref<Texture>& texture, uint32_t textureIndex)

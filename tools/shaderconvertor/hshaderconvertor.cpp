@@ -16,16 +16,13 @@ static std::unordered_map<std::string, std::string> includeMap{};
 void LoadIncludeMap(const fs::path& rootDir);
 std::string ProcessIncludes(const std::string& inputContent);
 
-shaderc::SpvCompilationResult CompileVulkanShader(const std::string& inputPath, shaderc_shader_kind kind, const std::string& outputPath)
+shaderc::SpvCompilationResult CompileVulkanShader(const std::string& inputPath, const std::string& outputPath,
+    shaderc::Compiler& compiler, shaderc::CompileOptions& options, shaderc_shader_kind kind)
 {
     std::ifstream file(inputPath);
     std::stringstream buffer;
     buffer << file.rdbuf();
     std::string source = buffer.str();
-
-    shaderc::Compiler compiler;
-    shaderc::CompileOptions options;
-    options.SetOptimizationLevel(shaderc_optimization_level_performance);
 
     shaderc::SpvCompilationResult result = compiler.CompileGlslToSpv(source, kind, inputPath.c_str(), options);
     file.close();
@@ -37,7 +34,8 @@ shaderc::SpvCompilationResult CompileVulkanShader(const std::string& inputPath, 
     return result;
 }
 
-void ConvertVulkanShader(const std::string& inputPath, const std::string& outputPath)
+void ConvertVulkanShader(const std::string& inputPath, const std::string& outputPath,
+    shaderc::Compiler& compiler, shaderc::CompileOptions& options)
 {
     std::string processed;
     {
@@ -58,7 +56,7 @@ void ConvertVulkanShader(const std::string& inputPath, const std::string& output
         hassert(outFile, "Failed to write output: %s", tempPath.c_str());
 
         outFile << processed;
-        log_log("Processed: %s -> %s", inputPath.c_str(), tempPath.c_str());
+        log_info_s("Processed: %s -> %s", inputPath.c_str(), tempPath.c_str());
     }
 
     shaderc_shader_kind kind;
@@ -74,11 +72,10 @@ void ConvertVulkanShader(const std::string& inputPath, const std::string& output
         default: hassert(false, "Unknown shader type: %s", inputPath.c_str());
     }
 
-    CompileVulkanShader(tempPath, kind, outputPath);
+    CompileVulkanShader(tempPath, outputPath, compiler, options, kind);
     fs::remove(tempPath);
 
-    log_log("Compiled: %s -> %s", tempPath.c_str(), outputPath.c_str());
-
+    log_info_s("Compiled: %s -> %s", tempPath.c_str(), outputPath.c_str());
 }
 
 int main(int argc, char* argv[])
@@ -87,23 +84,26 @@ int main(int argc, char* argv[])
 
     auto includePath = fs::current_path().parent_path() / fs::path("tools/shaderconvertor/includes/");
     LoadIncludeMap(includePath);
+
+    shaderc::Compiler compiler{};
+    shaderc::CompileOptions options;
+    options.SetOptimizationLevel(shaderc_optimization_level_performance);
+
     for (int i = 1; i < argc; i += 2)
     {
         fs::path inputPath = argv[i];
         fs::path outputPath = argv[i + 1];
-        ConvertVulkanShader(inputPath.string(), outputPath.string());
+        ConvertVulkanShader(inputPath.string(), outputPath.string(), compiler, options);
     }
 }
 
 void LoadIncludeMap(const fs::path& rootDir)
 {
-    log_log("Include Path: %s", rootDir.c_str());
     std::regex nameRegex(R"(#name\s+(\w+))");
 
     for (const auto& entry : fs::recursive_directory_iterator(rootDir))
     {
-        if (!entry.is_regular_file() || entry.path().extension() != ".glsl")
-            continue;
+        if (!entry.is_regular_file() || entry.path().extension() != ".glsl") continue;
 
         std::ifstream file(entry.path());
         hassert(file, "Failed to open: %s", entry.path().c_str());

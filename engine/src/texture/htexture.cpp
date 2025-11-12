@@ -65,51 +65,44 @@ namespace hf
         {
             const auto assetLoc = TO_RES_PATH(std::string("textures/") + assetPath) + ".meta";
             List<char> metadata{};
-            if (!START_READING(assetLoc.c_str(), metadata)) return nullptr;
+            START_READING(assetLoc.c_str(), metadata);
 
-            try
+            TextureCreationInfo info{};
+            TextureChannel desiredChannel;
+
+            ryml::Tree tree = ryml::parse_in_place(ryml::to_substr(metadata.data()));
+            ryml::NodeRef root = tree.rootref();
+
             {
-                TextureCreationInfo info{};
-                TextureChannel desiredChannel;
+                const auto v = root["desiredChannel"].val();
+                const std::string_view vView{v.str, v.len};
+                desiredChannel = STRING_TO_TEXTURE_CHANNEL(vView);
+            }
 
-                ryml::Tree tree = ryml::parse_in_place(ryml::to_substr(metadata.data()));
-                ryml::NodeRef root = tree.rootref();
+            info.mipLevels = (uint32_t)std::stoi(root["mipLevels"].val().str);
+            ReadTextureDetails_i(root["details"], info.details);
 
-                {
-                    const auto v = root["desiredChannel"].val();
-                    const std::string_view vView{v.str, v.len};
-                    desiredChannel = STRING_TO_TEXTURE_CHANNEL(vView);
-                }
+            const std::string texLoc = TO_RES_PATH(std::string("textures/") + assetPath);
 
-                info.mipLevels = (uint32_t)std::stoi(root["mipLevels"].val().str);
-                ReadTextureDetails_i(root["details"], info.details);
-
-                const std::string texLoc = TO_RES_PATH(std::string("textures/") + assetPath);
-
-                if (!utils::FileExists(texLoc.c_str()))
-                {
-                    log_error("[Hyperflow] Unable to find texture: %s", assetPath);
-                    return nullptr;
-                }
-
-                if (HF.renderingApi.type == RenderingApiType::Vulkan) stbi_set_flip_vertically_on_load(false);
-
-                ivec3 size{};
-                int32_t texChannels{};
-                info.pixels = stbi_load(texLoc.c_str(), &size.x, &size.y, &texChannels, (int32_t)desiredChannel);
-                size.z = 1;
-
-                info.channels = (TextureChannel)texChannels;
-                info.size = size;
-
-                auto tex = MakeRef<Texture>(info);
-                if (info.pixels) stbi_image_free(info.pixels);
-                return tex;
-            }catch (...)
+            if (!utils::FileExists(texLoc.c_str()))
             {
-                log_error("[Hyperflow] Error parsing Texture: %s", assetPath);
+                log_error("[Hyperflow] Unable to find texture: %s", assetPath);
                 return nullptr;
             }
+
+            if (HF.renderingApi.type == RenderingApiType::Vulkan) stbi_set_flip_vertically_on_load(false);
+
+            ivec3 size{};
+            int32_t texChannels{};
+            info.pixels = stbi_load(texLoc.c_str(), &size.x, &size.y, &texChannels, (int32_t)desiredChannel);
+            size.z = 1;
+
+            info.channels = (TextureChannel)texChannels;
+            info.size = size;
+
+            auto tex = MakeRef<Texture>(info);
+            if (info.pixels) stbi_image_free(info.pixels);
+            return tex;
         }
 
         bool DestroyTexture_i(Texture* tex)

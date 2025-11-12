@@ -11,14 +11,10 @@ namespace ml
         std::string warn, err;
         bool objRes = tinyobj::LoadObj(&attrib, &shapes, &materials, &warn, &err, path);
 
-        if (!warn.empty()) std::cout << "[Obj Parse Warning] " << warn.c_str() << std::endl;
-        if (!err.empty())  std::cout << "[Obj Parse Error] "   << err.c_str() << std::endl;
+        if (!warn.empty()) log_warn_s("[Obj Parse Warning] %s", warn.c_str());
+        if (!err.empty()) log_error_s("[Obj Parse Error] %s", err.c_str());
 
-        if (!objRes)
-        {
-            std::cout << "Failed to parse Obj" << std::endl;
-            return false;
-        }
+        hassert(objRes, "Failed to parse Obj: %s", path);
 
         meshInfo->subMeshes.reserve(shapes.size());
         meshInfo->headers.reserve(shapes.size());

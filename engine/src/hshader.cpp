@@ -55,45 +55,29 @@ namespace hf
             const auto assetLoc = (TO_RES_PATH_P("shaders") / assetPath).string() + ".meta";
 
             List<char> metadata{};
-            if (!START_READING(assetLoc.c_str(), metadata)) return nullptr;
+            START_READING(assetLoc.c_str(), metadata);
 
-            try
+            ShaderCreationInfo info{};
+
+            ryml::Tree tree = ryml::parse_in_place(ryml::to_substr(metadata.data()));
+            ryml::NodeRef root = tree.rootref();
+
             {
-                ShaderCreationInfo info{};
-
-                ryml::Tree tree = ryml::parse_in_place(ryml::to_substr(metadata.data()));
-                ryml::NodeRef root = tree.rootref();
-
-                {
-                    const auto v = root["layout"].val();
-                    const std::string_view vView{v.str, v.len};
-                    info.layout = FindShaderLayout(vView);
-                }
-
-                {
-                    const auto v = root["library"].val();
-                    const std::string_view vView{v.str, v.len};
-                    info.library = Cast<ShaderLibrary>(GetAsset(vView, AssetType::ShaderLibrary));
-                }
-
-                if (root.has_child("modulesInfo")) ReadShaderModulesInfo_i(root["modulesInfo"], info.library, info.modules);
-                else log_error("[Hyperflow] %s", "Unable to find moduleInfo");
-
-                return MakeRef<Shader>(info);
+                const auto v = root["layout"].val();
+                const std::string_view vView{v.str, v.len};
+                info.layout = FindShaderLayout(vView);
             }
-            catch(const HyperException& e)
+
             {
-                log_errori(e.GetFile().c_str(), e.GetLine(), e.what());
+                const auto v = root["library"].val();
+                const std::string_view vView{v.str, v.len};
+                info.library = Cast<ShaderLibrary>(GetAsset(vView, AssetType::ShaderLibrary));
             }
-            catch(const std::exception& e)
-            {
-                log_error("[Hyperflow] Error parsing Shader: %s\nError: %s", assetPath, e.what());
-            }
-            catch (...)
-            {
-                log_error("[Hyperflow] Unknown error parsing Shader: %s", assetPath);
-            }
-            return nullptr;
+
+            if (root.has_child("modulesInfo")) ReadShaderModulesInfo_i(root["modulesInfo"], info.library, info.modules);
+            else log_error("[Hyperflow] %s", "Unable to find moduleInfo");
+
+            return MakeRef<Shader>(info);
         }
 
         bool DestroyShader_i(Shader* shader)

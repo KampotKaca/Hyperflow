@@ -190,22 +190,21 @@ namespace hf
             const auto moduleFolder = std::filesystem::path(assetLoc).parent_path();
 
             List<char> metadata{};
-            if (!START_READING(assetLoc.c_str(), metadata)) return nullptr;
+            START_READING(assetLoc.c_str(), metadata);
 
-            try
+            TexturePackCreationInfo info{};
+
+            ryml::Tree tree = ryml::parse_in_place(ryml::to_substr(metadata.data()));
+            ryml::NodeRef root = tree.rootref();
+
+            List<TexturePackBindingInfo<Texture>> texList{};
+            List<TexturePackBindingInfo<Texture>::TextureInfo> texInfoList{};
+            List<TexturePackBindingInfo<Cubemap>> cubList{};
+            List<TexturePackBindingInfo<Cubemap>::TextureInfo> cubInfoList{};
+            List<TexturePackBindingInfo<RenderTexture>> rtList{};
+            List<TexturePackBindingInfo<RenderTexture>::TextureInfo> rtInfoList{};
+
             {
-                TexturePackCreationInfo info{};
-
-                ryml::Tree tree = ryml::parse_in_place(ryml::to_substr(metadata.data()));
-                ryml::NodeRef root = tree.rootref();
-
-                List<TexturePackBindingInfo<Texture>> texList{};
-                List<TexturePackBindingInfo<Texture>::TextureInfo> texInfoList{};
-                List<TexturePackBindingInfo<Cubemap>> cubList{};
-                List<TexturePackBindingInfo<Cubemap>::TextureInfo> cubInfoList{};
-                List<TexturePackBindingInfo<RenderTexture>> rtList{};
-                List<TexturePackBindingInfo<RenderTexture>::TextureInfo> rtInfoList{};
-
                 {
                     const auto v = root["layout"].val();
                     const std::string_view vView{v.str, v.len};
@@ -215,29 +214,16 @@ namespace hf
                 LoadBindings(root["texBindings"], AssetType::Texture, texList, texInfoList);
                 LoadBindings(root["cubBindings"], AssetType::Cubemap, cubList, cubInfoList);
                 LoadBindings(root["rtBindings"], AssetType::Texture, rtList, rtInfoList);
+            }
 
-                info.pTextureBindings = texList.data();
-                info.textureBindingCount = (uint32_t)texList.size();
-                info.pCubemapBindings = cubList.data();
-                info.cubemapBindingCount = (uint32_t)cubList.size();
-                info.pRenderTextureBindings = rtList.data();
-                info.renderTextureBindingCount = (uint32_t)rtList.size();
+            info.pTextureBindings = texList.data();
+            info.textureBindingCount = (uint32_t)texList.size();
+            info.pCubemapBindings = cubList.data();
+            info.cubemapBindingCount = (uint32_t)cubList.size();
+            info.pRenderTextureBindings = rtList.data();
+            info.renderTextureBindingCount = (uint32_t)rtList.size();
 
-                return MakeRef<TexturePack>(info);
-            }
-            catch(const HyperException& e)
-            {
-                log_errori(e.GetFile().c_str(), e.GetLine(), e.what());
-            }
-            catch(const std::exception& e)
-            {
-                log_error("[Hyperflow] Error parsing Texture Pack: %s\nError: %s", assetPath, e.what());
-            }
-            catch (...)
-            {
-                log_error("[Hyperflow] Unknown error parsing Texture Pack: %s", assetPath);
-            }
-            return nullptr;
+            return MakeRef<TexturePack>(info);
         }
 
         bool DestroyTexturePack_i(TexturePack* texPack)

@@ -88,46 +88,39 @@ namespace hf
         {
             const std::string assetLoc = TO_RES_PATH(std::string("models/") + assetPath) + ".meta";
             List<char> metadata{};
-            if (!START_READING(assetLoc.c_str(), metadata)) return nullptr;
+            START_READING(assetLoc.c_str(), metadata);
 
-            try
+            ModelCreationInfo info
             {
-                ModelCreationInfo info
-                {
-                    .filePath = assetPath,
-                    .meshStats = {}
-                };
+                .filePath = assetPath,
+                .meshStats = {}
+            };
 
-                ryml::Tree tree = ryml::parse_in_place(ryml::to_substr(metadata.data()));
-                ryml::NodeRef root = tree.rootref();
+            ryml::Tree tree = ryml::parse_in_place(ryml::to_substr(metadata.data()));
+            ryml::NodeRef root = tree.rootref();
 
-                auto typeFlags = root["typeFlags"];
+            auto typeFlags = root["typeFlags"];
 
-                for (ryml::NodeRef fmt : typeFlags.children())
-                {
-                    const auto v = fmt.val();
-                    const std::string_view valView{v.str, v.len};
-                    info.meshStats.typeFlags |= STRING_TO_MESH_DATA_TYPE(valView);
-                }
-
-                {
-                    const auto v = root["memoryType"].val();
-                    const std::string_view memTypeView(v.str, v.len);
-                    info.meshStats.memoryType = STRING_TO_BUFFER_MEMORY_TYPE(memTypeView);
-                }
-
-                {
-                    const auto v = root["vertexAttribute"].val();
-                    const std::string_view memTypeView(v.str, v.len);
-                    info.meshStats.vertexAttribute = HF.graphicsResources.vertexAttributes[memTypeView];
-                }
-
-                return MakeRef<Model>(info);
-            }catch (...)
+            for (ryml::NodeRef fmt : typeFlags.children())
             {
-                log_error("[Hyperflow] Error parsing BufferAttribute: %s", assetPath);
-                return nullptr;
+                const auto v = fmt.val();
+                const std::string_view valView{v.str, v.len};
+                info.meshStats.typeFlags |= STRING_TO_MESH_DATA_TYPE(valView);
             }
+
+            {
+                const auto v = root["memoryType"].val();
+                const std::string_view memTypeView(v.str, v.len);
+                info.meshStats.memoryType = STRING_TO_BUFFER_MEMORY_TYPE(memTypeView);
+            }
+
+            {
+                const auto v = root["vertexAttribute"].val();
+                const std::string_view memTypeView(v.str, v.len);
+                info.meshStats.vertexAttribute = HF.graphicsResources.vertexAttributes[memTypeView];
+            }
+
+            return MakeRef<Model>(info);
         }
 
         bool DestroyModel_i(Model* model)

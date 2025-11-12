@@ -495,38 +495,18 @@ namespace hf
 #undef X
     }
 
-    inline bool START_READING(const char* assetPath, List<char>& metadata)
+    inline void START_READING(const char* assetPath, List<char>& metadata)
     {
-        if (!utils::FileExists(assetPath))
-        {
-            log_error("[Hyperflow] Unable to find meta file: %s", assetPath);
-            return false;
-        }
-
-        if (!utils::ReadFile(assetPath, metadata))
-        {
-            log_error("[Hyperflow] Unable to read meta: %s", assetPath);
-            return false;
-        }
+        hassert(utils::FileExists(assetPath), "[Hyperflow] Unable to find meta file: %s", assetPath)
+        hassert(utils::ReadFile(assetPath, metadata), "[Hyperflow] Unable to read meta: %s", assetPath)
         metadata.push_back('\0');
-        return true;
     }
 
-    inline bool START_READING(const std::filesystem::path& assetPath, List<char>& metadata)
+    inline void START_READING(const std::filesystem::path& assetPath, List<char>& metadata)
     {
-        if (!utils::FileExists(assetPath))
-        {
-            log_error("[Hyperflow] Unable to find meta file: %s", assetPath.c_str());
-            return false;
-        }
-
-        if (!utils::ReadFile(assetPath, metadata))
-        {
-            log_error("[Hyperflow] Unable to read meta: %s", assetPath.c_str());
-            return false;
-        }
+        hassert(utils::FileExists(assetPath), "[Hyperflow] Unable to find meta file: %s", assetPath)
+        hassert(utils::ReadFile(assetPath, metadata), "[Hyperflow] Unable to read meta: %s", assetPath)
         metadata.push_back('\0');
-        return true;
     }
 
 #undef DATA_TYPE

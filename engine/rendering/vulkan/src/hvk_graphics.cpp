@@ -60,59 +60,59 @@ namespace hf
 
     void CreateLogicalDevice(GraphicsDevice& device)
     {
-        if (!device.features.features.robustBufferAccess)           log_warn("[Vulkan] Feature Not Supported %s", "Robust Buffer Access");
-        if (!device.features.features.fullDrawIndexUint32)          log_warn("[Vulkan] Feature Not Supported %s", "Full Draw Index Uint32");
-        if (!device.features.features.imageCubeArray)               log_warn("[Vulkan] Feature Not Supported %s", "Image Cube Array");
-        if (!device.features.features.independentBlend)             log_warn("[Vulkan] Feature Not Supported %s", "Independent Blend");
-        if (!device.features.features.sampleRateShading)            log_warn("[Vulkan] Feature Not Supported %s", "Sample Rate Shading");
-        if (!device.features.features.dualSrcBlend)                 log_warn("[Vulkan] Feature Not Supported %s", "Dual Src Blend");
-        if (!device.features.features.logicOp)                      log_warn("[Vulkan] Feature Not Supported %s", "Logic Op");
-        if (!device.features.features.multiDrawIndirect)            log_warn("[Vulkan] Feature Not Supported %s", "Multi Draw Indirect");
-        if (!device.features.features.drawIndirectFirstInstance)    log_warn("[Vulkan] Feature Not Supported %s", "Draw Indirect First Instance");
-        if (!device.features.features.depthClamp)                   log_warn("[Vulkan] Feature Not Supported %s", "Depth Clamp");
-        if (!device.features.features.depthBiasClamp)               log_warn("[Vulkan] Feature Not Supported %s", "Depth Bias Clamp");
-        if (!device.features.features.fillModeNonSolid)             log_warn("[Vulkan] Feature Not Supported %s", "Fill Mode Non-Solid");
-        if (!device.features.features.depthBounds)                  log_warn("[Vulkan] Feature Not Supported %s", "Depth Bounds");
-        if (!device.features.features.wideLines)                    log_warn("[Vulkan] Feature Not Supported %s", "Wide Lines");
-        if (!device.features.features.largePoints)                  log_warn("[Vulkan] Feature Not Supported %s", "Large Points");
-        if (!device.features.features.alphaToOne)                   log_warn("[Vulkan] Feature Not Supported %s", "Alpha To One");
-        if (!device.features.features.multiViewport)                log_warn("[Vulkan] Feature Not Supported %s", "Multi Viewport Features");
-        if (!device.features.features.samplerAnisotropy)            log_warn("[Vulkan] Feature Not Supported %s", "Sampler Anisotropy");
-        if (!device.features.features.textureCompressionETC2)       log_warn("[Vulkan] Feature Not Supported %s", "Texture Compression ETC2");
-        if (!device.features.features.textureCompressionASTC_LDR)   log_warn("[Vulkan] Feature Not Supported %s", "Texture Compression ASTC_LDR");
-        if (!device.features.features.textureCompressionBC)         log_warn("[Vulkan] Feature Not Supported %s", "Texture Compression BC");
-        if (!device.features.features.occlusionQueryPrecise)        log_warn("[Vulkan] Feature Not Supported %s", "Occlusion Query Precise");
-        if (!device.features.features.pipelineStatisticsQuery)      log_warn("[Vulkan] Feature Not Supported %s", "Pipeline Statistics Query");
-        if (!device.features.features.vertexPipelineStoresAndAtomics)           log_warn("[Vulkan] Feature Not Supported %s", "Vertex Pipeline Stores And Atomics");
-        if (!device.features.features.fragmentStoresAndAtomics)                 log_warn("[Vulkan] Feature Not Supported %s", "Fragment Stores And Atomics");
-        if (!device.features.features.shaderTessellationAndGeometryPointSize)   log_warn("[Vulkan] Feature Not Supported %s", "Shader Tessellation And Geometry Point Size");
-        if (!device.features.features.shaderImageGatherExtended)                log_warn("[Vulkan] Feature Not Supported %s", "Shader Image Gather Extended");
-        if (!device.features.features.shaderStorageImageExtendedFormats)        log_warn("[Vulkan] Feature Not Supported %s", "Shader Storage Image Extended Formats");
-        if (!device.features.features.shaderStorageImageMultisample)            log_warn("[Vulkan] Feature Not Supported %s", "Shader Storage Image Multisample");
-        if (!device.features.features.shaderStorageImageReadWithoutFormat)      log_warn("[Vulkan] Feature Not Supported %s", "Shader Image Read Without Format");
-        if (!device.features.features.shaderStorageImageWriteWithoutFormat)     log_warn("[Vulkan] Feature Not Supported %s", "Shader Image Write Without Format");
-        if (!device.features.features.shaderUniformBufferArrayDynamicIndexing)  log_warn("[Vulkan] Feature Not Supported %s", "Shader Uniform Buffer Array Dynamic Indexing");
-        if (!device.features.features.shaderSampledImageArrayDynamicIndexing)   log_warn("[Vulkan] Feature Not Supported %s", "Shader Sampled Image Array Dynamic Indexing");
-        if (!device.features.features.shaderStorageBufferArrayDynamicIndexing)  log_warn("[Vulkan] Feature Not Supported %s", "Shader Storage Buffer Array Dynamic Indexing");
-        if (!device.features.features.shaderStorageImageArrayDynamicIndexing)   log_warn("[Vulkan] Feature Not Supported %s", "Shader Storage Image Array Dynamic Indexing");
-        if (!device.features.features.shaderClipDistance)       log_warn("[Vulkan] Feature Not Supported %s", "Shader Clip Distance");
-        if (!device.features.features.shaderCullDistance)       log_warn("[Vulkan] Feature Not Supported %s", "Shader Cull Distance");
-        if (!device.features.features.shaderFloat64)            log_warn("[Vulkan] Feature Not Supported %s", "Shader Float 64");
-        if (!device.features.features.shaderInt64)              log_warn("[Vulkan] Feature Not Supported %s", "Shader Int 64");
-        if (!device.features.features.shaderInt16)              log_warn("[Vulkan] Feature Not Supported %s", "Shader Int 16");
-        if (!device.features.features.shaderResourceResidency)  log_warn("[Vulkan] Feature Not Supported %s", "Shader Resource Residency");
-        if (!device.features.features.shaderResourceMinLod)     log_warn("[Vulkan] Feature Not Supported %s", "Shader Resource Min Lod");
-        if (!device.features.features.sparseBinding)            log_warn("[Vulkan] Feature Not Supported %s", "Sparse Binding");
-        if (!device.features.features.sparseResidencyBuffer)    log_warn("[Vulkan] Feature Not Supported %s", "Sparse Residency Buffer");
-        if (!device.features.features.sparseResidencyImage2D)   log_warn("[Vulkan] Feature Not Supported %s", "Sparse Residency Image 2D");
-        if (!device.features.features.sparseResidencyImage3D)   log_warn("[Vulkan] Feature Not Supported %s", "Sparse Residency Image 3D");
-        if (!device.features.features.sparseResidency2Samples)  log_warn("[Vulkan] Feature Not Supported %s", "Sparse Residency 2 Samples");
-        if (!device.features.features.sparseResidency4Samples)  log_warn("[Vulkan] Feature Not Supported %s", "Sparse Residency 4 Samples");
-        if (!device.features.features.sparseResidency8Samples)  log_warn("[Vulkan] Feature Not Supported %s", "Sparse Residency 8 Samples");
-        if (!device.features.features.sparseResidency16Samples) log_warn("[Vulkan] Feature Not Supported %s", "Sparse Residency 16 Samples");
-        if (!device.features.features.sparseResidencyAliased)   log_warn("[Vulkan] Feature Not Supported %s", "Sparse Residency Aliased");
-        if (!device.features.features.variableMultisampleRate)  log_warn("[Vulkan] Feature Not Supported %s", "Variable Multisample Rate");
-        if (!device.features.features.inheritedQueries)         log_warn("[Vulkan] Feature Not Supported %s", "Inherited Queries");
+        if (!device.features.features.robustBufferAccess)           log_warn_s("[Vulkan] Feature Not Supported %s", "Robust Buffer Access");
+        if (!device.features.features.fullDrawIndexUint32)          log_warn_s("[Vulkan] Feature Not Supported %s", "Full Draw Index Uint32");
+        if (!device.features.features.imageCubeArray)               log_warn_s("[Vulkan] Feature Not Supported %s", "Image Cube Array");
+        if (!device.features.features.independentBlend)             log_warn_s("[Vulkan] Feature Not Supported %s", "Independent Blend");
+        if (!device.features.features.sampleRateShading)            log_warn_s("[Vulkan] Feature Not Supported %s", "Sample Rate Shading");
+        if (!device.features.features.dualSrcBlend)                 log_warn_s("[Vulkan] Feature Not Supported %s", "Dual Src Blend");
+        if (!device.features.features.logicOp)                      log_warn_s("[Vulkan] Feature Not Supported %s", "Logic Op");
+        if (!device.features.features.multiDrawIndirect)            log_warn_s("[Vulkan] Feature Not Supported %s", "Multi Draw Indirect");
+        if (!device.features.features.drawIndirectFirstInstance)    log_warn_s("[Vulkan] Feature Not Supported %s", "Draw Indirect First Instance");
+        if (!device.features.features.depthClamp)                   log_warn_s("[Vulkan] Feature Not Supported %s", "Depth Clamp");
+        if (!device.features.features.depthBiasClamp)               log_warn_s("[Vulkan] Feature Not Supported %s", "Depth Bias Clamp");
+        if (!device.features.features.fillModeNonSolid)             log_warn_s("[Vulkan] Feature Not Supported %s", "Fill Mode Non-Solid");
+        if (!device.features.features.depthBounds)                  log_warn_s("[Vulkan] Feature Not Supported %s", "Depth Bounds");
+        if (!device.features.features.wideLines)                    log_warn_s("[Vulkan] Feature Not Supported %s", "Wide Lines");
+        if (!device.features.features.largePoints)                  log_warn_s("[Vulkan] Feature Not Supported %s", "Large Points");
+        if (!device.features.features.alphaToOne)                   log_warn_s("[Vulkan] Feature Not Supported %s", "Alpha To One");
+        if (!device.features.features.multiViewport)                log_warn_s("[Vulkan] Feature Not Supported %s", "Multi Viewport Features");
+        if (!device.features.features.samplerAnisotropy)            log_warn_s("[Vulkan] Feature Not Supported %s", "Sampler Anisotropy");
+        if (!device.features.features.textureCompressionETC2)       log_warn_s("[Vulkan] Feature Not Supported %s", "Texture Compression ETC2");
+        if (!device.features.features.textureCompressionASTC_LDR)   log_warn_s("[Vulkan] Feature Not Supported %s", "Texture Compression ASTC_LDR");
+        if (!device.features.features.textureCompressionBC)         log_warn_s("[Vulkan] Feature Not Supported %s", "Texture Compression BC");
+        if (!device.features.features.occlusionQueryPrecise)        log_warn_s("[Vulkan] Feature Not Supported %s", "Occlusion Query Precise");
+        if (!device.features.features.pipelineStatisticsQuery)      log_warn_s("[Vulkan] Feature Not Supported %s", "Pipeline Statistics Query");
+        if (!device.features.features.vertexPipelineStoresAndAtomics)           log_warn_s("[Vulkan] Feature Not Supported %s", "Vertex Pipeline Stores And Atomics");
+        if (!device.features.features.fragmentStoresAndAtomics)                 log_warn_s("[Vulkan] Feature Not Supported %s", "Fragment Stores And Atomics");
+        if (!device.features.features.shaderTessellationAndGeometryPointSize)   log_warn_s("[Vulkan] Feature Not Supported %s", "Shader Tessellation And Geometry Point Size");
+        if (!device.features.features.shaderImageGatherExtended)                log_warn_s("[Vulkan] Feature Not Supported %s", "Shader Image Gather Extended");
+        if (!device.features.features.shaderStorageImageExtendedFormats)        log_warn_s("[Vulkan] Feature Not Supported %s", "Shader Storage Image Extended Formats");
+        if (!device.features.features.shaderStorageImageMultisample)            log_warn_s("[Vulkan] Feature Not Supported %s", "Shader Storage Image Multisample");
+        if (!device.features.features.shaderStorageImageReadWithoutFormat)      log_warn_s("[Vulkan] Feature Not Supported %s", "Shader Image Read Without Format");
+        if (!device.features.features.shaderStorageImageWriteWithoutFormat)     log_warn_s("[Vulkan] Feature Not Supported %s", "Shader Image Write Without Format");
+        if (!device.features.features.shaderUniformBufferArrayDynamicIndexing)  log_warn_s("[Vulkan] Feature Not Supported %s", "Shader Uniform Buffer Array Dynamic Indexing");
+        if (!device.features.features.shaderSampledImageArrayDynamicIndexing)   log_warn_s("[Vulkan] Feature Not Supported %s", "Shader Sampled Image Array Dynamic Indexing");
+        if (!device.features.features.shaderStorageBufferArrayDynamicIndexing)  log_warn_s("[Vulkan] Feature Not Supported %s", "Shader Storage Buffer Array Dynamic Indexing");
+        if (!device.features.features.shaderStorageImageArrayDynamicIndexing)   log_warn_s("[Vulkan] Feature Not Supported %s", "Shader Storage Image Array Dynamic Indexing");
+        if (!device.features.features.shaderClipDistance)       log_warn_s("[Vulkan] Feature Not Supported %s", "Shader Clip Distance");
+        if (!device.features.features.shaderCullDistance)       log_warn_s("[Vulkan] Feature Not Supported %s", "Shader Cull Distance");
+        if (!device.features.features.shaderFloat64)            log_warn_s("[Vulkan] Feature Not Supported %s", "Shader Float 64");
+        if (!device.features.features.shaderInt64)              log_warn_s("[Vulkan] Feature Not Supported %s", "Shader Int 64");
+        if (!device.features.features.shaderInt16)              log_warn_s("[Vulkan] Feature Not Supported %s", "Shader Int 16");
+        if (!device.features.features.shaderResourceResidency)  log_warn_s("[Vulkan] Feature Not Supported %s", "Shader Resource Residency");
+        if (!device.features.features.shaderResourceMinLod)     log_warn_s("[Vulkan] Feature Not Supported %s", "Shader Resource Min Lod");
+        if (!device.features.features.sparseBinding)            log_warn_s("[Vulkan] Feature Not Supported %s", "Sparse Binding");
+        if (!device.features.features.sparseResidencyBuffer)    log_warn_s("[Vulkan] Feature Not Supported %s", "Sparse Residency Buffer");
+        if (!device.features.features.sparseResidencyImage2D)   log_warn_s("[Vulkan] Feature Not Supported %s", "Sparse Residency Image 2D");
+        if (!device.features.features.sparseResidencyImage3D)   log_warn_s("[Vulkan] Feature Not Supported %s", "Sparse Residency Image 3D");
+        if (!device.features.features.sparseResidency2Samples)  log_warn_s("[Vulkan] Feature Not Supported %s", "Sparse Residency 2 Samples");
+        if (!device.features.features.sparseResidency4Samples)  log_warn_s("[Vulkan] Feature Not Supported %s", "Sparse Residency 4 Samples");
+        if (!device.features.features.sparseResidency8Samples)  log_warn_s("[Vulkan] Feature Not Supported %s", "Sparse Residency 8 Samples");
+        if (!device.features.features.sparseResidency16Samples) log_warn_s("[Vulkan] Feature Not Supported %s", "Sparse Residency 16 Samples");
+        if (!device.features.features.sparseResidencyAliased)   log_warn_s("[Vulkan] Feature Not Supported %s", "Sparse Residency Aliased");
+        if (!device.features.features.variableMultisampleRate)  log_warn_s("[Vulkan] Feature Not Supported %s", "Variable Multisample Rate");
+        if (!device.features.features.inheritedQueries)         log_warn_s("[Vulkan] Feature Not Supported %s", "Inherited Queries");
 
         std::set uniqueQueueFamilies =
         {
@@ -297,12 +297,12 @@ namespace hf
 
         GRAPHICS_DATA.device = devices[chosenDevice];
 
-        log_info("[Vulkan] Chosen Device: %s, Is Discrete: %i", GRAPHICS_DATA.device.properties.properties.deviceName,
+        log_trace_s("[Vulkan] Chosen Device: %s, Is Discrete: %i", GRAPHICS_DATA.device.properties.properties.deviceName,
                     GRAPHICS_DATA.device.properties.properties.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU);
         CreateLogicalDevice(GRAPHICS_DATA.device);
         GRAPHICS_DATA.deviceIsLoaded = true;
 
-        log_log("[Vulkan] Graphics device found [%s]", GRAPHICS_DATA.device.properties.properties.deviceName);
+        log_trace_s("[Vulkan] Graphics device found [%s]", GRAPHICS_DATA.device.properties.properties.deviceName);
 
         VmaAllocatorCreateInfo allocatorInfo{};
         allocatorInfo.physicalDevice = GRAPHICS_DATA.device.device;
@@ -338,13 +338,13 @@ namespace hf
             GRAPHICS_DATA.imageDescriptorBuffer = MakeURef<VkDescriptorBuffer>(types.data(), types.size(), VK_BUFFER_USAGE_SAMPLER_DESCRIPTOR_BUFFER_BIT_EXT);
         }
 
-        log_log("[Vulkan] Max vertex attributes supported: %i", GRAPHICS_DATA.device.properties.properties.limits.maxVertexInputAttributes);
-        log_log("[Vulkan] Max image array layers: %i",          GRAPHICS_DATA.device.properties.properties.limits.maxImageArrayLayers);
-        log_log("[Vulkan] Max texel buffer elements: %i",       GRAPHICS_DATA.device.properties.properties.limits.maxTexelBufferElements);
-        log_log("[Vulkan] Max uniform buffer range: %i",        GRAPHICS_DATA.device.properties.properties.limits.maxUniformBufferRange);
-        log_log("[Vulkan] Max storage buffer range: %i",        GRAPHICS_DATA.device.properties.properties.limits.maxStorageBufferRange);
-        log_log("[Vulkan] Max push constant size: %i",          GRAPHICS_DATA.device.properties.properties.limits.maxPushConstantsSize);
-        log_log("[Vulkan] Max color attachments: %i",           GRAPHICS_DATA.device.properties.properties.limits.maxColorAttachments);
+        log_trace_s("[Vulkan] Max vertex attributes supported: %i", GRAPHICS_DATA.device.properties.properties.limits.maxVertexInputAttributes);
+        log_trace_s("[Vulkan] Max image array layers: %i",          GRAPHICS_DATA.device.properties.properties.limits.maxImageArrayLayers);
+        log_trace_s("[Vulkan] Max texel buffer elements: %i",       GRAPHICS_DATA.device.properties.properties.limits.maxTexelBufferElements);
+        log_trace_s("[Vulkan] Max uniform buffer range: %i",        GRAPHICS_DATA.device.properties.properties.limits.maxUniformBufferRange);
+        log_trace_s("[Vulkan] Max storage buffer range: %i",        GRAPHICS_DATA.device.properties.properties.limits.maxStorageBufferRange);
+        log_trace_s("[Vulkan] Max push constant size: %i",          GRAPHICS_DATA.device.properties.properties.limits.maxPushConstantsSize);
+        log_trace_s("[Vulkan] Max color attachments: %i",           GRAPHICS_DATA.device.properties.properties.limits.maxColorAttachments);
     }
 
     static void DestroyLogicalDevice(LogicalDevice& device)

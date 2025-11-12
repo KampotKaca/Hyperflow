@@ -9,11 +9,7 @@ namespace ml
         ufbx_error error;
         ufbx_load_opts opts = {};
         ufbx_scene* scene = ufbx_load_file(path, &opts, &error);
-        if (!scene)
-        {
-            std::cerr << "Failed to load FBX: " << error.info << std::endl;
-            return false;
-        }
+        hassert(scene, "Failed to load FBX: %s", error.info);
 
         //Reserve space for all the necessary data
         meshInfo->subMeshes.reserve(scene->meshes.count);
@@ -107,7 +103,7 @@ namespace ml
                             auto* channel = blend->channels.data[b];
                             auto* shape = channel->target_shape;
 
-                            if (!shape) throw std::runtime_error("Missing shape while loading fbx!");
+                            hassert(shape, "Missing shape while loading fbx! %s", path);
 
                             auto blendOffset = ufbx_get_blend_shape_vertex_offset(shape, vIndex);
                             blendDeformer.offsets[b] = glm::vec3(blendOffset.x, blendOffset.y, blendOffset.z);

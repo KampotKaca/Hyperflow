@@ -15,14 +15,9 @@ namespace ml
         if (isGltf) gltfResult = loader.LoadASCIIFromFile(&model, &err, &warn, path);
         else gltfResult = loader.LoadBinaryFromFile(&model, &err, &warn, path);
 
-        if (!warn.empty()) std::cout << "[Gltf Parse Warning] " << warn.c_str() << std::endl;
-        if (!err.empty())  std::cout << "[Gltf Parse Error] "   << err.c_str() << std::endl;
-
-        if (!gltfResult)
-        {
-            std::cerr << "Failed to parse Gltf" << std::endl;
-            return false;
-        }
+        if (!warn.empty()) log_warn_s("[Gltf Parse Warning] %s", warn.c_str());
+        if (!err.empty()) log_error_s("[Gltf Parse Error] %s", err.c_str());
+        hassert(gltfResult, "Failed to parse Gltf: %s", path);
 
         meshInfo->subMeshes.reserve(model.meshes.size());
         meshInfo->headers.reserve(model.meshes.size());
@@ -188,7 +183,7 @@ namespace ml
             meshInfo->headers.push_back(header);
             meshInfo->subMeshes.push_back(std::move(subMeshInfo));
         }
-    }
+        }
 
         return true;
     }

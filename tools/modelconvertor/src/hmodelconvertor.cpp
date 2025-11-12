@@ -17,7 +17,7 @@ namespace ml
         uint32_t headerDataSize = meshInfo.headers.size() * sizeof(MeshHeader);
         uint32_t fullHeaderSize = sizeof(uint32_t) + headerDataSize + 1;
         uint32_t offset = 0;
-        hf::List<char> headerData = hf::List<char>(fullHeaderSize);
+        auto headerData = hf::List<char>(fullHeaderSize);
 
         memcpy(headerData.data() + offset, &submeshCount, sizeof(uint32_t));
         offset += sizeof(uint32_t);
@@ -132,24 +132,13 @@ namespace ml
 
         const int maxCompressedSize = LZ4_compressBound((int)meshData.size());
         auto compressedBuffer = (char*)hf::utils::Alloc(maxCompressedSize);
-        if (!compressedBuffer) std::cerr << "Failed to allocate memory" << std::endl;
+        hassert(compressedBuffer, "Failed to allocate memory: %s", outputFilePath.c_str());
 
         auto dataSize = LZ4_compress_default(meshData.data(), compressedBuffer, (int)meshData.size(), maxCompressedSize);
-
-        if (dataSize <= 0)
-        {
-            std::cerr << "Failed to compress file" << std::endl;
-            hf::utils::Free(compressedBuffer);
-            return false;
-        }
+        hassert(dataSize > 0, "Failed to compress file: %s", outputFilePath.c_str());
 
         std::ofstream outFile(outputFilePath, std::ios::binary);
-        if (!outFile)
-        {
-            std::cerr << "Failed to open output file" << std::endl;
-            hf::utils::Free(compressedBuffer);
-            return false;
-        }
+        hassert(outFile, "Failed to open output file: %s", outputFilePath.c_str());
 
         outFile.write(headerData.data(), fullHeaderSize);
         outFile.write(compressedBuffer, dataSize);
@@ -161,16 +150,12 @@ namespace ml
 
     bool LoadModel(const char* path, ModelInfo* meshInfo)
     {
-        std::string_view sv(path);
-        auto dotPos = sv.find_last_of('.');
-        if (dotPos == std::string_view::npos)
-        {
-            std::cerr << "Unknown model type! cannot extract file extension!";
-            return false;
-        }
+        const std::string_view sv(path);
+        const auto dotPos = sv.find_last_of('.');
+        hassert(dotPos != std::string_view::npos, "Unknown model type! cannot extract file extension!: %s", path);
 
         const std::string_view ext = sv.substr(dotPos + 1);
-        auto type = hf::STRING_TO_MODEL_TYPE(ext);
+        const auto type = hf::STRING_TO_MODEL_TYPE(ext);
 
         bool modelLoadingResult = false;
         switch (type)
@@ -330,12 +315,7 @@ namespace ml
 
 int main(int argc, char* argv[])
 {
-    if (argc < 3 || (argc - 1) % 2 != 0)
-    {
-        std::cerr << "Usage: " << argv[0] << " <input1> <output1> [<input2> <output2> ...]\n";
-        return 1;
-    }
-
+    hassert(argc >= 3 && (argc - 1) % 2 == 0, "Usage: %s <input1> <output1> [<input2> <output2> ...]", argv[0])
     std::ios_base::sync_with_stdio(true);
 
     for (uint32_t i = 1; i < argc; i += 2)
@@ -343,19 +323,11 @@ int main(int argc, char* argv[])
         std::string inputPath = argv[i];
         std::string outputPath = argv[i + 1];
 
-        try
-        {
-            ml::ModelInfo meshInfo{};
-            ml::LoadModel(inputPath.c_str(), &meshInfo);
+        ml::ModelInfo meshInfo{};
+        ml::LoadModel(inputPath.c_str(), &meshInfo);
 
-            if (ml::WriteMesh(meshInfo, outputPath))
-                std::cout << "Successfully converted " << inputPath << " to " << outputPath << std::endl;
-        }
-        catch (const std::exception& e)
-        {
-            std::cerr << "Error: " << e.what() << std::endl;
-            return 1;
-        }
+        hassert(ml::WriteMesh(meshInfo, outputPath), "Error: Unable to export model %s", inputPath.c_str());
+        log_info_s("Successfully converted %s -> %s", inputPath.c_str(), outputPath.c_str());
     }
 
     return 0;

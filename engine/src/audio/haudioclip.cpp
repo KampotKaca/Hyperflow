@@ -83,23 +83,16 @@ namespace hf
         {
             const auto assetLoc = TO_RES_PATH(std::string("audio/") + assetPath) + ".meta";
             List<char> metadata{};
-            if (!START_READING(assetLoc.c_str(), metadata)) return nullptr;
+            START_READING(assetLoc.c_str(), metadata);
 
-            try
-            {
-                AudioClipCreationInfo info{};
-                info.filePath = FilePath{ .path = assetPath };
+            AudioClipCreationInfo info{};
+            info.filePath = FilePath{ .path = assetPath };
 
-                ryml::Tree tree = ryml::parse_in_place(ryml::to_substr(metadata.data()));
-                ryml::NodeRef root = tree.rootref();
+            ryml::Tree tree = ryml::parse_in_place(ryml::to_substr(metadata.data()));
+            ryml::NodeRef root = tree.rootref();
 
-                ReadAudioClipSettings_i(root, info.settings);
-                return MakeRef<AudioClip>(info);
-            }catch (...)
-            {
-                log_error("[Hyperflow] Error parsing Audio clip: %s", assetPath);
-                return nullptr;
-            }
+            ReadAudioClipSettings_i(root, info.settings);
+            return MakeRef<AudioClip>(info);
         }
 
         bool DestroyAudioClip_i(AudioClip* clip)

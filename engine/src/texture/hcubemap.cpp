@@ -60,123 +60,116 @@ namespace hf
         {
             const auto assetLoc = TO_RES_PATH(std::string("cubemaps/") + assetPath) + ".meta";
             List<char> metadata{};
-            if (!START_READING(assetLoc.c_str(), metadata)) return nullptr;
+            START_READING(assetLoc.c_str(), metadata);
 
-            try
+            CubemapCreationInfo info{};
+
+            ryml::Tree tree = ryml::parse_in_place(ryml::to_substr(metadata.data()));
+            ryml::NodeRef root = tree.rootref();
+
+            TextureChannel desiredChannel;
             {
-                CubemapCreationInfo info{};
-                ryml::Tree tree = ryml::parse_in_place(ryml::to_substr(metadata.data()));
-                ryml::NodeRef root = tree.rootref();
+                const auto v = root["desiredChannel"].val();
+                std::string_view vView{v.str, v.len};
+                desiredChannel = STRING_TO_TEXTURE_CHANNEL(vView);
+            }
 
-                TextureChannel desiredChannel;
+            info.mipLevels = std::stoi(root["mipLevels"].val().str);
+            ReadTextureDetails_i(root["details"], info.details);
+
+            CubemapTexturePaths texPaths{};
+            ReadCubemapTexturePaths_i(root["texturePaths"], texPaths);
+
+            const auto fullCubemapFolderPath = TO_RES_PATH(std::string("cubemaps/") + assetPath + "/");
+            FilePath texturePaths[6]{};
+
+            switch (HF.renderingApi.type)
+            {
+            case RenderingApiType::None: throw GENERIC_EXCEPT("[Hyperflow]", "No rendering api to use the texture for!");
+            case RenderingApiType::Vulkan:
+            {
+                texturePaths[0] = texPaths.front;
+                texturePaths[1] = texPaths.back;
+                texturePaths[2] = texPaths.up;
+                texturePaths[3] = texPaths.down;
+                texturePaths[4] = texPaths.right;
+                texturePaths[5] = texPaths.left;
+            }break;
+            case RenderingApiType::Direct3D:
+            {
+                texturePaths[0] = texPaths.left;
+                texturePaths[1] = texPaths.right;
+                texturePaths[2] = texPaths.down;
+                texturePaths[3] = texPaths.up;
+                texturePaths[4] = texPaths.back;
+                texturePaths[5] = texPaths.front;
+            }break;
+            }
+
+            bool validLoading = true;
+            uint8_t* pixels = nullptr;
+            size_t pixelOffset = 0;
+            uvec3 textureSize{};
+
+            for (uint32_t i = 0; i < 6; i++)
+            {
+                std::string path = fullCubemapFolderPath + texturePaths[i].path;
+
+                if (!utils::FileExists(path.c_str()))
                 {
-                    const auto v = root["desiredChannel"].val();
-                    std::string_view vView{v.str, v.len};
-                    desiredChannel = STRING_TO_TEXTURE_CHANNEL(vView);
+                    log_error("[Hyperflow] Unable to find texture: %s", texturePaths[i].path.c_str());
+                    validLoading = false;
+                    break;
                 }
 
-                info.mipLevels = std::stoi(root["mipLevels"].val().str);
-                ReadTextureDetails_i(root["details"], info.details);
+                if (HF.renderingApi.type == RenderingApiType::Vulkan) stbi_set_flip_vertically_on_load(false);
 
-                CubemapTexturePaths texPaths{};
-                ReadCubemapTexturePaths_i(root["texturePaths"], texPaths);
+                ivec3 size{};
+                int32_t texChannels{};
+                uint8_t* pixelData = stbi_load(path.c_str(), &size.x, &size.y, &texChannels, (int32_t)desiredChannel);
+                size.z = 1;
 
-                const auto fullCubemapFolderPath = TO_RES_PATH(std::string("cubemaps/") + assetPath + "/");
-                FilePath texturePaths[6]{};
-
-                switch (HF.renderingApi.type)
+                if (i == 0 && size.x > 0 && size.y > 0)
                 {
-                case RenderingApiType::None: throw GENERIC_EXCEPT("[Hyperflow]", "No rendering api to use the texture for!");
-                case RenderingApiType::Vulkan:
-                {
-                    texturePaths[0] = texPaths.front;
-                    texturePaths[1] = texPaths.back;
-                    texturePaths[2] = texPaths.up;
-                    texturePaths[3] = texPaths.down;
-                    texturePaths[4] = texPaths.right;
-                    texturePaths[5] = texPaths.left;
-                }break;
-                case RenderingApiType::Direct3D:
-                {
-                    texturePaths[0] = texPaths.left;
-                    texturePaths[1] = texPaths.right;
-                    texturePaths[2] = texPaths.down;
-                    texturePaths[3] = texPaths.up;
-                    texturePaths[4] = texPaths.back;
-                    texturePaths[5] = texPaths.front;
-                }break;
+                    pixels = (uint8_t*)utils::Alloc(size.x * size.y * size.z * 4 * 6);
+                    pixelOffset = 0;
+                    textureSize = size;
                 }
 
-                bool validLoading = true;
-                uint8_t* pixels = nullptr;
-                size_t pixelOffset = 0;
-                uvec3 textureSize{};
-
-                for (uint32_t i = 0; i < 6; i++)
+                if (i != 0 && textureSize != (uvec3)size)
                 {
-                    std::string path = fullCubemapFolderPath + texturePaths[i].path;
-
-                    if (!utils::FileExists(path.c_str()))
-                    {
-                        log_error("[Hyperflow] Unable to find texture: %s", texturePaths[i].path.c_str());
-                        validLoading = false;
-                        break;
-                    }
-
-                    if (HF.renderingApi.type == RenderingApiType::Vulkan) stbi_set_flip_vertically_on_load(false);
-
-                    ivec3 size{};
-                    int32_t texChannels{};
-                    uint8_t* pixelData = stbi_load(path.c_str(), &size.x, &size.y,
-                    &texChannels, (int32_t)desiredChannel);
-                    size.z = 1;
-
-                    if (i == 0 && size.x > 0 && size.y > 0)
-                    {
-                        pixels = (uint8_t*)utils::Alloc(size.x * size.y * size.z * 4 * 6);
-                        pixelOffset = 0;
-                        textureSize = size;
-                    }
-
-                    if (i != 0 && textureSize != (uvec3)size)
-                    {
-                        log_error("[Hyperflow] Cubemap textures must be the same size!");
-                        validLoading = false;
-                        break;
-                    }
-
-                    if (pixelData)
-                    {
-                        auto dataSize = size.x * size.y * size.z * 4;
-                        memcpy(pixels + pixelOffset, pixelData, dataSize);
-                        pixelOffset += dataSize;
-                        stbi_image_free(pixelData);
-                    }
-                    else
-                    {
-                        log_error("[Hyperflow] Unable to load cubemap texture!");
-                        validLoading = false;
-                        break;
-                    }
+                    log_error_s("[Hyperflow] Cubemap textures must be the same size!");
+                    validLoading = false;
+                    break;
                 }
 
-                if (!validLoading)
+                if (pixelData)
                 {
-                    if (pixels) utils::Free(pixels);
-                    return nullptr;
+                    auto dataSize = size.x * size.y * size.z * 4;
+                    memcpy(pixels + pixelOffset, pixelData, dataSize);
+                    pixelOffset += dataSize;
+                    stbi_image_free(pixelData);
                 }
+                else
+                {
+                    log_error("[Hyperflow] Unable to load cubemap texture!");
+                    validLoading = false;
+                    break;
+                }
+            }
 
-                info.size = textureSize;
-                info.data = pixels;
-
-                auto cubemap = MakeRef<Cubemap>(info);
+            if (!validLoading)
+            {
                 if (pixels) utils::Free(pixels);
-                return cubemap;
-            }catch (...)
-            {
-                log_error("[Hyperflow] Error parsing Cubemap: %s", assetPath);
                 return nullptr;
             }
+
+            info.size = textureSize;
+            info.data = pixels;
+
+            auto cubemap = MakeRef<Cubemap>(info);
+            if (pixels) utils::Free(pixels);
+            return cubemap;
         }
 
         bool DestroyCubemap_i(Cubemap* cubemap)
