@@ -6,7 +6,7 @@
 #include "../../include/hex_renderer.h"
 #include "config.h"
 
-inline const char* vk_get_failure_reason(uint32_t e)
+inline const char* vk_get_failure_reason(const int32_t e)
 {
     switch (e)
     {

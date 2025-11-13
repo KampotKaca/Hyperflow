@@ -1,4 +1,4 @@
-#include "../include/hd3d_renderer.h"
+#include "hd3d_renderer.h"
 
 namespace hf
 {
@@ -37,11 +37,11 @@ namespace hf
             .windowHandle = window
         };
 
-        D3D11_HANDLE_EXCEPT(GRAPHICS_DATA.factory->CreateSwapChain(GRAPHICS_DATA.device, &dc, &instance->swapChain))
+        hwin_assert_e(GRAPHICS_DATA.factory->CreateSwapChain(GRAPHICS_DATA.device, &dc, &instance->swapChain), "CreateSwapChain Failed!")
 
         ID3D11Resource* backBuffer;
-        D3D11_HANDLE_EXCEPT(instance->swapChain->GetBuffer(0, __uuidof(ID3D11Resource), (void**)&backBuffer))
-        D3D11_HANDLE_EXCEPT(GRAPHICS_DATA.device->CreateRenderTargetView(backBuffer, nullptr, &instance->renderTexture))
+        hwin_assert_e(instance->swapChain->GetBuffer(0, __uuidof(ID3D11Resource), (void**)&backBuffer), "GetBuffer Failed!")
+        hwin_assert_e(GRAPHICS_DATA.device->CreateRenderTargetView(backBuffer, nullptr, &instance->renderTexture), "CreateRenderTargetView Failed!")
 
         if(backBuffer) backBuffer->Release();
         return instance;
@@ -70,7 +70,7 @@ namespace hf
 
     void EndFrame(D3DRenderer* rn)
     {
-        D3D11_HANDLE_EXCEPT(rn->swapChain->Present(1u, 0));
+        hwin_assert_e(rn->swapChain->Present(1u, 0), "Present Failed!")
     }
 
     void RegisterFrameBufferChange(D3DRenderer* rn, uvec2 newSize)

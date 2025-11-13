@@ -61,4 +61,38 @@
 #include <dbghelp.h>
 #include "hinternal.h"
 
+inline const char* win_translate_error_code(HRESULT result)
+{
+    static char buffer[512];
+    DWORD nMsgLen = FormatMessage
+    (
+        FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
+        nullptr, result, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+        buffer, 0, nullptr
+    );
+    if (nMsgLen == 0) return "Unidentified error code";
+    return buffer;
+}
+
+#define hwin_assert(x, ...)\
+        if (!(x))\
+        {\
+            log_fatal(__VA_ARGS__);\
+            auto error = GetLastError();\
+            std::ostringstream oss;\
+            oss << "[Error Code] " << std::hex << error << std::endl\
+            << "[Description] " << win_translate_error_code(error);\
+            abort();\
+        }
+
+#define hwin_assert_e(err, ...)\
+        if (err < 0)\
+        {\
+            log_fatal(__VA_ARGS__);\
+            std::ostringstream oss;\
+            oss << "[Error Code] " << std::hex << err << std::endl\
+            << "[Description] " << win_translate_error_code(err);\
+            abort();\
+        }
+
 #endif //HWIN_SHARED_H

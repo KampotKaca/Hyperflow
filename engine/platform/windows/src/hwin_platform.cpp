@@ -21,13 +21,13 @@ namespace hf::platform
     {
         char p[MAX_PATH];
         GetModuleFileNameA(nullptr, p, MAX_PATH);
-        std::filesystem::path exe(p);
+        const std::filesystem::path exe(p);
 
-        auto path = exe.parent_path() / (std::string("lib") + dllName + ".dll");
-        if (!utils::FileExists(path.string().c_str()))
-            throw GENERIC_EXCEPT("[Hyperflow]", "Unable to find dll at path %s", path.c_str());
-        auto dll = LoadLibraryA(path.string().c_str());
-        if (!dll) throw GENERIC_EXCEPT("[Hyperflow]", "Unable to load dll\n[Error] %s", GetLastError());
+        const auto path = exe.parent_path() / (std::string("lib") + dllName + ".dll");
+        hassert(utils::FileExists(path.string().c_str()), "[Hyperflow] Unable to find dll at path %s", path.c_str())
+        const auto dll = LoadLibraryA(path.string().c_str());
+        hwin_assert(dll, "[Hyperflow] Unable to load dll %s", path.string().c_str());
+
         return dll;
     }
 

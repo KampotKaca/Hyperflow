@@ -1,5 +1,5 @@
-﻿#include "../include/hd3d_graphics.h"
-#include "../include/hd3d_renderer.h"
+﻿#include "hd3d_graphics.h"
+#include "hd3d_renderer.h"
 
 namespace hf
 {
@@ -7,7 +7,7 @@ namespace hf
 
     void Direct3DLoad()
     {
-        D3D11_HANDLE_EXCEPT(D3D11CreateDevice
+        hwin_assert_e(D3D11CreateDevice
         (
             nullptr, // Use default adapter
             D3D_DRIVER_TYPE_HARDWARE,
@@ -19,11 +19,11 @@ namespace hf
             &GRAPHICS_DATA.device,
             nullptr, // Feature level
             &GRAPHICS_DATA.context
-        ))
+        ), "D3D11CreateDevice Failed!")
 
-        D3D11_HANDLE_EXCEPT(GRAPHICS_DATA.device->QueryInterface(__uuidof(IDXGIDevice), (void**)&GRAPHICS_DATA.dxgiDevice))
-        D3D11_HANDLE_EXCEPT(GRAPHICS_DATA.dxgiDevice->GetAdapter(&GRAPHICS_DATA.adapter))
-        D3D11_HANDLE_EXCEPT(GRAPHICS_DATA.adapter->GetParent(__uuidof(IDXGIFactory), (void**)&GRAPHICS_DATA.factory))
+        hwin_assert_e(GRAPHICS_DATA.device->QueryInterface(__uuidof(IDXGIDevice), (void**)&GRAPHICS_DATA.dxgiDevice), "QueryInterface Failed!")
+        hwin_assert_e(GRAPHICS_DATA.dxgiDevice->GetAdapter(&GRAPHICS_DATA.adapter), "GetAdapter Failed!")
+        hwin_assert_e(GRAPHICS_DATA.adapter->GetParent(__uuidof(IDXGIFactory), (void**)&GRAPHICS_DATA.factory), "GetParent Failed!")
     }
 
     void Direct3DUnload()
