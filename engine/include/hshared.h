@@ -227,10 +227,10 @@ namespace hf
     struct ShaderLibraryPreRasterModuleInfo
     {
         std::string name{};
-        FilePath vertexShaderPath{};
-        std::optional<FilePath> tessellationControlShaderPath{};
-        std::optional<FilePath> tessellationEvaluationShaderPath{};
-        std::optional<FilePath> geometryShaderPath{};
+        std::string vertexShaderPath{};
+        std::optional<std::string> tessellationControlShaderPath{};
+        std::optional<std::string> tessellationEvaluationShaderPath{};
+        std::optional<std::string> geometryShaderPath{};
         ShaderRasterizerOptions options{};
         ShaderLayout layout{};
     };
@@ -238,7 +238,7 @@ namespace hf
     struct ShaderLibraryFragmentModuleInfo
     {
         std::string name{};
-        FilePath fragmentShaderPath{};
+        std::string fragmentShaderPath{};
         ShaderDepthStencilOptions depthStencilOptions{};
         ShaderLayout layout{};
     };
