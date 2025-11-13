@@ -398,12 +398,12 @@ namespace hf
 
 	struct CubemapTexturePaths
 	{
-		FilePath left{};
-		FilePath right{};
-		FilePath down{};
-		FilePath up{};
-		FilePath back{};
-		FilePath front{};
+		std::string left{};
+		std::string right{};
+		std::string down{};
+		std::string up{};
+		std::string back{};
+		std::string front{};
 	};
 
 	struct CubemapCreationInfo

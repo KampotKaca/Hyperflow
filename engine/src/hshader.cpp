@@ -63,19 +63,40 @@ namespace hf
             ryml::NodeRef root = tree.rootref();
 
             {
-                const auto v = root["layout"].val();
-                const std::string_view vView{v.str, v.len};
-                info.layout = FindShaderLayout(vView);
+                auto node = root["layout"];
+                if (node.readable())
+                {
+                    const auto v = node.val();
+                    const std::string_view vView{v.str, v.len};
+                    info.layout = FindShaderLayout(vView);
+                }
+                else
+                {
+                    log_error_s("[Hyperflow] Shader '%s' has invalid layout", assetPath);
+                    info.layout = 0;
+                }
             }
 
             {
-                const auto v = root["library"].val();
-                const std::string_view vView{v.str, v.len};
-                info.library = Cast<ShaderLibrary>(GetAsset(vView, AssetType::ShaderLibrary));
+                auto node = root["library"];
+                if (node.readable())
+                {
+                    const auto v = node.val();
+                    const std::string_view vView{v.str, v.len};
+                    info.library = Cast<ShaderLibrary>(GetAsset(vView, AssetType::ShaderLibrary));
+                }
+                else
+                {
+                    log_error_s("[Hyperflow] Shader '%s' has invalid library", assetPath);
+                    info.library = nullptr;
+                }
             }
 
-            if (root.has_child("modulesInfo")) ReadShaderModulesInfo_i(root["modulesInfo"], info.library, info.modules);
-            else log_error("[Hyperflow] %s", "Unable to find moduleInfo");
+            {
+                auto node = root["modulesInfo"];
+                if (node.readable()) ReadShaderModulesInfo_i(node, info.library, info.modules);
+                else log_error_s("[Hyperflow] Shader %s has invalid moduleInfo");
+            }
 
             return MakeRef<Shader>(info);
         }

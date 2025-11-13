@@ -19,33 +19,27 @@ namespace hf
         ryml::NodeRef root = tree.rootref();
 
         {
-            info.anisotropicFilter = (TextureAnisotropicFilter)std::stoi(root["anisotropicFilter"].val().str);
+            if (!YamlGetIf(root, "anisotropicFilter", info.anisotropicFilter)) log_warn_s("[Hyperflow] Texture Sampler %s has invalid anisotropicFilter", assetPath);
+            if (!YamlGetIf(root, "useNormalizedCoordinates", info.useNormalizedCoordinates)) log_warn_s("[Hyperflow] Texture Sampler %s has invalid useNormalizedCoordinates", assetPath);
+            if (!YamlGetIf(root, "filter", info.filter)) log_warn_s("[Hyperflow] Texture Sampler %s has invalid filter", assetPath);
+            if (!YamlGetIf(root, "repeatMode", info.repeatMode)) log_warn_s("[Hyperflow] Texture Sampler %s has invalid repeatMode", assetPath);
 
             {
-                const auto useNormalizedCoordinates = root["useNormalizedCoordinates"].val();
-                const std::string_view vView{useNormalizedCoordinates.str, useNormalizedCoordinates.len};
-                info.useNormalizedCoordinates = ConvertToBool_i(vView);
+                auto node = root["comparison"];
+                if (node.readable())
+                {
+                    const auto comparison = node.val();
+                    const std::string_view vView{comparison.str, comparison.len};
+                    info.comparison = STRING_TO_COMPARISON_OPERATION(vView);
+                }
+                else log_warn_s("[Hyperflow] TextureSampler '%s' has invalid comparison!", assetPath);
             }
 
             {
-                const auto usageFlags = root["filter"].val();
-                const std::string_view vView{usageFlags.str, usageFlags.len};
-                info.filter = STRING_TO_TEXTURE_FILTER(vView);
+                auto node = root["mipMaps"];
+                if (!node.readable() || !ReadTextureMipMapInfo_i(node, info.mipMaps))
+                    log_warn_s("[Hyperflow] TextureSampler '%s' has invalid mipMaps!", assetPath);
             }
-
-            {
-                const auto repeatMode = root["repeatMode"].val();
-                const std::string_view vView{repeatMode.str, repeatMode.len};
-                info.repeatMode = STRING_TO_TEXTURE_REPEAT_MODE(vView);
-            }
-
-            {
-                const auto comparison = root["comparison"].val();
-                const std::string_view vView{comparison.str, comparison.len};
-                info.comparison = STRING_TO_COMPARISON_OPERATION(vView);
-            }
-
-            ReadTextureMipMapInfo_i(root["mipMaps"], info.mipMaps);
         }
 
         const auto sampler = Define(info);

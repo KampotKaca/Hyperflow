@@ -11,103 +11,142 @@ namespace hf
         return lowerStr == "true" || lowerStr == "1" || lowerStr == "yes";
     }
 
-    void ReadTextureDetails_i(ryml::NodeRef root, TextureDetails& result)
+#define YAML_GET(func)\
+    auto node = root[key];\
+    if (node.readable())\
+    {\
+        const auto v = node.val();\
+        const std::string_view vView{v.str, v.len};\
+        result = func(vView);\
+        return true;\
+    }\
+    return false
+
+#define YAML_GET_S(func)\
+    auto node = root[key];\
+    if (node.readable())\
+    {\
+        result = func(node.val().str);\
+        return true;\
+    }\
+    return false
+
+#define YAML_GET_ARRAY(func)\
+    auto node = root[key];\
+    if (node.readable() && node.num_children() > 0)\
+    {\
+        for (ryml::NodeRef fmt : node.children())\
+        {\
+            if (fmt.readable())\
+            {\
+                const auto v = fmt.val();\
+                const std::string_view vView{v.str, v.len};\
+                result |= func(vView);\
+            }\
+            else return false;\
+        }\
+        return true;\
+    }\
+    else return false
+
+    bool YamlGetIf(ryml::NodeRef root, c4::csubstr key, TextureRepeatMode& result) { YAML_GET(STRING_TO_TEXTURE_REPEAT_MODE); }
+    bool YamlGetIf(ryml::NodeRef root, c4::csubstr key, TextureChannel& result) { YAML_GET(STRING_TO_TEXTURE_CHANNEL); }
+    bool YamlGetIf(ryml::NodeRef root, c4::csubstr key, TextureFilter& result) { YAML_GET(STRING_TO_TEXTURE_FILTER); }
+    bool YamlGetIf(ryml::NodeRef root, c4::csubstr key, TextureFormat& result) { YAML_GET(STRING_TO_TEXTURE_FORMAT); }
+    bool YamlGetIf(ryml::NodeRef root, c4::csubstr key, TextureTiling& result) { YAML_GET(STRING_TO_TEXTURE_TILING); }
+    bool YamlGetIf(ryml::NodeRef root, c4::csubstr key, BufferMemoryType& result) { YAML_GET(STRING_TO_BUFFER_MEMORY_TYPE); }
+    bool YamlGetIf(ryml::NodeRef root, c4::csubstr key, TextureResultLayoutType& result) { YAML_GET(STRING_TO_TEXTURE_RESULT_LAYOUT_TYPE); }
+    bool YamlGetIf(ryml::NodeRef root, c4::csubstr key, ShaderCullMode& result) { YAML_GET(STRING_TO_SHADER_CULL_MODE); }
+    bool YamlGetIf(ryml::NodeRef root, c4::csubstr key, ShaderFaceDirection& result) { YAML_GET(STRING_TO_SHADER_FACE_DIRECTION); }
+    bool YamlGetIf(ryml::NodeRef root, c4::csubstr key, MeshPolygonMode& result) { YAML_GET(STRING_TO_MESH_POLYGON_MODE); }
+    bool YamlGetIf(ryml::NodeRef root, c4::csubstr key, ColorBlendFactorType& result) { YAML_GET(STRING_TO_COLOR_BLEND_FACTOR_TYPE); }
+    bool YamlGetIf(ryml::NodeRef root, c4::csubstr key, MipMapMode& result) { YAML_GET(STRING_TO_MIP_MAP_MODE); }
+
+    bool YamlGetIf(ryml::NodeRef root, c4::csubstr key, TextureAnisotropicFilter& result) { YAML_GET_S((TextureAnisotropicFilter)std::stoi); }
+    bool YamlGetIf(ryml::NodeRef root, c4::csubstr key, uint32_t& result) { YAML_GET_S((uint32_t)std::stoi); }
+    bool YamlGetIf(ryml::NodeRef root, c4::csubstr key, float_t& result) { YAML_GET_S(std::stof); }
+    bool YamlGetIf(ryml::NodeRef root, c4::csubstr key, bool& result) { YAML_GET(ConvertToBool_i); }
+
+    bool YamlGetIfArray(ryml::NodeRef root, c4::csubstr key, TextureAspectFlags& result) { YAML_GET_ARRAY(STRING_TO_TEXTURE_ASPECT_FLAGS); }
+    bool YamlGetIfArray(ryml::NodeRef root, c4::csubstr key, TextureUsageFlags& result) { YAML_GET_ARRAY(STRING_TO_TEXTURE_USAGE_FLAGS); }
+
+    bool YamlGetIf(ryml::NodeRef root, c4::csubstr key, TextureDetails& result)
     {
-        {
-            const auto v = root["format"].val();
-            const std::string_view vView{v.str, v.len};
-            result.format = STRING_TO_TEXTURE_FORMAT(vView);
-        }
-
-        {
-            auto aspectFlags = root["aspectFlags"];
-            for (ryml::NodeRef fmt : aspectFlags.children())
-            {
-                const auto v = fmt.val();
-                const std::string_view vView{v.str, v.len};
-                result.aspectFlags |= STRING_TO_TEXTURE_ASPECT_FLAGS(vView);
-            }
-        }
-
-        {
-            const auto v = root["tiling"].val();
-            const std::string_view vView{v.str, v.len};
-            result.tiling = STRING_TO_TEXTURE_TILING(vView);
-        }
-
-        {
-            auto usageFlags = root["usageFlags"];
-            for (ryml::NodeRef fmt : usageFlags.children())
-            {
-                const auto v = fmt.val();
-                const std::string_view vView{v.str, v.len};
-                result.usageFlags |= STRING_TO_TEXTURE_USAGE_FLAGS(vView);
-            }
-        }
-
-        {
-            const auto v = root["memoryType"].val();
-            const std::string_view vView{v.str, v.len};
-            result.memoryType = STRING_TO_BUFFER_MEMORY_TYPE(vView);
-        }
-
-        {
-            const auto v = root["finalLayout"].val();
-            const std::string_view vView{v.str, v.len};
-            result.finalLayout = STRING_TO_TEXTURE_RESULT_LAYOUT_TYPE(vView);
-        }
+        auto node = root[key];
+        return node.readable() && ReadTextureDetails_i(node, result);
     }
 
-    void ReadCubemapTexturePaths_i(ryml::NodeRef root, CubemapTexturePaths& result)
+#undef YAML_GET
+#undef YAML_GET_S
+#undef YAML_GET_ARRAY
+
+    bool ReadTextureDetails_i(ryml::NodeRef root, TextureDetails& result)
     {
-        {
-            const auto v = root["left"].val();
-            const std::string_view vView{v.str, v.len};
-            result.left.path = vView;
+#define DETAILES_DEF(v)\
+        if (!YamlGetIf(root, #v, result.v))\
+        {\
+            log_warn_s("[Hyperflow] Unable to retrive %s", #v);\
+            res = false;\
         }
 
-        {
-            const auto v = root["right"].val();
-            const std::string_view vView{v.str, v.len};
-            result.right.path = vView;
+#define DETAILES_DEF_ARR(v)\
+        if (!YamlGetIfArray(root, #v, result.v))\
+        {\
+            log_warn_s("[Hyperflow] Unable to retrive %s", #v);\
+            res = false;\
         }
 
-        {
-            const auto v = root["down"].val();
-            const std::string_view vView{v.str, v.len};
-            result.down.path = vView;
-        }
+        bool res = true;
+        DETAILES_DEF(format)
+        DETAILES_DEF(tiling)
+        DETAILES_DEF(memoryType)
+        DETAILES_DEF(finalLayout)
+        DETAILES_DEF_ARR(aspectFlags)
+        DETAILES_DEF_ARR(usageFlags)
 
-        {
-            const auto v = root["up"].val();
-            const std::string_view vView{v.str, v.len};
-            result.up.path = vView;
-        }
-
-        {
-            const auto v = root["back"].val();
-            const std::string_view vView{v.str, v.len};
-            result.back.path = vView;
-        }
-
-        {
-            const auto v = root["front"].val();
-            const std::string_view vView{v.str, v.len};
-            result.front.path = vView;
-        }
+#undef DETAILES_DEF
+#undef DETAILES_DEF_ARR
+        return res;
     }
 
-    void ReadTextureMipMapInfo_i(ryml::NodeRef root, TextureMipMapInfo& result)
+    bool ReadCubemapTexturePaths_i(ryml::NodeRef root, CubemapTexturePaths& result)
     {
-        {
-            const auto v = root["mode"].val();
-            const std::string_view vView{v.str, v.len};
-            result.mode = STRING_TO_MIP_MAP_MODE(vView);
+#define CUBE_DEF(n)\
+        if (!root.get_if(#n, &result.n))\
+        {\
+            log_error_s("[Hyperflow] Unable to retrive Cubmap %s texture", #n);\
+            res = false;\
         }
 
-        result.minLod  = std::stof(root["minLod"].val().str);
-        result.maxLod  = std::stof(root["maxLod"].val().str);
-        result.lodBias = std::stof(root["lodBias"].val().str);
+        bool res = true;
+        CUBE_DEF(left)
+        CUBE_DEF(right)
+        CUBE_DEF(down)
+        CUBE_DEF(up)
+        CUBE_DEF(back)
+        CUBE_DEF(front)
+
+#undef CUBE_DEF
+        return res;
+    }
+
+    bool ReadTextureMipMapInfo_i(ryml::NodeRef root, TextureMipMapInfo& result)
+    {
+#define MIPMAP_DEF(v)\
+        if (!YamlGetIf(root, #v, result.v))\
+        {\
+            res = false;\
+            log_warn_s("[Hyperflow] Unable to retrive %s", #v);\
+        }
+
+        bool res = true;
+        MIPMAP_DEF(mode)
+        MIPMAP_DEF(minLod)
+        MIPMAP_DEF(maxLod)
+        MIPMAP_DEF(lodBias)
+
+#undef MIPMAP_DEF
+        return res;
     }
 
     void ReadBiasOptions_i(ryml::NodeRef root, ShaderDepthBiasOptions& result)

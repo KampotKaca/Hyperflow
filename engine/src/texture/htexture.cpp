@@ -73,22 +73,22 @@ namespace hf
             ryml::Tree tree = ryml::parse_in_place(ryml::to_substr(metadata.data()));
             ryml::NodeRef root = tree.rootref();
 
+            if (!YamlGetIf(root, "desiredChannel", desiredChannel))
             {
-                const auto v = root["desiredChannel"].val();
-                const std::string_view vView{v.str, v.len};
-                desiredChannel = STRING_TO_TEXTURE_CHANNEL(vView);
+                log_warn_s("[Hyperflow] Texture %s has invalid desiredChannel!", assetPath);
+                desiredChannel = TextureChannel::RGBA;
             }
 
-            info.mipLevels = (uint32_t)std::stoi(root["mipLevels"].val().str);
-            ReadTextureDetails_i(root["details"], info.details);
+            if (!YamlGetIf(root, "mipLevels", info.mipLevels))
+            {
+                info.mipLevels = 1;
+                log_warn_s("[Hyperflow] Texture %s has invalid mipLevels!", assetPath);
+            }
+
+            if (!YamlGetIf(root, "details", info.details)) log_warn_s("[Hyperflow] Texture %s has invalid details!", assetPath);
 
             const std::string texLoc = TO_RES_PATH(std::string("textures/") + assetPath);
-
-            if (!utils::FileExists(texLoc.c_str()))
-            {
-                log_error("[Hyperflow] Unable to find texture: %s", assetPath);
-                return nullptr;
-            }
+            hassert(utils::FileExists(texLoc.c_str()), "[Hyperflow] Unable to find texture: %s", assetPath)
 
             if (HF.renderingApi.type == RenderingApiType::Vulkan) stbi_set_flip_vertically_on_load(false);
 
