@@ -2,7 +2,7 @@ layout: __axislines
 library: __engine_shader_lib/__engine_shader_lib
 
 modulesInfo:
-  vertexInputModule: __quad
-  preRasterModule: __axislines
-  fragmentModule: __axislines
-  fragmentOutputModule: __axislines
+  vertexInputModuleId: __quad
+  preRasterModuleId: __axislines
+  fragmentModuleId: __axislines
+  fragmentOutputModuleId: __axislines

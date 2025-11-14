@@ -508,7 +508,7 @@ namespace hf
             }
 
             {
-                const auto colorAttachmentsSettings = root["colorAttachmentsSettings"];
+                auto colorAttachmentsSettings = root["colorAttachmentsSettings"];
                 if (colorAttachmentsSettings.readable() && colorAttachmentsSettings.num_children() > 0)
                 {
                     result.colorAttachmentCount = colorAttachmentsSettings.num_children();
@@ -528,6 +528,15 @@ namespace hf
                             else log_error_s("[Hyperflow] Fragment output module '%s' one of the child attachments has invalid colorWriteMask", assetPath.string().c_str());
                         }
 
+                        {
+                            auto node = colorAttachmentSetting["blendingOptions"];
+                            if (node.readable())
+                            {
+                                ShaderBlendingOptions blendingOptions{};
+                                ReadShaderBlendingOptions_i(node, blendingOptions);
+                                colorAttachment.blendingOptions = blendingOptions;
+                            }
+                        }
                         if (colorAttachmentSetting.has_child("blendingOptions"))
                         {
                             ShaderBlendingOptions blendingOptions{};

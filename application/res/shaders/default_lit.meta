@@ -2,7 +2,7 @@ layout: default_lit
 library: app_shader_lib/app_shader_lib
 
 modulesInfo:
-  vertexInputModule: default_lit
-  preRasterModule: default_lit
-  fragmentModule: default_lit
-  fragmentOutputModule: default
+  vertexInputModuleId: default_lit
+  preRasterModuleId: default_lit
+  fragmentModuleId: default_lit
+  fragmentOutputModuleId: default

@@ -221,8 +221,8 @@ namespace hf
             depthStencilState.stencilTestEnable = moduleInfo.depthStencilOptions.enableStencil;
             depthStencilState.front = (VkStencilOpState)(VkStencilOp)moduleInfo.depthStencilOptions.frontStencil;
             depthStencilState.back = (VkStencilOpState)(VkStencilOp)moduleInfo.depthStencilOptions.backStencil;
-            depthStencilState.minDepthBounds = moduleInfo.depthStencilOptions.depthBounds.x;
-            depthStencilState.maxDepthBounds = moduleInfo.depthStencilOptions.depthBounds.y;
+            depthStencilState.minDepthBounds = moduleInfo.depthStencilOptions.minDepthBounds;
+            depthStencilState.maxDepthBounds = moduleInfo.depthStencilOptions.maxDepthBounds;
             depthStencilStates[i] = depthStencilState;
 
             VkGraphicsPipelineCreateInfo fragmentPipelineInfo{};

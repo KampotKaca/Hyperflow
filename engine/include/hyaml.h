@@ -9,42 +9,50 @@
 namespace hf
 {
     bool ConvertToBool_i(const std::string_view& view);
-    bool YamlGetIf(ryml::NodeRef root, c4::csubstr key, TextureRepeatMode& result);
-    bool YamlGetIf(ryml::NodeRef root, c4::csubstr key, TextureChannel& result);
-    bool YamlGetIf(ryml::NodeRef root, c4::csubstr key, TextureFilter& result);
-    bool YamlGetIf(ryml::NodeRef root, c4::csubstr key, TextureFormat& result);
-    bool YamlGetIf(ryml::NodeRef root, c4::csubstr key, TextureTiling& result);
-    bool YamlGetIf(ryml::NodeRef root, c4::csubstr key, BufferMemoryType& result);
-    bool YamlGetIf(ryml::NodeRef root, c4::csubstr key, TextureResultLayoutType& result);
-    bool YamlGetIf(ryml::NodeRef root, c4::csubstr key, ShaderCullMode& result);
-    bool YamlGetIf(ryml::NodeRef root, c4::csubstr key, ShaderFaceDirection& result);
-    bool YamlGetIf(ryml::NodeRef root, c4::csubstr key, MeshPolygonMode& result);
-    bool YamlGetIf(ryml::NodeRef root, c4::csubstr key, ColorBlendFactorType& result);
-    bool YamlGetIf(ryml::NodeRef root, c4::csubstr key, MipMapMode& result);
 
-    bool YamlGetIf(ryml::NodeRef root, c4::csubstr key, TextureAnisotropicFilter& result);
-    bool YamlGetIf(ryml::NodeRef root, c4::csubstr key, uint32_t& result);
-    bool YamlGetIf(ryml::NodeRef root, c4::csubstr key, float_t& result);
-    bool YamlGetIf(ryml::NodeRef root, c4::csubstr key, bool& result);
+    template<typename T> bool YamlGetIf(T root, c4::csubstr key, TextureRepeatMode& result);
+    template<typename T> bool YamlGetIf(T root, c4::csubstr key, TextureChannel& result);
+    template<typename T> bool YamlGetIf(T root, c4::csubstr key, TextureFilter& result);
+    template<typename T> bool YamlGetIf(T root, c4::csubstr key, TextureFormat& result);
+    template<typename T> bool YamlGetIf(T root, c4::csubstr key, TextureTiling& result);
+    template<typename T> bool YamlGetIf(T root, c4::csubstr key, BufferMemoryType& result);
+    template<typename T> bool YamlGetIf(T root, c4::csubstr key, TextureResultLayoutType& result);
+    template<typename T> bool YamlGetIf(T root, c4::csubstr key, ShaderCullMode& result);
+    template<typename T> bool YamlGetIf(T root, c4::csubstr key, ShaderFaceDirection& result);
+    template<typename T> bool YamlGetIf(T root, c4::csubstr key, MeshPolygonMode& result);
+    template<typename T> bool YamlGetIf(T root, c4::csubstr key, ColorBlendFactorType& result);
+    template<typename T> bool YamlGetIf(T root, c4::csubstr key, MipMapMode& result);
+    template<typename T> bool YamlGetIf(T root, c4::csubstr key, ColorBlendOp& result);
+    template<typename T> bool YamlGetIf(T root, c4::csubstr key, ColorBlendFactorType& result);
+    template<typename T> bool YamlGetIf(T root, c4::csubstr key, DepthComparisonFunction& result);
+    template<typename T> bool YamlGetIf(T root, c4::csubstr key, StencilOperation& result);
 
-    bool YamlGetIfArray(ryml::NodeRef root, c4::csubstr key, TextureAspectFlags& result);
-    bool YamlGetIfArray(ryml::NodeRef root, c4::csubstr key, TextureUsageFlags& result);
+    template<typename T> bool YamlGetIf(T root, c4::csubstr key, AudioClipFormat& result);
+    template<typename T> bool YamlGetIf(T root, c4::csubstr key, AudioClipChannelMixMode& result);
+    template<typename T> bool YamlGetIf(T root, c4::csubstr key, AudioClipDitherMode& result);
 
-    bool YamlGetIf(ryml::NodeRef root, c4::csubstr key, TextureDetails& result);
+    template<typename T> bool YamlGetIf(T root, c4::csubstr key, TextureAnisotropicFilter& result);
+    template<typename T> bool YamlGetIf(T root, c4::csubstr key, uint32_t& result);
+    template<typename T> bool YamlGetIf(T root, c4::csubstr key, float_t& result);
+    template<typename T> bool YamlGetIf(T root, c4::csubstr key, bool& result);
 
-    bool ReadTextureDetails_i       (ryml::NodeRef root, TextureDetails& result);
-    bool ReadCubemapTexturePaths_i  (ryml::NodeRef root, CubemapTexturePaths& result);
-    bool ReadTextureMipMapInfo_i    (ryml::NodeRef root, TextureMipMapInfo& result);
-    void ReadBiasOptions_i          (ryml::NodeRef root, ShaderDepthBiasOptions& result);
-    void ReadRasterizerOptions_i    (ryml::NodeRef root, ShaderRasterizerOptions& result);
-    void ReadDepthStencilOptions_i  (ryml::NodeRef root, ShaderDepthStencilOptions& result);
-    void ReadBlendingOptions_i      (ryml::NodeRef root, BlendingOptions& result);
-    void ReadShaderBlendingOptions_i(ryml::NodeRef root, ShaderBlendingOptions& result);
+    template<typename T> bool YamlGetIfArray(T root, c4::csubstr key, TextureAspectFlags& result);
+    template<typename T> bool YamlGetIfArray(T root, c4::csubstr key, TextureUsageFlags& result);
 
-    void ReadBlendingOptions_i      (c4::yml::ConstNodeRef root, BlendingOptions& result);
-    void ReadShaderBlendingOptions_i(c4::yml::ConstNodeRef root, ShaderBlendingOptions& result);
-    void ReadShaderModulesInfo_i    (c4::yml::ConstNodeRef root, const Ref<ShaderLibrary>& lib, ShaderModulesInfo& result);
-    void ReadAudioClipSettings_i    (c4::yml::ConstNodeRef root, AudioClipSettings& result);
+    template<typename T> bool YamlGetIf(T root, c4::csubstr key, TextureDetails& result);
+    template<typename T> bool YamlGetIf(T root, c4::csubstr key, BlendingOptions& result);
+
+    template<typename T> bool ReadTextureDetails_i       (T root, TextureDetails& result);
+    template<typename T> bool ReadCubemapTexturePaths_i  (T root, CubemapTexturePaths& result);
+    template<typename T> bool ReadTextureMipMapInfo_i    (T root, TextureMipMapInfo& result);
+    template<typename T> bool ReadBiasOptions_i          (T root, ShaderDepthBiasOptions& result);
+    template<typename T> bool ReadRasterizerOptions_i    (T oot, ShaderRasterizerOptions& result);
+    template<typename T> bool ReadDepthStencilOptions_i  (T root, ShaderDepthStencilOptions& result);
+    template<typename T> bool ReadBlendingOptions_i      (T root, BlendingOptions& result);
+    template<typename T> bool ReadShaderBlendingOptions_i(T root, ShaderBlendingOptions& result);
+
+    template<typename T> bool ReadShaderModulesInfo_i    (T root, const Ref<ShaderLibrary>& lib, ShaderModulesInfo& result);
+    template<typename T> bool ReadAudioClipSettings_i    (T root, AudioClipSettings& result);
 }
 
 #endif //HYAML_H

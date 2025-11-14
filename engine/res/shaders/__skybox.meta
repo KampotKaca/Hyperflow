@@ -2,7 +2,7 @@ layout: __skybox
 library: __engine_shader_lib/__engine_shader_lib
 
 modulesInfo:
-  vertexInputModule: __default
-  preRasterModule: __skybox
-  fragmentModule: __skybox
-  fragmentOutputModule: __skybox
+  vertexInputModuleId: __default
+  preRasterModuleId: __skybox
+  fragmentModuleId: __skybox
+  fragmentOutputModuleId: __skybox

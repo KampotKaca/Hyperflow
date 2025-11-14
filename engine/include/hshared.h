@@ -197,7 +197,8 @@ namespace hf
 		StencilOperation frontStencil = StencilOperation::Keep;
 		StencilOperation backStencil = StencilOperation::Zero;
 
-		vec2 depthBounds = { 0, 1 };
+	    float_t minDepthBounds = 0.0f;
+	    float_t maxDepthBounds = 1.0f;
 	};
 
     struct ShaderDrawOutputFormats
