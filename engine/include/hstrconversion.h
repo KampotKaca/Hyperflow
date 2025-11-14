@@ -497,6 +497,17 @@ namespace hf
 #undef X
     }
 
+    constexpr RenderingApiType STRING_TO_RENDERING_API_TYPE(const std::string_view str)
+    {
+#define X RenderingApiType
+        switch (fnv1a(str))
+        {
+            DATA_TYPE(None) DATA_TYPE(Vulkan) DATA_TYPE(Direct3D)
+            DEFAULT_TYPE(None, RenderingApiType)
+        }
+#undef X
+    }
+
     inline void START_READING(const char* assetPath, List<char>& metadata)
     {
         hassert(utils::FileExists(assetPath), "[Hyperflow] Unable to find meta file: %s", assetPath)
