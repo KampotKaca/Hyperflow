@@ -29,6 +29,7 @@ namespace hf
     template<typename T> bool YamlGetIf_i(T root, c4::csubstr key, ColorMaskingFlags& result);
     template<typename T> bool YamlGetIf_i(T root, c4::csubstr key, ShaderBlendOp& result);
     template<typename T> bool YamlGetIf_i(T root, c4::csubstr key, MeshPrimitiveTopologyType& result);
+    template<typename T> bool YamlGetIf_i(T root, c4::csubstr key, ComparisonOperation& result);
 
     template<typename T> bool YamlGetIf_i(T root, c4::csubstr key, AudioClipFormat& result);
     template<typename T> bool YamlGetIf_i(T root, c4::csubstr key, AudioClipChannelMixMode& result);
@@ -39,8 +40,11 @@ namespace hf
     template<typename T> bool YamlGetIf_i(T root, c4::csubstr key, float_t& result);
     template<typename T> bool YamlGetIf_i(T root, c4::csubstr key, bool& result);
 
-    template<typename T> bool YamlGetIfArray_i(T root, c4::csubstr key, TextureAspectFlags& result);
-    template<typename T> bool YamlGetIfArray_i(T root, c4::csubstr key, TextureUsageFlags& result);
+    template<typename T> bool YamlGetIfFlags_i(T root, c4::csubstr key, TextureAspectFlags& result);
+    template<typename T> bool YamlGetIfFlags_i(T root, c4::csubstr key, TextureUsageFlags& result);
+    template<typename T> bool YamlGetIfFlags_i(T root, c4::csubstr key, MeshDataType& result);
+    template<typename T> bool YamlGetIfFlags_i(T root, c4::csubstr key, ShaderUsageStageFlags& result);
+
     template<typename T> int32_t YamlGetIfArray_i(T root, c4::csubstr key, VertexBufferAttribute* resultArr);
     template<typename T> int32_t YamlGetIfArray_i(T root, c4::csubstr key, ColorAttachmentSettings* resultArr);
 
@@ -52,6 +56,7 @@ namespace hf
     template<typename T> bool ReadDepthStencilOptions_i  (T root, ShaderDepthStencilOptions& result);
     template<typename T> bool ReadBlendingOptions_i      (T root, BlendingOptions& result);
     template<typename T> bool ReadShaderBlendingOptions_i(T root, ShaderBlendingOptions& result);
+    template<typename T> bool ReadMeshStats_i(T root, MeshStats& result);
 
     template<typename T> bool ReadShaderModulesInfo_i    (T root, const Ref<ShaderLibrary>& lib, ShaderModulesInfo& result);
     template<typename T> bool ReadAudioClipSettings_i    (T root, AudioClipSettings& result);
@@ -63,12 +68,15 @@ namespace hf
     template<typename T> bool YamlGetIf_i(T root, c4::csubstr key, ShaderRasterizerOptions& result);
     template<typename T> bool YamlGetIf_i(T root, c4::csubstr key, BlendingOptions& result);
     template<typename T> bool YamlGetIf_i(T root, c4::csubstr key, ShaderBlendingOptions& result);
+    template<typename T> bool YamlGetIf_i(T root, c4::csubstr key, MeshStats& result);
+
     template<typename T> bool YamlGetIf_i(T root, c4::csubstr key, const Ref<ShaderLibrary>& lib, ShaderModulesInfo& result);
     template<typename T> bool YamlGetIf_i(T root, c4::csubstr key, ShaderDepthStencilOptions& result);
     template<typename T> bool YamlGetIf_i(T root, c4::csubstr key, AudioClipSettings& result);
     template<typename T> bool YamlGetIf_i(T root, c4::csubstr key, Ref<ShaderLibrary>& result);
 
     template<typename T> bool YamlGetIf_ShaderLayout_i(T root, c4::csubstr key, ShaderLayout& result);
+    template<typename T> bool YamlGetIf_VertexAttribute_i(T root, c4::csubstr key, VertexBufferAttribute& result);
 }
 
 #endif //HYAML_H

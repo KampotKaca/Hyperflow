@@ -10,7 +10,7 @@ namespace hf
         explicit AudioClip(const AudioClipCreationInfo& info);
         ~AudioClip();
 
-        FilePath filePath{};
+        std::string filePath{};
         AudioClipSettings settings{};
 
         void* pcmData{};

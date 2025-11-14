@@ -9,16 +9,9 @@ namespace hf
 {
     AudioClip::AudioClip(const AudioClipCreationInfo& info) : filePath(info.filePath), settings(info.settings)
     {
-        std::string audioLoc{};
+        std::string audioLoc = TO_RES_PATH(std::string("audio/") + filePath);
 
-        if (filePath.isAbsolute) audioLoc = filePath.path;
-        else audioLoc = TO_RES_PATH(std::string("audio/") + filePath.path);
-
-        if (!utils::FileExists(audioLoc.c_str()))
-        {
-            log_error("[Hyperflow] Unable to find Audio clip: %s", filePath.path.c_str());
-            return;
-        }
+        hassert(utils::FileExists(audioLoc.c_str()), "[Hyperflow] Unable to find Audio clip: %s", filePath.c_str())
 
         const ma_decoder_config decoderConfig
         {
@@ -29,16 +22,8 @@ namespace hf
         };
 
         ma_decoder decoder;
-        if (ma_decoder_init_file(audioLoc.c_str(), &decoderConfig, &decoder) != MA_SUCCESS)
-        {
-            log_error("[Hyperflow] Unable to load audio clip: %s", filePath.path.c_str());
-            return;
-        }
-        if (ma_decoder_get_length_in_pcm_frames(&decoder, (ma_uint64*)&frameCount) != MA_SUCCESS)
-        {
-            log_error("[Hyperflow] Unable to get length of the audio clip: %s", filePath.path.c_str());
-            return;
-        }
+        hassert(ma_decoder_init_file(audioLoc.c_str(), &decoderConfig, &decoder) == MA_SUCCESS, "[Hyperflow] Unable to load audio clip: %s", filePath.c_str())
+        hassert(ma_decoder_get_length_in_pcm_frames(&decoder, (ma_uint64*)&frameCount) == MA_SUCCESS, "[Hyperflow] Unable to get length of the audio clip: %s", filePath.c_str())
 
         channels = decoder.outputChannels;
         sampleRate = decoder.outputSampleRate;
@@ -47,11 +32,7 @@ namespace hf
         pcmData = utils::Alloc(frameCount * decoder.outputChannels * sizeof(float_t));
 
         ma_uint64 fRead;
-        if (ma_decoder_read_pcm_frames(&decoder, pcmData, frameCount, &fRead) != MA_SUCCESS)
-        {
-            log_error("[Hyperflow] Unable to audio clip frames: %s", filePath.path.c_str());
-            return;
-        }
+        hassert(ma_decoder_read_pcm_frames(&decoder, pcmData, frameCount, &fRead) == MA_SUCCESS, "[Hyperflow] Unable to audio clip frames: %s", filePath.c_str())
         ma_decoder_uninit(&decoder);
         framesRead = fRead;
     }
@@ -86,7 +67,7 @@ namespace hf
             START_READING(assetLoc.c_str(), metadata);
 
             AudioClipCreationInfo info{};
-            info.filePath = FilePath{ .path = assetPath };
+            info.filePath = std::string(assetPath);
 
             ryml::Tree tree = ryml::parse_in_place(ryml::to_substr(metadata.data()));
             ryml::NodeRef root = tree.rootref();

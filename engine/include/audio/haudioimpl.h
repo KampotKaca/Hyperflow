@@ -34,20 +34,11 @@ namespace hf::ir
 
         auto buffer = (ma_audio_buffer*)player->buffer;
         if (!buffer) buffer = new ma_audio_buffer();
-        if (ma_audio_buffer_init(&bufferConfig, buffer) != MA_SUCCESS)
-        {
-            log_error("Unable create player for the Audio clip -> %s", clip->filePath.path.c_str());
-            return false;
-        }
+        hassert(ma_audio_buffer_init(&bufferConfig, buffer) == MA_SUCCESS, "Unable create player for the Audio clip -> %s", clip->filePath.c_str())
 
         auto handle = (ma_sound*)player->buffer;
         if (!handle) handle = new ma_sound();
-        if (ma_sound_init_from_data_source(&AUDIO_DATA.engine, buffer,
-            flags, (ma_sound_group*)player->parent->handle, handle) != MA_SUCCESS)
-        {
-            log_error("Unable create player for the Audio clip -> %s", clip->filePath.path.c_str());
-            return false;
-        }
+        hassert(ma_sound_init_from_data_source(&AUDIO_DATA.engine, buffer, flags, (ma_sound_group*)player->parent->handle, handle) == MA_SUCCESS, "Unable create player for the Audio clip -> %s", clip->filePath.c_str())
 
         player->buffer = buffer;
         player->handle = handle;
@@ -92,8 +83,7 @@ namespace hf::ir
         hassert(player->clip, "[Hyperflow] Cannot get the position without clip.");
 
         uint64_t position = 0;
-        if(ma_sound_get_cursor_in_pcm_frames((ma_sound*)player->handle, (ma_uint64*)&position) != MA_SUCCESS)
-            log_error("Unable to get the audio position %llu", position);
+        hassert(ma_sound_get_cursor_in_pcm_frames((ma_sound*)player->handle, (ma_uint64*)&position) == MA_SUCCESS, "Unable to get the audio position %llu", position)
         return (double_t)position / player->clip->sampleRate;
     }
 
@@ -110,9 +100,7 @@ namespace hf::ir
     {
         hassert(IsLoaded_i(player), "[Hyperflow] Trying to access destroyed audio player");
         hassert(player->clip, "[Hyperflow] Cannot seek the player without clip.");
-
-        if (ma_sound_seek_to_second((ma_sound*)player->handle, positionInSeconds) != MA_SUCCESS)
-            log_error("Unable to seek audio to position %f", positionInSeconds);
+        hassert(ma_sound_seek_to_second((ma_sound*)player->handle, positionInSeconds) == MA_SUCCESS, "[Hyperflow] Unable to seek audio to position %f", positionInSeconds);
     }
 
     template<typename T>
@@ -122,8 +110,7 @@ namespace hf::ir
         hassert(player->clip, "[Hyperflow] Cannot seek the player without clip.");
 
         auto p = (uint64_t)((double_t)player->clip->frameCount * position);
-        if (ma_sound_seek_to_pcm_frame((ma_sound*)player->handle, p) != MA_SUCCESS)
-            log_error("Unable to seek audio to position %f", p);
+        hassert(ma_sound_seek_to_pcm_frame((ma_sound*)player->handle, p) == MA_SUCCESS, "[Hyperflow] Unable to seek audio to position %f", p);
     }
 
     template<typename T>
@@ -131,7 +118,7 @@ namespace hf::ir
     {
         hassert(IsLoaded_i(player), "[Hyperflow] Trying to access destroyed audio player");
         player->stateFlags |= AudioPlayerStateFlags::Playing;
-        if (ma_sound_start((ma_sound*)player->handle) != MA_SUCCESS) log_error("Unable to play audio player");
+        hassert(ma_sound_start((ma_sound*)player->handle) == MA_SUCCESS, "[Hyperflow] Unable to play audio player");
     }
 
     template<typename T>
@@ -139,7 +126,7 @@ namespace hf::ir
     {
         hassert(IsLoaded_i(player), "[Hyperflow] Trying to access destroyed audio player");
         player->stateFlags &= (AudioPlayerStateFlags)~(uint32_t)AudioPlayerStateFlags::Playing;
-        if (ma_sound_stop((ma_sound*)player->handle) != MA_SUCCESS) log_error("Unable to pause audio player");
+        hassert(ma_sound_stop((ma_sound*)player->handle) == MA_SUCCESS, "[Hyperflow] Unable to pause audio player");
     }
 
     template<typename T>

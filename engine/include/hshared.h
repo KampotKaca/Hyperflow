@@ -68,15 +68,6 @@ namespace hf
 #endif
 
 	//endregion
-	//region Definitions
-
-    struct FilePath
-    {
-        std::string path{};
-        bool isAbsolute = false;
-    };
-
-	//endregion
 	//region Rendering
 
 	struct ShaderLibrary;
@@ -587,7 +578,7 @@ namespace hf
 
     struct AudioClipCreationInfo
     {
-        FilePath filePath{};
+        std::string filePath{};
         AudioClipSettings settings{};
     };
 

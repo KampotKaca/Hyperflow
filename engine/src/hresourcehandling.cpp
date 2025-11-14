@@ -30,12 +30,9 @@ namespace hf::ir
                 case RuntimeBufferType::Index: HF.renderingApi.api.DestroyIndexBuffer(buffer.buffer); break;
             }
         }
-        for (const auto texPack : HF.deletedResources.texturePacks)
-            HF.renderingApi.api.DestroyTexturePack(texPack);
-        for (const auto tex : HF.deletedResources.textures)
-            HF.renderingApi.api.DestroyTexture(tex);
-        for (const auto tex : HF.deletedResources.renderTextures)
-            HF.renderingApi.api.DestroyRenderTexture(tex);
+        for (const auto texPack : HF.deletedResources.texturePacks) HF.renderingApi.api.DestroyTexturePack(texPack);
+        for (const auto tex : HF.deletedResources.textures) HF.renderingApi.api.DestroyTexture(tex);
+        for (const auto tex : HF.deletedResources.renderTextures) HF.renderingApi.api.DestroyRenderTexture(tex);
 
         HF.deletedResources.shaderLibraries.clear();
         HF.deletedResources.shaders.clear();

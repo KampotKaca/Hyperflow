@@ -99,26 +99,7 @@ namespace hf
             ryml::Tree tree = ryml::parse_in_place(ryml::to_substr(metadata.data()));
             ryml::NodeRef root = tree.rootref();
 
-            auto typeFlags = root["typeFlags"];
-
-            for (ryml::NodeRef fmt : typeFlags.children())
-            {
-                const auto v = fmt.val();
-                const std::string_view valView{v.str, v.len};
-                info.meshStats.typeFlags |= STRING_TO_MESH_DATA_TYPE(valView);
-            }
-
-            {
-                const auto v = root["memoryType"].val();
-                const std::string_view memTypeView(v.str, v.len);
-                info.meshStats.memoryType = STRING_TO_BUFFER_MEMORY_TYPE(memTypeView);
-            }
-
-            {
-                const auto v = root["vertexAttribute"].val();
-                const std::string_view memTypeView(v.str, v.len);
-                info.meshStats.vertexAttribute = HF.graphicsResources.vertexAttributes[memTypeView];
-            }
+            if (!YamlGetIf_i(root, "meshStats", info.meshStats)) log_error_s("[Hyperflow] Model %s has invalid typeFlags", assetPath);
 
             return MakeRef<Model>(info);
         }

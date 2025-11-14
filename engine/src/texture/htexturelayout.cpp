@@ -21,21 +21,16 @@ namespace hf
 
         {
             auto bindings = root["bindings"];
+            hassert(bindings.readable() && bindings.num_children() > 0, "[Hyperflow] Texture layout %s has invalid bindings!", assetPath)
+
             texLayoutBindings.reserve(bindings.num_children());
             for (ryml::NodeRef childBinding : bindings.children())
             {
                 TextureLayoutBindingInfo bindingInfo{};
                 {
-                    bindingInfo.bindingId = (uint32_t)std::stoi(childBinding["bindingId"].val().str);
-                    bindingInfo.arraySize = (uint32_t)std::stoi(childBinding["arraySize"].val().str);
-
-                    auto usageFlags = childBinding["usageFlags"];
-                    for (ryml::NodeRef fmt : usageFlags.children())
-                    {
-                        const auto v = fmt.val();
-                        const std::string_view vView{v.str, v.len};
-                        bindingInfo.usageFlags |= STRING_TO_SHADER_USAGE_FLAGS(vView);
-                    }
+                    hassert(YamlGetIf_i(childBinding, "bindingId", bindingInfo.bindingId), "[Hyperflow] Texture layout %s has invalid bindingId!", assetPath)
+                    hassert(YamlGetIf_i(childBinding, "arraySize", bindingInfo.arraySize), "[Hyperflow] Texture layout %s has invalid arraySize!", assetPath)
+                    hassert(YamlGetIfFlags_i(childBinding, "usageFlags", bindingInfo.usageFlags), "[Hyperflow] Texture layout %s has invalid usageFlags!", assetPath)
                 }
                 texLayoutBindings.push_back(bindingInfo);
             }

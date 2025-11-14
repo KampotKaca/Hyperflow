@@ -18,29 +18,12 @@ namespace hf
         ryml::Tree tree = ryml::parse_in_place(ryml::to_substr(metadata.data()));
         ryml::NodeRef root = tree.rootref();
 
-        {
-            if (!YamlGetIf_i(root, "anisotropicFilter", info.anisotropicFilter)) log_warn_s("[Hyperflow] Texture Sampler %s has invalid anisotropicFilter", assetPath);
-            if (!YamlGetIf_i(root, "useNormalizedCoordinates", info.useNormalizedCoordinates)) log_warn_s("[Hyperflow] Texture Sampler %s has invalid useNormalizedCoordinates", assetPath);
-            if (!YamlGetIf_i(root, "filter", info.filter)) log_warn_s("[Hyperflow] Texture Sampler %s has invalid filter", assetPath);
-            if (!YamlGetIf_i(root, "repeatMode", info.repeatMode)) log_warn_s("[Hyperflow] Texture Sampler %s has invalid repeatMode", assetPath);
-
-            {
-                auto node = root["comparison"];
-                if (node.readable())
-                {
-                    const auto comparison = node.val();
-                    const std::string_view vView{comparison.str, comparison.len};
-                    info.comparison = STRING_TO_COMPARISON_OPERATION(vView);
-                }
-                else log_warn_s("[Hyperflow] TextureSampler '%s' has invalid comparison!", assetPath);
-            }
-
-            {
-                auto node = root["mipMaps"];
-                if (!node.readable() || !ReadTextureMipMapInfo_i(node, info.mipMaps))
-                    log_warn_s("[Hyperflow] TextureSampler '%s' has invalid mipMaps!", assetPath);
-            }
-        }
+        if (!YamlGetIf_i(root, "anisotropicFilter", info.anisotropicFilter)) log_warn_s("[Hyperflow] Texture Sampler %s has invalid anisotropicFilter", assetPath);
+        if (!YamlGetIf_i(root, "useNormalizedCoordinates", info.useNormalizedCoordinates)) log_warn_s("[Hyperflow] Texture Sampler %s has invalid useNormalizedCoordinates", assetPath);
+        if (!YamlGetIf_i(root, "filter", info.filter)) log_warn_s("[Hyperflow] Texture Sampler %s has invalid filter", assetPath);
+        if (!YamlGetIf_i(root, "repeatMode", info.repeatMode)) log_warn_s("[Hyperflow] Texture Sampler %s has invalid repeatMode", assetPath);
+        if (!YamlGetIf_i(root, "comparison", info.comparison)) log_warn_s("[Hyperflow] Texture Sampler %s has invalid comparison", assetPath);
+        if (!YamlGetIf_i(root, "mipMaps", info.mipMaps)) log_warn_s("[Hyperflow] Texture Sampler %s has invalid mipMaps", assetPath);
 
         const auto sampler = Define(info);
         ir::HF.graphicsResources.textureSamplers[assetPath] = sampler;

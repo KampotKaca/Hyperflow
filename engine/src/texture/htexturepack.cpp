@@ -204,17 +204,17 @@ namespace hf
             List<TexturePackBindingInfo<RenderTexture>> rtList{};
             List<TexturePackBindingInfo<RenderTexture>::TextureInfo> rtInfoList{};
 
-            {
-                {
-                    const auto v = root["layout"].val();
-                    const std::string_view vView{v.str, v.len};
-                    info.layout = FindTextureLayout(vView);
-                }
-
-                LoadBindings(root["texBindings"], AssetType::Texture, texList, texInfoList);
-                LoadBindings(root["cubBindings"], AssetType::Cubemap, cubList, cubInfoList);
-                LoadBindings(root["rtBindings"], AssetType::Texture, rtList, rtInfoList);
+            hassert(YamlGetIf_ShaderLayout_i(root, "layout", info.layout), "[Hyperflow] Texture pack %s has invalid layout!", assetPath)
+#define LOAD_BINDINGS(name, type, ls, ils)\
+            {\
+                auto node = root[name];\
+                if (node.readable()) LoadBindings(node, AssetType::type, ls, ils);\
             }
+
+            LOAD_BINDINGS("texBindings", Texture, texList, texInfoList)
+            LOAD_BINDINGS("cubBindings", Cubemap, cubList, cubInfoList)
+            LOAD_BINDINGS("rtBindings", Texture, rtList, rtInfoList)
+#undef LOAD_BINDINGS
 
             info.pTextureBindings = texList.data();
             info.textureBindingCount = (uint32_t)texList.size();

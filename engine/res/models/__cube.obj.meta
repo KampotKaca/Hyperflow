@@ -1,8 +1,9 @@
-typeFlags:
-  - Position
-  - Normal
-#  - Color
-  - TexCoord
+meshStats:
+  typeFlags:
+    - Position
+    - Normal
+  #  - Color
+    - TexCoord
 
-memoryType: Static
-vertexAttribute: __pos_nor_tex
+  memoryType: Static
+  vertexAttribute: __pos_nor_tex
