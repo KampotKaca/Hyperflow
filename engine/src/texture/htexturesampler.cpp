@@ -19,10 +19,10 @@ namespace hf
         ryml::NodeRef root = tree.rootref();
 
         {
-            if (!YamlGetIf(root, "anisotropicFilter", info.anisotropicFilter)) log_warn_s("[Hyperflow] Texture Sampler %s has invalid anisotropicFilter", assetPath);
-            if (!YamlGetIf(root, "useNormalizedCoordinates", info.useNormalizedCoordinates)) log_warn_s("[Hyperflow] Texture Sampler %s has invalid useNormalizedCoordinates", assetPath);
-            if (!YamlGetIf(root, "filter", info.filter)) log_warn_s("[Hyperflow] Texture Sampler %s has invalid filter", assetPath);
-            if (!YamlGetIf(root, "repeatMode", info.repeatMode)) log_warn_s("[Hyperflow] Texture Sampler %s has invalid repeatMode", assetPath);
+            if (!YamlGetIf_i(root, "anisotropicFilter", info.anisotropicFilter)) log_warn_s("[Hyperflow] Texture Sampler %s has invalid anisotropicFilter", assetPath);
+            if (!YamlGetIf_i(root, "useNormalizedCoordinates", info.useNormalizedCoordinates)) log_warn_s("[Hyperflow] Texture Sampler %s has invalid useNormalizedCoordinates", assetPath);
+            if (!YamlGetIf_i(root, "filter", info.filter)) log_warn_s("[Hyperflow] Texture Sampler %s has invalid filter", assetPath);
+            if (!YamlGetIf_i(root, "repeatMode", info.repeatMode)) log_warn_s("[Hyperflow] Texture Sampler %s has invalid repeatMode", assetPath);
 
             {
                 auto node = root["comparison"];

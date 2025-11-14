@@ -62,41 +62,9 @@ namespace hf
             ryml::Tree tree = ryml::parse_in_place(ryml::to_substr(metadata.data()));
             ryml::NodeRef root = tree.rootref();
 
-            {
-                auto node = root["layout"];
-                if (node.readable())
-                {
-                    const auto v = node.val();
-                    const std::string_view vView{v.str, v.len};
-                    info.layout = FindShaderLayout(vView);
-                }
-                else
-                {
-                    log_error_s("[Hyperflow] Shader '%s' has invalid layout", assetPath);
-                    info.layout = 0;
-                }
-            }
-
-            {
-                auto node = root["library"];
-                if (node.readable())
-                {
-                    const auto v = node.val();
-                    const std::string_view vView{v.str, v.len};
-                    info.library = Cast<ShaderLibrary>(GetAsset(vView, AssetType::ShaderLibrary));
-                }
-                else
-                {
-                    log_error_s("[Hyperflow] Shader '%s' has invalid library", assetPath);
-                    info.library = nullptr;
-                }
-            }
-
-            {
-                auto node = root["modulesInfo"];
-                if (node.readable()) ReadShaderModulesInfo_i(node, info.library, info.modules);
-                else log_error_s("[Hyperflow] Shader %s has invalid moduleInfo");
-            }
+            if (!YamlGetIf_ShaderLayout_i(root, "layout", info.layout)) log_error_s("[Hyperflow] Shader '%s' has invalid layout", assetPath);
+            if (!YamlGetIf_i(root, "library", info.library)) log_error_s("[Hyperflow] Shader '%s' has invalid library", assetPath);
+            if (!YamlGetIf_i(root, "modulesInfo", info.library, info.modules)) log_error_s("[Hyperflow] Shader %s has invalid moduleInfo");
 
             return MakeRef<Shader>(info);
         }

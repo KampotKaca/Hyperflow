@@ -316,7 +316,7 @@ namespace hf
 #undef X
     }
 
-    constexpr MeshPrimitiveTopologyType STRING_TO_PRIMITIVE_TOPOLOGY_TYPE(const std::string_view str)
+    constexpr MeshPrimitiveTopologyType STRING_TO_MESH_PRIMITIVE_TOPOLOGY_TYPE(const std::string_view str)
     {
 #define X MeshPrimitiveTopologyType
         switch (fnv1a(str))

@@ -222,11 +222,7 @@ namespace hf
             ryml::Tree tree = ryml::parse_in_place(ryml::to_substr(metadata.data()));
             ryml::NodeRef root = tree.rootref();
 
-            if(!root.get_if("cacheFileName", &info.cacheFileName))
-            {
-                log_warn_s("[Hyperflow] Shader library '%s' does not have a cache file name", assetPath);
-                info.cacheFileName = "shader_lib_cachefile!";
-            }
+            if(!root.get_if("cacheFileName", &info.cacheFileName)) log_warn_s("[Hyperflow] Shader library '%s' does not have a cache file name", assetPath);
 
             const auto vertexInputModuleFolder = moduleFolder / "vertexinputs";
             const auto preRasterModuleFolder = moduleFolder / "prerasters";
@@ -321,63 +317,15 @@ namespace hf
             ryml::Tree tree = ryml::parse_in_place(ryml::to_substr(metadata.data()));
             ryml::NodeRef root = tree.rootref();
 
-            {
-                auto node = root["enablePrimitiveRestart"];
-                if (node.readable())
-                {
-                    const auto v = node.val();
-                    const std::string_view vView{v.str, v.len};
-                    result.enablePrimitiveRestart = ConvertToBool_i(vView);
-                }
-                else
-                {
-                    log_warn_s("[Hyperflow] Vertex input module '%s' does not have a enablePrimitiveRestart", assetPath.string().c_str());
-                    result.enablePrimitiveRestart = false;
-                }
-            }
+            if (!YamlGetIf_i(root, "enablePrimitiveRestart", result.enablePrimitiveRestart)) log_warn_s("[Hyperflow] Vertex input module '%s' does not have a enablePrimitiveRestart", assetPath.string().c_str());
+            if (!YamlGetIf_i(root, "topology", result.topology)) log_warn_s("[Hyperflow] Vertex input module '%s' does not have a topology", assetPath.string().c_str());
 
+            auto attribCount = YamlGetIfArray_i(root, "attributes", result.pAttributes);
+            if (attribCount >= 0) result.attributeCount = (uint32_t)attribCount;
+            else
             {
-                auto node = root["topology"];
-                if (node.readable())
-                {
-                    const auto v = node.val();
-                    const std::string_view vView{v.str, v.len};
-                    result.topology = STRING_TO_PRIMITIVE_TOPOLOGY_TYPE(vView);
-                }
-                else
-                {
-                    log_warn_s("[Hyperflow] Vertex input module '%s' does not have a topology", assetPath.string().c_str());
-                    result.topology = MeshPrimitiveTopologyType::TriangleList;
-                }
-            }
-
-            {
-                const auto attributes = root["attributes"];
-                if (attributes.readable() && attributes.num_children() > 0)
-                {
-                    result.attributeCount = attributes.num_children();
-                    uint32_t index = 0;
-                    for (auto fmt : attributes.children())
-                    {
-                        if (fmt.readable())
-                        {
-                            const auto v = fmt.val();
-                            const std::string_view vView{v.str, v.len};
-                            result.pAttributes[index] = FindVertexAttribute(std::string(vView).c_str());
-                        }
-                        else
-                        {
-                            log_error_s("[Hyperflow] Vertex input module '%s' has invalid attribute", assetPath.string().c_str());
-                            result.pAttributes[index] = 0;
-                        }
-                        index++;
-                    }
-                }
-                else
-                {
-                    log_warn_s("[Hyperflow] Vertex input module '%s' does not have any attributes", assetPath.string().c_str());
-                    result.attributeCount = 0;
-                }
+                log_error_s("[Hyperflow] Vertex input module '%s' has invalid attribute", assetPath.string().c_str());
+                result.attributeCount = 0;
             }
         }
 
@@ -391,62 +339,18 @@ namespace hf
             ryml::Tree tree = ryml::parse_in_place(ryml::to_substr(metadata.data()));
             ryml::NodeRef root = tree.rootref();
 
-            {
-                auto node = root["layout"];
-                if (node.readable())
-                {
-                    const auto v = node.val();
-                    const std::string_view vView{v.str, v.len};
-                    result.layout = FindShaderLayout(vView);
-                }
-                else
-                {
-                    log_error_s("[Hyperflow] Pre raster module '%s' has invalid layout", assetPath.string().c_str());
-                    result.layout = 0;
-                }
-            }
+            std::string tessellationControlShaderPath{};
+            std::string tessellationEvaluationShaderPath{};
+            std::string geometryShaderPath{};
 
-            if (!root.get_if("vertexShaderPath", &result.vertexShaderPath))
-            {
-                log_error_s("[Hyperflow] Pre raster module '%s' has invalid vertexShaderPath", assetPath.string().c_str());
-                result.vertexShaderPath = "Invalid Path!";
-            }
+            if (!YamlGetIf_ShaderLayout_i(root, "layout", result.layout)) log_error_s("[Hyperflow] Pre raster module '%s' has invalid layout", assetPath.string().c_str());
+            if (!root.get_if("vertexShaderPath", &result.vertexShaderPath)) log_error_s("[Hyperflow] Pre raster module '%s' has invalid vertexShaderPath", assetPath.string().c_str());
 
-            {
-                auto node = root["tessellationControlShaderPath"];
-                if (node.readable())
-                {
-                    const auto v = node.val();
-                    const std::string_view vView{v.str, v.len};
-                    result.tessellationControlShaderPath = vView;
-                }
-            }
+            if (root.get_if("tessellationControlShaderPath", &tessellationControlShaderPath)) result.tessellationControlShaderPath = tessellationControlShaderPath;
+            if (root.get_if("tessellationEvaluationShaderPath", &tessellationEvaluationShaderPath)) result.tessellationEvaluationShaderPath = tessellationEvaluationShaderPath;
+            if (root.get_if("geometryShaderPath", &geometryShaderPath)) result.geometryShaderPath = geometryShaderPath;
 
-            {
-                auto node = root["tessellationEvaluationShaderPath"];
-                if (node.readable())
-                {
-                    const auto v = node.val();
-                    const std::string_view vView{v.str, v.len};
-                    result.tessellationEvaluationShaderPath = vView;
-                }
-            }
-
-            {
-                auto node = root["geometryShaderPath"];
-                if (node.readable())
-                {
-                    const auto v = node.val();
-                    const std::string_view vView{v.str, v.len};
-                    result.geometryShaderPath = vView;
-                }
-            }
-
-            {
-                auto node = root["options"];
-                if (node.readable()) ReadRasterizerOptions_i(node, result.options);
-                else log_trace_s("[Hyperflow] Pre raster module '%s' has invalid options", assetPath.string().c_str());
-            }
+            if (!YamlGetIf_i(root, "options", result.options)) log_error_s("[Hyperflow] Pre raster module '%s' has invalid options", assetPath.string().c_str());
         }
 
         void ReadFragmentModule(const std::filesystem::path& assetPath, const std::filesystem::path& parentFolderPath, ShaderLibraryFragmentModuleInfo& result)
@@ -459,32 +363,9 @@ namespace hf
             ryml::Tree tree = ryml::parse_in_place(ryml::to_substr(metadata.data()));
             ryml::NodeRef root = tree.rootref();
 
-            {
-                auto node = root["layout"];
-                if (node.readable())
-                {
-                    const auto v = node.val();
-                    const std::string_view vView{v.str, v.len};
-                    result.layout = FindShaderLayout(vView);
-                }
-                else
-                {
-                    log_error_s("[Hyperflow] Fragment module '%s' has invalid layout", assetPath.string().c_str());
-                    result.layout = 0;
-                }
-            }
-
-            if (!root.get_if("fragmentShaderPath", &result.fragmentShaderPath))
-            {
-                log_error_s("[Hyperflow] Fragment module '%s' has invalid fragmentShaderPath", assetPath.string().c_str());
-                result.fragmentShaderPath = "Invalid Path!";
-            }
-
-            {
-                auto node = root["depthStencilOptions"];
-                if (node.readable()) ReadDepthStencilOptions_i(node, result.depthStencilOptions);
-                else log_error_s("[Hyperflow] Fragment module '%s' has invalid depthStencilOptions", assetPath.string().c_str());
-            }
+            if (!YamlGetIf_ShaderLayout_i(root, "layout", result.layout)) log_error_s("[Hyperflow] Fragment module '%s' has invalid layout", assetPath.string().c_str());
+            if (!root.get_if("fragmentShaderPath", &result.fragmentShaderPath)) log_error_s("[Hyperflow] Fragment module '%s' has invalid fragmentShaderPath", assetPath.string().c_str());
+            if (!YamlGetIf_i(root, "depthStencilOptions", result.depthStencilOptions)) log_error_s("[Hyperflow] Fragment module '%s' has invalid depthStencilOptions", assetPath.string().c_str());
         }
 
         void ReadFragmentOutputModule(const std::filesystem::path& assetPath, const std::filesystem::path& parentFolderPath, ShaderLibraryFragmentOutputModuleInfo& result)
@@ -498,58 +379,13 @@ namespace hf
             ryml::NodeRef root = tree.rootref();
 
             {
-                auto node = root["blendOp"];
-                if (node.readable())
-                {
-                    const auto v = node.val();
-                    const std::string_view vView{v.str, v.len};
-                    result.blendOp = STRING_TO_SHADER_BLEND_OPERATION(vView);
-                }
+                ShaderBlendOp blendOp{};
+                if (YamlGetIf_i(root, "blendOp", blendOp)) result.blendOp = blendOp;
             }
 
-            {
-                auto colorAttachmentsSettings = root["colorAttachmentsSettings"];
-                if (colorAttachmentsSettings.readable() && colorAttachmentsSettings.num_children() > 0)
-                {
-                    result.colorAttachmentCount = colorAttachmentsSettings.num_children();
-                    uint32_t index = 0;
-                    for (auto colorAttachmentSetting : colorAttachmentsSettings.children())
-                    {
-                        ColorAttachmentSettings colorAttachment{};
-
-                        {
-                            auto node = colorAttachmentSetting["colorWriteMask"];
-                            if (node.readable())
-                            {
-                                const auto v = node.val();
-                                const std::string_view vView{v.str, v.len};
-                                colorAttachment.colorWriteMask = STRING_TO_COLOR_MASKING_FLAGS(vView);
-                            }
-                            else log_error_s("[Hyperflow] Fragment output module '%s' one of the child attachments has invalid colorWriteMask", assetPath.string().c_str());
-                        }
-
-                        {
-                            auto node = colorAttachmentSetting["blendingOptions"];
-                            if (node.readable())
-                            {
-                                ShaderBlendingOptions blendingOptions{};
-                                ReadShaderBlendingOptions_i(node, blendingOptions);
-                                colorAttachment.blendingOptions = blendingOptions;
-                            }
-                        }
-                        if (colorAttachmentSetting.has_child("blendingOptions"))
-                        {
-                            ShaderBlendingOptions blendingOptions{};
-                            ReadShaderBlendingOptions_i(colorAttachmentSetting["blendingOptions"], blendingOptions);
-                            colorAttachment.blendingOptions = blendingOptions;
-                        }
-
-                        result.pColorAttachmentsSettings[index] = colorAttachment;
-                        index++;
-                    }
-                }
-                else log_error_s("[Hyperflow] Fragment output module '%s' has invalid colorAttachmentsSettings", assetPath.string().c_str());
-            }
+            int32_t colorAttachmentCount = YamlGetIfArray_i(root, "colorAttachmentsSettings", result.pColorAttachmentsSettings);
+            if (colorAttachmentCount >= 0) result.colorAttachmentCount = (uint32_t)colorAttachmentCount;
+            else log_error_s("[Hyperflow] Fragment output module '%s' has invalid colorAttachmentsSettings", assetPath.string().c_str());
         }
 
         //endregion

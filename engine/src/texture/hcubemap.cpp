@@ -67,44 +67,12 @@ namespace hf
             ryml::Tree tree = ryml::parse_in_place(ryml::to_substr(metadata.data()));
             ryml::NodeRef root = tree.rootref();
 
-            TextureChannel desiredChannel;
-            {
-                auto node = root["desiredChannel"];
-                if (node.readable())
-                {
-                    const auto v = node.val();
-                    std::string_view vView{v.str, v.len};
-                    desiredChannel = STRING_TO_TEXTURE_CHANNEL(vView);
-                }
-                else
-                {
-                    log_warn_s("[Hyperflow] Cubemap %s has invalid desiredChannel!", assetPath);
-                    desiredChannel = TextureChannel::RGBA;
-                }
-            }
-
-            {
-                auto node = root["mipLevels"];
-                if (node.readable()) info.mipLevels = std::stoi(node.val().str);
-                else
-                {
-                    info.mipLevels = 1;
-                    log_warn_s("[Hyperflow] Cubemap %s has invalid mipLevels!", assetPath);
-                }
-            }
-
-            {
-                auto node = root["details"];
-                if (!node.readable() || !ReadTextureDetails_i(node, info.details))
-                    log_warn_s("[Hyperflow] Cubemap %s has invalid details!", assetPath);
-            }
-
+            TextureChannel desiredChannel = TextureChannel::RGBA;
             CubemapTexturePaths texPaths{};
-            {
-                auto node = root["texturePaths"];
-                if (!node.readable() || !ReadCubemapTexturePaths_i(node, texPaths))
-                    log_warn_s("[Hyperflow] Cubemap %s has invalid texturePaths!", assetPath);
-            }
+            if (!YamlGetIf_i(root, "desiredChannel", desiredChannel)) log_warn_s("[Hyperflow] Cubemap %s has invalid desiredChannel!", assetPath);
+            if (!YamlGetIf_i(root, "mipLevels", info.mipLevels)) log_warn_s("[Hyperflow] Cubemap %s has invalid mipLevels!", assetPath);
+            if (!YamlGetIf_i(root, "details", info.details)) log_warn_s("[Hyperflow] Cubemap %s has invalid details!", assetPath);
+            if (!YamlGetIf_i(root, "texturePaths", texPaths)) log_warn_s("[Hyperflow] Cubemap %s has invalid texturePaths!", assetPath);
 
             const auto fullCubemapFolderPath = TO_RES_PATH(std::string("cubemaps/") + assetPath + "/");
             std::string texturePaths[6]{};

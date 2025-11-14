@@ -19,7 +19,7 @@ namespace hf
         switch (severity)
         {
         case VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT:
-            log_info_s("[Vulkan Debug Callback] %s", callbackData->pMessage);
+            log_trace_s("[Vulkan Debug Callback] %s", callbackData->pMessage);
             break;
         case VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT:
             log_warn_s("[Vulkan Debug Callback] %s", callbackData->pMessage);
@@ -143,7 +143,7 @@ namespace hf
     void InitInstanceVersion()
     {
         hvk_assert(vkEnumerateInstanceVersion(&GRAPHICS_DATA.supportedVersion), "vkEnumerateInstanceVersion Failed!");
-        log_info_s("[Vulkan] Supported Vulkan API Version: (%i.%i.%i)",
+        log_trace_s("[Vulkan] Supported Vulkan API Version: (%i.%i.%i)",
             VK_VERSION_MAJOR(GRAPHICS_DATA.supportedVersion),
             VK_VERSION_MINOR(GRAPHICS_DATA.supportedVersion),
             VK_VERSION_PATCH(GRAPHICS_DATA.supportedVersion));

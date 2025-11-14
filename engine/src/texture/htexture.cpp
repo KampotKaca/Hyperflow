@@ -73,19 +73,9 @@ namespace hf
             ryml::Tree tree = ryml::parse_in_place(ryml::to_substr(metadata.data()));
             ryml::NodeRef root = tree.rootref();
 
-            if (!YamlGetIf(root, "desiredChannel", desiredChannel))
-            {
-                log_warn_s("[Hyperflow] Texture %s has invalid desiredChannel!", assetPath);
-                desiredChannel = TextureChannel::RGBA;
-            }
-
-            if (!YamlGetIf(root, "mipLevels", info.mipLevels))
-            {
-                info.mipLevels = 1;
-                log_warn_s("[Hyperflow] Texture %s has invalid mipLevels!", assetPath);
-            }
-
-            if (!YamlGetIf(root, "details", info.details)) log_warn_s("[Hyperflow] Texture %s has invalid details!", assetPath);
+            if (!YamlGetIf_i(root, "desiredChannel", desiredChannel)) log_warn_s("[Hyperflow] Texture %s has invalid desiredChannel!", assetPath);
+            if (!YamlGetIf_i(root, "mipLevels", info.mipLevels)) log_warn_s("[Hyperflow] Texture %s has invalid mipLevels!", assetPath);
+            if (!YamlGetIf_i(root, "details", info.details)) log_warn_s("[Hyperflow] Texture %s has invalid details!", assetPath);
 
             const std::string texLoc = TO_RES_PATH(std::string("textures/") + assetPath);
             hassert(utils::FileExists(texLoc.c_str()), "[Hyperflow] Unable to find texture: %s", assetPath)

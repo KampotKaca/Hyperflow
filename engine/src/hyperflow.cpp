@@ -41,7 +41,7 @@ namespace hf
 
 			if(ir::HF.lifecycleCallbacks.onStartCallback) ir::HF.lifecycleCallbacks.onStartCallback();
 
-			log_info_s("[Hyperflow] Loading Time: %f", ir::HF.time.GetAbsoluteTimePassed());
+			log_trace_s("[Hyperflow] Loading Time: %f", ir::HF.time.GetAbsoluteTimePassed());
 			while (IsRunning())
 			{
 				ir::HF.time.StartFrame();
