@@ -1,5 +1,4 @@
 #version 450
-#include "global"
 
 layout(set = 1, binding = 0) uniform samplerCube skyboxSampler;
 

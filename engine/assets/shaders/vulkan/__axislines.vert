@@ -1,5 +1,5 @@
 #version 450
-#include "global"
+#include <global.glsl>
 
 layout(location = 0) in vec2 inPosition;
 layout(location = 0) out vec3 outPosition;

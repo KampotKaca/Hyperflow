@@ -13,8 +13,6 @@ endif ()
 add_executable(${PROJECT_NAME} ${SHADER_CONVERTOR_SRC})
 include("${CMAKE_SOURCE_DIR}/cmake/General.cmake")
 
-file(COPY ${CMAKE_SOURCE_DIR}/tools/shaderconvertor/includes DESTINATION ${CMAKE_BINARY_DIR}/tools/shaderconvertor)
-
 target_include_directories(${PROJECT_NAME}
         PRIVATE
         includes/

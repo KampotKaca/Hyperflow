@@ -1,5 +1,12 @@
 
 file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/res DESTINATION ${CMAKE_BINARY_DIR})
+set(SHADER_DEPENDENCY_FOLDERS
+        "${CMAKE_CURRENT_SOURCE_DIR}/assets/shaderdependencies"
+        "${CMAKE_SOURCE_DIR}/engine/assets/shaderdependencies")
+
+list(REMOVE_DUPLICATES SHADER_DEPENDENCY_FOLDERS)
+set(SHADER_DEPENDENCY_FOLDER_COUNT)
+list(LENGTH SHADER_DEPENDENCY_FOLDERS SHADER_DEPENDENCY_FOLDER_COUNT)
 
 # === Shader Setup ===
 function(CollectShaders SHADER_SOURCE_DIRS SHADER_BINARY_DIR OUT_SHADERCONVERTOR_ARGS OUT_PROCESSED_SHADERS)
@@ -73,8 +80,8 @@ add_custom_target("${PROJECT_NAME}_Prebuild" ALL
         COMMAND ${CMAKE_COMMAND} -E echo "Running modelconvertor..."
         COMMAND modelconvertor ${MODELCONVERTOR_ARGS}
         COMMAND ${CMAKE_COMMAND} -E echo "Running shaderconvertor vulkan..."
-        COMMAND shaderconvertor Vulkan ${SHADERCONVERTOR_VULKAN_ARGS}
+        COMMAND shaderconvertor Vulkan ${SHADER_DEPENDENCY_FOLDER_COUNT} ${SHADER_DEPENDENCY_FOLDERS} ${SHADERCONVERTOR_VULKAN_ARGS}
         COMMAND ${CMAKE_COMMAND} -E echo "Running shaderconvertor d3d..."
-        COMMAND shaderconvertor Direct3D ${SHADERCONVERTOR_D3D_ARGS}
+        COMMAND shaderconvertor Direct3D ${SHADER_DEPENDENCY_FOLDER_COUNT} ${SHADER_DEPENDENCY_FOLDERS} ${SHADERCONVERTOR_D3D_ARGS}
         COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/res ${CMAKE_BINARY_DIR}/res
 )

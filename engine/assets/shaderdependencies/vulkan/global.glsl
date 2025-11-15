@@ -1,5 +1,3 @@
-//#name global
-
 struct Camera
 {
     vec3 lookDirection;

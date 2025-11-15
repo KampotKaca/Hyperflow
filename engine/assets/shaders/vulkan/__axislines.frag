@@ -1,5 +1,5 @@
 #version 450
-#include "global"
+#include <global.glsl>
 
 layout(push_constant) uniform PushConstants
 {

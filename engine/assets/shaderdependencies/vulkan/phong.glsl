@@ -1,5 +1,3 @@
-//#name phonglighting
-
 struct PhongLightInfo
 {
     float ambient;

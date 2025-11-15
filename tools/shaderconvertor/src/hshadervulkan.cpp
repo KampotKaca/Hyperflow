@@ -10,81 +10,83 @@ namespace sh
 {
     static std::unordered_map<std::string, std::string> includeMap{};
 
-    static std::string ProcessIncludes(const std::string& inputContent)
+    class GLSL_Includer final : public shaderc::CompileOptions::IncluderInterface
     {
-        std::istringstream inputStream(inputContent);
-        std::ostringstream outputStream;
-
-        std::string line;
-        std::regex includeRegex(R"(^\s*#include\s+["<]?(\w+)[">]?)");
-
-        while (std::getline(inputStream, line))
+    public:
+        shaderc_include_result* GetInclude(
+            const char* requested_source,
+            shaderc_include_type type,
+            const char* requesting_source,
+            size_t include_depth) override
         {
-            std::smatch match;
-            if (std::regex_match(line, match, includeRegex))
-            {
-                const std::string& includeKey = match[1];
-                auto it = includeMap.find(includeKey);
-                if (it != includeMap.end())
-                {
-                    outputStream << "// BEGIN include <" << includeKey << ">\n";
-                    outputStream << it->second;
-                    outputStream << "// END include <" << includeKey << ">\n";
-                }
-                else
-                {
-                    log_error("Warning: No include found for key '%s'", includeKey.c_str());
-                    outputStream << line << '\n';
-                }
-            }
-            else
-            {
-                outputStream << line << '\n';
-            }
+            auto it = includeMap.find(requested_source);
+            if (it == includeMap.end())
+                return MakeResult(requested_source, "", "Include not found");
+
+            return MakeResult(requested_source, it->second, nullptr);
         }
 
-        return outputStream.str();
-    }
+        void ReleaseInclude(shaderc_include_result* data) override
+        {
+            delete[] data->source_name;
+            delete[] data->content;
+            delete data;
+        }
 
-    static shaderc::SpvCompilationResult CompileVulkanShader(const char* inputPath, const char* outputPath, shaderc::Compiler& compiler, shaderc::CompileOptions& options, shaderc_shader_kind kind)
+    private:
+        shaderc_include_result* MakeResult(const std::string& name,
+                                           const std::string& content,
+                                           const char* error_msg)
+        {
+            auto* r = new shaderc_include_result();
+            r->source_name = Clone(name);
+            r->source_name_length = name.size();
+            r->content = Clone(content);
+            r->content_length = content.size();
+            r->user_data = nullptr;
+            return r;
+        }
+
+        char* Clone(const std::string& s)
+        {
+            char* mem = new char[s.size() + 1];
+            memcpy(mem, s.data(), s.size());
+            mem[s.size()] = '\0';
+            return mem;
+        }
+    };
+
+    static shaderc::SpvCompilationResult CompileVulkanShader(const std::string& input, const char* inputPath, const char* outputPath, shaderc::Compiler& compiler, shaderc::CompileOptions& options, shaderc_shader_kind kind)
     {
-        std::ifstream file(inputPath);
-        std::stringstream buffer;
-        buffer << file.rdbuf();
-        std::string source = buffer.str();
+        shaderc::SpvCompilationResult result = compiler.CompileGlslToSpv(input, kind, inputPath, options);
 
-        shaderc::SpvCompilationResult result = compiler.CompileGlslToSpv(source, kind, inputPath, options);
-        file.close();
-        hassert(result.GetCompilationStatus() == shaderc_compilation_status_success, "Shader compile error: %s", result.GetErrorMessage().c_str());
+        hassert(result.GetCompilationStatus() == shaderc_compilation_status_success, "[Hyperflow] Shader compilation error: %s", result.GetErrorMessage().c_str());
         std::ofstream out(outputPath, std::ios::binary);
         out.write((const char*)(result.cbegin()), std::distance(result.cbegin(), result.cend()) * sizeof(uint32_t));
 
         return result;
     }
 
+    static std::string PreprocessShader(const char* inputPath, shaderc::Compiler& compiler, shaderc::CompileOptions& options)
+    {
+        std::string source;
+        {
+            std::ifstream in(inputPath);
+            hassert(in, "[Hyperflow] Failed to open input file to preprocess: %s", inputPath);
+            std::stringstream ss;
+            ss << in.rdbuf();
+            source = ss.str();
+        }
+
+        shaderc::PreprocessedSourceCompilationResult pre = compiler.PreprocessGlsl(source, shaderc_glsl_infer_from_source, inputPath, options);
+        hassert(pre.GetCompilationStatus() == shaderc_compilation_status_success, "[Hyperflow] Shader Preprocessing failed: %s", pre.GetErrorMessage().c_str())
+
+        return { pre.cbegin(), pre.cend() };
+    }
+
     static void ConvertVulkanShader(const char* inputPath, const char* outputPath, shaderc::Compiler& compiler, shaderc::CompileOptions& options)
     {
-        std::string processed;
-        {
-            std::ifstream inFile(inputPath);
-            hassert(inFile, "Failed to open input: %s", inputPath);
-
-            std::ostringstream buffer;
-            buffer << inFile.rdbuf();
-            processed = ProcessIncludes(buffer.str());
-        }
-
-        std::string tempPath = outputPath;
-        if (tempPath.ends_with(".spv"))
-            tempPath = tempPath.substr(0, tempPath.length() - 4);
-
-        {
-            std::ofstream outFile(tempPath);
-            hassert(outFile, "Failed to write output: %s", tempPath.c_str());
-
-            outFile << processed;
-            log_info_s("Processed: %s -> %s", inputPath, tempPath.c_str());
-        }
+        std::string processed = PreprocessShader(inputPath, compiler, options);
 
         shaderc_shader_kind kind;
         auto ext = fs::path(inputPath).extension();
@@ -99,57 +101,42 @@ namespace sh
             default: hassert(false, "Unknown shader type: %s", inputPath);
         }
 
-        CompileVulkanShader(tempPath.c_str(), outputPath, compiler, options, kind);
-        fs::remove(tempPath);
+        CompileVulkanShader(processed, inputPath, outputPath, compiler, options, kind);
 
-        log_info_s("Compiled: %s -> %s", tempPath.c_str(), outputPath);
+        log_info_s("Compiled: %s -> %s", fs::path(inputPath).filename().c_str(), fs::path(outputPath).filename().c_str());
     }
 
-    static void LoadIncludeMap(const fs::path& rootDir)
+    static void LoadIncludeMap(const std::vector<std::string>& rootDirs)
     {
-        std::regex nameRegex(R"(#name\s+(\w+))");
-
-        for (const auto& entry : fs::recursive_directory_iterator(rootDir))
+        for (const auto& dir : rootDirs)
         {
-            if (!entry.is_regular_file() || entry.path().extension() != ".glsl") continue;
-
-            std::ifstream file(entry.path());
-            hassert(file, "Failed to open: %s", entry.path().c_str());
-
-            std::string line;
-            std::ostringstream fullSource;
-            std::string nameKey;
-            bool nameFound = false;
-
-            while (std::getline(file, line))
+            for (const auto& entry : fs::recursive_directory_iterator(dir))
             {
-                std::smatch match;
-                if (!nameFound && std::regex_search(line, match, nameRegex))
-                {
-                    nameKey = match[1];
-                    nameFound = true;
-                    continue; // Skip this line
-                }
-                fullSource << line << '\n';
-            }
+                if (!entry.is_regular_file() || entry.path().extension() != ".glsl") continue;
 
-            if (nameFound) includeMap[std::move(nameKey)] = std::move(fullSource).str();
-            else log_error("Warning: No '#name' directive found in %s", entry.path().c_str());
+                std::ifstream file(entry.path());
+                hassert(file, "Failed to open: %s", entry.path().c_str());
+
+                std::ostringstream fullSource;
+                fullSource << file.rdbuf();
+
+                std::string line;
+                includeMap[entry.path().filename().c_str()] = fullSource.str();
+                file.close();
+            }
         }
     }
 
-    static void CompileShaders(char** paths, uint32_t count)
+    void HandleVulkanShaders(const std::vector<std::string>& rootDirs, char** paths, uint32_t count)
     {
+        LoadIncludeMap(rootDirs);
+
         shaderc::Compiler compiler{};
         shaderc::CompileOptions options;
         options.SetOptimizationLevel(shaderc_optimization_level_performance);
+        options.SetIncluder(std::make_unique<GLSL_Includer>());
 
         for (int i = 0; i < count; i++) ConvertVulkanShader(paths[i * 2], paths[i * 2 + 1], compiler, options);
-    }
 
-    void HandleVulkanShaders(const fs::path& rootDir, char** paths, uint32_t count)
-    {
-        LoadIncludeMap(rootDir);
-        CompileShaders(paths, count);
     }
 }

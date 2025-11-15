@@ -1,6 +1,6 @@
 #version 450
-#include "global"
-#include "phonglighting"
+#include <global.glsl>
+#include <phong.glsl>
 
 layout(push_constant) uniform PushConstants
 {
