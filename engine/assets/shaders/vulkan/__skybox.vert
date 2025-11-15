@@ -1,5 +1,5 @@
 #version 450
-#include <global.glsl>
+#include <__global.glsl>
 
 layout(location = 0) in vec3 inPosition;
 layout(location = 0) out vec3 outTexcoord;

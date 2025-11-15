@@ -6,7 +6,7 @@
 
 namespace sh
 {
-    void HandleDirect3DShaders(const fs::path& rootDir, char** paths, uint32_t count)
+    void HandleDirect3DShaders(const std::vector<std::string>& rootDir, char** paths, uint32_t count)
     {
 
     }

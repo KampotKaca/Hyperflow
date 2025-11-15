@@ -103,13 +103,14 @@ namespace sh
 
         CompileVulkanShader(processed, inputPath, outputPath, compiler, options, kind);
 
-        log_info_s("Compiled: %s -> %s", fs::path(inputPath).filename().c_str(), fs::path(outputPath).filename().c_str());
+        log_info_s("Compiled: %s -> %s", fs::path(inputPath).filename().string().c_str(), fs::path(outputPath).filename().string().c_str());
     }
 
     static void LoadIncludeMap(const std::vector<std::string>& rootDirs)
     {
         for (const auto& dir : rootDirs)
         {
+            if (!fs::exists(dir)) continue;
             for (const auto& entry : fs::recursive_directory_iterator(dir))
             {
                 if (!entry.is_regular_file() || entry.path().extension() != ".glsl") continue;
@@ -121,7 +122,8 @@ namespace sh
                 fullSource << file.rdbuf();
 
                 std::string line;
-                includeMap[entry.path().filename().c_str()] = fullSource.str();
+                std::string name = entry.path().filename().string();
+                includeMap[name] = fullSource.str();
                 file.close();
             }
         }

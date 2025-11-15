@@ -329,7 +329,7 @@ int main(int argc, char* argv[])
         {
             namespace fs = std::filesystem;
             hassert(ml::WriteMesh(meshInfo, outputPath), "Error: Unable to export model %s", inputPath.c_str());
-            log_info_s("Successfully converted %s -> %s", fs::path(inputPath).filename().c_str(), fs::path(outputPath).filename().c_str());
+            log_info_s("Successfully converted %s -> %s", fs::path(inputPath).filename().string().c_str(), fs::path(outputPath).filename().string().c_str());
         }
     }
 

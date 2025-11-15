@@ -1,6 +1,6 @@
 #version 450
-#include <global.glsl>
-#include <phong.glsl>
+#include <__global.glsl>
+#include <__phong.glsl>
 
 layout(push_constant) uniform PushConstants
 {
