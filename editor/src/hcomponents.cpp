@@ -117,6 +117,7 @@ namespace hf::ed
         {
             DrawColor("Color", dl.color, flags);
             Draw("Rotation", dl.euler, 0, flags | DrawStateFlag::ButtonLess);
+            Draw("Intensity", dl.intensity, 0, flags | DrawStateFlag::ButtonLess);
 
             EndComponent();
         }
@@ -274,6 +275,19 @@ namespace hf::ed
             return true;
         }
         return false;
+    }
+
+    bool DrawCustomComponent(const char* label, const void* id, const std::function<void()>& exec, DrawStateFlag flags)
+    {
+        ImGui::PushID(PointerToID(id));
+        const bool result = StartComponent(label, flags);
+        if(result)
+        {
+            exec();
+            EndComponent();
+        }
+        ImGui::PopID();
+        return result;
     }
 
     bool Draw(const char* label, const Ref<AudioPlayer>& pl, DrawStateFlag flags)

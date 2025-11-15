@@ -1,10 +1,10 @@
 #version 450
 #include <__global.glsl>
-#include <__phong.glsl>
+#include <__blinn_phong.glsl>
 
 layout(push_constant) uniform PushConstants
 {
-    vec4 phongData; //xyz specular color, w smoothness
+    vec4 ambientColor; //xyz ambient color, w smoothness
 } PUSH_CONSTANT;
 
 layout(location = 0) in vec2 o_TexCoord;
@@ -21,8 +21,9 @@ void main()
     vec4 color = texture(viking_room, o_TexCoord) * vec4(o_Color, 1.0f);
 
     PhongLightInfo lightInfo;
-    lightInfo.ambient = 0.2f;
-    lightInfo.smoothness = PUSH_CONSTANT.phongData.w;
-    lightInfo.ambientColor = PUSH_CONSTANT.phongData.xyz;
-    outColor = vec4(SolvePhongLights(color.rgb, GLOBAL.CAMERA.position, o_WPosition, normalize(o_WNormal), lightInfo), color.w);
+    lightInfo.ambient = 0.1f;
+    lightInfo.smoothness = PUSH_CONSTANT.ambientColor.a;
+    lightInfo.ambientColor = PUSH_CONSTANT.ambientColor.rgb;
+    vec3 lightColor = SolvePhongLights(o_WPosition, normalize(o_WNormal), lightInfo);
+    outColor = vec4(color.rgb * lightColor, color.w);
 }

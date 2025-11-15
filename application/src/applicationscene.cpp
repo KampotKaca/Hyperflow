@@ -2,6 +2,7 @@
 #include "applicationsceneassets.h"
 #include "resources.h"
 #include "application.h"
+#include "debug.h"
 
 namespace app
 {
@@ -97,7 +98,7 @@ namespace app
                         auto mesh = hf::GetMesh(viking_room_model, 0);
                         const auto meshVolume = hf::GetMeshBoundingVolume(mesh);
                         DefaultPushConstant pc{};
-                        pc.phongData = hf::vec4{ hf::utils::ColorFromHash(0x9B9B9B), 0.8 };
+                        pc.ambientColor = hf::vec4{ hf::utils::ColorFromHash(0x9B9B9B), 0.3f };
 
                         hf::dp::DrawGroupSetPushConstant(pc);
                         hf::dp::StartDrawCall(mesh);
@@ -126,7 +127,7 @@ namespace app
 
                         hf::dp::DrawGroupAddTexPackBinding(APP_TEXTURE_PACKS.white_pack, 1);
                         DefaultPushConstant pc{};
-                        pc.phongData = hf::vec4{ hf::utils::ColorFromHash(0x9B9B9B), 1.0 };
+                        pc.ambientColor = hf::vec4{ hf::utils::ColorFromHash(0x9B9B9B), sphere.smoothness };
 
                         hf::dp::DrawGroupSetPushConstant(pc);
                         hf::dp::StartDrawCall(mesh);
@@ -153,7 +154,7 @@ namespace app
 
                         hf::dp::DrawGroupAddTexPackBinding(APP_TEXTURE_PACKS.white_pack, 1);
                         DefaultPushConstant pc{};
-                        pc.phongData = hf::vec4{ hf::utils::ColorFromHash(0x9B9B9B), .1f };
+                        pc.ambientColor = hf::vec4{ hf::utils::ColorFromHash(0x9B9B9B), ground.smoothness };
 
                         hf::dp::DrawGroupSetPushConstant(pc);
                         hf::dp::StartDrawCall(mesh);
@@ -165,7 +166,7 @@ namespace app
                             {
                                 .modelMatrix = ground.cullingVolume.trsMatrix,
                                 .normalMatrix = ground.cullingVolume.normalMatrix,
-                                .color = hf::vec4{ hf::utils::ColorFromHash(0x19CB1E), 1 },
+                                .color = hf::vec4{ ground.color, 1 },
                             }, ground.cullingVolume);
                         }
 

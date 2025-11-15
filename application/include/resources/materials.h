@@ -34,7 +34,7 @@ namespace app
 
     struct DefaultPushConstant
     {
-        alignas(16) hf::vec4 phongData; //xyz specular color, w smoothness
+        alignas(16) hf::vec4 ambientColor; //xyz specular color, w smoothness
     };
 
     struct AppMaterials

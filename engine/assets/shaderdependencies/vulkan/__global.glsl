@@ -20,8 +20,8 @@ struct Time
 
 struct DirectionalLight
 {
-    vec3 direction;
-    vec3 color;
+    vec4 direction;
+    vec4 color; //w is intensity
 };
 
 struct SpotLight

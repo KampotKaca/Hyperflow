@@ -69,6 +69,8 @@ namespace hf::ed
     bool DrawAudioSettingsWindow(const char* label, bool* isOpen = nullptr, WindowFlags flags = WindowFlags::None);
     bool DrawEditorWindow(const char* label, EditorContextData& data, bool* isOpen = nullptr, WindowFlags flags = WindowFlags::None);
 
+    bool DrawCustomComponent(const char* label, const void* id, const std::function<void()>& exec, DrawStateFlag flags = DrawStateFlag::None);
+
     bool Draw(const char* label, const Ref<AudioPlayer>& pl,   DrawStateFlag flags = DrawStateFlag::None);
     bool Draw(const char* label, const Ref<AudioPlayer3D>& pl, DrawStateFlag flags = DrawStateFlag::None);
     bool Draw(const char* label, const Ref<AudioListener>& ls, DrawStateFlag flags = DrawStateFlag::None);

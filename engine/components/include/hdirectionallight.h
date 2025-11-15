@@ -7,8 +7,9 @@ namespace hf
 {
     struct DirectionalLight
     {
-        vec3 euler { 90, 0, 0 };
+        vec3 euler { -90, 0, 0 };
         vec3 color { 1, 1, 1 };
+        float_t intensity = 1;
 
         [[nodiscard]] LightUniformInfo::Directional GetUniformInfo() const
         {
@@ -17,8 +18,8 @@ namespace hf
             const vec4 forward = rot * vec4(0, 0, -1, 0);
             return LightUniformInfo::Directional
             {
-                .direction = vec3(forward),
-                .color = color
+                .direction = forward,
+                .color = vec4(color, intensity)
             };
         }
     };

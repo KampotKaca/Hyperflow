@@ -722,8 +722,8 @@ namespace hf
 	{
 		struct alignas(16) Directional
 		{
-			alignas(16) vec3 direction;
-			alignas(16) vec3 color;
+			alignas(16) vec4 direction;
+			alignas(16) vec4 color;
 		};
 
 		struct alignas(16) Spot

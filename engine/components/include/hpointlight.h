@@ -17,7 +17,7 @@ namespace hf
             return LightUniformInfo::Point
             {
                 .position = vec4(position, range),
-                .color = vec4(color * intensity, intensity)
+                .color = vec4(color, intensity)
             };
         }
     };
