@@ -154,6 +154,16 @@ namespace hf
     {
         return !(lhs == rhs);
     }
+
+    namespace utils
+    {
+        inline vec3 ToEuler(const vec3& direction)
+        {
+            const float pitch = glm::asin(direction.y);
+            const float yaw   = glm::atan(direction.x, direction.z);
+            return vec3(pitch, yaw, 0.0f);
+        }
+    }
 }
 
 #endif //HMATH_H

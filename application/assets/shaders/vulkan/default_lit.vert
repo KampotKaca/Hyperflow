@@ -23,7 +23,7 @@ layout(location = 15) in vec4 instance_albedo;
 layout(location = 0) out vec2 o_TexCoord;
 layout(location = 1) out vec3 o_Color;
 layout(location = 2) out vec3 o_WNormal;
-layout(location = 3) out vec3 o_FragPosition;
+layout(location = 3) out vec3 o_WPosition;
 
 void main()
 {
@@ -31,12 +31,12 @@ void main()
     mat3 normalMatrix = mat3(instance_normal_col0.xyz, instance_normal_col1.xyz, instance_normal_col2.xyz);
 
     mat4 modelView    = GLOBAL.CAMERA.view * modelMatrix;
-    vec4 pos = GLOBAL.CAMERA.viewProj * modelMatrix * vec4(inPosition, 1.0);
+    vec4 pos = modelMatrix * vec4(inPosition, 1.0);
 
     o_Color = vec3(instance_albedo);
     o_TexCoord = inTexCoord;
     o_WNormal = normalize(normalMatrix * inNormal);
-    o_FragPosition = pos.xyz;
+    o_WPosition = pos.xyz;
 
-    gl_Position = pos;
+    gl_Position = GLOBAL.CAMERA.viewProj * pos;
 }

@@ -54,11 +54,30 @@ namespace app
 
             background_music3D = hf::Create(info);
         }
+
+        sphere.transform.position = hf::vec3{ -3, 1, 3 };
+        ground.transform.scale = hf::vec3{ 100, 1, 100 };
+
+        for (uint32_t x = 0; x < VIKING_ROOM_AXIS_SIZE; x++)
+            for (uint32_t z = 0; z < VIKING_ROOM_AXIS_SIZE; z++)
+                vikingRooms[x * VIKING_ROOM_AXIS_SIZE + z].transform.position = hf::vec3{ x, 0, z } * 2.0f - hf::vec3{ VIKING_ROOM_AXIS_SIZE, 0, VIKING_ROOM_AXIS_SIZE };
     }
 
     void ApplicationScene::Update()
     {
+        {
+            hf::AudioCone newCone{};
+            newCone.position = APP_DEBUG.camera.camera3D.position;
+            newCone.euler = hf::utils::ToEuler(APP_DEBUG.camera.camera3D.direction);
+            hf::SetCone(APP_OBJECTS.mainListener, newCone);
+        }
 
+        {
+            hf::AudioCone newCone{};
+            newCone.position = sphere.transform.position;
+            newCone.euler = sphere.transform.euler;
+            hf::SetCone(background_music3D, newCone);
+        }
     }
 
     void ApplicationScene::Render()
@@ -86,7 +105,7 @@ namespace app
                         for (uint32_t x = 0; x < VIKING_ROOM_AXIS_SIZE; x++)
                             for (uint32_t z = 0; z < VIKING_ROOM_AXIS_SIZE; z++)
                             {
-                                auto& vikingRoom = APP_OBJECTS.vikingRooms[x * VIKING_ROOM_AXIS_SIZE + z];
+                                auto& vikingRoom = vikingRooms[x * VIKING_ROOM_AXIS_SIZE + z];
                                 vikingRoom.cullingVolume.Update(vikingRoom.transform, meshVolume);
                                 hf::dp::DrawAddInstance(LitInstanceData
                                 {
@@ -113,7 +132,6 @@ namespace app
                         hf::dp::StartDrawCall(mesh);
 
                         {
-                            auto& sphere = APP_OBJECTS.sphere;
                             sphere.cullingVolume.Update(sphere.transform, meshVolume);
 
                             hf::dp::DrawAddInstance(LitInstanceData
@@ -127,34 +145,27 @@ namespace app
                         hf::dp::EndDrawCall();
                     }
                     hf::dp::EndDrawGroup();
-                }
-                hf::dp::EndMat();
-            }
-            hf::dp::EndShader();
-        }
-        hf::dp::EndShaderLayout();
 
-        hf::dp::StartShaderLayout(APP_SHADER_LAYOUTS.default_unlit); //Ground setup
-        {
-            hf::dp::BindGlobalUniformBuffer();
-
-            hf::dp::StartShader(APP_SHADERS.default_unlit);
-            {
-                hf::dp::StartMat(nullptr);
-                {
                     hf::dp::StartDrawGroup();
                     {
-                        const auto meshVolume = hf::GetMeshBoundingVolume(hf::primitives::GetMesh(hf::PrimitiveMeshType::Plane));
-                        hf::dp::StartDrawCall(hf::primitives::GetMesh(hf::PrimitiveMeshType::Plane));
+                        auto mesh = hf::primitives::GetMesh(hf::PrimitiveMeshType::Plane);
+                        const auto meshVolume = hf::GetMeshBoundingVolume(mesh);
+
+                        hf::dp::DrawGroupAddTexPackBinding(APP_TEXTURE_PACKS.white_pack, 1);
+                        DefaultPushConstant pc{};
+                        pc.phongData = hf::vec4{ hf::utils::ColorFromHash(0x9B9B9B), .1f };
+
+                        hf::dp::DrawGroupSetPushConstant(pc);
+                        hf::dp::StartDrawCall(mesh);
 
                         {
-                            auto& ground = APP_OBJECTS.ground;
                             ground.cullingVolume.Update(ground.transform, meshVolume);
 
-                            hf::dp::DrawAddInstance(DefaultInstanceData
+                            hf::dp::DrawAddInstance(LitInstanceData
                             {
                                 .modelMatrix = ground.cullingVolume.trsMatrix,
-                                .color = hf::vec4{ hf::utils::ColorFromHash(0x19CB1E), 1 }
+                                .normalMatrix = ground.cullingVolume.normalMatrix,
+                                .color = hf::vec4{ hf::utils::ColorFromHash(0x19CB1E), 1 },
                             }, ground.cullingVolume);
                         }
 

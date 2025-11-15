@@ -124,6 +124,23 @@ namespace hf::ed
         return result;
     }
 
+    bool Draw(const char* label, PointLight& dl, DrawStateFlag flags)
+    {
+        ImGui::PushID(PointerToID(&dl));
+        const bool result = StartComponent(label, flags);
+        if(result)
+        {
+            Draw("Position", dl.position, 0, flags);
+            DrawColor("Color", dl.color, flags);
+            Draw("Range", dl.range, 0, flags | DrawStateFlag::ButtonLess);
+            Draw("Intensity", dl.intensity, 0, flags | DrawStateFlag::ButtonLess);
+
+            EndComponent();
+        }
+        ImGui::PopID();
+        return result;
+    }
+
     bool Draw(const char* label, Camera3DCore& cam, DrawStateFlag flags)
     {
         ImGui::PushID(PointerToID(&cam));
@@ -279,16 +296,19 @@ namespace hf::ed
         if(result)
         {
             vec2 range = GetRange(pl);
-            vec2 oldDistance = range;
-            Draw("Range", range.x, 0.01f, 100000.0f, "%.2f", flags | DrawStateFlag::DontStretchWidth);
-            ImGui::SameLine();
-            DrawSlider("Falloff", range.y, 0.0f, range.x, "%.2f", flags | DrawStateFlag::Nameless);
+            Draw("MinRange", range.x, 0.0f, 100000.0f, "%.2f", flags);
+            Draw("Falloff", range.y, 0.0f, 100000.0f, "%.2f", flags);
+            SetRange(pl, range.x, range.y);
 
-            if (range != oldDistance) SetRange(pl, range.x, range.y);
+            {
+                float_t rolloffFactor = GetRolloffFactor(pl);
+                if(DrawSlider("Rolloff Factor", rolloffFactor, 0.0f, 4.0f, "%.02f", flags)) SetRolloffFactor(pl, rolloffFactor);
+            }
+
 
             DrawAudioSettings(pl, flags);
             auto cone = GetCone(pl);
-            if(DrawCone(cone, flags)) Set(pl, cone);
+            if(DrawCone(cone, flags)) SetCone(pl, cone);
             auto velocity = GetVelocity(pl);
             if (Draw("Velocity", velocity, 0, flags | DrawStateFlag::ButtonLess)) SetVelocity(pl, velocity);
 
@@ -307,7 +327,7 @@ namespace hf::ed
             auto isEnabled = IsEnabled(ls);
             if (Draw("Enabled", isEnabled, flags)) Enable(ls, isEnabled);
             auto cone = GetCone(ls);
-            if(DrawCone(cone, flags)) Set(ls, cone);
+            if(DrawCone(cone, flags)) SetCone(ls, cone);
             auto velocity = GetVelocity(ls);
             if (Draw("Velocity", velocity, 0, flags | DrawStateFlag::ButtonLess)) SetVelocity(ls, velocity);
 

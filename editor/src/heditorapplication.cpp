@@ -7,6 +7,7 @@
 #include "application.h"
 #include "debug.h"
 #include "heditorapplication.h"
+#include "heditorimpl.h"
 
 namespace app
 {
@@ -71,9 +72,12 @@ namespace app
         hf::ed::SetNextWindowPos(hf::vec2{ 300, 300 }, hf::ed::Condition::FirstUseEver);
         if (hf::ed::StartWindow("Project Settings"))
         {
+            hf::ed::Draw("Listener", APP_OBJECTS.mainListener);
+
             if (hf::ed::StartDropdown("Lights"))
             {
                 hf::ed::Draw("Directional", APP_OBJECTS.mainLight);
+                hf::ed::Draw("Point", APP_OBJECTS.central_light);
                 hf::ed::EndDropdown();
             }
 
@@ -90,31 +94,7 @@ namespace app
         data.gridLines = &APP_DEBUG.gridLinesInfo;
         hf::ed::DrawEditorWindow("Editor", data);
 
-        hf::ed::SetNextWindowSize(hf::vec2{ 300, 300 }, hf::ed::Condition::FirstUseEver);
-        hf::ed::SetNextWindowPos(hf::vec2{ 100, 100 }, hf::ed::Condition::FirstUseEver);
-        if (hf::ed::StartWindow("Inspector"))
-        {
-            if (hf::ed::StartDropdown("Viking Room"))
-            {
-                // hf::editor::Draw("Transform", APP_OBJECTS.vikingRoom.transform);
-                hf::ed::Draw("Listener", APP_OBJECTS.mainListener);
-                hf::ed::EndDropdown();
-            }
-
-            if (hf::ed::StartDropdown("Ground"))
-            {
-                hf::ed::Draw("Transform", APP_OBJECTS.ground.transform);
-                hf::ed::EndDropdown();
-            }
-
-            if (hf::ed::StartDropdown("Sphere"))
-            {
-                hf::ed::Draw("Transform", APP_OBJECTS.sphere.transform);
-                hf::ed::EndDropdown();
-            }
-
-            hf::ed::EndWindow();
-        }
+        DrawInspector();
 
         hf::ed::EndFrame();
 

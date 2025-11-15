@@ -43,6 +43,7 @@ namespace app
     {
         hf::dp::SetCamera(APP_DEBUG.camera.camera3D);
         hf::dp::AddLight(APP_OBJECTS.mainLight);
+        hf::dp::AddLight(APP_OBJECTS.central_light);
 
         DebugPrepass();
         hf::dp::StartRenderTex(APP_RENDER_TEXTURES.mainDrawRenderTexture);

@@ -11,12 +11,7 @@ namespace hf
         ~AudioPlayer3D();
 
         AudioPlayerSettings settings{};
-        AudioPlayer3DSettings settings3d
-        {
-            .maxRange = -1,
-            .falloff = -1,
-            .attenuationModel = Audio3DAttenuationModel::None
-        };
+        AudioPlayer3DSettings settings3d{};
         AudioCone cone{};
         vec3 velocity{};
 

@@ -80,23 +80,31 @@ namespace hf
     void Play(const Ref<AudioPlayer3D>& player) { ir::Play_i(player.get()); }
     void Pause(const Ref<AudioPlayer3D>& player) { ir::Pause_i(player.get()); }
 
-    void SetRange(const Ref<AudioPlayer3D>& player, float_t maxRange, float_t falloff)
+    void SetRange(const Ref<AudioPlayer3D>& player, float_t minRange, float_t falloff)
     {
         hassert(IsLoaded(player), "[Hyperflow] Trying to access destroyed audio player");
         auto& settings = player->settings3d;
-        falloff = glm::min(maxRange, falloff);
-        if (settings.maxRange != maxRange)
+        if (settings.minRange != minRange)
         {
-            settings.maxRange = maxRange;
-            ma_sound_set_max_distance((ma_sound*)player->handle, maxRange);
+            settings.minRange = minRange;
+            ma_sound_set_min_distance((ma_sound*)player->handle, minRange);
         }
 
         if (settings.falloff != falloff)
         {
             settings.falloff = falloff;
-            float_t minDistance = glm::max(0.001f, maxRange - falloff);
-            ma_sound_set_min_distance((ma_sound*)player->handle, minDistance);
+            float_t maxDistance = minRange + falloff;
+            ma_sound_set_max_distance((ma_sound*)player->handle, maxDistance);
         }
+    }
+
+    float ComputeAttenuation(float distance, float minDist, float maxDist)
+    {
+        if (distance <= minDist) return 1.0f;
+        if (distance >= maxDist) return 0.0f;
+
+        float d = (distance - minDist) / (maxDist - minDist);
+        return 1.0f / (1.0f + 4.0f* d * d);
     }
 
     void SetAttenuationModel(const Ref<AudioPlayer3D>& player, Audio3DAttenuationModel atten)
@@ -110,12 +118,24 @@ namespace hf
         }
     }
 
+    void SetRolloffFactor(const Ref<AudioPlayer3D>& player, float_t rolloffFactor)
+    {
+        hassert(IsLoaded(player), "[Hyperflow] Trying to access destroyed audio player");
+        auto& config = player->settings3d;
+        if (config.rolloffFactor != rolloffFactor)
+        {
+            config.rolloffFactor = rolloffFactor;
+            ma_sound_set_rolloff((ma_sound*)player->handle, rolloffFactor);
+        }
+    }
+
     void SetVolume(const Ref<AudioPlayer3D>& player, float_t volume) { ir::SetVolume_i(player.get(), volume); }
     void SetPitch(const Ref<AudioPlayer3D>& player, float_t pitch) { ir::SetPitch_i(player.get(), pitch); }
     void SetLoopingMode(const Ref<AudioPlayer3D>& player, bool loopingEnabled) { ir::SetLoopingMode_i(player.get(), loopingEnabled); }
 
-    vec2 GetRange(const Ref<AudioPlayer3D>& player) { return {player->settings3d.maxRange, player->settings3d.falloff}; }
+    vec2 GetRange(const Ref<AudioPlayer3D>& player) { return {player->settings3d.minRange, player->settings3d.falloff}; }
     Audio3DAttenuationModel GetAttenuationModel(const Ref<AudioPlayer3D>& player) { return player->settings3d.attenuationModel; }
+    float_t GetRolloffFactor(const Ref<AudioPlayer3D>& player) { return player->settings3d.rolloffFactor; }
 
     void Seek(const Ref<AudioPlayer3D>& player, float_t positionInSeconds) { ir::Seek_i(player.get(), positionInSeconds); }
     void SeekPercent(const Ref<AudioPlayer3D>& player, float_t position) { ir::SeekPercent_i(player.get(), position); }
@@ -133,13 +153,14 @@ namespace hf
 
         auto& settings3d = player->settings3d;
         auto handle = (ma_sound*)player->handle;
-        ma_sound_set_max_distance(handle, settings3d.maxRange);
-        ma_sound_set_min_distance(handle, settings3d.maxRange - settings3d.falloff);
+        ma_sound_set_min_distance(handle, settings3d.minRange);
+        ma_sound_set_max_distance(handle, settings3d.minRange + settings3d.falloff);
         ma_sound_set_attenuation_model(handle, (ma_attenuation_model)settings3d.attenuationModel);
+        ma_sound_set_rolloff(handle, settings3d.rolloffFactor);
         ma_sound_set_spatialization_enabled(handle, true);
     }
 
-    void Set(const Ref<AudioPlayer3D>& pl, const AudioCone& cone)
+    void SetCone(const Ref<AudioPlayer3D>& pl, const AudioCone& cone)
     {
         hassert(IsLoaded(pl), "[Hyperflow] Trying to access destroyed audio player");
 
@@ -152,7 +173,7 @@ namespace hf
 
         if (cone.euler != coneRef.euler)
         {
-            vec3 direction = vec3(glm::eulerAngleXYZ(cone.euler.x, cone.euler.y, cone.euler.z) * vec4(0, 0, 1, 0));
+            vec3 direction = vec3(glm::eulerAngleXYZ(cone.euler.x, cone.euler.y, cone.euler.z) * vec4(0, 0, -1, 0));
             ma_sound_set_direction(handle, direction.x, direction.y, direction.z);
         }
 

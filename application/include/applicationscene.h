@@ -5,6 +5,26 @@
 
 namespace app
 {
+    constexpr uint32_t VIKING_ROOM_AXIS_SIZE = 100;
+
+    struct VikingRoom
+    {
+        hf::Transform transform{};
+        hf::VolumeTransform cullingVolume{};
+    };
+
+    struct Sphere
+    {
+        hf::Transform transform{};
+        hf::VolumeTransform cullingVolume{};
+    };
+
+    struct Ground
+    {
+        hf::Transform transform{};
+        hf::VolumeTransform cullingVolume{};
+    };
+
     struct ApplicationScene final : public hf::Scene
     {
         ApplicationScene();
@@ -21,8 +41,12 @@ namespace app
 
         hf::Ref<hf::TexturePack> viking_room_pack{};
         
-        hf::Ref<hf::AudioPlayer> background_music;
-        hf::Ref<hf::AudioPlayer3D> background_music3D;
+        hf::Ref<hf::AudioPlayer> background_music{};
+        hf::Ref<hf::AudioPlayer3D> background_music3D{};
+
+        VikingRoom vikingRooms[VIKING_ROOM_AXIS_SIZE * VIKING_ROOM_AXIS_SIZE]{};
+        Sphere sphere{};
+        Ground ground{};
     };
 }
 

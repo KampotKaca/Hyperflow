@@ -260,15 +260,17 @@ namespace hf
     double_t GetPlayedPercent(const Ref<AudioPlayer3D>& player);
     bool IsLoopingEnabled(const Ref<AudioPlayer3D>& player);
     bool IsPlaying(const Ref<AudioPlayer3D>& player);
-    void SetRange(const Ref<AudioPlayer3D>& player, float_t maxRange, float_t falloff);
+    void SetRange(const Ref<AudioPlayer3D>& player, float_t minRange, float_t falloff);
     void SetAttenuationModel(const Ref<AudioPlayer3D>& player, Audio3DAttenuationModel atten);
+    void SetRolloffFactor(const Ref<AudioPlayer3D>& player, float_t rolloffFactor);
     void SetVelocity(const Ref<AudioPlayer3D>& pl, vec3 velocity);
-    void Set(const Ref<AudioPlayer3D>& pl, const AudioCone& cone);
+    void SetCone(const Ref<AudioPlayer3D>& pl, const AudioCone& cone);
     vec3 GetVelocity(const Ref<AudioPlayer3D>& pl);
     AudioCone GetCone(const Ref<AudioPlayer3D>& pl);
-    //X -> near, Y -> far
+    //X -> minRange, Y -> falloff
     vec2 GetRange(const Ref<AudioPlayer3D>& player);
     Audio3DAttenuationModel GetAttenuationModel(const Ref<AudioPlayer3D>& player);
+    float_t GetRolloffFactor(const Ref<AudioPlayer3D>& player);
 
     //endregion
     //region Audio Listener
@@ -280,7 +282,7 @@ namespace hf
 
     void Enable(const Ref<AudioListener>& ls, bool enable);
     void SetVelocity(const Ref<AudioListener>& ls, vec3 velocity);
-    void Set(const Ref<AudioListener>& ls, const AudioCone& cone);
+    void SetCone(const Ref<AudioListener>& ls, const AudioCone& cone);
     bool IsEnabled(const Ref<AudioListener>& ls);
     vec3 GetVelocity(const Ref<AudioListener>& ls);
     AudioCone GetCone(const Ref<AudioListener>& ls);

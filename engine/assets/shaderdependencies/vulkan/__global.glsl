@@ -1,3 +1,6 @@
+#ifndef __GLOBAL_GLSL
+#define __GLOBAL_GLSL
+
 struct Camera
 {
     vec3 lookDirection;
@@ -31,8 +34,8 @@ struct SpotLight
 
 struct PointLight
 {
-    vec3 position;
-    vec4 color; // w is range
+    vec4 position; //w is range
+    vec4 color; // w is intensity
 };
 
 const uint MAX_DIRECTIONAL_LIGHTS = 4;
@@ -55,3 +58,5 @@ layout(set = 0, binding = 0) uniform Global
 } GLOBAL;
 
 const uint MAX_MATERIAL_SIZE = 1024;
+
+#endif

@@ -23,12 +23,12 @@ namespace hf
         auto listener = MakeRef<AudioListener>(info);
         listener->handle = newId;
 
-        Set(listener, info.cone);
+        SetCone(listener, info.cone);
         Enable(listener, info.isEnabled);
         return listener;
     }
 
-    void Set(const Ref<AudioListener>& ls, const AudioCone& cone)
+    void SetCone(const Ref<AudioListener>& ls, const AudioCone& cone)
     {
         auto oldCone = ls->cone;
         auto handle = (ma_uint32)ls->handle;
@@ -42,7 +42,7 @@ namespace hf
 
         if (oldCone.euler != cone.euler)
         {
-            const auto direction = vec3(glm::eulerAngleXYZ(cone.euler.x, cone.euler.y, cone.euler.z) * vec4(0, 0, 1, 0));
+            const auto direction = vec3(glm::eulerAngleXYZ(cone.euler.x, cone.euler.y, cone.euler.z) * vec4(0, 0, -1, 0));
             ma_engine_listener_set_direction(&ir::AUDIO_DATA.engine, handle, direction.x, direction.y, direction.z);
         }
 

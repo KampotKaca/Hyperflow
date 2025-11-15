@@ -591,9 +591,10 @@ namespace hf
 
     struct AudioPlayer3DSettings
     {
-        float_t maxRange = 100.0f;
-        float_t falloff = 10.0f;
+        float_t minRange = 2.0f;
+        float_t falloff = 100.0f;
         Audio3DAttenuationModel attenuationModel = Audio3DAttenuationModel::Linear;
+        float_t rolloffFactor = 1.0f;
     };
 
     struct AudioPlayerCreationInfo
@@ -735,8 +736,8 @@ namespace hf
 
 		struct alignas(16) Point
 		{
-			alignas(16) vec3 position;
-			alignas(16) vec4 color; // w is range
+			alignas(16) vec4 position; //w is range
+			alignas(16) vec4 color; // w is intensity
 		};
 
 		alignas(16) Directional directionalLights[MAX_DIRECTIONAL_LIGHTS]{};

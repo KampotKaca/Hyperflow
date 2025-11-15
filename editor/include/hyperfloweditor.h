@@ -61,6 +61,7 @@ namespace hf::ed
 
     bool Draw(const char* label, Transform& trs,       DrawStateFlag flags = DrawStateFlag::None);
     bool Draw(const char* label, DirectionalLight& dl, DrawStateFlag flags = DrawStateFlag::None);
+    bool Draw(const char* label, PointLight& dl,       DrawStateFlag flags = DrawStateFlag::None);
     bool Draw(const char* label, Camera3DCore& cam,    DrawStateFlag flags = DrawStateFlag::None);
 
     bool DrawMemoryStatisticsWindow(const char* label, bool* isOpen = nullptr, WindowFlags flags = WindowFlags::None);
